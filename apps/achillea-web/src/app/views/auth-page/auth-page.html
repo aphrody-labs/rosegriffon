@@ -1,0 +1,10 @@
+<p-panel class="m-[1.5rem]" [showHeader]="false">
+	<h1 class="mt-6 font-bold text-2xl text-center">Authentification</h1>
+	<p class="text-center italic">Vous devez être authentifié pour accéder à ce service</p>
+
+	<div class="flex justify-center gap-10 mt-10">
+		<p-button (click)="onReturn()">Retour</p-button>
+
+		<p-button icon="pi pi-discord" label="M'authentifier avec discord" (click)="onAuth()" />
+	</div>
+</p-panel>

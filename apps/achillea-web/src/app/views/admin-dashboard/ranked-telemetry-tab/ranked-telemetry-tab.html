@@ -1,0 +1,71 @@
+<div class="flex flex-col gap-3">
+	<div class="flex flex-wrap items-end justify-end gap-3">
+		<div class="flex flex-wrap items-end gap-2">
+			<div class="flex flex-col gap-1">
+				<label class="text-xs uppercase opacity-60">Filtrer par lobby</label>
+				<p-inputNumber
+					[ngModel]="lobbyFilter()"
+					(ngModelChange)="lobbyFilter.set($event)"
+					[useGrouping]="false"
+					[min]="0"
+					placeholder="#lobby"
+				></p-inputNumber>
+			</div>
+			<p-button label="Filtrer" icon="pi pi-filter" size="small" (onClick)="refresh()"></p-button>
+			@if (lobbyFilter() != null) {
+			<p-button
+				label="Effacer"
+				icon="pi pi-times"
+				size="small"
+				severity="secondary"
+				[outlined]="true"
+				(onClick)="clearFilter()"
+			></p-button>
+			}
+			<p-button
+				icon="pi pi-refresh"
+				[text]="true"
+				[loading]="loading()"
+				pTooltip="Rafraîchir"
+				(onClick)="refresh()"
+			></p-button>
+		</div>
+	</div>
+
+	<p-table
+		[value]="events()"
+		[loading]="loading()"
+		styleClass="p-datatable-sm"
+		[paginator]="true"
+		[rows]="20"
+		[rowsPerPageOptions]="[20, 50, 100]"
+	>
+		<ng-template pTemplate="header">
+			<tr>
+				<th>Date</th>
+				<th>Type</th>
+				<th>Lobby</th>
+				<th>Salle</th>
+				<th>Joueur</th>
+				<th>Détail</th>
+			</tr>
+		</ng-template>
+		<ng-template pTemplate="body" let-e>
+			<tr>
+				<td class="whitespace-nowrap">{{ e.createdAt | date: "short" }}</td>
+				<td><p-tag [value]="e.type" severity="info"></p-tag></td>
+				<td>{{ e.lobbyId != null ? '#' + e.lobbyId : '—' }}</td>
+				<td class="font-mono text-xs">{{ e.roomCode ?? '—' }}</td>
+				<td>{{ e.displayName ?? e.userId ?? '—' }}</td>
+				<td class="text-xs opacity-80 max-w-md truncate" [title]="detailText(e.detail)">
+					{{ detailText(e.detail) }}
+				</td>
+			</tr>
+		</ng-template>
+		<ng-template pTemplate="emptymessage">
+			<tr>
+				<td colspan="6" class="text-center py-4 opacity-60">Aucun événement de télémétrie.</td>
+			</tr>
+		</ng-template>
+	</p-table>
+</div>

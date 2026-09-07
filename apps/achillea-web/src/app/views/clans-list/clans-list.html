@@ -1,0 +1,135 @@
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 min-h-screen">
+	<aside class="md:col-span-1 col-span-1 filter aside">
+		<div class="flex flex-col justify-center">
+			<p-fieldset [toggleable]="true" legend="Affiner la recherche">
+				<p-floatlabel variant="on" class="w-full">
+					<input class="w-full" type="text" id="filter-name" pInputText [(ngModel)]="inputFilter" />
+					<label for="filter-name">Nom</label>
+				</p-floatlabel>
+				<div class="flex flex-row mt-4">
+					<div class="flex items-center">
+						<p-checkbox
+							inputId="recruiting"
+							[binary]="true"
+							(onChange)="disableAutoRecruitFilter()"
+							[(ngModel)]="isRecruiting"
+						/>
+						<label for="recruiting" class="ml-2">Recrute</label>
+					</div>
+					<div class="flex items-center ml-2">
+						<p-checkbox
+							[disabled]="!isRecruiting()"
+							inputId="auto_recruit"
+							[binary]="true"
+							[(ngModel)]="autoRecruit"
+						/>
+						<label for="auto_recruit" class="ml-2">Recrutement auto</label>
+					</div>
+				</div>
+				<div class="flex items-center mt-2">
+					<p-checkbox inputId="match_criteria" [binary]="true" [(ngModel)]="matchClanCriteria" />
+					<label for="match_criteria" class="ml-2" pTooltip="Clans auxquels vous pouvez postuler"
+						>Éligible</label
+					>
+				</div>
+				<div class="flex items-center mt-2">
+					<p-checkbox inputId="pro_criteria" [binary]="true" [(ngModel)]="proFilter" />
+					<label for="pro_criteria" class="ml-2">Pro</label>
+				</div>
+				<div class="flex flex-row flex-wrap gap-[1rem] mb-4 mt-4">
+					<p-floatlabel variant="on" class="w-full">
+						<p-inputNumber
+							class="flex"
+							fluid
+							[(ngModel)]="levelFilter"
+							inputId="level_filter"
+							[min]="1"
+						/>
+						<label for="level_filter">Niveau</label>
+					</p-floatlabel>
+					<div>
+						<p-radioButton
+							name="lvl_filter"
+							value="min"
+							[(ngModel)]="levelFilterChoice"
+							inputId="min"
+						/>
+						<label for="min" class="ml-2">Min.</label>
+					</div>
+					<div>
+						<p-radioButton
+							name="lvl_filter"
+							value="max"
+							[(ngModel)]="levelFilterChoice"
+							inputId="max"
+						/>
+						<label for="max" class="ml-2">Max.</label>
+					</div>
+				</div>
+				<app-language-select
+					(singleSelectionChange)="languageFilter.set($event)"
+				></app-language-select>
+			</p-fieldset>
+			<p-fieldset [toggleable]="true" legend="Options de tri" class="mt-2">
+				<div class="flex flex-row flex-wrap gap-[1rem] mt-2">
+					<div>
+						<p-radioButton
+							name="sort_level"
+							value="level"
+							[(ngModel)]="sortValue"
+							inputId="sort_level"
+						/>
+						<label for="sort_level" class="ml-2">Niv.</label>
+					</div>
+					<div>
+						<p-radioButton
+							name="sort_fame"
+							value="fame"
+							[(ngModel)]="sortValue"
+							inputId="sort_fame"
+						/>
+						<label for="sort_fame" class="ml-2">Renom</label>
+					</div>
+					<div>
+						<p-radioButton
+							name="sort_foundation"
+							value="foundation"
+							[(ngModel)]="sortValue"
+							inputId="sort_foundation"
+						/>
+						<label for="sort_foundation" class="ml-2">Ancienneté</label>
+					</div>
+				</div>
+				<p-divider></p-divider>
+				<div class="flex flex-row flex-wrap gap-[1rem] mt-2">
+					<div>
+						<p-radioButton
+							name="sort_asc"
+							value="asc"
+							[(ngModel)]="sortOption"
+							inputId="sort_asc"
+						/>
+						<label for="sort_asc" class="ml-2">Ascendant</label>
+					</div>
+					<div>
+						<p-radioButton
+							name="sort_desc"
+							value="desc"
+							[(ngModel)]="sortOption"
+							inputId="sort_desc"
+						/>
+						<label for="sort_desc" class="ml-2">Descendant</label>
+					</div>
+				</div>
+			</p-fieldset>
+		</div>
+	</aside>
+	<main
+		#scrollContainer
+		class="md:col-span-3 col-span-1 main flex flex-col gap-[1rem] overflow-y-auto"
+	>
+		@for (clan of clansDisplay(); track clan) {
+		<app-clan-card [clan]="clan" (click)="navigateToClanProfil(clan.id)"></app-clan-card>
+		}
+	</main>
+</div>

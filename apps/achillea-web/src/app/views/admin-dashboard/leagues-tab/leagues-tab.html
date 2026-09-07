@@ -1,0 +1,61 @@
+<div class="flex flex-col gap-4">
+	<div class="flex justify-between items-center">
+		<span class="text-sm opacity-70">Championnats (lecture + lien public)</span>
+		<div class="flex gap-2">
+			<a routerLink="/leagues/astral" class="p-button p-button-sm p-button-outlined">Page Astral</a>
+			<p-button
+				icon="pi pi-refresh"
+				size="small"
+				severity="secondary"
+				[outlined]="true"
+				[loading]="loading()"
+				(onClick)="reload()"
+			></p-button>
+		</div>
+	</div>
+
+	<p-table [value]="items()" [loading]="loading()" styleClass="p-datatable-sm">
+		<ng-template pTemplate="header">
+			<tr>
+				<th>Nom</th>
+				<th>Saison</th>
+				<th>Format</th>
+				<th>Équipes</th>
+				<th>Champion</th>
+			</tr>
+		</ng-template>
+		<ng-template pTemplate="body" let-l>
+			<tr>
+				<td class="font-medium">{{ l.name }}</td>
+				<td>{{ l.season }}</td>
+				<td>{{ l.format }}</td>
+				<td>{{ l.teamCount }}</td>
+				<td>{{ l.champion || "—" }}</td>
+			</tr>
+		</ng-template>
+	</p-table>
+
+	@if (astral()?.table; as table) {
+	<section class="flex flex-col gap-2">
+		<h4 class="m-0 text-sm font-semibold uppercase opacity-70">Classement S1 (extrait)</h4>
+		<p-table [value]="table" styleClass="p-datatable-sm" [rows]="8" [paginator]="table.length > 8">
+			<ng-template pTemplate="header">
+				<tr>
+					<th>#</th>
+					<th>Équipe</th>
+					<th class="text-center">Pts</th>
+					<th class="text-center">J</th>
+				</tr>
+			</ng-template>
+			<ng-template pTemplate="body" let-row let-i="rowIndex">
+				<tr>
+					<td>{{ i + 1 }}</td>
+					<td>{{ row.team || row.name || row.short || "—" }}</td>
+					<td class="text-center">{{ row.points ?? row.pts ?? "—" }}</td>
+					<td class="text-center">{{ row.played ?? row.pj ?? "—" }}</td>
+				</tr>
+			</ng-template>
+		</p-table>
+	</section>
+	}
+</div>

@@ -1,0 +1,121 @@
+<p-table
+	[value]="sortClanMembers(clanMembers())"
+	[loading]="areMembersLoading()"
+	[tableStyle]="{ 'min-width': '50rem' }"
+>
+	<ng-template #header>
+		<tr>
+			@for (col of memberColumns; track col) {
+			<th>{{ col.header }}</th>
+			}
+		</tr>
+	</ng-template>
+	<ng-template #body let-member>
+		<tr>
+			<td>
+				<div class="flex items-center">
+					<p-avatar class="mr-2" shape="circle" [image]="member.user.avatar"></p-avatar>
+					{{ member.user.username }}
+				</div>
+			</td>
+			@if (managingMember() && selectedMember?.user?.id === member.user.id) {
+			<td>
+				<app-clan-role-select
+					[disabled]="!canManageRole()"
+					[preselectedRole]="member.clanRole"
+					(singleSelectionChange)="updateMemberRoles($event)"
+				></app-clan-role-select>
+			</td>
+			} @else {
+			<td>{{ getMemberRoleName(member.clanRole) }}</td>
+			} @if (managingMember() && selectedMember?.user?.id === member.user.id) {
+			<td>
+				<app-clan-tag-select [distinctionsFormControl]="distinctionsControl"></app-clan-tag-select>
+			</td>
+			} @else {
+			<td>{{ member.distinctions.join(', ') }}</td>
+			}
+			<td>{{ member.clanFameContributed }}</td>
+			<td>{{ sqlDateToUsableDate(member.createdAt) | date:'longDate' }}</td>
+			<td>{{ sqlDateToUsableDate(member.user.lastInteract) | date:'longDate' }}</td>
+			<td>{{ member.user.currentLevel }}</td>
+			<td>
+				<p-tag>
+					<img
+						[src]="getEloImagePath(member.user.soloRank.key)"
+						[alt]="member.user.soloRank.key"
+						class="inline-block w-5 h-5 mr-1 align-middle"
+						loading="lazy"
+						decoding="async"
+					/>
+					<span class="align-middle">{{ member.user.soloRank.key }}</span>
+				</p-tag>
+			</td>
+			@if (managingMember() && selectedMember?.user?.id === member.user.id) {
+			<td>
+				<button
+					pButton
+					[text]="true"
+					severity="secondary"
+					class="shrink-0! mr-2"
+					(click)="saveMemberChanges()"
+					[disabled]="!canUpdate()"
+				>
+					<i pButtonIcon class="pi pi-check"></i>
+				</button>
+				<button pButton [text]="true" severity="secondary" class="shrink-0!" (click)="endEdition()">
+					<i pButtonIcon class="pi pi-times"></i>
+				</button>
+			</td>
+			} @else {
+			<td>
+				<p-menu #memberMenu appendTo="body" [popup]="true" [model]="memberItems"></p-menu>
+
+				<button
+					pButton
+					[text]="true"
+					severity="secondary"
+					class="shrink-0!"
+					(click)="openMemberMenu($event, memberMenu, member)"
+				>
+					<i pButtonIcon class="pi pi-ellipsis-h"></i>
+				</button>
+			</td>
+			}
+		</tr>
+	</ng-template>
+</p-table>
+<p-dialog
+	header="Confirmation d'Exclusion"
+	(onHide)="onDialogClose()"
+	[modal]="true"
+	[(visible)]="showKickModal"
+>
+	<div>
+		<p>Souhaitez-vous vraiment exclure {{ selectedMember?.user?.username }} ?</p>
+		<p-iftalabel class="flex flex-auto mt-2">
+			<textarea
+				rows="5"
+				cols="30"
+				id="kickReason"
+				fluid
+				pTextarea
+				[autoResize]="true"
+				[formControl]="kickReasonControl"
+				aria-describedby="kickReason-help"
+			></textarea>
+			<label for="kickReason">Raison de l'exclusion</label>
+			<small id="kickReason-help">La raison doit comporter au moins 3 caractères.</small>
+		</p-iftalabel>
+	</div>
+	<div class="flex justify-end mt-4 gap-2">
+		<p-button
+			label="Exclure"
+			severity="primary"
+			(click)="kickMember()"
+			[disabled]="kickReasonControl.invalid"
+			[loading]="kickLoading()"
+		/>
+		<p-button label="Annuler" severity="secondary" (click)="showKickModal = false" />
+	</div>
+</p-dialog>

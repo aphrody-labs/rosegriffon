@@ -1,0 +1,61 @@
+:host {
+	display: block;
+}
+
+.tier-emblem {
+	transition: transform 0.2s ease;
+}
+
+.tier-emblem:hover {
+	transform: scale(1.05);
+}
+
+::ng-deep .tier-card.is-mine {
+	outline: 2px solid var(--p-primary-color);
+	outline-offset: -2px;
+	box-shadow: 0 0 24px color-mix(in oklch, var(--p-primary-color) 35%, transparent);
+}
+
+.my-tier-badge {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.2rem 0.5rem;
+	border-radius: 999px;
+	background: var(--p-primary-color);
+	color: var(--p-primary-contrast-color, #fff);
+	font-size: 0.65rem;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	z-index: 2;
+}
+
+.my-tier-badge .pi {
+	font-size: 0.7rem;
+}
+
+.dot-mine {
+	display: inline-block;
+	width: 0.6rem;
+	height: 0.6rem;
+	border-radius: 999px;
+	background: var(--p-primary-color);
+}
+
+.hub-link {
+	display: inline-flex;
+	align-items: center;
+	font-size: 0.85rem;
+	opacity: 0.75;
+	text-decoration: none;
+	color: inherit;
+	transition: opacity 0.15s ease;
+}
+
+.hub-link:hover {
+	opacity: 1;
+	color: var(--p-primary-color);
+}

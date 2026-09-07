@@ -1,0 +1,191 @@
+<div class="admin-overview flex flex-col gap-6">
+	<div class="flex flex-wrap items-center justify-between gap-3">
+		<div class="flex items-center gap-2 flex-wrap">
+			@if (alertCount() > 0) {
+			<p-tag [value]="alertCount() + ' alerte(s)'" severity="danger" [rounded]="true"></p-tag>
+			} @else {
+			<p-tag value="RAS" severity="success" [rounded]="true"></p-tag>
+			} @if (lastRefresh(); as lr) {
+			<span class="text-sm section-muted">MAJ {{ lr | date: "HH:mm:ss" }} · auto 30 s</span>
+			}
+		</div>
+		<p-button
+			icon="pi pi-refresh"
+			label="Rafraîchir"
+			size="small"
+			severity="secondary"
+			[outlined]="true"
+			[loading]="loading()"
+			(onClick)="refresh()"
+		></p-button>
+	</div>
+
+	<!-- Grille multi-domaines (interactive) -->
+	@if (opsOverview(); as o) {
+	<section class="flex flex-col gap-3">
+		<h4 class="m-0 text-sm font-semibold uppercase tracking-wide section-muted">
+			Tous les domaines
+		</h4>
+		<div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+			@for (tile of domainTiles(o); track tile.id) {
+			<button
+				type="button"
+				class="kpi-card text-left"
+				[class.kpi-alert]="tile.warn"
+				(click)="go(tile.id)"
+			>
+				<div class="kpi-value">{{ tile.value }}</div>
+				<div class="kpi-label">{{ tile.label }}</div>
+				<div class="text-xs opacity-60 mt-1">{{ tile.sub }}</div>
+			</button>
+			}
+		</div>
+	</section>
+	} @else if (loading()) {
+	<div class="text-sm opacity-60 py-4">Chargement de l'overview ops…</div>
+	} @else {
+	<div class="text-sm opacity-60 py-4">
+		Overview ops indisponible (API /admin/ops). Les onglets ranked restent utilisables.
+	</div>
+	} @if (alertItems().length > 0) {
+	<section class="flex flex-col gap-3">
+		<h4 class="m-0 text-sm font-semibold uppercase tracking-wide section-muted">À traiter</h4>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+			@for (a of alertItems(); track a.id + a.title) {
+			<div class="alert-card" [class.alert-warn]="a.warn">
+				<div class="flex items-start justify-between gap-2">
+					<div>
+						<div class="font-semibold flex items-center gap-2">
+							<i [class]="a.icon"></i>
+							{{ a.title }}
+						</div>
+						<p class="m-0 mt-1 text-sm opacity-80">{{ a.detail }}</p>
+					</div>
+					<p-button
+						label="Ouvrir"
+						size="small"
+						[severity]="a.warn ? 'warn' : 'secondary'"
+						(onClick)="go(a.id)"
+					></p-button>
+				</div>
+			</div>
+			}
+		</div>
+	</section>
+	}
+
+	<section class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+		<div class="flex flex-col gap-3">
+			<div class="flex items-center justify-between">
+				<h4 class="m-0 text-sm font-semibold uppercase tracking-wide section-muted">
+					Tournois en cours
+				</h4>
+				<p-button
+					label="Tous"
+					icon="pi pi-trophy"
+					size="small"
+					[text]="true"
+					(onClick)="go('tournaments')"
+				></p-button>
+			</div>
+			@if (ongoingTournaments().length === 0) {
+			<div class="empty-panel">Aucun tournoi en cours.</div>
+			} @else {
+			<p-table
+				[value]="ongoingTournaments()"
+				styleClass="p-datatable-sm"
+				[tableStyle]="{ 'min-width': '100%' }"
+			>
+				<ng-template pTemplate="header">
+					<tr>
+						<th>Nom</th>
+						<th>Format</th>
+						<th class="text-center">Capacité</th>
+						<th class="text-right">Podium AP</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-t>
+					<tr>
+						<td class="font-medium">{{ t.name }}</td>
+						<td class="text-sm opacity-80">{{ typeLabel(t) }}</td>
+						<td class="text-center">{{ t.participantsNumber }}</td>
+						<td class="text-right font-mono text-sm">{{ prizeSummary(t) }}</td>
+					</tr>
+				</ng-template>
+			</p-table>
+			}
+		</div>
+
+		<div class="flex flex-col gap-3">
+			<h4 class="m-0 text-sm font-semibold uppercase tracking-wide section-muted">
+				Bonus podium à verser
+			</h4>
+			@if (finishedNeedingPrize().length === 0) {
+			<div class="empty-panel">Aucun bonus en attente.</div>
+			} @else {
+			<p-table [value]="finishedNeedingPrize()" styleClass="p-datatable-sm">
+				<ng-template pTemplate="header">
+					<tr>
+						<th>Tournoi</th>
+						<th class="text-center">Taille</th>
+						<th class="text-right">AP</th>
+						<th class="text-right">Action</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-t>
+					<tr>
+						<td class="font-medium">{{ t.name }}</td>
+						<td class="text-center">{{ t.participantsNumber }}</td>
+						<td class="text-right font-mono text-sm">{{ prizeSummary(t) }}</td>
+						<td class="text-right">
+							<p-button
+								icon="pi pi-star"
+								label="Verser"
+								size="small"
+								severity="warn"
+								(onClick)="applyPrize(t)"
+							></p-button>
+						</td>
+					</tr>
+				</ng-template>
+			</p-table>
+			}
+		</div>
+	</section>
+
+	<section class="flex flex-col gap-3">
+		<div>
+			<h4 class="m-0 text-sm font-semibold uppercase tracking-wide section-muted">
+				Barème podium (AP)
+			</h4>
+			<p class="m-0 mt-1 text-xs section-muted max-w-2xl">
+				32 joueurs = 50 / 25 / 10. Élimination simple & double uniquement.
+			</p>
+		</div>
+		<div
+			class="overflow-x-auto rounded-xl border"
+			style="border-color: var(--p-surface-700, #494949)"
+		>
+			<table class="prize-table w-full text-sm">
+				<thead>
+					<tr>
+						<th class="text-left">Taille</th>
+						<th class="text-center">1er</th>
+						<th class="text-center">2e</th>
+						<th class="text-center">Demis</th>
+					</tr>
+				</thead>
+				<tbody>
+					@for (tier of prizeTiers; track tier.maxSize) {
+					<tr [class.prize-highlight]="tier.maxSize === 32">
+						<td>{{ tier.label }}</td>
+						<td class="text-center font-semibold tabular-nums">{{ tier.table.first }}</td>
+						<td class="text-center tabular-nums">{{ tier.table.second }}</td>
+						<td class="text-center tabular-nums">{{ tier.table.semi }}</td>
+					</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</section>
+</div>

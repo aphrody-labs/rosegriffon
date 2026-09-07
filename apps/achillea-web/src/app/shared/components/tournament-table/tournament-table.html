@@ -1,0 +1,220 @@
+@if (isStandalone()) {
+<div class="p-[1.5rem]">
+	<p-panel [pt]="{ contentWrapper: '!overflow-x-auto' }" class="overflow-x-auto">
+		<div class="resize-container-1 flex flex-col bg-surface-50 dark:bg-surface-900 md:px-8">
+			<p-table
+				[value]="tournaments()"
+				[loading]="tournamentsAreLoading()"
+				[scrollable]="true"
+				styleClass="tt-table"
+			>
+				<ng-template #header>
+					<tr>
+						@for (col of tableColumns; track col) {
+						<th>{{ col.header }}</th>
+						}
+					</tr>
+				</ng-template>
+				<ng-template #body let-tournament>
+					<tr [routerLink]="['/events/tournaments', tournament.id]" class="hover:cursor-pointer">
+						<td>
+							<div class="flex items-center gap-2">
+								@if (tournament.logo) {
+								<p-avatar shape="circle" [image]="tournament.logo" class="shrink-0" />
+								}
+								<span class="font-medium">{{ tournament.name }}</span>
+							</div>
+						</td>
+						<td>
+							<div class="flex items-center">
+								<p-avatar
+									class="mr-2"
+									shape="circle"
+									[image]="tournament.organization.logo"
+								></p-avatar>
+								{{ tournament.organization.name }}
+							</div>
+						</td>
+						<td>
+							<span>{{ stageTypeToString(tournament.tournamentType) }}</span>
+						</td>
+						<td>
+							<span>{{ tournament.participantsNumber }}</span>
+						</td>
+						<td>{{ sqlDateToUsableDate(tournament.startsAt) | date: "longDate" }}</td>
+						<td>
+							<p-tag
+								[value]="getTagLabel(tournament.internalState)"
+								[severity]="getTagSeverity(tournament.internalState)"
+							/>
+						</td>
+					</tr>
+				</ng-template>
+			</p-table>
+		</div>
+	</p-panel>
+</div>
+} @else {
+<p-table
+	[value]="tournaments()"
+	[loading]="tournamentsAreLoading()"
+	[scrollable]="true"
+	styleClass="tt-table"
+>
+	<ng-template #header>
+		<tr>
+			@for (col of tableColumns; track col) {
+			<th>{{ col.header }}</th>
+			}
+		</tr>
+	</ng-template>
+	<ng-template #body let-tournament>
+		<tr class="hover:bg-surface-100 dark:hover:bg-surface-800">
+			<td>
+				<div class="flex items-center gap-2">
+					@if (tournament.logo) {
+					<p-avatar shape="circle" [image]="tournament.logo" class="shrink-0" />
+					}
+					<a
+						[routerLink]="['/events/tournaments', tournament.id]"
+						class="font-medium text-(--p-primary-color) hover:underline"
+						>{{ tournament.name }}</a
+					>
+				</div>
+			</td>
+			<td>
+				<div class="flex items-center">
+					<p-avatar class="mr-2" shape="circle" [image]="tournament.organization.logo"></p-avatar>
+					{{ tournament.organization.name }}
+				</div>
+			</td>
+			<td>
+				<span>{{ stageTypeToString(tournament.tournamentType) }}</span>
+			</td>
+			<td>
+				<span>{{ tournament.participantsNumber }}</span>
+			</td>
+			<td>{{ sqlDateToUsableDate(tournament.startsAt) | date: "longDate" }}</td>
+			<td>
+				<p-tag
+					[value]="getTagLabel(tournament.internalState)"
+					[severity]="getTagSeverity(tournament.internalState)"
+				/>
+			</td>
+			@if (showAdminActions()) {
+			<td>
+				<span
+					class="font-mono text-sm tabular-nums"
+					[pTooltip]="'1er / 2e / demis (AP plats)'"
+					tooltipPosition="top"
+					>{{ prizeSummary(tournament) }}</span
+				>
+			</td>
+			<td>
+				<p-tag
+					[value]="podiumStatusLabel(tournament)"
+					[severity]="podiumStatusSeverity(tournament)"
+				/>
+			</td>
+			<td (click)="$event.stopPropagation()">
+				<div class="flex flex-wrap items-center gap-1">
+					@if (canEdit(tournament)) {
+					<p-button
+						icon="pi pi-pencil"
+						[rounded]="true"
+						[text]="true"
+						severity="secondary"
+						pTooltip="Modifier le tournoi (textes, dates, images…)"
+						tooltipPosition="top"
+						(onClick)="openEdit(tournament, $event)"
+					/>
+					} @if (canOpenRegistrations(tournament)) {
+					<p-button
+						icon="pi pi-lock-open"
+						[rounded]="true"
+						[text]="true"
+						severity="success"
+						pTooltip="Ouvrir les inscriptions"
+						tooltipPosition="top"
+						[loading]="actionLoadingId() === tournament.id"
+						(onClick)="openRegistrations(tournament, $event)"
+					/>
+					} @if (canGenerateBracket(tournament)) {
+					<p-button
+						icon="pi pi-sitemap"
+						[rounded]="true"
+						[text]="true"
+						severity="help"
+						[pTooltip]="
+							tournament.internalState === TournamentState.PREPARING
+								? 'Régénérer le bracket'
+								: 'Générer le bracket'
+						"
+						tooltipPosition="top"
+						[loading]="actionLoadingId() === tournament.id"
+						(onClick)="generateBracket(tournament, $event)"
+					/>
+					} @if (canStartTournament(tournament)) {
+					<p-button
+						icon="pi pi-play"
+						[rounded]="true"
+						[text]="true"
+						severity="success"
+						pTooltip="Démarrer le tournoi"
+						tooltipPosition="top"
+						[loading]="actionLoadingId() === tournament.id"
+						(onClick)="startTournament(tournament, $event)"
+					/>
+					} @if (canApplyPlacementPrize(tournament)) {
+					<p-button
+						icon="pi pi-star"
+						[rounded]="true"
+						[text]="true"
+						severity="warn"
+						pTooltip="Verser le bonus AP podium (1er / 2e / demis)"
+						tooltipPosition="top"
+						[loading]="actionLoadingId() === tournament.id"
+						(onClick)="applyPlacementPrizes(tournament, $event)"
+					/>
+					}
+					<p-button
+						icon="pi pi-external-link"
+						[rounded]="true"
+						[text]="true"
+						severity="info"
+						pTooltip="Page publique du tournoi"
+						tooltipPosition="top"
+						[routerLink]="['/events/tournaments', tournament.id]"
+					/>
+				</div>
+			</td>
+			}
+		</tr>
+	</ng-template>
+	<ng-template #emptymessage>
+		<tr>
+			<td [attr.colspan]="tableColumns.length" class="text-center opacity-60 py-6">
+				Aucun tournoi pour le moment.
+			</td>
+		</tr>
+	</ng-template>
+</p-table>
+
+<!-- Dialog d'édition complète depuis le dashboard -->
+<p-dialog
+	header="Modifier le tournoi"
+	[(visible)]="showEditDialog"
+	[modal]="true"
+	[style]="{ width: '95vw', 'max-width': '48rem' }"
+	[dismissableMask]="true"
+	(onHide)="onEditClosed()"
+>
+	@if (editingTournament(); as t) {
+	<app-tournament-creation-form
+		[tournamentToEdit]="t"
+		(closeDialog)="onEditClosed()"
+		(saved)="onTournamentSaved($event)"
+	/>
+	}
+</p-dialog>
+}

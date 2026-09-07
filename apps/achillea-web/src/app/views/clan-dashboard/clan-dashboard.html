@@ -1,0 +1,164 @@
+<div class="p-[1.5rem]">
+	<p-panel class="flex">
+		<div class="resize-container-1 flex flex-col bg-surface-50 dark:bg-surface-900 md:px-8">
+			<section class="bg-surface-0 dark:bg-surface-950 pb-10">
+				<div class="flex flex-col gap-8">
+					<div class="flex justify-between sm:items-center gap-4 sm:flex-row flex-col">
+						<div class="flex flex-col md:flex-row items-center gap-2">
+							<img
+								[src]="clan?.clanAvatarUrl"
+								alt="clan_logo"
+								class="max-w-[100px] max-h-[100px]"
+								loading="lazy"
+								decoding="async"
+							/>
+							<div class="flex flex-col gap-1 md:gap-2 text-center md:text-start">
+								<h1
+									class="m-0 text-surface-900 dark:text-surface-0 text-xl font-semibold leading-tight"
+								>
+									Dashboard du Clan {{ clan?.name }}
+								</h1>
+								<p class="m-0 text-surface-500 dark:text-surface-300 text-base leading-tight">
+									Gestion de Clan
+								</p>
+							</div>
+						</div>
+						<button
+							pButton
+							severity="primary"
+							[disabled]="disableSync()"
+							(click)="synchronize()"
+							[loading]="isSynchronizing()"
+						>
+							<i class="pi pi-sync text-base flex items-center"></i>
+							<span class="text-base flex items-center h-full leading-none">Synchroniser</span>
+						</button>
+					</div>
+					<div class="border-b border-surface-200 dark:border-[#494949] py-4">
+						<ul class="flex items-center overflow-x-auto gap-4 list-none m-0 p-0">
+							@for (item of tabs; track item.label) {
+							<li>
+								<p-button
+									[icon]="item.icon"
+									[label]="item.label"
+									[text]="activeTabAction !== item.label"
+									[outlined]="false"
+									[severity]="activeTabAction === item.label ? 'primary' : undefined"
+									[styleClass]="getTabClasses(item.label)"
+									(onClick)="activeTabAction = item.label"
+									[disabled]="item.disabled"
+								></p-button>
+							</li>
+							}
+						</ul>
+					</div>
+				</div>
+			</section>
+			<div class="flex flex-col flex-auto bg-surface-950">
+				@if (activeTabAction === 'Infos') {
+				<section class="bg-surface-0 dark:bg-surface-900">
+					<section>
+						<div class="flex flex-col gap-4">
+							<div class="flex flex-col gap-2">
+								<h3
+									class="mt-0 mb-0 text-surface-900 dark:text-surface-0 font-medium text-xl leading-tight"
+								>
+									Infos
+								</h3>
+								<p
+									class="mt-0 mb-0 text-surface-500 dark:text-surface-400 font-normal leading-tight"
+								>
+									Logo, nom, tag, biographie et réseaux du clan
+								</p>
+							</div>
+						</div>
+						<app-clan-info-form
+							[clan]="clan"
+							[canEdit]="canEditInfo()"
+							(saved)="onClanInfoSaved($event)"
+						></app-clan-info-form>
+					</section>
+				</section>
+				} @if (activeTabAction === 'Membres') {
+				<section class="bg-surface-0 dark:bg-surface-900">
+					<section>
+						<div class="flex flex-col gap-4">
+							<div class="flex flex-col gap-2">
+								<h3
+									class="mt-0 mb-0 text-surface-900 dark:text-surface-0 font-medium text-xl leading-tight"
+								>
+									Membres
+								</h3>
+								<p
+									class="mt-0 mb-0 text-surface-500 dark:text-surface-400 font-normal leading-tight"
+								>
+									Gestion des membres, de leurs rôles et de leurs fonctions
+								</p>
+							</div>
+						</div>
+						<div class="mt-4">
+							<app-manage-members
+								[areMembersLoading]="areMembersLoading"
+								[clanMembers]="clanMembers()"
+							></app-manage-members>
+						</div>
+					</section>
+				</section>
+				} @if (activeTabAction === 'Invitations') {
+				<section class="bg-surface-0 dark:bg-surface-900">
+					<section>
+						<div class="flex flex-col gap-4">
+							<div class="flex flex-col gap-2">
+								<h3
+									class="mt-0 mb-0 text-surface-900 dark:text-surface-0 font-medium text-xl leading-tight"
+								>
+									Invitations
+								</h3>
+								<p
+									class="mt-0 mb-0 text-surface-500 dark:text-surface-400 font-normal leading-tight"
+								>
+									Gestion des invitations existantes et émissions de nouvelles invitations
+								</p>
+							</div>
+							<p-button
+								label="Nouvelle invitation"
+								styleClass="w-fit"
+								(click)="openInviteDialog()"
+							></p-button>
+						</div>
+						<div class="mt-4">
+							<app-manage-invites></app-manage-invites>
+						</div>
+					</section>
+				</section>
+				} @if (activeTabAction === 'Candidatures') {
+				<section class="bg-surface-0 dark:bg-surface-900">
+					<section>
+						<div class="flex flex-col gap-4">
+							<div class="flex flex-col gap-2">
+								<h3
+									class="mt-0 mb-0 text-surface-900 dark:text-surface-0 font-medium text-xl leading-tight"
+								>
+									Candidatures
+								</h3>
+								<p
+									class="mt-0 mb-0 text-surface-500 dark:text-surface-400 font-normal leading-tight"
+								>
+									Gestion des candidatures existantes
+								</p>
+							</div>
+						</div>
+						<div class="mt-4">
+							<app-manage-applications></app-manage-applications>
+						</div>
+					</section>
+				</section>
+				}
+			</div>
+		</div>
+	</p-panel>
+</div>
+<app-invite-member
+	[showDialog]="showInviteDialog"
+	(success)="refreshInvites($event)"
+></app-invite-member>

@@ -1,0 +1,303 @@
+<div class="ranked-page max-w-3xl mx-auto p-4 md:p-6 flex flex-col gap-4">
+	<!-- Mode selector (format + classé/non classé) -->
+	<div class="flex flex-wrap justify-center items-center gap-3">
+		<p-selectButton
+			[options]="modeOptions"
+			[ngModel]="selectedMode()"
+			(ngModelChange)="selectedMode.set($event)"
+			optionLabel="label"
+			optionValue="value"
+			[allowEmpty]="false"
+			[disabled]="searching()"
+		></p-selectButton>
+		<p-selectButton
+			[options]="rankedOptions"
+			[ngModel]="selectedRanked()"
+			(ngModelChange)="selectedRanked.set($event)"
+			optionLabel="label"
+			optionValue="value"
+			[allowEmpty]="false"
+			[disabled]="searching() || challengeLink() !== null"
+		></p-selectButton>
+	</div>
+
+	<!-- Profile card -->
+	@if (profile(); as p) {
+	<p-card>
+		<div class="flex flex-col md:flex-row items-center gap-6">
+			<div
+				class="rank-emblem flex items-center justify-center w-32 h-32 rounded-2xl shadow-lg p-3"
+				[style.background]="tierGradient()"
+			>
+				<img
+					[src]="tierImage()"
+					[alt]="tierLabel()"
+					class="w-full h-full object-contain drop-shadow-md"
+					loading="eager"
+					fetchpriority="high"
+					decoding="async"
+					width="128"
+					height="128"
+				/>
+			</div>
+			<div class="flex-1 text-center md:text-left">
+				<h1 class="text-3xl font-bold mb-1">{{ tierLabel() }}</h1>
+				<div class="flex items-center justify-center md:justify-start gap-2 mb-2 flex-wrap">
+					<p-tag severity="info" [value]="p.elo + ' AP'"></p-tag>
+					<p-tag severity="secondary" [value]="(p.mode === 2 ? '1v1' : '2v2')"></p-tag>
+					@if (trendDeltaLabel()) {
+					<p-tag [severity]="trendSeverity()" [value]="trendDeltaLabel() + ' / 7j'"></p-tag>
+					}
+				</div>
+				@if (percentileLabel()) {
+				<div class="text-xs md:text-sm opacity-70 mb-2">
+					<i class="pi pi-globe mr-1"></i>{{ percentileLabel() }}
+				</div>
+				}
+				<div class="text-sm opacity-80 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+					<span><b>{{ p.wins }}</b> victoires</span>
+					<span><b>{{ p.losses }}</b> défaites</span>
+					<span>Pic : <b>{{ p.peakRating }}</b> AP</span>
+					<span>Winrate : <b>{{ winrate() }}%</b></span>
+				</div>
+				<div class="text-xs opacity-60 mt-1">
+					{{ p.gamesPlayed }} {{ p.gamesPlayed > 1 ? 'parties jouées' : 'partie jouée' }}
+				</div>
+				@if ((trend()?.sparkline ?? []).length > 1) {
+				<div class="mt-3 flex items-center gap-2">
+					<span class="text-xs opacity-60">Évolution {{ trend()!.sparkline.length }} derniers</span>
+					<app-sparkline [data]="trend()!.sparkline" [width]="160" [height]="32"></app-sparkline>
+				</div>
+				}
+			</div>
+		</div>
+	</p-card>
+	} @else {
+	<p-card>
+		<div class="text-center py-6 opacity-60">
+			<i class="pi pi-spin pi-spinner text-2xl"></i>
+			<div class="mt-2">Chargement du profil…</div>
+		</div>
+	</p-card>
+	}
+
+	<!-- Search / cancel -->
+	<p-card>
+		@if (!searching()) {
+		<div class="flex flex-col items-center gap-4 py-4">
+			<p class="text-center opacity-80">
+				Lance une recherche pour trouver un adversaire de ton niveau en {{ selectedMode() === 2 ?
+				'1v1' : '2v2' }} —
+				<b>{{ selectedRanked() ? 'classé' : 'non classé' }}</b>.
+			</p>
+			@if (!selectedRanked()) {
+			<p class="text-xs opacity-60 text-center -mt-2">
+				Partie amicale : aucun impact sur ton rang ni tes AP.
+			</p>
+			}
+			<p-button
+				label="Rechercher un adversaire"
+				icon="pi pi-search"
+				severity="primary"
+				size="large"
+				[disabled]="!profile()"
+				(onClick)="startSearch()"
+			></p-button>
+		</div>
+		} @else {
+		<div class="flex flex-col items-center gap-4 py-6">
+			<p-progressSpinner styleClass="!w-16 !h-16" strokeWidth="3"></p-progressSpinner>
+			<div class="text-center">
+				<div class="text-lg font-semibold">Recherche d'un adversaire… {{ searchElapsed() }}s</div>
+				<div class="text-sm opacity-70 mt-1">
+					La recherche continue jusqu'à trouver un adversaire (la fourchette de niveau s'élargit
+					avec le temps).
+				</div>
+				<div class="text-xs opacity-60 mt-2">Mode : {{ selectedMode() === 2 ? '1v1' : '2v2' }}</div>
+			</div>
+			<p-button
+				label="Annuler"
+				icon="pi pi-times"
+				severity="secondary"
+				[outlined]="true"
+				(onClick)="cancelSearch()"
+			></p-button>
+		</div>
+		}
+	</p-card>
+
+	<!-- Lien de défi partageable (inviter quelqu'un hors présence) -->
+	<p-card>
+		<div class="flex items-center gap-2 mb-3">
+			<i class="pi pi-link text-xl"></i>
+			<h2 class="text-lg font-semibold m-0">Défier par lien</h2>
+		</div>
+		@if (challengeLink(); as link) {
+		<div class="flex flex-col gap-3">
+			<p class="text-sm opacity-80 m-0">
+				Partage ce lien à ton adversaire. Reste sur cette page : le match démarre dès qu'il
+				l'accepte.
+			</p>
+			<div class="flex items-center gap-2">
+				<input
+					pInputText
+					type="text"
+					[value]="link.url"
+					readonly
+					class="flex-1 font-mono text-xs"
+				/>
+				<p-button icon="pi pi-copy" severity="secondary" pTooltip="Copier" (onClick)="copyLink()" />
+			</div>
+			<div class="flex items-center justify-between gap-2">
+				<div class="flex items-center gap-2 text-sm opacity-70">
+					<i class="pi pi-spin pi-spinner"></i>
+					<span>En attente d'acceptation… ({{ link.ranked ? 'classé' : 'non classé' }})</span>
+				</div>
+				<p-button
+					label="Annuler"
+					icon="pi pi-times"
+					severity="secondary"
+					[outlined]="true"
+					size="small"
+					(onClick)="cancelLink()"
+				></p-button>
+			</div>
+		</div>
+		} @else {
+		<div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+			<p class="text-sm opacity-80 m-0">
+				Génère un lien de défi en {{ selectedMode() === 2 ? '1v1' : '2v2' }} ({{ selectedRanked() ?
+				'classé' : 'non classé' }}) à envoyer à n'importe quel joueur.
+			</p>
+			<p-button
+				label="Créer un lien de défi"
+				icon="pi pi-link"
+				severity="primary"
+				[loading]="creatingLink()"
+				[disabled]="searching()"
+				(onClick)="createLink()"
+			></p-button>
+		</div>
+		}
+	</p-card>
+
+	<!-- Inviter un adversaire en ligne (défi direct) -->
+	<p-card>
+		<div class="flex items-center gap-2 mb-3">
+			<i class="pi pi-users text-xl"></i>
+			<h2 class="text-lg font-semibold m-0">Inviter un adversaire en ligne</h2>
+			<p-tag severity="success" [value]="onlinePlayers().length + ' en ligne'"></p-tag>
+		</div>
+
+		@if (inviteSent(); as sent) {
+		<div class="flex items-center justify-between gap-3 mb-3 p-3 rounded-lg bg-primary-50/40">
+			<div class="flex items-center gap-2">
+				<i class="pi pi-spin pi-spinner"></i>
+				<span>Invitation envoyée à <b>{{ sent.targetDisplayName }}</b>, en attente…</span>
+			</div>
+		</div>
+		} @if (onlinePlayers().length === 0) {
+		<div class="text-center py-4 opacity-60 text-sm">
+			Aucun autre joueur en ligne pour l'instant. Reste sur la page, la liste se met à jour en temps
+			réel.
+		</div>
+		} @else {
+		<div class="flex flex-col gap-2">
+			@for (p of onlinePlayers(); track p.userId) {
+			<div class="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-surface-100/40">
+				<div class="flex items-center gap-3 min-w-0">
+					<p-avatar [image]="p.avatar" shape="circle" size="large" />
+					<div class="min-w-0">
+						<div class="font-medium truncate">{{ p.displayName }}</div>
+						<div class="text-xs opacity-70">{{ p.elo }} AP</div>
+					</div>
+				</div>
+				<p-button
+					label="Défier"
+					icon="pi pi-bolt"
+					size="small"
+					severity="primary"
+					[disabled]="inviteSent() !== null || searching() || challengeLink() !== null"
+					(onClick)="challenge(p.userId)"
+				></p-button>
+			</div>
+			}
+		</div>
+		}
+	</p-card>
+
+	<!-- Cross-nav vers les sous-pages ranked -->
+	<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+		<a [routerLink]="['/ranked/leaderboard']" class="ranked-nav-card group">
+			<i class="pi pi-trophy text-2xl"></i>
+			<div>
+				<div class="font-semibold">Classement</div>
+				<div class="text-xs opacity-70">Top mondial par mode</div>
+			</div>
+			<i
+				class="pi pi-arrow-right opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition"
+			></i>
+		</a>
+		<a [routerLink]="['/ranked/tiers']" class="ranked-nav-card group">
+			<i class="pi pi-th-large text-2xl"></i>
+			<div>
+				<div class="font-semibold">Paliers</div>
+				<div class="text-xs opacity-70">Distribution des rangs</div>
+			</div>
+			<i
+				class="pi pi-arrow-right opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition"
+			></i>
+		</a>
+		<a [routerLink]="['/ranked/history']" class="ranked-nav-card group">
+			<i class="pi pi-history text-2xl"></i>
+			<div>
+				<div class="font-semibold">Historique</div>
+				<div class="text-xs opacity-70">Tes derniers matches</div>
+			</div>
+			<i
+				class="pi pi-arrow-right opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition"
+			></i>
+		</a>
+	</div>
+
+	<!-- Dialog : on est défié par un autre joueur -->
+	<p-dialog
+		[visible]="inviteDialogVisible()"
+		[modal]="true"
+		[closable]="false"
+		[draggable]="false"
+		[resizable]="false"
+		[dismissableMask]="false"
+		header="Défi ranked"
+		[style]="{ width: '24rem' }"
+	>
+		@if (pendingInvite(); as inv) {
+		<div class="flex flex-col items-center gap-3 py-2">
+			<p-avatar [image]="inv.fromAvatar" shape="circle" size="xlarge" />
+			<div class="text-center">
+				<div class="text-lg">
+					<b>{{ inv.fromDisplayName }}</b> te défie ({{ inv.ranked ? 'classé' : 'non classé' }})
+				</div>
+				<div class="text-sm opacity-70 mt-1">
+					{{ inv.fromElo }} AP · {{ inv.mode === 2 ? '1v1' : '2v2' }}
+				</div>
+			</div>
+		</div>
+		}
+		<div class="flex justify-end gap-2 mt-4">
+			<p-button
+				label="Refuser"
+				icon="pi pi-times"
+				severity="secondary"
+				[outlined]="true"
+				(onClick)="respondInvite(false)"
+			></p-button>
+			<p-button
+				label="Accepter"
+				icon="pi pi-check"
+				severity="primary"
+				(onClick)="respondInvite(true)"
+			></p-button>
+		</div>
+	</p-dialog>
+</div>

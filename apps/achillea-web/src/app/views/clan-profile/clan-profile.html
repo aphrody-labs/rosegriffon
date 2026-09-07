@@ -1,0 +1,113 @@
+<div class="p-[1.5rem]">
+	@if (clan?.state === ClanState.Approved) {
+	<p-panel class="flex">
+		<div class="flex items-center flex-col md:flex-row md:justify-center gap-2">
+			<img
+				[src]="clan?.clanAvatarUrl"
+				alt="clan_logo"
+				class="max-w-[10rem] lg:max-w-[20rem] basis-1/3 md:self-start"
+				loading="lazy"
+				decoding="async"
+			/>
+			<div class="basis-2/3 md:self-start md:mt-[2rem] lg:mt-[4rem]">
+				<div class="flex justify-between">
+					<h1 class="font-bold text-2xl lg:text-3xl md:mb-[1rem] lg:mb-[1.5rem]">
+						[{{clan?.shortenedName}}] {{ clan?.name }}
+					</h1>
+					<div class="hidden md:block">
+						<p-button icon="pi pi-twitch" [rounded]="true" [text]="true" severity="contrast" />
+						@if (clan?.xUrl) {
+						<a [href]="clan?.xUrl" target="_blank" (click)="$event.stopPropagation()">
+							<p-button icon="pi pi-twitter" [rounded]="true" [text]="true" severity="contrast" />
+						</a>
+						} @if (clan?.tiktokUrl) {
+						<a [href]="clan?.tiktokUrl" target="_blank" (click)="$event.stopPropagation()">
+							<p-button icon="pi pi-tiktok" [rounded]="true" [text]="true" severity="contrast" />
+						</a>
+						} @if (clan?.instagramUrl) {
+						<a [href]="clan?.instagramUrl" target="_blank" (click)="$event.stopPropagation()">
+							<p-button icon="pi pi-instagram" [rounded]="true" [text]="true" severity="contrast" />
+						</a>
+						}
+					</div>
+				</div>
+				<div class="flex justify-center mt-2 md:hidden">
+					<p-button icon="pi pi-twitch" [rounded]="true" [text]="true" severity="contrast" />
+					@if (clan?.xUrl) {
+					<a [href]="clan?.xUrl" target="_blank" (click)="$event.stopPropagation()">
+						<p-button icon="pi pi-twitter" [rounded]="true" [text]="true" severity="contrast" />
+					</a>
+					} @if (clan?.tiktokUrl) {
+					<a [href]="clan?.tiktokUrl" target="_blank" (click)="$event.stopPropagation()">
+						<p-button icon="pi pi-tiktok" [rounded]="true" [text]="true" severity="contrast" />
+					</a>
+					} @if (clan?.instagramUrl) {
+					<a [href]="clan?.instagramUrl" target="_blank" (click)="$event.stopPropagation()">
+						<p-button icon="pi pi-instagram" [rounded]="true" [text]="true" severity="contrast" />
+					</a>
+					}
+				</div>
+				<div class="hidden md:block">
+					<p-panel [toggleable]="true" [collapsed]="true" toggler="header" header="Biographie">
+						<p>{{clan?.clanBiography}}</p>
+					</p-panel>
+				</div>
+				<p-button
+					class="hidden md:block md:mt-4"
+					label="Candidater"
+					styleClass="w-fit"
+					(click)="showApplicationDialog.set(true)"
+					[disabled]="disableApplicationButton()"
+				></p-button>
+			</div>
+		</div>
+		<div class="block mt-2 md:hidden">
+			<p-panel [toggleable]="true" [collapsed]="true" toggler="header" header="Biographie">
+				<p>{{clan?.clanBiography}}</p>
+			</p-panel>
+		</div>
+		<div class="flex justify-center mt-4 md:hidden">
+			<p-button
+				label="Candidater"
+				styleClass="w-fit"
+				(click)="showApplicationDialog.set(true)"
+				[disabled]="disableApplicationButton()"
+			></p-button>
+		</div>
+		<p-tabs value="0">
+			<p-tablist class="flex justify-between">
+				<p-tab value="0">Organisation</p-tab>
+				<p-tab value="1">Membres</p-tab>
+			</p-tablist>
+			<p-tabpanels>
+				<p-tabpanel value="0">
+					<app-clan-orgchart
+						[clanMembers]="clanMembers"
+						[areMembersLoading]="areMembersLoading"
+					></app-clan-orgchart>
+				</p-tabpanel>
+				<p-tabpanel value="1">
+					<app-clan-members
+						[clanMembers]="clanMembers"
+						[areMembersLoading]="areMembersLoading"
+					></app-clan-members>
+				</p-tabpanel>
+			</p-tabpanels>
+		</p-tabs>
+	</p-panel>
+	} @if (clan?.state === ClanState.PendingReview) {
+	<div class="flex justify-center mt-16 text-center">
+		<h1 class="text-4xl font-semibold">
+			Ce clan est en attente d'approbation par les administrateurs !
+		</h1>
+	</div>
+	} @if (clan?.state === ClanState.Creating) {
+	<div class="flex justify-center mt-16 text-center">
+		<h1 class="text-4xl font-semibold">Ce clan est en cours de validation par les fondateurs !</h1>
+	</div>
+	}
+</div>
+<app-application-dialog
+	[showDialog]="showApplicationDialog"
+	[targetClanId]="clan?.id"
+></app-application-dialog>

@@ -1,0 +1,2337 @@
+<!doctype html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Achillea Web - Documentation</title>
+
+		<!-- Google Fonts: Inter -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+			rel="stylesheet"
+		/>
+
+		<!-- Prism.js dark theme + core + languages -->
+		<link
+			href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+			rel="stylesheet"
+		/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"
+			defer
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"
+			defer
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"
+			defer
+		></script>
+
+		<style>
+			/* ===== RESET & BASE ===== */
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+
+			:root {
+				--bg: #0f0f13;
+				--bg-card: rgba(255, 255, 255, 0.03);
+				--bg-card-hover: rgba(255, 255, 255, 0.06);
+				--border: rgba(255, 255, 255, 0.08);
+				--border-hover: rgba(107, 71, 255, 0.3);
+				--text: #e4e4e7;
+				--text-muted: #a1a1aa;
+				--text-heading: #fafafa;
+				--accent: #6b47ff;
+				--accent-light: #8b6fff;
+				--accent-glow: rgba(107, 71, 255, 0.15);
+				--sidebar-w: 280px;
+				--code-bg: #1a1a2e;
+				--success: #22c55e;
+				--warning: #f59e0b;
+			}
+
+			html {
+				scroll-behavior: smooth;
+				scrollbar-color: var(--accent) var(--bg);
+			}
+
+			body {
+				font-family:
+					"Inter",
+					system-ui,
+					-apple-system,
+					BlinkMacSystemFont,
+					"Segoe UI",
+					Roboto,
+					sans-serif;
+				background: var(--bg);
+				color: var(--text);
+				line-height: 1.7;
+				overflow-x: hidden;
+			}
+
+			::selection {
+				background: var(--accent);
+				color: #fff;
+			}
+
+			::-webkit-scrollbar {
+				width: 8px;
+			}
+			::-webkit-scrollbar-track {
+				background: var(--bg);
+			}
+			::-webkit-scrollbar-thumb {
+				background: var(--accent);
+				border-radius: 4px;
+			}
+
+			a {
+				color: var(--accent-light);
+				text-decoration: none;
+				transition: color 0.2s;
+			}
+			a:hover {
+				color: #a78bfa;
+			}
+
+			/* ===== SIDEBAR ===== */
+			.sidebar {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: var(--sidebar-w);
+				height: 100vh;
+				background: rgba(15, 15, 19, 0.97);
+				border-right: 1px solid var(--border);
+				padding: 24px 0;
+				overflow-y: auto;
+				z-index: 100;
+				transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+				backdrop-filter: blur(20px);
+			}
+
+			.sidebar-logo {
+				padding: 0 24px 24px;
+				border-bottom: 1px solid var(--border);
+				margin-bottom: 16px;
+			}
+
+			.sidebar-logo h2 {
+				font-size: 1.15rem;
+				font-weight: 700;
+				color: var(--text-heading);
+				letter-spacing: -0.02em;
+			}
+
+			.sidebar-logo span {
+				font-size: 0.75rem;
+				color: var(--text-muted);
+				font-weight: 400;
+			}
+
+			.sidebar nav {
+				padding: 0 12px;
+			}
+
+			.sidebar nav a {
+				display: block;
+				padding: 8px 16px;
+				font-size: 0.85rem;
+				color: var(--text-muted);
+				border-radius: 8px;
+				transition: all 0.2s;
+				font-weight: 500;
+			}
+
+			.sidebar nav a:hover {
+				color: var(--text);
+				background: var(--accent-glow);
+			}
+
+			.sidebar nav a.active {
+				color: var(--accent-light);
+				background: var(--accent-glow);
+				border-left: 3px solid var(--accent);
+			}
+
+			/* ===== HAMBURGER ===== */
+			.hamburger {
+				display: none;
+				position: fixed;
+				top: 16px;
+				left: 16px;
+				z-index: 200;
+				width: 44px;
+				height: 44px;
+				border: 1px solid var(--border);
+				border-radius: 10px;
+				background: rgba(15, 15, 19, 0.9);
+				backdrop-filter: blur(12px);
+				cursor: pointer;
+				align-items: center;
+				justify-content: center;
+				flex-direction: column;
+				gap: 5px;
+			}
+
+			.hamburger span {
+				display: block;
+				width: 20px;
+				height: 2px;
+				background: var(--text);
+				border-radius: 2px;
+				transition: all 0.3s;
+			}
+
+			.hamburger.open span:nth-child(1) {
+				transform: translateY(7px) rotate(45deg);
+			}
+			.hamburger.open span:nth-child(2) {
+				opacity: 0;
+			}
+			.hamburger.open span:nth-child(3) {
+				transform: translateY(-7px) rotate(-45deg);
+			}
+
+			.sidebar-overlay {
+				display: none;
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.6);
+				z-index: 90;
+			}
+
+			/* ===== MAIN CONTENT ===== */
+			.main {
+				margin-left: var(--sidebar-w);
+				min-height: 100vh;
+			}
+
+			/* ===== HERO ===== */
+			.hero {
+				position: relative;
+				padding: 100px 48px 80px;
+				background: linear-gradient(135deg, rgba(107, 71, 255, 0.12) 0%, rgba(15, 15, 19, 0) 50%);
+				border-bottom: 1px solid var(--border);
+				overflow: hidden;
+			}
+
+			.hero::before {
+				content: "";
+				position: absolute;
+				top: -200px;
+				right: -200px;
+				width: 600px;
+				height: 600px;
+				background: radial-gradient(circle, rgba(107, 71, 255, 0.08) 0%, transparent 70%);
+				pointer-events: none;
+			}
+
+			.hero h1 {
+				font-size: 3.5rem;
+				font-weight: 900;
+				color: var(--text-heading);
+				letter-spacing: -0.04em;
+				margin-bottom: 12px;
+			}
+
+			.hero h1 span {
+				color: var(--accent-light);
+			}
+
+			.hero .subtitle {
+				font-size: 1.15rem;
+				color: var(--text-muted);
+				max-width: 650px;
+				margin-bottom: 32px;
+				line-height: 1.8;
+			}
+
+			.badges {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+			}
+
+			.badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 8px;
+				padding: 8px 16px;
+				border-radius: 10px;
+				font-size: 0.8rem;
+				font-weight: 600;
+				color: #fff;
+				border: 1px solid rgba(255, 255, 255, 0.1);
+				transition:
+					transform 0.2s,
+					box-shadow 0.2s;
+			}
+
+			.badge:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+			}
+
+			.badge-angular {
+				background: rgba(221, 0, 49, 0.2);
+				border-color: rgba(221, 0, 49, 0.4);
+				color: #ff4c6a;
+			}
+			.badge-ts {
+				background: rgba(49, 120, 198, 0.2);
+				border-color: rgba(49, 120, 198, 0.4);
+				color: #5ba0e0;
+			}
+			.badge-primeng {
+				background: rgba(99, 102, 241, 0.2);
+				border-color: rgba(99, 102, 241, 0.4);
+				color: #818cf8;
+			}
+			.badge-tailwind {
+				background: rgba(6, 182, 212, 0.2);
+				border-color: rgba(6, 182, 212, 0.4);
+				color: #22d3ee;
+			}
+			.badge-socketio {
+				background: rgba(255, 255, 255, 0.08);
+				border-color: rgba(255, 255, 255, 0.15);
+				color: #e4e4e7;
+			}
+
+			/* ===== SECTIONS ===== */
+			.content {
+				max-width: 920px;
+				padding: 48px 48px 80px;
+			}
+
+			.section {
+				margin-bottom: 72px;
+				opacity: 0;
+				transform: translateY(30px);
+				transition:
+					opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+					transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+			}
+
+			.section.visible {
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			.section h2 {
+				font-size: 1.75rem;
+				font-weight: 800;
+				color: var(--text-heading);
+				letter-spacing: -0.03em;
+				margin-bottom: 24px;
+				padding-bottom: 12px;
+				border-bottom: 2px solid var(--accent);
+				display: inline-block;
+			}
+
+			.section h3 {
+				font-size: 1.2rem;
+				font-weight: 700;
+				color: var(--text-heading);
+				margin: 28px 0 14px;
+			}
+
+			.section p,
+			.section li {
+				color: var(--text);
+				margin-bottom: 12px;
+			}
+
+			.section ul,
+			.section ol {
+				padding-left: 24px;
+				margin-bottom: 16px;
+			}
+
+			.section li {
+				margin-bottom: 6px;
+			}
+
+			strong {
+				color: var(--text-heading);
+				font-weight: 600;
+			}
+
+			code:not([class*="language-"]) {
+				background: rgba(107, 71, 255, 0.12);
+				color: var(--accent-light);
+				padding: 2px 8px;
+				border-radius: 5px;
+				font-size: 0.85em;
+				font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+			}
+
+			/* ===== CARDS ===== */
+			.card {
+				background: var(--bg-card);
+				border: 1px solid var(--border);
+				border-radius: 14px;
+				padding: 24px;
+				margin-bottom: 20px;
+				transition:
+					background 0.2s,
+					border-color 0.2s;
+			}
+
+			.card:hover {
+				background: var(--bg-card-hover);
+				border-color: var(--border-hover);
+			}
+
+			/* ===== TABLES ===== */
+			.table-wrapper {
+				overflow-x: auto;
+				margin: 16px 0 24px;
+				border-radius: 12px;
+				border: 1px solid var(--border);
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 0.88rem;
+			}
+
+			thead {
+				background: rgba(107, 71, 255, 0.1);
+			}
+
+			th {
+				text-align: left;
+				padding: 12px 16px;
+				font-weight: 600;
+				color: var(--accent-light);
+				border-bottom: 1px solid var(--border);
+				white-space: nowrap;
+			}
+
+			td {
+				padding: 10px 16px;
+				border-bottom: 1px solid var(--border);
+				color: var(--text);
+			}
+
+			tr:last-child td {
+				border-bottom: none;
+			}
+
+			tr:hover td {
+				background: rgba(107, 71, 255, 0.05);
+			}
+
+			/* ===== CODE BLOCKS ===== */
+			.code-block {
+				position: relative;
+				margin: 16px 0 24px;
+				border-radius: 12px;
+				overflow: hidden;
+				border: 1px solid var(--border);
+			}
+
+			.code-block pre {
+				margin: 0;
+				padding: 20px 24px;
+				background: var(--code-bg) !important;
+				font-size: 0.83rem;
+				line-height: 1.7;
+				overflow-x: auto;
+			}
+
+			.code-block code {
+				font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+				font-size: 0.83rem;
+			}
+
+			.code-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 8px 16px;
+				background: rgba(26, 26, 46, 0.8);
+				border-bottom: 1px solid var(--border);
+				font-size: 0.75rem;
+				color: var(--text-muted);
+				font-weight: 500;
+			}
+
+			.copy-btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				background: rgba(255, 255, 255, 0.06);
+				border: 1px solid var(--border);
+				color: var(--text-muted);
+				padding: 4px 12px;
+				border-radius: 6px;
+				cursor: pointer;
+				font-size: 0.72rem;
+				font-family: inherit;
+				transition: all 0.2s;
+			}
+
+			.copy-btn:hover {
+				background: var(--accent-glow);
+				color: var(--accent-light);
+				border-color: var(--border-hover);
+			}
+
+			.copy-btn.copied {
+				color: var(--success);
+				border-color: rgba(34, 197, 94, 0.3);
+			}
+
+			/* ===== ASCII DIAGRAMS ===== */
+			.ascii-diagram {
+				background: var(--code-bg);
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				padding: 24px;
+				margin: 16px 0 24px;
+				overflow-x: auto;
+				font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+				font-size: 0.8rem;
+				line-height: 1.6;
+				color: var(--accent-light);
+				white-space: pre;
+			}
+
+			/* ===== FEATURE GRID ===== */
+			.feature-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+				gap: 16px;
+				margin: 20px 0;
+			}
+
+			.feature-card {
+				background: var(--bg-card);
+				border: 1px solid var(--border);
+				border-radius: 14px;
+				padding: 20px;
+				transition: all 0.25s;
+			}
+
+			.feature-card:hover {
+				background: var(--bg-card-hover);
+				border-color: var(--border-hover);
+				transform: translateY(-2px);
+			}
+
+			.feature-card h4 {
+				font-size: 1rem;
+				font-weight: 700;
+				color: var(--accent-light);
+				margin-bottom: 8px;
+			}
+
+			.feature-card p {
+				font-size: 0.85rem;
+				color: var(--text-muted);
+				margin: 0;
+				line-height: 1.5;
+			}
+
+			/* ===== FOOTER ===== */
+			.footer {
+				border-top: 1px solid var(--border);
+				padding: 40px 48px;
+				text-align: center;
+				color: var(--text-muted);
+				font-size: 0.85rem;
+			}
+
+			.footer a {
+				color: var(--accent-light);
+				font-weight: 600;
+			}
+
+			.footer .footer-links {
+				display: flex;
+				justify-content: center;
+				gap: 24px;
+				margin-top: 12px;
+			}
+
+			/* ===== RESPONSIVE ===== */
+			@media (max-width: 1024px) {
+				.sidebar {
+					transform: translateX(-100%);
+				}
+				.sidebar.open {
+					transform: translateX(0);
+				}
+				.sidebar-overlay.open {
+					display: block;
+				}
+				.hamburger {
+					display: flex;
+				}
+				.main {
+					margin-left: 0;
+				}
+				.hero {
+					padding: 80px 24px 60px;
+				}
+				.hero h1 {
+					font-size: 2.5rem;
+				}
+				.content {
+					padding: 32px 24px 60px;
+				}
+				.footer {
+					padding: 32px 24px;
+				}
+			}
+
+			@media (max-width: 640px) {
+				.hero h1 {
+					font-size: 2rem;
+				}
+				.hero .subtitle {
+					font-size: 1rem;
+				}
+				.badges {
+					gap: 8px;
+				}
+				.badge {
+					padding: 6px 12px;
+					font-size: 0.72rem;
+				}
+				.content {
+					padding: 24px 16px 48px;
+				}
+				.section h2 {
+					font-size: 1.4rem;
+				}
+				table {
+					font-size: 0.78rem;
+				}
+				th,
+				td {
+					padding: 8px 10px;
+				}
+				.feature-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Hamburger Button -->
+		<button class="hamburger" id="hamburger" aria-label="Menu">
+			<span></span>
+			<span></span>
+			<span></span>
+		</button>
+
+		<!-- Sidebar Overlay -->
+		<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+		<!-- Sidebar -->
+		<aside class="sidebar" id="sidebar">
+			<div class="sidebar-logo">
+				<h2>Achillea Web</h2>
+				<span>Documentation technique</span>
+			</div>
+			<nav id="sidebarNav">
+				<a href="#presentation">Presentation</a>
+				<a href="#stack">Stack technique</a>
+				<a href="#installation">Installation</a>
+				<a href="#architecture">Architecture</a>
+				<a href="#reactivite">Reactivite</a>
+				<a href="#routes">Routes et navigation</a>
+				<a href="#composants">Composants</a>
+				<a href="#services">Services</a>
+				<a href="#modeles">Modeles de donnees</a>
+				<a href="#auth">Authentification</a>
+				<a href="#theming">Theming et design</a>
+				<a href="#notifications">Notifications</a>
+				<a href="#i18n">Internationalisation</a>
+				<a href="#configuration">Configuration</a>
+				<a href="#contribution">Contribution</a>
+			</nav>
+		</aside>
+
+		<!-- Main Content -->
+		<div class="main">
+			<!-- Hero -->
+			<header class="hero">
+				<h1>Achillea <span>Web</span></h1>
+				<p class="subtitle">
+					Plateforme communautaire pour la scene competitive d'Inazuma Eleven: Victory Road.
+					Application Angular 21 moderne avec standalone components, Signals et httpResource.
+				</p>
+				<div class="badges">
+					<span class="badge badge-angular">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+							<path
+								d="M12 2L2 7l1.5 12.5L12 22l8.5-2.5L22 7L12 2zm0 2.1l7.1 4.2-1.3 10.2L12 20.1l-5.8-1.6L4.9 8.3 12 4.1zM12 6L7.4 15.4h1.7l1-2.3h3.8l1 2.3h1.7L12 6zm0 3.4l1.3 3.1h-2.6L12 9.4z"
+							/>
+						</svg>
+						Angular 21
+					</span>
+					<span class="badge badge-ts">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+							<path
+								d="M3 3h18v18H3V3zm10.7 13.3v1.8c.3.2.7.3 1.1.4.4.1.8.1 1.2.1.4 0 .8 0 1.1-.1.3-.1.6-.3.9-.5.2-.2.4-.5.5-.8.1-.3.2-.7.2-1.1 0-.3-.1-.6-.2-.8-.1-.2-.3-.4-.5-.6-.2-.2-.4-.3-.7-.4-.3-.1-.5-.2-.8-.4-.2-.1-.4-.2-.5-.3-.2-.1-.3-.2-.4-.3-.1-.1-.2-.2-.2-.3-.1-.1-.1-.2-.1-.4 0-.1 0-.3.1-.4.1-.1.1-.2.2-.3.1-.1.2-.1.4-.2.1 0 .3-.1.5-.1.1 0 .3 0 .4.1.2 0 .3.1.4.1.1.1.3.1.4.2l.3.2.7-1.4c-.3-.2-.6-.4-1-.5-.4-.1-.8-.2-1.3-.2-.4 0-.8.1-1.1.2-.3.1-.6.3-.8.5-.2.2-.4.4-.5.7-.1.3-.2.6-.2.9 0 .5.1.9.4 1.2.3.3.7.6 1.3.9.2.1.4.2.6.3.2.1.3.2.5.3.1.1.2.2.3.3.1.1.1.2.1.4s0 .3-.1.4c-.1.1-.1.2-.2.3-.1.1-.2.1-.4.2-.1 0-.3.1-.5.1-.4 0-.7-.1-1-.2-.3-.2-.5-.3-.7-.5l-.7 1.3zM10.2 9.8H6.7v1.5h1.2v5.3h1.5v-5.3h1.2l-.4-1.5z"
+							/>
+						</svg>
+						TypeScript 5.9
+					</span>
+					<span class="badge badge-primeng">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+							<path
+								d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"
+							/>
+						</svg>
+						PrimeNG 21
+					</span>
+					<span class="badge badge-tailwind">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+							<path
+								d="M12 6c-2.67 0-4.33 1.33-5 4 1-1.33 2.17-1.83 3.5-1.5.76.19 1.31.74 1.91 1.35C13.31 10.76 14.36 12 17 12c2.67 0 4.33-1.33 5-4-1 1.33-2.17 1.83-3.5 1.5-.76-.19-1.31-.74-1.91-1.35C15.69 7.24 14.64 6 12 6zM7 12c-2.67 0-4.33 1.33-5 4 1-1.33 2.17-1.83 3.5-1.5.76.19 1.31.74 1.91 1.35C8.31 16.76 9.36 18 12 18c2.67 0 4.33-1.33 5-4-1 1.33-2.17 1.83-3.5 1.5-.76-.19-1.31-.74-1.91-1.35C10.69 13.24 9.64 12 7 12z"
+							/>
+						</svg>
+						Tailwind CSS 4
+					</span>
+					<span class="badge badge-socketio">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+							<path
+								d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.57.05-1-.38-1.56-.74-.87-.57-1.36-.92-2.2-1.48-.97-.64-.34-1 .21-1.57.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .33z"
+							/>
+						</svg>
+						Socket.io 4
+					</span>
+				</div>
+			</header>
+
+			<div class="content">
+				<!-- Presentation -->
+				<section class="section" id="presentation">
+					<h2>Presentation</h2>
+					<p>
+						<strong>Achillea Web</strong> est le frontend de la plateforme Achillea, une application
+						<strong>Angular 21</strong> moderne destinee a la communaute competitive d'Inazuma
+						Eleven: Victory Road.
+					</p>
+					<p>
+						Elle repose sur une architecture <strong>100% standalone components</strong> (sans
+						NgModule), le systeme de <strong>Signals</strong> d'Angular pour la reactivite, et l'API
+						experimentale <strong><code>httpResource</code></strong>
+						pour le chargement declaratif des donnees.
+					</p>
+
+					<h3>Fonctionnalites principales</h3>
+					<div class="feature-grid">
+						<div class="feature-card">
+							<h4>Clans</h4>
+							<p>
+								Creation (wizard multi-etapes), gestion des membres, invitations, candidatures,
+								distinctions, organigramme hierarchique
+							</p>
+						</div>
+						<div class="feature-card">
+							<h4>Tournois</h4>
+							<p>
+								Creation complete, inscriptions, seeding, brackets (single/double elimination, round
+								robin), report et validation des scores
+							</p>
+						</div>
+						<div class="feature-card">
+							<h4>Ranked</h4>
+							<p>Statistiques Elo 1v1 et 2v2, historique de matchs, classement par paliers</p>
+						</div>
+						<div class="feature-card">
+							<h4>Profils</h4>
+							<p>Profil joueur enrichi (stats ranked + interclan), profil clan public</p>
+						</div>
+						<div class="feature-card">
+							<h4>Notifications</h4>
+							<p>Temps reel via WebSocket (Socket.io), apercu dans le header</p>
+						</div>
+						<div class="feature-card">
+							<h4>Administration</h4>
+							<p>Dashboard admin pour moderation et validation d'organisations</p>
+						</div>
+					</div>
+				</section>
+
+				<!-- Stack technique -->
+				<section class="section" id="stack">
+					<h2>Stack technique</h2>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Couche</th>
+									<th>Technologie</th>
+									<th>Version</th>
+									<th>Role</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Framework</td>
+									<td><strong>Angular</strong></td>
+									<td>21.0.5</td>
+									<td>SPA, standalone components, Signals</td>
+								</tr>
+								<tr>
+									<td>Langage</td>
+									<td><strong>TypeScript</strong></td>
+									<td>5.9.3</td>
+									<td>Typage statique</td>
+								</tr>
+								<tr>
+									<td>Composants UI</td>
+									<td><strong>PrimeNG</strong></td>
+									<td>21.1.1</td>
+									<td>80+ composants (Table, Dialog, Button, Calendar...)</td>
+								</tr>
+								<tr>
+									<td>Theming</td>
+									<td><strong>@primeuix/themes</strong></td>
+									<td>2.0.2</td>
+									<td>Preset Aura personnalise, dark mode</td>
+								</tr>
+								<tr>
+									<td>CSS</td>
+									<td><strong>Tailwind CSS</strong></td>
+									<td>4.1.11</td>
+									<td>Utility-first, dark mode via <code>dark:</code> variant</td>
+								</tr>
+								<tr>
+									<td>PostCSS</td>
+									<td><strong>@tailwindcss/postcss</strong></td>
+									<td>4.1.11</td>
+									<td>Integration build Angular</td>
+								</tr>
+								<tr>
+									<td>Reactivite</td>
+									<td><strong>RxJS</strong></td>
+									<td>7.8.0</td>
+									<td>Streams (HttpClient, WebSocket)</td>
+								</tr>
+								<tr>
+									<td>Temps reel</td>
+									<td><strong>Socket.io Client</strong></td>
+									<td>4.8.1</td>
+									<td>Namespace <code>/notifications</code>, WebSocket + polling fallback</td>
+								</tr>
+								<tr>
+									<td>Tournois</td>
+									<td><strong>brackets-model + brackets-viewer</strong></td>
+									<td>1.6.0 / 1.9.0</td>
+									<td>Modelisation et rendu visuel des brackets</td>
+								</tr>
+								<tr>
+									<td>Animations</td>
+									<td><strong>ngx-lottie</strong></td>
+									<td>20.0.0</td>
+									<td>Animations vectorielles (wizard de creation)</td>
+								</tr>
+								<tr>
+									<td>i18n</td>
+									<td><strong>@ngx-translate</strong></td>
+									<td>16.0.4</td>
+									<td>Traductions dynamiques (francais)</td>
+								</tr>
+								<tr>
+									<td>Utilitaires</td>
+									<td><strong>@sindresorhus/transliterate</strong></td>
+									<td>2.2.0</td>
+									<td>Normalisation des noms de clan (Unicode &rarr; ASCII)</td>
+								</tr>
+								<tr>
+									<td>Tests</td>
+									<td><strong>Jasmine + Karma</strong></td>
+									<td>5.8 / 6.4</td>
+									<td>Tests unitaires (Chrome)</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<!-- Installation -->
+				<section class="section" id="installation">
+					<h2>Installation</h2>
+
+					<h3>Prerequis</h3>
+					<ul>
+						<li><strong>Node.js</strong> &gt;= 20</li>
+						<li><strong>npm</strong> &gt;= 9</li>
+						<li>
+							Backend <strong>AchilleaBackend</strong> en cours d'execution (port
+							<code>4010</code> en dev, <code>4000</code> en prod)
+						</li>
+					</ul>
+
+					<h3>Demarrage rapide</h3>
+					<div class="code-block">
+						<div class="code-header">
+							<span>bash</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-bash"># Cloner le repo
+git clone https://github.com/rose-griffon/AchilleaWeb.git
+cd AchilleaWeb
+
+# Installer les dependances
+npm install
+
+# Lancer le serveur de developpement (proxy vers localhost:4010)
+npm start</code></pre>
+					</div>
+					<p>L'application est accessible sur <strong>http://localhost:4200/</strong>.</p>
+
+					<h3>Commandes disponibles</h3>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Commande</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>npm start</code></td>
+									<td>Serveur de developpement avec hot reload</td>
+								</tr>
+								<tr>
+									<td><code>npm run build</code></td>
+									<td>Build de production optimise</td>
+								</tr>
+								<tr>
+									<td><code>npm run watch</code></td>
+									<td>Build en mode watch (developpement)</td>
+								</tr>
+								<tr>
+									<td><code>npm test</code></td>
+									<td>Tests unitaires via Karma/Chrome</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<!-- Architecture -->
+				<section class="section" id="architecture">
+					<h2>Architecture</h2>
+					<div class="ascii-diagram">
+						src/ &#x251C;&#x2500;&#x2500; app/ &#x2502; &#x251C;&#x2500;&#x2500; core/ # Logique
+						transversale &#x2502; &#x2502; &#x251C;&#x2500;&#x2500; guards/ # 5 guards de route
+						(auth, clan, role...) &#x2502; &#x2502; &#x251C;&#x2500;&#x2500; helpers/ # Utilitaires
+						(normalisation noms, dates, ranks) &#x2502; &#x2502; &#x2514;&#x2500;&#x2500; models/ #
+						14 fichiers d'interfaces TypeScript &#x2502; &#x2502; &#x2502; &#x251C;&#x2500;&#x2500;
+						shared/ &#x2502; &#x2502; &#x251C;&#x2500;&#x2500; components/ # 25 composants
+						reutilisables &#x2502; &#x2502; &#x2502; &#x251C;&#x2500;&#x2500; clan-*/ # 11
+						composants clan &#x2502; &#x2502; &#x2502; &#x251C;&#x2500;&#x2500; tournament-*/ # 5
+						composants tournoi &#x2502; &#x2502; &#x2502; &#x251C;&#x2500;&#x2500; header/footer/ #
+						Layout &#x2502; &#x2502; &#x2502; &#x2514;&#x2500;&#x2500; searchbar/ # Autocompletion
+						&#x2502; &#x2502; &#x2514;&#x2500;&#x2500; services/ # 7 services metier injectes
+						&#x2502; &#x2502; &#x2502; &#x251C;&#x2500;&#x2500; views/ # 12 pages (lazy loaded)
+						&#x2502; &#x2502; &#x251C;&#x2500;&#x2500; homepage/ &#x2502; &#x2502;
+						&#x251C;&#x2500;&#x2500; auth-page/ &#x2502; &#x2502; &#x251C;&#x2500;&#x2500;
+						clan-creation/ # Wizard multi-etapes avec Lottie &#x2502; &#x2502;
+						&#x251C;&#x2500;&#x2500; clan-dashboard/ # Gestion clan (membres, invites) &#x2502;
+						&#x2502; &#x251C;&#x2500;&#x2500; clan-profile/ &#x2502; &#x2502;
+						&#x251C;&#x2500;&#x2500; clans-list/ &#x2502; &#x2502; &#x251C;&#x2500;&#x2500;
+						tournament-*/ &#x2502; &#x2502; &#x251C;&#x2500;&#x2500; user-profile/ &#x2502; &#x2502;
+						&#x2514;&#x2500;&#x2500; admin-dashboard/ &#x2502; &#x2502; &#x2502;
+						&#x251C;&#x2500;&#x2500; app.ts # Composant racine (&lt;router-outlet&gt;) &#x2502;
+						&#x251C;&#x2500;&#x2500; app.routes.ts # Configuration des routes (lazy loading)
+						&#x2502; &#x2514;&#x2500;&#x2500; app.config.ts # Providers globaux (theme, i18n, HTTP)
+						&#x2502; &#x251C;&#x2500;&#x2500; assets/ &#x2502; &#x251C;&#x2500;&#x2500; i18n/fr.json
+						# Traductions francaises &#x2502; &#x251C;&#x2500;&#x2500; fonts/ # Inter Variable
+						(WOFF2, 400-900) &#x2502; &#x2514;&#x2500;&#x2500; images/ # Backgrounds et logos
+						(light/dark) &#x2502; &#x251C;&#x2500;&#x2500; styles.css # Tailwind CSS + PrimeNG +
+						styles globaux &#x2514;&#x2500;&#x2500; main.ts # Bootstrap Angular public/
+						&#x251C;&#x2500;&#x2500; ranks/ # Images des paliers Elo (8 rangs, WebP/PNG)
+						&#x251C;&#x2500;&#x2500; flags/ # 7 drapeaux pays (SVG) &#x251C;&#x2500;&#x2500;
+						animations/ # Fichiers Lottie JSON &#x2514;&#x2500;&#x2500; favicon.ico
+					</div>
+				</section>
+
+				<!-- Reactivite -->
+				<section class="section" id="reactivite">
+					<h2>Reactivite et state management</h2>
+					<p>
+						L'application utilise <strong>exclusivement les Signals Angular</strong> pour la gestion
+						d'etat &mdash; aucun store externe (NgRx, Akita, etc.).
+					</p>
+
+					<h3>Signals</h3>
+					<p>
+						Les Signals sont des valeurs reactives qui notifient automatiquement les consommateurs
+						lors des changements :
+					</p>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">// Signal modifiable
+user = signal&lt;UserDTO | undefined&gt;(undefined);
+
+// Signal derive (recalcule automatiquement)
+userHasClan = computed(() =&gt; !!this.user()?.clan);
+
+// Effet (s'execute quand les signaux dependants changent)
+effect(() =&gt; {
+  const resp = this.clansResource.value();
+  if (resp) this._accumulated.set(resp.data);
+});</code></pre>
+					</div>
+
+					<h3>httpResource (API experimentale Angular 19.2+)</h3>
+					<p>
+						<code>httpResource</code> est un wrapper reactif autour de <code>HttpClient</code> qui
+						expose le statut et la reponse sous forme de Signals :
+					</p>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">// Requete reactive : se relance automatiquement quand clanId() change
+readonly clanFromRoute = httpResource&lt;ClanDTO&gt;(
+  () =&gt; this.clanId() ? { url: `/api/clans/${this.clanId()}` } : undefined
+);
+
+// Acces aux donnees via Signals
+const clan = this.clanFromRoute.value();       // Donnees
+const loading = this.clanFromRoute.isLoading(); // Chargement en cours
+const error = this.clanFromRoute.error();       // Erreur eventuelle</code></pre>
+					</div>
+					<div class="code-block">
+						<div class="code-header">
+							<span>HTML (Template)</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-markup">&lt;!-- Utilisation dans les templates --&gt;
+@if (clan.hasValue()) {
+  &lt;clan-card [clan]="clan.value()" /&gt;
+} @else if (clan.isLoading()) {
+  &lt;p-progressSpinner /&gt;
+} @else if (clan.error()) {
+  &lt;p-message severity="error" text="Erreur de chargement" /&gt;
+}</code></pre>
+					</div>
+
+					<h3>Pattern de pagination infinie</h3>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">// Accumulation des pages via effet
+private _accumulated = signal&lt;ClanDTO[]&gt;([]);
+
+readonly clansResource = httpResource&lt;Paginated&lt;ClanDTO&gt;&gt;(
+  () =&gt; this.page() !== 0 ? ({
+    url: '/api/clans',
+    params: { page: this.page(), pagination: this.limit() }
+  }) : undefined
+);
+
+effect(() =&gt; {
+  const resp = this.clansResource.value();
+  if (!resp) return;
+  this._accumulated.update(prev =&gt; [...prev, ...resp.data]);
+});
+
+clans = computed(() =&gt; this._accumulated());</code></pre>
+					</div>
+				</section>
+
+				<!-- Routes -->
+				<section class="section" id="routes">
+					<h2>Routes et navigation</h2>
+					<p>
+						Toutes les routes utilisent le <strong>lazy loading</strong> via
+						<code>loadComponent</code> pour optimiser le temps de chargement initial :
+					</p>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Route</th>
+									<th>Page</th>
+									<th>Protection</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>/</code></td>
+									<td>Homepage</td>
+									<td>&mdash;</td>
+									<td>Page d'accueil publique</td>
+								</tr>
+								<tr>
+									<td><code>/auth</code></td>
+									<td>AuthPage</td>
+									<td>&mdash;</td>
+									<td>Connexion via Discord OAuth</td>
+								</tr>
+								<tr>
+									<td><code>/clans</code></td>
+									<td>ClansList</td>
+									<td>&mdash;</td>
+									<td>Liste des clans (pagination infinie)</td>
+								</tr>
+								<tr>
+									<td><code>/clans/create</code></td>
+									<td>ClanCreation</td>
+									<td><code>authGuard</code></td>
+									<td>Wizard de creation de clan (Lottie)</td>
+								</tr>
+								<tr>
+									<td><code>/clans/dashboard</code></td>
+									<td>ClanDashboard</td>
+									<td><code>inClanGuard(SubCaptain)</code></td>
+									<td>Gestion clan (vice-capitaine minimum)</td>
+								</tr>
+								<tr>
+									<td><code>/clans/:id</code></td>
+									<td>ClanProfile</td>
+									<td><code>clanGuard</code></td>
+									<td>Profil public d'un clan</td>
+								</tr>
+								<tr>
+									<td><code>/users/:id</code></td>
+									<td>UserProfile</td>
+									<td><code>userProfileGuard</code></td>
+									<td>Profil joueur (stats ranked + interclan)</td>
+								</tr>
+								<tr>
+									<td><code>/events/create/tournament</code></td>
+									<td>TournamentCreation</td>
+									<td><code>authGuard</code></td>
+									<td>Formulaire de creation de tournoi</td>
+								</tr>
+								<tr>
+									<td><code>/events/list/tournament</code></td>
+									<td>TournamentTable</td>
+									<td>&mdash;</td>
+									<td>Liste des tournois</td>
+								</tr>
+								<tr>
+									<td><code>/events/tournaments/:id</code></td>
+									<td>TournamentPage</td>
+									<td>&mdash;</td>
+									<td>Detail, brackets et scores</td>
+								</tr>
+								<tr>
+									<td><code>/admins/dashboard</code></td>
+									<td>AdminDashboard</td>
+									<td><code>userRoleGuard(Admin)</code></td>
+									<td>Dashboard d'administration</td>
+								</tr>
+								<tr>
+									<td><code>/forbidden</code></td>
+									<td>Forbidden</td>
+									<td>&mdash;</td>
+									<td>Acces refuse (403)</td>
+								</tr>
+								<tr>
+									<td><code>/not-found</code></td>
+									<td>NotFound</td>
+									<td>&mdash;</td>
+									<td>Page introuvable (404)</td>
+								</tr>
+								<tr>
+									<td><code>**</code></td>
+									<td>&mdash;</td>
+									<td>&mdash;</td>
+									<td>Redirection vers <code>/not-found</code></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>Systeme de guards</h3>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Guard</th>
+									<th>Logique</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>authGuard</code></td>
+									<td>
+										Verifie la connexion, redirige vers <code>/auth?returnUrl=...</code> sinon
+									</td>
+								</tr>
+								<tr>
+									<td><code>clanGuard</code></td>
+									<td>
+										Charge le clan par ID, redirige vers <code>/not-found</code> si inexistant
+									</td>
+								</tr>
+								<tr>
+									<td><code>inClanGuard(role?)</code></td>
+									<td>Verifie l'appartenance a un clan + role minimum optionnel</td>
+								</tr>
+								<tr>
+									<td><code>userProfileGuard</code></td>
+									<td>Charge le profil utilisateur, redirige si inexistant</td>
+								</tr>
+								<tr>
+									<td><code>userRoleGuard(role?)</code></td>
+									<td>
+										Verifie le role global (User &rarr; Moderator &rarr; Admin &rarr; SuperAdmin)
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<!-- Composants -->
+				<section class="section" id="composants">
+					<h2>Composants</h2>
+
+					<h3>Module Clans (11 composants)</h3>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Composant</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>clan-card</code></td>
+									<td>
+										Carte d'affichage clan (logo, nom, tag, fame, reseaux sociaux, recrutement)
+									</td>
+								</tr>
+								<tr>
+									<td><code>clan-members</code></td>
+									<td>Table des membres avec role, distinctions et date d'arrivee</td>
+								</tr>
+								<tr>
+									<td><code>manage-members</code></td>
+									<td>Edition de roles, exclusion de membres (Captain/SubCaptain)</td>
+								</tr>
+								<tr>
+									<td><code>manage-invites</code></td>
+									<td>Gestion des invitations envoyees (revoquer, relancer)</td>
+								</tr>
+								<tr>
+									<td><code>manage-applications</code></td>
+									<td>Gestion des candidatures recues (accepter, rejeter)</td>
+								</tr>
+								<tr>
+									<td><code>invite-member</code></td>
+									<td>Dialog de creation d'invitation (autocompletion utilisateur)</td>
+								</tr>
+								<tr>
+									<td><code>clan-role-select</code></td>
+									<td>
+										Dropdown de selection de role (Trial &rarr; Member &rarr; SubCaptain &rarr;
+										Captain)
+									</td>
+								</tr>
+								<tr>
+									<td><code>clan-tag-select</code></td>
+									<td>
+										Multi-selection de distinctions (Joueur, Staff, Artiste, Createur de contenu)
+									</td>
+								</tr>
+								<tr>
+									<td><code>clan-applications</code></td>
+									<td>Vue des candidatures en attente</td>
+								</tr>
+								<tr>
+									<td><code>clan-orgchart</code></td>
+									<td>Organigramme hierarchique du clan</td>
+								</tr>
+								<tr>
+									<td><code>application-dialog</code></td>
+									<td>Dialog de candidature a un clan</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>Module Tournois (5 composants)</h3>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Composant</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>tournament-table</code></td>
+									<td>Table de listing des tournois (filtres, tri, pagination)</td>
+								</tr>
+								<tr>
+									<td><code>tournament-creation-form</code></td>
+									<td>Formulaire complet : type, format (BO1/BO3/BO5), dates, regles, affiches</td>
+								</tr>
+								<tr>
+									<td><code>event-participants-table</code></td>
+									<td>Table des participants avec gestion du seeding</td>
+								</tr>
+								<tr>
+									<td><code>event-organizers-manager</code></td>
+									<td>Ajout/suppression de Tournament Organizers</td>
+								</tr>
+								<tr>
+									<td><code>scores-dialog</code></td>
+									<td>Dialog de saisie et validation multi-parties des scores</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>Layout et utilitaires (9 composants)</h3>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Composant</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>header</code></td>
+									<td>Barre de navigation (PrimeNG Menubar), menu utilisateur, notifications</td>
+								</tr>
+								<tr>
+									<td><code>footer</code></td>
+									<td>Pied de page</td>
+								</tr>
+								<tr>
+									<td><code>searchbar</code></td>
+									<td>Autocompletion utilisateurs et clans (debounce, suggestion service)</td>
+								</tr>
+								<tr>
+									<td><code>country-select</code></td>
+									<td>Selection de pays (7 pays supportes, drapeaux SVG)</td>
+								</tr>
+								<tr>
+									<td><code>language-select</code></td>
+									<td>Selection de langues (ISO 639-1)</td>
+								</tr>
+								<tr>
+									<td><code>notif-preview</code></td>
+									<td>Apercu de notification dans le header</td>
+								</tr>
+								<tr>
+									<td><code>organization-table</code></td>
+									<td>Table des organisations</td>
+								</tr>
+								<tr>
+									<td><code>organizer-form</code></td>
+									<td>Formulaire de creation/edition d'organisation</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<!-- Services -->
+				<section class="section" id="services">
+					<h2>Services</h2>
+
+					<h3>UserService &mdash; Authentification et profils</h3>
+					<p>
+						Gere l'utilisateur connecte, le chargement paresseux, les notifications et
+						l'autocompletion.
+					</p>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">// Signaux reactifs
+user = signal&lt;UserDTO | undefined&gt;(undefined);
+userHasClan = computed(() =&gt; !!this.user()?.clan);
+userIsAdmin = computed(() =&gt; this.user()?.role &gt;= UserRole.Administrator);
+userIsSuperAdmin = computed(() =&gt; this.user()?.role &gt;= UserRole.SuperAdministrator);</code></pre>
+					</div>
+
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Endpoint</th>
+									<th>Methode</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>/api/auth/me</code></td>
+									<td>GET</td>
+									<td>Profil de l'utilisateur connecte</td>
+								</tr>
+								<tr>
+									<td><code>/api/auth/discord</code></td>
+									<td>GET</td>
+									<td>Redirection OAuth Discord</td>
+								</tr>
+								<tr>
+									<td><code>/api/auth/logout</code></td>
+									<td>POST</td>
+									<td>Deconnexion (suppression cookie)</td>
+								</tr>
+								<tr>
+									<td><code>/api/users/:id</code></td>
+									<td>GET</td>
+									<td>Profil enrichi (stats ranked + interclan)</td>
+								</tr>
+								<tr>
+									<td><code>/api/misc/suggest/users</code></td>
+									<td>GET</td>
+									<td>Autocompletion utilisateurs</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/role</code></td>
+									<td>GET</td>
+									<td>Role clan de l'utilisateur</td>
+								</tr>
+								<tr>
+									<td><code>/api/notifications/me</code></td>
+									<td>GET</td>
+									<td>Notifications de l'utilisateur</td>
+								</tr>
+								<tr>
+									<td><code>/api/notifications/read/:id</code></td>
+									<td>PATCH</td>
+									<td>Marquer une notification comme lue</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>ClanService &mdash; Gestion des clans</h3>
+					<p>CRUD complet, gestion des membres, invitations, candidatures, pagination infinie.</p>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Endpoint</th>
+									<th>Methode</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>/api/clans</code></td>
+									<td>GET</td>
+									<td>Liste paginee des clans</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/:id</code></td>
+									<td>GET</td>
+									<td>Detail d'un clan</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/:id/members</code></td>
+									<td>GET</td>
+									<td>Membres d'un clan</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/create</code></td>
+									<td>POST</td>
+									<td>Creer un clan</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/updateMember</code></td>
+									<td>POST</td>
+									<td>Modifier role/distinctions</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/kick/:id</code></td>
+									<td>POST</td>
+									<td>Exclure un membre</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/invites</code></td>
+									<td>GET</td>
+									<td>Invitations envoyees</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/invites/create</code></td>
+									<td>POST</td>
+									<td>Creer une invitation</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/invites/revoke</code></td>
+									<td>POST</td>
+									<td>Revoquer une invitation</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/invites/notify</code></td>
+									<td>POST</td>
+									<td>Relancer une invitation</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/applications</code></td>
+									<td>GET</td>
+									<td>Candidatures recues</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/applications/create</code></td>
+									<td>POST</td>
+									<td>Envoyer une candidature</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/applications/accept</code></td>
+									<td>POST</td>
+									<td>Accepter une candidature</td>
+								</tr>
+								<tr>
+									<td><code>/api/clans/applications/reject</code></td>
+									<td>POST</td>
+									<td>Rejeter une candidature</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>TournamentsService &mdash; Gestion des tournois</h3>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Endpoint</th>
+									<th>Methode</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>/api/tournaments</code></td>
+									<td>GET</td>
+									<td>Liste des tournois (avec filtres)</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/:id</code></td>
+									<td>GET</td>
+									<td>Detail + participants + bracket data</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/create/achillea</code></td>
+									<td>POST</td>
+									<td>Creer un tournoi</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/participate/:id</code></td>
+									<td>POST</td>
+									<td>S'inscrire</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/unregister/:id</code></td>
+									<td>POST</td>
+									<td>Se desinscrire</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/remove-participant/:id</code></td>
+									<td>POST</td>
+									<td>Retirer un participant</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/set-participant-seeding/:id</code></td>
+									<td>POST</td>
+									<td>Modifier le seed</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/report-score</code></td>
+									<td>POST</td>
+									<td>Reporter un score</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/validate-score</code></td>
+									<td>POST</td>
+									<td>Valider un score</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/open-registrations/:id</code></td>
+									<td>POST</td>
+									<td>Ouvrir les inscriptions</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/start/:id</code></td>
+									<td>PUT</td>
+									<td>Demarrer le tournoi</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/generate-bracket/:id</code></td>
+									<td>POST</td>
+									<td>Generer le bracket</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/add-managers/:id</code></td>
+									<td>POST</td>
+									<td>Ajouter des TOs</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/remove-manager/:id</code></td>
+									<td>POST</td>
+									<td>Retirer un TO</td>
+								</tr>
+								<tr>
+									<td><code>/api/tournaments/lobby/:id</code></td>
+									<td>GET</td>
+									<td>Detail d'un lobby</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>OrganizationService &mdash; Organisations</h3>
+					<p>CRUD des entites organisatrices de tournois (creation, listing, detail).</p>
+
+					<h3>NotificationSocketService &mdash; Temps reel</h3>
+					<p>
+						Connexion WebSocket via <strong>Socket.io</strong> sur le namespace
+						<code>/notifications</code> avec fallback polling.
+					</p>
+
+					<h3>LanguageService &mdash; Langues</h3>
+					<p>Mapping des codes ISO 639-1 vers les pays supportes (fr, en, es, de, it, pt, jp).</p>
+
+					<h3>HistoryService &mdash; Navigation</h3>
+					<p>Suivi de l'historique de navigation pour redirection post-login.</p>
+				</section>
+
+				<!-- Modeles -->
+				<section class="section" id="modeles">
+					<h2>Modeles de donnees</h2>
+
+					<h3>Utilisateur</h3>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">interface UserDTO {
+  id: string;               // ID Discord
+  name: string;             // Nom d'affichage
+  rank: Rank;               // Palier Elo actuel
+  logo: string;             // URL avatar
+}
+
+interface EnrichedUserDTO extends UserDTO {
+  clan?: {
+    id: number;
+    shortenedName: string;
+    name: string;
+    avatarUrl: string;
+    role: ClanMemberRole;
+    distinctions: ClanMemberDistinction[];
+  };
+  interclans: {
+    total: number;
+    wins: number;
+    losses: number;
+    goalsScoredAvg: number;
+    goalsReceivedAvg: number;
+  };
+  ranked: {
+    solo: RankedModeStats;   // Stats 1v1
+    duo: RankedModeStats;    // Stats 2v2
+  };
+}
+
+enum UserRole {
+  User = 0,
+  Moderator = 1,
+  Administrator = 2,
+  SuperAdministrator = 3
+}</code></pre>
+					</div>
+
+					<h3>Clan</h3>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">interface ClanDTO {
+  id: number;
+  name: string;                    // Nom complet
+  shortenedName: string;           // Tag (ex: "RG")
+  normalizedShortName: string;     // Tag normalise (ASCII)
+  clanAvatarUrl: string;
+  clanBiography: string;
+  fame: number;                    // Points de renommee
+  isRecruiting: boolean;
+  isInactive: boolean;
+  isDisbanded: boolean;
+  autoAcceptMembers: boolean;
+  state: ClanState;                // Creating | PendingReview | Approved
+  languages: string[];             // Codes ISO langues parlees
+  experience: {
+    currentLevel: number;
+    totalXp: number;
+  };
+  membersCount: number;
+  xUrl?: string;                   // Lien X (Twitter)
+  instagramUrl?: string;
+  tiktokUrl?: string;
+}
+
+enum ClanMemberRole {
+  Trial = 0,        // Periode d'essai
+  Member = 1,       // Membre confirme
+  SubCaptain = 2,   // Vice-capitaine
+  Captain = 3       // Capitaine (proprietaire)
+}
+
+enum ClanMemberDistinction {
+  Player = 'Joueur',
+  Staff = 'Staff',
+  Artist = 'Artiste',
+  ContentCreator = 'Createur de contenu'
+}</code></pre>
+					</div>
+
+					<h3>Tournoi</h3>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">interface Tournament extends EventEntity {
+  internalState: TournamentState;
+  // Pending &rarr; Preregistering &rarr; Preparing &rarr; Ongoing &rarr; Finished | Canceled
+  tournamentType: StageType;
+  // single_elimination | double_elimination | round_robin
+  matchFormat: MatchFormat;
+  // BO1 | BO3 | BO5 | DOUBLE_LEG | CUSTOM
+  participantsNumber: number;
+  participants: ParticipantDTO[];
+  managers: UserDTO[];              // Tournament Organizers
+  organization: OrganizationDTO;
+  startsAt: Date;
+  grandFinalAt: Date;
+  seedOrdering: SeedOrdering;
+  groupStageEnabled: boolean;
+  affiche: string;                  // URL affiche
+  logo: string;                     // URL logo
+  ruleset: string;                  // Reglement
+  planning: string;                 // Planning
+}
+
+interface ParticipantDTO {
+  id: number;
+  user: UserDTO;
+  tournament: Tournament;
+  bracketParticipantId?: number;    // ID dans le bracket
+  seed?: number;                    // Position de seed
+  hasCheckedIn: boolean;
+}</code></pre>
+					</div>
+
+					<h3>Lobby / Match</h3>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">interface LobbyDTO {
+  id: number;
+  mode: MatchMode;                  // ONE_VS_ONE = 2, TWO_VS_TWO = 4
+  state: LobbyState;
+  // Fresh &rarr; Ongoing &rarr; Pending validation &rarr; Contested &rarr; Finished | Canceled | Forfeited
+  bracketMatchId?: number;
+  lobbyUsers: LobbyUserDTO[];
+  lobbyMatches: LobbyMatchDTO[];
+  hostUser: LobbyUserDTO | null;
+  matchFormat: MatchFormat;
+}
+
+interface LobbyMatchDTO {
+  id: number;
+  gameNumber: number;               // Numero de partie (1, 2, 3...)
+  scoreTeam1: number;
+  scoreTeam2: number;
+  team1Validated: boolean;
+  team2Validated: boolean;
+  adminValidated: boolean;
+}</code></pre>
+					</div>
+
+					<h3>Rang Elo</h3>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">interface Rank {
+  label: string;                    // "Bronze", "Diamond", etc.
+  minElo: number;
+  maxElo: number;
+  gradient: string[];               // Couleurs CSS du palier
+}
+
+// Paliers : Unranked &rarr; Bronze &rarr; Silver &rarr; Gold &rarr; Diamond &rarr; Emerald &rarr; Immortal &rarr; Radiant</code></pre>
+					</div>
+				</section>
+
+				<!-- Auth -->
+				<section class="section" id="auth">
+					<h2>Authentification et securite</h2>
+
+					<h3>Flux d'authentification (Discord OAuth2)</h3>
+					<div class="ascii-diagram">
+						&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+						&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+						&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+						&#x2502; Utilisateur &#x2502;&#x2500;&#x2500;&#x2500;&#x2500;&gt;&#x2502; GET
+						/auth/discord&#x2502;&#x2500;&#x2500;&#x2500;&#x2500;&gt;&#x2502; Discord &#x2502;
+						&#x2502; (Frontend) &#x2502; &#x2502; (Backend) &#x2502; &#x2502; OAuth2 &#x2502;
+						&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+						&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+						&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+						&#x2502;
+						&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+						&#x2502; Code d'autorisation v
+						&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+						&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+						&#x2502; Backend echange &#x2502;&#x2500;&#x2500;&#x2500;&#x2500;&gt;&#x2502; Cookie JWT
+						&#x2502; &#x2502; code &#x2192; token &#x2502; &#x2502; HTTP-only &#x2502;
+						&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+						&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+						&#x2502;
+						&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+						v
+						&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+						&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+						&#x2502; GET /auth/me &#x2502;&#x2500;&#x2500;&#x2500;&#x2500;&gt;&#x2502; Profil user
+						&#x2502; &#x2502; (avec cookie) &#x2502; &#x2502; charge &#x2502;
+						&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+						&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
+					</div>
+
+					<ol>
+						<li>
+							Clic sur "Se connecter" &rarr; redirection
+							<code>GET /api/auth/discord?state=returnUrl</code>
+						</li>
+						<li>Discord authentifie l'utilisateur et redirige avec un code</li>
+						<li>Le backend echange le code, cree/met a jour l'utilisateur, signe un JWT</li>
+						<li>Le JWT est stocke dans un <strong>cookie HTTP-only</strong> (securise)</li>
+						<li>Le frontend charge le profil via <code>GET /api/auth/me</code></li>
+						<li>WebSocket se connecte automatiquement pour les notifications</li>
+					</ol>
+					<p>
+						Toutes les requetes API incluent <code>withCredentials: true</code> pour transmettre le
+						cookie de session.
+					</p>
+				</section>
+
+				<!-- Theming -->
+				<section class="section" id="theming">
+					<h2>Theming et design</h2>
+
+					<h3>Theme PrimeNG (Aura personnalise)</h3>
+					<p>
+						Le theme utilise l'API <code>definePreset</code> de
+						<strong>@primeuix/themes</strong> pour personnaliser le preset Aura :
+					</p>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">import { definePreset } from '@primeuix/themes';
+import Aura from '@primeuix/themes/aura';
+
+const myPreset = definePreset(Aura, {
+  semantic: {
+    colorScheme: {
+      light: {
+        primary: {
+          50: '#eee8ff',
+          // ... gradient violet
+          500: '#6b47ff',    // Couleur principale
+          950: '#13002d'
+        },
+        surface: { /* gradient gris */ }
+      },
+      dark: { /* variante sombre */ }
+    }
+  }
+});
+
+// app.config.ts
+providePrimeNG({
+  theme: {
+    preset: myPreset,
+    options: {
+      darkModeSelector: 'system'  // Detection automatique
+    }
+  }
+})</code></pre>
+					</div>
+
+					<h3>Tailwind CSS 4</h3>
+					<p>
+						Tailwind CSS v4 est utilise en complement de PrimeNG pour le layout et les utilitaires :
+					</p>
+					<ul>
+						<li>
+							Integration via <strong>@tailwindcss/postcss</strong> (configuration dans
+							<code>.postcssrc.json</code>)
+						</li>
+						<li>
+							Dark mode : <code>dark:</code> variant base sur
+							<code>prefers-color-scheme</code> (detection systeme automatique)
+						</li>
+						<li>
+							Integration PrimeNG : <strong>tailwindcss-primeui</strong> pour harmoniser les classes
+						</li>
+					</ul>
+
+					<h3>Typographie</h3>
+					<ul>
+						<li><strong>Inter Variable</strong> (poids 400-900, format WOFF2)</li>
+						<li>
+							Fallback :
+							<code>system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto</code>
+						</li>
+					</ul>
+
+					<h3>Assets visuels</h3>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Type</th>
+									<th>Fichiers</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Backgrounds</td>
+									<td><code>site_bg_light.png</code>, <code>site_bg_dark.png</code></td>
+								</tr>
+								<tr>
+									<td>Logos</td>
+									<td><code>logo_light.png</code>, <code>logo_dark.png</code></td>
+								</tr>
+								<tr>
+									<td>Rangs Elo</td>
+									<td>8 images (bronze &rarr; radiant) en WebP/PNG</td>
+								</tr>
+								<tr>
+									<td>Drapeaux</td>
+									<td>7 pays en SVG (fr, en, es, de, it, pt, jp)</td>
+								</tr>
+								<tr>
+									<td>Animations</td>
+									<td><code>completed.json</code> (Lottie, wizard de creation de clan)</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<!-- Notifications -->
+				<section class="section" id="notifications">
+					<h2>Notifications temps reel</h2>
+					<p>
+						Les notifications sont gerees via <strong>Socket.io</strong> avec le namespace dedie
+						<code>/notifications</code> :
+					</p>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">// NotificationSocketService
+private socket = io('/notifications', {
+  withCredentials: true,
+  transports: ['websocket', 'polling']  // WebSocket prioritaire, polling en fallback
+});
+
+// Ecoute des notifications
+this.socket.on('notification', (data: NotificationModel) =&gt; {
+  this._userNotifications.update(prev =&gt; [data, ...prev]);
+});</code></pre>
+					</div>
+
+					<h3>Types de notifications</h3>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Type</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>CLAN_MEMBER_KICK</code></td>
+									<td>Exclusion d'un membre</td>
+								</tr>
+								<tr>
+									<td><code>NEW_ORGANIZATION_CREATION_REQUEST</code></td>
+									<td>Demande de creation d'organisation</td>
+								</tr>
+								<tr>
+									<td><code>NEW_ORGANIZATION_ACCEPT_REPLY</code></td>
+									<td>Organisation acceptee</td>
+								</tr>
+								<tr>
+									<td><code>NEW_ORGANIZATION_REJECT_REPLY</code></td>
+									<td>Organisation refusee</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>Categories</h3>
+					<p>
+						<code>USER</code> | <code>CLAN</code> | <code>GLOBAL</code> | <code>ORGANIZATION</code>
+					</p>
+				</section>
+
+				<!-- i18n -->
+				<section class="section" id="i18n">
+					<h2>Internationalisation</h2>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Parametre</th>
+									<th>Valeur</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Bibliotheque</td>
+									<td>
+										<code>@ngx-translate/core</code> + <code>@ngx-translate/http-loader</code>
+									</td>
+								</tr>
+								<tr>
+									<td>Langue par defaut</td>
+									<td>Francais (<code>fr</code>)</td>
+								</tr>
+								<tr>
+									<td>Fichier de traduction</td>
+									<td><code>src/assets/i18n/fr.json</code></td>
+								</tr>
+								<tr>
+									<td>Locale Angular</td>
+									<td><code>fr-FR</code></td>
+								</tr>
+								<tr>
+									<td>Chargement</td>
+									<td>Dynamique via HTTP (lazy)</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p>
+						Les traductions incluent les labels PrimeNG (mois, jours, format date
+						<code>dd/mm/yy</code>, premiere semaine : lundi).
+					</p>
+				</section>
+
+				<!-- Configuration -->
+				<section class="section" id="configuration">
+					<h2>Configuration</h2>
+
+					<h3>Proxy API</h3>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Environnement</th>
+									<th>Fichier</th>
+									<th>Cible</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Developpement</td>
+									<td><code>proxy.dev.json</code></td>
+									<td><code>http://localhost:4010</code></td>
+								</tr>
+								<tr>
+									<td>Production</td>
+									<td><code>proxy.prod.json</code></td>
+									<td><code>http://localhost:4000</code></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p>
+						Toutes les requetes <code>/api/*</code> sont proxifiees automatiquement vers le backend.
+					</p>
+
+					<h3>Build de production</h3>
+					<div class="code-block">
+						<div class="code-header">
+							<span>bash</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-bash">npm run build</code></pre>
+					</div>
+
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>Parametre</th>
+									<th>Valeur</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Output hashing</td>
+									<td>Active (cache busting)</td>
+								</tr>
+								<tr>
+									<td>Budget initial</td>
+									<td>1.5 MB warning / 5 MB erreur</td>
+								</tr>
+								<tr>
+									<td>Budget composants</td>
+									<td>4 KB warning / 8 KB erreur</td>
+								</tr>
+								<tr>
+									<td>Optimisations</td>
+									<td>Tree-shaking, minification, AOT compilation</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<h3>Configuration Angular (<code>app.config.ts</code>)</h3>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes, withComponentInputBinding()),
+    provideHttpClient(),
+    providePrimeNG({ theme: { preset: myPreset } }),
+    provideLottieOptions({ player: () =&gt; player }),
+    provideTranslateService({ ... }),
+    { provide: LOCALE_ID, useValue: 'fr-FR' },
+    MessageService
+  ]
+};</code></pre>
+					</div>
+				</section>
+
+				<!-- Contribution -->
+				<section class="section" id="contribution">
+					<h2>Contribution</h2>
+
+					<h3>Conventions</h3>
+					<ul>
+						<li>
+							<strong>Commits</strong> : Conventional Commits en francais (<code
+								>feat: ajout de la page profil</code
+							>)
+						</li>
+						<li>
+							<strong>Branches</strong> : <code>feature/</code>, <code>fix/</code>,
+							<code>chore/</code>
+						</li>
+						<li><strong>Linting</strong> : lancer <code>npm run lint</code> avant chaque commit</li>
+						<li>
+							<strong>Code</strong> : standalone components, Signals (pas d'Observables pour
+							l'etat), <code>httpResource</code> pour les appels API
+						</li>
+					</ul>
+
+					<h3>Structure d'un composant</h3>
+					<div class="code-block">
+						<div class="code-header">
+							<span>TypeScript</span>
+							<button class="copy-btn" onclick="copyCode(this)">Copier</button>
+						</div>
+						<pre><code class="language-typescript">@Component({
+  selector: 'app-mon-composant',
+  standalone: true,
+  imports: [CommonModule, FormsModule, /* PrimeNG... */],
+  templateUrl: './mon-composant.html',
+  styleUrl: './mon-composant.css'
+})
+export class MonComposant {
+  // Inputs typees
+  clan = input.required&lt;ClanDTO&gt;();
+
+  // Signaux locaux
+  loading = signal(false);
+
+  // Services injectes
+  private clanService = inject(ClanService);
+
+  // Computed
+  memberCount = computed(() =&gt; this.clan().membersCount);
+}</code></pre>
+					</div>
+				</section>
+			</div>
+
+			<!-- Footer -->
+			<footer class="footer">
+				<p>
+					Projet prive &mdash;
+					<a href="https://rosegriffon.fr" target="_blank" rel="noopener">Rose Griffon</a>
+				</p>
+				<div class="footer-links">
+					<a href="https://github.com/rose-griffon/AchilleaWeb" target="_blank" rel="noopener"
+						>GitHub</a
+					>
+					<a href="#presentation">Haut de page</a>
+				</div>
+			</footer>
+		</div>
+
+		<script>
+			// ===== SIDEBAR TOGGLE (mobile) =====
+			const hamburger = document.getElementById("hamburger");
+			const sidebar = document.getElementById("sidebar");
+			const overlay = document.getElementById("sidebarOverlay");
+
+			function toggleSidebar() {
+				hamburger.classList.toggle("open");
+				sidebar.classList.toggle("open");
+				overlay.classList.toggle("open");
+			}
+
+			hamburger.addEventListener("click", toggleSidebar);
+			overlay.addEventListener("click", toggleSidebar);
+
+			// Close sidebar when clicking a nav link (mobile)
+			sidebar.querySelectorAll("nav a").forEach((link) => {
+				link.addEventListener("click", () => {
+					if (window.innerWidth <= 1024) {
+						toggleSidebar();
+					}
+				});
+			});
+
+			// ===== ACTIVE SECTION HIGHLIGHT =====
+			const sections = document.querySelectorAll(".section[id]");
+			const navLinks = document.querySelectorAll("#sidebarNav a");
+
+			const observerOptions = {
+				root: null,
+				rootMargin: "-80px 0px -60% 0px",
+				threshold: 0,
+			};
+
+			const sectionObserver = new IntersectionObserver((entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						const id = entry.target.id;
+						navLinks.forEach((link) => {
+							link.classList.toggle("active", link.getAttribute("href") === "#" + id);
+						});
+					}
+				});
+			}, observerOptions);
+
+			sections.forEach((section) => sectionObserver.observe(section));
+
+			// ===== FADE-IN ANIMATIONS =====
+			const fadeObserver = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (entry.isIntersecting) {
+							entry.target.classList.add("visible");
+							fadeObserver.unobserve(entry.target);
+						}
+					});
+				},
+				{
+					root: null,
+					rootMargin: "0px 0px -60px 0px",
+					threshold: 0.1,
+				}
+			);
+
+			document.querySelectorAll(".section").forEach((section) => {
+				fadeObserver.observe(section);
+			});
+
+			// ===== COPY BUTTON =====
+			function copyCode(btn) {
+				const codeBlock = btn.closest(".code-block");
+				const code = codeBlock.querySelector("code");
+				const text = code.textContent;
+
+				navigator.clipboard
+					.writeText(text)
+					.then(() => {
+						btn.textContent = "Copie !";
+						btn.classList.add("copied");
+						setTimeout(() => {
+							btn.textContent = "Copier";
+							btn.classList.remove("copied");
+						}, 2000);
+					})
+					.catch(() => {
+						// Fallback for older browsers
+						const textarea = document.createElement("textarea");
+						textarea.value = text;
+						textarea.style.position = "fixed";
+						textarea.style.opacity = "0";
+						document.body.appendChild(textarea);
+						textarea.select();
+						document.execCommand("copy");
+						document.body.removeChild(textarea);
+						btn.textContent = "Copie !";
+						btn.classList.add("copied");
+						setTimeout(() => {
+							btn.textContent = "Copier";
+							btn.classList.remove("copied");
+						}, 2000);
+					});
+			}
+
+			// ===== RE-HIGHLIGHT PRISM ON LOAD =====
+			document.addEventListener("DOMContentLoaded", () => {
+				if (typeof Prism !== "undefined") {
+					Prism.highlightAll();
+				}
+			});
+		</script>
+	</body>
+</html>

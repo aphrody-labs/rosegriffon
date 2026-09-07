@@ -1,0 +1,15 @@
+<p-floatlabel variant="on" class="w-full mt-2">
+	<p-multiSelect
+		[options]="distinctions"
+		optionLabel="label"
+		optionValue="value"
+		[formControl]="distinctionsFormControl"
+		[filter]="true"
+		display="chip"
+		appendTo="body"
+		class="w-full"
+		inputId="distinctionSelect"
+		[invalid]="distinctionsFormControl.invalid"
+	></p-multiSelect>
+	<label for="distinctionSelect">Distinctions</label>
+</p-floatlabel>
