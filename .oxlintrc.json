@@ -159,6 +159,15 @@
 			"rules": {
 				"import/no-cycle": "off"
 			}
+		},
+		{
+			"files": [
+				"apps/achillea-bot/**/*.ts",
+				"apps/achillea-web/**/*.ts"
+			],
+			"rules": {
+				"import/no-cycle": "off"
+			}
 		}
 	]
 }

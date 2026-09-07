@@ -26,7 +26,9 @@ async function main() {
 	try {
 		console.log("Regenerating PASSIVE database...");
 		// Dynamic import to avoid earlier "cannot find" issues if sync file writes happened
-		const { buildPassiveSkillDatabase } = await import("../skills/mapper-passive.js");
+		const { buildPassiveSkillDatabase } = await import(
+			"../../../packages/inagle/src/skills/mapper-passive"
+		);
 		const pasDb = buildPassiveSkillDatabase();
 		console.log(`Generated ${pasDb.stats.uniqueEffects} unique passive skills.`);
 
