@@ -1,0 +1,22 @@
+<p-floatlabel variant="on">
+	<p-select
+		fluid
+		[options]="languages"
+		optionLabel="name"
+		[(ngModel)]="selected"
+		(onChange)="onChange($event.value)"
+		[filter]="true"
+		[showClear]="true"
+		inputId="pays"
+	>
+		<ng-template let-lang pTemplate="item">
+			<img [src]="lang.flag" alt="{{ lang.name }}" class="inline-block w-6 h-4 mr-2 align-middle" />
+			<span class="align-middle">{{ lang.name }}</span>
+		</ng-template>
+		<ng-template let-lang pTemplate="selectedItem">
+			<img [src]="lang.flag" alt="{{ lang.name }}" class="inline-block w-6 h-4 mr-2 align-middle" />
+			<span class="align-middle">{{ lang.name }}</span>
+		</ng-template>
+	</p-select>
+	<label for="pays">Pays d'origine</label>
+</p-floatlabel>

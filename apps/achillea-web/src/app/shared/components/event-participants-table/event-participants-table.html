@@ -1,0 +1,453 @@
+<p-table
+	paginatorDropdownAppendTo="body"
+	#dt1
+	[value]="rosterParticipants()"
+	dataKey="id"
+	[globalFilterFields]="['user.username']"
+	[paginator]="true"
+	[rowsPerPageOptions]="[10, 25, 50, 100]"
+	[rows]="25"
+	sortField="seed"
+	[sortOrder]="1"
+	styleClass="ept-table"
+>
+	<ng-template #caption>
+		<div class="ept-caption">
+			@if (canManageSeeding) {
+			<div class="ept-caption__meta">
+				<p class="ept-hint">
+					Seeding éditable en inscriptions et préparation.
+					<strong>Seed prise</strong> → échange automatique.
+					<span class="ept-hint__kbd">Entrée</span> valide ·
+					<span class="ept-hint__kbd">Échap</span> annule.
+				</p>
+				<div class="ept-stats">
+					<span class="ept-stat" pTooltip="Participants avec une seed attribuée">
+						<i class="pi pi-sort-numeric-up" aria-hidden="true"></i>
+						{{ seededCount() }}/{{ participants().length }} seedés
+					</span>
+					<span class="ept-stat ept-stat--muted" pTooltip="Capacité du bracket">
+						Capacité {{ activeParticipants().length }}/{{ participantsCount }}
+					</span>
+					@if (waitlist().length > 0) {
+					<span class="ept-stat ept-stat--muted" pTooltip="Joueurs en attente d'une place">
+						<i class="pi pi-hourglass" aria-hidden="true"></i>
+						{{ waitlist().length }} en attente
+					</span>
+					} @if (disqualifiedCount() > 0) {
+					<span class="ept-stat ept-stat--danger" pTooltip="Joueurs disqualifiés">
+						<i class="pi pi-ban" aria-hidden="true"></i>
+						{{ disqualifiedCount() }} DQ
+					</span>
+					} @if (freeSeeds().length > 0 && freeSeeds().length <= 8) {
+					<span class="ept-stat ept-stat--muted" pTooltip="Slots de seed encore libres">
+						Libres : {{ freeSeeds().join(", ") }}
+					</span>
+					} @else if (freeSeeds().length > 8) {
+					<span class="ept-stat ept-stat--muted"> {{ freeSeeds().length }} seeds libres </span>
+					}
+				</div>
+			</div>
+			}
+
+			<div class="ept-toolbar">
+				<div class="ept-toolbar__actions">
+					<p-button
+						label="Réinit. filtres"
+						[outlined]="true"
+						icon="pi pi-filter-slash"
+						size="small"
+						severity="secondary"
+						(onClick)="clear(dt1)"
+					/>
+					@if (canManageSeeding) {
+					<p-button
+						label="Seed ranked"
+						icon="pi pi-chart-bar"
+						severity="help"
+						[outlined]="true"
+						size="small"
+						[loading]="bulkLoading() && confirmAction() === 'ranked'"
+						[disabled]="isBusy || editingParticipantId() != null"
+						(onClick)="openRankedConfirm()"
+						pTooltip="Seed 1 = meilleur ELO solo ranked. Aperçu avant validation."
+						tooltipPosition="bottom"
+					/>
+					<p-button
+						label="Mélanger"
+						icon="pi pi-sync"
+						severity="secondary"
+						[outlined]="true"
+						size="small"
+						[disabled]="isBusy || editingParticipantId() != null || participants().length === 0"
+						(onClick)="openRandomConfirm()"
+						pTooltip="Assigne des seeds 1…N au hasard."
+						tooltipPosition="bottom"
+					/>
+					<p-button
+						label="Effacer seeds"
+						icon="pi pi-eraser"
+						severity="danger"
+						[outlined]="true"
+						size="small"
+						[disabled]="isBusy || editingParticipantId() != null || seededCount() === 0"
+						(onClick)="openClearConfirm()"
+						pTooltip="Retire toutes les seeds (remplissage par ordre d'inscription)."
+						tooltipPosition="bottom"
+					/>
+					}
+				</div>
+				<p-iconfield iconPosition="left" class="ept-search">
+					<p-inputicon>
+						<i class="pi pi-search"></i>
+					</p-inputicon>
+					<input
+						pInputText
+						type="text"
+						[(ngModel)]="searchValue"
+						(input)="dt1.filterGlobal($event.target.value, 'contains')"
+						placeholder="Rechercher un joueur"
+					/>
+				</p-iconfield>
+			</div>
+		</div>
+	</ng-template>
+
+	<ng-template #header>
+		<tr>
+			<th pSortableColumn="seed" style="width: 7rem">Seed <p-sortIcon field="seed" /></th>
+			<th pSortableColumn="user.username">Joueur <p-sortIcon field="user.username" /></th>
+			<th pSortableColumn="user.soloRank.elo" style="min-width: 10rem">
+				Ranked <p-sortIcon field="user.soloRank.elo" />
+			</th>
+			<th pSortableColumn="user.currentLevel" style="width: 5rem">
+				Niv. <p-sortIcon field="user.currentLevel" />
+			</th>
+			<th style="width: 12rem">Actions</th>
+		</tr>
+	</ng-template>
+
+	<ng-template #body let-participant>
+		<tr
+			[class.ept-row--editing]="editingParticipantId() === participant.id"
+			[class.ept-row--seeded]="participant.seed != null"
+		>
+			<td>
+				@if (editingParticipantId() !== participant.id) { @if (participant.seed != null) {
+				<span class="ept-seed-badge">{{ participant.seed }}</span>
+				} @else {
+				<span class="ept-seed-empty" pTooltip="Pas de seed — place libre dans le bracket">∅</span>
+				} } @else {
+				<div class="ept-seed-edit">
+					<p-inputNumber
+						[formControl]="seedControl"
+						mode="decimal"
+						[useGrouping]="false"
+						[max]="participantsCount"
+						[min]="0"
+						[showButtons]="false"
+						placeholder="∅"
+						inputStyleClass="ept-seed-input"
+						(keydown)="onSeedKeydown($event, participant)"
+					/>
+					@if (occupantOfSeed(seedControl.value); as occ) {
+					<span class="ept-swap-hint" pTooltip="Cette seed est prise — validation = échange">
+						↔ {{ occ.user.username }}
+					</span>
+					}
+				</div>
+				}
+			</td>
+			<td>
+				<div class="ept-user-cell">
+					<div class="ept-user" [routerLink]="['/users', participant.user.id]">
+						<app-user-avatar
+							[userId]="participant.user.id"
+							[avatar]="participant.user.avatar"
+							[name]="participant.user.username"
+							shape="circle"
+						/>
+						<span class="ept-user__name">{{ participant.user.username }}</span>
+					</div>
+					@if (statusOf(participant) === ParticipantStatus.DISQUALIFIED) {
+					<span
+						class="ept-status ept-status--dq"
+						[pTooltip]="participant.statusReason || 'Disqualifié'"
+						tooltipPosition="top"
+					>
+						<i class="pi pi-ban" aria-hidden="true"></i> DQ
+					</span>
+					}
+				</div>
+			</td>
+			<td>
+				<div class="ept-rank">
+					<p-tag styleClass="ept-rank-tag">
+						<img
+							[src]="getEloImagePath(rankKeyOf(participant))"
+							[alt]="rankKeyOf(participant)"
+							class="ept-rank-img"
+							loading="lazy"
+							decoding="async"
+						/>
+						<span>{{ rankKeyOf(participant) }}</span>
+					</p-tag>
+					<span class="ept-elo" pTooltip="ELO solo ranked">{{ eloOf(participant) }}</span>
+				</div>
+			</td>
+			<td class="ept-level">{{ participant.user.currentLevel ?? "—" }}</td>
+			<td>
+				@if (editingParticipantId() === participant.id) {
+				<div class="ept-actions">
+					<p-button
+						icon="pi pi-check"
+						severity="success"
+						size="small"
+						[loading]="seedSaving()"
+						[disabled]="seedSaving()"
+						(onClick)="onEditSeed(participant)"
+						pTooltip="Valider (Entrée)"
+					/>
+					<p-button
+						icon="pi pi-times"
+						severity="secondary"
+						[outlined]="true"
+						size="small"
+						[disabled]="seedSaving()"
+						(onClick)="resetSeedEdition()"
+						pTooltip="Annuler (Échap)"
+					/>
+				</div>
+				} @else {
+				<div class="ept-actions">
+					@if (canManageSeeding && statusOf(participant) === ParticipantStatus.ACTIVE) {
+					<p-button
+						label="Seed"
+						icon="pi pi-sort-numeric-up"
+						severity="secondary"
+						[outlined]="true"
+						size="small"
+						[disabled]="isBusy || editingParticipantId() != null"
+						(onClick)="editSeed(participant)"
+					/>
+					} @if (canRemoveParticipant && statusOf(participant) !== ParticipantStatus.DISQUALIFIED) {
+					<p-button
+						icon="pi pi-user-minus"
+						severity="danger"
+						[outlined]="true"
+						size="small"
+						[disabled]="isBusy"
+						(onClick)="openRemoveConfirm(participant)"
+						pTooltip="Retirer du tournoi"
+						tooltipPosition="left"
+					/>
+					} @if (statusOf(participant) === ParticipantStatus.DISQUALIFIED) { @if (canReinstate) {
+					<p-button
+						icon="pi pi-replay"
+						label="Réintégrer"
+						severity="success"
+						[outlined]="true"
+						size="small"
+						[disabled]="isBusy"
+						(onClick)="openReinstateConfirm(participant)"
+						pTooltip="Annuler la disqualification"
+						tooltipPosition="left"
+					/>
+					} @else {
+					<span class="ept-frozen">Disqualifié</span>
+					} } @else if (canDisqualify) {
+					<p-button
+						icon="pi pi-ban"
+						severity="danger"
+						[outlined]="true"
+						size="small"
+						[disabled]="isBusy"
+						(onClick)="openDisqualifyConfirm(participant)"
+						pTooltip="Disqualifier (motif obligatoire)"
+						tooltipPosition="left"
+					/>
+					} @if (!canManageSeeding && !canDisqualify) {
+					<span class="ept-frozen">—</span>
+					}
+				</div>
+				}
+			</td>
+		</tr>
+	</ng-template>
+
+	<ng-template #emptymessage>
+		<tr>
+			<td colspan="5" class="ept-empty">Aucun participant inscrit.</td>
+		</tr>
+	</ng-template>
+</p-table>
+
+@if (waitlist().length > 0) {
+<section class="ept-waitlist">
+	<header class="ept-waitlist__header">
+		<h3 class="ept-waitlist__title">
+			<i class="pi pi-hourglass" aria-hidden="true"></i>
+			Liste d'attente ({{ waitlist().length }})
+		</h3>
+		<p class="ept-waitlist__hint">
+			@if (hasFreeSlot()) { Une place est libre — le premier de la liste peut être promu. } @else {
+			Promotion automatique dès qu'une place se libère. }
+		</p>
+	</header>
+
+	<ol class="ept-waitlist__list">
+		@for (participant of waitlist(); track participant.id) {
+		<li class="ept-waitlist__row">
+			<span class="ept-waitlist__pos">{{ participant.waitlistPosition ?? "—" }}</span>
+			<div class="ept-user" [routerLink]="['/users', participant.user.id]">
+				<app-user-avatar
+					[userId]="participant.user.id"
+					[avatar]="participant.user.avatar"
+					[name]="participant.user.username"
+					shape="circle"
+				/>
+				<span class="ept-user__name">{{ participant.user.username }}</span>
+			</div>
+			<span class="ept-waitlist__rank">
+				<img
+					[src]="getEloImagePath(rankKeyOf(participant))"
+					[alt]="rankKeyOf(participant)"
+					class="ept-rank-img"
+					loading="lazy"
+					decoding="async"
+				/>
+				{{ eloOf(participant) }}
+			</span>
+			@if (canRemoveParticipant) {
+			<div class="ept-waitlist__actions">
+				<p-button
+					icon="pi pi-arrow-up"
+					label="Promouvoir"
+					severity="success"
+					[outlined]="true"
+					size="small"
+					[disabled]="isBusy || !hasFreeSlot()"
+					(onClick)="openPromoteConfirm(participant)"
+					[pTooltip]="
+						hasFreeSlot()
+							? 'Faire passer ce joueur dans les inscrits'
+							: 'Aucune place libre — retire un inscrit d\'abord'
+					"
+					tooltipPosition="left"
+				/>
+				<p-button
+					icon="pi pi-user-minus"
+					severity="danger"
+					[outlined]="true"
+					size="small"
+					[disabled]="isBusy"
+					(onClick)="openRemoveConfirm(participant)"
+					pTooltip="Retirer de la liste d'attente"
+					tooltipPosition="left"
+				/>
+			</div>
+			}
+		</li>
+		}
+	</ol>
+</section>
+}
+
+<!-- Confirm dialog (ranked preview / random / clear / remove) -->
+<p-dialog
+	[header]="confirmTitle"
+	[visible]="confirmVisible()"
+	(visibleChange)="$event ? confirmVisible.set(true) : closeConfirm()"
+	[modal]="true"
+	[dismissableMask]="!bulkLoading()"
+	[closable]="!bulkLoading()"
+	[style]="{ width: '95vw', 'max-width': '32rem' }"
+	styleClass="ept-confirm"
+>
+	@if (confirmAction() === 'ranked') {
+	<p class="ept-confirm__text">
+		Attribue les seeds <strong>1…{{ rankedPreview().length }}</strong> selon l’ELO solo ranked
+		(meilleur ELO = seed 1). <strong>Écrase</strong> le seeding actuel et régénère le bracket si
+		possible.
+	</p>
+	<ul class="ept-preview">
+		@for (row of rankedPreview().slice(0, 12); track row.userId) {
+		<li class="ept-preview__row">
+			<span class="ept-seed-badge">{{ row.seed }}</span>
+			<app-user-avatar
+				[userId]="row.userId"
+				[avatar]="row.avatar"
+				[name]="row.username"
+				shape="circle"
+			/>
+			<span class="ept-preview__name">{{ row.username }}</span>
+			<span class="ept-preview__elo">
+				<img [src]="getEloImagePath(row.rankKey)" [alt]="row.rankKey" class="ept-rank-img" />
+				{{ row.elo }}
+			</span>
+		</li>
+		} @if (rankedPreview().length > 12) {
+		<li class="ept-preview__more">… et {{ rankedPreview().length - 12 }} autres</li>
+		}
+	</ul>
+	} @else if (confirmAction() === 'random') {
+	<p class="ept-confirm__text">
+		Mélange aléatoire des seeds pour les <strong>{{ participants().length }}</strong> inscrits (1…{{
+		randomSeedCap }}). Écrase le seeding actuel.
+	</p>
+	} @else if (confirmAction() === 'clear') {
+	<p class="ept-confirm__text">
+		Retirer les <strong>{{ seededCount() }}</strong> seed(s) attribuée(s) ? Le bracket se remplira
+		par ordre d’inscription tant qu’aucune seed n’est posée.
+	</p>
+	} @else if (confirmAction() === 'remove') { @if (pendingRemove(); as p) {
+	<p class="ept-confirm__text">
+		Retirer <strong>{{ p.user.username }}</strong> de <strong>{{ event().name }}</strong> ?
+	</p>
+	} } @else if (confirmAction() === 'disqualify') { @if (pendingStatusTarget(); as p) {
+	<p class="ept-confirm__text">
+		Disqualifier <strong>{{ p.user.username }}</strong> de <strong>{{ event().name }}</strong> ? @if
+		(event().internalState === TournamentState.ONGOING) { Ses matchs en cours passeront en
+		<strong>forfait</strong> et le bracket avancera. } @else { Sa place sera libérée (et rendue au
+		premier de la liste d'attente s'il y en a une). }
+	</p>
+	<label class="ept-confirm__label" for="dq-reason">Motif (obligatoire, visible des TO)</label>
+	<input
+		id="dq-reason"
+		pInputText
+		class="ept-confirm__input"
+		type="text"
+		maxlength="500"
+		[value]="disqualifyReason()"
+		(input)="onDisqualifyReasonInput($event)"
+		placeholder="ex. absence répétée, non-respect du règlement…"
+	/>
+	} } @else if (confirmAction() === 'reinstate') { @if (pendingStatusTarget(); as p) {
+	<p class="ept-confirm__text">
+		Annuler la disqualification de <strong>{{ p.user.username }}</strong> ? Il retrouvera une place
+		si le tournoi n'est pas complet, sinon il ira en liste d'attente.
+	</p>
+	} } @else if (confirmAction() === 'promote') { @if (pendingStatusTarget(); as p) {
+	<p class="ept-confirm__text">
+		Promouvoir <strong>{{ p.user.username }}</strong> depuis la liste d'attente ? Il occupera une
+		place d'inscrit et recevra le rôle Discord du tournoi.
+	</p>
+	} }
+
+	<div class="ept-confirm__footer">
+		<p-button
+			label="Annuler"
+			severity="secondary"
+			[outlined]="true"
+			[disabled]="bulkLoading()"
+			(onClick)="closeConfirm()"
+		/>
+		<p-button
+			[label]="confirmLabel"
+			[severity]="confirmSeverity"
+			[loading]="bulkLoading()"
+			[disabled]="bulkLoading() || !canConfirmAction"
+			(onClick)="runConfirmedAction()"
+		/>
+	</div>
+</p-dialog>

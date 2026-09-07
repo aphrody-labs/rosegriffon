@@ -1,0 +1,29 @@
+<div class="flex flex-col gap-6 p-6">
+	<div class="flex flex-col gap-1">
+		<h1 class="text-2xl font-bold text-surface-900 dark:text-surface-0 m-0">Mes disponibilités</h1>
+		<p class="text-surface-500 m-0">
+			Renseignez votre disponibilité pour chaque événement à caster
+		</p>
+	</div>
+
+	@if (loading()) {
+	<div class="flex justify-center items-center py-16">
+		<i class="pi pi-spin pi-spinner text-3xl text-surface-400"></i>
+	</div>
+	} @else if (events().length === 0) {
+	<div class="flex flex-col items-center gap-2 py-16 text-surface-400">
+		<i class="pi pi-calendar text-4xl"></i>
+		<span>Aucun sondage ouvert pour ce tournoi</span>
+	</div>
+	} @else {
+	<div class="flex flex-col gap-4">
+		@for (event of events(); track event.id) {
+		<app-cast-availability-form
+			[event]="event"
+			[loading]="!!submitting()[event.id]"
+			(submitted)="onAvailabilitySubmit($event)"
+		/>
+		}
+	</div>
+	}
+</div>

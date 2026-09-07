@@ -1,0 +1,265 @@
+<div class="flex flex-col gap-3">
+	<div class="flex items-center justify-end gap-3 flex-wrap">
+		<div class="flex items-center gap-2 flex-wrap justify-end">
+			@if (activeSeason(); as a) {
+			<p-button
+				icon="pi pi-replay"
+				label="Reset ladder (saison active)"
+				size="small"
+				severity="danger"
+				[outlined]="true"
+				(onClick)="resetTarget.set(a)"
+			></p-button>
+			}
+			<p-button
+				icon="pi pi-plus"
+				label="Nouvelle saison"
+				size="small"
+				(onClick)="openCreate()"
+			></p-button>
+			<p-button
+				icon="pi pi-refresh"
+				[text]="true"
+				[loading]="loading()"
+				pTooltip="Rafraîchir"
+				(onClick)="refresh()"
+			></p-button>
+		</div>
+	</div>
+
+	<p-table
+		[value]="seasons()"
+		[loading]="loading()"
+		styleClass="p-datatable-sm"
+		[tableStyle]="{ 'min-width': '60rem' }"
+	>
+		<ng-template pTemplate="header">
+			<tr>
+				<th>Saison</th>
+				<th>État</th>
+				<th>Début</th>
+				<th>Fin</th>
+				<th class="text-center">K-factor</th>
+				<th class="text-center">Rating base</th>
+				<th class="text-center">Joueurs</th>
+				<th class="text-right">Actions</th>
+			</tr>
+		</ng-template>
+		<ng-template pTemplate="body" let-s>
+			<tr>
+				<td class="font-medium">{{ s.name }}</td>
+				<td>
+					<p-tag [value]="stateLabel(s.state)" [severity]="stateSeverity(s.state)"></p-tag>
+				</td>
+				<td>{{ s.startsAt | date: "dd/MM/yyyy HH:mm" }}</td>
+				<td>{{ s.endsAt | date: "dd/MM/yyyy HH:mm" }}</td>
+				<td class="text-center">{{ s.config.kFactor }}</td>
+				<td class="text-center">{{ s.config.baseRating }}</td>
+				<td class="text-center">{{ s.playerCount }}</td>
+				<td class="text-right whitespace-nowrap">
+					<p-button
+						icon="pi pi-pencil"
+						[text]="true"
+						size="small"
+						pTooltip="Modifier"
+						(onClick)="openEdit(s)"
+					></p-button>
+					@if (s.state !== "Active") {
+					<p-button
+						icon="pi pi-check-circle"
+						[text]="true"
+						size="small"
+						severity="success"
+						pTooltip="Activer cette saison"
+						[loading]="busyId() === s.id"
+						(onClick)="activateTarget.set(s)"
+					></p-button>
+					}
+					<p-button
+						icon="pi pi-replay"
+						[text]="true"
+						size="small"
+						severity="danger"
+						pTooltip="Réinitialiser le ladder"
+						(onClick)="resetTarget.set(s)"
+					></p-button>
+				</td>
+			</tr>
+		</ng-template>
+		<ng-template pTemplate="emptymessage">
+			<tr>
+				<td colspan="8" class="text-center opacity-60 py-4">Aucune saison.</td>
+			</tr>
+		</ng-template>
+	</p-table>
+</div>
+
+<!-- Création / édition d'une saison -->
+<p-dialog
+	[header]="dialogTitle()"
+	[modal]="true"
+	[(visible)]="formOpen"
+	[closable]="true"
+	[style]="{ width: '34rem' }"
+>
+	<div class="flex flex-col gap-4">
+		<div class="flex flex-col gap-1">
+			<label class="text-xs uppercase opacity-60">Nom de la saison</label>
+			<input
+				pInputText
+				[ngModel]="fName()"
+				(ngModelChange)="fName.set($event)"
+				placeholder="Saison 2"
+			/>
+		</div>
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+			<div class="flex flex-col gap-1">
+				<label class="text-xs uppercase opacity-60">Début</label>
+				<p-datepicker
+					[ngModel]="fStart()"
+					(ngModelChange)="fStart.set($event)"
+					[showTime]="true"
+					[showIcon]="true"
+					dateFormat="dd/mm/yy"
+					appendTo="body"
+				></p-datepicker>
+			</div>
+			<div class="flex flex-col gap-1">
+				<label class="text-xs uppercase opacity-60">Fin</label>
+				<p-datepicker
+					[ngModel]="fEnd()"
+					(ngModelChange)="fEnd.set($event)"
+					[showTime]="true"
+					[showIcon]="true"
+					dateFormat="dd/mm/yy"
+					appendTo="body"
+				></p-datepicker>
+			</div>
+		</div>
+		<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+			<div class="flex flex-col gap-1">
+				<label class="text-xs uppercase opacity-60">K-factor</label>
+				<p-inputNumber
+					[ngModel]="fK()"
+					(ngModelChange)="fK.set($event)"
+					[min]="1"
+					[max]="200"
+					[showButtons]="true"
+				></p-inputNumber>
+			</div>
+			<div class="flex flex-col gap-1">
+				<label class="text-xs uppercase opacity-60">Rating de base</label>
+				<p-inputNumber
+					[ngModel]="fBase()"
+					(ngModelChange)="fBase.set($event)"
+					[min]="0"
+					[max]="100000"
+				></p-inputNumber>
+			</div>
+			<div class="flex flex-col gap-1">
+				<label class="text-xs uppercase opacity-60">Decay</label>
+				<p-inputNumber
+					[ngModel]="fDecay()"
+					(ngModelChange)="fDecay.set($event)"
+					[min]="0"
+					[max]="1000"
+				></p-inputNumber>
+			</div>
+		</div>
+		@if (editingId()) {
+		<div class="flex flex-col gap-1">
+			<label class="text-xs uppercase opacity-60">État</label>
+			<p-select
+				[ngModel]="fState()"
+				(ngModelChange)="fState.set($event)"
+				[options]="stateOptions"
+				optionLabel="label"
+				optionValue="value"
+				appendTo="body"
+			></p-select>
+			<small class="opacity-50"
+				>Activer plutôt via le bouton dédié pour clôturer automatiquement la saison active
+				courante.</small
+			>
+		</div>
+		}
+	</div>
+	<ng-template pTemplate="footer">
+		<p-button
+			label="Annuler"
+			[text]="true"
+			severity="secondary"
+			(onClick)="formOpen.set(false)"
+		></p-button>
+		<p-button
+			label="Enregistrer"
+			icon="pi pi-check"
+			[disabled]="!canSave() || saving()"
+			[loading]="saving()"
+			(onClick)="save()"
+		></p-button>
+	</ng-template>
+</p-dialog>
+
+<!-- Confirmation activation -->
+<p-dialog
+	header="Activer la saison ?"
+	[modal]="true"
+	[visible]="activateTarget() !== null"
+	(onHide)="activateTarget.set(null)"
+	[style]="{ width: '28rem' }"
+>
+	@if (activateTarget(); as s) {
+	<p class="text-sm">
+		La saison <b>{{ s.name }}</b> deviendra <b>Active</b>. Toute saison actuellement active sera
+		<b>clôturée</b>. Le calcul Elo des prochains matchs utilisera la config de cette saison
+		(K-factor {{ s.config.kFactor }}, base {{ s.config.baseRating }}).
+	</p>
+	<ng-template pTemplate="footer">
+		<p-button
+			label="Annuler"
+			[text]="true"
+			severity="secondary"
+			(onClick)="activateTarget.set(null)"
+		></p-button>
+		<p-button
+			label="Activer"
+			icon="pi pi-check-circle"
+			severity="success"
+			[loading]="busyId() === s.id"
+			(onClick)="confirmActivate()"
+		></p-button>
+	</ng-template>
+	}
+</p-dialog>
+
+<!-- Confirmation reset du ladder (destructif) -->
+<p-dialog
+	header="Réinitialiser le ladder ?"
+	[modal]="true"
+	[visible]="resetTarget() !== null"
+	(onHide)="resetTarget.set(null)"
+	[style]="{ width: '30rem' }"
+>
+	@if (resetTarget(); as s) {
+	<p class="text-sm">
+		Tous les joueurs seront remis au rating de base de <b>{{ s.name }}</b> ({{ s.config.baseRating
+		}}) : Elo, pic, parties, victoires et défaites remis à zéro. <b>Action irréversible.</b>
+	</p>
+	<ng-template pTemplate="footer">
+		<p-button
+			label="Annuler"
+			[text]="true"
+			severity="secondary"
+			(onClick)="resetTarget.set(null)"
+		></p-button>
+		<p-button
+			label="Réinitialiser"
+			icon="pi pi-replay"
+			severity="danger"
+			[loading]="busyId() === s.id"
+			(onClick)="confirmReset()"
+		></p-button>
+	</ng-template>
+	}
+</p-dialog>

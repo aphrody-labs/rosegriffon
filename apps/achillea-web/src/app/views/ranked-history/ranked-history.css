@@ -1,0 +1,40 @@
+:host {
+	display: block;
+}
+
+.match-row {
+	background-color: var(--p-surface-800);
+	border-left: 4px solid transparent;
+	transition: background-color 0.15s ease;
+}
+
+.match-row:hover {
+	background-color: var(--p-surface-700);
+}
+
+.match-row.win {
+	border-left-color: var(--p-green-500);
+}
+
+.match-row.loss {
+	border-left-color: var(--p-red-500);
+}
+
+.match-row.forfeit {
+	border-left-color: var(--p-orange-500);
+}
+
+.hub-link {
+	display: inline-flex;
+	align-items: center;
+	font-size: 0.85rem;
+	opacity: 0.75;
+	text-decoration: none;
+	color: inherit;
+	transition: opacity 0.15s ease;
+}
+
+.hub-link:hover {
+	opacity: 1;
+	color: var(--p-primary-color);
+}

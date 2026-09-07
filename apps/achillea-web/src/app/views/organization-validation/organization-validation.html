@@ -1,0 +1,30 @@
+@if (org) {
+<div class="p-[1.5rem] bg-(--p-content-background) flex flex-col gap-4">
+	<app-organizer-form
+		#form
+		[initialData]="org"
+		[mode]="OrganizationFormMode.Validate"
+	></app-organizer-form>
+	<div
+		class="flex items-center justify-end gap-3 border-t border-surface-200 dark:border-surface-700 pt-4"
+	>
+		<p-button
+			label="Rejeter"
+			icon="pi pi-times"
+			severity="danger"
+			[outlined]="true"
+			[loading]="busy()"
+			(onClick)="reject()"
+		></p-button>
+		<p-button
+			label="Approuver"
+			icon="pi pi-check"
+			severity="success"
+			[loading]="busy()"
+			(onClick)="approve()"
+		></p-button>
+	</div>
+</div>
+} @else {
+<p-progress-spinner></p-progress-spinner>
+}

@@ -1,0 +1,356 @@
+<!-- Hero section -->
+<section
+	class="hero"
+	#heroRoot
+	(click)="onHeroClick($event)"
+	(pointermove)="onHeroPointerMove($event)"
+	(pointerleave)="onHeroPointerLeave()"
+>
+	<!-- Decorative background layer (effects target this only) -->
+	<div class="hero-bg" aria-hidden="true">
+		<div
+			class="hero-bg__img"
+			[class.hero-bg__img--punch]="bgPunch()"
+			[style.transform]="bgTransform()"
+		></div>
+		<canvas #fxCanvas class="hero-bg__fx"></canvas>
+		<div class="hero-bg__vignette"></div>
+		@for (r of ripples(); track r.id) {
+		<span
+			class="hero-ripple"
+			[class.hero-ripple--ink]="r.variant === 'ink'"
+			[class.hero-ripple--violet]="r.variant === 'violet'"
+			[class.hero-ripple--reduced]="reducedMotion()"
+			[style.left.px]="r.x"
+			[style.top.px]="r.y"
+		></span>
+		}
+	</div>
+
+	<div class="hero-content">
+		<app-searchbar
+			class="flex flex-auto justify-center searchbar"
+			[multiple]="false"
+			[behaviour]="'routerLink'"
+			[searchType]="'all'"
+			[searchFormControl]="formControl"
+		></app-searchbar>
+	</div>
+
+	<!-- Accroche -->
+	<div class="accroche">
+		<p class="opacity-70 text-sm md:text-lg">
+			Le serveur central de la scène esport Inazuma Eleven: Victory Road.
+		</p>
+	</div>
+
+	<!-- ========== TOURNOI À LA UNE ========== -->
+	@if (featuredLoading() || featured()) {
+	<section class="featured" aria-labelledby="featured-heading">
+		@if (featuredLoading()) {
+		<div class="featured-shell featured-shell--skeleton" aria-busy="true" aria-live="polite">
+			<div class="ft-skeleton-bg"></div>
+			<div class="ft-skeleton-body">
+				<div class="ft-skel ft-skel--pill"></div>
+				<div class="ft-skel ft-skel--title"></div>
+				<div class="ft-skel ft-skel--line"></div>
+				<div class="ft-skel ft-skel--bar"></div>
+				<div class="ft-skel-row">
+					<div class="ft-skel ft-skel--avatar"></div>
+					<div class="ft-skel ft-skel--avatar"></div>
+					<div class="ft-skel ft-skel--avatar"></div>
+					<div class="ft-skel ft-skel--avatar"></div>
+				</div>
+				<div class="ft-skel ft-skel--btn"></div>
+			</div>
+			<span class="sr-only">Chargement du tournoi à la une…</span>
+		</div>
+		} @else if (featured(); as t) {
+		<div class="featured-head">
+			<div class="featured-head__left">
+				<span class="featured-kicker" id="featured-heading">
+					@if (t.internalState === TournamentState.ONGOING) {
+					<span class="ft-live-dot" aria-hidden="true"></span>
+					À la une · Live } @else {
+					<i class="pi pi-star-fill" aria-hidden="true"></i>
+					À la une }
+				</span>
+				@if (countdownLabel(); as cd) {
+				<span
+					class="featured-countdown"
+					[class.featured-countdown--live]="t.internalState === TournamentState.ONGOING"
+					aria-live="polite"
+				>
+					<i class="pi pi-clock" aria-hidden="true"></i>
+					{{ cd }}
+				</span>
+				}
+			</div>
+			<a routerLink="/events/list/tournament" class="featured-all-link">
+				Tous les tournois
+				<i class="pi pi-arrow-right" aria-hidden="true"></i>
+			</a>
+		</div>
+
+		<a
+			class="featured-card group"
+			[routerLink]="['/events/tournaments', t.id]"
+			pRipple
+			[attr.aria-label]="'Ouvrir le tournoi ' + t.name"
+		>
+			<!-- Cover -->
+			<div class="featured-card__media" aria-hidden="true">
+				@if (coverUrl() && !coverBroken()) {
+				<img
+					class="featured-card__cover"
+					[src]="coverUrl()!"
+					alt=""
+					loading="eager"
+					decoding="async"
+					(error)="coverBroken.set(true)"
+				/>
+				} @else {
+				<div class="featured-card__cover featured-card__cover--fallback"></div>
+				}
+				<div class="featured-card__scrim"></div>
+				<div class="featured-card__glow"></div>
+			</div>
+
+			<div class="featured-card__body">
+				<!-- Logo + badges -->
+				<div class="featured-card__top">
+					<div class="featured-card__logo-wrap">
+						@if (logoUrl() && !logoBroken()) {
+						<img
+							class="featured-card__logo"
+							[src]="logoUrl()!"
+							[alt]="t.name"
+							loading="eager"
+							decoding="async"
+							(error)="logoBroken.set(true)"
+						/>
+						} @else {
+						<div class="featured-card__logo featured-card__logo--ph" aria-hidden="true">
+							<i class="pi pi-trophy"></i>
+						</div>
+						}
+					</div>
+
+					<div class="featured-card__meta">
+						<div class="featured-card__badges">
+							<p-tag
+								[value]="stateLabel(t.internalState)"
+								[severity]="stateSeverity(t.internalState)"
+								[rounded]="true"
+								styleClass="ft-state-tag"
+							/>
+							@if (isFull() && t.internalState === TournamentState.PREREGISTERING) {
+							<span class="ft-chip">Complet</span>
+							}
+						</div>
+						<h2 class="featured-card__title">{{ t.name }}</h2>
+						@if (t.organization; as org) {
+						<div class="featured-card__org">
+							@if (org.logo) {
+							<img
+								class="featured-card__org-logo"
+								[src]="org.logo"
+								[alt]=""
+								loading="lazy"
+								decoding="async"
+							/>
+							}
+							<span>par <strong>{{ org.name }}</strong></span>
+						</div>
+						}
+					</div>
+				</div>
+
+				<p class="featured-card__status">{{ statusHeadline() }}</p>
+
+				<!-- Specs -->
+				<ul class="featured-card__specs">
+					<li>
+						<i class="pi pi-sitemap" aria-hidden="true"></i>
+						<span>{{ typeLabel(t.tournamentType) }}</span>
+					</li>
+					@if (formatLabel(t.matchFormat); as fmt) {
+					<li>
+						<i class="pi pi-bolt" aria-hidden="true"></i>
+						<span>{{ fmt }}</span>
+					</li>
+					}
+					<li>
+						<i class="pi pi-calendar" aria-hidden="true"></i>
+						<span>{{ t.startsAt | date: "EEE d MMM · HH:mm" }}</span>
+					</li>
+					<li>
+						<i class="pi pi-users" aria-hidden="true"></i>
+						<span>{{ featuredParticipants().length }}/{{ t.participantsNumber }} joueurs</span>
+					</li>
+				</ul>
+
+				<!-- Fill -->
+				<div class="featured-card__fill">
+					<div class="featured-card__fill-labels">
+						<span>Remplissage</span>
+						<span class="featured-card__fill-pct">{{ fillPercent() }}%</span>
+					</div>
+					<p-progressBar
+						[value]="fillPercent()"
+						[showValue]="false"
+						styleClass="ft-progress"
+						[attr.aria-label]="'Remplissage ' + fillPercent() + ' pourcent'"
+					/>
+				</div>
+
+				<!-- Avatars -->
+				@if (previewAvatars().length > 0) {
+				<div class="featured-card__players">
+					<div class="featured-card__avatars" aria-hidden="true">
+						@for (p of previewAvatars(); track p.id; let i = $index) {
+						<span
+							class="featured-card__avatar"
+							[style.z-index]="previewAvatars().length - i"
+							[pTooltip]="participantName(p)"
+							tooltipPosition="top"
+						>
+							<app-user-avatar
+								[userId]="p.user.id"
+								[avatar]="p.user.avatar"
+								[name]="participantName(p)"
+								shape="circle"
+								size="normal"
+							/>
+						</span>
+						} @if (overflowCount() > 0) {
+						<span class="featured-card__avatar featured-card__avatar--more">
+							+{{ overflowCount() }}
+						</span>
+						}
+					</div>
+					<span class="featured-card__players-hint">
+						@if (t.internalState === TournamentState.ONGOING) { Joueurs du bracket } @else if
+						(isFull()) { Tableau complet } @else { Déjà inscrits }
+					</span>
+				</div>
+				}
+
+				<!-- CTA row -->
+				<div class="featured-card__cta">
+					<span class="featured-card__cta-btn">
+						<i [class]="ctaIcon(t)" aria-hidden="true"></i>
+						{{ ctaLabel(t) }}
+					</span>
+					<span class="featured-card__cta-ghost">
+						Détails
+						<i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+					</span>
+				</div>
+			</div>
+		</a>
+
+		<!-- Autres tournois actifs -->
+		@if (otherActive().length > 0) {
+		<div class="featured-others">
+			<span class="featured-others__label">Aussi en activité</span>
+			<div class="featured-others__list">
+				@for (o of otherActive(); track o.id) {
+				<a class="featured-mini" [routerLink]="['/events/tournaments', o.id]" pRipple>
+					@if (o.logo) {
+					<img class="featured-mini__logo" [src]="o.logo" [alt]="" loading="lazy" />
+					} @else {
+					<span class="featured-mini__logo featured-mini__logo--ph" aria-hidden="true">
+						<i class="pi pi-trophy"></i>
+					</span>
+					}
+					<span class="featured-mini__body">
+						<span class="featured-mini__name">{{ o.name }}</span>
+						<span class="featured-mini__state">{{ stateLabel(o.internalState) }}</span>
+					</span>
+					<i class="pi pi-angle-right featured-mini__chev" aria-hidden="true"></i>
+				</a>
+				}
+			</div>
+		</div>
+		} }
+	</section>
+	}
+
+	<!-- Cards section -->
+	<div class="cards-section">
+		<div class="cards-grid">
+			<!-- Clans -->
+			<a routerLink="/clans" pRipple class="home-card group">
+				<div class="card-icon">
+					<i class="pi pi-users"></i>
+				</div>
+				<div class="card-text">
+					<h3>Clans</h3>
+					<p>Rejoins ou crée ton clan et affronte d'autres équipes.</p>
+				</div>
+				<i class="pi pi-arrow-right card-arrow"></i>
+			</a>
+
+			<!-- Classé (les tournois sont déjà à la une / liste dédiée — pas de 2e entrée) -->
+			<a routerLink="/ranked" pRipple class="home-card group">
+				<div class="card-icon">
+					<i class="pi pi-chart-bar"></i>
+				</div>
+				<div class="card-text">
+					<h3>Classé</h3>
+					<p>File 1v1 / 2v2, paliers AP et classements.</p>
+				</div>
+				<i class="pi pi-arrow-right card-arrow"></i>
+			</a>
+
+			<!-- Twitch -->
+			<div (click)="openTwitch()" pRipple class="home-card group cursor-pointer">
+				<div class="card-icon twitch">
+					<i class="pi pi-twitch"></i>
+				</div>
+				<div class="card-text">
+					<h3>Twitch</h3>
+					<p>Matchs en direct sur notre chaîne.</p>
+				</div>
+				<i class="pi pi-external-link card-arrow"></i>
+			</div>
+
+			<!-- Discord -->
+			<div (click)="openDiscord()" pRipple class="home-card group cursor-pointer">
+				<div class="card-icon discord">
+					<i class="pi pi-discord"></i>
+				</div>
+				<div class="card-text">
+					<h3>Discord</h3>
+					<p>Rejoins la communauté compétitive.</p>
+				</div>
+				<i class="pi pi-external-link card-arrow"></i>
+			</div>
+		</div>
+
+		<!-- Playlists YouTube -->
+		@if (playlists.length > 0) {
+		<div class="playlists-section">
+			<h2 class="playlists-title">Revivez les meilleurs matchs</h2>
+			<div class="playlists-grid">
+				@for (playlist of playlists; track playlist.id) {
+				<a [href]="playlist.url" target="_blank" rel="noopener" pRipple class="playlist-card group">
+					<div class="playlist-thumb">
+						<img [src]="playlist.thumbnail" [alt]="playlist.title" loading="lazy" />
+						<div class="playlist-overlay">
+							<i class="pi pi-play-circle"></i>
+						</div>
+						<span class="playlist-count">{{ playlist.count }} vidéos</span>
+					</div>
+					<div class="playlist-info">
+						<h4>{{ playlist.title }}</h4>
+						<p>{{ playlist.description }}</p>
+					</div>
+				</a>
+				}
+			</div>
+		</div>
+		}
+	</div>
+</section>

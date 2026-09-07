@@ -1,0 +1,66 @@
+<!-- src/app/components/language-select/language-select.component.html -->
+@if (mode === 'single') {
+<p-floatlabel variant="on">
+	<p-select
+		fluid
+		[options]="languages"
+		optionLabel="language"
+		[(ngModel)]="selected"
+		(onChange)="onChange($event.value)"
+		[filter]="true"
+		[showClear]="true"
+		inputId="langues"
+	>
+		<ng-template let-lang pTemplate="item">
+			<img
+				[src]="lang.flag"
+				alt="{{ lang.language }}"
+				class="inline-block w-6 h-4 mr-2 align-middle"
+			/>
+			<span class="align-middle">{{ lang.language }}</span>
+		</ng-template>
+		<ng-template let-lang pTemplate="selectedItem">
+			<img
+				[src]="lang.flag"
+				alt="{{ lang.language }}"
+				class="inline-block w-6 h-4 mr-2 align-middle"
+			/>
+			<span class="align-middle">{{ lang.language }}</span>
+		</ng-template>
+	</p-select>
+	<label for="langues">Langue parlée</label>
+</p-floatlabel>
+} @else {
+<p-floatlabel variant="on">
+	<p-multiSelect
+		[options]="languages"
+		optionLabel="language"
+		[(ngModel)]="multiSelected"
+		(onChange)="onMultiChange()"
+		(onClear)="onMultiClear()"
+		[filter]="true"
+		display="chip"
+		[showClear]="true"
+		inputId="multiLangues"
+		fluid
+	>
+		<ng-template let-lang pTemplate="item">
+			<img
+				[src]="lang.flag"
+				alt="{{ lang.language }}"
+				class="inline-block w-6 h-4 mr-2 align-middle"
+			/>
+			<span class="align-middle">{{ lang.language }}</span>
+		</ng-template>
+		<ng-template let-lang pTemplate="selectedItem">
+			<img
+				[src]="lang.flag"
+				alt="{{ lang.language }}"
+				class="inline-block w-6 h-4 mr-2 align-middle"
+			/>
+			<span class="align-middle">{{ lang.language }}</span>
+		</ng-template>
+	</p-multiSelect>
+	<label for="multiLangues">Langues parlées</label>
+</p-floatlabel>
+}
