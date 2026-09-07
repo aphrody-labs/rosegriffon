@@ -24,15 +24,16 @@
  * `estScanne()` permet de le dire à l'utilisateur plutôt que d'afficher du vide.
  *
  * ── OÙ ELLE VIT ────────────────────────────────────────────────────────────
- * Sur la même machine, en boucle locale (`achillea-bot.service`, :4000). L'adresse
- * reste configurable par `ACHILLEA_API_URL` : le jour où le service déménage, rien
- * ici ne bouge.
+ * Achillea a sa propre infra (VPS dédié, nginx/systemd propres) — jamais colocalisée
+ * avec ce dépôt, et elle en change (cf. `migration.md` côté `rose-griffon/achillea`).
+ * L'adresse reste configurable par `ACHILLEA_API_URL` ; le défaut vise l'entrée
+ * publique stable plutôt qu'une IP de VPS qui bouge.
  */
 
 import { z } from "zod";
 
-/** Boucle locale par défaut : les deux bots tournent sur le même VPS. */
-const BASE = (Bun.env.ACHILLEA_API_URL ?? "http://127.0.0.1:4000").replace(/\/+$/, "");
+/** Entrée publique stable : ne dépend pas de l'IP du VPS derrière `ranked.rosegriffon.fr`. */
+const BASE = (Bun.env.ACHILLEA_API_URL ?? "https://ranked.rosegriffon.fr/api").replace(/\/+$/, "");
 
 /**
  * Un bot Discord ne doit jamais rester bloqué sur un service voisin : au-delà de ce

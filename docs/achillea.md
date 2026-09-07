@@ -9,6 +9,14 @@ cross-site entre les **3 sites**.
 > elle, est en service depuis le 14/8/2026 — voir la section ci-dessous. Le code Achillea vit
 > dans son propre dépôt ; ce doc décrit les points de contact côté monorepo RG.
 
+> **Décision (7/9/2026)** : un plan de portage d'Achillea dans l'arbre RG (`apps/achillea-web`,
+> `apps/achillea-bot`, `packages/achillea-core`/`-types`) a été écarté après comparaison avec
+> le dépôt `rose-griffon/achillea` réel. Celui-ci a sa propre infra qui **diverge** de RG (VPS
+> dédié — `51.255.162.6` confirmé le 27/8/2026 — Supabase Cloud séparé `yftdclwvehxxffwqvhmc`,
+> nginx/systemd propres) et migre aujourd'hui même vers un *nouveau* VPS dédié, pas vers celui
+> de RG (`migration.md` côté Achillea). La frontière API/CDN/liens décrite plus bas reste la
+> bonne stratégie ; le plan de portage n'a jamais été committé.
+
 ## Passerelle en service — guildes, rôles et salons (14/8/2026)
 
 Le bot Achillea expose `GET /guilds`, `/guilds/stats` et `/guilds/:id` (métadonnées d'un
@@ -34,10 +42,13 @@ Discord.
 
 Commandes : `/achillea serveur`, `/achillea roles`, `/achillea salons`, `/achillea scan`.
 
-L'adresse de l'API est configurable par `ACHILLEA_API_URL` ; par défaut la boucle locale
-(`http://127.0.0.1:4000`), les deux bots tournant sur la même machine. **Cette section
-corrige la table ci-dessous** : Achillea n'est plus servi depuis le VPS `51.255.162.6`,
-son bot et son front tournent sur le VPS principal.
+L'adresse de l'API est configurable par `ACHILLEA_API_URL`. **Correctif (7/9/2026)** : le
+défaut pointait jusqu'ici sur la boucle locale (`http://127.0.0.1:4000`), sur l'hypothèse
+erronée que les deux bots partagent une machine. Faux — le dépôt `achillea` confirme (commit
+`c64001e5`, 27/8/2026) l'hôte de production `51.255.162.6`, et prépare aujourd'hui son
+transfert vers un **nouveau VPS dédié**, encore différent (`migration.md`) : Achillea garde
+une infra propre et ne converge pas vers celle de RG. Le défaut a été corrigé vers l'entrée
+publique stable `https://ranked.rosegriffon.fr/api`, indépendante de l'IP du VPS derrière.
 
 ## 0. État vérifié (tests live — 2026-06-04)
 
