@@ -16,6 +16,13 @@ cross-site entre les **3 sites**.
 > nginx/systemd propres) et migre aujourd'hui même vers un *nouveau* VPS dédié, pas vers celui
 > de RG (`migration.md` côté Achillea). La frontière API/CDN/liens décrite plus bas reste la
 > bonne stratégie ; le plan de portage n'a jamais été committé.
+>
+> **`migration.md` lu le 7/9/2026** (clone jetable, hors de ce dépôt) : bascule vers un VPS neuf,
+> services Achillea déjà arrêtés côté ancien VPS le temps du transfert — cohérent avec
+> `ranked.rosegriffon.fr/api/health` observé en **503** ce jour (front Angular statique encore
+> servi, 200). IP du nouveau VPS **pas encore fixée** (§10 du dossier de migration) : c'est
+> pourquoi la gateway `/achillea/` ci-dessous vise `ranked.rosegriffon.fr` et jamais une IP —
+> DNS et certifs restent entièrement du ressort d'Achillea, RG n'a rien à changer à la bascule.
 
 ## Passerelle en service — guildes, rôles et salons (14/8/2026)
 
@@ -87,23 +94,14 @@ Aujourd'hui l'API Achillea est exposée sur **`ranked.rosegriffon.fr/api/*`** (c
 les rewrites de son nginx). `api.rosegriffon.fr` n'est qu'un **stub** (`/health`, vérifié). Objectif : en faire la
 **passerelle API unifiée** de l'écosystème, avec un préfixe par produit.
 
-### Proposition
-- `api.rosegriffon.fr/achillea/*` → proxy vers le bot Achillea (`127.0.0.1:4002`, l'entrypoint Colyseus+REST
-  qui proxie déjà `/api` vers le TSed `:4000`).
+### Proposition — écrite dans le repo, pas encore activée sur le VPS
+- `api.rosegriffon.fr/achillea/*` → proxy vers `https://ranked.rosegriffon.fr/api/` (pas de `127.0.0.1:4002` :
+  le bot Achillea vit sur son propre VPS, cf. la décision du 7/9/2026 ci-dessus — l'IP change avec leur
+  migration, `ranked.rosegriffon.fr` non).
 - Conserver `ranked.rosegriffon.fr` (WSS Colyseus + REST actuel) pour compat ; `api.rosegriffon.fr/achillea`
   devient l'alias canonique « API publique ».
-
-```nginx
-# /etc/nginx/conf.d/api.rosegriffon.conf — ajouter :
-location /achillea/ {
-    proxy_pass         http://127.0.0.1:4002/api/;   # strip /achillea/ -> /api/
-    proxy_http_version 1.1;
-    proxy_set_header   Host $host;
-    proxy_set_header   X-Forwarded-Proto https;
-    proxy_set_header   X-Forwarded-Host $host;       # requis : OAuth callback du bot lit x-forwarded-host
-    proxy_read_timeout 30s;
-}
-```
+- Bloc `location /achillea/` déjà écrit dans `infra/nginx/api.rosegriffon.conf`. Activation : `sudo cp` +
+  `nginx -t` + `reload` (cf. en-tête du fichier) — pas fait automatiquement par un déploiement d'app.
 
 ### Points d'attention
 - **CORS** : ajouter `https://api.rosegriffon.fr` aux `WEB_ALLOWED_ORIGINS` du bot (`apps/bot/.env`).
@@ -155,35 +153,28 @@ Aligner sur l'approche `docs/la stratégie SEO du dépôt` (website + azalee, **
 > **Priorité** : sans prerender, Google n'indexe que l'index. `@angular/ssr` (prerender des pages entité)
 > = gain SEO #1, puis sitemap + JSON-LD + OG. Réutiliser les conventions titres/OG de `la stratégie SEO du dépôt`.
 
-## 5. Intégration cross-site (home des 3 sites)
+## 5. Intégration cross-site (home des 3 sites) — largement fait, vérifié (7/9/2026)
 
-Aujourd'hui les 3 sites ne se renvoient quasiment pas (liens épars). Objectif : un **maillage écosystème**
-cohérent, mutualisé.
+Le maillage existe déjà des deux côtés, pas seulement en projet :
+- **website** (`apps/website/src/app/page.tsx`) : bannières `AzaleeBanner` + `AchilleaBanner` sur la home,
+  et le footer (`components/layout/footer.tsx`, colonne « L'association ») liste `azalee.rosegriffon.fr` +
+  `achillea.rosegriffon.fr`.
+- **azalee** (`apps/azalee/app/page.tsx` → `NetworkSection`) : bannières `RgtvBanner` (→ rosegriffon.fr) +
+  `AchilleaBanner` sur la home. Le footer (`components/layout/Footer.tsx`) n'avait que les réseaux sociaux,
+  pas de lien texte vers `rosegriffon.fr`/`achillea.rosegriffon.fr` — ajouté en colonne « L'association »
+  pour égaler le pattern website.
+- **achillea** : logos `rg-logo.png` + `azalee-logo.png` déjà embarqués côté front (cross-branding amorcé,
+  cf. §7 historique) ; liens de retour non vérifiés depuis ce dépôt (code dans `rose-griffon/achillea`).
 
-### a. Composant partagé « écosystème »
-- Ajouter dans **`packages/ui`** un composant `EcosystemNav` / `EcosystemFooter` (logo + lien + 1 phrase),
-  réutilisé par `website` et `azalee` (porté en Angular pour Achillea).
-- **Source unique** des sites exportée depuis **`packages/ui`** (`@rosegriffon/config` est réservé au
-  tooling : tsconfig/tailwind/oxlint, pas de data runtime — vérifié). Atout : Achillea embarque déjà
-  `rg-logo.png` + `azalee-logo.png` dans `apps/web/public/` (cross-branding amorcé).
+**Reste (dette, pas absence)** : `AchilleaBanner` existe en **deux copies divergentes** (`apps/website` et
+`apps/azalee/components/home`) — layouts différents (mobile dédié côté azalee), pas un simple doublon
+copier-coller, donc pas mutualisé dans `packages/ui` en un composant unique sans un vrai design commun
+préalable. Pas de `RG_SITES`/`EcosystemNav` partagé : chaque app définit ses props en dur dans son propre
+composant de bannière.
 
-```ts
-// packages/ui — source unique des sites de l'écosystème
-export const RG_SITES = [
-  { id: "website", name: "Rose Griffon", url: "https://rosegriffon.fr", desc: "Le hub de la communauté" },
-  { id: "azalee",  name: "Azalée",       url: "https://azalee.rosegriffon.fr", desc: "Le wiki Inazuma Eleven" },
-  { id: "achillea",name: "Achillea",     url: "https://achillea.rosegriffon.fr", desc: "Clans, tournois & ranked" },
-] as const;
-```
-
-### b. Home pages
-- **rosegriffon.fr** : section « L'écosystème » (cartes Azalée + Achillea, CTA wiki / ranked).
-- **azalee.rosegriffon.fr** : bandeau/foot vers Achillea (ranked/clans) + site principal.
-- **achillea** : home avec liens vers Azalée (fiches personnages) + rosegriffon.fr.
-
-### c. SEO du maillage
-- Liens **réciproques** crawlables entre les 3 domaines (autorité partagée).
-- `Organization` JSON-LD avec `sameAs` listant les 3 domaines + réseaux.
+### SEO du maillage
+- Liens réciproques crawlables entre website ↔ azalee (vérifié). Achillea → à vérifier côté de son repo.
+- `Organization` JSON-LD avec `sameAs` listant les 3 domaines : à vérifier (non audité ici).
 - Domaine `achillea.rosegriffon.fr` en place (200, nginx) — le sous-domaine RG consolide le SEO.
 
 ## 6. Cron & types (écosystème)
