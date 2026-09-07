@@ -56,6 +56,8 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 | [mcp.md](mcp.md) | Serveur MCP du monorepo : mise en service, connexion distante, portées. |
 | [rag-unified.md](rag-unified.md) | Recherche sémantique unifiée : embeddings auto-hébergés, graphe de liens, ingestion. |
 | [stockage-secondaire.md](stockage-secondaire.md) | Archive froide sur le second VPS : pourquoi elle a existé, ce qui en est revenu le 21/8/2026, et ce qui ne doit jamais être déporté. |
+| [achillea-services.md](achillea-services.md) | Topologie, secrets hors Git, ports, sondes et contrat d'upload Supabase d'Achillea. |
+| [achillea-storage-migration.md](achillea-storage-migration.md) | Runbook sûr et reprenable pour migrer les octets Storage Cloud d'Achillea vers sa pile locale isolée. |
 
 ## Écosystème
 

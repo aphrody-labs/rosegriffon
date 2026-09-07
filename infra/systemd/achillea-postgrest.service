@@ -1,0 +1,34 @@
+[Unit]
+Description=Achillea PostgREST (database achillea, isolated)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+EnvironmentFile=/etc/rose-griffon/achillea-postgrest.env
+Environment=PGRST_SERVER_HOST=127.0.0.1
+Environment=PGRST_SERVER_PORT=8820
+Environment=PGRST_DB_SCHEMAS=public
+Environment=PGRST_DB_ANON_ROLE=anon
+ExecStart=/usr/local/bin/postgrest
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+LockPersonality=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryHigh=512M
+MemoryMax=1G
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=achillea-postgrest
+
+[Install]
+WantedBy=multi-user.target

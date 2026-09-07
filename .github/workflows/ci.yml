@@ -1,0 +1,64 @@
+name: Validation continue
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  achillea:
+    name: Achillea sans secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Installer le lockfile unique
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Vérifier les imports et la topologie
+        run: |
+          bun run check:imports
+          bun run check:achillea-services
+          bun test scripts/achillea/*.test.ts
+          systemd-analyze verify infra/systemd/achillea-*.service
+
+      - name: Vérifier les packages partagés
+        run: |
+          bun --filter @achillea/types type-check
+          bun --filter @achillea/types test
+          bun --filter @achillea/core type-check
+          bun --filter @achillea/core test
+          bun --filter @achillea/client type-check
+          bun --filter @achillea/client test
+
+      - name: Vérifier le backend
+        working-directory: apps/achillea-bot
+        run: |
+          bun run type-check
+          bun run lint
+          bun run test:unit
+          bun run build:compile
+          bun run build:ranked
+
+      - name: Vérifier le frontend et son artefact
+        working-directory: apps/achillea-web
+        run: |
+          bun run type-check
+          bun run lint
+          bun run test
+          node ./node_modules/@angular/cli/bin/ng.js test --watch=false
+          bun run build

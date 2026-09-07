@@ -11,9 +11,14 @@
 /apps/website/    @aphrody-code
 /apps/azalee/     @aphrody-code
 /apps/bot/        @aphrody-code
+/apps/achillea-web/ @aphrody-code
+/apps/achillea-bot/ @aphrody-code
 
 # Packages partagés
 /packages/        @aphrody-code
+/packages/achillea-types/  @aphrody-code
+/packages/achillea-core/   @aphrody-code
+/packages/achillea-client/ @aphrody-code
 
 # Migrations Supabase (sensitive)
 /apps/website/sql/migrations/  @aphrody-code

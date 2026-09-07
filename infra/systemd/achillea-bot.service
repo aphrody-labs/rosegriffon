@@ -1,0 +1,63 @@
+# Achillea : Discord + API REST + Socket.IO, avec ranked/Colyseus comme enfant.
+# Ce fichier est une source versionnee. Son installation et son demarrage sont
+# des operations separees, explicitement validees par l'exploitant.
+[Unit]
+Description=Achillea bot, API, Socket.IO and ranked
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/rg/apps/achillea-bot
+EnvironmentFile=/etc/rose-griffon/achillea.env
+Environment=PATH=/home/ubuntu/.bun/bin:/usr/local/bin:/usr/bin:/bin
+Environment=NODE_ENV=production
+Environment=API_HOST=127.0.0.1
+Environment=API_PORT=4000
+Environment=RANKED_HOST=127.0.0.1
+Environment=RANKED_PORT=4002
+Environment=SOCKET_HOST=127.0.0.1
+Environment=SOCKET_PORT=4005
+Environment=RANKED_ENTRY=/home/ubuntu/rg/apps/achillea-bot/build/ranked/main.js
+ExecStart=/home/ubuntu/.bun/bin/bun build/main.js
+
+# Le sous-processus ranked doit vivre et mourir avec le parent.
+KillMode=control-group
+KillSignal=SIGTERM
+TimeoutStopSec=30
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+
+# Le runtime ecrit uniquement ses uploads, rendus et journaux sous son workspace.
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=full
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectHostname=true
+ProtectClock=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+MemoryHigh=2G
+MemoryMax=4G
+MemorySwapMax=512M
+TasksMax=1024
+LimitNOFILE=65536
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=achillea-bot
+
+[Install]
+WantedBy=multi-user.target

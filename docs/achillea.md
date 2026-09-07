@@ -5,11 +5,10 @@ Design / plan d'intégration d'**Achillea** (dashboard communautaire Inazuma Ele
 `ranked.rosegriffon.fr` puis `api.rosegriffon.fr`, assets publics à aligner avec `cdn.rosegriffon.fr`,
 SEO aligné sur le monorepo RG, et intégration cross-site entre les **3 sites**.
 
-> Statut : **document de référence** pour l'état actuel, la cible monorepo et les points de
-> contact Achillea/RG. La première passerelle réelle est en service depuis le 14/8/2026 — voir
-> la section ci-dessous. Le code Achillea vit encore dans son propre dépôt ; le plan directeur
-> de portage décrit plus bas la cible à exécuter par tranches, sans déplacer la production par
-> défaut.
+> Statut : **document de référence et journal d'exécution** pour la cible monorepo et les points
+> de contact Achillea/RG. La première passerelle réelle est en service depuis le 14/8/2026 — voir
+> la section ci-dessous. Le code du commit source audité est désormais importé dans les workspaces
+> dédiés de ce dépôt ; la production historique n'a pas été basculée.
 > **Décision de cadrage (7/9/2026)** : préparer l'intégration dans l'arbre RG par des chemins
 > dédiés (`apps/achillea-web`, `apps/achillea-bot`, `packages/achillea-core` et
 > `packages/achillea-types`), avec un client partagé éventuel séparé, sans copier Achillea
@@ -252,9 +251,9 @@ composant de bannière.
 | Opérations | 13 docs, 16 fichiers d'infra, 20 scripts, Docker + workflows GitHub | adapter un par un ; ne pas copier l'automatisation de production telle quelle |
 
 Le dépôt source a son propre `package.json`, son propre catalogue Bun et trois lockfiles
-(`bun.lock` racine, `apps/bot/bun.lock`, `apps/web/bun.lock`). Il n'existe actuellement
-aucun workspace `apps/achillea-*` ou `packages/achillea-*` dans RG : l'intégration du code
-n'a donc pas commencé, même si plusieurs adaptateurs et assets Achillea existent déjà. À titre
+(`bun.lock` racine, `apps/bot/bun.lock`, `apps/web/bun.lock`). Ces lockfiles et artefacts n'ont
+pas été importés : les workspaces `apps/achillea-*` et `packages/achillea-*` utilisent désormais
+le lockfile unique RG. À titre
 de repère, l'inventaire RG compte 2 294 fichiers suivis sous `apps`, 1 382 sous `packages`,
 115 sous `scripts`, 52 sous `infra` et 91 sous `docs` ; les surfaces Achillea identifiées
 ci-dessous sont des points de contact dans cet arbre, pas un workspace déjà intégré.
@@ -397,6 +396,13 @@ ce qui existe déjà de ce qui manque :
 
 ### 8.7 Phases d'exécution et gates
 
+**État vérifié le 7/9/2026** : Gate 0 et Gate 1 sont acquises. Les validations statiques de
+Gate 2 et Gate 3 passent (backend, packages, frontend, artefacts et tests sans secrets), mais
+leurs sondes live restent conditionnées à la base locale et aux secrets rotatés. Gate 4 est
+partielle : le client partagé est branché dans le bot RG, tandis que gateway/CDN ne sont pas
+activés. Gate 5 est préparée par des scripts à refus par défaut ; aucun dump Cloud, restore,
+service, DNS ou proxy n'a été exécuté par cette campagne.
+
 #### Phase 0 — Rebaser et importer proprement
 
 - figer le commit source audité et produire un manifeste des fichiers importés ;
@@ -471,16 +477,19 @@ locale ou IP de VPS dans l'artefact prod, et aucun secret dans le bundle.
 | Client RG guildes/rôles/salons | en service, distant, validé par Zod | conserver comme compatibilité puis centraliser |
 | Maillage website/Azalée | largement en place, copies divergentes | mutualiser après design commun |
 | Bloc Nginx `/achillea/` | écrit dans RG, non activé par ce plan | allowlist + contrat + approbation |
-| Workspaces Achillea dans RG | absents | Phase 0 puis Phase 1 |
-| Portage backend/frontend/core/types | non commencé dans RG | Phases 1 à 3 |
-| Base/migrations/secrets | séparés | ne pas fusionner ; dry-run dédié |
-| DNS, certificats, systemd production | hors périmètre | Phase 5 uniquement |
+| Workspaces Achillea dans RG | importés, lockfile racine reproductible | maintenir les gates ciblées |
+| Portage backend/frontend/core/types | réalisé et validé sans secrets live | sondes avec environnement isolé |
+| Base/migrations/secrets | cible `achillea` et outils préparés, aucune restauration | fournir des credentials rotatés hors Git |
+| Storage | migration d'octets idempotente préparée | exécuter après restore et gel des écritures |
+| Auth Supabase | schéma inclus dans le dump, GoTrue local absent | qualifier GoTrue avant toute bascule Auth |
+| DNS, certificats, systemd production | non activés | Gate 5 uniquement |
 | SEO SSR/prerender/sitemap | partiel/global seulement | après le build SPA fonctionnel |
 
-### 8.9 Hors périmètre permanent du premier portage
+### 8.9 Opérations séparées du portage de code
 
-- migration ou copie de secrets, `.env`, données Supabase, snapshots, `storage`, `uploads`,
-  preuves, logs, backups ou certificats ;
+- les secrets réels restent hors Git ; tout identifiant divulgué doit être révoqué avant usage ;
+- le dump Cloud, la restauration dans `achillea` et la copie des octets Storage utilisent les
+  runbooks dédiés, une fenêtre de gel et des inventaires source/cible ;
 - modification destructive d'une base, rollback SQL destructif ou exécution des migrations
   sur la base RG ;
 - bascule DNS, rechargement Nginx, redémarrage systemd, changement OAuth ou déploiement public ;
