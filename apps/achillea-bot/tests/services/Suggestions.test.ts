@@ -36,20 +36,20 @@ describeLive("Suggestions (PostgreSQL fuzzy search integration)", () => {
 		// Insert test clans
 		const clans = await sql<{ id: number }[]>`
 			INSERT INTO "clan" (
-				name, shortened_name, normalized_short_name, normalized_name, founders, role_id, 
-				clan_avatar_url, clan_biography, state, channel_id, clan_emoji_id, languages, 
-				origin, is_hidden, is_disbanded, auto_accept_members, clan_fame, is_recruiting, 
+				name, shortened_name, normalized_short_name, normalized_name, founders, role_id,
+				clan_avatar_url, clan_biography, state, channel_id, clan_emoji_id, languages,
+				origin, is_hidden, is_disbanded, auto_accept_members, clan_fame, is_recruiting,
 				is_inactive, under_member_limit, created_at, updated_at
 			)
-			VALUES 
+			VALUES
 				(
-					'Antigravity Team', 'AG', 'ag', 'ANTIGRAVITY TEAM', ARRAY['999999999999999991'], '999999999999999901', 
-					'http://avatar1', 'bio1', 1, '999999999999999911', '999999999999999921', ARRAY['fr'], 
+					'Antigravity Team', 'AG', 'ag', 'ANTIGRAVITY TEAM', ARRAY['999999999999999991'], '999999999999999901',
+					'http://avatar1', 'bio1', 1, '999999999999999911', '999999999999999921', ARRAY['fr'],
 					'fr', false, false, false, 0, true, false, false, NOW(), NOW()
 				),
 				(
-					'Rose Griffon', 'RG', 'rg', 'ROSE GRIFFON', ARRAY['999999999999999991'], '999999999999999902', 
-					'http://avatar2', 'bio2', 1, '999999999999999912', '999999999999999922', ARRAY['fr'], 
+					'Rose Griffon', 'RG', 'rg', 'ROSE GRIFFON', ARRAY['999999999999999991'], '999999999999999902',
+					'http://avatar2', 'bio2', 1, '999999999999999912', '999999999999999922', ARRAY['fr'],
 					'fr', false, false, false, 0, true, false, false, NOW(), NOW()
 				)
 			RETURNING id
@@ -67,7 +67,7 @@ describeLive("Suggestions (PostgreSQL fuzzy search integration)", () => {
 		// Insert test users
 		await sql`
 			INSERT INTO "user" (id, display_name, normalized_display_name, username, role, last_interact, created_at, updated_at, blacklist_id)
-			VALUES 
+			VALUES
 				(${testUserIds[0]}, 'Achillea Tester', 'achillea tester', 'achillea_dev_test_user_1', 0, NOW(), NOW(), NOW(), NULL),
 				(${testUserIds[1]}, 'Antigravity Coder', 'antigravity coder', 'achillea_dev_test_user_2', 0, NOW(), NOW(), NOW(), NULL),
 				(${testUserIds[2]}, 'Blacklisted Hacker', 'blacklisted hacker', 'achillea_dev_test_user_3', 0, NOW(), NOW(), NOW(), ${testBlacklistId})

@@ -39,4 +39,3 @@ export class Migration20260426010000 extends Migration {
     this.addSql(`DROP TYPE IF EXISTS license_status;`);
   }
 }
-

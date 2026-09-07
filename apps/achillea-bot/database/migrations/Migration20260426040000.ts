@@ -57,4 +57,3 @@ export class Migration20260426040000 extends Migration {
     this.addSql(`DROP TYPE IF EXISTS transaction_type;`);
   }
 }
-

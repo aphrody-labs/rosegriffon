@@ -14,4 +14,3 @@ export class Migration20260426060000 extends Migration {
     this.addSql(`ALTER TABLE "user" DROP COLUMN IF EXISTS "twitch_url";`);
   }
 }
-

@@ -120,4 +120,3 @@ export class Migration20260426000000 extends Migration {
     this.addSql(`DROP TABLE IF EXISTS "ruleset";`);
   }
 }
-
