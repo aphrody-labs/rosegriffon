@@ -19,6 +19,9 @@
 		"**/data/**",
 		"**/*.min.js",
 		"**/patches/**",
-		"**/scratch/**"
+		"**/scratch/**",
+		"**/*.conf",
+		"**/*.inc",
+		"**/*.d.ts"
 	]
 }

@@ -2,7 +2,7 @@
 	"name": "@rosegriffon/monorepo",
 	"version": "0.1.0",
 	"private": true,
-	"description": "Rose Griffon monorepo \u2014 site communautaire (azalee wiki IEVR + website rosegriffon + bot Discord). Stack Next 16.2 / React 19.2 / Bun 1.3 / Supabase / Turborepo.",
+	"description": "Rose Griffon monorepo — site communautaire (azalee wiki IEVR + website rosegriffon + bot Discord). Stack Next 16.2 / React 19.2 / Bun 1.3 / Supabase / Turborepo.",
 	"workspaces": {
 		"packages": [
 			"apps/*",
@@ -201,6 +201,7 @@
 		"lint": "turbo run lint",
 		"lint:fix": "turbo run lint:fix",
 		"type-check": "turbo run type-check",
+		"typecheck": "bun run type-check",
 		"test": "turbo run test",
 		"clean": "turbo run clean && rm -rf node_modules .turbo",
 		"format": "oxfmt .",
@@ -232,6 +233,7 @@
 		"docs:map": "bun scripts/generate-repo-map.ts",
 		"docs:bundle": "bun scripts/bundle-llms-docs.ts",
 		"docs:check-links": "bun scripts/check-docs-links.ts",
+		"docs:check": "bun run docs:check-links",
 		"docs:lint": "bunx markdownlint-cli2 \"docs/**/*.md\" \"plugins/**/*.md\" \"!docs/reference/**\"",
 		"docs:build": "bun run docs:map && bun run docs:bundle && bun run docs:check-links && bun run docs:lint",
 		"inagle:manifest:game-assets": "bun scripts/inagle/pipeline/generate-game-assets-manifest.ts"
