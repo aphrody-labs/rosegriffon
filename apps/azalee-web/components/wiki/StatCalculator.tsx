@@ -199,8 +199,8 @@ export function StatCalculator() {
 						<h2 className="text-sm font-bold text-on-surface mb-3">Courbe du total (Lv1→99)</h2>
 						<TotalCurve curve={curve} level={level} />
 						<p className="mt-2 text-[11px] text-on-surface-variant/70 flex items-center gap-1">
-							<Icon name="bolt" size={12} className="text-primary" /> Tables de croissance réelles du
-							jeu (moteur niers, byte-exact).
+							<Icon name="bolt" size={12} className="text-primary" /> Tables de croissance réelles
+							du jeu.
 						</p>
 					</div>
 				</div>

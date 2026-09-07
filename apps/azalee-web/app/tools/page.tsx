@@ -47,14 +47,6 @@ const TOOLS: Array<{
 		icon: "stadium",
 		title: "Mon Équipe",
 	},
-	{
-		container: "bg-secondary-container text-on-secondary-container",
-		description:
-			"Explorateur de données du jeu et extension Blender : prévisualisation 3D/image/vidéo/audio, mods, sauvegardes.",
-		href: "/tools/niers",
-		icon: "folder_open",
-		title: "niers",
-	},
 ];
 
 export default function ToolsPage() {

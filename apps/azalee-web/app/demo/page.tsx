@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 		"Démo 3D interactive d'Aphrodi (Byron Love Aphrody) dans Inazuma Eleven: Victory Road — modèles complets texturés des 3 ères, cut-ins jouables avec caméra scénarisée et export MP4, voix japonaise, calcul de statistiques byte-exact et galerie de textures téléchargeables.",
 	openGraph: {
 		description:
-			"Toutes les ressources 3D d'un personnage réunies : modèles, cut-ins, voix, stats et textures — moteur niers, byte-exact.",
+			"Toutes les ressources 3D d'un personnage réunies : modèles, cut-ins, voix, stats et textures.",
 		images: ["/opengraph-image"],
 		locale: "fr_FR",
 		siteName: "Azalée - Inazuma Eleven Victory Road",
@@ -279,7 +279,7 @@ export default function DemoPage() {
 				<p className="max-w-3xl text-sm text-on-surface-variant">
 					{data.identity.nameJa} · {data.identity.kana} — équipe {data.identity.teamNameEn}. Toutes les
 					ressources 3D du personnage réunies : modèles complets texturés des 3 ères, cut-ins jouables
-					(caméra scénarisée, export MP4), voix japonaise, statistiques byte-exact (moteur niers) et
+					(caméra scénarisée, export MP4), voix japonaise, statistiques byte-exact et
 					textures téléchargeables. Une seule scène, pilotée à la demande.
 				</p>
 			</header>
