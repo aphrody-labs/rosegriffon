@@ -30,6 +30,24 @@ export function Footer() {
 						>
 							Numéro RNA
 						</Link>
+						{/* Maillage écosystème : website a déjà ces liens vers azalee/achillea
+						    dans son footer, l'inverse manquait ici. */}
+						<Link
+							href="https://rosegriffon.fr"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-sm text-on-surface-variant hover:text-primary hover:underline transition-colors rounded-sm"
+						>
+							Rose Griffon (site)
+						</Link>
+						<Link
+							href="https://achillea.rosegriffon.fr"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-sm text-on-surface-variant hover:text-primary hover:underline transition-colors rounded-sm"
+						>
+							Achilléa — compétitif
+						</Link>
 					</div>
 
 					{/* CONTACT */}
