@@ -10,8 +10,6 @@ import {
 } from "@/auth";
 import {
 	configuredOAuthCallback,
-	OAUTH_STATE_COOKIE,
-	oauthStateCookieOptions,
 	verifyOAuthState,
 } from "../security/oauth-state";
 import { parseProviderOAuthState } from "../security/provider-oauth-state";
@@ -51,7 +49,6 @@ export class DiscordOAuthCallbackController extends BaseController {
 		} catch {
 			return res.status(400).send("Invalid OAuth state");
 		}
-		res.clearCookie(OAUTH_STATE_COOKIE, oauthStateCookieOptions);
 
 		const clientId = env.isDev
 			? (env.DISCORD_CLIENT_ID_DEV ?? env.DISCORD_CLIENT_ID)
