@@ -77,6 +77,11 @@ case "$CIBLE" in
 	rag-api)         PORT=8806; SEUIL_GIB=1.6; SANTE="/";       RELEASES="" ;;
 	cdn-variants)    PORT=8805; SEUIL_GIB=2.6; SANTE="/";       RELEASES="" ;;
 	rg-cdn)          PORT=8804; SEUIL_GIB=0.8; SANTE="/health"; RELEASES="" ;;
+	achillea-bot)      PORT=4000; SEUIL_GIB=3.4; SANTE="/health/check"; RELEASES="" ;;
+	achillea-postgrest) PORT=8820; SEUIL_GIB=0.8; SANTE="/"; RELEASES="" ;;
+	achillea-storage)  PORT=8821; SEUIL_GIB=1.6; SANTE="/bucket/images"; RELEASES="" ;;
+	achillea-realtime) PORT=8822; SEUIL_GIB=0.8; SANTE="/health"; RELEASES="" ;;
+	achillea-auth)     PORT=8824; SEUIL_GIB=0.8; SANTE="/health"; RELEASES="" ;;
 	*) echo "rg-watchdog: service inconnu « $CIBLE » — l'ajouter à la table" >&2; exit 2 ;;
 esac
 

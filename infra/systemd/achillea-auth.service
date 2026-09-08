@@ -1,0 +1,29 @@
+[Unit]
+Description=Achillea Supabase Auth (GoTrue, isolated)
+After=docker.service postgresql.service network-online.target
+Requires=docker.service postgresql.service
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/rose-griffon/achillea-auth.env
+ExecStartPre=-/usr/bin/docker rm -f achillea-auth
+ExecStart=/usr/bin/docker run --rm --name achillea-auth --network host --env-file /etc/rose-griffon/achillea-auth.env supabase/gotrue:v2.189.0
+ExecStop=/usr/bin/docker stop -t 20 achillea-auth
+Restart=always
+RestartSec=5
+TimeoutStartSec=180
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

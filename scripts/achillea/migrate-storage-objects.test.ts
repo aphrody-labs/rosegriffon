@@ -14,6 +14,7 @@ import {
 	sanitizedPlan,
 	validateObjectMagic,
 	validateObjectName,
+	verifyBucketContract,
 	type StorageMigrationConfig,
 } from "./migrate-storage-objects";
 
@@ -150,6 +151,23 @@ describe("configuration de migration Storage Achillea", () => {
 	});
 });
 
+describe("contrat des buckets", () => {
+	test("accepte ranked-proofs absent sur une source Cloud historique", async () => {
+		const available = await verifyBucketContract(
+			`https://${projectRef}.supabase.co`,
+			sourceKey,
+			"source-cloud",
+			async (input) => {
+				const name = decodeURIComponent(new URL(String(input)).pathname.split("/").at(-1)!);
+				if (name === "ranked-proofs") return new Response(null, { status: 400 });
+				return Response.json({ id: "images", public: true });
+			},
+			true
+		);
+		expect([...available]).toEqual(["images"]);
+	});
+});
+
 describe("garde-fous CLI et noms d'objets", () => {
 	test("reste en dry-run par defaut", () => {
 		expect(parseCommandOptions([])).toEqual({
@@ -195,18 +213,22 @@ describe("validation de contenu et orchestration", () => {
 	const jpeg = Uint8Array.from([0xff, 0xd8, 0xff, 0xe0, 1]);
 	const webp = new TextEncoder().encode("RIFFxxxxWEBPdata");
 	const gif = new TextEncoder().encode("GIF89adata");
+	const svg = new TextEncoder().encode('<?xml version="1.0"?><svg></svg>');
 
-	test("detecte les quatre formats par magic bytes", () => {
+	test("detecte les cinq formats par magic bytes", () => {
 		expect(detectImageMime(png)).toBe("image/png");
 		expect(detectImageMime(jpeg)).toBe("image/jpeg");
 		expect(detectImageMime(webp)).toBe("image/webp");
 		expect(detectImageMime(gif)).toBe("image/gif");
+		expect(detectImageMime(svg)).toBe("image/svg+xml");
 		expect(detectImageMime(new TextEncoder().encode("not-image"))).toBeNull();
 	});
 
 	test("interdit GIF et contenu inconnu dans les preuves privees", () => {
 		expect(validateObjectMagic("images", gif)).toBe("image/gif");
+		expect(validateObjectMagic("images", svg)).toBe("image/svg+xml");
 		expect(() => validateObjectMagic("ranked-proofs", gif)).toThrow("Magic bytes");
+		expect(() => validateObjectMagic("ranked-proofs", svg)).toThrow("Magic bytes");
 		expect(() => validateObjectMagic("images", new Uint8Array([1, 2, 3]))).toThrow("Magic bytes");
 	});
 

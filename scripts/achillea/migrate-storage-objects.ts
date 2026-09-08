@@ -19,12 +19,13 @@ const EXPECTED_TARGET_ORIGIN = "http://127.0.0.1:8823";
 const EXPECTED_TARGET_ROOT = "/var/www/achillea-storage";
 const DEFAULT_STATE_DIRECTORY = "/home/ubuntu/achillea-storage-migration";
 const PAGE_SIZE = 1_000;
+const MAGIC_PREFIX_BYTES = 512;
 const CONFIRMATION = "ACHILLEA_STORAGE_MIGRATION";
 
 export const bucketContract = {
 	images: {
 		public: true,
-		allowedMimeTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"],
+		allowedMimeTypes: ["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"],
 	},
 	"ranked-proofs": {
 		public: false,
@@ -241,6 +242,12 @@ export function detectImageMime(bytes: Uint8Array): string | null {
 		["GIF87a", "GIF89a"].includes(new TextDecoder().decode(bytes.subarray(0, 6)))
 	)
 		return "image/gif";
+	const textPrefix = new TextDecoder().decode(bytes).trimStart().toLowerCase();
+	if (
+		textPrefix.startsWith("<svg") ||
+		(textPrefix.startsWith("<?xml") && textPrefix.includes("<svg"))
+	)
+		return "image/svg+xml";
 	return null;
 }
 
@@ -274,29 +281,34 @@ async function safeFetch(
 	}
 }
 
-async function verifyBucketContract(
+export async function verifyBucketContract(
 	origin: string,
 	key: string,
 	label: string,
-	fetcher: Fetch
-): Promise<void> {
+	fetcher: Fetch,
+	allowMissingPrivateBucket = false
+): Promise<Set<BucketName>> {
+	const available = new Set<BucketName>();
 	for (const [name, contract] of Object.entries(bucketContract) as Array<
 		[BucketName, (typeof bucketContract)[BucketName]]
 	>) {
-		const response = await expectResponse(
-			await safeFetch(
-				fetcher,
-				`${origin}/storage/v1/bucket/${encodeURIComponent(name)}`,
-				{ headers: requestHeaders(key) },
-				`Lecture bucket ${label}`
-			),
+		const response = await safeFetch(
+			fetcher,
+			`${origin}/storage/v1/bucket/${encodeURIComponent(name)}`,
+			{ headers: requestHeaders(key) },
 			`Lecture bucket ${label}`
 		);
+		if (!response.ok && allowMissingPrivateBucket && name === "ranked-proofs") {
+			if (response.status === 400 || response.status === 404) continue;
+		}
+		await expectResponse(response, `Lecture bucket ${label}`);
 		const bucket = (await response.json()) as { id?: string; public?: boolean };
 		if (bucket.id !== name || bucket.public !== contract.public) {
 			throw new Error(`Contrat du bucket ${name} invalide sur ${label}`);
 		}
+		available.add(name);
 	}
+	return available;
 }
 
 export async function listAllObjects(
@@ -398,7 +410,7 @@ async function streamToPrivateFile(
 			size += value.byteLength;
 			hasher.update(value);
 			for (const byte of value) {
-				if (head.length >= 16) break;
+				if (head.length >= MAGIC_PREFIX_BYTES) break;
 				head.push(byte);
 			}
 			await handle.write(value);
@@ -424,7 +436,7 @@ async function hashPrivateFile(
 	if (!info.isFile() || (info.mode & 0o077) !== 0)
 		throw new Error("Fichier stage Storage absent ou non prive");
 	const bytes = new Uint8Array(await readFile(file));
-	const mimeType = validateObjectMagic(bucket, bytes.subarray(0, 16));
+	const mimeType = validateObjectMagic(bucket, bytes.subarray(0, MAGIC_PREFIX_BYTES));
 	return {
 		size: bytes.byteLength,
 		sha256: createHash("sha256").update(bytes).digest("hex"),
@@ -508,12 +520,18 @@ function progressWriter(file: string): (record: ProgressRecord) => Promise<void>
 
 async function inventory(config: StorageMigrationConfig, fetcher: Fetch): Promise<StorageManifest> {
 	await ensurePrivateDirectory(config.stateDirectory);
-	await verifyBucketContract(config.sourceOrigin, config.sourceKey, "source-cloud", fetcher);
+	const sourceBuckets = await verifyBucketContract(
+		config.sourceOrigin,
+		config.sourceKey,
+		"source-cloud",
+		fetcher,
+		true
+	);
 	const inventoryProgressPath = path.join(config.stateDirectory, "inventory-progress.ndjson");
 	const progress = await readProgress(inventoryProgressPath);
 	const writeProgress = progressWriter(inventoryProgressPath);
 	const descriptors: Array<{ bucket: BucketName; name: string }> = [];
-	for (const bucket of Object.keys(bucketContract) as BucketName[]) {
+	for (const bucket of sourceBuckets) {
 		for (const name of await listAllObjects(
 			config.sourceOrigin,
 			config.sourceKey,
@@ -636,7 +654,7 @@ async function targetHash(
 	return {
 		size: bytes.byteLength,
 		sha256: createHash("sha256").update(bytes).digest("hex"),
-		mimeType: validateObjectMagic(object.bucket, bytes.subarray(0, 16)),
+		mimeType: validateObjectMagic(object.bucket, bytes.subarray(0, MAGIC_PREFIX_BYTES)),
 	};
 }
 

@@ -9,7 +9,7 @@ values (
 	'images',
 	true,
 	6291456,
-	array['image/png', 'image/jpeg', 'image/webp', 'image/gif']
+	array['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml']
 )
 on conflict (id) do update
 set

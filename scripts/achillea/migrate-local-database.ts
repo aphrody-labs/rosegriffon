@@ -4,7 +4,14 @@ import path from "node:path";
 
 const repositoryRoot = path.resolve(import.meta.dir, "../..");
 const requiredSchemas = ["auth", "public", "storage"];
-const requiredRoles = ["anon", "authenticated", "authenticator", "service_role"];
+const requiredRoles = [
+	"anon",
+	"authenticated",
+	"authenticator",
+	"service_role",
+	"dashboard_user",
+	"data_analyst",
+];
 const forbiddenDatabases = new Set(["rg", "rose_griffon", "postgres", "template0", "template1"]);
 
 export interface LocalTarget {
@@ -69,13 +76,17 @@ export function parseRestoreList(contents: string): DumpInventory {
 			schemas.add(schema[1]);
 			owners.add(schema[2]);
 		}
-		const extension = line.match(/\sEXTENSION\s+-\s+(\S+)\s+(\S+)\s*$/);
+		// Current pg_dump versions omit the owner column for EXTENSION TOC rows.
+		const extension = line.match(/\sEXTENSION\s+-\s+(\S+)(?:\s+(\S+))?\s*$/);
 		if (extension) {
 			extensions.add(extension[1]);
-			owners.add(extension[2]);
+			if (extension[2]) owners.add(extension[2]);
 		}
 		const table = line.match(/\sTABLE\s+(?:DATA\s+)?(\S+)\s+(\S+)\s+(\S+)\s*$/);
 		if (table) {
+			// PostgreSQL creates `public` from template1, so pg_dump may omit its
+			// SCHEMA entry while still containing schema-qualified table entries.
+			schemas.add(table[1]);
 			tables.add(`${table[1]}.${table[2]}`);
 			owners.add(table[3]);
 		}

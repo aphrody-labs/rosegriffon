@@ -205,8 +205,7 @@ export function validateManifest(manifest: AchilleaServiceManifest): string[] {
 		errors.push("ranked proof limit must be 5 MiB decoded");
 
 	const localTarget = manifest.localSupabaseTarget;
-	if (localTarget.status !== "prepared-not-active")
-		errors.push("local Supabase target must stay prepared-not-active");
+	if (localTarget.status !== "active") errors.push("local Supabase target must be active");
 	if (localTarget.database !== "achillea")
 		errors.push("local Supabase database must be exactly achillea");
 	for (const forbidden of ["rg", "rose_griffon", "postgres", "template0", "template1"]) {
@@ -217,8 +216,8 @@ export function validateManifest(manifest: AchilleaServiceManifest): string[] {
 		errors.push("local Supabase database must use the dedicated local socket contract");
 	if (localTarget.storageRoot !== "/var/www/achillea-storage")
 		errors.push("local Supabase storage root must stay isolated");
-	if (localTarget.authApi.status !== "required-before-cutover")
-		errors.push("local Supabase auth blocker must remain explicit");
+	if (localTarget.authApi.status !== "active")
+		errors.push("local Supabase auth API must be active");
 	const localPorts = localTarget.services.map(({ port }) => port);
 	if (!unique(localPorts.map(String))) errors.push("local Supabase ports must be unique");
 	const allApplicationPorts = manifest.services.flatMap(({ port }) =>
@@ -282,6 +281,7 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		postgrestSystemd,
 		storageSystemd,
 		realtimeSystemd,
+		authSystemd,
 		internalNginx,
 	] = await Promise.all([
 		read("apps/achillea-bot/src/main.ts"),
@@ -305,6 +305,7 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		read("infra/systemd/achillea-postgrest.service"),
 		read("infra/systemd/achillea-storage.service"),
 		read("infra/systemd/achillea-realtime.service"),
+		read("infra/systemd/achillea-auth.service"),
 		read("infra/nginx/achillea-supabase-internal.conf"),
 	]);
 
@@ -450,6 +451,7 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 			["RG_REALTIME_HOST=127.0.0.1", "RG_REALTIME_PORT=8822", "achillea-realtime.env"],
 			"Realtime",
 		],
+		[authSystemd, ["achillea-auth.env", "supabase/gotrue:v2.189.0", "--network host"], "Auth"],
 	] as Array<[string, string[], string]>) {
 		for (const fragment of fragments) {
 			if (!has(contents, fragment)) errors.push(`${label} unit is missing ${fragment}`);
@@ -462,12 +464,15 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		"127.0.0.1:8820",
 		"127.0.0.1:8821",
 		"127.0.0.1:8822",
+		"127.0.0.1:8824",
 	]) {
 		if (!has(internalNginx, fragment))
 			errors.push(`Achillea internal Supabase nginx config is missing ${fragment}`);
 	}
-	if (has(internalNginx, "listen 0.0.0.0") || has(internalNginx, "location /auth/v1/"))
-		errors.push("Achillea internal Supabase nginx must stay private and must not fake an auth API");
+	if (has(internalNginx, "listen 0.0.0.0"))
+		errors.push("Achillea internal Supabase nginx must stay private");
+	if (!has(internalNginx, "location /auth/v1/"))
+		errors.push("Achillea internal Supabase nginx must proxy the real auth API");
 
 	for (const fragment of [
 		"server 127.0.0.1:4000",

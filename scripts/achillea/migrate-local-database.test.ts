@@ -23,6 +23,22 @@ describe("Achillea local database migration", () => {
 		expect(inventory.owners).toContain("supabase_auth_admin");
 	});
 
+	test("deduit public quand PostgreSQL omet son entree SCHEMA", () => {
+		const inventory = parseRestoreList(`
+11; 2615 101 SCHEMA - auth supabase_admin
+12; 2615 102 SCHEMA - storage supabase_storage_admin
+20; 1259 300 TABLE public clan postgres
+21; 1259 301 TABLE auth users supabase_auth_admin
+22; 1259 302 TABLE storage objects supabase_storage_admin
+`);
+		expect(inventory.schemas).toEqual(["auth", "public", "storage"]);
+	});
+
+	test("inventorie une extension sans colonne owner", () => {
+		const inventory = parseRestoreList("7; 3079 33771 EXTENSION - pg_net ");
+		expect(inventory.extensions).toEqual(["pg_net"]);
+	});
+
 	test("cible uniquement la base locale achillea", () => {
 		expect(resolveLocalTarget()).toEqual({
 			database: "achillea",

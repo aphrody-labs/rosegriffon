@@ -198,7 +198,7 @@
 		}
 	},
 	"localSupabaseTarget": {
-		"status": "prepared-not-active",
+		"status": "active",
 		"database": "achillea",
 		"forbiddenDatabases": ["rg", "rose_griffon", "postgres", "template0", "template1"],
 		"databaseHost": "/var/run/postgresql",
@@ -207,7 +207,8 @@
 		"secretsFiles": [
 			"/etc/rose-griffon/achillea-postgrest.env",
 			"/etc/rose-griffon/achillea-storage.env",
-			"/etc/rose-griffon/achillea-realtime.env"
+			"/etc/rose-griffon/achillea-realtime.env",
+			"/etc/rose-griffon/achillea-auth.env"
 		],
 		"services": [
 			{
@@ -229,11 +230,16 @@
 				"id": "achillea-supabase-internal",
 				"port": 8823,
 				"config": "infra/nginx/achillea-supabase-internal.conf"
+			},
+			{
+				"id": "achillea-auth",
+				"port": 8824,
+				"unit": "infra/systemd/achillea-auth.service"
 			}
 		],
 		"authApi": {
-			"status": "required-before-cutover",
-			"reason": "La base auth est migree mais aucun service GoTrue Achillea isole n'est active par ce lot."
+			"status": "active",
+			"reason": "GoTrue Achillea isole est publie via /auth/v1 et utilise la base auth locale."
 		}
 	},
 	"productionChecks": [
@@ -241,6 +247,7 @@
 		"http://127.0.0.1:4002/api/health",
 		"tcp://127.0.0.1:4005",
 		"https://achillea.rosegriffon.fr/",
+		"https://achillea.rosegriffon.fr/auth/v1/health",
 		"https://ranked.rosegriffon.fr/api/health"
 	]
 }
