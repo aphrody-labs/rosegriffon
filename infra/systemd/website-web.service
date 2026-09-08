@@ -47,8 +47,10 @@ MemorySwapMax=512M
 MemoryLow=256M
 TasksMax=2048
 OOMScoreAdjust=-200
-CPUWeight=150
-IOWeight=150
+# Les pages publiques passent avant les bots, imports et traitements IA lors
+# d'une contention CPU ou disque. Ces poids ne plafonnent pas les autres unités.
+CPUWeight=1000
+IOWeight=1000
 
 # Durcissement (compatible JIT — PAS de MemoryDenyWriteExecute, qui casse le JIT Bun/V8)
 NoNewPrivileges=true

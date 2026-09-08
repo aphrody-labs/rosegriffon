@@ -57,8 +57,9 @@ MemorySwapMax=512M
 MemoryLow=256M
 TasksMax=2048
 OOMScoreAdjust=-100
-CPUWeight=150
-IOWeight=150
+# Même priorité que le slot A afin qu'une bascule bleu/vert ne dégrade pas le site.
+CPUWeight=1000
+IOWeight=1000
 
 NoNewPrivileges=true
 ProtectSystem=strict
