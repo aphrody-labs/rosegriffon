@@ -350,6 +350,7 @@ const server = defineServer({
 		// Le frontend Angular appelle ça au lieu de /api/auth/me pour avoir
 		// le rôle (Administrator) qui débloque l'admin dashboard.
 		app.get("/api/users/me", async (req, res) => {
+			res.setHeader("Cache-Control", "no-store");
 			const auth = resolveAuth(req);
 			if (!auth) {
 				res.status(401).json({ error: "unauthenticated" });

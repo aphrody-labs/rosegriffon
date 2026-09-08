@@ -1,6 +1,6 @@
 import { computed, effect, Injectable, Signal, signal, inject } from "@angular/core";
 import { HttpClient, httpResource } from "@angular/common/http";
-import { Suggestion, SuggestionRank, UserRole } from "../../core/models/Suggestion";
+import { Suggestion, UserRole } from "../../core/models/Suggestion";
 import { Router } from "@angular/router";
 import { EnrichedUserDTO } from "../../core/models/User";
 import { ClanMemberRole } from "../../core/models/ClanMember";
@@ -8,25 +8,10 @@ import { NotificationSocketService } from "./notification-socket-service";
 import { firstValueFrom, Subscription } from "rxjs";
 import { MessageService } from "primeng/api";
 import { NotificationModel } from "../../core/models/Notification";
-import { SupabaseService } from "../../core/supabase/supabase.service";
-import type { Session } from "@supabase/supabase-js";
+import { AuthSessionService } from "../../core/auth/auth-session.service";
+import type { AuthUser } from "../../core/auth/auth.models";
 
-export type UserDTO = {
-	id: string;
-	username: string;
-	clanId?: number;
-	sim: number;
-	avatar?: string;
-	soloRank: SuggestionRank;
-	duoRank: SuggestionRank;
-	lastInteract?: Date;
-	role?: UserRole;
-	currentLevel?: number;
-	totalXp?: number;
-	hasTwitch?: boolean;
-	hasChallonge?: boolean;
-	hasYoutube?: boolean;
-};
+export type UserDTO = AuthUser;
 
 @Injectable({
 	providedIn: "root",
@@ -36,44 +21,17 @@ export class UserService {
 	private router = inject(Router);
 	private notifWS = inject(NotificationSocketService);
 	private msg = inject(MessageService);
-	private supabase = inject(SupabaseService);
+	private auth = inject(AuthSessionService);
 
-	private readonly AUTH_API = "/api/auth";
 	private readonly USERS_API = "/api/users";
 	private readonly NOTIFICATIONS_API = "/api/notifications";
 
-	// Session Supabase (auth OAuth Discord côté Supabase). Reste optionnelle :
-	// tant que le provider Discord n'est pas activé dans le dashboard Supabase
-	// (cf. apps/web/SUPABASE-AUTH.md), le flux cookie/JWT du bot sert de fallback.
-	readonly supabaseSession = signal<Session | null>(null);
-
-	constructor() {
-		// Hydrate la session Supabase au démarrage + écoute les changements
-		// (connexion via redirect OAuth, refresh token, déconnexion).
-		void this.supabase.client.auth.getSession().then(({ data }) => {
-			this.supabaseSession.set(data.session ?? null);
-		});
-		this.supabase.client.auth.onAuthStateChange((_event, session) => {
-			this.supabaseSession.set(session ?? null);
-		});
-	}
-
-	// Connexion via Supabase OAuth Discord. Prête côté code ; nécessite l'activation
-	// du provider Discord dans le dashboard Supabase (cf. SUPABASE-AUTH.md).
-	loginWithSupabase = async (returnUrl: string) => {
-		const redirectTo = `${window.location.origin}${returnUrl.startsWith("/") ? returnUrl : `/${returnUrl}`}`;
-		return this.supabase.client.auth.signInWithOAuth({
-			provider: "discord",
-			options: { redirectTo },
-		});
-	};
-
 	handleLogin = (returnUrl: string) => {
-		window.location.href = `api/auth/discord?state=${encodeURIComponent(returnUrl)}`;
-		// This will hit your API, which redirects to Discord's OAuth page.
+		this.auth.login(returnUrl);
 	};
 
-	user = signal<UserDTO | undefined>(undefined);
+	readonly user = this.auth.user;
+	readonly authStatus = this.auth.status;
 	userHasClan = computed(() => this.user()?.clanId !== null && this.user()?.clanId !== undefined);
 	userIsAdmin = computed(() => {
 		const role = this.user()?.role;
@@ -83,83 +41,50 @@ export class UserService {
 		const role = this.user()?.role;
 		return role !== undefined && role >= UserRole.SuperAdministrator;
 	});
-	isUserLoading = signal<boolean>(false);
-	private _loadingPromise: Promise<void> | null = null;
+	isUserLoading = computed(() => this.authStatus() === "loading");
 	private _notifSub?: Subscription;
 
-	setUser(user: UserDTO | undefined) {
-		this.user.set(user);
-	}
-
 	patchUser(partial: Partial<UserDTO>) {
-		const current = this.user();
-		if (!current) return;
-
-		this.user.set({ ...current, ...partial });
+		this.auth.patchUser(partial);
 	}
 
 	async reloadUser() {
-		this.setUser(undefined);
+		this.auth.invalidate();
 		await this.loadUserIfNeeded();
 	}
 
 	async loadUserIfNeeded() {
-		// Already loaded
-		if (this.user() !== undefined) return;
-
-		// Already loading
-		if (this.isUserLoading()) {
-			// Wait for the current loading to finish
-			if (this._loadingPromise) await this._loadingPromise;
+		const user = await this.auth.loadUser();
+		if (!user) {
+			this._notifSub?.unsubscribe();
+			this._notifSub = undefined;
+			this.notifWS.disconnect();
 			return;
 		}
 
-		// Start loading
-		this.isUserLoading.set(true);
-		this._loadingPromise = (async () => {
-			try {
-				// /api/users/me proxy via nginx vers ranked.rosegriffon.fr :
-				// user enrichi (role, clanId, hasChallonge) depuis Postgres.
-				const res = await fetch("/api/users/me", { credentials: "include" });
-				if (res.ok) {
-					const user = await res.json();
-					this.user.set(user);
-
-					// Connect to websockets (une seule souscription : remplace l'ancienne
-					// pour éviter les notifications dupliquées après reloadUser).
-					this.notifWS.connect();
-					this._notifSub?.unsubscribe();
-					this._notifSub = this.notifWS.onNotification().subscribe((data) => {
-						this._userNotifications.update((list) => [...list, data.notification]);
-					});
-
-					await this.getAndSetUserNotifications();
-				} else {
-					this.user.set(undefined);
-					// Disconnect, just in case
-					this.notifWS.disconnect();
-				}
-			} finally {
-				this.isUserLoading.set(false);
-				this._loadingPromise = null;
-			}
-		})();
-		await this._loadingPromise;
+		await this.notifWS.connect();
+		if (!this._notifSub) {
+			this._notifSub = this.notifWS.onNotification().subscribe((data) => {
+				this._userNotifications.update((list) => [...list, data.notification]);
+			});
+			await this.getAndSetUserNotifications();
+		}
 	}
 
 	async logOut() {
-		const res = await fetch("api/auth/logout", { credentials: "include" });
-		// Déconnexion Supabase best-effort (purge la session locale si présente).
-		void this.supabase.client.auth.signOut().catch(() => undefined);
-		this.supabaseSession.set(null);
-		if (res.ok) {
-			this.user.set(undefined);
+		const loggedOut = await this.auth.logout();
+		if (loggedOut) {
 			this._userNotifications.set([]);
 			this._notifSub?.unsubscribe();
 			this._notifSub = undefined;
 			this.notifWS.disconnect();
-			this.router.navigate(["/"]);
+			await this.router.navigate(["/"]);
 		} else {
+			this.msg.add({
+				severity: "error",
+				summary: "Déconnexion impossible",
+				detail: "Réessaie dans quelques instants.",
+			});
 			return undefined;
 		}
 	}

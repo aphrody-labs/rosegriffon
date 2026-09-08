@@ -1,48 +1,34 @@
-# Authentification Supabase (OAuth Discord) — web
+# Authentification Achillea
 
-Le front sait se connecter de **deux** façons. La seconde est codée mais **dormante** tant
-que le provider Discord n'est pas activé côté Supabase.
+L’authentification utilisateur est centralisée dans l’API Achillea. Le client Supabase du
+frontend sert uniquement aux lectures publiques protégées par RLS et ne crée pas de seconde
+session navigateur.
 
-## 1. Cookie/JWT du bot (actif, par défaut)
+## Flux canonique Discord
 
-Flux historique, opérationnel en prod :
+1. Le frontend appelle `GET /api/auth/discord?state=…`.
+2. L’API signe le `state`, le lie à un nonce dans un cookie HttpOnly de 10 minutes, puis redirige
+   vers Discord OAuth2 (`identify`).
+3. `GET /api/auth/callback` vérifie la signature, le nonce et la destination interne, échange le
+   code, synchronise l’utilisateur et pose le cookie `token`.
+4. `GET /api/users/me` hydrate l’unique état d’auth Angular (`AuthSessionService`).
+5. `POST /api/auth/logout` efface le cookie avec exactement le même scope.
 
-- `GET /api/auth/discord?state=…` → 302 vers Discord OAuth (scope `identify`, app prod
-  `1427690638576582697` = AchilleaBot ; proxy nginx → bot VPS),
-- callback `GET /api/auth/callback` → échange du code + `syncWebUser`, puis le bot pose un cookie
-  `token=<JWT>; HttpOnly; Secure; SameSite=Lax` (JWT **HS256** signé avec `JWT_SECRET_KEY`, 30 j),
-- `GET /api/auth/me` / `/api/users/me` lisent ce cookie (middleware `CookieAuthorize`, vérif HS256).
+Le cookie de session est `HttpOnly`, `SameSite=Lax`, `Secure` en HTTPS, valable 30 jours. Les
+nouveaux JWT sont limités par `issuer`, `audience`, `subject` et `tokenUse=session`. Les anciens
+JWT sans ces claims restent temporairement lisibles pendant leur expiration naturelle afin de
+permettre une migration sans déconnexion générale.
 
-C'est le **fallback** utilisé tant que l'auth Supabase n'est pas activée. Rien à faire.
+## Temps réel
 
-## 2. Supabase Auth (OAuth Discord) — optionnel, à activer
+Le cookie du domaine web ne traverse pas vers le domaine WebSocket. Le frontend demande donc
+`GET /api/auth/token`, qui émet un JWT distinct `tokenUse=realtime`, limité à 5 minutes. Un cache
+unique dans `AuthSessionService` alimente Socket.IO et Colyseus. Le JWT de session de 30 jours
+n’est jamais exposé au JavaScript.
 
-Côté code (déjà prêt) :
+## Supabase
 
-- `SupabaseService` (`src/app/core/supabase/supabase.service.ts`) crée le client avec
-  `flowType: "pkce"`, `persistSession`, `autoRefreshToken`, `detectSessionInUrl`,
-- `loginWithSupabase(returnUrl)` (`src/app/shared/services/user-service.ts`) appelle
-  `auth.signInWithOAuth({ provider: "discord", … })`,
-- la session (`supabaseSession`) est hydratée au démarrage (`auth.getSession()`) et suivie
-  (`onAuthStateChange`) ; `logOut()` fait un `auth.signOut()` best-effort.
-
-Pour l'**activer** (console Supabase, projet `yftdclwvehxxffwqvhmc`) :
-
-1. **Authentication → Providers → Discord** : activer, renseigner `Client ID` / `Client Secret`
-   de l'app Discord prod `1427690638576582697` (AchilleaBot).
-2. **Redirect URLs** : ajouter `https://achillea.rosegriffon.fr/**` (et l'URL de dev locale).
-3. Dans le **Discord Developer Portal → OAuth2 → Redirects**, ajouter l'URL de callback Supabase
-   `https://yftdclwvehxxffwqvhmc.supabase.co/auth/v1/callback` (au caractère près).
-4. NB : l'auth ici est **uniquement** l'OAuth Discord — pas d'email/mot de passe. Le réglage
-   _Leaked password protection_ ne s'applique donc qu'au cas (non prévu) où un provider
-   email/password serait ajouté.
-
-Tant que ces étapes ne sont pas faites, `signInWithOAuth` échoue côté Supabase et l'app
-retombe sur le flux cookie/JWT du bot (point 1). Aucune régression : le code Supabase reste
-inerte sans configuration dashboard.
-
-## Périmètre des données
-
-- **Lecture dashboard** (clas­sements, clans, casters…) : Supabase **direct** via la clé
-  publishable (vues curatées `*_view`, RLS).
-- **Écritures métier** (elo, wallet, sanctions, ranked live) : **API du bot** (proxy nginx).
+`SupabaseService` utilise la clé publishable pour les vues publiques. Sa configuration désactive
+`persistSession`, `autoRefreshToken` et `detectSessionInUrl` afin d’éviter un second flux OAuth
+concurrent avec le cookie de l’API. Les écritures métier et toutes les autorisations restent
+arbitrées côté serveur.

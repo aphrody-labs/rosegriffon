@@ -54,7 +54,7 @@ C'est exactement le flow demandé : si `team1Validated && team2Validated` → ok
 ### Existant
 
 - `socket-server.ts` : Socket.IO sur `SOCKET_PORT` (4001 prod), Express+http.Server bare
-- Namespace `/notifications` avec auth cookie JWT (cookie `token`, secret `env.JWT_SECRET_KEY`)
+- Namespace `/notifications` avec JWT temps réel de 5 minutes (`tokenUse=realtime`)
 - Helper `emitToUsers(userIds, event, payload)`
 - CORS allowlist : `localhost:4200`, `achillea.rosegriffon.fr`
 
@@ -63,7 +63,8 @@ C'est exactement le flow demandé : si `team1Validated && team2Validated` → ok
 - **Colyseus 0.17** sur port dédié (`:4002`) — process séparé `achillea-ranked.service`
 - Transport : `BunWebSockets` (natif Bun, couche compat Express incluse)
 - Schema state via `@colyseus/schema 4.0`
-- Auth via `onAuth(token)` qui verify le cookie session (alignement front ↔ bot, voir §6)
+- Auth via `onAuth(token)` qui vérifie le jeton temps réel centralisé ; le cookie session reste
+  accepté uniquement sur les requêtes same-origin
 
 ## 4. Architecture cible
 
@@ -149,13 +150,15 @@ class MatchState extends Schema {
 6. UI affiche eloVariation et bouton "retour matchmaking"
 ```
 
-## 6. Mismatchs à régler
+## 6. Contrat d’auth unifié
 
-| Mismatch   | Côté front   | Côté bot                               | Décision                              |
-| ---------- | ------------ | -------------------------------------- | ------------------------------------- |
-| Nom cookie | `session`    | `token`                                | aligner sur `token` (le bot dicte)    |
-| Var JWT    | `JWT_SECRET` | `JWT_SECRET_KEY`                       | mettre la même valeur dans les 2 vars |
-| CORS bot   | n/a          | n'inclut pas `achillea.rosegriffon.fr` | ajouter                               |
+| Usage       | Transport                      | Durée    | Audience            |
+| ----------- | ------------------------------ | -------- | ------------------- |
+| Session web | cookie `token` HttpOnly        | 30 jours | `achillea-web`      |
+| Temps réel  | handshake Socket.IO / Colyseus | 5 min    | `achillea-realtime` |
+
+Les deux jetons sont signés par le backend avec `JWT_SECRET_KEY`. Le frontend ne connaît jamais
+ce secret et ne reçoit jamais le JWT long terme du cookie.
 
 ## 7. Système Elo
 
@@ -171,17 +174,7 @@ newElo = playerElo + delta; // borné à [0, ∞[
 
 Tier courant = ligne `Rank` où `minElo <= newElo <= maxElo`.
 
-## 8. Questions ouvertes (à valider avant code)
-
-1. **Aligner cookie+secret JWT** front ↔ bot ? Ou endpoint d'échange `/api/auth/exchange` ?
-2. **Ranked perpétuel** : 1 entity `Ranked` permanente OPEN, ou matchmaking 100% en mémoire (Colyseus QueueRoom RAM-only) avec création directe `Lobby` à la fin ?
-3. **Sous-domaine** : `ranked.rosegriffon.fr` (vhost dédié) ou path `api.rosegriffon.fr/ranked/` ?
-4. **Process** : `achillea-ranked.service` séparé (recommandé), ou greffé dans `main.ts` du bot ?
-5. **Système Elo** : K-factor unique par season, ou par tier (provisional placement vs ranked confirmé) ?
-6. **BO1 ou BO3 par défaut** ? (`Lobby.matchFormat` supporte déjà `SINGLE_LEG`, `DOUBLE_LEG`, `CUSTOM`)
-7. **Anti-grief** : timeout auto si un joueur ne valide pas son score sous N minutes ? Forfeit auto ?
-
-## 9. Refs
+## 8. Refs
 
 - Colyseus docs : https://docs.colyseus.io/
 - Bot — entities ranked : `apps/achillea-bot/src/entities/{UserElo,Rank,Season,Lobby,LobbyMatch,LobbyUser,Ranked,RankedQueueEntry}.ts`

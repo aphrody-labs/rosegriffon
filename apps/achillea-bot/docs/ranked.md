@@ -74,7 +74,8 @@ bun run dev
 Héritées de `.env` du bot :
 
 - `DATABASE_*` (host, port, user, password, name)
-- `JWT_SECRET_KEY` — **doit être identique côté front** (signe les cookies session)
+- `JWT_SECRET_KEY` — secret serveur partagé par l’API, Socket.IO et le process ranked ; il ne doit
+  jamais être exposé au frontend
 
 Spécifiques (avec défauts) :
 

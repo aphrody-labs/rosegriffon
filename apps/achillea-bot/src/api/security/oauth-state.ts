@@ -2,7 +2,10 @@ import { randomBytes, timingSafeEqual } from "node:crypto";
 
 import jwt from "jsonwebtoken";
 
+import { getCookieValue } from "@/auth";
 import { env } from "@/env";
+
+export { getCookieValue } from "@/auth";
 
 export const OAUTH_STATE_COOKIE = "achillea_oauth_state";
 
@@ -16,7 +19,22 @@ type OAuthStatePayload = jwt.JwtPayload & {
 };
 
 export function isSafeInternalRedirect(value: unknown): value is string {
-	return typeof value === "string" && /^\/(?![/\\])/.test(value);
+	if (
+		typeof value !== "string" ||
+		value.length > 2_048 ||
+		!value.startsWith("/") ||
+		value.startsWith("//") ||
+		value.includes("\\") ||
+		/[\u0000-\u001f\u007f]/.test(value)
+	) {
+		return false;
+	}
+
+	try {
+		return new URL(value, "https://achillea.invalid").origin === "https://achillea.invalid";
+	} catch {
+		return false;
+	}
 }
 
 export function configuredOAuthCallback(path = "/api/auth/callback"): string {
@@ -63,23 +81,6 @@ export function verifyOAuthState(state: unknown, cookieHeader: string | undefine
 	}
 
 	return decoded.redirect;
-}
-
-export function getCookieValue(header: string | undefined, name: string): string | null {
-	if (!header) return null;
-
-	for (const part of header.split(";")) {
-		const [key, ...value] = part.trim().split("=");
-		if (key === name) {
-			try {
-				return decodeURIComponent(value.join("="));
-			} catch {
-				return null;
-			}
-		}
-	}
-
-	return null;
 }
 
 export const oauthStateCookieOptions = {

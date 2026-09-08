@@ -1,7 +1,6 @@
 import { Context, Middleware } from "@tsed/common";
-import * as jwt from "jsonwebtoken";
 
-import { env } from "@/env";
+import { SESSION_COOKIE_NAME, verifySessionToken } from "@/auth";
 import { UserService } from "@/services";
 import { resolveDependency } from "@/utils/functions";
 
@@ -11,19 +10,16 @@ export class OptionalAuthMiddleware {
 
 	async use(@Context() ctx: Context) {
 		const userService = await this.userServicePromise;
-		const token = ctx.request.cookies?.token;
+		const token = ctx.request.cookies?.[SESSION_COOKIE_NAME];
 
 		if (!token) return;
 
 		try {
-			const decoded = jwt.verify(token, env.JWT_SECRET_KEY, {
-				algorithms: ["HS256"],
-			}) as jwt.JwtPayload;
-			if (typeof decoded.id !== "string" || !decoded.id) return;
+			const decoded = verifySessionToken(token);
 			const userData = await userService.syncWebUser(decoded.id);
 
 			if (userData) {
-				ctx.set("user", await userService.toDTO(userData, decoded.avatar, decoded.sim));
+				ctx.set("user", await userService.toDTO(userData, decoded.avatar ?? "", decoded.sim ?? 0));
 			}
 		} catch {
 			// Authentication is optional; invalid credentials are intentionally ignored.

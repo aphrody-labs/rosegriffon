@@ -1,10 +1,30 @@
-import { Context, Controller, Get, HeaderParams, QueryParams, Res, UseBefore } from "@tsed/common";
+import {
+	Context,
+	Controller,
+	Get,
+	HeaderParams,
+	Post,
+	QueryParams,
+	Res,
+	UseBefore,
+} from "@tsed/common";
 import type { Response } from "express";
 
+import {
+	discordAuthorizeUrl,
+	exchangeDiscordCode,
+	REALTIME_TTL_SECONDS,
+	SESSION_COOKIE_NAME,
+	sessionClearCookieOptions,
+	sessionCookieOptions,
+	signRealtimeToken,
+	signSessionToken,
+} from "@/auth";
 import { CookieAuthorize } from "@/api/middlewares";
 import {
 	configuredOAuthCallback,
 	createOAuthState,
+	isSafeInternalRedirect,
 	OAUTH_STATE_COOKIE,
 	oauthStateCookieOptions,
 	verifyOAuthState,
@@ -15,33 +35,20 @@ import { OAuthService, UserService } from "@/services";
 import { BaseController } from "@/utils/classes";
 import { resolveDependencies } from "@/utils/functions";
 
-// Note: jsonwebtoken importé dynamiquement dans /callback pour éviter le coût
-// au boot pour les autres routes du controller.
-
-type DiscordUser = {
-	id: string;
-	username: string;
-	avatar: string;
-};
-
-function getDiscordRedirectURI(state: string) {
+function discordClientId(): string {
 	const clientId = env.isDev
 		? (env.DISCORD_CLIENT_ID_DEV ?? env.DISCORD_CLIENT_ID)
 		: env.DISCORD_CLIENT_ID;
-
 	if (!clientId)
 		throw new Error("DISCORD_CLIENT_ID manquant dans .env (ou DISCORD_CLIENT_ID_DEV en dev)");
-
-	const authorizeUrl = new URL("https://discord.com/oauth2/authorize");
-	authorizeUrl.search = new URLSearchParams({
-		client_id: clientId,
-		response_type: "code",
-		redirect_uri: configuredOAuthCallback(),
-		scope: "identify",
-		state,
-	}).toString();
-	return authorizeUrl.toString();
+	return clientId;
 }
+
+function sessionIsSecure(): boolean {
+	return new URL(env.OAUTH_CALLBACK_BASE_URL).protocol === "https:";
+}
+
+const TEST_SESSION_TTL_SECONDS = 24 * 60 * 60;
 
 @Controller("/auth")
 export class AuthController extends BaseController {
@@ -64,7 +71,9 @@ export class AuthController extends BaseController {
 	discordLogin(@QueryParams("state") state: string, @Res() res: Response) {
 		const oauthState = createOAuthState(state);
 		res.cookie(OAUTH_STATE_COOKIE, oauthState.nonce, oauthStateCookieOptions);
-		return res.redirect(getDiscordRedirectURI(oauthState.state));
+		return res.redirect(
+			discordAuthorizeUrl(discordClientId(), configuredOAuthCallback(), oauthState.state)
+		);
 	}
 
 	// Connexion de TEST anonyme — pour tester le ranked sans login Discord réel.
@@ -84,21 +93,20 @@ export class AuthController extends BaseController {
 		}
 
 		const test = await this.userService.createTestUser();
-		const jwt = await import("jsonwebtoken");
-		const sessionToken = jwt.default.sign(
-			{ id: test.id, username: test.username, avatar: test.avatar },
-			env.JWT_SECRET_KEY,
-			{ expiresIn: "1d" }
+		const sessionToken = signSessionToken(
+			{
+				id: test.id,
+				username: test.username,
+				avatar: test.avatar,
+			},
+			TEST_SESSION_TTL_SECONDS
 		);
-		res.cookie("token", sessionToken, {
-			httpOnly: true,
-			secure: true,
-			sameSite: "lax",
-			maxAge: 24 * 60 * 60 * 1000,
-			path: "/",
+		res.cookie(SESSION_COOKIE_NAME, sessionToken, {
+			...sessionCookieOptions(sessionIsSecure()),
+			maxAge: TEST_SESSION_TTL_SECONDS * 1000,
 		});
 		// Anti open-redirect : chemin interne à un seul slash (rejette //host et /\host).
-		const safeState = /^\/(?![/\\])/.test(state ?? "") ? state : "/ranked";
+		const safeState = isSafeInternalRedirect(state) ? state : "/ranked";
 		return res.redirect(safeState);
 	}
 
@@ -127,18 +135,27 @@ export class AuthController extends BaseController {
 	// Authenticated user info endpoint
 	@Get("/me")
 	@UseBefore(CookieAuthorize)
-	async me(@Context() ctx: Context) {
+	async me(@Context() ctx: Context, @Res() res: Response) {
 		const user = ctx.get("user") as UserDTO;
-		user.avatar = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+		if (user.avatar && !user.avatar.startsWith("http")) {
+			user.avatar = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+		}
 
-		return user;
+		res.setHeader("Cache-Control", "no-store");
+		return res.json(user);
 	}
 
-	// Logout (clear cookie)
-	@Get("/logout")
+	// POST est la route canonique. Le GET reste disponible pendant la migration des anciens clients.
+	@Post("/logout")
 	logout(@Res() res: Response) {
-		res.clearCookie("token");
+		res.clearCookie(SESSION_COOKIE_NAME, sessionClearCookieOptions(sessionIsSecure()));
+		res.setHeader("Cache-Control", "no-store");
 		res.json({ ok: true });
+	}
+
+	@Get("/logout")
+	logoutLegacy(@Res() res: Response) {
+		return this.logout(res);
 	}
 
 	// Token endpoint pour Colyseus client (cookie HttpOnly cross-domain WSS)
@@ -146,12 +163,13 @@ export class AuthController extends BaseController {
 	@UseBefore(CookieAuthorize)
 	async token(@Context() ctx: Context, @Res() res: Response) {
 		const user = ctx.get("user") as UserDTO;
-		// Le cookie 'token' est ce JWT — on le retourne en JSON pour usage côté client.
-		const cookieHeader = res.req.headers.cookie ?? "";
-		const m = /(?:^|;\s*)token=([^;]+)/.exec(cookieHeader);
-		const token = m ? decodeURIComponent(m[1]) : null;
-		if (!token) return res.status(401).json({ error: "unauthenticated" });
-		return res.json({ token, expiresIn: 30 * 24 * 60 * 60, userId: user.id });
+		const token = signRealtimeToken({
+			id: user.id,
+			username: user.username,
+			avatar: user.avatar,
+		});
+		res.setHeader("Cache-Control", "no-store");
+		return res.json({ token, expiresIn: REALTIME_TTL_SECONDS, userId: user.id });
 	}
 
 	// Callback Discord OAuth — alias canonique sur /api/auth/callback
@@ -176,9 +194,7 @@ export class AuthController extends BaseController {
 		res.clearCookie(OAUTH_STATE_COOKIE, oauthStateCookieOptions);
 		const redirectUri = configuredOAuthCallback();
 
-		const clientId = env.isDev
-			? (env.DISCORD_CLIENT_ID_DEV ?? env.DISCORD_CLIENT_ID)
-			: env.DISCORD_CLIENT_ID;
+		const clientId = discordClientId();
 		const clientSecret = env.isDev
 			? (env.DISCORD_CLIENT_SECRET_DEV ?? env.DISCORD_CLIENT_SECRET)
 			: env.DISCORD_CLIENT_SECRET;
@@ -187,51 +203,16 @@ export class AuthController extends BaseController {
 		}
 
 		try {
-			const tokenRes = await fetch("https://discord.com/api/v10/oauth2/token", {
-				method: "POST",
-				headers: { "Content-Type": "application/x-www-form-urlencoded" },
-				body: new URLSearchParams({
-					client_id: clientId,
-					client_secret: clientSecret,
-					grant_type: "authorization_code",
-					code,
-					redirect_uri: redirectUri,
-				}),
-			});
-			if (!tokenRes.ok) {
-				console.error("[auth/callback] token exchange failed:", tokenRes.status);
-				return res.status(500).send("OAuth token exchange failed");
-			}
-			const tokenData = (await tokenRes.json()) as { access_token: string };
-
-			const meRes = await fetch("https://discord.com/api/v10/users/@me", {
-				headers: { Authorization: `Bearer ${tokenData.access_token}` },
-			});
-			if (!meRes.ok) {
-				return res.status(500).send("Failed to fetch Discord profile");
-			}
-			const me = (await meRes.json()) as { id: string; avatar: string | null; username: string };
+			const me = await exchangeDiscordCode(code, { clientId, clientSecret, redirectUri });
 
 			await this.userService.syncWebUser(me.id);
 
-			const jwt = await import("jsonwebtoken");
-			const sessionToken = jwt.default.sign(
-				{ id: me.id, username: me.username, avatar: me.avatar ?? "" },
-				env.JWT_SECRET_KEY,
-				{ expiresIn: "30d" }
-			);
-
-			res.cookie("token", sessionToken, {
-				httpOnly: true,
-				secure: new URL(redirectUri).protocol === "https:",
-				sameSite: "lax",
-				maxAge: 30 * 24 * 60 * 60 * 1000,
-				path: "/",
-			});
+			const sessionToken = signSessionToken(me);
+			res.cookie(SESSION_COOKIE_NAME, sessionToken, sessionCookieOptions(sessionIsSecure()));
 
 			return res.redirect(safeState);
-		} catch {
-			console.error("[auth/callback] failed");
+		} catch (error) {
+			console.error("[auth/callback] failed", error instanceof Error ? error.message : "unknown");
 			return res.status(500).send("OAuth callback failed");
 		}
 	}

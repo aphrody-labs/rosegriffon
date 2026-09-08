@@ -6,17 +6,19 @@ import { environment } from "../../../environments/environment";
 /**
  * Client Supabase partagé du front.
  *
- * Périmètre : lecture directe du dashboard (tables/vues ouvertes en RLS) + auth.
+ * Périmètre : lecture directe du dashboard (tables/vues publiques en RLS).
  * Les écritures à logique métier (elo, wallet, sanctions, ranked live) restent
- * sur l'API du bot. La clé est la clé publishable (publique).
+ * sur l'API du bot. L'authentification utilisateur est centralisée dans
+ * AuthSessionService et l'API Discord ; ce client n'entretient donc aucune
+ * seconde session navigateur concurrente.
  */
 @Injectable({ providedIn: "root" })
 export class SupabaseService {
 	readonly client: SupabaseClient = createClient(environment.supabaseUrl, environment.supabaseKey, {
 		auth: {
-			persistSession: true,
-			autoRefreshToken: true,
-			detectSessionInUrl: true,
+			persistSession: false,
+			autoRefreshToken: false,
+			detectSessionInUrl: false,
 			flowType: "pkce",
 		},
 	});

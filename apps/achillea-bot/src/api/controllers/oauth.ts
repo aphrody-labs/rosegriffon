@@ -1,8 +1,13 @@
 import { Controller, Get, HeaderParams, QueryParams, Res } from "@tsed/common";
 import axios from "axios";
 import type { Response } from "express";
-import jwt from "jsonwebtoken";
 
+import {
+	exchangeDiscordCode,
+	SESSION_COOKIE_NAME,
+	sessionCookieOptions,
+	signSessionToken,
+} from "@/auth";
 import {
 	configuredOAuthCallback,
 	OAUTH_STATE_COOKIE,
@@ -16,22 +21,6 @@ import { UserService, Database } from "@/services";
 import { BaseController } from "@/utils/classes";
 import { Provider } from "@/utils/enums";
 import { resolveDependenciesSync } from "@/utils/functions";
-
-type DiscordTokenResponse = {
-	access_token: string;
-	token_type: string;
-	expires_in: number;
-	refresh_token: string;
-	scope: string;
-};
-
-type DiscordMe = {
-	id: string;
-	username: string;
-	global_name?: string;
-	discriminator: string;
-	avatar: string | null;
-};
 
 @Controller("/bot/OAuth/callback")
 export class DiscordOAuthCallbackController extends BaseController {
@@ -79,42 +68,17 @@ export class DiscordOAuthCallbackController extends BaseController {
 		const redirectUri = configuredOAuthCallback("/bot/OAuth/callback/discord");
 
 		try {
-			// 1. Exchange code -> tokens
-			const tokenRes = await axios.post<DiscordTokenResponse>(
-				"https://discord.com/api/v10/oauth2/token",
-				new URLSearchParams({
-					client_id: clientId,
-					client_secret: clientSecret,
-					grant_type: "authorization_code",
-					code,
-					redirect_uri: redirectUri,
-				}),
-				{ headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-			);
-
-			// 2. Fetch profil
-			const meRes = await axios.get<DiscordMe>("https://discord.com/api/v10/users/@me", {
-				headers: { Authorization: `Bearer ${tokenRes.data.access_token}` },
-			});
-
-			const me = meRes.data;
+			const me = await exchangeDiscordCode(code, { clientId, clientSecret, redirectUri });
 
 			// 3. Sync user en DB (crée si inexistant)
 			await this.userService.syncWebUser(me.id);
 
-			// 4. Sign JWT — payload minimal (id + avatar pour /auth/me)
-			const token = jwt.sign({ id: me.id, avatar: me.avatar ?? "", sim: 0 }, env.JWT_SECRET_KEY, {
-				expiresIn: "30d",
-			});
-
-			// 5. Set cookie httpOnly
-			res.cookie("token", token, {
-				httpOnly: true,
-				secure: true,
-				sameSite: "lax",
-				maxAge: 30 * 24 * 60 * 60 * 1000, // 30 jours
-				path: "/",
-			});
+			const token = signSessionToken({ ...me, sim: 0 });
+			res.cookie(
+				SESSION_COOKIE_NAME,
+				token,
+				sessionCookieOptions(new URL(redirectUri).protocol === "https:")
+			);
 
 			// 6. Redirect vers le state (path frontend) ou racine
 			return res.redirect(safeState);

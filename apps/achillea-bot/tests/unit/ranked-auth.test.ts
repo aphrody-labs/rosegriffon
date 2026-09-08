@@ -13,6 +13,7 @@ import { beforeAll, describe, expect, test } from "bun:test";
 import jwt from "jsonwebtoken";
 
 import { authFromColyseus, getCookie, verifyToken } from "../../src/ranked/auth";
+import { signRealtimeToken, signSessionToken } from "../../src/auth/session";
 
 const TEST_SECRET = "secret-de-test-unitaire-ranked-auth";
 
@@ -154,6 +155,17 @@ describe("authFromColyseus", () => {
 			{ token: "ctx-invalide", headers }
 		);
 		expect(user).toBeNull();
+	});
+
+	test("keeps web sessions in cookies and realtime tokens in handshakes", () => {
+		const session = signSessionToken({ id: "session-user" });
+		const realtime = signRealtimeToken({ id: "realtime-user" });
+		expect(authFromColyseus({}, { headers: { cookie: `token=${session}` } })?.id).toBe(
+			"session-user"
+		);
+		expect(authFromColyseus({}, { token: realtime })?.id).toBe("realtime-user");
+		expect(authFromColyseus({}, { token: session })).toBeNull();
+		expect(authFromColyseus({}, { headers: { cookie: `token=${realtime}` } })).toBeNull();
 	});
 });
 
