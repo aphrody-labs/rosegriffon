@@ -1239,6 +1239,16 @@ const server = defineServer({
 				target: `http://127.0.0.1:${BOT_API_PORT}`,
 				changeOrigin: true,
 				on: {
+					// express.json() above consumes the incoming stream. Re-emit the
+					// parsed payload for the upstream; otherwise Bun's compatibility
+					// layer tries to read an object/string as a ReadableStream.
+					proxyReq: (proxyReq, req) => {
+						if (!req.body || typeof req.body !== "object") return;
+						const body = JSON.stringify(req.body);
+						proxyReq.setHeader("content-type", "application/json");
+						proxyReq.setHeader("content-length", Buffer.byteLength(body));
+						proxyReq.write(body);
+					},
 					error: (err, _req, res) => {
 						console.error("[ranked] bot proxy error:", err.message);
 						// `headersSent` n'est pas fiable sur la réponse Bun/express du proxy
