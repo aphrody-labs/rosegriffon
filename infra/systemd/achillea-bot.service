@@ -19,6 +19,7 @@ Environment=NODE_ENV=production
 # Le profil legacy (DEV_BOT_TOKEN) reste disponible pour les autres guildes via l'import.
 Environment=BOT_PROFILE=current
 Environment=DISCORD_OAUTH_PROFILE=current
+Environment=BOT_COMMAND_GUILDS=1055585286320554055,1134795051361386506,1387955162450100296
 Environment=API_HOST=127.0.0.1
 Environment=API_PORT=4000
 Environment=RANKED_HOST=127.0.0.1

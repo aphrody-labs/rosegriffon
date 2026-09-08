@@ -366,6 +366,12 @@ async function init() {
 				// appelé ici directement après login pour ne pas dépendre du @Once('clientReady')
 				// (qui peut ne pas trigger correctement avec les intents réduits)
 				try {
+					// Des commandes globales residuelles d'une ancienne installation
+					// provoquent un doublon avec les commandes guild-scoped.
+					if (env.BOT_COMMAND_GUILDS && discordBotProfile.name === "current") {
+						await client.application?.commands.set([]);
+						console.info("Discord global commands cleared (guild-scoped profile)");
+					}
 					await client.initApplicationCommands();
 					const globalCmds = await client.application?.commands.fetch().catch(() => null);
 					console.info(

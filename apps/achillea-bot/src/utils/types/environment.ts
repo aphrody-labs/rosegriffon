@@ -13,6 +13,7 @@ export const env = cleanEnv(process.env, {
 		default: "current",
 	}),
 	DISCORD_OAUTH_PROFILE: str({ choices: ["legacy", "current"], default: "current" }),
+	BOT_COMMAND_GUILDS: str({ default: undefined }),
 	BOT_TOKEN: str({ default: undefined }),
 	DEV_BOT_TOKEN: str({ default: undefined }),
 
