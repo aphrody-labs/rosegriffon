@@ -46,7 +46,7 @@ tournaient en `MemoryMax=infinity` : une fuite dans n'importe lequel épuisait l
 de l'hôte, et c'est l'OOM killer **global** qui choisissait sa victime — il a tué
 `nie-model-serve` à 02 h 16 ce jour-là, alors que sa propre limite de 24 Gio n'était pas
 approchée. Les surfaces publiques sont à `OOMScoreAdjust=-200`, les gros consommateurs
-sans visiteur (`nie-model-serve`, `rg-rag-embed`) à `+300` : si l'hôte manque de mémoire,
+sans visiteur (`nie-model-serve`) à `+300` : si l'hôte manque de mémoire,
 ce sont eux qui tombent, pas le wiki.
 
 De même, tous les démons sont en `Restart=always` et non `on-failure` : une sortie en
