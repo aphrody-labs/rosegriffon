@@ -127,10 +127,15 @@ export class LeaderboardAnnounceService {
 
 		if (existing) {
 			const msg = await channel.messages.fetch(existing).catch(() => null);
-			if (msg) {
+			if (msg && msg.author.id === this.client.user?.id) {
 				await msg.edit({ embeds: [embed] });
 				console.info("[leaderboard] message édité");
 				return;
+			}
+			if (msg) {
+				console.warn(
+					`[leaderboard] message ${existing} appartient au bot ${msg.author.id}; remplacement pour le profil actif`
+				);
 			}
 		}
 
