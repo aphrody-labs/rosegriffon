@@ -30,16 +30,16 @@ import {
 	verifyOAuthState,
 } from "../security/oauth-state";
 import { env } from "@/env";
-import { discordBotProfile } from "@/configs/discord-profile";
+import { discordOAuthProfile } from "@/configs/discord-profile";
 import type { UserDTO } from "@/services";
 import { OAuthService, UserService } from "@/services";
 import { BaseController } from "@/utils/classes";
 import { resolveDependencies } from "@/utils/functions";
 
 function discordClientId(): string {
-	const clientId = discordBotProfile.clientId;
+	const clientId = discordOAuthProfile.clientId;
 	if (!clientId)
-		throw new Error(`DISCORD_CLIENT_ID manquant pour le profil ${discordBotProfile.name}`);
+		throw new Error(`DISCORD_CLIENT_ID manquant pour le profil ${discordOAuthProfile.name}`);
 	return clientId;
 }
 

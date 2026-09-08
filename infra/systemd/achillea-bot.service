@@ -15,10 +15,11 @@ WorkingDirectory=/home/ubuntu/rg/apps/achillea-bot
 EnvironmentFile=/etc/rose-griffon/achillea.env
 Environment=PATH=/home/ubuntu/.bun/bin:/usr/local/bin:/usr/bin:/bin
 Environment=NODE_ENV=production
-# Profil Discord explicite : l'ancien bot est encore membre des serveurs
-# historiques et possede les messages/panneaux existants. Basculer vers
-# `current` seulement apres invitation et activation des intents de la nouvelle app.
-Environment=BOT_PROFILE=legacy
+# Le bot courant possede les panneaux et couvre les guildes communautaires.
+# OAuth reste sur l'application legacy tant que le secret OAuth current n'est pas deploye.
+Environment=BOT_PROFILE=current
+Environment=DISCORD_CLIENT_ID_DEV=1427690638576582697
+Environment=DISCORD_OAUTH_PROFILE=legacy
 Environment=API_HOST=127.0.0.1
 Environment=API_PORT=4000
 Environment=RANKED_HOST=127.0.0.1

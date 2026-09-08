@@ -12,6 +12,7 @@ export const env = cleanEnv(process.env, {
 		choices: ["legacy", "current"],
 		default: process.env.NODE_ENV === "development" ? "current" : "legacy",
 	}),
+	DISCORD_OAUTH_PROFILE: str({ choices: ["legacy", "current"], default: "legacy" }),
 	BOT_TOKEN: str({ default: undefined }),
 	DEV_BOT_TOKEN: str({ default: undefined }),
 
