@@ -130,9 +130,14 @@ export class RankedQueuePanelService {
 		const payload = { embeds: [embed], components: [row] };
 		if (existing) {
 			const msg = await channel.messages.fetch(existing).catch(() => null);
-			if (msg) {
+			if (msg && msg.author.id === this.client.user?.id) {
 				await msg.edit(payload);
 				return;
+			}
+			if (msg) {
+				console.warn(
+					`[ranked-queue] message ${existing} appartient au bot ${msg.author.id}; remplacement pour le profil actif`
+				);
 			}
 		}
 		const sent = await channel.send(payload);
