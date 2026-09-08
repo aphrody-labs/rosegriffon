@@ -81,6 +81,16 @@ async function probe(url: string): Promise<boolean> {
 	}
 }
 
+function oauthStateRedirect(location: string): string {
+	const state = new URL(location).searchParams.get("state") ?? "";
+	const segments = state.split(".");
+	expect(segments).toHaveLength(3);
+	const payload = JSON.parse(Buffer.from(segments[1] ?? "", "base64url").toString("utf8")) as {
+		redirect?: unknown;
+	};
+	return typeof payload.redirect === "string" ? payload.redirect : "";
+}
+
 // Sonde de disponibilité : si l'hôte ne répond pas, on saute la suite réseau concernée.
 const apiOnline = await probe(`${API_BASE}/api/health`);
 const ogOnline = await probe(`${OG_BASE}/opengraph-image`);
@@ -176,7 +186,7 @@ describe.skipIf(!apiOnline)("API contract — sécurité (auth, idempotent)", ()
 		expect(res.status).toBe(404);
 	});
 
-	test("GET /api/auth/discord?state=%2F → 302 vers Discord, redirect_uri callback + state=%2F", async () => {
+	test("GET /api/auth/discord?state=%2F → 302 vers Discord avec un state signé", async () => {
 		const res = await http(`${API_BASE}/api/auth/discord?state=%2F`, { redirect: "manual" });
 		expect(res.status).toBe(302);
 		const loc = res.headers.get("location") ?? "";
@@ -185,8 +195,9 @@ describe.skipIf(!apiOnline)("API contract — sécurité (auth, idempotent)", ()
 		// …avec un redirect_uri pointant sur le path canonique du callback…
 		expect(loc).toContain("redirect_uri=");
 		expect(loc).toContain(encodeURIComponent("/api/auth/callback"));
-		// …et le state interne sûr ré-encodé tel quel.
-		expect(loc).toContain("state=%2F");
+		// …et le state interne sûr est encapsulé dans un JWT anti-CSRF signé.
+		expect(oauthStateRedirect(loc)).toBe("/");
+		expect(res.headers.get("set-cookie") ?? "").toContain("HttpOnly");
 	});
 
 	test("SÉCU open-redirect : state=//evil.com → 302 mais state assaini (PAS //evil.com)", async () => {
@@ -196,12 +207,10 @@ describe.skipIf(!apiOnline)("API contract — sécurité (auth, idempotent)", ()
 		expect(res.status).toBe(302);
 		const loc = res.headers.get("location") ?? "";
 		expect(loc.startsWith("https://discord.com/oauth2/authorize")).toBe(true);
-		// Le state hostile est rejeté → ramené au chemin interne "/" (encodé %2F).
+		// Le state hostile est rejeté → ramené au chemin interne "/" dans le JWT signé.
 		expect(loc).not.toContain("evil.com");
 		expect(loc).not.toContain("//evil");
-		// Forme encodée du double-slash hostile interdite dans le state transmis.
-		expect(loc).not.toContain("state=%2F%2Fevil");
-		expect(loc).toContain("state=%2F");
+		expect(oauthStateRedirect(loc)).toBe("/");
 	});
 });
 

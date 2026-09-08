@@ -16,6 +16,7 @@ const textExtensions = new Set([
 const ipLiteral =
 	/(?<![A-Za-z0-9])(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3}(?![A-Za-z0-9])/;
 const forbiddenHost = /localhost|\[::1\]/i;
+const jwtSignature = /\beyJ[A-Za-z0-9_-]{16,}\.eyJ[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{16,}\b/;
 const secretSignatures: Array<[string, RegExp]> = [
 	["private-key", /-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/],
 	["aws-access-key", /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/],
@@ -23,7 +24,7 @@ const secretSignatures: Array<[string, RegExp]> = [
 	["slack-token", /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/],
 	["stripe-secret", /\bsk_(?:live|test)_[A-Za-z0-9]{16,}\b/],
 	["google-api-key", /\bAIza[0-9A-Za-z_-]{35}\b/],
-	["jwt", /\beyJ[A-Za-z0-9_-]{16,}\.eyJ[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{16,}\b/],
+	["jwt", jwtSignature],
 	[
 		"credential-url",
 		/\b(?:postgres(?:ql)?|mysql|redis|mongodb(?:\+srv)?):\/\/[^\s/]+:[^\s@]{4,}@/i,
@@ -34,6 +35,30 @@ const secretSignatures: Array<[string, RegExp]> = [
 		/\b(?:M|N|O)[A-Za-z0-9_-]{20,30}\.[A-Za-z0-9_-]{5,10}\.[A-Za-z0-9_-]{20,50}\b/,
 	],
 ];
+
+function contentForSecretScan(path: string, content: string): string {
+	if (!path.endsWith("/achillea-config.js")) return content;
+
+	return content.replace(
+		/("supabasePublishableKey"\s*:\s*")([^"]*)(")/,
+		(full, prefix: string, key: string, suffix: string) => {
+			if (key.startsWith("sb_publishable_")) return `${prefix}[public-supabase-key]${suffix}`;
+			if (!jwtSignature.test(key)) return full;
+
+			try {
+				const payload = JSON.parse(Buffer.from(key.split(".")[1] ?? "", "base64url").toString());
+				if (payload.role !== "anon") {
+					throw new Error("Supabase browser key does not carry the anon role");
+				}
+			} catch (error) {
+				if (error instanceof Error && error.message.includes("does not carry")) throw error;
+				throw new Error("Supabase browser key is not a valid anon JWT");
+			}
+
+			return `${prefix}[public-supabase-anon-key]${suffix}`;
+		}
+	);
+}
 
 async function files(directory: string): Promise<string[]> {
 	const entries = await readdir(directory, { withFileTypes: true });
@@ -65,8 +90,10 @@ for (const path of artifactFiles) {
 	if (forbiddenHost.test(content) || ipLiteral.test(content)) {
 		throw new Error(`production artifact contains a forbidden host literal: ${path}`);
 	}
+	const contentToScan = contentForSecretScan(path, content);
 	for (const [name, signature] of secretSignatures) {
-		if (signature.test(content)) throw new Error(`production artifact matches ${name}: ${path}`);
+		if (signature.test(contentToScan))
+			throw new Error(`production artifact matches ${name}: ${path}`);
 	}
 }
 
