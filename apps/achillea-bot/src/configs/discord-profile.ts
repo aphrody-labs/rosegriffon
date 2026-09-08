@@ -23,19 +23,19 @@ export function resolveDiscordBotProfile(
 	if (name === "current") {
 		return {
 			name,
-			token: env.DEV_BOT_TOKEN,
-			clientId: env.DISCORD_CLIENT_ID_DEV,
-			clientSecret: env.DISCORD_CLIENT_SECRET_DEV,
-			publicKey: env.DISCORD_PUBLIC_KEY_DEV,
+			token: env.BOT_TOKEN,
+			clientId: env.DISCORD_CLIENT_ID,
+			clientSecret: env.DISCORD_CLIENT_SECRET,
+			publicKey: env.DISCORD_PUBLIC_KEY,
 		};
 	}
 
 	return {
 		name,
-		token: env.BOT_TOKEN,
-		clientId: env.DISCORD_CLIENT_ID,
-		clientSecret: env.DISCORD_CLIENT_SECRET,
-		publicKey: env.DISCORD_PUBLIC_KEY,
+		token: env.DEV_BOT_TOKEN,
+		clientId: env.DISCORD_CLIENT_ID_DEV,
+		clientSecret: env.DISCORD_CLIENT_SECRET_DEV,
+		publicKey: env.DISCORD_PUBLIC_KEY_DEV,
 	};
 }
 
