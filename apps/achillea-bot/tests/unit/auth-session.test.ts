@@ -1,0 +1,60 @@
+import { describe, expect, test } from "bun:test";
+import jwt from "jsonwebtoken";
+
+import {
+	AUTH_ISSUER,
+	REALTIME_AUDIENCE,
+	SESSION_AUDIENCE,
+	sessionClearCookieOptions,
+	sessionCookieOptions,
+	signRealtimeToken,
+	signSessionToken,
+	verifyRealtimeToken,
+	verifySessionToken,
+} from "../../src/auth/session";
+
+process.env.JWT_SECRET_KEY = "secret-de-test-unitaire-auth-centralisee";
+
+describe("central auth session contract", () => {
+	test("issues a purpose-bound web session", () => {
+		const token = signSessionToken({ id: "42", username: "Aphrodi" });
+		const decoded = jwt.decode(token) as jwt.JwtPayload & { tokenUse: string };
+		expect(decoded.sub).toBe("42");
+		expect(decoded.iss).toBe(AUTH_ISSUER);
+		expect(decoded.aud).toBe(SESSION_AUDIENCE);
+		expect(decoded.tokenUse).toBe("session");
+		expect(verifySessionToken(token)).toEqual({
+			id: "42",
+			username: "Aphrodi",
+			avatar: undefined,
+			sim: undefined,
+		});
+		expect(() => verifyRealtimeToken(token)).toThrow("Invalid token use");
+	});
+
+	test("issues a short, purpose-bound realtime token", () => {
+		const token = signRealtimeToken({ id: "7", avatar: "hash" });
+		const decoded = jwt.decode(token) as jwt.JwtPayload & { tokenUse: string };
+		expect(decoded.aud).toBe(REALTIME_AUDIENCE);
+		expect(decoded.tokenUse).toBe("realtime");
+		expect(verifyRealtimeToken(token).id).toBe("7");
+		expect(() => verifySessionToken(token)).toThrow("Invalid token use");
+		expect((decoded.exp ?? 0) - (decoded.iat ?? 0)).toBe(300);
+	});
+
+	test("temporarily accepts legacy signed cookies but can reject them explicitly", () => {
+		const legacy = jwt.sign({ id: "99" }, process.env.JWT_SECRET_KEY!, {
+			algorithm: "HS256",
+			expiresIn: "30d",
+		});
+		expect(verifySessionToken(legacy).id).toBe("99");
+		expect(() => verifySessionToken(legacy, false)).toThrow("Legacy token rejected");
+	});
+
+	test("uses identical cookie scope when setting and clearing", () => {
+		const set = sessionCookieOptions(true);
+		const clear = sessionClearCookieOptions(true);
+		expect(clear).toEqual({ httpOnly: true, secure: true, sameSite: "lax", path: "/" });
+		expect(set.maxAge).toBeGreaterThan(0);
+	});
+});

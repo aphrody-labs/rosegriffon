@@ -4,6 +4,7 @@ import { Client, Room } from "@colyseus/sdk";
 import { MessageService } from "primeng/api";
 
 import { environment } from "../../../environments/environment";
+import { AuthSessionService } from "../../core/auth/auth-session.service";
 import {
 	MatchMode,
 	RankedChallengeLink,
@@ -45,7 +46,7 @@ export class RankedRoomService {
 	private queueRoom: Room | null = null;
 	private matchRoom: Room | null = null;
 	private lobbyRoom: Room | null = null;
-	private cachedToken: string | null = null;
+	private auth = inject(AuthSessionService);
 
 	readonly searching = signal(false);
 	readonly etaSeconds = signal<number | null>(null);
@@ -221,29 +222,14 @@ export class RankedRoomService {
 	// ranked.rosegriffon.fr (cross-domain). On récupère le JWT via
 	// /api/auth/token (proxy nginx) et on le passe en options Colyseus.
 	private async getAuthToken(): Promise<string | null> {
-		if (this.cachedToken) {
-			this.client.auth.token = this.cachedToken;
-			return this.cachedToken;
-		}
-		try {
-			const r = await fetch("/api/auth/token", { credentials: "include" });
-			if (!r.ok) return null;
-			const body = (await r.json()) as { token: string };
-			this.cachedToken = body.token;
-			// Pose le token sur le SDK Colyseus → envoyé en `?_authToken=` sur TOUTE connexion
-			// (joinOrCreate ET consumeSeatReservation / joinById). C'est le SEUL moyen d'authentifier
-			// la MatchRoom depuis un navigateur cross-domain : les options de consumeSeatReservation
-			// ne sont PAS transmises au onAuth serveur (≠ joinOrCreate), et le cookie/Authorization
-			// ne traversent pas l'upgrade WebSocket vers ranked.rosegriffon.fr.
-			this.client.auth.token = body.token;
-			return body.token;
-		} catch {
-			return null;
-		}
+		const token = await this.auth.getRealtimeToken();
+		if (token) this.client.auth.token = token;
+		return token;
 	}
 
 	clearAuthCache(): void {
-		this.cachedToken = null;
+		this.auth.clearRealtimeToken();
+		this.client.auth.token = "";
 	}
 
 	get me(): RankedPlayerView | undefined {

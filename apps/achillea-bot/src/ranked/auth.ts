@@ -1,42 +1,27 @@
-// Vérifie le cookie session du frontend pour Colyseus onAuth + REST.
-// Le bot signe avec process.env.JWT_SECRET_KEY ; le frontend doit utiliser
-// la même clé et le même nom de cookie (`token`) — voir docs/ranking.md §6.
+// Adaptateurs transport pour le contrat d'auth centralisé.
+import {
+	getCookieValue,
+	SESSION_COOKIE_NAME,
+	type SessionIdentity,
+	verifyRealtimeToken,
+	verifySessionToken,
+} from "@/auth";
 
-import jwt from "jsonwebtoken";
-
-export interface SessionUser {
-	id: string;
-	username?: string;
-	avatar?: string;
-}
+export type SessionUser = SessionIdentity;
 
 export function getCookie(cookieHeader: string | null, name: string): string | null {
-	if (!cookieHeader) return null;
-	for (const part of cookieHeader.split(";")) {
-		const [k, ...v] = part.trim().split("=");
-		if (k === name) return decodeURIComponent(v.join("="));
-	}
-	return null;
+	return getCookieValue(cookieHeader, name);
 }
 
 export function verifyToken(token: string): SessionUser {
-	const secret = process.env.JWT_SECRET_KEY;
-	if (!secret) throw new Error("JWT_SECRET_KEY missing");
-	const payload = jwt.verify(token, secret, { algorithms: ["HS256"] }) as Record<string, unknown>;
-	const id = typeof payload.id === "string" ? payload.id : String(payload.sub ?? "");
-	if (!id) throw new Error("Token sans id");
-	return {
-		id,
-		username: typeof payload.username === "string" ? payload.username : undefined,
-		avatar: typeof payload.avatar === "string" ? payload.avatar : undefined,
-	};
+	return verifyRealtimeToken(token);
 }
 
 export function authFromCookieHeader(header: string | null): SessionUser | null {
-	const token = getCookie(header, "token");
+	const token = getCookie(header, SESSION_COOKIE_NAME);
 	if (!token) return null;
 	try {
-		return verifyToken(token);
+		return verifySessionToken(token);
 	} catch {
 		return null;
 	}

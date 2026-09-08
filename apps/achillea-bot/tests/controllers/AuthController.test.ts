@@ -7,6 +7,7 @@
 import "reflect-metadata";
 
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import jwt from "jsonwebtoken";
 import { container } from "tsyringe";
 
 class MockUserServiceClass {}
@@ -230,6 +231,7 @@ describe("AuthController", () => {
 		const jsonMock = mock(() => {});
 		const mockRes = {
 			clearCookie: clearCookieMock,
+			setHeader: mock(() => {}),
 			json: jsonMock,
 		} as any;
 
@@ -239,6 +241,24 @@ describe("AuthController", () => {
 		expect(clearCookieMock.mock.calls[0][0]).toBe("token");
 		expect(jsonMock.mock.calls.length).toBe(1);
 		expect(jsonMock.mock.calls[0][0]).toEqual({ ok: true });
+	});
+
+	test("token returns a short-lived realtime token instead of the session cookie", () => {
+		const jsonMock = mock(() => {});
+		const mockRes = { setHeader: mock(() => {}), json: jsonMock } as any;
+		const ctx = {
+			get: mock(() => ({ id: "42", username: "realtime-user", avatar: "hash" })),
+		} as any;
+
+		authController.token(ctx, mockRes);
+
+		expect(jsonMock).toHaveBeenCalledTimes(1);
+		const body = jsonMock.mock.calls[0][0] as { token: string; expiresIn: number; userId: string };
+		expect(body.expiresIn).toBe(300);
+		expect(body.userId).toBe("42");
+		const decoded = jwt.decode(body.token) as jwt.JwtPayload & { tokenUse: string };
+		expect(decoded.tokenUse).toBe("realtime");
+		expect(decoded.aud).toBe("achillea-realtime");
 	});
 
 	test("callback exchanges code, syncs user, sets session cookie and redirects", async () => {

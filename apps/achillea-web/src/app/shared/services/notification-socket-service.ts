@@ -1,63 +1,87 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { io, Socket } from "socket.io-client";
 import { Observable } from "rxjs";
 import { environment } from "../../../environments/environment";
+import { AuthSessionService } from "../../core/auth/auth-session.service";
 
 @Injectable({
 	providedIn: "root",
 })
 export class NotificationSocketService {
+	private auth = inject(AuthSessionService);
 	private socket?: Socket;
-	private connecting = false;
+	private connectPromise: { generation: number; value: Promise<void> } | null = null;
+	private connectionGeneration = 0;
+	private authRefreshAttempted = false;
 
 	async connect(): Promise<void> {
-		if (this.socket?.connected || this.connecting) return;
-		this.connecting = true;
+		if (this.socket?.connected) return;
+		if (this.socket) {
+			const token = await this.auth.getRealtimeToken();
+			if (token) this.socket.auth = { token };
+			this.authRefreshAttempted = false;
+			this.socket.connect();
+			return;
+		}
+		if (this.connectPromise?.generation === this.connectionGeneration) {
+			return this.connectPromise.value;
+		}
+
+		const generation = this.connectionGeneration;
+		const pending = { generation, value: this.open(generation) };
+		this.connectPromise = pending;
 		try {
-			const namespace = "/notifications";
-			const base = environment.socketUrl ? environment.socketUrl.replace(/\/$/, "") : "";
-			const target = `${base}${namespace}`;
-
-			// Cross-domain (achillea.* → ranked.*) : le cookie `token` ne traverse pas le
-			// domaine du backend WS. On récupère donc le JWT (même endpoint que le client
-			// Colyseus) et on le passe dans le handshake Socket.IO. Sans ça, l'auth du
-			// namespace /notifications échoue et AUCUN event temps réel n'arrive
-			// (match_found, rematch_offer, notifications) → revanche cassée en prod.
-			const token = await this.fetchToken();
-
-			this.socket = io(target, {
-				path: environment.socketPath,
-				withCredentials: true,
-				transports: ["websocket", "polling"],
-				auth: token ? { token } : {},
-			});
-
-			this.socket.on("connect", () => {
-				console.info("Socket connected", this.socket?.id);
-			});
-
-			this.socket.on("disconnect", () => {
-				console.info("Socket disconnected");
-			});
+			await pending.value;
 		} finally {
-			this.connecting = false;
+			if (this.connectPromise === pending) this.connectPromise = null;
 		}
 	}
 
-	// JWT brut (cookie HttpOnly → token) pour authentifier le socket cross-domain.
-	private async fetchToken(): Promise<string | null> {
-		try {
-			const r = await fetch("/api/auth/token", { credentials: "include" });
-			if (!r.ok) return null;
-			const body = (await r.json()) as { token?: string };
-			return body.token ?? null;
-		} catch {
-			return null;
-		}
+	private async open(generation: number): Promise<void> {
+		const namespace = "/notifications";
+		const base = environment.socketUrl ? environment.socketUrl.replace(/\/$/, "") : "";
+		const target = `${base}${namespace}`;
+
+		// Cross-domain (achillea.* → ranked.*) : le cookie `token` ne traverse pas le
+		// domaine du backend WS. On récupère donc le JWT (même endpoint que le client
+		// Colyseus) et on le passe dans le handshake Socket.IO. Sans ça, l'auth du
+		// namespace /notifications échoue et AUCUN event temps réel n'arrive
+		// (match_found, rematch_offer, notifications) → revanche cassée en prod.
+		const token = await this.auth.getRealtimeToken();
+		if (generation !== this.connectionGeneration) return;
+
+		this.socket = io(target, {
+			path: environment.socketPath,
+			withCredentials: true,
+			transports: ["websocket", "polling"],
+			auth: token ? { token } : {},
+		});
+
+		this.socket.on("connect", () => {
+			this.authRefreshAttempted = false;
+			console.info("Socket connected", this.socket?.id);
+		});
+
+		this.socket.on("disconnect", () => {
+			console.info("Socket disconnected");
+		});
+
+		this.socket.on("connect_error", async (error) => {
+			if (!/auth/i.test(error.message) || this.authRefreshAttempted) return;
+			this.authRefreshAttempted = true;
+			this.auth.clearRealtimeToken();
+			const refreshed = await this.auth.getRealtimeToken();
+			if (!refreshed || !this.socket) return;
+			this.socket.auth = { token: refreshed };
+			this.socket.connect();
+		});
 	}
 
 	disconnect() {
+		this.connectionGeneration += 1;
+		this.authRefreshAttempted = false;
 		this.socket?.disconnect();
+		this.socket = undefined;
 	}
 
 	/** Listen for "notification" events from the server */

@@ -17,8 +17,12 @@ export const authGuard: CanActivateFn = async (
 
 	if (svc.user()) {
 		return true;
-	} else {
-		router.navigate(["/auth"], { queryParams: { returnUrl: state.url } });
-		return false;
 	}
+
+	return router.createUrlTree(["/auth"], {
+		queryParams: {
+			returnUrl: state.url,
+			...(svc.authStatus() === "error" ? { reason: "unavailable" } : {}),
+		},
+	});
 };

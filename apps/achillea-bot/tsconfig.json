@@ -28,6 +28,8 @@
 
 		"baseUrl": "./",
 		"paths": {
+			"@/auth": ["./src/auth"],
+			"@/auth/*": ["./src/auth/*"],
 			"@/decorators": ["./src/utils/decorators"],
 			"@/decorators/*": ["./src/plugins/*/utils/decorators"],
 

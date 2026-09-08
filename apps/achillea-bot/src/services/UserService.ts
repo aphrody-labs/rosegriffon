@@ -165,8 +165,8 @@ export class UserService {
 			await this.db.em.getRepository(User).updateLastInteract(dUser);
 		}
 		// Discord injoignable (ou utilisateur de test) → on retombe sur la donnée stockée.
-		// La protection contre les jetons forgés reste la SIGNATURE JWT (jwt.verify dans
-		// CookieAuthorize, secret JWT_SECRET_KEY) ; en complément, getUserData renvoie null
+		// La protection contre les jetons forgés reste la vérification centralisée du JWT
+		// (signature, audience et usage) ; en complément, getUserData renvoie null
 		// pour un id sans ligne user_view → un jeton signé pointant un user inexistant est aussi rejeté.
 		return await this.getUserData(userId);
 	}

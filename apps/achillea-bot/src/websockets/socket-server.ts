@@ -1,12 +1,16 @@
 import http from "node:http";
 
 import express from "express";
-import jwt from "jsonwebtoken";
 import type { DefaultEventsMap, ExtendedError, Socket } from "socket.io";
 import { Server as SocketIOServer } from "socket.io";
 
+import {
+	getCookieValue,
+	SESSION_COOKIE_NAME,
+	verifyRealtimeToken,
+	verifySessionToken,
+} from "@/auth";
 import { urlsConfig } from "@/configs/urls";
-import { env } from "@/env";
 
 // Create an Express app (optional; you can use plain HTTP too)
 const app = express();
@@ -38,37 +42,21 @@ function authMiddleware(
 				? (socket.handshake.auth as { token: string }).token
 				: null;
 		const rawCookie = socket.handshake.headers.cookie;
-		const token = authToken ?? (rawCookie ? getCookieValue(rawCookie, "token") : null);
+		const cookieToken = rawCookie ? getCookieValue(rawCookie, SESSION_COOKIE_NAME) : null;
+		const token = authToken ?? cookieToken;
 		if (!token) {
 			console.warn("⚠ Token absent (ni handshake auth ni cookie)");
 
 			return next(new Error("Authentication error"));
 		}
 
-		const payload = jwt.verify(token, env.JWT_SECRET_KEY, { algorithms: ["HS256"] });
-		if (typeof payload === "string" || typeof payload.id !== "string" || !payload.id) {
-			return next(new Error("Authentication error"));
-		}
+		const payload = authToken ? verifyRealtimeToken(token) : verifySessionToken(token);
 		(socket as any).user = payload;
 
 		next();
 	} catch (err) {
 		next(new Error("Authentication error"));
 	}
-}
-
-function getCookieValue(cookieHeader: string, name: string) {
-	if (!cookieHeader) return null;
-
-	const parts = cookieHeader.split(";");
-	for (const part of parts) {
-		const [key, ...vals] = part.trim().split("=");
-		if (key === name) {
-			return decodeURIComponent(vals.join("="));
-		}
-	}
-
-	return null;
 }
 
 // ─── /notifications ─────────────────────────────────────────────────────
