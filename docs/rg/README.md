@@ -42,6 +42,7 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 
 | Doc | Portée |
 | --- | --- |
+| [PROD-STATUS.md](PROD-STATUS.md) | État vérifié de la production, surfaces retirées et règles pour les agents. |
 | [deploy.md](deploy.md) | Déploiement et exploitation : services, procédures, diagnostic, interdits. |
 | [deploiement-sans-coupure.md](deploiement-sans-coupure.md) | Publication bleu/vert : slots, versions, prévisualisation, et les trois pièges qui cassent une prod pendant un déploiement. |
 | [self-host-supabase.md](self-host-supabase.md) | Sortie de Supabase : PostgreSQL local, PostgREST, Storage et Realtime auto-hébergés. |
