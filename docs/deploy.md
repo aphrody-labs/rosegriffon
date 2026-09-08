@@ -7,6 +7,11 @@ status: "stable"
 
 # Déploiement et exploitation
 
+> **Production status — 2026-09-08:** BXC, public MCP, and public RAG are retired.
+> Their old service rows and commands below are historical references only. The
+> canonical current state is [`PROD-STATUS.md`](PROD-STATUS.md). Do not enable a
+> retired unit or install its old public vhost.
+
 Tout tourne sur un **seul VPS**, derrière nginx, en services systemd lancés par
 l'utilisateur `ubuntu`. Il n'y a aucun déploiement externe : les deux
 applications Next ont été rapatriées en auto-hébergement.
@@ -21,17 +26,18 @@ une commande explicite sur la machine.
 | `azalee-web` | 3003 | wiki Azalée (Next 16 standalone) | oui |
 | `website-web` | 3004 | site principal (Next 16 standalone) | oui |
 | `azalee-api` | 8807 | API JSON headless du wiki (41 routes) | non |
-| `rg-mcp` | 8808 | serveur Model Context Protocol | non |
-| `rag-api` | 8806 | recherche sémantique locale | non |
-| `rg-rag-embed` | 8799 | service d'embeddings auto-hébergé | non |
+| `rg-mcp` | 8808 | **retired — public HTTP disabled; local stdio only** | non |
+| `rag-api` | 8806 | **retired — public HTTP disabled** | non |
+| `rg-rag-embed` | 8799 | **retired — embeddings sidecar disabled** | non |
 | `rg-cdn` | 8804 | CDN images (`/images`, `/upload`) | non |
 | `cdn-variants` | 8805 | redimensionnement + WebP à la volée | non |
 | `nie-model-serve` | 8790 | modèles 3D assemblés à la volée, décodage **live** des textures des archives CPK | non (binaire Rust) |
 | `rg-cron` | — | tâches planifiées | non |
 | `nie-miroir.timer` | — | rafraîchissement quotidien du miroir SQLite canonique | non |
 
-Domaines : `rosegriffon.fr`, `azalee.rosegriffon.fr`, `api.rosegriffon.fr`
-(passerelle des outils internes), `cdn.rosegriffon.fr`, `mcp.rosegriffon.fr`.
+Domaines actifs : `rosegriffon.fr`, `azalee.rosegriffon.fr`, `api.rosegriffon.fr`,
+`cdn.rosegriffon.fr`, and `achillea.rosegriffon.fr`. `mcp.rosegriffon.fr` remains a
+retired vhost and returns `410`.
 Les configurations nginx et les unités systemd sont versionnées dans
 [`infra/`](../infra).
 
@@ -108,7 +114,7 @@ redémarrage :
 
 ```bash
 sudo systemctl restart azalee-api.service   # API headless du wiki
-sudo systemctl restart rg-mcp.service       # serveur MCP
+# RETIRED: rg-mcp.service is masked; use the local stdio MCP process.
 sudo systemctl restart rg-cron.service      # tâches planifiées
 ```
 
