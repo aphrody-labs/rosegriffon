@@ -14,6 +14,7 @@ import "reflect-metadata";
 
 // Env de test
 process.env.NODE_ENV = process.env.NODE_ENV ?? "test";
+process.env.BOT_PROFILE = process.env.BOT_PROFILE ?? "legacy";
 process.env.BOT_TOKEN = process.env.BOT_TOKEN ?? "test-bot-token";
 process.env.DEV_BOT_TOKEN = process.env.DEV_BOT_TOKEN ?? "test-dev-bot-token";
 process.env.TEST_GUILD_ID = process.env.TEST_GUILD_ID ?? "100000000000000000";

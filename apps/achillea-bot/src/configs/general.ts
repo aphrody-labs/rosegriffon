@@ -1,4 +1,5 @@
 import { env } from "@/env";
+import { discordBotProfile } from "./discord-profile";
 
 export const generalConfig: GeneralConfigType = {
 	name: "AchilleaBot", // the name of your bot
@@ -48,7 +49,9 @@ const coreManagerConfig_Test = {
 	rankedCategoryId: "1261289734521749524", // The category ID of the category where the ranked channels will be created
 	clanCategoryId: "1366082215460606003", // The category ID of the category where the clan channels will be created
 	interclanCategoryId: "1433410236009545789",
-	botId: "1256600975464992818", // The bot ID
+	botId:
+		discordBotProfile.clientId ??
+		(discordBotProfile.name === "current" ? "1427690638576582697" : "1256600975464992818"),
 	clanInvitesForumId: "1367046267590541363",
 	clanAnnouncementsChannelId: "1388101315263201334", // The channel ID of the channel where the clan announcements will be sent
 	botChannelId: "1388102060356145152", // The channel ID of the channel where the users will use bot commands
@@ -68,7 +71,9 @@ const coreManagerConfig_Prod = {
 	rankedCategoryId: "1398801439026974822", // The category ID of the category where the ranked channels will be created
 	clanCategoryId: "1457486074874957917", // The category ID of the category where the clan channels will be created
 	interclanCategoryId: "",
-	botId: "1427690638576582697", // The bot ID
+	botId:
+		discordBotProfile.clientId ??
+		(discordBotProfile.name === "current" ? "1427690638576582697" : "1256600975464992818"),
 	clanInvitesForumId: "1398801519729709128",
 	clanAnnouncementsChannelId: "1398801515694788719", // The channel ID of the channel where the clan announcements will be sent
 	botChannelId: "1437025812833370313", // The channel ID of the channel where the users will use bot commands

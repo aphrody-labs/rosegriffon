@@ -30,17 +30,16 @@ import {
 	verifyOAuthState,
 } from "../security/oauth-state";
 import { env } from "@/env";
+import { discordBotProfile } from "@/configs/discord-profile";
 import type { UserDTO } from "@/services";
 import { OAuthService, UserService } from "@/services";
 import { BaseController } from "@/utils/classes";
 import { resolveDependencies } from "@/utils/functions";
 
 function discordClientId(): string {
-	const clientId = env.isDev
-		? (env.DISCORD_CLIENT_ID_DEV ?? env.DISCORD_CLIENT_ID)
-		: env.DISCORD_CLIENT_ID;
+	const clientId = discordBotProfile.clientId;
 	if (!clientId)
-		throw new Error("DISCORD_CLIENT_ID manquant dans .env (ou DISCORD_CLIENT_ID_DEV en dev)");
+		throw new Error(`DISCORD_CLIENT_ID manquant pour le profil ${discordBotProfile.name}`);
 	return clientId;
 }
 

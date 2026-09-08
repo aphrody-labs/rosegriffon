@@ -5,10 +5,17 @@ import { cleanEnv, num, str, url } from "envalid";
 export const env = cleanEnv(process.env, {
 	NODE_ENV: str({ choices: ["development", "production", "test"], default: "development" }),
 
-	BOT_TOKEN: str(),
-	DEV_BOT_TOKEN: str(),
+	// Profils Discord : `legacy` conserve l'ancien bot present sur les serveurs
+	// historiques ; `current` utilise la nouvelle application. Token, client ID,
+	// secret OAuth et cle publique sont toujours selectionnes ensemble.
+	BOT_PROFILE: str({
+		choices: ["legacy", "current"],
+		default: process.env.NODE_ENV === "development" ? "current" : "legacy",
+	}),
+	BOT_TOKEN: str({ default: undefined }),
+	DEV_BOT_TOKEN: str({ default: undefined }),
 
-	TEST_GUILD_ID: str(),
+	TEST_GUILD_ID: str({ default: undefined }),
 	BOT_OWNER_ID: str(),
 
 	DISCORD_CLIENT_ID: str({ default: undefined }),
