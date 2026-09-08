@@ -76,6 +76,15 @@ location /realtime/v1/ {
     add_header X-Accel-Buffering no;
 }
 
+# Compatibilité d'une couverture d'article publiée avant la migration Storage.
+# L'objet source n'existe ni dans le bucket local `article`, ni dans les
+# sauvegardes disponibles. L'article pointe désormais vers l'asset du jeu qui
+# servait de couverture ; garder cette redirection exacte évite que les pages
+# et caches sociaux antérieurs à la migration continuent de recevoir une 404.
+location = /storage/v1/object/public/article/71308511-4a51-4e8b-9f50-57e8c547a951.webp {
+    return 301 https://cdn.rosegriffon.fr/dx11/menu/220_img/gallery_img2/img_story_ev02_main_0020.png$is_args$args;
+}
+
 location /storage/v1/ {
     proxy_pass http://127.0.0.1:8810/;
     proxy_http_version 1.1;
