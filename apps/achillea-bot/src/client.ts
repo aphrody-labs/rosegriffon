@@ -109,12 +109,18 @@ export async function resolveGrantedIntents(botToken: string): Promise<GatewayIn
 }
 
 export function clientConfig(intents: readonly GatewayIntentBits[] = FULL_INTENTS): ClientOptions {
+	const commandGuilds = env.BOT_COMMAND_GUILDS
+		?.split(",")
+		.map((id) => id.trim())
+		.filter(Boolean);
 	return {
 		// to only use global commands (use @Guild for specific guild command), comment this line
 		botGuilds:
-			env.NODE_ENV === "development" && env.TEST_GUILD_ID
-				? [env.TEST_GUILD_ID]
-				: undefined,
+			commandGuilds?.length
+				? commandGuilds
+				: env.NODE_ENV === "development" && env.TEST_GUILD_ID
+					? [env.TEST_GUILD_ID]
+					: undefined,
 
 		// Intents résolus par `resolveGrantedIntents()` : demander un intent privilégié
 		// non activé dans le Dev Portal fait refuser la connexion EN BLOC.
