@@ -40,6 +40,7 @@ export function resolveDiscordBotProfile(
 }
 
 export const discordBotProfile = resolveDiscordBotProfile();
+export const discordOAuthProfile = resolveDiscordBotProfile(env.DISCORD_OAUTH_PROFILE);
 
 export function assertDiscordBotProfile(profile: DiscordBotProfile): void {
 	if (!profile.token) throw new Error(`Token Discord absent pour le profil ${profile.name}`);

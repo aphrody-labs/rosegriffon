@@ -48,7 +48,7 @@ hors Git :
 
 | Classe              | Variables                                                                                                                                       |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Discord             | `BOT_PROFILE=legacy|current`; profil `legacy` : `BOT_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_PUBLIC_KEY`; profil `current` : `DEV_BOT_TOKEN`, `DISCORD_CLIENT_ID_DEV`, `DISCORD_CLIENT_SECRET_DEV`, `DISCORD_PUBLIC_KEY_DEV`; `TEST_GUILD_ID`, `BOT_OWNER_ID` |
+| Discord             | `BOT_PROFILE=legacy|current` (Gateway) et `DISCORD_OAUTH_PROFILE=legacy|current` (OAuth indépendant) ; profil `legacy` : `BOT_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_PUBLIC_KEY`; profil `current` : `DEV_BOT_TOKEN`, `DISCORD_CLIENT_ID_DEV`, `DISCORD_CLIENT_SECRET_DEV`, `DISCORD_PUBLIC_KEY_DEV`; `TEST_GUILD_ID`, `BOT_OWNER_ID` |
 | PostgreSQL Supabase | `DATABASE_URL` (recommandé) ; les cinq variables `DATABASE_*` historiques restent un repli                                                      |
 | API et sessions     | `API_ADMIN_TOKEN`, `JWT_SECRET_KEY`, `RANKED_INTERNAL_SECRET`                                                                                   |
 | Redis               | `REDIS_HOST`, `REDIS_PORT`                                                                                                                      |
