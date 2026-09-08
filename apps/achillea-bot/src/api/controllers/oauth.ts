@@ -14,6 +14,7 @@ import {
 } from "../security/oauth-state";
 import { parseProviderOAuthState } from "../security/provider-oauth-state";
 import { urlsConfig } from "@/configs";
+import { discordBotProfile } from "@/configs/discord-profile";
 import { env } from "@/env";
 import { UserService, Database } from "@/services";
 import { BaseController } from "@/utils/classes";
@@ -50,12 +51,8 @@ export class DiscordOAuthCallbackController extends BaseController {
 			return res.status(400).send("Invalid OAuth state");
 		}
 
-		const clientId = env.isDev
-			? (env.DISCORD_CLIENT_ID_DEV ?? env.DISCORD_CLIENT_ID)
-			: env.DISCORD_CLIENT_ID;
-		const clientSecret = env.isDev
-			? (env.DISCORD_CLIENT_SECRET_DEV ?? env.DISCORD_CLIENT_SECRET)
-			: env.DISCORD_CLIENT_SECRET;
+		const clientId = discordBotProfile.clientId;
+		const clientSecret = discordBotProfile.clientSecret;
 		if (!clientId || !clientSecret) {
 			return res.status(500).send("DISCORD_CLIENT_ID / DISCORD_CLIENT_SECRET non configurés");
 		}

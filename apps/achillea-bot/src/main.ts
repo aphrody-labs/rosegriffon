@@ -19,7 +19,7 @@ import { container } from "tsyringe";
 import type { constructor } from "tsyringe/dist/typings/types";
 
 import { Server } from "@/api/server";
-import { apiConfig } from "@/configs";
+import { apiConfig, discordBotProfile } from "@/configs";
 import { keptInstances } from "@/decorators";
 import { env } from "@/env";
 import { NoBotTokenError } from "@/errors";
@@ -34,7 +34,11 @@ import {
 } from "@/services";
 import { checkEnvironmentVariables, initDataTable, resolveDependency } from "@/utils/functions";
 
-import { clientConfig, resolveGrantedIntents } from "./client";
+import {
+	assertDiscordTokenMatchesProfile,
+	clientConfig,
+	resolveGrantedIntents,
+} from "./client";
 import { CastReminders } from "./cron/CastReminders";
 import { WorkerService } from "./services/WorkerService";
 import { startSocketServer, stopSocketServer } from "./websockets/socket-server";
@@ -262,8 +266,23 @@ async function init() {
 	// Les intents sont résolus AVANT la construction : `client.options.intents` est
 	// figé ensuite, et Discord refuse la connexion entière si l'un des intents
 	// privilégiés demandés n'est pas activé sur l'application.
-	const bootToken = env.NODE_ENV === "development" ? env.DEV_BOT_TOKEN : env.BOT_TOKEN;
-	const intents = bootToken ? await resolveGrantedIntents(bootToken) : undefined;
+	let bootToken = discordBotProfile.token;
+	let intents;
+	if (bootToken) {
+		try {
+			await assertDiscordTokenMatchesProfile(bootToken, discordBotProfile);
+			intents = await resolveGrantedIntents(bootToken);
+			console.info(
+				`[bot] Profil Discord ${discordBotProfile.name} valide — application=${discordBotProfile.clientId}, intents=${intents.length}`
+			);
+		} catch (error) {
+			console.error(
+				`[bot] Profil Discord ${discordBotProfile.name} refuse — REST/Socket.IO/ranked restent actifs :`,
+				error instanceof Error ? error.message : error
+			);
+			bootToken = undefined;
+		}
+	}
 	const client = new Client(clientConfig(intents));
 	activeClient = client;
 
@@ -314,7 +333,7 @@ async function init() {
 		});
 
 		// log in with the bot token
-		const botToken = env.NODE_ENV === "development" ? env.DEV_BOT_TOKEN : env.BOT_TOKEN;
+		const botToken = bootToken;
 
 		// Token absent : même politique que login KO ci-dessous — Discord est HS mais
 		// l'API REST, Socket.IO et le ranked déjà démarrés doivent rester debout.

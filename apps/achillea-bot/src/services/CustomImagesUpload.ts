@@ -6,10 +6,10 @@ import type { Attachment } from "discord.js";
 import sharp from "sharp";
 
 import { coreManagerConfig } from "@/configs";
+import { discordBotProfile } from "@/configs/discord-profile";
 import { Service } from "@/decorators";
 import type { ImageRepository } from "@/entities";
 import { Image } from "@/entities";
-import { env } from "@/env";
 import { Database } from "@/services";
 import { SupabaseImageStorage } from "@/services/SupabaseImageStorage";
 import type { EntityManager } from "@mikro-orm/core";
@@ -137,7 +137,7 @@ export class CustomImagesUpload {
 		const newBuffer = await this.ensureBufferSize(buffer);
 
 		const base64 = `data:${mimeType};base64,${newBuffer.toString("base64")}`;
-		const token = env.isDev ? env.DEV_BOT_TOKEN : env.BOT_TOKEN;
+		const token = discordBotProfile.token;
 
 		const res = await axios.post(
 			`https://discord.com/api/v10/applications/${coreManagerConfig.botId}/emojis`,
@@ -162,7 +162,7 @@ export class CustomImagesUpload {
 	async deleteEmoji(emojiId: string): Promise<void> {
 		const url = `https://discord.com/api/v10/applications/${coreManagerConfig.botId}/emojis/${emojiId}`;
 
-		const token = env.isDev ? env.DEV_BOT_TOKEN : env.BOT_TOKEN;
+		const token = discordBotProfile.token;
 
 		await axios.delete(url, {
 			headers: {
@@ -179,7 +179,7 @@ export class CustomImagesUpload {
 			{ name: newName },
 			{
 				headers: {
-					Authorization: `Bot ${env.BOT_TOKEN}`,
+					Authorization: `Bot ${discordBotProfile.token}`,
 					"Content-Type": "application/json",
 				},
 			}

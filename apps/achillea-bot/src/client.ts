@@ -2,6 +2,7 @@ import { GatewayIntentBits, Partials } from "discord.js";
 import type { ClientOptions } from "@aphrody/discordx";
 
 import { generalConfig, logsConfig } from "@/configs";
+import { discordBotProfile } from "@/configs/discord-profile";
 import { env } from "@/env";
 import {
 	ChannelRestriction,
@@ -110,7 +111,10 @@ export async function resolveGrantedIntents(botToken: string): Promise<GatewayIn
 export function clientConfig(intents: readonly GatewayIntentBits[] = FULL_INTENTS): ClientOptions {
 	return {
 		// to only use global commands (use @Guild for specific guild command), comment this line
-		botGuilds: env.NODE_ENV === "development" ? [env.TEST_GUILD_ID] : undefined,
+		botGuilds:
+			env.NODE_ENV === "development" && env.TEST_GUILD_ID
+				? [env.TEST_GUILD_ID]
+				: undefined,
 
 		// Intents résolus par `resolveGrantedIntents()` : demander un intent privilégié
 		// non activé dans le Dev Portal fait refuser la connexion EN BLOC.
@@ -135,4 +139,25 @@ export function clientConfig(intents: readonly GatewayIntentBits[] = FULL_INTENT
 			prefix: generalConfig.simpleCommandsPrefix,
 		},
 	};
+}
+
+/** Refuse silencieusement les melanges token/application avant le login Gateway. */
+export async function assertDiscordTokenMatchesProfile(
+	botToken: string,
+	profile = discordBotProfile
+): Promise<void> {
+	if (!profile.clientId) throw new Error(`Client ID Discord absent pour le profil ${profile.name}`);
+	const response = await fetch("https://discord.com/api/v10/applications/@me", {
+		headers: { Authorization: `Bot ${botToken}` },
+		signal: AbortSignal.timeout(10_000),
+	});
+	if (!response.ok) {
+		throw new Error(`Token Discord invalide pour le profil ${profile.name} (HTTP ${response.status})`);
+	}
+	const application = (await response.json()) as { id?: string };
+	if (application.id !== profile.clientId) {
+		throw new Error(
+			`Profil Discord incoherent : token=${application.id ?? "inconnu"}, clientId=${profile.clientId}`
+		);
+	}
 }
