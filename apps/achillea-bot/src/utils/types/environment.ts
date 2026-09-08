@@ -10,9 +10,9 @@ export const env = cleanEnv(process.env, {
 	// secret OAuth et cle publique sont toujours selectionnes ensemble.
 	BOT_PROFILE: str({
 		choices: ["legacy", "current"],
-		default: process.env.NODE_ENV === "development" ? "current" : "legacy",
+		default: "current",
 	}),
-	DISCORD_OAUTH_PROFILE: str({ choices: ["legacy", "current"], default: "legacy" }),
+	DISCORD_OAUTH_PROFILE: str({ choices: ["legacy", "current"], default: "current" }),
 	BOT_TOKEN: str({ default: undefined }),
 	DEV_BOT_TOKEN: str({ default: undefined }),
 
