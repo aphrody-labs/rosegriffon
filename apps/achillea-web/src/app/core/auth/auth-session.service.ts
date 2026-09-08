@@ -98,7 +98,10 @@ export class AuthSessionService {
 			const response = await fetch(apiUrl("/api/auth/logout"), {
 				method: "POST",
 				credentials: "include",
-				headers: { Accept: "application/json" },
+				headers: { Accept: "application/json", "Content-Type": "application/json" },
+				// Le proxy ranked Bun attend un ReadableStream pour les requêtes POST.
+				// Un objet JSON vide évite son erreur sur un corps totalement absent.
+				body: "{}",
 			});
 			if (!response.ok) return false;
 			this.clearLocalSession("anonymous");
