@@ -5,9 +5,9 @@ import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { bearer } from "better-auth/plugins";
 import { agentAuth } from "@better-auth/agent-auth";
-import { Pool } from "pg";
 import { logAudit } from "@/lib/audit";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
+import { getPgPool } from "@/lib/db/pg";
 import { getIPIntelligence } from "@/lib/ip-intelligence";
 import { getPublicOrigin } from "@/lib/site-url";
 import { sendEmail } from "@/src/lib/email";
@@ -21,18 +21,7 @@ import {
 
 export { ensureUserProfile } from "@rosegriffon/auth";
 
-const getDatabaseURL = () => {
-	let url = process.env.DATABASE_URL;
-	if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
-		url =
-			"***REDACTED-DATABASE-URL***";
-	}
-	return url;
-};
-
-const pool = new Pool({
-	connectionString: getDatabaseURL(),
-});
+const pool = getPgPool();
 
 // Service-role Supabase client for hooks
 const supabaseAdmin = createSupabaseServiceClient();
