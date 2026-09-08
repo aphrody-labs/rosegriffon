@@ -191,7 +191,10 @@ export class AuthController extends BaseController {
 		} catch {
 			return res.status(400).send("Invalid OAuth state");
 		}
-		res.clearCookie(OAUTH_STATE_COOKIE, oauthStateCookieOptions);
+		// Ne pas émettre un second Set-Cookie ici. Le proxy HTTP Bun qui expose
+		// `/api/*` ne relaie pas fiablement plusieurs Set-Cookie sur la même réponse
+		// et perdait alors le cookie de session. Le nonce, HttpOnly et borné à 10 min,
+		// expire naturellement ; le code Discord reste à usage unique.
 		const redirectUri = configuredOAuthCallback();
 
 		const clientId = discordClientId();

@@ -288,11 +288,9 @@ describe("AuthController", () => {
 		}) as any;
 
 		const cookieMock = mock(() => {});
-		const clearCookieMock = mock(() => {});
 		const redirectMock = mock(() => {});
 		const mockRes = {
 			cookie: cookieMock,
-			clearCookie: clearCookieMock,
 			redirect: redirectMock,
 		} as any;
 		const { createOAuthState, OAUTH_STATE_COOKIE } =
@@ -317,7 +315,9 @@ describe("AuthController", () => {
 		expect(cookieMock.mock.calls[0][0]).toBe("token");
 		expect(cookieMock.mock.calls[0][1]).toBeDefined(); // JWT token
 		expect(cookieMock.mock.calls[0][2].httpOnly).toBe(true);
-		expect(clearCookieMock).toHaveBeenCalled();
+		// Une seule mutation de cookie doit traverser le proxy Bun : le nonce CSRF
+		// court expire naturellement, la session ne doit jamais être le 2e Set-Cookie.
+		expect(cookieMock.mock.calls.length).toBe(1);
 
 		// Verify redirect to safe state
 		expect(redirectMock.mock.calls.length).toBe(1);
