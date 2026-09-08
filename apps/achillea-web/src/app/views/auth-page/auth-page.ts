@@ -22,8 +22,10 @@ export class AuthPage implements OnInit {
 	async ngOnInit() {
 		await this.svc.loadUserIfNeeded();
 		if (this.svc.user()) {
+			const user = this.svc.user()!;
+			const fallback = `/users/${encodeURIComponent(user.id)}`;
 			await this.router.navigateByUrl(
-				safeReturnUrl(this.route.snapshot.queryParamMap.get("returnUrl"))
+				safeReturnUrl(this.route.snapshot.queryParamMap.get("returnUrl"), fallback)
 			);
 		}
 	}
@@ -34,7 +36,9 @@ export class AuthPage implements OnInit {
 	}
 
 	onAuth() {
-		const url = this.route.snapshot.queryParamMap.get("returnUrl") || "/";
+		// Le callback revient sur cette page : elle connaît alors l'identité et
+		// peut envoyer l'utilisateur vers son profil réel.
+		const url = this.route.snapshot.queryParamMap.get("returnUrl") || "/auth";
 		this.svc.handleLogin(url);
 	}
 }
