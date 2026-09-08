@@ -37,6 +37,11 @@ const INFRA_SYSTEMD = `${RACINE}/infra/systemd`;
 const INFRA_NGINX = `${RACINE}/infra/nginx`;
 const INFRA_SYSCTL = `${RACINE}/infra/sysctl`;
 const INFRA_LOGROTATE = `${RACINE}/infra/logrotate`;
+// Les services du jeu et les vhosts Aphrody ont migré dans le dépôt `niers`.
+// Les recopier ici recréerait deux sources de vérité qui divergent. Le contrôle
+// suit donc leur source canonique là où elle vit réellement.
+const NIERS_SYSTEMD = "/home/ubuntu/niers/deploy/systemd";
+const NIERS_NGINX = "/home/ubuntu/niers/deploy/nginx";
 const NGINX_CONF_D = "/etc/nginx/conf.d";
 const SYSCTL_D = "/etc/sysctl.d";
 const LOGROTATE_D = "/etc/logrotate.d";
@@ -64,7 +69,9 @@ interface Objet {
 type État = "identique" | "diverge" | "absent-dépôt" | "absent-machine";
 
 const lire = async (chemin: string | null): Promise<string | null> => {
-	if (!chemin) {return null;}
+	if (!chemin) {
+		return null;
+	}
 	const fichier = Bun.file(chemin);
 	return (await fichier.exists()) ? await fichier.text() : null;
 };
@@ -82,7 +89,10 @@ async function unités(): Promise<Objet[]> {
 		.filter((nom) => PRÉFIXES_UNITÉS.some((préfixe) => nom.startsWith(préfixe)));
 
 	const dansDépôt = await readdir(INFRA_SYSTEMD).catch(() => [] as string[]);
-	const noms = [...new Set([...surMachine, ...dansDépôt.filter(suffixe)])];
+	const dansNiers = await readdir(NIERS_SYSTEMD).catch(() => [] as string[]);
+	const noms = [
+		...new Set([...surMachine, ...dansDépôt.filter(suffixe), ...dansNiers.filter(suffixe)]),
+	];
 
 	return Promise.all(
 		noms.toSorted().map(async (nom) => {
@@ -92,13 +102,17 @@ async function unités(): Promise<Objet[]> {
 			// Les unités livrées par un paquet (/usr/lib/systemd) ne sont pas les nôtres.
 			const nôtre = fragment.startsWith("/etc/systemd/system/");
 			return {
-				dépôt: `${INFRA_SYSTEMD}/${nom}`,
+				dépôt: dansNiers.includes(nom) ? `${NIERS_SYSTEMD}/${nom}` : `${INFRA_SYSTEMD}/${nom}`,
 				famille: "systemd" as const,
 				machine: nôtre ? fragment : null,
 				nom,
 			};
 		})
-	).then((liste) => liste.filter((o) => o.machine !== null || dansDépôt.includes(o.nom)));
+	).then((liste) =>
+		liste.filter(
+			(o) => o.machine !== null || dansDépôt.includes(o.nom) || dansNiers.includes(o.nom)
+		)
+	);
 }
 
 /** Vhosts et fragments nginx effectivement chargés (`conf.d/*.conf` et les `.inc` inclus). */
@@ -109,10 +123,13 @@ async function vhosts(): Promise<Objet[]> {
 	const dansDépôt = (await readdir(INFRA_NGINX).catch(() => [] as string[])).filter(
 		(nom) => nom.endsWith(".conf") || nom.endsWith(".inc") || nom.endsWith(".http")
 	);
-	const noms = [...new Set([...surMachine, ...dansDépôt])].toSorted();
+	const dansNiers = (await readdir(NIERS_NGINX).catch(() => [] as string[])).filter(
+		(nom) => nom.endsWith(".conf") || nom.endsWith(".inc") || nom.endsWith(".http")
+	);
+	const noms = [...new Set([...surMachine, ...dansDépôt, ...dansNiers])].toSorted();
 
 	return noms.map((nom) => ({
-		dépôt: `${INFRA_NGINX}/${nom}`,
+		dépôt: dansNiers.includes(nom) ? `${NIERS_NGINX}/${nom}` : `${INFRA_NGINX}/${nom}`,
 		famille: "nginx" as const,
 		machine: surMachine.includes(nom) ? `${NGINX_CONF_D}/${nom}` : null,
 		nom,
@@ -153,9 +170,15 @@ async function rotationJournaux(): Promise<Objet[]> {
 
 async function état(objet: Objet): Promise<État> {
 	const [côtéDépôt, côtéMachine] = await Promise.all([lire(objet.dépôt), lire(objet.machine)]);
-	if (côtéDépôt === null && côtéMachine === null) {return "identique";}
-	if (côtéDépôt === null) {return "absent-dépôt";}
-	if (côtéMachine === null) {return "absent-machine";}
+	if (côtéDépôt === null && côtéMachine === null) {
+		return "identique";
+	}
+	if (côtéDépôt === null) {
+		return "absent-dépôt";
+	}
+	if (côtéMachine === null) {
+		return "absent-machine";
+	}
 	return côtéDépôt === côtéMachine ? "identique" : "diverge";
 }
 
@@ -171,7 +194,9 @@ function secrets(contenu: string): string[] {
 	for (const [, clé, valeur] of contenu.matchAll(MOTIF_SECRET)) {
 		const brut = (valeur ?? "").trim().replaceAll(/^["']|["']$/gu, "");
 		// Un chemin de fichier ou une valeur courte n'est pas un secret.
-		if (brut.startsWith("/") || brut.length < 12) {continue;}
+		if (brut.startsWith("/") || brut.length < 12) {
+			continue;
+		}
 		trouvés.push(`${clé}… = ${brut.slice(0, 6)}…`);
 	}
 	return trouvés;
@@ -193,7 +218,12 @@ const LÉGENDE: Record<État, string> = {
 };
 
 async function commandeCheck(options: { secrets: boolean }): Promise<number> {
-	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau()), ...(await rotationJournaux())];
+	const objets = [
+		...(await unités()),
+		...(await vhosts()),
+		...(await réglagesNoyau()),
+		...(await rotationJournaux()),
+	];
 	const états = await Promise.all(objets.map(async (o) => ({ objet: o, état: await état(o) })));
 
 	let dérive = 0;
@@ -203,7 +233,9 @@ async function commandeCheck(options: { secrets: boolean }): Promise<number> {
 		for (const { objet, état: st } of lot) {
 			// « absent de la machine » n'est pas une dérive : ce sont les gabarits que le dépôt
 			// Garde sans les servir (bascule HTTP-only d'azalée, doublure b hors rotation).
-			if (st === "diverge" || st === "absent-dépôt") {dérive += 1;}
+			if (st === "diverge" || st === "absent-dépôt") {
+				dérive += 1;
+			}
 			process.stdout.write(`  ${COULEUR[st]}${LÉGENDE[st].padEnd(20)}${FIN} ${objet.nom}\n`);
 		}
 	}
@@ -218,9 +250,11 @@ async function commandeCheck(options: { secrets: boolean }): Promise<number> {
 				process.stdout.write(`  [31m${objet.nom}[0m : ${trouvé}\n`);
 			}
 		}
-		if (compte === 0)
-			{process.stdout.write("  aucun — tous les secrets passent par EnvironmentFile\n");}
-		else {dérive += compte;}
+		if (compte === 0) {
+			process.stdout.write("  aucun — tous les secrets passent par EnvironmentFile\n");
+		} else {
+			dérive += compte;
+		}
 	}
 
 	process.stdout.write(
@@ -232,13 +266,22 @@ async function commandeCheck(options: { secrets: boolean }): Promise<number> {
 }
 
 async function commandePull(): Promise<number> {
-	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau()), ...(await rotationJournaux())];
+	const objets = [
+		...(await unités()),
+		...(await vhosts()),
+		...(await réglagesNoyau()),
+		...(await rotationJournaux()),
+	];
 	let importés = 0;
 	for (const objet of objets) {
 		const st = await état(objet);
-		if (st === "identique" || st === "absent-machine") {continue;}
+		if (st === "identique" || st === "absent-machine") {
+			continue;
+		}
 		const contenu = await lire(objet.machine);
-		if (contenu === null) {continue;}
+		if (contenu === null) {
+			continue;
+		}
 		await Bun.write(objet.dépôt, contenu);
 		importés += 1;
 		process.stdout.write(`  importé  ${objet.famille}/${objet.nom}\n`);
@@ -250,7 +293,12 @@ async function commandePull(): Promise<number> {
 }
 
 async function commandeDiff(nom: string): Promise<number> {
-	const objets = [...(await unités()), ...(await vhosts()), ...(await réglagesNoyau()), ...(await rotationJournaux())];
+	const objets = [
+		...(await unités()),
+		...(await vhosts()),
+		...(await réglagesNoyau()),
+		...(await rotationJournaux()),
+	];
 	const objet = objets.find((o) => o.nom === nom || o.nom === `${nom}.service`);
 	if (!objet) {
 		process.stderr.write(`objet inconnu : ${nom}\n`);
