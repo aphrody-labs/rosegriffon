@@ -324,6 +324,39 @@ describe("AuthController", () => {
 		expect(redirectMock.mock.calls[0][0]).toBe("/clans");
 	});
 
+	test("callback redirects with a notice when the user denies the authorization", async () => {
+		globalThis.fetch = mock(() => Promise.reject(new Error("must not be called"))) as any;
+		const { createOAuthState, OAUTH_STATE_COOKIE } =
+			await import("../../src/api/security/oauth-state");
+		const oauthState = createOAuthState("/ranked");
+		const redirectMock = mock(() => {});
+		const statusMock = mock(() => ({ send: mock(() => {}) }));
+		const mockRes = { redirect: redirectMock, status: statusMock } as any;
+
+		await authController.callback(
+			"",
+			oauthState.state,
+			`${OAUTH_STATE_COOKIE}=${oauthState.nonce}`,
+			mockRes,
+			"access_denied",
+			"The resource owner or authorization server denied the request"
+		);
+
+		expect(statusMock).not.toHaveBeenCalled();
+		expect(redirectMock.mock.calls[0][0]).toBe("/ranked?auth=denied");
+		expect(globalThis.fetch).not.toHaveBeenCalled();
+	});
+
+	test("callback without code nor state falls back to the home page with a notice", async () => {
+		globalThis.fetch = mock(() => Promise.reject(new Error("must not be called"))) as any;
+		const redirectMock = mock(() => {});
+		const mockRes = { redirect: redirectMock } as any;
+
+		await authController.callback("", "", "", mockRes);
+
+		expect(redirectMock.mock.calls[0][0]).toBe("/?auth=error");
+	});
+
 	test("callback rejects a state that is not bound to the browser cookie", async () => {
 		globalThis.fetch = mock(() => Promise.reject(new Error("must not be called"))) as any;
 		const { createOAuthState, OAUTH_STATE_COOKIE } =

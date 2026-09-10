@@ -27,7 +27,9 @@ import {
 	isSafeInternalRedirect,
 	OAUTH_STATE_COOKIE,
 	oauthStateCookieOptions,
+	safeRedirectFromState,
 	verifyOAuthState,
+	withAuthNotice,
 } from "../security/oauth-state";
 import { env } from "@/env";
 import { discordOAuthProfile } from "@/configs/discord-profile";
@@ -179,9 +181,26 @@ export class AuthController extends BaseController {
 		@QueryParams("code") code: string,
 		@QueryParams("state") state: string,
 		@HeaderParams("cookie") cookieHeader: string,
-		@Res() res: Response
+		@Res() res: Response,
+		@QueryParams("error") oauthError?: string,
+		@QueryParams("error_description") oauthErrorDescription?: string
 	) {
-		if (!code) return res.status(400).send("Missing code");
+		if (oauthError) {
+			console.info(
+				`[auth/callback] autorisation refusée (${oauthError})`,
+				oauthErrorDescription ?? ""
+			);
+
+			return res.redirect(
+				withAuthNotice(
+					safeRedirectFromState(state, cookieHeader),
+					oauthError === "access_denied" ? "denied" : "error"
+				)
+			);
+		}
+		if (!code) {
+			return res.redirect(withAuthNotice(safeRedirectFromState(state, cookieHeader), "error"));
+		}
 		await this.dependenciesReady;
 
 		let safeState: string;
@@ -217,7 +236,7 @@ export class AuthController extends BaseController {
 			return res.redirect(safeState);
 		} catch (error) {
 			console.error("[auth/callback] failed", error instanceof Error ? error.message : "unknown");
-			return res.status(500).send("OAuth callback failed");
+			return res.redirect(withAuthNotice(safeState, "error"));
 		}
 	}
 }

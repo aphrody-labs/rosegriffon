@@ -83,6 +83,30 @@ export function verifyOAuthState(state: unknown, cookieHeader: string | undefine
 	return decoded.redirect;
 }
 
+export type AuthNotice = "denied" | "error";
+
+/**
+ * Discord renvoie `?error=access_denied` quand l'utilisateur refuse l'autorisation
+ * (ou ferme la fenetre de consentement). On rebascule alors sur le site avec une
+ * notice `?auth=…` que le front transforme en message, au lieu d'afficher une
+ * page d'erreur brute a l'utilisateur.
+ */
+export function withAuthNotice(redirect: string, notice: AuthNotice): string {
+	const url = new URL(isSafeInternalRedirect(redirect) ? redirect : "/", "https://achillea.invalid");
+	url.searchParams.set("auth", notice);
+
+	return `${url.pathname}${url.search}${url.hash}`;
+}
+
+/** Redirection interne portee par le state, ou la racine si le state est invalide. */
+export function safeRedirectFromState(state: unknown, cookieHeader: string | undefined): string {
+	try {
+		return verifyOAuthState(state, cookieHeader);
+	} catch {
+		return "/";
+	}
+}
+
 export const oauthStateCookieOptions = {
 	httpOnly: true,
 	secure: new URL(env.OAUTH_CALLBACK_BASE_URL).protocol === "https:",
