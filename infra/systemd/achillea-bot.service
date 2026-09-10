@@ -15,10 +15,12 @@ WorkingDirectory=/home/ubuntu/rg/apps/achillea-bot
 EnvironmentFile=/etc/rose-griffon/achillea.env
 Environment=PATH=/home/ubuntu/.bun/bin:/usr/local/bin:/usr/bin:/bin
 Environment=NODE_ENV=production
-# Le bot current (BOT_TOKEN) est l'application nouvelle, présente sur les 3 guildes cœur.
-# Le profil legacy (DEV_BOT_TOKEN) reste disponible pour les autres guildes via l'import.
+# Gateway : profil current (BOT_TOKEN) = application 1427690638576582697, celle qui
+# possède les panneaux et couvre les guildes communautaires.
+# OAuth du site : profil legacy (DISCORD_CLIENT_ID_DEV/SECRET_DEV) = application
+# 1256600975464992818, seule à porter le secret OAuth utilisé par achillea.rosegriffon.fr.
 Environment=BOT_PROFILE=current
-Environment=DISCORD_OAUTH_PROFILE=current
+Environment=DISCORD_OAUTH_PROFILE=legacy
 Environment=BOT_COMMAND_GUILDS=1055585286320554055,1134795051361386506,1387955162450100296
 Environment=API_HOST=127.0.0.1
 Environment=API_PORT=4000
