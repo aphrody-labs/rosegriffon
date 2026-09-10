@@ -196,12 +196,14 @@ export class AuthController extends BaseController {
 		// expire naturellement ; le code Discord reste à usage unique.
 		const redirectUri = configuredOAuthCallback();
 
+		// Le secret DOIT venir du meme profil que le client ID envoye a /authorize,
+		// sinon Discord repond invalid_client a l'echange du code.
 		const clientId = discordClientId();
-		const clientSecret = env.isDev
-			? (env.DISCORD_CLIENT_SECRET_DEV ?? env.DISCORD_CLIENT_SECRET)
-			: env.DISCORD_CLIENT_SECRET;
+		const clientSecret = discordOAuthProfile.clientSecret;
 		if (!clientId || !clientSecret) {
-			return res.status(500).send("DISCORD_CLIENT_ID / DISCORD_CLIENT_SECRET non configurés");
+			return res
+				.status(500)
+				.send(`Identifiants OAuth Discord absents pour le profil ${discordOAuthProfile.name}`);
 		}
 
 		try {
