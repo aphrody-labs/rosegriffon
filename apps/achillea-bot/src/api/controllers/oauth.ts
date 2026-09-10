@@ -10,7 +10,9 @@ import {
 } from "@/auth";
 import {
 	configuredOAuthCallback,
+	safeRedirectFromState,
 	verifyOAuthState,
+	withAuthNotice,
 } from "../security/oauth-state";
 import { parseProviderOAuthState } from "../security/provider-oauth-state";
 import { urlsConfig } from "@/configs";
@@ -41,9 +43,21 @@ export class DiscordOAuthCallbackController extends BaseController {
 		@QueryParams("code") code: string,
 		@QueryParams("state") state: string,
 		@HeaderParams("cookie") cookieHeader: string,
-		@Res() res: Response
+		@Res() res: Response,
+		@QueryParams("error") oauthError?: string
 	) {
-		if (!code) return res.status(400).send("Missing code");
+		// Refus de l'utilisateur sur l'ecran de consentement : retour au site avec notice.
+		if (oauthError) {
+			return res.redirect(
+				withAuthNotice(
+					safeRedirectFromState(state, cookieHeader),
+					oauthError === "access_denied" ? "denied" : "error"
+				)
+			);
+		}
+		if (!code) {
+			return res.redirect(withAuthNotice(safeRedirectFromState(state, cookieHeader), "error"));
+		}
 		let safeState: string;
 		try {
 			safeState = verifyOAuthState(state, cookieHeader);
@@ -78,7 +92,7 @@ export class DiscordOAuthCallbackController extends BaseController {
 			return res.redirect(safeState);
 		} catch (err: any) {
 			console.error("[OAuth callback discord] failed", err?.response?.status ?? "unknown");
-			return res.status(500).send("OAuth Discord callback failed");
+			return res.redirect(withAuthNotice(safeState, "error"));
 		}
 	}
 
