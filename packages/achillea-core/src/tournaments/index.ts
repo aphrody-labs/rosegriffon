@@ -14,7 +14,7 @@
  * (1er / 2e / 3e-4e / 5e-8e / ...).
  */
 
-import { ScoreReportPolicy } from "@achillea/types";
+import { ScoreReportPolicy } from "@rosegriffon/achillea-types";
 
 /**
  * Droit de saisir / valider le score d'un match de tournoi.
@@ -163,3 +163,5 @@ export function goalAverage(goalsScored: number, goalsConceded: number): number 
 	if (goalsConceded > 0) return goalsScored / goalsConceded;
 	return goalsScored > 0 ? GOAL_AVERAGE_PERFECT : 0;
 }
+
+export * from "./organizers";

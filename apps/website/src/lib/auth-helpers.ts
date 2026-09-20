@@ -69,3 +69,105 @@ export async function requirePatreonCreator() {
 	}
 	return user;
 }
+
+/**
+ * Require auth or fail with an error (for server actions).
+ */
+export async function requireAuthOrFail() {
+	const session = await getServerSession();
+	if (!session?.user) {
+		throw new Error("Non autorisé");
+	}
+	return session;
+}
+
+/**
+ * Same as requireAdmin but throws instead of redirecting.
+ */
+export async function requireAdminOrFail() {
+	const user = await getServerUser();
+	if (!user) {
+		throw new Error("Non autorisé");
+	}
+
+	const supabase = createAdminClient();
+	const profile = await resolveProfile(supabase, user);
+
+	if (!profile || !isAdmin(profile.role)) {
+		throw new Error("Accès réservé aux administrateurs");
+	}
+
+	return { profile, session: { user } };
+}
+
+/**
+ * True if the user with the given Discord ID owns the Médaille Azalée role.
+ */
+export async function hasMedailleAzaleeRole(
+	discordId: string | null | undefined
+): Promise<boolean> {
+	if (!discordId) {
+		return false;
+	}
+	const { createSupabaseServiceClient } = await import("@rosegriffon/db/service");
+	const supabase = createSupabaseServiceClient();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const { data } = (await (supabase as any)
+		.from("discord_members")
+		.select("roles")
+		.eq("discord_id", discordId)
+		.single()) as { data: { roles: unknown } | null };
+
+	if (!data?.roles) {
+		return false;
+	}
+
+	const roles = Array.isArray(data.roles)
+		? (data.roles as string[])
+		: (() => {
+				try {
+					return JSON.parse(String(data.roles)) as string[];
+				} catch {
+					return [];
+				}
+			})();
+
+	return roles.includes("1269389408465059952");
+}
+
+/**
+ * Editor-tier guard: ADMIN_ROLES or Médaille Azalée members.
+ */
+export async function requireEditorOrFail() {
+	const session = await getServerSession();
+	if (!session?.user) {
+		throw new Error("Non autorisé");
+	}
+
+	const supabase = createAdminClient();
+	const profile = await resolveProfile(supabase, session.user);
+
+	if (!profile) {
+		throw new Error("Profil introuvable");
+	}
+
+	if (isAdmin(profile.role)) {
+		return {
+			isAdmin: true as const,
+			isMedaille: false as const,
+			profile,
+			session,
+		};
+	}
+
+	if (await hasMedailleAzaleeRole(profile.discord_id)) {
+		return {
+			isAdmin: false as const,
+			isMedaille: true as const,
+			profile,
+			session,
+		};
+	}
+
+	throw new Error("Accès réservé à l'équipe rédactionnelle");
+}

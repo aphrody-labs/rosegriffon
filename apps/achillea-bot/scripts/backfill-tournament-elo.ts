@@ -18,7 +18,7 @@ import {
 	DEFAULT_BASE_RATING,
 	DEFAULT_K_FACTOR,
 	progressiveEloDelta,
-} from "@achillea/core";
+} from "@rosegriffon/achillea-core";
 import { computeSeriesOutcome } from "../src/services/tournamentRules";
 import { MatchFormat } from "../src/utils/enums";
 

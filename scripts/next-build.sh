@@ -39,12 +39,13 @@ mkdir -p "$BUILD_TMP"
 build_start=$(date +%s)
 env TMPDIR="$BUILD_TMP" \
 	NODE_ENV=production NODE_NO_WARNINGS=1 \
+	NODE_OPTIONS="--max-old-space-size=8192 ${NODE_OPTIONS:-}" \
 	"$NODE_BIN" node_modules/next/dist/bin/next build --turbopack "$@"
 rc=$?
 
 if [ -f .next/BUILD_ID ] && [ "$(stat -c %Y .next/BUILD_ID)" -ge "$build_start" ]; then
-	if [ "$APP_NAME" = "azalee" ] && [ ! -f "$SERVER_JS" ]; then
-		echo "✗ build réellement échoué — server.js absent pour azalee" >&2
+	if [ ! -f "$SERVER_JS" ]; then
+		echo "✗ build réellement échoué — server.js absent ($SERVER_JS)" >&2
 		exit 1
 	fi
 	if [ "$rc" -ne 0 ]; then

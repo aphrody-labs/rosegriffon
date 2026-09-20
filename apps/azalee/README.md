@@ -7,7 +7,9 @@
 <p align="center">
   Base de données communautaire pour <strong>Inazuma Eleven: Victory Road</strong>
   <br />
-  <a href="https://azalee.rosegriffon.fr"><strong>azalee.rosegriffon.fr</strong></a>
+  <strong>Note importante :</strong> Le wiki Azalée a été entièrement fusionné dans l'application unifiée <strong><a href="https://rosegriffon.fr/wiki">rosegriffon.fr/wiki</a></strong> (<code>apps/website</code>).
+  <br />
+  Toutes les requêtes vers <code>azalee.rosegriffon.fr</code> sont automatiquement redirigées en 301 sans rupture.
 </p>
 
 <p align="center">

@@ -1,2 +1,2 @@
-// Source unique : @achillea/core/names (logique pure portable).
-export { normalizeNames } from "@achillea/core";
+// Source unique : @rosegriffon/achillea-core/names (logique pure portable).
+export { normalizeNames } from "@rosegriffon/achillea-core";

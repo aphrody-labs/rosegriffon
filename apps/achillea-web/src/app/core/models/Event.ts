@@ -1,14 +1,2 @@
-export interface EventEntity {
-	id: number;
-	name: string;
-	description: string;
-	type: EventTypeEnum;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-export enum EventTypeEnum {
-	TOURNAMENT = "TOURNAMENT",
-	INTERCLAN = "INTERCLAN",
-	RANKED = "RANKED",
-}
+export { EventTypeEnum } from "@rosegriffon/achillea-types";
+export type { EventEntity } from "@rosegriffon/achillea-types";

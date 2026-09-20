@@ -1,12 +1,12 @@
 /**
  * Politique de saisie des scores d'un tournoi (staff seul / joueurs).
  *
- * Tests purs : la règle vit dans `@achillea/core` et n'a besoin ni de base ni de DI.
+ * Tests purs : la règle vit dans `@rosegriffon/achillea-core` et n'a besoin ni de base ni de DI.
  * Ce qui est verrouillé ici, c'est qu'un organisateur passe toujours, qu'un tournoi
  * d'avant l'option (politique absente) garde le comportement joueurs, et qu'une valeur
  * inconnue ne parte jamais vers la colonne — elle porte une contrainte CHECK.
  */
-import { canReportTournamentScore } from "@achillea/core";
+import { canReportTournamentScore } from "@rosegriffon/achillea-core";
 import { describe, expect, test } from "bun:test";
 
 import { parseScoreReportPolicy } from "../../src/services/TournamentsService";

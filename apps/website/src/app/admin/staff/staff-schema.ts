@@ -215,7 +215,7 @@ export function validerFichierImage(fichier: {
 	size: number;
 	type: string;
 }): { ok: true } | { ok: false; message: string } {
-	if (!TYPES_IMAGE_ACCEPTES.includes(fichier.type)) {
+	if (!(fichier.type in EXTENSIONS_PAR_TYPE)) {
 		return {
 			message: "Format d'image non supporté : utilisez PNG, JPEG, WebP, AVIF ou GIF.",
 			ok: false,

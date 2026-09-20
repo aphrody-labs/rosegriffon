@@ -1,20 +1,13 @@
-import type { SuggestionRank, UserRole } from "../models/Suggestion";
+/**
+ * Modèles d'authentification côté web.
+ *
+ * L'utilisateur de session EST le `SessionUserDTO` du contrat : le déclarer
+ * une seconde fois ici avait fait diverger les deux formes (`type` manquant,
+ * rangs sans dégradé).
+ */
+
+import type { SessionUserDTO } from "@rosegriffon/achillea-types";
 
 export type AuthStatus = "unknown" | "loading" | "authenticated" | "anonymous" | "error";
 
-export type AuthUser = {
-	id: string;
-	username: string;
-	clanId?: number;
-	sim: number;
-	avatar?: string;
-	soloRank: SuggestionRank;
-	duoRank: SuggestionRank;
-	lastInteract?: Date;
-	role?: UserRole;
-	currentLevel?: number;
-	totalXp?: number;
-	hasTwitch?: boolean;
-	hasChallonge?: boolean;
-	hasYoutube?: boolean;
-};
+export type AuthUser = SessionUserDTO;

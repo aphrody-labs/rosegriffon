@@ -9,16 +9,20 @@ tourner. Tout est en **Bun**, tout tourne sur un seul VPS.
 ```
 rg/
 ├── apps/
-│   ├── azalee/          # Wiki IEVR (azalee.rosegriffon.fr) — @rosegriffon/azalee-web
-│   ├── website/         # Site principal (rosegriffon.fr)
-│   ├── cdn/             # Serveur d'images du CDN
-│   ├── cdn-variants/    # Redimensionnement + WebP à la volée
-│   ├── storage/         # API de stockage compatible Supabase (fichiers locaux)
-│   ├── realtime/        # Diffusion SSE des changements Postgres (LISTEN/NOTIFY)
-│   ├── rag-api/         # Recherche sémantique locale
-│   └── bot/             # Bot Discord — source conservée, NON déployé
+│   ├── website/         # Application unifiée Rose Griffon (rosegriffon.fr) : portail, wiki (/wiki), chroniques & news, admin (/admin)
+│   ├── azalee/          # Archivé / fusionné dans apps/website (redirections 301 azalee.rosegriffon.fr -> rosegriffon.fr/wiki)
+│   ├── achillea-web/    # Application Angular 19 / PrimeNG : tournois, classements, licences (achillea.rosegriffon.fr)
+│   ├── achillea-bot/    # Bot Discord et API tournois Achilléa
+│   ├── bot/             # Bot Discord unifié (rg-bot & azalee-bot)
+│   ├── cdn/             # Serveur d'images du CDN (:8804)
+│   ├── storage/         # API de stockage compatible Supabase (fichiers locaux :8810)
+│   └── realtime/        # Diffusion SSE des changements Postgres (LISTEN/NOTIFY :8812)
 ├── packages/
 │   ├── azalee/          # Bibliothèque Bun du wiki : données, index CPK/texte, CLI, API headless
+│   ├── achillea-types/  # Contrat pur TypeScript de l'écosystème tournois Achilléa (0 runtime dep)
+│   ├── achillea-core/   # Logique métier pure, règles de calcul, labels, formats et adaptateurs
+│   ├── achillea-contract/# Générateur de contrats polyglottes (JSON Schema, Rust, Swift, Kotlin)
+│   ├── achillea-client/ # Client HTTP d'API isomorphe pour Achilléa
 │   ├── mcp/             # Serveur Model Context Protocol du monorepo
 │   ├── inagle/          # Parser binaire CPK/G4TX + pipeline de données du jeu
 │   ├── inagle-cross/    # Catalogue Inazuma Eleven Cross (jeu mobile)
@@ -104,7 +108,9 @@ versions partagées : toute dépendance commune passe par lui. Les dépendances
 internes s'écrivent `workspace:*`, jamais une version figée.
 
 Imports internes : `@rosegriffon/ui`, `@rosegriffon/db`,
-`@rosegriffon/types`, `@rosegriffon/azalee`, `@rosegriffon/config/*`.
+`@rosegriffon/types`, `@rosegriffon/azalee`, `@rosegriffon/config/*`,
+`@rosegriffon/achillea-types`, `@rosegriffon/achillea-core`,
+`@rosegriffon/achillea-client`, `@rosegriffon/achillea-contract`.
 
 ## Travailler avec un agent
 

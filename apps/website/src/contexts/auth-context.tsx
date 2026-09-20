@@ -1,7 +1,6 @@
 "use client";
 
-import { createContext, useContext } from "react";
-
+import { createContext, useContext, useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
 interface AuthContextType {
@@ -14,17 +13,41 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-	const { data: session, isPending, error } = authClient.useSession();
+	const [user, setUser] = useState<typeof authClient.$Infer.Session.user | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		let active = true;
+		authClient
+			.getSession()
+			.then(({ data }) => {
+				if (active) {
+					setUser(data?.user ?? null);
+					setIsLoading(false);
+				}
+			})
+			.catch((err) => {
+				if (active) {
+					setError(err ? String(err) : null);
+					setIsLoading(false);
+				}
+			});
+		return () => {
+			active = false;
+		};
+	}, []);
 
 	const logout = async () => {
 		await authClient.signOut();
+		setUser(null);
 	};
 
 	const value: AuthContextType = {
-		error: error ? String(error) : null,
-		isLoading: isPending,
+		error,
+		isLoading,
 		logout,
-		user: session?.user ?? null,
+		user,
 	};
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

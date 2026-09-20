@@ -1,119 +1,113 @@
-import type { z } from "zod";
+/**
+ * `AchilleaClient` — agrégat de ressources au-dessus du transport `AchilleaHttp`.
+ *
+ * Aucune méthode ne lève : tout appel rend un `AchilleaClientResult<T>` que
+ * l'appelant discrimine sur `ok`. Le client est isomorphe (RSC Next.js,
+ * navigateur, Bun) et ne dépend d'aucun framework.
+ */
 
+import { AdminResource } from "./admin";
+import { AuthResource } from "./auth";
+import { CastsResource } from "./casts";
+import { ClansResource } from "./clans";
 import {
-	achilleaGuildDetailSchema,
-	achilleaGuildPageSchema,
-	achilleaGuildStatsSchema,
+	GuildsResource,
 	type AchilleaGuildDetail,
 	type AchilleaGuildPage,
 	type AchilleaGuildStats,
-} from "./schemas";
-
-export const DEFAULT_ACHILLEA_API_URL = "https://ranked.rosegriffon.fr/api";
-export const DEFAULT_ACHILLEA_TIMEOUT_MS = 8000;
-
-export type AchilleaClientFailure =
-	| { ok: false; kind: "unreachable"; detail: string; path: string }
-	| { ok: false; kind: "http"; detail: string; path: string; status: number }
-	| { ok: false; kind: "invalid_json"; detail: string; path: string }
-	| { ok: false; kind: "invalid_response"; detail: string; path: string };
-
-export type AchilleaClientResult<T> = { ok: true; value: T } | AchilleaClientFailure;
-
-export type AchilleaFetch = (
-	input: string | URL | Request,
-	init?: RequestInit
-) => Promise<Response>;
-
-export interface AchilleaClientOptions {
-	/** API origin including its optional path prefix. Trailing slashes are ignored. */
-	baseUrl?: string;
-	/** Abort a request after this duration. Defaults to 8 seconds. */
-	timeoutMs?: number;
-	/** Injectable Fetch implementation for non-browser runtimes and tests. */
-	fetch?: AchilleaFetch;
-}
-
-function errorDetail(error: unknown): string {
-	return error instanceof Error ? error.message : String(error);
-}
-
-function validationDetail(error: z.ZodError): string {
-	const firstIssue = error.issues[0];
-	if (!firstIssue) return "unexpected response structure";
-	return `${firstIssue.path.join(".") || "(root)"} : ${firstIssue.message}`;
-}
+} from "./guilds";
+import {
+	AchilleaHttp,
+	type AchilleaClientOptions,
+	type AchilleaClientResult,
+	type AchilleaFetch,
+} from "./http";
+import { LeaguesResource } from "./leagues";
+import { LicensesResource } from "./licenses";
+import { NotificationsResource } from "./notifications";
+import { OrganizationsResource } from "./organizations";
+import { PlayerNotesResource } from "./player-notes";
+import { RankedResource } from "./ranked";
+import { SanctionsResource } from "./sanctions";
+import { StatsResource } from "./stats";
+import { TournamentsResource } from "./tournaments";
+import { UsersResource } from "./users";
+import { WalletResource } from "./wallet";
 
 export class AchilleaClient {
-	readonly baseUrl: string;
-	readonly timeoutMs: number;
-	readonly fetch: AchilleaFetch;
+	readonly http: AchilleaHttp;
+
+	readonly admin: AdminResource;
+	readonly auth: AuthResource;
+	readonly casts: CastsResource;
+	readonly clans: ClansResource;
+	readonly guilds: GuildsResource;
+	readonly leagues: LeaguesResource;
+	readonly licenses: LicensesResource;
+	readonly notifications: NotificationsResource;
+	readonly organizations: OrganizationsResource;
+	readonly playerNotes: PlayerNotesResource;
+	readonly ranked: RankedResource;
+	readonly sanctions: SanctionsResource;
+	readonly stats: StatsResource;
+	readonly tournaments: TournamentsResource;
+	readonly users: UsersResource;
+	readonly wallet: WalletResource;
 
 	constructor(options: AchilleaClientOptions = {}) {
-		this.baseUrl = (options.baseUrl ?? DEFAULT_ACHILLEA_API_URL).replace(/\/+$/u, "");
-		this.timeoutMs = options.timeoutMs ?? DEFAULT_ACHILLEA_TIMEOUT_MS;
-		this.fetch = options.fetch ?? globalThis.fetch;
+		this.http = new AchilleaHttp(options);
+
+		this.admin = new AdminResource(this.http);
+		this.auth = new AuthResource(this.http);
+		this.casts = new CastsResource(this.http);
+		this.clans = new ClansResource(this.http);
+		this.guilds = new GuildsResource(this.http);
+		this.leagues = new LeaguesResource(this.http);
+		this.licenses = new LicensesResource(this.http);
+		this.notifications = new NotificationsResource(this.http);
+		this.organizations = new OrganizationsResource(this.http);
+		this.playerNotes = new PlayerNotesResource(this.http);
+		this.ranked = new RankedResource(this.http);
+		this.sanctions = new SanctionsResource(this.http);
+		this.stats = new StatsResource(this.http);
+		this.tournaments = new TournamentsResource(this.http);
+		this.users = new UsersResource(this.http);
+		this.wallet = new WalletResource(this.http);
 	}
 
-	private async request<T>(path: string, schema: z.ZodType<T>): Promise<AchilleaClientResult<T>> {
-		let response: Response;
-		try {
-			response = await this.fetch(`${this.baseUrl}${path}`, {
-				headers: { Accept: "application/json" },
-				signal: AbortSignal.timeout(this.timeoutMs),
-			});
-		} catch (error) {
-			return { ok: false, kind: "unreachable", detail: errorDetail(error), path };
-		}
-
-		if (!response.ok) {
-			return {
-				ok: false,
-				kind: "http",
-				detail: `HTTP ${response.status} for ${path}`,
-				path,
-				status: response.status,
-			};
-		}
-
-		let body: unknown;
-		try {
-			body = await response.json();
-		} catch (error) {
-			return {
-				ok: false,
-				kind: "invalid_json",
-				detail: `unreadable response: ${errorDetail(error)}`,
-				path,
-			};
-		}
-
-		const parsed = schema.safeParse(body);
-		if (!parsed.success) {
-			return {
-				ok: false,
-				kind: "invalid_response",
-				detail: validationDetail(parsed.error),
-				path,
-			};
-		}
-
-		return { ok: true, value: parsed.data };
+	/** Origine de l'API, préfixe de chemin inclus. */
+	get baseUrl(): string {
+		return this.http.baseUrl;
 	}
 
-	/** `GET /guilds`: scanned guilds ordered by member count. */
+	/** Délai d'abandon par défaut, en millisecondes. */
+	get timeoutMs(): number {
+		return this.http.timeoutMs;
+	}
+
+	/** Implémentation de Fetch effectivement utilisée. */
+	get fetch(): AchilleaFetch {
+		return this.http.fetch;
+	}
+
+	// ── Compatibilité ─────────────────────────────────────────────────────────
+	// Les trois méthodes ci-dessous précèdent le découpage par ressource et sont
+	// consommées telles quelles par `apps/bot`. Elles délèguent à `guilds` et
+	// gardent leur signature publique.
+
+	/** `GET /guilds` — alias historique de `client.guilds.list`. */
 	listGuilds(page = 1, limit = 25): Promise<AchilleaClientResult<AchilleaGuildPage>> {
-		return this.request(`/guilds?page=${page}&limit=${limit}`, achilleaGuildPageSchema);
+		return this.guilds.list(page, limit);
 	}
 
-	/** `GET /guilds/stats`: aggregates over all scanned guilds. */
+	/** `GET /guilds/stats` — alias historique de `client.guilds.stats`. */
 	getGuildStats(): Promise<AchilleaClientResult<AchilleaGuildStats>> {
-		return this.request("/guilds/stats", achilleaGuildStatsSchema);
+		return this.guilds.stats();
 	}
 
-	/** `GET /guilds/:id`: guild details including roles and channels. */
+	/** `GET /guilds/:id` — alias historique de `client.guilds.get`. */
 	getGuild(id: string): Promise<AchilleaClientResult<AchilleaGuildDetail>> {
-		return this.request(`/guilds/${encodeURIComponent(id)}`, achilleaGuildDetailSchema);
+		return this.guilds.get(id);
 	}
 }
 

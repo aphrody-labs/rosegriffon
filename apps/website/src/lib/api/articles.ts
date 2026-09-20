@@ -9,6 +9,7 @@ export interface GetArticlesOptions {
 	status?: string;
 	category?: string;
 	query?: string;
+	app?: string;
 }
 
 export interface ArticlesResponse {
@@ -29,12 +30,20 @@ export async function getArticles({
 	status,
 	category,
 	query,
+	app,
 }: GetArticlesOptions = {}): Promise<ArticlesResponse> {
 	const pool = getPgPool();
 	const from = (page - 1) * limit;
 
-	const conditions: string[] = ["app = $1"];
-	const params: unknown[] = ["website"];
+	const conditions: string[] = [];
+	const params: unknown[] = [];
+
+	if (app && app !== "all") {
+		params.push(app);
+		conditions.push(`app = $${params.length}`);
+	} else {
+		conditions.push("app IN ('website', 'azalee')");
+	}
 
 	if (status && status !== "all") {
 		params.push(status);
@@ -96,8 +105,8 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 
 	try {
 		const { rows } = await pool.query<Article>(
-			"SELECT * FROM articles WHERE slug = $1 AND app = $2 LIMIT 1",
-			[slug, "website"]
+			"SELECT * FROM articles WHERE slug = $1 AND app IN ('website', 'azalee') LIMIT 1",
+			[slug]
 		);
 
 		const [article] = rows;
@@ -118,8 +127,7 @@ export async function getArticleStats() {
 
 	try {
 		const { rows } = await pool.query<Pick<Article, "status" | "category">>(
-			"SELECT status, category FROM articles WHERE app = $1",
-			["website"]
+			"SELECT status, category FROM articles WHERE app IN ('website', 'azalee')"
 		);
 
 		const total = rows.length;

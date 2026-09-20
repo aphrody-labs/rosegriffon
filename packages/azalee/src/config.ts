@@ -78,8 +78,10 @@ function dataDirCandidates(): string[] {
 		// `next build` (cwd = `apps/azalee`).
 		path.resolve(process.cwd(), "data"),
 		// Exécution depuis la racine du monorepo (CLI, tests, scripts).
+		path.resolve(process.cwd(), "apps/website/data"),
 		path.resolve(process.cwd(), "apps/azalee/data"),
-		// Depuis `packages/azalee` : ../../apps/azalee/data.
+		// Depuis `packages/azalee` : ../../apps/website/data ou ../../apps/azalee/data.
+		path.resolve(root, "../../apps/website/data"),
 		path.resolve(root, "../../apps/azalee/data"),
 	].filter((p): p is string => Boolean(p));
 }

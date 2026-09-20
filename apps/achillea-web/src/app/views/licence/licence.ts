@@ -9,7 +9,12 @@ import { ProgressSpinner } from "primeng/progressspinner";
 import { LicenseService } from "../../shared/services/license-service";
 import { UserService } from "../../shared/services/user-service";
 import { apiUrl } from "../../core/http/api-url";
-import { LicenseStatus } from "../../core/models/License";
+import {
+	LicenseStatus,
+	licenseStatusLabel,
+	licenseStatusTone,
+	type Tone,
+} from "../../core/models/License";
 
 @Component({
 	selector: "app-licence",
@@ -42,15 +47,13 @@ export class Licence implements OnInit {
 		this.loading.set(false);
 	}
 
-	statusSeverity(status: LicenseStatus): "success" | "danger" | "secondary" {
-		if (status === "Active") return "success";
-		if (status === "Revoked") return "danger";
-		return "secondary";
+	// Libellé et tonalité viennent de `@rosegriffon/achillea-core` : le bot et
+	// tout futur front affichent exactement le même vocabulaire.
+	protected statusSeverity(status: LicenseStatus): Tone {
+		return licenseStatusTone(status);
 	}
 
-	statusLabel(status: LicenseStatus): string {
-		if (status === "Active") return "Active";
-		if (status === "Revoked") return "Révoquée";
-		return "Expirée";
+	protected statusLabel(status: LicenseStatus): string {
+		return licenseStatusLabel(status);
 	}
 }

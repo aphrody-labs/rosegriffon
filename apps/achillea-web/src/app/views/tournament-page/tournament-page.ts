@@ -1041,7 +1041,7 @@ export class TournamentPage implements OnInit, OnDestroy {
 		return this.userLabel(user).charAt(0).toUpperCase();
 	}
 
-	/** Sentinel `GOAL_AVERAGE_PERFECT` (999, voir @achillea/core/tournaments) -> "∞". */
+	/** Sentinel `GOAL_AVERAGE_PERFECT` (999, voir @rosegriffon/achillea-core/tournaments) -> "∞". */
 	protected formatGoalAverage(value: number): string {
 		if (value >= 999) return "∞";
 		return value.toFixed(2);

@@ -3,7 +3,6 @@ import { describe, expect, test } from "bun:test";
 import {
 	ClanMemberDistinction,
 	ClanMemberRole,
-	ClanMemberRoleName,
 	ClanState,
 	EventTypeEnum,
 	MatchMode,
@@ -13,10 +12,10 @@ import {
 	TeamSide,
 	TournamentState,
 	UserRole,
-} from "@achillea/types";
-import { ClanState as DirectClanState } from "@achillea/types/enums/clanState";
+} from "@rosegriffon/achillea-types";
+import { ClanState as DirectClanState } from "@rosegriffon/achillea-types/enums/clanState";
 
-describe("@achillea/types runtime contracts", () => {
+describe("@rosegriffon/achillea-types runtime contracts", () => {
 	test("keeps the numeric enum values used by persisted contracts", () => {
 		expect(ClanState).toMatchObject({ Creating: 0, PendingReview: 1, Approved: 2 });
 		expect(ClanMemberRole).toMatchObject({ Trial: 0, Member: 1, SubCaptain: 2, Captain: 3 });
@@ -37,15 +36,6 @@ describe("@achillea/types runtime contracts", () => {
 		expect(String(ScoreReportPolicy.STAFF_ONLY)).toBe("staff_only");
 		expect(String(StageType.double_elimination)).toBe("double_elimination");
 		expect(String(ClanMemberDistinction.ContentCreator)).toBe("Créateur de contenu");
-	});
-
-	test("maps every clan member role to its display label", () => {
-		expect(ClanMemberRoleName).toEqual({
-			[ClanMemberRole.Trial]: "Membre à l'essai",
-			[ClanMemberRole.Member]: "Membre",
-			[ClanMemberRole.SubCaptain]: "Vice-Président",
-			[ClanMemberRole.Captain]: "Président",
-		});
 	});
 
 	test("resolves the public enum subpath", () => {

@@ -2,6 +2,28 @@
 
 Toutes les évolutions notables du monorepo `rg`. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) + [SemVer](https://semver.org/lang/fr/).
 
+## [Non publié]
+
+### Ajouté
+
+- **Achilléa devient portable** (`docs/achillea-modulaire.md`) : le domaine est découpé en quatre couches dont aucune ne connaît Angular — `achillea-types` (contrat pur), `achillea-core` (règles métier), `achillea-client` (accès API isomorphe), `achillea-contract` (export hors TypeScript). Objectif tenu et vérifiable : migrer le front vers Next.js + Tailwind + shadcn, ouvrir un client de jeu Rust ou une app mobile sans réécrire le métier.
+- **`@rosegriffon/achillea-contract`** : lit l'AST de `achillea-types` et génère JSON Schema 2020-12, Rust `serde`, Swift `Codable` et Kotlin `kotlinx.serialization` pour les 226 formes du domaine. Le Rust produit est vérifié par `cargo check`. `bun run achillea:contract:check` échoue en CI si l'export est périmé.
+- **`achillea-core` passe de 12 à 23 domaines** : brackets (tours, exempts, seeding standard), statistiques, clans, casts, inscrits de tournoi, portefeuille, pagination, URL d'API, identité (avatars, images de rang), libellés fr-FR et tonalités neutres traduites en variantes shadcn. Deux tests de garde refusent toute dépendance runtime ou framework dans `types` et `core`.
+- **`achillea-client` couvre l'API entière** : 197 routes sur 16 ressources, schémas verrouillés par `satisfies z.ZodType<Dto>`, erreurs renvoyées en résultat typé plutôt qu'en exception, authentification par cookie ou par jeton injecté.
+- **Achilléa consommable depuis `apps/website`** : les trois paquets sont déclarés et transpilés par Next, avec un pont tonalités → `<Badge>` shadcn dans `src/lib/achillea/`.
+
+### Corrigé
+
+- **Tri des membres de clan** : la table de priorité des distinctions était indexée par le nom anglais du membre d'enum alors que la valeur stockée est française, et `ContentCreator` y était traduit en « Content Creator » (avec espace). Aucune distinction ne matchait hormis `Staff` ; les créateurs de contenu tombaient en fin de liste. La règle est unique et testée, les deux composants qui la dupliquaient la délèguent.
+- **`GET /organizations/me` et `GET /bot/users/cached` ne répondaient jamais** : déclarées après leurs jokers `/:id`, elles étaient capturées par eux. Routes littérales remontées, avec un commentaire qui dit pourquoi l'ordre compte.
+- **`Omit` ignoré à la génération du contrat** : `WireTournament extends Omit<Tournament, …>` ne produisait que ses quatre champs propres, les trente hérités disparaissaient du Rust et du JSON Schema sans avertissement.
+- **Hook de restauration de `bun.lock`** : son garde cherchait `@rosegriffon/monorepo` alors que la racine s'appelle `@rose-griffon/monorepo`. Il sortait en silence sans jamais corriger la régression `lockfileVersion: 2` — le mode d'échec exact que son propre commentaire décrivait.
+
+### Modifié
+
+- **Scope aligné sur le monorepo** : `@achillea/*` devient `@rosegriffon/achillea-*`, et les apps `achillea-bot` / `achillea-web` sont scopées. Les chemins sur disque, le nom de projet Angular et les unités systemd sont inchangés.
+- **Fin de la duplication des DTO** : les 1 621 lignes de modèles Angular deviennent 230 lignes de ré-exports ; les 66 contrats déclarés en attente dans le client remontent dans `achillea-types`. Une seule déclaration par forme.
+
 ## [0.4.0] — 2026-08-10
 
 ### Ajouté

@@ -5,7 +5,7 @@
 
 import { describe, expect, test } from "bun:test";
 
-import { placementPrizeAp, prizeTableForTournamentSize, applyEloUpdate } from "@achillea/core";
+import { placementPrizeAp, prizeTableForTournamentSize, applyEloUpdate } from "@rosegriffon/achillea-core";
 
 describe("prizeTableForTournamentSize", () => {
 	test("Evo 32 (petit tournoi) → 50 / 25 / 10", () => {

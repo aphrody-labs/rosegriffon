@@ -12,6 +12,7 @@ import type { Article } from "@/lib/api/articles";
 import { getPgPool } from "@/lib/db/pg";
 import { createClient } from "@/lib/supabase/server";
 
+import { LexicalRenderer } from "@/components/editor/lexical-renderer";
 import { ShareButtons } from "./components/ShareButtons";
 
 // ⚡ ISR - Revalidation toutes les 15 minutes
@@ -27,8 +28,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 	try {
 		const pool = getPgPool();
 		const { rows } = await pool.query<ArticleMetaRow>(
-			"SELECT title, excerpt, featured_image_url FROM articles WHERE slug = $1 AND status = $2 AND app = $3 LIMIT 1",
-			[slug, "published", "website"]
+			"SELECT title, excerpt, featured_image_url FROM articles WHERE slug = $1 AND status = $2 AND app IN ('website', 'azalee') LIMIT 1",
+			[slug, "published"]
 		);
 		article = rows[0] ?? null;
 	} catch (error) {
@@ -72,8 +73,8 @@ export default async function ChroniquePage({ params }: { params: Promise<{ slug
 	try {
 		const pool = getPgPool();
 		const { rows } = await pool.query<Article>(
-			"SELECT * FROM articles WHERE slug = $1 AND status = $2 AND app = $3 LIMIT 1",
-			[slug, "published", "website"]
+			"SELECT * FROM articles WHERE slug = $1 AND status = $2 AND app IN ('website', 'azalee') LIMIT 1",
+			[slug, "published"]
 		);
 		articleData = rows[0] ?? null;
 	} catch (error) {
@@ -175,11 +176,9 @@ export default async function ChroniquePage({ params }: { params: Promise<{ slug
 
 					<Card className="border-none shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
 						<CardContent className="p-6 sm:p-8 lg:p-10">
-							<div
+							<LexicalRenderer
+								content={content.content}
 								className="prose prose-lg dark:prose-invert max-w-none"
-								dangerouslySetInnerHTML={{
-									__html: content.content,
-								}}
 							/>
 						</CardContent>
 					</Card>

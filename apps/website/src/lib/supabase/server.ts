@@ -14,11 +14,16 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 export async function createClient(): Promise<SupabaseClient> {
-	const cookieStore = await cookies();
-	return createSupabaseServerClient({
-		getAll: () => cookieStore.getAll(),
-		set: (name, value, options) => cookieStore.set(name, value, options),
-	}) as unknown as SupabaseClient;
+	try {
+		const cookieStore = await cookies();
+		return createSupabaseServerClient({
+			getAll: () => cookieStore.getAll(),
+			set: (name, value, options) => cookieStore.set(name, value, options),
+		}) as unknown as SupabaseClient;
+	} catch {
+		// When called at build time (e.g. generateStaticParams) without request context
+		return createPublicClient();
+	}
 }
 
 export function createPublicClient(): SupabaseClient {

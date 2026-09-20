@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
-import { formatLicenseNumber, generateQrSecret, LICENSE_VALIDITY_MS } from "@achillea/core";
+import { formatLicenseNumber, generateQrSecret, LICENSE_VALIDITY_MS } from "@rosegriffon/achillea-core";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import QRCode from "qrcode";
 import { singleton } from "tsyringe";
@@ -54,7 +54,7 @@ export class LicenseService {
 		const seq = (await em.count(License, { issuedAt: { $gte: yearStart, $lt: yearEnd } })) + 1;
 		const licenseNumber = formatLicenseNumber(year, seq);
 
-		// 64 hex chars via Web Crypto (logique pure @achillea/core).
+		// 64 hex chars via Web Crypto (logique pure @rosegriffon/achillea-core).
 		const qrSecret = generateQrSecret();
 
 		const license = new License();

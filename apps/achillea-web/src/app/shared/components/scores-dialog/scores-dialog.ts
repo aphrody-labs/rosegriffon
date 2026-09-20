@@ -43,8 +43,8 @@ export class ScoresDialog implements OnInit {
 	isTournamentOngoing = input.required<boolean>();
 	/**
 	 * Qui saisit les scores de ce tournoi. Miroir de `canReportTournamentScore`
-	 * (@achillea/core/tournaments), que l'API fait respecter de son côté : la règle est
-	 * dupliquée ici parce que le front ne résout que `@achillea/types`.
+	 * (@rosegriffon/achillea-core/tournaments), que l'API fait respecter de son côté : la règle est
+	 * dupliquée ici parce que le front ne résout que `@rosegriffon/achillea-types`.
 	 */
 	scoreReportPolicy = input<ScoreReportPolicy>(ScoreReportPolicy.PLAYERS);
 	onScoreValidation = output<boolean>();

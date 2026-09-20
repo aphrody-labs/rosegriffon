@@ -1,5 +1,5 @@
 {
-	"name": "achillea-web",
+	"name": "@rosegriffon/achillea-web",
 	"version": "0.0.2",
 	"private": true,
 	"scripts": {
@@ -20,7 +20,6 @@
 		"clean": "bun scripts/clean.ts"
 	},
 	"dependencies": {
-		"@achillea/types": "workspace:*",
 		"@angular/common": "^21.2.16",
 		"@angular/compiler": "^21.2.16",
 		"@angular/core": "^21.2.16",
@@ -32,6 +31,9 @@
 		"@ngx-translate/core": "^17.0.0",
 		"@ngx-translate/http-loader": "^17.0.0",
 		"@primeuix/themes": "^2.0.3",
+		"@rosegriffon/achillea-client": "workspace:*",
+		"@rosegriffon/achillea-core": "workspace:*",
+		"@rosegriffon/achillea-types": "workspace:*",
 		"@sindresorhus/transliterate": "catalog:",
 		"@supabase/supabase-js": "^2.107.0",
 		"@tailwindcss/postcss": "^4.3.0",

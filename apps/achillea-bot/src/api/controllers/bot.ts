@@ -162,6 +162,14 @@ export class BotController extends BaseController {
 		return users;
 	}
 
+	// DOIT rester déclarée AVANT `@Get("/users/:id")` : les routes sont montées
+	// dans l'ordre de déclaration, et `/users/:id` capturait « cached » comme
+	// identifiant Discord — la route ne répondait jamais.
+	@Get("/users/cached")
+	async cachedUsers() {
+		return this.client.users.cache.map((user) => user.toJSON());
+	}
+
 	@Get("/users/:id")
 	async user(@PathParams("id") id: string) {
 		// get discord user
@@ -179,11 +187,6 @@ export class BotController extends BaseController {
 			discord: discordUser,
 			database: databaseUser,
 		};
-	}
-
-	@Get("/users/cached")
-	async cachedUsers() {
-		return this.client.users.cache.map((user) => user.toJSON());
 	}
 
 	@Get("/maintenance")

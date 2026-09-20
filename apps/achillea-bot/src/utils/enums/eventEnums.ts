@@ -1,4 +1,4 @@
-// Source unique : @achillea/types (enums partagés bot ↔ web).
+// Source unique : @rosegriffon/achillea-types (enums partagés bot ↔ web).
 export {
 	EventTypeEnum,
 	TournamentState,
@@ -15,4 +15,4 @@ export {
 	TournamentEventType,
 	PlayerNoteCategory,
 	PlayerNoteSeverity,
-} from "@achillea/types";
+} from "@rosegriffon/achillea-types";

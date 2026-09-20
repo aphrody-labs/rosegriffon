@@ -6,7 +6,7 @@
  * décision d'escalade ici.
  */
 
-import { SanctionType } from "../enums/sanction";
+import { SanctionType } from "@rosegriffon/achillea-types";
 
 /** Fenêtre d'observation des avertissements pour l'escalade (30 jours, en secondes). */
 export const ESCALATION_WINDOW_SEC = 30 * 24 * 60 * 60;

@@ -853,8 +853,8 @@ export class UserService {
 	}
 }
 
-// Source unique : @achillea/types (contrat partagé bot ↔ web).
+// Source unique : @rosegriffon/achillea-types (contrat partagé bot ↔ web).
 // (RankDTO du package ≡ SuggestionRank ; UserRole = enum partagé.)
-import type { UserDTO } from "@achillea/types";
+import type { UserDTO } from "@rosegriffon/achillea-types";
 
 export type { UserDTO };

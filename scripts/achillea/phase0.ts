@@ -339,8 +339,8 @@ async function dependencyRows(source: string): Promise<DependencyRow[]> {
 				const metadata = npmMetadata.get(name);
 				const resolved = declared === "workspace:*" ? (workspaceVersions.get(name) ?? "workspace") : (lockVersions.get(name) ?? "non résolue dans bun.lock");
 				const metadataLicense = metadata?.license;
-				const license = name.startsWith("@achillea/")
-					? (manifests.get(name === "@achillea/core" ? "packages/core" : "packages/types")?.license ?? "non déclarée")
+				const license = name.startsWith("@rosegriffon/achillea-")
+					? (manifests.get(name === "@rosegriffon/achillea-core" ? "packages/core" : "packages/types")?.license ?? "non déclarée")
 					: metadataLicense
 						? metadata?.version === resolved
 							? metadataLicense
@@ -348,7 +348,7 @@ async function dependencyRows(source: string): Promise<DependencyRow[]> {
 						: "indéterminée localement";
 				const licenseProvenance = metadata?.license
 					? `apps/bot/package-lock.json metadata (${metadata.version ?? "version inconnue"})`
-					: name.startsWith("@achillea/")
+					: name.startsWith("@rosegriffon/achillea-")
 						? "package.json du workspace source"
 						: "aucune metadata de licence locale disponible";
 				let decision = dependencyDecision(name, declared, rgCatalog);

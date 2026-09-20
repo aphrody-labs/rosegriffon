@@ -20,11 +20,12 @@ import {
 	Users,
 } from "lucide-react";
 
+import type React from "react";
 import { RGTVIcon } from "@/components/sidebar/atoms/RGTVIcon";
 export interface SubMenuItem {
 	title: string;
 	url: string;
-	icon: React.ElementType;
+	icon: React.ComponentType<{ className?: string }>;
 	badge?: {
 		text: string;
 		variant?: "new" | "hot" | "beta" | "soon";
@@ -38,7 +39,7 @@ export interface SubMenuItem {
 export interface MenuItem {
 	title: string;
 	url?: string;
-	icon: React.ElementType;
+	icon: React.ComponentType<{ className?: string }>;
 	className?: string;
 	collapsible?: boolean;
 	items?: SubMenuItem[];

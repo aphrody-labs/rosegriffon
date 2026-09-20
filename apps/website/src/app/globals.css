@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@rosegriffon/ui/styles.css";
+@import "./sprites.css";
+@plugin "@tailwindcss/typography";
+
+@utility pt-safe {
+	padding-top: env(safe-area-inset-top);
+}
+
+@utility pb-safe {
+	padding-bottom: env(safe-area-inset-bottom);
+}
 
 /* La détection automatique de Tailwind s'arrête à la racine du projet et ignore
  * `node_modules`, où `@rosegriffon/ui` est un lien symbolique : sans ce

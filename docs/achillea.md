@@ -207,7 +207,7 @@ composant de bannière.
   backup DB, rappels casts, transitions de phases…). Séparé du cron RG.
 - **Types** : deux paquets de contrats distincts, sans recouvrement —
   `@rosegriffon/types` (`article`, `stream`, `team`, `stats`, `user`, `roles`, `event`…) côté RG ;
-  `@achillea/types` (enums `clanState`, `clanMemberRole`, `userRole`, `eventEnums`) côté Achillea.
+  `@rosegriffon/achillea-types` (enums `clanState`, `clanMemberRole`, `userRole`, `eventEnums`) côté Achillea.
   Pour qu'un site RG consomme l'API Achillea de façon typée, publier/partager un sous-ensemble de contrat
   (DTO `clans`/`tournaments`) — sinon typage manuel côté consommateur.
 
@@ -287,7 +287,7 @@ ci-dessous sont des points de contact dans cet arbre, pas un workspace déjà in
    son Supabase est partagé avec le site RG. Les noms de chemins dédiés sont une frontière
    d'ownership, pas un simple rangement.
 2. Conserver d'abord les noms de packages source (`achillea-bot`, `achillea-web`,
-   `@achillea/core`, `@achillea/types`) pour limiter les changements simultanés ; une
+   `@rosegriffon/achillea-core`, `@rosegriffon/achillea-types`) pour limiter les changements simultanés ; une
    éventuelle renommée `@rosegriffon/*` sera une migration séparée.
 3. Garder le backend en configuration locale CJS + `tsc-alias` et le front en configuration
    Angular propre. RG utilise ESM + `moduleResolution: Bundler` ; un héritage mécanique du
@@ -419,7 +419,7 @@ reproductible et décision écrite pour chaque dépendance critique.
 
 #### Phase 1 — Workspaces purs et contrats
 
-- porter `@achillea/types`, puis `@achillea/core` ; ajouter leurs scripts ciblables ;
+- porter `@rosegriffon/achillea-types`, puis `@rosegriffon/achillea-core` ; ajouter leurs scripts ciblables ;
 - créer les schémas/DTO publics et le client HTTP optionnel ; documenter la version du contrat ;
 - adapter `tsconfig`, `turbo`, lint et check-imports en gardant les réglages locaux CJS/Angular ;
 - régénérer un unique lockfile RG seulement après validation des manifests.

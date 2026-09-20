@@ -1,4 +1,4 @@
-import { UserRole } from "@achillea/types";
+import { UserRole } from "@rosegriffon/achillea-types";
 
 /**
  * AchilleaRole — 4 rôles globaux RBAC Achilléa.

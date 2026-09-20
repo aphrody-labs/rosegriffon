@@ -231,10 +231,15 @@ export class SqliteQueryBuilder {
 	eq(col: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
 		if (val === null) {
-			this.wheres.push(sql`${column} IS NULL`);
+			this.wheres.push(sql`(${column} IS NULL OR ${column} = '\\\\N')`);
+		} else if (typeof val === "boolean") {
+			if (val) {
+				this.wheres.push(sql`(${column} = 1 OR ${column} = 't' OR ${column} = 'true')`);
+			} else {
+				this.wheres.push(sql`(${column} = 0 OR ${column} = 'f' OR ${column} = 'false')`);
+			}
 		} else {
-			const bound = typeof val === "boolean" ? (val ? 1 : 0) : val;
-			this.wheres.push(sql`${column} = ${bound}`);
+			this.wheres.push(sql`${column} = ${val}`);
 		}
 		return this;
 	}
@@ -242,10 +247,15 @@ export class SqliteQueryBuilder {
 	neq(col: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
 		if (val === null) {
-			this.wheres.push(sql`${column} IS NOT NULL`);
+			this.wheres.push(sql`(${column} IS NOT NULL AND ${column} != '\\\\N')`);
+		} else if (typeof val === "boolean") {
+			if (val) {
+				this.wheres.push(sql`(${column} != 1 AND ${column} != 't' AND ${column} != 'true')`);
+			} else {
+				this.wheres.push(sql`(${column} != 0 AND ${column} != 'f' AND ${column} != 'false')`);
+			}
 		} else {
-			const bound = typeof val === "boolean" ? (val ? 1 : 0) : val;
-			this.wheres.push(sql`${column} != ${bound}`);
+			this.wheres.push(sql`${column} != ${val}`);
 		}
 		return this;
 	}
@@ -253,12 +263,17 @@ export class SqliteQueryBuilder {
 	not(col: string, op: string, val: string | number | boolean | null) {
 		const column = this.cleanCol(col);
 		if (op === "is" && val === null) {
-			this.wheres.push(sql`${column} IS NOT NULL`);
+			this.wheres.push(sql`(${column} IS NOT NULL AND ${column} != '\\\\N')`);
 		} else if (op === "like" || op === "ilike") {
 			this.wheres.push(sql`${column} NOT LIKE ${val}`);
+		} else if (typeof val === "boolean") {
+			if (val) {
+				this.wheres.push(sql`(${column} != 1 AND ${column} != 't' AND ${column} != 'true')`);
+			} else {
+				this.wheres.push(sql`(${column} != 0 AND ${column} != 'f' AND ${column} != 'false')`);
+			}
 		} else {
-			const bound = typeof val === "boolean" ? (val ? 1 : 0) : val;
-			this.wheres.push(sql`${column} != ${bound}`);
+			this.wheres.push(sql`${column} != ${val}`);
 		}
 		return this;
 	}
@@ -352,11 +367,11 @@ export class SqliteQueryBuilder {
 
 			// Null checks (PostgREST: `col.is.null` / `col.not.is.null`) — sans param.
 			if (rest === "is.null") {
-				conditions.push(sql`${column} IS NULL`);
+				conditions.push(sql`(${column} IS NULL OR ${column} = '\\\\N')`);
 				continue;
 			}
 			if (rest === "not.is.null") {
-				conditions.push(sql`${column} IS NOT NULL`);
+				conditions.push(sql`(${column} IS NOT NULL AND ${column} != '\\\\N')`);
 				continue;
 			}
 
@@ -385,7 +400,13 @@ export class SqliteQueryBuilder {
 					conditions.push(sql`${column} LIKE ${val.replaceAll("*", "%")}`);
 					break;
 				case "eq":
-					conditions.push(sql`${column} = ${val === "true" ? 1 : val === "false" ? 0 : val}`);
+					if (val === "true") {
+						conditions.push(sql`(${column} = 1 OR ${column} = 't' OR ${column} = 'true')`);
+					} else if (val === "false") {
+						conditions.push(sql`(${column} = 0 OR ${column} = 'f' OR ${column} = 'false')`);
+					} else {
+						conditions.push(sql`${column} = ${val}`);
+					}
 					break;
 				case "neq":
 					conditions.push(sql`${column} != ${val}`);
@@ -446,9 +467,9 @@ export class SqliteQueryBuilder {
 		// >= 3.30) pour matcher la sémantique supabase-js, sinon les lignes à
 		// valeur NULL (ex. zukan_order) remontent en tête et cassent l'ordre.
 		if (options?.nullsFirst === true) {
-			this.orders.push(sql`${column} ${dir} NULLS FIRST`);
+			this.orders.push(sql`CASE WHEN ${column} IS NULL OR ${column} = '\\\\N' THEN 0 ELSE 1 END, ${column} ${dir}`);
 		} else if (options?.nullsFirst === false) {
-			this.orders.push(sql`${column} ${dir} NULLS LAST`);
+			this.orders.push(sql`CASE WHEN ${column} IS NULL OR ${column} = '\\\\N' THEN 1 ELSE 0 END, ${column} ${dir}`);
 		} else {
 			this.orders.push(sql`${column} ${dir}`);
 		}
@@ -571,7 +592,11 @@ export class SqliteQueryBuilder {
 	private parseRow(row: Record<string, unknown>): Record<string, unknown> {
 		const parsed: Record<string, unknown> = {};
 		for (const [key, val] of Object.entries(row)) {
-			if (typeof val === "string" && (val.startsWith("{") || val.startsWith("["))) {
+			if (val === "\\N") {
+				parsed[key] = null;
+			} else if (key === "zukan_order" && typeof val === "string" && /^-?\d+$/.test(val)) {
+				parsed[key] = parseInt(val, 10);
+			} else if (typeof val === "string" && (val.startsWith("{") || val.startsWith("["))) {
 				try {
 					parsed[key] = JSON.parse(val);
 				} catch {

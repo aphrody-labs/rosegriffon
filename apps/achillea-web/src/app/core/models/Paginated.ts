@@ -1,9 +1,1 @@
-export interface Paginated<T> {
-	data: T[];
-	meta: {
-		page: number;
-		limit: number;
-		total: number;
-		pageCount: number;
-	};
-}
+export type { PageMeta, PageSizeMeta, PagedList, PageQuery, Paginated } from "@rosegriffon/achillea-types";

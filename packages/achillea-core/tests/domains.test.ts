@@ -1,5 +1,5 @@
 /**
- * Suite de tests approfondie de @achillea/core (logique pure, multi-runtime).
+ * Suite de tests approfondie de @rosegriffon/achillea-core (logique pure, multi-runtime).
  *
  * Complémentaire de `core.test.ts` : on cible ici les fonctions / constantes
  * exportées peu ou pas couvertes et les cas limites de CHAQUE domaine

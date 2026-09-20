@@ -1,13 +1,2 @@
-export type SocialMediaDTO = {
-	platform: SocialMedia;
-	username: string;
-	canonicalUrl: string;
-};
-
-export enum SocialMedia {
-	X,
-	Instagram,
-	TikTok,
-	Youtube,
-	Twitch,
-}
+export { SocialMedia } from "@rosegriffon/achillea-types";
+export type { SocialMediaDTO } from "@rosegriffon/achillea-types";

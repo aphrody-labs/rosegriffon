@@ -76,7 +76,7 @@ export class UserProfile implements OnInit {
 		return total === 0 ? "—" : `${Math.round(((wins ?? 0) / total) * 100)}%`;
 	}
 
-	/** Sentinel GOAL_AVERAGE_PERFECT (999, voir @achillea/core/tournaments) -> "∞". */
+	/** Sentinel GOAL_AVERAGE_PERFECT (999, voir @rosegriffon/achillea-core/tournaments) -> "∞". */
 	formatGoalAverage(value: number): string {
 		if (value >= 999) return "∞";
 		return value.toFixed(2);

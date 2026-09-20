@@ -7,7 +7,7 @@
  *   navigateur, edge (Deno/Web), Node 18+ et Bun — aucune dépendance Node.
  */
 
-import { LicenseStatus } from "../enums/license";
+import { LicenseStatus } from "@rosegriffon/achillea-types";
 
 /** Préfixe des numéros de licence Achilléa. */
 export const LICENSE_PREFIX = "ACH";

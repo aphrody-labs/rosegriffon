@@ -38,12 +38,17 @@ jobs:
 
       - name: Vérifier les packages partagés
         run: |
-          bun --filter @achillea/types type-check
-          bun --filter @achillea/types test
-          bun --filter @achillea/core type-check
-          bun --filter @achillea/core test
-          bun --filter @achillea/client type-check
-          bun --filter @achillea/client test
+          bun --filter @rosegriffon/achillea-types type-check
+          bun --filter @rosegriffon/achillea-types test
+          bun --filter @rosegriffon/achillea-core type-check
+          bun --filter @rosegriffon/achillea-core test
+          bun --filter @rosegriffon/achillea-client type-check
+          bun --filter @rosegriffon/achillea-client test
+          bun --filter @rosegriffon/achillea-contract type-check
+          bun --filter @rosegriffon/achillea-contract test
+
+      - name: Vérifier que le contrat exporté est à jour
+        run: bun --filter @rosegriffon/achillea-contract check
 
       - name: Vérifier le backend
         working-directory: apps/achillea-bot

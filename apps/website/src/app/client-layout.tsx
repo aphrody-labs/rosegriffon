@@ -17,6 +17,7 @@ import SidebarNavigationHandler from "@/components/layout/SidebarNavigationHandl
 import EdgeSwipeDetector from "@/components/shared/EdgeSwipeDetector";
 import MobileWatermark from "@/components/shared/MobileWatermark";
 import { AuthProvider } from "@/contexts/auth-context";
+import { LanguageProvider } from "@/components/providers/language-provider";
 import { ProfileProvider } from "@/contexts/profile-context";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { Providers } from "@/lib/providers";
@@ -86,12 +87,13 @@ export default function ClientLayout({
 			<Providers>
 				<AuthProvider>
 					<ProfileProvider>
-						<SidebarWrapper isMedium={isMedium}>
-							{/* Accessibilité: lien pour sauter au contenu principal */}
-							<SkipToContent />
+						<LanguageProvider>
+							<SidebarWrapper isMedium={isMedium}>
+								{/* Accessibilité: lien pour sauter au contenu principal */}
+								<SkipToContent />
 
-							{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
-							{showRail && <WebsiteNavigationRail />}
+								{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
+								{showRail && <WebsiteNavigationRail />}
 
 							{/* SIDEBAR — tiroir en compact, tiroir à la demande en medium
 							    (le bouton « Menu » du rail l'ouvre), panneau fixe en expanded.
@@ -148,7 +150,8 @@ export default function ClientLayout({
 								</div>
 							</SidebarInset>
 
-						</SidebarWrapper>
+							</SidebarWrapper>
+						</LanguageProvider>
 						<Toaster richColors position="top-right" />
 					</ProfileProvider>
 				</AuthProvider>

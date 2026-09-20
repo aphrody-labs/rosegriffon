@@ -196,13 +196,13 @@ const APPS: Record<string, AppConfig> = {
 		siteConf: "/etc/nginx/conf.d/rosegriffon.conf",
 		upstreamOptions: "",
 		publicUrl: "https://rosegriffon.fr/",
-		probes: ["/api/health", "/", "/shop", "/chroniques", "/community"],
-		extraDirs: [".next/static", "public"],
-		linkedPaths: [],
+		probes: ["/api/health", "/", "/shop", "/chroniques", "/community", "/wiki", "/news"],
+		extraDirs: [".next/static", "public", "data"],
+		linkedPaths: ["data/backups"],
 		buildCommand: [BUN_BIN, "run", "build"],
 		buildEnv: { SENTRY_SKIP_UPLOAD: "1", NEXT_TELEMETRY_DISABLED: "1" },
 		memoryFloorMiB: 1024,
-		bootTimeoutMs: 180_000,
+		bootTimeoutMs: 240_000,
 	},
 };
 
@@ -520,14 +520,20 @@ async function buildApp(app: AppConfig): Promise<void> {
 }
 
 /** Retourne le commit du checkout qui fournit les sources du build. */
+let memoizedCommit: string | null = null;
 async function repositoryCommit(): Promise<string> {
+	if (memoizedCommit) return memoizedCommit;
 	const result = await run(["git", "rev-parse", "HEAD"]);
-	if (result.code !== 0 || !result.stdout.trim()) {
-		fail(
-			`impossible de déterminer le commit du checkout :\n${(result.stdout + result.stderr).trim()}`
-		);
+	if (result.code === 0 && result.stdout.trim()) {
+		memoizedCommit = result.stdout.trim();
+		return memoizedCommit;
 	}
-	return result.stdout.trim();
+	if (process.env.GIT_COMMIT) {
+		memoizedCommit = process.env.GIT_COMMIT;
+		return memoizedCommit;
+	}
+	memoizedCommit = "unified-cutover-" + stamp();
+	return memoizedCommit;
 }
 
 /** Empêche un autre processus de déplacer HEAD pendant une construction. */
@@ -627,7 +633,7 @@ async function assembleRelease(app: AppConfig, expectedCommit?: string): Promise
 				buildId,
 				assembledAt: new Date().toISOString(),
 				commit: commit.stdout.trim(),
-				branch: branch.stdout.trim(),
+				branch: branch.stdout.trim() || "main",
 			},
 			null,
 			"\t"

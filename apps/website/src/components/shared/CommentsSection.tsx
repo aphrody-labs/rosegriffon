@@ -16,6 +16,7 @@ import { MessageSquare, Trash2, Send, ShieldAlert, Award } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { subscribeTable } from "@/lib/realtime";
 import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/contexts/auth-context";
 import { addCommentAction, deleteCommentAction, getCommentsAction } from "@/app/actions/comments";
 import { toast } from "sonner";
 
@@ -52,7 +53,8 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 
-	const { data: session } = authClient.useSession();
+	const { user } = useAuth();
+	const session = user ? { user } : null;
 	// `window.location` n'existe pas pendant le rendu serveur : l'y lire faisait
 	// échouer le SSR de toute page portant les commentaires (les chroniques
 	// n'arrivaient plus qu'en squelette, sans <h1> ni texte, donc sans contenu

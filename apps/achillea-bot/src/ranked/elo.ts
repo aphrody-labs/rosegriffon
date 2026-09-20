@@ -1,5 +1,5 @@
 // Calcul Elo classique avec K-factor configurable par Season.
-// Logique pure déplacée dans @achillea/core ; on ré-exporte pour conserver
+// Logique pure déplacée dans @rosegriffon/achillea-core ; on ré-exporte pour conserver
 // les chemins d'import existants côté bot (ranked).
 
 export {
@@ -8,4 +8,4 @@ export {
 	expectedScore,
 	progressiveEloDelta,
 	tierEloFactors,
-} from "@achillea/core";
+} from "@rosegriffon/achillea-core";

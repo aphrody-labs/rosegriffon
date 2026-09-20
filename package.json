@@ -1,5 +1,5 @@
 {
-	"name": "@rosegriffon/monorepo",
+	"name": "@rose-griffon/monorepo",
 	"version": "0.1.0",
 	"private": true,
 	"description": "Rose Griffon monorepo — site communautaire (azalee wiki IEVR + website rosegriffon + bot Discord). Stack Next 16.2 / React 19.2 / Bun 1.3 / Supabase / Turborepo.",
@@ -242,6 +242,9 @@
 		"docs:build": "bun run docs:map && bun run docs:bundle && bun run docs:check-links && bun run docs:lint",
 		"check:imports": "bun scripts/check-imports.ts",
 		"check:achillea-services": "bun scripts/achillea/check-services-config.ts",
+		"achillea:contract": "bun --filter @rosegriffon/achillea-contract generate",
+		"achillea:contract:check": "bun --filter @rosegriffon/achillea-contract check",
+		"achillea:verify": "bun --filter @rosegriffon/achillea-types type-check && bun --filter @rosegriffon/achillea-types test && bun --filter @rosegriffon/achillea-core type-check && bun --filter @rosegriffon/achillea-core test && bun --filter @rosegriffon/achillea-client type-check && bun --filter @rosegriffon/achillea-client test && bun --filter @rosegriffon/achillea-contract type-check && bun --filter @rosegriffon/achillea-contract test && bun --filter @rosegriffon/achillea-contract check",
 		"inagle:manifest:game-assets": "bun scripts/inagle/pipeline/generate-game-assets-manifest.ts"
 	},
 	"dependencies": {
