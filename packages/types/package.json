@@ -21,6 +21,9 @@
     "./instagram": "./src/instagram.ts",
     "./schemas": "./src/schemas.ts"
   },
+  "scripts": {
+    "test": "bun test src"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"

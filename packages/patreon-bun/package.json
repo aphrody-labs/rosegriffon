@@ -46,6 +46,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
+    "test": "bun test src",
     "build:js": "bun build src/index.ts --outdir dist --target bun --format esm",
     "build:types": "bun --bun tsc --emitDeclarationOnly --noCheck",
     "build": "bun run build:js && bun run build:types",
