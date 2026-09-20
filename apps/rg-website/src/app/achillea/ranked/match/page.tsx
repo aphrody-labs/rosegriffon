@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useRankedMatch } from "@/lib/achillea/use-ranked-match";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import {
@@ -22,46 +24,51 @@ import {
 export default function RankedMatchPage() {
 	const { user, status, login } = useAchilleaAuth();
 
-	// Match state (active / simulated)
-	const [roomCode] = useState<string>("ACH-7842");
-	const [matchMode] = useState<string>("1v1 Classé");
+	// État RÉEL du match, poussé par le serveur (Colyseus). Tout ce qui suivait
+	// ici était inventé : code de salon, mode, adversaire, ELO, chat local,
+	// soumission en `setTimeout`. Rien n'atteignait le serveur.
+	const parametres = useSearchParams();
+	const match = useRankedMatch(parametres.get("salle"));
+
+	const roomCode = match.codeSalle;
+	const matchMode = `${match.joueurs.length === 4 ? "2v2" : "1v1"} ${match.classe ? "Classé" : "Amical"}`;
+
+	// Le joueur courant et son adversaire sortent de l'état du serveur, jamais
+	// d'une valeur de repli : afficher « Adversaire_99 » à la place d'un nom
+	// manquant rend une page crédible qui ne décrit rien.
+	const moi = match.joueurs.find((joueur) => joueur.userId === user?.id) ?? null;
+	const adversaire = match.joueurs.find((joueur) => joueur.userId !== user?.id) ?? null;
+
 	const [myScore, setMyScore] = useState<number>(0);
 	const [oppScore, setOppScore] = useState<number>(0);
-	const [scoreSubmitted, setScoreSubmitted] = useState<boolean>(false);
-	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+	const scoreSubmitted = moi?.submitted ?? false;
+	const proofUploaded = moi?.proofUploaded ?? false;
 
-	// Proof upload & dispute
 	const [disputeOpen, setDisputeOpen] = useState<boolean>(false);
-	const [proofUploaded, setProofUploaded] = useState<boolean>(false);
 	const [disputeReason, setDisputeReason] = useState<string>("");
-
-	// In-room chat
-	const [messages, setMessages] = useState<Array<{ sender: string; text: string; time: string }>>([
-		{ sender: "Système", text: "Match initialisé. Bonne chance !", time: "14:02" },
-	]);
 	const [chatInput, setChatInput] = useState<string>("");
+
+	// Les scores saisis suivent ceux que le serveur a déjà enregistrés : après
+	// un rechargement, le formulaire reflète l'état réel au lieu de repartir de
+	// zéro et de laisser croire que rien n'a été soumis.
+	useEffect(() => {
+		if (!moi) return;
+		setMyScore(moi.myScore);
+		setOppScore(moi.oppScore);
+	}, [moi?.myScore, moi?.oppScore]);
 
 	const handleSendChat = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!chatInput.trim()) return;
-		const now = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-		setMessages((prev) => [
-			...prev,
-			{ sender: user?.username ?? "Moi", text: chatInput.trim(), time: now },
-		]);
+		match.envoyerMessage(chatInput);
 		setChatInput("");
 	};
 
-	const handleSubmitScore = async () => {
-		setIsSubmitting(true);
-		setTimeout(() => {
-			setIsSubmitting(false);
-			setScoreSubmitted(true);
-		}, 800);
+	const handleSubmitScore = () => {
+		match.soumettreScore(myScore, oppScore);
 	};
 
 	const handleUploadProof = () => {
-		setProofUploaded(true);
+		match.signalerPreuve();
 	};
 
 	return (
@@ -114,8 +121,10 @@ export default function RankedMatchPage() {
 							className="w-16 h-16 ring-2 ring-primary"
 						/>
 						<div>
-							<div className="font-bold text-sm">{user?.username ?? "Mon Pseudo"}</div>
-							<div className="text-xs text-amber-400 font-mono mt-0.5">1 240 AP · Divin</div>
+							<div className="font-bold text-sm">{moi?.displayName || user?.username || "—"}</div>
+							<div className="text-xs text-[var(--achillea-lime)] font-mono mt-0.5">
+								{moi ? `${moi.elo} AP` : "—"}
+							</div>
 						</div>
 					</div>
 
@@ -125,7 +134,7 @@ export default function RankedMatchPage() {
 						<div className="font-mono text-4xl font-extrabold text-foreground tracking-tight bg-background border border-border/80 py-2 px-6 rounded-2xl inline-block shadow-inner">
 							{myScore} - {oppScore}
 						</div>
-						<div className="text-xs text-muted-foreground">Best of 1 · Temps réglementaire</div>
+						<div className="text-xs text-muted-foreground">{matchMode}</div>
 					</div>
 
 					{/* Away Player (Opponent) */}
@@ -134,13 +143,17 @@ export default function RankedMatchPage() {
 							Extérieur (Adversaire)
 						</span>
 						<UserAvatar
-							avatar=""
-							displayName="Adversaire"
+							avatar={adversaire?.avatar ?? ""}
+							displayName={adversaire?.displayName ?? "En attente"}
 							className="w-16 h-16 ring-2 ring-border"
 						/>
 						<div>
-							<div className="font-bold text-sm">Adversaire_99</div>
-							<div className="text-xs text-amber-400 font-mono mt-0.5">1 215 AP · Divin</div>
+							<div className="font-bold text-sm">
+								{adversaire?.displayName ?? "En attente d'un adversaire"}
+							</div>
+							<div className="text-xs text-[var(--achillea-lime)] font-mono mt-0.5">
+								{adversaire ? `${adversaire.elo} AP` : "—"}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -194,10 +207,10 @@ export default function RankedMatchPage() {
 							<button
 								type="button"
 								onClick={handleSubmitScore}
-								disabled={isSubmitting}
+								disabled={match.connexion !== "connecte"}
 								className="w-full py-3 px-4 bg-primary text-primary-foreground font-bold text-sm rounded-xl hover:bg-primary/90 transition shadow-sm flex items-center justify-center gap-2"
 							>
-								{isSubmitting ? (
+								{match.connexion === "connexion" ? (
 									<Loader2 className="w-4 h-4 animate-spin" />
 								) : (
 									<Check className="w-4 h-4" />
@@ -269,15 +282,35 @@ export default function RankedMatchPage() {
 
 					{/* Messages scroll */}
 					<div className="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
-						{messages.map((m, idx) => (
-							<div key={idx} className="p-2 rounded-lg bg-background/80 border border-border/60 space-y-0.5">
-								<div className="flex items-center justify-between text-[10px] text-muted-foreground">
-									<span className="font-semibold text-foreground">{m.sender}</span>
-									<span>{m.time}</span>
-								</div>
-								<p className="text-muted-foreground leading-relaxed">{m.text}</p>
-							</div>
-						))}
+						{match.messages.length === 0 ? (
+							<p className="py-4 text-center text-muted-foreground">Aucun message.</p>
+						) : (
+							match.messages.map((m, idx) => {
+								// L'auteur est résolu depuis les joueurs du match : le serveur
+								// n'envoie qu'un identifiant, et afficher cet identifiant brut
+								// dans une conversation ne veut rien dire pour un joueur.
+								const auteur =
+									match.joueurs.find((joueur) => joueur.userId === m.userId)?.displayName ??
+									(m.userId ? "Joueur" : "Système");
+								return (
+									<div
+										key={`${m.userId}-${m.at}-${idx}`}
+										className="p-2 rounded-lg bg-background/80 border border-border/60 space-y-0.5"
+									>
+										<div className="flex items-center justify-between text-[10px] text-muted-foreground">
+											<span className="font-semibold text-foreground">{auteur}</span>
+											<span>
+												{new Date(m.at).toLocaleTimeString("fr-FR", {
+													hour: "2-digit",
+													minute: "2-digit",
+												})}
+											</span>
+										</div>
+										<p className="text-muted-foreground leading-relaxed">{m.text}</p>
+									</div>
+								);
+							})
+						)}
 					</div>
 
 					{/* Input form */}

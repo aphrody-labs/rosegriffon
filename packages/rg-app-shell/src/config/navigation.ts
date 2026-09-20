@@ -393,7 +393,13 @@ export function construireEsportItems(bases: NavBases): NavItem[] {
 	const e = (chemin: string) => joindreDomaine(bases.esport, chemin);
 
 	return [
-		{ icon: "sports_esports", label: "nav.esport.home", path: e("/") },
+		{
+			// Logo Achilléa officiel (`public/achillea/logo1.svg`).
+			icon: "sports_esports",
+			imageUrl: "/achillea/logo1.svg",
+			label: "nav.esport.home",
+			path: e("/"),
+		},
 		{
 			children: [
 				{ icon: "groups", label: "nav.esport.clans.list", path: e("/clans") },
@@ -425,7 +431,13 @@ export function construireEsportItems(bases: NavBases): NavItem[] {
 			label: "nav.esport.tournaments",
 			path: e("/tournaments"),
 		},
-		{ icon: "stadium", label: "nav.esport.leagues", path: e("/leagues/astral") },
+		{
+			// Marque de l'Astral League (`public/achillea/leagues/astral-logo-mark.png`).
+			icon: "stadium",
+			imageUrl: "/achillea/leagues/astral-logo-mark.png",
+			label: "nav.esport.leagues",
+			path: e("/leagues/astral"),
+		},
 		{ icon: "videocam", label: "nav.esport.casts", path: e("/casts") },
 		{ icon: "badge", label: "nav.esport.licence", path: e("/licence") },
 		{ icon: "account_balance_wallet", label: "nav.esport.wallet", path: e("/wallet") },
@@ -450,7 +462,15 @@ export function construireAssociationItems(bases: NavBases): NavItem[] {
 			path: a("/chroniques"),
 		},
 		{ icon: "event", label: "nav.association.events", path: a("/evenements") },
-		{ icon: "live_tv", label: "nav.association.rgtv", path: a("/rose-griffon-tv") },
+		{
+			// L'image officielle de la webTV, pas un pictogramme générique : elle
+			// est livrée dans `public/rgtv/rgtv.webp` et porte l'identité de la
+			// chaîne. `imageUrl` a la priorité sur `icon` dans la barre latérale.
+			icon: "live_tv",
+			imageUrl: "/rgtv/rgtv.webp",
+			label: "nav.association.rgtv",
+			path: a("/rose-griffon-tv"),
+		},
 		{
 			children: [
 				{ icon: "forum", label: "nav.association.community", path: a("/community") },

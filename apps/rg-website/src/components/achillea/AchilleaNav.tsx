@@ -5,31 +5,26 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useAchilleaAuth } from "@/lib/achillea";
 import { Button, Badge } from "@rosegriffon/ui";
-import {
-	Home,
-	Users,
-	Zap,
-	Trophy,
-	Star,
-	Video,
-	IdCard,
-	Wallet,
-	BookOpen,
-	ShieldAlert,
-	LogIn,
-	LogOut,
-} from "lucide-react";
+import { PrimeIcon } from "@/components/achillea/PrimeIcon";
 
+/**
+ * Noms PrimeIcons, ceux-là mêmes qu'utilise le front Angular.
+ *
+ * Correspondance reprise de `shared/components/header/header.ts` : `pi-home`,
+ * `pi-users`, `pi-bolt`, `pi-trophy`, `pi-star`, `pi-video`, `pi-id-card`,
+ * `pi-wallet`, `pi-book`. Les remplacer par des équivalents Lucide donnait une
+ * iconographie générique là où Achilléa a la sienne.
+ */
 export const ACHILLEA_NAV_LINKS = [
-	{ label: "Accueil", path: "/achillea", icon: Home, exact: true },
-	{ label: "Clans", path: "/achillea/clans", icon: Users },
-	{ label: "Ranked", path: "/achillea/ranked", icon: Zap },
-	{ label: "Tournois", path: "/achillea/tournaments", icon: Trophy },
-	{ label: "Astral League", path: "/achillea/leagues/astral", icon: Star },
-	{ label: "Casts", path: "/achillea/casts", icon: Video },
-	{ label: "Licence", path: "/achillea/licence", icon: IdCard },
-	{ label: "Wallet", path: "/achillea/wallet", icon: Wallet },
-	{ label: "Guide", path: "/achillea/guide", icon: BookOpen },
+	{ label: "Accueil", path: "/achillea", icon: "home", exact: true },
+	{ label: "Clans", path: "/achillea/clans", icon: "users" },
+	{ label: "Ranked", path: "/achillea/ranked", icon: "bolt" },
+	{ label: "Tournois", path: "/achillea/tournaments", icon: "trophy" },
+	{ label: "Astral League", path: "/achillea/leagues/astral", icon: "star" },
+	{ label: "Casts", path: "/achillea/casts", icon: "video" },
+	{ label: "Licence", path: "/achillea/licence", icon: "id-card" },
+	{ label: "Wallet", path: "/achillea/wallet", icon: "wallet" },
+	{ label: "Guide", path: "/achillea/guide", icon: "book" },
 ];
 
 export function AchilleaNav() {
@@ -67,7 +62,6 @@ export function AchilleaNav() {
 				{/* Desktop nav links */}
 				<nav className="hidden lg:flex items-center gap-1 overflow-x-auto py-1">
 					{ACHILLEA_NAV_LINKS.map((link) => {
-						const Icon = link.icon;
 						const isActive = link.exact
 							? pathname === link.path
 							: pathname === link.path || pathname?.startsWith(`${link.path}/`);
@@ -82,7 +76,7 @@ export function AchilleaNav() {
 										: "text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/40"
 								}`}
 							>
-								<Icon className="size-3.5" />
+								<PrimeIcon name={link.icon} className="text-sm" />
 								<span>{link.label}</span>
 							</Link>
 						);
@@ -97,7 +91,7 @@ export function AchilleaNav() {
 									: "text-[var(--achillea-primary)] hover:bg-amber-500/10"
 							}`}
 						>
-							<ShieldAlert className="size-3.5" />
+							<PrimeIcon name="shield" className="text-sm" />
 							<span>Admin</span>
 						</Link>
 					)}
@@ -135,7 +129,7 @@ export function AchilleaNav() {
 								title="Se déconnecter"
 								aria-label="Se déconnecter"
 							>
-								<LogOut className="size-4" />
+								<PrimeIcon name="sign-out" className="text-sm" />
 							</Button>
 						</div>
 					) : (
@@ -144,7 +138,7 @@ export function AchilleaNav() {
 							onClick={() => login(pathname || "/achillea")}
 							className="bg-[var(--discord-blurple)] hover:bg-[var(--discord-blurple-hover)] text-white font-bold text-xs gap-1.5 rounded-xl shadow-sm"
 						>
-							<LogIn className="size-3.5" />
+							<PrimeIcon name="sign-in" className="text-sm" />
 							<span>Discord</span>
 						</Button>
 					)}
@@ -154,7 +148,6 @@ export function AchilleaNav() {
 			{/* Sub-nav mobile bar */}
 			<div className="lg:hidden border-t border-outline/10 px-3 py-2 overflow-x-auto flex items-center gap-1.5 scrollbar-none">
 				{ACHILLEA_NAV_LINKS.map((link) => {
-					const Icon = link.icon;
 					const isActive = link.exact
 						? pathname === link.path
 						: pathname === link.path || pathname?.startsWith(`${link.path}/`);
@@ -169,7 +162,7 @@ export function AchilleaNav() {
 									: "text-on-surface-variant hover:bg-surface-variant/30"
 							}`}
 						>
-							<Icon className="size-3" />
+							<PrimeIcon name={link.icon} className="text-xs" />
 							<span>{link.label}</span>
 						</Link>
 					);
@@ -183,7 +176,7 @@ export function AchilleaNav() {
 								: "hover:bg-amber-500/10"
 						}`}
 					>
-						<ShieldAlert className="size-3" />
+						<PrimeIcon name="shield" className="text-xs" />
 						<span>Admin</span>
 					</Link>
 				)}
