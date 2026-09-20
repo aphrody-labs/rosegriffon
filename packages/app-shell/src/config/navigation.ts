@@ -1,4 +1,9 @@
-import { CHEMINS_WIKI, joindreWiki, type NavBases } from "./routes";
+import {
+	CHEMINS_WIKI,
+	joindreDomaine,
+	joindreWiki,
+	type NavBases,
+} from "./routes";
 
 export interface NavItem {
 	label: string;
@@ -290,4 +295,183 @@ export function construireNavigation(bases: NavBases) {
 		mobileNavItems: construireMobileNavItems(bases),
 		navigationItems: construireNavigationItems(bases),
 	};
+}
+
+// ─── NAVIGATION UNIFIÉE — TROIS DOMAINES ─────────────────────────────────────
+//
+// Depuis la fusion des trois sites sous `rosegriffon.fr`, un seul menu doit
+// porter le wiki Azalée, l'e-sport Achilléa et le portail de l'association.
+// Les empiler à plat donnerait une cinquantaine d'entrées sans hiérarchie :
+// on les groupe donc en trois sous-catégories repliables.
+//
+// TOUT EST ADDITIF. `construireNavigationItems` et ses sœurs ne changent pas de
+// signature ni de résultat : les apps migrent quand elles veulent, et rien ne
+// casse entre-temps.
+
+/** Les trois domaines du réseau, dans l'ordre d'affichage du menu. */
+export const DOMAINES = ["association", "wiki", "esport"] as const;
+
+export type Domaine = (typeof DOMAINES)[number];
+
+export interface SousCategorieNav {
+	/** Domaine, pour cibler un style ou un thème par section. */
+	domaine: Domaine;
+	/** Entrée racine repliable, avec ses enfants. */
+	item: NavItem;
+}
+
+/**
+ * Menu de l'e-sport (Achilléa).
+ *
+ * Rend `null` si l'app ne monte pas ce domaine : mieux vaut une sous-catégorie
+ * absente qu'une sous-catégorie pleine de liens morts. C'est le cas d'`azalee`,
+ * qui ne sert que le wiki.
+ */
+export function construireEsportItems(bases: NavBases): NavItem[] {
+	if (bases.esport === undefined) return [];
+	const e = (chemin: string) => joindreDomaine(bases.esport, chemin);
+
+	return [
+		{ icon: "sports_esports", label: "nav.esport.home", path: e("/") },
+		{
+			children: [
+				{ icon: "groups", label: "nav.esport.clans.list", path: e("/clans") },
+				{ icon: "add_circle", label: "nav.esport.clans.create", path: e("/clans/create") },
+				{ icon: "shield", label: "nav.esport.clans.dashboard", path: e("/clans/dashboard") },
+			],
+			icon: "groups",
+			label: "nav.esport.clans",
+			path: e("/clans"),
+		},
+		{
+			children: [
+				{ icon: "swords", label: "nav.esport.ranked.play", path: e("/ranked") },
+				{ icon: "leaderboard", label: "nav.esport.ranked.leaderboard", path: e("/ranked/leaderboard") },
+				{ icon: "military_tech", label: "nav.esport.ranked.tiers", path: e("/ranked/tiers") },
+				{ icon: "history", label: "nav.esport.ranked.history", path: e("/ranked/history") },
+			],
+			icon: "swords",
+			label: "nav.esport.ranked",
+			path: e("/ranked"),
+		},
+		{
+			children: [
+				{ icon: "emoji_events", label: "nav.esport.tournaments.list", path: e("/tournaments") },
+				{ icon: "add_circle", label: "nav.esport.tournaments.create", path: e("/tournaments/create") },
+				{ icon: "trending_up", label: "nav.esport.tournaments.circuit", path: e("/tournaments/circuit/ranking") },
+			],
+			icon: "emoji_events",
+			label: "nav.esport.tournaments",
+			path: e("/tournaments"),
+		},
+		{ icon: "stadium", label: "nav.esport.leagues", path: e("/leagues/astral") },
+		{ icon: "videocam", label: "nav.esport.casts", path: e("/casts") },
+		{ icon: "badge", label: "nav.esport.licence", path: e("/licence") },
+		{ icon: "account_balance_wallet", label: "nav.esport.wallet", path: e("/wallet") },
+		{ icon: "menu_book", label: "nav.esport.guide", path: e("/guide") },
+	];
+}
+
+/** Menu du portail de l'association. */
+export function construireAssociationItems(bases: NavBases): NavItem[] {
+	if (bases.association === undefined) return [];
+	const a = (chemin: string) => joindreDomaine(bases.association, chemin);
+
+	return [
+		{ icon: "home", label: "nav.association.home", path: a("/") },
+		{
+			children: [
+				{ icon: "feed", label: "nav.association.news", path: a("/news") },
+				{ icon: "auto_stories", label: "nav.association.chronicles", path: a("/chroniques") },
+			],
+			icon: "newspaper",
+			label: "nav.association.editorial",
+			path: a("/chroniques"),
+		},
+		{ icon: "event", label: "nav.association.events", path: a("/evenements") },
+		{ icon: "live_tv", label: "nav.association.rgtv", path: a("/rose-griffon-tv") },
+		{ icon: "storefront", label: "nav.association.shop", path: a("/shop") },
+		{
+			children: [
+				{ icon: "forum", label: "nav.association.community", path: a("/community") },
+				{ icon: "how_to_vote", label: "nav.association.polls", path: a("/sondages") },
+				{ icon: "celebration", label: "nav.association.iergday", path: a("/iergday") },
+			],
+			icon: "forum",
+			label: "nav.association.life",
+			path: a("/community"),
+		},
+		{
+			children: [
+				{ icon: "info", label: "nav.association.about", path: a("/a-propos") },
+				{ icon: "diversity_3", label: "nav.association.team", path: a("/notre-equipe") },
+				{ icon: "rocket_launch", label: "nav.association.projects", path: a("/projets") },
+				{ icon: "volunteer_activism", label: "nav.association.support", path: a("/nous-soutenir") },
+			],
+			icon: "info",
+			label: "nav.association.about_us",
+			path: a("/a-propos"),
+		},
+	];
+}
+
+/**
+ * Menu complet, groupé en trois sous-catégories.
+ *
+ * Une sous-catégorie sans enfant est OMISE, pas rendue vide : une app qui ne
+ * monte qu'un domaine (azalee) obtient un menu d'un seul groupe, et non trois
+ * accordéons dont deux ne s'ouvrent sur rien.
+ *
+ * `groupOnly` sur l'entête : le groupe n'est pas une destination, seulement un
+ * déclencheur de repli — sans ce drapeau la barre latérale en ferait un lien
+ * vers une page qui n'existe pas.
+ */
+export function construireNavigationUnifiee(bases: NavBases): SousCategorieNav[] {
+	const groupes: { domaine: Domaine; enfants: NavItem[]; icon: string; label: string }[] = [
+		{
+			domaine: "association",
+			enfants: construireAssociationItems(bases),
+			icon: "diversity_3",
+			label: "nav.domaine.association",
+		},
+		{
+			domaine: "wiki",
+			enfants: construireNavigationItems(bases),
+			icon: "menu_book",
+			label: "nav.domaine.wiki",
+		},
+		{
+			domaine: "esport",
+			enfants: construireEsportItems(bases),
+			icon: "sports_esports",
+			label: "nav.domaine.esport",
+		},
+	];
+
+	return groupes
+		.filter((groupe) => groupe.enfants.length > 0)
+		.map((groupe) => ({
+			domaine: groupe.domaine,
+			item: {
+				children: groupe.enfants,
+				defaultOpen: true,
+				groupOnly: true,
+				icon: groupe.icon,
+				label: groupe.label,
+				path: `#${groupe.domaine}`,
+			},
+		}));
+}
+
+/**
+ * Domaine auquel appartient une route.
+ *
+ * Sert à ouvrir la bonne sous-catégorie au chargement et à appliquer le thème
+ * de section. L'ordre du test compte : l'e-sport et le wiki sont préfixés, donc
+ * testés d'abord ; l'association est la racine et récupère tout le reste.
+ */
+export function domaineDeLaRoute(pathname: string, bases: NavBases): Domaine {
+	if (bases.esport && estRouteActive(pathname, bases.esport)) return "esport";
+	if (bases.wiki && estRouteActive(pathname, bases.wiki)) return "wiki";
+	return "association";
 }
