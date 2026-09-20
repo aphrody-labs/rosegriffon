@@ -381,31 +381,45 @@ déjà `azalee.rosegriffon.fr` → `/wiki`.
 
 ---
 
-## 10. Unification des bases (fait le 20/9/2026)
+## 10. Fusion des bases (miroir le 20/9/2026, fusion le même jour)
 
-### Ce qui a été câblé
+### Première étape : le miroir FDW, et sa limite
 
-`rg` et `achillea` sont **deux bases du même cluster Postgres 18**. Elles ne
-sont pas fusionnées : le schéma `public` d'`achillea` est exposé en lecture
-dans la base `rg`, sous le schéma `achillea`, via `postgres_fdw`.
+Le schéma `public` d'`achillea` a d'abord été exposé en LECTURE dans `rg`, sous
+le schéma `achillea`, via `postgres_fdw` (`scripts/ops/achillea-fdw.ts`, retiré
+depuis). La jointure marchait sans copier un octet, mais elle ne réglait que la
+moitié du problème :
 
-- Script : `scripts/ops/achillea-fdw.ts` (`--verifier`, `--retirer`).
-- Rôle dédié `achillea_reader`, `BYPASSRLS`, secret hors dépôt dans
-  `/etc/rose-griffon/achillea-fdw.env`.
-- 75 tables exposées. Schéma accordé à `rg` et `service_role` **uniquement** —
-  jamais `anon`/`authenticated`, jamais exposé par PostgREST.
-- Tâche `rg-cron` `sync:achillea` (4 h 20) : réaligne la **forme** du miroir
-  après les migrations d'Achilléa. Les **données** sont lues en direct, il n'y
-  a rien à copier.
-- Couche de lecture croisée : `apps/website/src/lib/achillea/admin-db.ts`.
+- 75 tables **étrangères** : lisibles, jamais écrivables, aucune contrainte ne
+  pouvait franchir la frontière ;
+- deux bases à sauvegarder, à migrer, à surveiller ;
+- une tâche nocturne (`sync:achillea`) pour réaligner la FORME des tables après
+  chaque migration d'Achilléa — un rattrapage permanent ;
+- surtout : l'identité restait coupée en deux, un compte de chaque côté pour la
+  même personne.
 
-### Pourquoi pas une fusion de tables
+### Ce qui a été fait
 
-Une seule collision de nom existait (`user`), donc la fusion était techniquement
-possible. Elle a été écartée : elle imposerait une synchronisation permanente,
-une fenêtre de divergence, et un second propriétaire de la vérité pour des
-données dont `achillea-bot` reste l'unique écrivain. Le FDW donne la jointure
-sans copier un octet, et se retire d'un `DROP SCHEMA`.
+`achillea` est désormais un **schéma de la base `rg`**, avec de vraies tables :
+`scripts/ops/achillea-merge.ts` (`--verify`, `--copy`, `--copy-storage`,
+`--cutover`).
+
+- 69 tables, 67 politiques RLS reprises telles quelles, et les ACL d'origine —
+  Achilléa suit le modèle Supabase, où `anon`/`authenticated` ont des droits
+  larges et où la barrière réelle est la RLS.
+- Les buckets `images` (381 objets) et `ranked-proofs` rejoignent le schéma
+  `storage` commun. Les fichiers ne bougent pas : ils restent sous
+  `/var/www/achillea-storage`, servis par `achillea-storage.service`.
+- `achillea-bot`, `achillea-postgrest`, `achillea-storage` et
+  `achillea-realtime` pointent sur `rg`. Le chemin de recherche est posé sur
+  les RÔLES (`alter role … in database rg set search_path = achillea, public`),
+  pas dans MikroORM : les 56 migrations écrivent des noms non qualifiés, et
+  l'application n'a pas changé d'une ligne.
+- `achillea-auth` (GoTrue dédié) est arrêté et désactivé : un seul utilisateur
+  dans son schéma `auth`, aucun appel `/auth/v1/` dans les journaux nginx.
+- La tâche `sync:achillea` et le rôle `achillea_reader` ont été supprimés.
+
+La base `achillea` n'est PAS détruite : elle reste le repli immédiat.
 
 ### Ce que ça débloque, chiffré
 
@@ -419,6 +433,21 @@ sans copier un octet, et se retire d'un `DROP SCHEMA`.
 Les 3 312 joueurs Achilléa sans profil RG sont la cible naturelle de la
 passerelle d'inscription. `discord_id` est la seule clé commune : pas d'e-mail
 partagé, pas d'identifiant interne unifié.
+
+### Une seule session
+
+`POST /api/achillea/session` échange la session Rose Griffon contre le jeton
+qu'attend l'API Achilléa : il retrouve le compte Discord lié
+(`account.provider_id = 'discord'`), garantit l'existence du joueur dans
+`achillea."user"` — même base, donc une seule requête — et signe le JWT avec le
+secret partagé (`ACHILLEA_JWT_SECRET`, identique à `JWT_SECRET_KEY` du bot).
+Le format est verrouillé par `apps/website/src/lib/achillea/jeton.test.ts`, qui
+fait vérifier notre signature par `jsonwebtoken`, le vérificateur réel du bot.
+
+`AchilleaAuthProvider` ne décide donc plus rien, et `AchilleaNav` n'a plus de
+bouton « Connexion » : il y avait deux connexions et deux déconnexions dans le
+même chrome, pour le même compte Discord. Un membre sans Discord lié reçoit un
+`409` — pas de compte e-sport fantôme.
 
 ### Deux incidents corrigés au passage
 
