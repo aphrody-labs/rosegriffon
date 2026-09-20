@@ -38,7 +38,7 @@ export interface LobbyDTO {
 	lobbyUsers: LobbyUserDTO[];
 	lobbyMatches: LobbyMatchDTO[];
 	hostUser: LobbyUserDTO | null;
-	matchFormat: MatchFormat;
+	matchFormat?: MatchFormat | null;
 }
 
 export interface GameScoreDTO {

@@ -37,11 +37,24 @@ export const leagueTeamSchema = z.object({
 	name: z.string(),
 }) satisfies z.ZodType<LeagueTeam>;
 
+/**
+ * Barème de points d'une saison.
+ *
+ * Mesuré sur `GET /leagues/astral` : l'API renvoie
+ * `{ win, draw, loss, winOvertime, lossOvertime }`. Le contrat attendait
+ * `winRegulation`/`lossRegulation`, qui n'existent nulle part côté serveur :
+ * la saison entière — 8 équipes, 28 résultats — était rejetée pour deux noms
+ * de champ. Les deux graphies sont acceptées, toutes optionnelles, pour ne plus
+ * jamais faire tomber un classement sur un barème.
+ */
 export const leaguePointsConfigSchema = z.object({
-	winRegulation: z.number(),
-	lossRegulation: z.number(),
-	winOvertime: z.number(),
-	lossOvertime: z.number(),
+	win: z.number().optional(),
+	draw: z.number().optional(),
+	loss: z.number().optional(),
+	winRegulation: z.number().optional(),
+	lossRegulation: z.number().optional(),
+	winOvertime: z.number().optional(),
+	lossOvertime: z.number().optional(),
 }) satisfies z.ZodType<LeaguePointsConfig>;
 
 export const leagueStandingRowSchema = z.object({

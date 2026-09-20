@@ -1,3 +1,4 @@
+import type { PageMeta } from "./common";
 /**
  * Formes du tableau de bord d'administration : ops, portefeuilles, audit,
  * santé du bot et console base de données.
@@ -169,7 +170,7 @@ export interface DbColumn {
 export interface DbRowsPage {
 	data: Array<Record<string, unknown>>;
 	columns: DbColumn[];
-	meta: { page: number; limit: number; total: number; pageCount: number };
+	meta: PageMeta;
 }
 
 export interface DbMutationResult {

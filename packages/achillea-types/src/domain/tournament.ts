@@ -26,20 +26,20 @@ export interface NewTournamentDTO {
 	description: string;
 	series?: TournamentSeries | null;
 	organization: OrganizationDTO | number;
-	managers: UserDTO[];
+	managers?: UserDTO[];
 
 	startsAt: Date;
 	grandFinalAt: Date;
 
 	tournamentType: StageType;
-	participantsNumber: number;
-	seedOrdering: SeedOrdering;
-	matchFormat: MatchFormat;
+	participantsNumber?: number | null;
+	seedOrdering?: SeedOrdering | null;
+	matchFormat?: MatchFormat | null;
 	customFormatChildCount?: number | null;
 	groupStageEnabled: boolean;
 	groupStageType?: StageType | null;
 
-	affiche: string;
+	affiche?: string | null;
 	logo: string;
 	ruleset: string;
 	planning: string;
@@ -64,19 +64,19 @@ export interface Tournament extends EventEntity {
 
 	series?: TournamentSeries | null;
 	organization: OrganizationDTO;
-	managers: UserDTO[];
-	participants: ParticipantDTO[];
+	managers?: UserDTO[];
+	participants?: ParticipantDTO[];
 
 	tournamentType: StageType;
-	participantsNumber: number;
-	seedOrdering: SeedOrdering;
-	matchFormat: MatchFormat;
+	participantsNumber?: number | null;
+	seedOrdering?: SeedOrdering | null;
+	matchFormat?: MatchFormat | null;
 	customFormatChildCount?: number | null;
 	groupStageEnabled: boolean;
 	groupStageType?: StageType | null;
 
 	logo: string;
-	affiche: string;
+	affiche?: string | null;
 	planning: string;
 	ruleset: string;
 

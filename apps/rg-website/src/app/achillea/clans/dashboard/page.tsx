@@ -20,6 +20,7 @@ import {
 	UserCheck,
 	Save,
 } from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
 
 export default function ClanDashboardPage() {
 	const { user, isAuthenticated, login } = useAchilleaAuth();
@@ -70,7 +71,9 @@ export default function ClanDashboardPage() {
 					if (invRes.ok) setInvites(invRes.value);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("clans/dashboard", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});

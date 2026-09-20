@@ -36,20 +36,36 @@ export const organizationStateSchema = z.enum(
  * est donc paresseux des deux côtés, avec un type explicite pour couper le
  * cycle d'inférence.
  */
+/**
+ * Organisation, telle que l'API la sert RÉELLEMENT.
+ *
+ * Mesuré sur `GET /tournaments` : `id` est un NOMBRE, `owner` un simple
+ * identifiant Discord (pas un utilisateur complet), et `orgManagers`,
+ * `socialMedias`, `broadcastMedias` sont absents. Le contrat exigeait les six :
+ * la validation échouait sur `data.0.organization`, donc les **9 tournois**
+ * étaient rejetés en bloc et la page affichait « Aucun tournoi trouvé ».
+ *
+ * Les deux formes d'`owner` sont acceptées : `GET /tournaments` imbrique un
+ * identifiant, `GET /organizations/:id` renvoie l'utilisateur entier. Une
+ * organisation ne doit jamais pouvoir invalider le tournoi qui la cite.
+ */
 export const organizationDtoSchema: z.ZodType<OrganizationDTO> = z.object({
-	id: z.string().optional(),
+	id: z.union([z.string(), z.number()]).optional(),
 	state: organizationStateSchema.optional(),
 	name: z.string(),
 	normalizedName: z.string(),
 	logo: z.string(),
 	description: z.string(),
-	owner: userDtoSchema,
-	orgManagers: z.array(userDtoSchema),
+	owner: z.union([z.string(), userDtoSchema]).optional(),
+	orgManagers: z.array(userDtoSchema).optional(),
 	managers: z.array(z.lazy(() => orgManagerDtoSchema)).optional(),
 	preapproved: z.boolean().optional(),
-	socialMedias: z.array(socialMediaDtoSchema),
-	broadcastMedias: z.array(socialMediaDtoSchema),
-	origin: countrySchema,
+	socialMedias: z.array(socialMediaDtoSchema).optional(),
+	broadcastMedias: z.array(socialMediaDtoSchema).optional(),
+	// L'API sert tantôt un code de langue nu (`"fr"`), tantôt le pays complet.
+	// Le contrat n'acceptait que l'objet : un code sur deux caractères faisait
+	// tomber toute l'organisation, donc tous les tournois qui la citent.
+	origin: z.union([z.string(), countrySchema]).optional(),
 	createdAt: apiDateSchema.optional(),
 	updatedAt: apiDateSchema.optional(),
 });

@@ -5,13 +5,21 @@ import type { Rank, UserDTO } from "./user";
 
 export interface ClanDTO {
 	id: number;
-	founders: string;
+	/**
+	 * Identifiants Discord des fondateurs.
+	 *
+	 * L'API en renvoie un TABLEAU. Le contrat disait `string`, donc la
+	 * validation rejetait chaque clan : les 42 clans existaient, l'API les
+	 * servait, et la page affichait « 0 clan trouvé ».
+	 */
+	founders: string[];
 	name: string;
 	shortenedName: string;
 	normalizedShortName: string;
 	clanAvatarUrl: string;
 	clanBiography: string;
-	fame: number;
+	/** Absent de la charge utile de `GET /clans` : optionnel. */
+	fame?: number;
 	xUrl?: string | null;
 	instagramUrl?: string | null;
 	tiktokUrl?: string | null;

@@ -12,6 +12,7 @@ import {
 	Loader2,
 	ChevronRight,
 } from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
 
 export default function OrganizationsPendingValidationPage() {
 	const { user, isAuthenticated } = useAchilleaAuth();
@@ -31,7 +32,9 @@ export default function OrganizationsPendingValidationPage() {
 					setOrgs(res.value.data);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("organizations/validate", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});

@@ -13,6 +13,7 @@ import {
 	Loader2,
 	Clock,
 } from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
 
 export default function CastPlanningPage({
 	params,
@@ -38,7 +39,9 @@ export default function CastPlanningPage({
 					setDetail(res.value);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("casts/[id]/planning", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});

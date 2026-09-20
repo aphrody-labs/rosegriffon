@@ -26,8 +26,15 @@ export interface WireTournament
 	extends Omit<Tournament, "series" | "organization" | "managers" | "participants"> {
 	series?: EntityRef<WireTournamentSeries> | null;
 	organization: EntityRef<OrganizationDTO>;
-	managers: Array<EntityRef<UserDTO>>;
-	participants: Array<EntityRef<WireParticipant>>;
+	/**
+	 * Relations OPTIONNELLES sur la liste.
+	 *
+	 * `GET /tournaments` ne les peuple pas — seul `GET /tournaments/:id` le
+	 * fait. Les exiger faisait rejeter les 9 tournois de la liste et affichait
+	 * « Aucun tournoi trouvé » sur une API qui en servait neuf.
+	 */
+	managers?: Array<EntityRef<UserDTO>>;
+	participants?: Array<EntityRef<WireParticipant>>;
 }
 
 /** `ParticipantDTO` tel qu'il circule (le tournoi n'est souvent qu'un id). */

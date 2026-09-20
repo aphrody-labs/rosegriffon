@@ -50,10 +50,15 @@ export interface LeagueTeam {
 }
 
 export interface LeaguePointsConfig {
-	winRegulation: number;
-	lossRegulation: number;
-	winOvertime: number;
-	lossOvertime: number;
+	/** Graphie servie par l'API. */
+	win?: number;
+	draw?: number;
+	loss?: number;
+	/** Graphie historique du contrat, conservée pour les appelants existants. */
+	winRegulation?: number;
+	lossRegulation?: number;
+	winOvertime?: number;
+	lossOvertime?: number;
 }
 
 export interface LeagueSeasonPayload {

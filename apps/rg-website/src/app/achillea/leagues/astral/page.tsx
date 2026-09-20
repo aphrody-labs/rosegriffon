@@ -18,6 +18,7 @@ import {
 	Loader2,
 	CheckCircle2,
 } from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
 
 export default function AstralLeaguePage() {
 	const [season, setSeason] = useState<LeagueSeasonPayload | null>(null);
@@ -38,7 +39,9 @@ export default function AstralLeaguePage() {
 					setSeason(res.value);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("leagues/astral", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});

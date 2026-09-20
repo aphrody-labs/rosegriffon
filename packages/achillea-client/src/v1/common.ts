@@ -48,11 +48,21 @@ export const clanMemberDistinctionSchema = z.enum(
 ) satisfies z.ZodType<ClanMemberDistinction>;
 export const socialMediaSchema = z.enum(SocialMedia) satisfies z.ZodType<SocialMedia>;
 
+/**
+ * Métadonnées de pagination.
+ *
+ * Mesuré sur `GET /clans` : l'API renvoie `{ total, pageCount: null }` — ni
+ * `page`, ni `limit`, et `pageCount` peut valoir `null` quand le total tient en
+ * une page. Les exiger faisait échouer la validation de la réponse ENTIÈRE,
+ * donc effaçait les 42 clans pour une histoire de compteur.
+ *
+ * Une enveloppe de pagination ne doit jamais pouvoir invalider sa charge utile.
+ */
 export const pageMetaSchema = z.object({
-	page: z.number(),
-	limit: z.number(),
+	page: z.number().optional(),
+	limit: z.number().optional(),
 	total: z.number(),
-	pageCount: z.number(),
+	pageCount: z.number().nullable().optional(),
 }) satisfies z.ZodType<PageMeta>;
 
 export const pageSizeMetaSchema = z.object({
@@ -116,11 +126,11 @@ export const userDtoSchema = z.object({
 	id: z.string(),
 	type: z.string().optional(),
 	username: z.string(),
-	sim: z.number(),
+	sim: z.number().optional(),
 	avatar: z.string().optional(),
 	clanId: z.number().optional(),
-	soloRank: rankDtoSchema,
-	duoRank: rankDtoSchema,
+	soloRank: rankDtoSchema.optional(),
+	duoRank: rankDtoSchema.optional(),
 	lastInteract: apiDateSchema.optional(),
 	role: userRoleSchema.optional(),
 	currentLevel: z.number().optional(),

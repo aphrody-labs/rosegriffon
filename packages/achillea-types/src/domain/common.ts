@@ -7,10 +7,17 @@
 
 /** Métadonnées de page renvoyées par l'API (style `Paginated<T>` historique). */
 export interface PageMeta {
-	page: number;
-	limit: number;
+	/**
+	 * Seul `total` est garanti.
+	 *
+	 * Mesuré sur `GET /clans` : l'API renvoie `{ total, pageCount: null }`. Une
+	 * enveloppe de pagination ne doit jamais pouvoir invalider sa charge utile —
+	 * exiger ces champs effaçait les 42 clans pour une histoire de compteur.
+	 */
+	page?: number;
+	limit?: number;
 	total: number;
-	pageCount: number;
+	pageCount?: number | null;
 }
 
 export interface Paginated<T> {

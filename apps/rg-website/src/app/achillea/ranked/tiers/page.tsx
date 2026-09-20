@@ -15,6 +15,7 @@ import {
 	Sparkles,
 	TrendingUp,
 } from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
 
 // The canonical 11 tiers metadata fallback
 const DEFAULT_TIERS: RankedTierInfo[] = [
@@ -49,7 +50,9 @@ export default function RankedTiersPage() {
 					setTiers(res.value);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("ranked/tiers", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});

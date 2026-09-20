@@ -27,6 +27,7 @@ import {
 	ExternalLink,
 	ShieldAlert,
 } from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedHubPage() {
 	const { user, isAuthenticated, login } = useAchilleaAuth();
@@ -79,7 +80,9 @@ export default function RankedHubPage() {
 					setTrend(trendRes.value);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("ranked", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoadingProfile(false);
 			});

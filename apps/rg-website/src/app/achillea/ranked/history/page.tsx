@@ -22,6 +22,7 @@ import {
 	XCircle,
 	AlertTriangle,
 } from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedHistoryPage() {
 	const { user, isAuthenticated, login } = useAchilleaAuth();
@@ -50,7 +51,9 @@ export default function RankedHistoryPage() {
 					setHistory(res.value);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("ranked/history", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});
