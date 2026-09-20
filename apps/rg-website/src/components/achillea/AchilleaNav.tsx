@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Button } from "@rosegriffon/ui";
 
 import { PrimeIcon } from "@/components/achillea/PrimeIcon";
 import { useAchilleaAuth } from "@/lib/achillea";
@@ -50,7 +49,11 @@ export const ACHILLEA_NAV_LINKS = [
 
 export function AchilleaNav() {
 	const pathname = usePathname() ?? "";
-	const { isAuthenticated, login, logout, user } = useAchilleaAuth();
+	// La session e-sport est DÉRIVÉE de la session Rose Griffon (cf.
+	// `lib/achillea/auth-context.tsx`) : cette barre n'a plus de bouton de
+	// connexion à elle. Elle ne lit `user` que pour décider si l'onglet
+	// d'administration a lieu d'être.
+	const { user } = useAchilleaAuth();
 	const isStaff = (user?.role ?? 0) >= 1;
 
 	const onglets: readonly { icon: string; label: string; path: string; exact?: boolean }[] = [
@@ -95,36 +98,6 @@ export function AchilleaNav() {
 					);
 				})}
 			</nav>
-
-			{/*
-			 * Session Achilléa. Elle reste distincte de la session Rose Griffon —
-			 * ce n'est donc pas un doublon du menu de compte global, et c'est le
-			 * seul endroit où elle est visible. Un contrôle unique, là où il y en
-			 * avait quatre.
-			 */}
-			<div className="shrink-0">
-				{isAuthenticated && user ? (
-					<Button
-						aria-label={`Session Achilléa : ${user.username}. Se déconnecter.`}
-						className="size-8 text-on-surface-variant hover:text-alerte"
-						onClick={() => void logout()}
-						size="icon"
-						title={`${user.username} — se déconnecter`}
-						variant="ghost"
-					>
-						<PrimeIcon className="text-sm" name="sign-out" />
-					</Button>
-				) : (
-					<Button
-						className="h-8 gap-1.5 rounded-lg bg-[var(--discord-blurple)] px-2.5 text-xs font-bold text-white hover:bg-[var(--discord-blurple-hover)]"
-						onClick={() => login(pathname || "/achillea")}
-						size="sm"
-					>
-						<PrimeIcon className="text-sm" name="sign-in" />
-						<span className="max-sm:sr-only">Connexion</span>
-					</Button>
-				)}
-			</div>
 		</div>
 	);
 }
