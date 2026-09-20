@@ -5,10 +5,63 @@ Plan d'exécution pour absorber **`apps/achillea-web` (Angular 21 + PrimeNG)** d
 `rosegriffon.fr` devienne l'unique site du réseau : portail, wiki Azalée et
 Achilléa compétitif.
 
-> Statut : **plan**. Aucune étape n'est exécutée par ce document. Il prolonge
+> Statut : **plan, décisions tranchées le 20/9/2026** (§0). Il prolonge
 > `docs/achillea-modulaire.md` (§ « Prochaine étape si l'on migre le front ») et
 > ne redit pas ce qui y est déjà décrit. Contexte d'intégration :
 > `docs/achillea.md`. Services et ports : `docs/achillea-services.md`.
+
+---
+
+## 0. Décisions tranchées (20/9/2026)
+
+### 0.1 — Chemins d'URL en anglais
+
+`/achillea/clans/create`, `/achillea/tournaments/[id]`, `/achillea/ranked/leaderboard`…
+Le contrat de nommage du `CLAUDE.md` est explicite : **anglais pour tout ce que
+la machine lit, URLs comprises**. Une première version de ce plan proposait des
+chemins français (`/tournois`, `/creation`, `/portefeuille`) : c'était une
+violation du contrat, elle est annulée. Bonus non négligeable : les chemins
+Angular actuels deviennent des sous-chemins quasi identiques, donc les
+redirections 301 sont triviales et le risque SEO s'effondre.
+
+### 0.2 — Authentification : cookie élargi à `.rosegriffon.fr`, pas de pont de jetons
+
+Fait constaté : `apps/achillea-bot/src/auth/session.ts` pose un cookie de session
+`httpOnly`, `sameSite: "lax"`, **sans `domain`** — donc *host-only* sur l'hôte de
+l'API. Conséquences réelles :
+
+- Depuis un navigateur sur `rosegriffon.fr`, un `fetch(credentials: "include")`
+  vers `api.rosegriffon.fr` **fonctionne** (même site au sens `SameSite`).
+  L'`AchilleaAuthProvider` côté client est donc valide tel quel.
+- Mais le **serveur Next ne verra jamais ce cookie** : le navigateur ne
+  l'attache pas aux requêtes vers `rosegriffon.fr`. Sans correctif, toute page
+  Achilléa authentifiée devient client-only, et la garde de rôle redescend côté
+  navigateur — exactement ce que la phase 2 interdit.
+
+**Décision** : ajouter `domain: ".rosegriffon.fr"` à `sessionCookieOptions()`.
+Une ligne, réversible, aucun changement de contrat d'API, aucune migration de
+données. Le serveur Next peut alors relayer le cookie entrant vers
+`client.auth.me()` et résoudre la session **en RSC**, ce qui rend les gardes
+serveur possibles.
+
+Les deux options du plan initial sont écartées :
+- *Pont de jetons* : demandait d'accepter un nouvel émetteur côté API, pour un
+  résultat que l'élargissement de domaine obtient gratuitement.
+- *Unification complète des comptes* : touche `achillea-bot` et sa base. Reste
+  la cible long terme, hors de ce plan.
+
+Contrepartie assumée : le cookie devient ambiant sur tous les sous-domaines RG.
+Il reste `httpOnly` (illisible en JS) ; le risque ajouté est l'autorité ambiante
+en cas de XSS sur un sous-domaine, tous first-party. `sameSite: "lax"` est
+conservé. CORS : `Access-Control-Allow-Credentials` avec origine explicite,
+jamais `*`.
+
+### 0.3 — Un seul exécutant, un seul plan
+
+Le portage est **exécuté par l'agent déjà en vol** (assets, `auth-context.tsx`,
+`hero-bg-fx.ts`, 6 composants partagés sous `src/components/achillea/`). Ce
+document est la référence d'architecture et de revue ; `docs/achillea-migration-plan.md`
+est absorbé ici et supprimé — un seul plan, sinon les deux dérivent.
 
 ---
 
@@ -60,49 +113,50 @@ métier à sauver — ce sont des appels HTTP et de la mise en forme que `client
 
 ## 2. Cible : plan de routes
 
-Préfixe `/achillea` dans `apps/website/src/app/achillea/**`. `achillea.rosegriffon.fr`
-redirige ensuite en **301** vers ces chemins (même schéma que
-`azalee.rosegriffon.fr` → `/wiki`, déjà éprouvé).
+Préfixe `/achillea` dans `apps/website/src/app/achillea/**`, chemins **en
+anglais** (§0.1). `achillea.rosegriffon.fr` redirige ensuite en **301** vers ces
+chemins — même schéma que `azalee.rosegriffon.fr` → `/wiki`, déjà éprouvé.
 
-| Angular (`app.routes.ts`) | Next (`apps/website/src/app/achillea/…`) | Rendu | Garde |
-| --- | --- | --- | --- |
-| `""` | `page.tsx` | RSC + ISR | — |
-| `auth` | `(auth)/connexion/page.tsx` | — | *fusionné avec l'auth du site* |
-| `clans` | `clans/page.tsx` | RSC | — |
-| `clans/create` | `clans/creation/page.tsx` | client | session |
-| `clans/dashboard` | `clans/tableau-de-bord/page.tsx` | client | rôle ≥ `SubCaptain` |
-| `clans/:id` | `clans/[id]/page.tsx` | RSC | — |
-| `users/:id` | `joueurs/[id]/page.tsx` | RSC | — |
-| `events/create/tournament` | `tournois/creation/page.tsx` | client | session |
-| `events/list/tournament` | `tournois/page.tsx` | RSC | — |
-| `events/tournaments/:id` | `tournois/[id]/page.tsx` | RSC + îlots | — |
-| `events/tournaments/circuit/ranking` | `tournois/circuit/classement/page.tsx` | RSC | — |
-| `leagues/astral` (+3 alias) | `ligues/astral/page.tsx` (+ `redirects` Next) | RSC | — |
-| `organizations/create` | `organisations/creation/page.tsx` | client | session |
-| `ranked` | `ranked/page.tsx` | client | session |
-| `ranked/tiers` | `ranked/paliers/page.tsx` | statique | — |
-| `ranked/leaderboard` | `ranked/classement/page.tsx` | RSC + ISR 60 s | — |
-| `ranked/history` | `ranked/historique/page.tsx` | client | session |
-| `ranked/match` | `ranked/match/page.tsx` | client (temps réel) | session |
-| `ranked/defi/:code` | `ranked/defi/[code]/page.tsx` | client | — |
-| `licence` | `licence/page.tsx` | client | session |
-| `licence/verify/:qr` | `licence/verification/[qr]/page.tsx` | RSC | — |
-| `wallet` | `portefeuille/page.tsx` | client | session |
-| `casts` | `casts/page.tsx` | RSC | — |
-| `casts/:tournamentId/availability` | `casts/[tournoi]/disponibilites/page.tsx` | client | session |
-| `casts/:tournamentId/planning` | `casts/[tournoi]/planning/page.tsx` | client | Administrator |
-| `admins/dashboard` | `admin/page.tsx` | client | Moderator+ |
-| `admins/sanctions` | `admin/sanctions/page.tsx` | client | Administrator |
-| `admins/ranked-disputes` | `admin/litiges/page.tsx` | client | Administrator |
-| `admins/dashboard/organizations/validate/:id` | `admin/organisations/[id]/page.tsx` | client | Administrator |
-| `guide`, `guide/brand` | `guide/page.tsx`, `guide/marque/page.tsx` | statique | — |
-| `forbidden`, `not-found`, `**` | `forbidden/page.tsx`, `not-found.tsx` | statique | — |
+| Angular (`app.routes.ts`) | Next (`app/achillea/…`) | Rendu | Garde | Ressources du client |
+| --- | --- | --- | --- | --- |
+| `""` | `page.tsx` | RSC + ISR | — | `tournaments.list`, `ranked.leaderboard` |
+| `auth` | `auth/page.tsx` | client | — | `auth.discordLoginUrl` |
+| `clans` | `clans/page.tsx` | RSC | — | `clans.list` |
+| `clans/create` | `clans/create/page.tsx` | client | session | `clans.create` |
+| `clans/dashboard` | `clans/dashboard/page.tsx` | client | rôle ≥ `SubCaptain` | `clans.update`, invitations, candidatures |
+| `clans/:id` | `clans/[id]/page.tsx` | RSC | — | `clans.get`, `clans.members` |
+| `users/:id` | `users/[id]/page.tsx` | RSC | — | `users.profile`, `ranked`, `stats` |
+| `events/list/tournament` | `tournaments/page.tsx` | RSC | — | `tournaments.list` |
+| `events/tournaments/:id` | `tournaments/[id]/page.tsx` | RSC + îlots | — | `tournaments.get`, bracket, participants |
+| `events/create/tournament` | `tournaments/create/page.tsx` | client | session | `tournaments.create` |
+| `events/tournaments/circuit/ranking` | `tournaments/circuit/ranking/page.tsx` | RSC | — | `stats`, `tournaments.circuit` |
+| `leagues/astral` (+3 alias) | `leagues/astral/page.tsx` | RSC | — | `leagues.getSeason` |
+| `organizations/create` | `organizations/create/page.tsx` | client | session | `organizations.create` |
+| `ranked` | `ranked/page.tsx` | client | session | `ranked.profile`, `ranked.match` |
+| `ranked/tiers` | `ranked/tiers/page.tsx` | statique | — | `ranked.tiers` |
+| `ranked/leaderboard` | `ranked/leaderboard/page.tsx` | RSC + ISR 60 s | — | `ranked.leaderboard` |
+| `ranked/history` | `ranked/history/page.tsx` | client | session | `ranked.history` |
+| `ranked/match` | `ranked/match/page.tsx` | client (temps réel) | session | `ranked.match`, Colyseus |
+| `ranked/defi/:code` | `ranked/defi/[code]/page.tsx` | client | — | `ranked.challenge` |
+| `licence` | `licence/page.tsx` | client | session | `licenses.me` |
+| `licence/verify/:qr` | `licence/verify/[qr]/page.tsx` | RSC | — | `licenses.verify` |
+| `wallet` | `wallet/page.tsx` | client | session | `wallet.balance` |
+| `casts` | `casts/page.tsx` | RSC | — | `casts.casters` |
+| `casts/:tournamentId/availability` | `casts/[tournamentId]/availability/page.tsx` | client | session | `casts.submitAvailability` |
+| `casts/:tournamentId/planning` | `casts/[tournamentId]/planning/page.tsx` | client | Administrator | `casts.planning` |
+| `admins/dashboard` | `admins/dashboard/page.tsx` | client | Moderator+ | `admin.*` |
+| `admins/sanctions` | `admins/sanctions/page.tsx` | client | Administrator | `sanctions.*` |
+| `admins/ranked-disputes` | `admins/ranked-disputes/page.tsx` | client | Administrator | `admin.disputes` |
+| `admins/dashboard/organizations/validate/:id` | `admins/dashboard/organizations/validate/[id]/page.tsx` | client | Administrator | `organizations.validate` |
+| `guide`, `guide/brand` | `guide/page.tsx`, `guide/brand/page.tsx` | statique | — | — |
+| `forbidden`, `not-found`, `**` | `forbidden/page.tsx`, `not-found.tsx` | statique | — | — |
 
-**Les anciennes URL doivent survivre.** Tout chemin Angular listé ci-dessus reçoit
-une entrée dans `next.config` (`redirects()`), permanente, avec la vue
-correspondante. Un tableau de correspondance non exhaustif = régression SEO.
+Les alias `leagues/astral-s1`, `leagues/asytral`, `leagues/asytral-s1`
+deviennent des `redirects()` permanents vers `leagues/astral`.
 
----
+**Les anciennes URL doivent survivre.** Chaque chemin Angular ci-dessus reçoit
+une redirection permanente dans `next.config` vers son équivalent préfixé
+`/achillea`. Un tableau de correspondance non exhaustif = régression SEO.
 
 ## 3. Correspondance des mécanismes Angular → Next
 
@@ -127,31 +181,45 @@ correspondante. Un tableau de correspondance non exhaustif = régression SEO.
 
 ---
 
-## 4. Le point dur : l'authentification
+## 4. Authentification — mise en œuvre de la décision §0.2
 
 Deux systèmes cohabitent aujourd'hui.
 
 - `apps/website` : `@rosegriffon/auth` (better-auth) + Supabase self-host,
   cookie de session sur `rosegriffon.fr`.
-- `apps/achillea-web` : `AuthSessionService`, jeton porté vers l'API Achilléa
-  (`ranked.rosegriffon.fr`, via `api.rosegriffon.fr/achillea/`), plus un
-  **jeton temps réel** distinct (`getRealtimeToken`, marge de renouvellement
-  30 s) pour Socket.IO et Colyseus.
+- Achilléa : session Discord propre, posée par
+  `apps/achillea-bot/src/auth/session.ts` (`httpOnly`, `sameSite: "lax"`,
+  host-only), plus un **jeton temps réel** distinct (`getRealtimeToken`, marge
+  de renouvellement 30 s) pour Socket.IO et Colyseus — le cookie `httpOnly`
+  n'étant pas exploitable en WSS cross-domaine.
 
-**Décision à prendre avant la phase 2** (elle conditionne tout le reste) :
+Ils **restent séparés**. On ne fusionne pas les comptes ; on rend seulement la
+session Achilléa lisible par le serveur Next.
 
-1. **Pont de jetons (recommandé, réversible)** — la session `rosegriffon.fr`
-   fait foi ; une route handler `/api/achillea/token` échange le cookie contre
-   un jeton Achilléa côté serveur et ne l'expose jamais au navigateur pour les
-   appels RSC. Les îlots client reçoivent un jeton court via la même route.
-   Aucun changement côté API Achilléa hormis l'acceptation de l'émetteur.
-2. **Unification complète des comptes** — un seul utilisateur, une seule base.
-   Meilleur résultat final, mais demande une migration de données et touche
-   `achillea-bot` : hors périmètre de ce plan.
+**Mise en œuvre, dans l'ordre :**
 
-Le reste du plan suppose l'option 1. `safeReturnUrl()` de
-`core/auth/auth-session.service.ts` est la seule fonction de ce fichier à
-conserver — elle part dans `apps/website/src/lib/achillea/`.
+1. `sessionCookieOptions()` → ajouter `domain: ".rosegriffon.fr"`. Les sessions
+   déjà émises restent host-only jusqu'à expiration : prévoir la cohabitation
+   des deux portées pendant un `SESSION_TTL`, et ne pas s'étonner d'un
+   double-cookie transitoire.
+2. CORS de l'API : autoriser `https://rosegriffon.fr` en origine **explicite**
+   avec `Access-Control-Allow-Credentials: true`. Jamais `*` — la combinaison
+   est refusée par le navigateur, et le serait à raison.
+3. `apps/website/src/lib/achillea/session.ts` (serveur) : lit les cookies
+   entrants, les relaie à `client.auth.me()`, mémoïse par requête. C'est la
+   brique qui permet `redirect()` **avant** rendu sur les pages gardées.
+4. Les gardes de rôle réutilisent `access` de `@rosegriffon/achillea-core` —
+   la règle existe, on ne la réécrit pas.
+5. `AchilleaAuthProvider` (déjà écrit) reste, mais devient un miroir hydraté
+   depuis le serveur plutôt que la source de vérité : il ne doit plus être le
+   seul à décider qui voit quoi.
+
+`safeReturnUrl()` de `core/auth/auth-session.service.ts` est la seule fonction
+de ce fichier à conserver — elle part dans `apps/website/src/lib/achillea/`.
+
+**Invariant non négociable** : une garde côté client est un confort
+d'affichage. Toute action sensible reste refusée côté API, comme aujourd'hui
+(cf. le commentaire de `admins/dashboard` dans `app.routes.ts`).
 
 ---
 
@@ -183,7 +251,7 @@ Components, ISR court sur ce qui bouge (classements : 60 s).
   refuseront toute entrée de menu sans page.
 
 ### Phase 2 — authentification + écrans de session (≈ 3 000 LOC)
-Pont de jetons (§4), puis `ranked`, `ranked/historique`, `licence`,
+Élargissement du cookie + session serveur (§0.2 et §4), puis `ranked`, `ranked/historique`, `licence`,
 `portefeuille`, `clans/creation`, `clans/tableau-de-bord`,
 `organisations/creation`, `tournois/creation`,
 `casts/[tournoi]/disponibilites`.
@@ -259,9 +327,54 @@ cd apps/website && bun run build
 
 | Risque | Conséquence | Parade |
 | --- | --- | --- |
-| Authentification (§4) | Bloque les phases 2-4 ; une erreur expose des données | Trancher **avant** la phase 2 ; pont de jetons réversible |
+| Cookie élargi à `.rosegriffon.fr` (§0.2) | Autorité ambiante sur tous les sous-domaines en cas de XSS | Cookie `httpOnly`, `sameSite: lax`, CORS à origine explicite ; élargissement réversible en une ligne |
+| Gardes restées côté client | Une page admin rendue à qui n'y a pas droit | Session résolue en RSC (§4) ; l'API refuse de toute façon les actions sensibles |
 | PrimeNG → `packages/ui` | 30 composants partagés à re-créer ; dérive visuelle | Combler les manques dans `packages/ui` (bénéficie aux 3 sites), jamais en local |
 | URLs perdues | Régression SEO durable | Tableau de redirections exhaustif, vérifié par un test |
 | `admin-dashboard` (4 961 LOC) | Lot ingérable | Découpage par onglet en phase 3 |
 | Temps réel Colyseus/Socket.IO | Matchs ranked cassés | Dernier lot, front Angular encore déployable |
 | `NEXT_PUBLIC_*` inliné | Front pointant sur la mauvaise API | Déployer depuis `apps/website` |
+
+---
+
+## 9. Annexe — détail fonctionnel par section
+
+Absorbé de `docs/achillea-migration-plan.md` (supprimé). Ce que chaque écran doit
+rendre, pour que « porté » veuille dire quelque chose de vérifiable.
+
+- **Hub `/achillea`** — hero interactif (parallaxe + canvas de particules,
+  `hero-bg-fx.ts`), tournoi à la une (compte à rebours, statut live, jauge de
+  remplissage, avatars des participants), grille d'accès rapide (Clans, Ranked,
+  Twitch, Discord), playlists vidéo.
+- **Clans** — `ClanCard`, recherche et filtres niveau / recrutement / langue ;
+  fiche clan avec bannière, statistiques, effectif, rôles, réseaux sociaux ;
+  création (sélecteur de tag et de langues) ; tableau de bord (invitations,
+  candidatures).
+- **Ranked** — podium Top 3, table à pagination paresseuse, 11 paliers avec
+  jauge de répartition (`TierDistribution`), file d'attente avec chrono
+  dynamique et notifications, saisie de score et ouverture de litige.
+- **Tournois & Astral League** — table de tournois avec tags de statut, page de
+  tournoi (suivi des phases, `brackets-viewer`, participants), circuit
+  (statistiques et records), page officielle Astral (classement, calendrier des
+  journées, H2H, statistiques joueurs).
+- **Services & compte** — carte de licence + vérificateur QR public, solde ACH
+  et journal de transactions (`Intl.NumberFormat("fr-FR")` : NBSP étroit avant
+  `€`, normaliser `/\s+/g` dans les tests), profil compétiteur (ELO × circuit),
+  guide et brand kit.
+- **Backoffice `/achillea/admins/dashboard`** — onglets : Vue d'ensemble,
+  Arbitrage litiges, Saisons, Clans, Tournois, Bot, Télémétrie, Sanctions,
+  Licences, Guildes. À porter onglet par onglet (§5, phase 3).
+
+### Correction sur les redirections
+
+Le plan absorbé plaçait les 301 (`/clans/:path*`, `/ranked/:path*`,
+`/events/:path*`, `/wallet`, `/casts/:path*`, `/licence/:path*`,
+`/leagues/:path*`) dans `next.config.ts`, à la **racine de `rosegriffon.fr`**.
+C'est le mauvais endroit : ces chemins n'ont jamais existé sur `rosegriffon.fr`,
+ils existaient sur `achillea.rosegriffon.fr`. Les déclarer à la racine ne
+récupère aucun lien entrant et **gèle sept préfixes d'URL** que le portail ne
+pourra plus utiliser (un futur `/wallet` côté boutique, par exemple).
+
+Le bon endroit est le vhost `infra/nginx/achillea.rosegriffon.conf` :
+`301 https://rosegriffon.fr/achillea$request_uri`. C'est exactement ce que fait
+déjà `azalee.rosegriffon.fr` → `/wiki`.
