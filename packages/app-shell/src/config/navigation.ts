@@ -451,7 +451,6 @@ export function construireAssociationItems(bases: NavBases): NavItem[] {
 		},
 		{ icon: "event", label: "nav.association.events", path: a("/evenements") },
 		{ icon: "live_tv", label: "nav.association.rgtv", path: a("/rose-griffon-tv") },
-		{ icon: "storefront", label: "nav.association.shop", path: a("/shop") },
 		{
 			children: [
 				{ icon: "forum", label: "nav.association.community", path: a("/community") },
@@ -462,14 +461,22 @@ export function construireAssociationItems(bases: NavBases): NavItem[] {
 			label: "nav.association.life",
 			path: a("/community"),
 		},
+		/*
+		 * L'association en UNE entrée.
+		 *
+		 * « À propos », « Notre équipe » et les partenaires décrivaient la même
+		 * chose découpée en trois pages, dont deux quasi vides (`notre-equipe`
+		 * fait 7 lignes). Trois entrées de menu pour un seul sujet, c'est trois
+		 * fois plus de place occupée et un choix à faire là où il n'y a rien à
+		 * choisir. `/a-propos` les réunit ; les projets et le soutien restent
+		 * distincts, ce sont de vraies destinations.
+		 */
 		{
 			children: [
-				{ icon: "info", label: "nav.association.about", path: a("/a-propos") },
-				{ icon: "diversity_3", label: "nav.association.team", path: a("/notre-equipe") },
 				{ icon: "rocket_launch", label: "nav.association.projects", path: a("/projets") },
 				{ icon: "volunteer_activism", label: "nav.association.support", path: a("/nous-soutenir") },
 			],
-			icon: "info",
+			icon: "diversity_3",
 			label: "nav.association.about_us",
 			path: a("/a-propos"),
 		},
@@ -536,4 +543,90 @@ export function domaineDeLaRoute(pathname: string, bases: NavBases): Domaine {
 	if (bases.wiki && estRouteActive(pathname, bases.wiki)) return "wiki";
 	if (pathname === "/news" || pathname.startsWith("/news/")) return "wiki";
 	return "association";
+}
+
+// ─── BARRE SUPÉRIEURE ET NAVIGATION MOBILE — PAGES VITALES ───────────────────
+//
+// PRINCIPE DE RÉPARTITION
+// Trois surfaces, trois rôles, et surtout trois BUDGETS d'espace différents :
+//
+//   - la barre supérieure et la barre du bas sont toujours visibles. Elles
+//     coûtent de la place sur CHAQUE page, donc elles ne portent que ce qui
+//     doit rester à un geste : les trois domaines et l'actualité ;
+//   - la barre latérale est dépliable. Elle peut porter l'arborescence
+//     complète, y compris les sous-catégories ;
+//   - le pied de page porte ce qui se consulte une fois : mentions légales,
+//     boutique, présentation de l'association.
+//
+// CE QUI SORT DE LA NAVIGATION
+// `/shop` et `/a-propos` quittent le menu. Ce ne sont pas des destinations de
+// parcours : on arrive sur la boutique depuis une campagne ou le pied de page,
+// et sur la présentation de l'association une fois, au premier passage. Les
+// laisser dans une barre toujours visible coûtait deux emplacements sur cinq
+// pour des pages consultées marginalement.
+
+/** Au plus cinq entrées : au-delà, les cibles tactiles passent sous 48 px. */
+const MAX_ONGLETS_MOBILE = 5;
+
+/**
+ * Entrées de la barre supérieure : les trois domaines, plus l'actualité.
+ *
+ * On n'y met JAMAIS de sous-niveau. Un menu déroulant dans une barre
+ * permanente rend la cible instable au survol et ne survit pas au tactile ;
+ * c'est le rôle de la barre latérale.
+ */
+export function construireItemsBarreSuperieure(bases: NavBases): NavItem[] {
+	const items: NavItem[] = [
+		{ icon: "home", label: "nav.association.home", path: joindreDomaine(bases.association, "/") },
+	];
+
+	if (bases.wiki !== undefined) {
+		items.push({
+			activePaths: [joindreWiki(bases.wiki, "/")],
+			icon: "menu_book",
+			label: "nav.domaine.wiki",
+			path: joindreWiki(bases.wiki, "/"),
+		});
+	}
+
+	if (bases.esport !== undefined) {
+		items.push({
+			activePaths: [bases.esport],
+			icon: "sports_esports",
+			label: "nav.domaine.esport",
+			path: joindreDomaine(bases.esport, "/"),
+		});
+	}
+
+	items.push({
+		activePaths: ["/news", "/chroniques"],
+		icon: "newspaper",
+		label: "nav.association.editorial",
+		path: "/news",
+	});
+
+	return items;
+}
+
+/**
+ * Onglets de la barre du bas, sur mobile.
+ *
+ * Mêmes destinations que la barre supérieure, plus le compte : sur mobile la
+ * barre supérieure se réduit au titre et au menu, c'est donc la barre du bas
+ * qui porte la navigation. Garder les deux surfaces cohérentes évite qu'une
+ * entrée n'existe que dans une orientation d'écran.
+ */
+export function construireOngletsMobile(bases: NavBases): NavItem[] {
+	const vitaux = construireItemsBarreSuperieure(bases);
+	const compte: NavItem = {
+		activePaths: ["/settings", "/profil"],
+		icon: "account_circle",
+		label: "nav.account",
+		path: "/settings",
+	};
+
+	// Le compte est le dernier onglet, toujours. S'il fallait couper, ce serait
+	// dans les domaines — jamais dans l'accès au compte, qui n'a pas d'autre
+	// point d'entrée sur mobile.
+	return [...vitaux.slice(0, MAX_ONGLETS_MOBILE - 1), compte];
 }
