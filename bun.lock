@@ -236,6 +236,10 @@
     "apps/cdn": {
       "name": "cdn",
       "version": "0.1.0",
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
     },
     "apps/realtime": {
       "name": "realtime",
@@ -243,10 +247,19 @@
       "dependencies": {
         "pg": "catalog:",
       },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
+        "typescript": "catalog:",
+      },
     },
     "apps/storage": {
       "name": "storage",
       "version": "0.1.0",
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
     },
     "apps/website": {
       "name": "@rosegriffon/website",

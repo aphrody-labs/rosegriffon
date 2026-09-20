@@ -351,6 +351,12 @@ const nextConfig: NextConfig = {
 			{ hostname: "achillea.rosegriffon.fr", protocol: "https" },
 			{ hostname: "cdn.discordapp.com", protocol: "https" },
 			{ hostname: "static-cdn.jtvnw.net", protocol: "https" },
+			// Vignettes des VOD et des clips Twitch (`TwitchEnrichedInfo.tsx`) :
+			// deux hôtes distincts de celui des avatars, et ils manquaient. Next
+			// répondait 400 sur chaque aperçu, la page RGTV affichait des cadres
+			// noirs.
+			{ hostname: "vod-secure.twitch.tv", protocol: "https" },
+			{ hostname: "clips-media-assets2.twitch.tv", protocol: "https" },
 			{ hostname: "pbs.twimg.com", protocol: "https" },
 			{ hostname: "abs.twimg.com", protocol: "https" },
 			{ hostname: "dxi4wb638ujep.cloudfront.net", protocol: "https" },
