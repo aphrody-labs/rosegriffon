@@ -18,7 +18,9 @@
 			"@rosegriffon/auth": ["../../packages/auth/src/index.ts"],
 			"@rosegriffon/auth/*": ["../../packages/auth/src/*"],
 			"@rosegriffon/ui": ["../../packages/ui/src/index.ts"],
-			"@rosegriffon/ui/*": ["../../packages/ui/src/*"]
+			"@rosegriffon/ui/*": ["../../packages/ui/src/*"],
+			"@rosegriffon/app-shell": ["../../packages/app-shell/src/index.ts"],
+			"@rosegriffon/app-shell/*": ["../../packages/app-shell/src/*"]
 		}
 	},
 	"include": [

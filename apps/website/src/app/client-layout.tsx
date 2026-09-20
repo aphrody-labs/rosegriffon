@@ -75,8 +75,9 @@ export default function ClientLayout({
 		pathname?.startsWith("/login") ||
 		pathname?.startsWith("/register") ||
 		pathname?.startsWith("/auth");
+	const isWikiPage = pathname?.startsWith("/wiki");
 
-	const shouldHideSidebar = isAdminPage || isShopPage || isAuthPage;
+	const shouldHideSidebar = isAdminPage || isShopPage || isAuthPage || isWikiPage;
 
 	// Le rail n'existe qu'au breakpoint « medium » ET hors pages sans chrome :
 	// toute réservation de place doit suivre exactement cette condition.
@@ -143,7 +144,7 @@ export default function ClientLayout({
 									    son layout : sans cette garde, les six routes du tunnel
 									    d'achat empilaient deux `contentinfo` — rupture visuelle et
 									    liens légaux annoncés deux fois par les lecteurs d'écran. */}
-									{!isShopPage && <Footer />}
+									{!isShopPage && !isWikiPage && <Footer />}
 									<MobileWatermark />
 									{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
 									{isCompact && !shouldHideSidebar && <MobileBottomNavigation />}

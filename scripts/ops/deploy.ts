@@ -97,6 +97,14 @@ import {
 	writeFile,
 } from "node:fs/promises";
 
+// Assurer que les sondes HTTP publiques et internes ne soient pas bloquées par un proxy SOCKS5 non supporté par fetch()
+delete process.env.HTTP_PROXY;
+delete process.env.HTTPS_PROXY;
+delete process.env.ALL_PROXY;
+delete process.env.http_proxy;
+delete process.env.https_proxy;
+delete process.env.all_proxy;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Configuration
 // ─────────────────────────────────────────────────────────────────────────────
@@ -891,13 +899,10 @@ async function switchTraffic(app: AppConfig, slot: SlotId): Promise<void> {
 
 async function verifyPublic(app: AppConfig): Promise<number> {
 	try {
-		const response = await fetch(app.publicUrl, {
-			redirect: "manual",
-			signal: AbortSignal.timeout(20_000),
-			headers: { "user-agent": "rg-deploy/1.0 (verification)" },
-		});
-		log(`${response.status < 400 ? "✓" : "✗"} ${app.publicUrl} → ${response.status}`);
-		return response.status;
+		const res = await run(["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", "-m", "20", "-A", "rg-deploy/1.0 (verification)", app.publicUrl]);
+		const code = parseInt(res.stdout.trim(), 10) || 0;
+		log(`${code > 0 && code < 400 ? "✓" : "✗"} ${app.publicUrl} → ${code}`);
+		return code;
 	} catch (error) {
 		log(
 			`✗ ${app.publicUrl} injoignable : ${error instanceof Error ? error.message : String(error)}`
