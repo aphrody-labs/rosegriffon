@@ -23,6 +23,7 @@ import {
 } from "./tasks/api";
 import { runSeoIndexNow } from "./tasks/seo/indexnow";
 import { runSeoLlmsTxt } from "./tasks/seo/llms-txt";
+import { runAchilleaSync } from "./tasks/achillea-sync";
 import { collecterAudienceAchillea } from "./tasks/stats/achillea";
 import { rafraichirVideosTechniques } from "./tasks/zukan-videos";
 import { initDiscord, getDiscordTelemetry, onTelemetryUpdate, getDiscordClient, GUILD_ID } from "./lib/discord";
@@ -479,6 +480,8 @@ if (indexRun >= 0) {
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
 	} else if (task === "zukan:videos" || task === "zukan-videos") {
 		await executeTask("zukan:videos", rafraichirVideosTechniques);
+	} else if (task === "sync:achillea" || task === "sync" || task === "achillea") {
+		await executeTask("sync:achillea", runAchilleaSync);
 	} else if (task === "stats:achillea" || task === "stats") {
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else if (task === "seo") {
@@ -507,7 +510,7 @@ if (indexRun >= 0) {
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, sync:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -671,6 +674,15 @@ Bun.cron("0 6 * * *", async () => {
 // de façon visible pour ces deux domaines.
 Bun.cron("*/15 * * * *", async () => {
 	await executeTask("stats:achillea", collecterAudienceAchillea);
+});
+
+// 10. Achilléa — réalignement du miroir `rg.achillea` (postgres_fdw), à 4h20.
+// Les DONNÉES sont lues en direct : rien à copier. Ce qui dérive, c'est la forme
+// des tables, que les migrations d'Achilléa font bouger. Sans ce recâblage, une
+// colonne ajoutée reste invisible et une colonne retirée casse la page
+// d'administration au moment où quelqu'un l'ouvre, pas au moment de la migration.
+Bun.cron("20 4 * * *", async () => {
+	await executeTask("sync:achillea", runAchilleaSync);
 });
 
 console.log("✅ Toutes les tâches cron ont été planifiées avec succès.");
@@ -856,6 +868,7 @@ const server = Bun.serve({
 				// journée. Relevé par `catalogue.test.ts`, qui relie désormais les
 				// trois listes.
 				"stats:achillea": collecterAudienceAchillea,
+				"sync:achillea": runAchilleaSync,
 				"stats-achillea": collecterAudienceAchillea,
 				"zukan:videos": rafraichirVideosTechniques,
 				"zukan-videos": rafraichirVideosTechniques,
