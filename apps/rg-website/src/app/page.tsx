@@ -157,7 +157,15 @@ export default async function Home() {
 			<WebsiteSchema />
 			<RealtimeSettingsListener />
 
-			<div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-3 px-4 py-4 lg:h-[calc(100dvh-3.5rem)] lg:grid-cols-12 lg:grid-rows-[minmax(0,5fr)_minmax(0,4fr)_auto] lg:overflow-hidden lg:px-6">
+			{/*
+			 * La fenêtre fixe demande DEUX conditions, pas une : assez large (`lg`)
+			 * ET assez haute (`min-height: 44rem`). Un écran large mais court —
+			 * 1366×650, un portable posé sur une station d'accueil — n'a pas la
+			 * place, et `overflow-hidden` y couperait le contenu au lieu de le
+			 * condenser. Sous l'un ou l'autre seuil, la grille redevient une
+			 * colonne qui défile.
+			 */}
+			<div className="tableau-de-bord-accueil mx-auto grid w-full max-w-7xl grid-cols-1 gap-3 px-4 py-4 lg:grid-cols-12 lg:px-6">
 				{/* Identité */}
 				<Tuile className="justify-between lg:col-span-7 lg:row-span-1" label="Rose Griffon">
 					<div className="flex min-h-0 flex-col gap-3">
