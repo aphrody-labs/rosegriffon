@@ -4213,5 +4213,8 @@
 	"nav.wiki.modes": "ゲームモード",
 	"nav.wiki.game_menus": "メニュー画面",
 	"nav.wiki.more": "その他",
-	"nav.wiki.cpk_browser": "CPKブラウザ"
+	"nav.wiki.cpk_browser": "CPKブラウザ",
+	"ui.language.change": "言語を変更",
+	"ui.language.current": "現在の言語",
+	"ui.language.label": "言語"
 }

@@ -1,9 +1,11 @@
 "use client";
 
+import { basesDepuisChemin, joindreWiki } from "@rosegriffon/app-shell";
 import type { BaseCharacter } from "@rosegriffon/inagle";
 import { CircleDot, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useLanguage } from "@/components/providers/language-provider";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
@@ -52,10 +54,33 @@ interface BaseCharacterTableProps {
 }
 
 /**
+ * Préfixe un chemin du wiki avec le point de montage de l'app qui rend ce
+ * tableau.
+ *
+ * LE BUG QUE ÇA CORRIGE
+ * Les `href` étaient écrits en dur (`/chara/<slug>`). Or ce composant est servi
+ * par DEUX apps : à la racine d'`azalee.rosegriffon.fr`, où `/chara/<slug>` est
+ * correct, et sous `/wiki` de `rosegriffon.fr`, où la bonne cible est
+ * `/wiki/chara/<slug>`. Mesuré en production sur `rosegriffon.fr/wiki/chara` :
+ * les 200 fiches de la page pointaient toutes sur `/chara/<slug>` et repassaient
+ * donc par une redirection 308 évitable (200 des 204 sauts relevés sur le wiki).
+ *
+ * `basesDepuisChemin` déduit le montage du chemin courant au lieu de le coder en
+ * dur : le fichier reste identique octet à octet dans les deux arbres, ce
+ * qu'exige `packages/app-shell/test/synchronisation-chrome.test.ts`.
+ */
+function useLienWiki(): (chemin: string) => string {
+	const pathname = usePathname();
+	const bases = basesDepuisChemin(pathname ?? "/");
+	return (chemin: string) => joindreWiki(bases.wiki, chemin);
+}
+
+/**
  * Row component for a single base character with variant switching
  */
 function BaseCharacterRow({ character, rowIndex }: { character: BaseCharacter; rowIndex: number }) {
 	const { t, language } = useLanguage();
+	const lienWiki = useLienWiki();
 	const variants = character.variants || [];
 	const activeVariant = variants[0];
 
@@ -204,7 +229,7 @@ function BaseCharacterRow({ character, rowIndex }: { character: BaseCharacter; r
 			{/* Nom avec image */}
 			<TableCell>
 				<Link
-					href={`/chara/${(character as any).baseSlug || character.slug || activeVariant.charaParamId}`}
+					href={lienWiki(`/chara/${(character as any).baseSlug || character.slug || activeVariant.charaParamId}`)}
 					className="flex items-center gap-3 group"
 				>
 					<div className="relative size-12 rounded-lg overflow-hidden bg-surface-container-highest shrink-0 ring-1 ring-outline-variant/30">
@@ -368,6 +393,7 @@ function BaseCharacterRow({ character, rowIndex }: { character: BaseCharacter; r
  */
 function BaseCharacterCard({ character, rowIndex }: { character: BaseCharacter; rowIndex: number }) {
 	const { t, language } = useLanguage();
+	const lienWiki = useLienWiki();
 	const variants = character.variants || [];
 	const activeVariant = variants[0];
 
@@ -489,7 +515,7 @@ function BaseCharacterCard({ character, rowIndex }: { character: BaseCharacter; 
 			{/* Main character info (Portrait + Name/Element/Position) */}
 			<div className="flex gap-3 items-start">
 				<Link
-					href={`/chara/${(character as any).baseSlug || character.slug || activeVariant.charaParamId}`}
+					href={lienWiki(`/chara/${(character as any).baseSlug || character.slug || activeVariant.charaParamId}`)}
 					className="relative size-16 rounded-xl overflow-hidden bg-surface-container-highest shrink-0 ring-1 ring-outline-variant/30"
 				>
 					<SafeImage
@@ -506,7 +532,7 @@ function BaseCharacterCard({ character, rowIndex }: { character: BaseCharacter; 
 
 				<div className="flex flex-col min-w-0 flex-1">
 					<Link
-						href={`/chara/${(character as any).baseSlug || character.slug || activeVariant.charaParamId}`}
+						href={lienWiki(`/chara/${(character as any).baseSlug || character.slug || activeVariant.charaParamId}`)}
 						className="flex flex-wrap items-center gap-1.5"
 					>
 						<span className="font-black text-on-surface group-hover:text-primary transition-colors text-sm sm:text-base leading-tight font-grade-high truncate">

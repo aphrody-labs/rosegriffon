@@ -104,8 +104,31 @@ export default async function WikiHomePage() {
 
 	return (
 		<div className="animate-in fade-in duration-700">
-			{/* Hero interactif de l'encyclopédie Azalée */}
-			<LandingHero stats={wikiStats} />
+			{/*
+			 * Hero interactif de l'encyclopédie Azalée.
+			 *
+			 * LA GOUTTIÈRE QUI MANQUAIT
+			 * `LandingHero` est un composant partagé avec `apps/azalee`, où le
+			 * `Shell` d'`@rosegriffon/app-shell` enveloppe les pages dans
+			 * `px-4 md:px-8 lg:px-12` : son `-mx-4 md:-mx-8 lg:-mx-12` annule
+			 * exactement cette gouttière pour obtenir un plein cadre. Ici, la zone
+			 * de contenu (`#main-content` dans `client-layout.tsx`) n'a aucune
+			 * gouttière horizontale, et ces marges négatives débordaient donc sous
+			 * le rail de navigation, où `overflow-x: hidden` les rognait. Mesuré en
+			 * production sur `rosegriffon.fr/wiki` à 780 px de large : zone de
+			 * contenu à `left: 160px` (605 px), `<section>` du hero à `left: 128px`
+			 * (669 px, soit 32 px hors cadre de chaque côté) et `h1` à `left: 125px`
+			 * — les 35 premiers pixels de chaque ligne du titre étaient coupés
+			 * (« L'information la plus précise autour d'Inazuma Eleven. »).
+			 *
+			 * Rétablir la gouttière attendue recale le hero sur la largeur exacte de
+			 * la zone de contenu (bord du rail à droite de l'écran) à toutes les
+			 * tailles, sans toucher au composant partagé ni à son `overflow-hidden`,
+			 * qui borne le fond en Ken Burns.
+			 */}
+			<div className="px-4 md:px-8 lg:px-12">
+				<LandingHero stats={wikiStats} />
+			</div>
 
 			{/* Contenu principal */}
 			<div

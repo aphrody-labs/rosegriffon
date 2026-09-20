@@ -78,7 +78,13 @@ export function LandingHero({ stats }: LandingHeroProps) {
 		: [];
 
 	return (
-		<section className="relative h-[90svh] min-h-[520px] md:h-[75vh] md:min-h-[520px] md:max-h-[700px] overflow-hidden bg-black w-auto -mx-4 md:-mx-8 lg:-mx-12">
+		/*
+		 * `@container/hero` : les bascules de ce hero doivent suivre SA largeur, pas
+		 * celle de la fenêtre. Le rail de navigation réserve 160 px à gauche, que
+		 * les points de rupture `md:`/`lg:` ignorent — d'où le rognage décrit
+		 * ci-dessous sur la colonne de la mascotte.
+		 */
+		<section className="@container/hero relative h-[90svh] min-h-[520px] md:h-[75vh] md:min-h-[520px] md:max-h-[700px] overflow-hidden bg-black w-auto -mx-4 md:-mx-8 lg:-mx-12">
 			{/* Background switcher with parallax wrapper (layer 1 — deepest, -300px).
 			    Plusieurs key visuals défilent en crossfade ; Ken Burns sur l'actif.
 			    Motion réduit → 1re image statique, sans cycle ni zoom. */}
@@ -213,7 +219,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 				{/* Left: Text & CTA (layer 3 — foreground, -75px) */}
 				<motion.div
 					style={foregroundStyle}
-					className="flex flex-col items-start text-left space-y-5 max-w-xl animate-[fadeSlideUp_0.8s_ease-out_0.2s_both]"
+					className="flex flex-col items-start text-left space-y-5 max-w-xl min-w-0 animate-[fadeSlideUp_0.8s_ease-out_0.2s_both]"
 				>
 					<Image
 						src="/ie.webp"
@@ -253,10 +259,23 @@ export function LandingHero({ stats }: LandingHeroProps) {
 					</div>
 				</motion.div>
 
-				{/* Right: Mascot Reika (layer 2 — mascot, -150px) */}
+				{/* Right: Mascot Reika (layer 2 — mascot, -150px)
+				    Colonne incompressible (320 px fixes) masquée tant que le hero
+				    lui-même n'est pas assez large (`@3xl/hero` = 48 rem).
+
+				    LE BUG QUE ÇA CORRIGE
+				    La bascule deux colonnes se déclenche sur `md:` (768 px de
+				    FENÊTRE), alors que le hero n'occupe que la zone de contenu —
+				    amputée des 160 px du rail de navigation. Mesuré sur
+				    `rosegriffon.fr/wiki` à 780 px : rangée large de 605 px pour
+				    308 + 48 + 320 = 676 px de contenu, donc 35 px qui débordaient de
+				    chaque côté à cause de `justify-center`, rognés par
+				    l'`overflow-hidden` du hero. Résultat à l'écran : « L'information
+				    la plus précise autour d'Inazuma Eleven. » amputée de son premier
+				    caractère à chaque ligne. */}
 				<motion.div
 					style={mascotStyle}
-					className="relative animate-[mascotEntrance_1s_ease-out_0.4s_both]"
+					className="relative hidden @3xl/hero:block animate-[mascotEntrance_1s_ease-out_0.4s_both]"
 				>
 					<div className="relative w-[320px] h-[420px] lg:w-[420px] lg:h-[540px] animate-[gentleFloat_6s_ease-in-out_infinite]">
 						{/* Multi-layered glow behind mascot */}

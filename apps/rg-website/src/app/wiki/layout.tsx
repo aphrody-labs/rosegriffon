@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { LanguageProvider } from "@/components/providers/language-provider";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 
 export const metadata: Metadata = {
@@ -16,18 +15,10 @@ export const metadata: Metadata = {
 	},
 };
 
-export default function WikiLayout({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
+export default function WikiLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<LanguageProvider>
-			<SupabaseProvider>
-				<div className="wiki-scope min-h-full">
-					{children}
-				</div>
-			</SupabaseProvider>
-		</LanguageProvider>
+		<SupabaseProvider>
+			<div className="wiki-scope min-h-full">{children}</div>
+		</SupabaseProvider>
 	);
 }

@@ -19,10 +19,8 @@ export const dynamicParams = true;
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { OverrideSkillData } from "@/components/wiki/OverrideSkillSection";
-import { SkillCutinSection } from "@/components/wiki/SkillCutinSection";
 import { SkillDetail } from "@/components/wiki/SkillDetail";
 import type { SkillVideoVariant } from "@/components/wiki/SkillVideoPlayer";
-import { cutinHasAssets, getSkillCutin } from "@rosegriffon/azalee/game/skills-cutin";
 import { getSkillImageUrl } from "@rosegriffon/azalee/images";
 import { createClient } from "@/lib/supabase/server";
 import { wikiService } from "@/lib/wiki-service";
@@ -264,7 +262,6 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 		await wikiService.getOverrideSkillsForSkill(skillHexId);
 
 	// Assets de cut-in (niers : modèle 3D, telop, son) — clé = code interne `skill_id_str`.
-	const cutinEntry = getSkillCutin((skill as any).internalCode || id);
 
 	// Vidéos officielles zukan (1 ou 2 variantes selon la technique).
 	const { variants: videos, publishedAt } = await fetchSkillVideos((skill as any).skillId || id);
@@ -335,15 +332,6 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 				overrideSkills={overrideSkills}
 				videos={videos}
 			/>
-			{cutinEntry?.cutin && (
-				<div className="mt-6">
-					<SkillCutinSection
-						cutin={cutinEntry.cutin}
-						skillName={name}
-						assetsAvailable={cutinHasAssets(cutinEntry.cutin.event_id_name)}
-					/>
-				</div>
-			)}
 		</>
 	);
 }

@@ -9,12 +9,14 @@ import {
 	Button,
 } from "@rosegriffon/ui";
 import { Palette, Type, Image as ImageIcon, ArrowLeft } from "lucide-react";
+import { metadonneesAchillea } from "@/app/achillea/metadonnees";
 
-export const metadata = {
-	title: "Brand Kit & Direction Artistique — Achilléa",
+export const metadata = metadonneesAchillea({
+	titre: "Brand kit & direction artistique",
 	description:
 		"Charte graphique, palette des 11 paliers de ranking, typographies et logos d'Achilléa.",
-};
+	chemin: "/achillea/guide/brand",
+});
 
 interface BrandFont {
 	family: string;

@@ -4213,5 +4213,8 @@
 	"nav.wiki.modes": "Modes de jeu",
 	"nav.wiki.game_menus": "Écrans de menu",
 	"nav.wiki.more": "Plus de contenu",
-	"nav.wiki.cpk_browser": "Explorateur CPK"
+	"nav.wiki.cpk_browser": "Explorateur CPK",
+	"ui.language.change": "Changer de langue",
+	"ui.language.current": "Langue actuelle",
+	"ui.language.label": "Langue"
 }

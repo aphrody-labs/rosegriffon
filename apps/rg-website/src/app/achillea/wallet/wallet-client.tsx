@@ -25,7 +25,7 @@ import {
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function WalletPage() {
-	const { user, isAuthenticated, login } = useAchilleaAuth();
+	const { user, isAuthenticated, login, isLoading: authLoading } = useAchilleaAuth();
 	const [balance, setBalance] = useState<WalletBalance | null>(null);
 	const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -64,6 +64,21 @@ export default function WalletPage() {
 			cancelled = true;
 		};
 	}, [isAuthenticated]);
+
+	/*
+	 * La session arrive par un aller-retour réseau (`GET /auth/me`) : tant qu'il
+	 * n'a pas répondu, `isAuthenticated` vaut false. Rendre le mur tout de suite
+	 * annonce « Connexion requise » à un visiteur DÉJÀ connecté, à CHAQUE
+	 * chargement — c'est ce qui donne l'impression qu'Achilléa refuse l'accès.
+	 * Les pages d'administration attendaient déjà, celles-ci non.
+	 */
+	if (authLoading) {
+		return (
+			<div className="max-w-md mx-auto px-4 py-20 text-center text-sm text-muted-foreground">
+				Vérification de la session…
+			</div>
+		);
+	}
 
 	if (!isAuthenticated) {
 		return (

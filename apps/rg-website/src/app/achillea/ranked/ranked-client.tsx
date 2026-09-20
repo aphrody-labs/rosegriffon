@@ -30,7 +30,7 @@ import {
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedHubPage() {
-	const { user, isAuthenticated, login } = useAchilleaAuth();
+	const { user, isAuthenticated, isLoading, login } = useAchilleaAuth();
 	const [mode, setMode] = useState<1 | 2>(1); // 1 = 1v1, 2 = 2v2
 	const [isRanked, setIsRanked] = useState<boolean>(true);
 	const [profile, setProfile] = useState<RankedProfile | null>(null);
@@ -224,14 +224,37 @@ export default function RankedHubPage() {
 				</div>
 			</div>
 
-			{/* Authenticated Profile or Login prompt */}
-			{!isAuthenticated ? (
+			{/*
+			 * Seul le PROFIL personnel (ELO, victoires, tendance) demande une
+			 * session : le classement complet et les paliers restent lisibles sans
+			 * compte, et le mur le dit au lieu de laisser croire que tout le mode
+			 * classé est fermé.
+			 *
+			 * `isLoading` d'abord : sinon le mur s'affiche le temps que
+			 * `GET /auth/me` réponde, y compris à un joueur déjà connecté.
+			 */}
+			{isLoading ? (
+				<div className="p-12 text-center border border-border rounded-2xl bg-card text-sm text-muted-foreground">
+					Vérification de la session…
+				</div>
+			) : !isAuthenticated ? (
 				<div className="p-8 border border-border/80 bg-card/40 backdrop-blur-sm rounded-2xl text-center space-y-4">
 					<ShieldAlert className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
 					<div className="space-y-1">
-						<h2 className="text-xl font-bold">Connexion requise pour le classé</h2>
+						<h2 className="text-xl font-bold">Connexion requise pour votre profil classé</h2>
 						<p className="text-sm text-muted-foreground max-w-md mx-auto">
 							Connectez-vous avec votre compte Discord pour enregistrer vos statistiques, grimper le classement et participer aux matchs compétitifs.
+						</p>
+						<p className="text-xs text-muted-foreground max-w-md mx-auto pt-1">
+							Le{" "}
+							<Link href="/achillea/ranked/leaderboard" className="font-semibold underline hover:text-foreground">
+								classement complet
+							</Link>{" "}
+							et les{" "}
+							<Link href="/achillea/ranked/tiers" className="font-semibold underline hover:text-foreground">
+								paliers
+							</Link>{" "}
+							restent consultables sans compte.
 						</p>
 					</div>
 					<button

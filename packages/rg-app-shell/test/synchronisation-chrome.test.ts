@@ -32,6 +32,26 @@ const DIVERGENCES_ASSUMEES = new Map<string, string>([
 	["home/WikiCarousel.tsx", "bloc de page d'accueil, propre à chaque site"],
 	["home/AchilleaBanner.tsx", "bloc de page d'accueil, propre à chaque site"],
 	["home/RgtvBanner.tsx", "bloc de page d'accueil, propre à chaque site"],
+	[
+		"AdSenseGate.tsx",
+		"Azalée ne possède plus les surfaces plein écran migrées vers niers, contrairement au portail historique",
+	],
+	[
+		"wiki/AuraDetail.tsx",
+		"Azalée conserve la fiche de données sans le viewer 3D, désormais détenu par niers",
+	],
+	[
+		"wiki/CharaAssetsSection.tsx",
+		"Azalée conserve les voix du wiki sans les modèles 3D, désormais détenus par niers",
+	],
+	[
+		"wiki/CharacterSheet.tsx",
+		"Azalée ne propose plus de lien vers le comparateur retiré avec les outils niers",
+	],
+	[
+		"wiki/CharacterTable.tsx",
+		"Azalée ne charge plus le viewer 3D depuis les tableaux de personnages du wiki",
+	],
 ]);
 
 function listerFichiers(racine: string): string[] {

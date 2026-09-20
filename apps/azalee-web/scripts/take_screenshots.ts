@@ -19,9 +19,6 @@ const PAGES = {
 	boutique: "http://127.0.0.1:3003/boutique",
 	"boutique-esprits": "http://127.0.0.1:3003/boutique/1526934762",
 	drops: "http://127.0.0.1:3003/drops",
-	gallery: "http://127.0.0.1:3003/gallery",
-	save: "http://127.0.0.1:3003/save",
-	cpk: "http://127.0.0.1:3003/cpk",
 	quete: "http://127.0.0.1:3003/quete",
 	"quete-classroom": "http://127.0.0.1:3003/quete/0x8933A62B",
 	succes: "http://127.0.0.1:3003/succes",
@@ -30,10 +27,6 @@ const PAGES = {
 	"stade-index60": "http://127.0.0.1:3003/stade/0x2FF907D4",
 	entraineur: "http://127.0.0.1:3003/entraineur",
 	"entraineur-silvia": "http://127.0.0.1:3003/entraineur/1",
-	compare: "http://127.0.0.1:3003/tools/compare",
-	"random-team": "http://127.0.0.1:3003/tools/random-team",
-	translator: "http://127.0.0.1:3003/tools/translator",
-	"my-team": "http://127.0.0.1:3003/tools/my-team",
 	news: "http://127.0.0.1:3003/news",
 	dashboard: "http://127.0.0.1:3003/dashboard",
 	capsule: "http://127.0.0.1:3003/capsule",
@@ -41,8 +34,6 @@ const PAGES = {
 	equipe: "http://127.0.0.1:3003/equipe",
 	"equipe-detail": "http://127.0.0.1:3003/equipe/0xF01BB293",
 	invocation: "http://127.0.0.1:3003/invocation",
-	"keshin-models": "http://127.0.0.1:3003/keshin",
-	modeles: "http://127.0.0.1:3003/modeles",
 	"patch-notes": "http://127.0.0.1:3003/patch-notes",
 	"patch-notes-detail": "http://127.0.0.1:3003/patch-notes/ps-steam_ver_1_4_2"
 };
@@ -78,9 +69,7 @@ async function main() {
 		try {
 			await page.goto(url, { waitUntil: "load", timeout: 45000 });
 			
-			// Si c'est une page de modèles 3D WebGL, on attend 8s de rendu, sinon 3s.
-			const is3D = name === "keshin-models" || name === "modeles" || name.includes("keshin") || name.includes("model");
-			await page.waitForTimeout(is3D ? 8000 : 3000);
+			await page.waitForTimeout(3000);
 
 			console.log(`Taking screenshot: ${filename}`);
 			await page.screenshot({ path: artifactPath, fullPage: false });
@@ -95,4 +84,3 @@ async function main() {
 }
 
 main().catch(console.error);
-

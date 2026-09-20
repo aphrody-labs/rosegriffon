@@ -255,6 +255,17 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 										<UserMinus className="w-4 h-4" />
 										Se désinscrire
 									</>
+								) : !isAuthenticated ? (
+									/*
+									 * La fiche du tournoi est publique : format, inscrits et arbre
+									 * de rencontres s'affichent sans session. Seule l'INSCRIPTION
+									 * en demande une — le bouton le dit au lieu de rediriger un
+									 * visiteur vers Discord sans prévenir.
+									 */
+									<>
+										<UserPlus className="w-4 h-4" />
+										Se connecter pour s'inscrire
+									</>
 								) : (
 									<>
 										<UserPlus className="w-4 h-4" />

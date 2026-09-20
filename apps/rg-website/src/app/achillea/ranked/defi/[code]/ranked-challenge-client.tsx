@@ -20,7 +20,7 @@ export default function RankedChallengePage({ code }: { code: string }) {
 	const rawCode = (code || "").toUpperCase();
 
 	const router = useRouter();
-	const { user, isAuthenticated, login } = useAchilleaAuth();
+	const { user, isAuthenticated, isLoading: authLoading, login } = useAchilleaAuth();
 
 	const [preview, setPreview] = useState<RankedChallengePreview | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -94,7 +94,15 @@ export default function RankedChallengePage({ code }: { code: string }) {
 						<Swords className="w-7 h-7" />
 					</div>
 
-					{!isAuthenticated ? (
+					{/*
+					 * `isLoading` avant `!isAuthenticated` : sinon le destinataire du
+					 * défi, déjà connecté, voit d'abord « Connexion requise ».
+					 */}
+					{authLoading ? (
+						<div className="py-8 text-xs text-muted-foreground">
+							Vérification de la session…
+						</div>
+					) : !isAuthenticated ? (
 						<div className="space-y-4">
 							<div className="space-y-1">
 								<h2 className="text-xl font-bold">Connexion requise pour accepter ce défi</h2>

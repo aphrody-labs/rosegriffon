@@ -147,19 +147,35 @@
 	--achillea-rank-11-stops: #ffa910, #e18204, #ffe150, #a15b0e, #dab338;
 
 	position: relative;
-	background-color: #f3f1f8;
-	background-image: url("/achillea/site_bg_light.png");
+	/*
+	 * ACHILLÉA EST SOMBRE, SANS CONDITION.
+	 *
+	 * Ce bloc déclarait un fond CLAIR (`#f3f1f8`, `site_bg_light.png`) et
+	 * renvoyait l'inversion sombre à
+	 * `:is(.dark, .theme-achillea, [data-theme="theme-achillea"])`. Aucun de ces
+	 * trois sélecteurs ne correspond à quoi que ce soit en production : `.dark`
+	 * n'est posé nulle part sur le site, `next-themes` écrit la classe `achillea`
+	 * (pas `theme-achillea`) sur `<html>`, et l'attribut `data-theme` n'existe
+	 * pas (l'app est configurée en `attribute="class"`). Le fond restait donc
+	 * clair tandis que le texte venait des jetons Achilléa, qui sont sombres :
+	 * mesuré sur `/achillea/licence`, texte `rgb(243,237,247)` sur fond
+	 * `rgb(243,241,248)` = 1,01:1 — constaté sur 7 pages Achilléa.
+	 *
+	 * La charte Achilléa n'a qu'un mode (`THEMES.achillea.background = #0D0814`)
+	 * et les 5 thèmes du site peuvent tous être posés sur `<html>` : la section
+	 * ne peut donc pas dépendre du thème ambiant pour rester lisible. Le fond et
+	 * la couleur de texte sont ceux de `.theme-achillea`
+	 * (`--md-sys-color-surface` / `--md-sys-color-on-surface`), en littéral pour
+	 * qu'ils ne dépendent d'aucun ancêtre.
+	 */
+	background-color: #0d0814;
+	color: #f3edf7;
+	background-image: url("/achillea/site_bg_dark.png");
 	background-position: center top;
 	background-repeat: no-repeat;
 	background-size: cover;
 	background-attachment: fixed;
 	min-height: 100%;
-}
-
-:is(.dark, .theme-achillea, [data-theme="theme-achillea"]) .achillea-scope {
-	background-color: #0d0814;
-	background-image: url("/achillea/site_bg_dark.png");
-	color: #f3f1f8;
 }
 
 /* Gradients de Paliers ELO */
@@ -184,27 +200,24 @@
 	box-shadow: 0 0 25px -5px rgba(223, 255, 87, 0.4);
 }
 
+/*
+ * Même correction que pour `.achillea-scope` : la carte claire était la base et
+ * la variante sombre pendait à des sélecteurs qui ne matchent rien. Une carte
+ * blanche à 85 % sous un texte `#f3edf7` était l'une des sources du 1,01:1
+ * mesuré. La variante sombre devient donc la seule.
+ */
 .achillea-card {
-	background: rgba(255, 255, 255, 0.85);
+	background: rgba(18, 12, 28, 0.75);
 	backdrop-filter: blur(12px);
-	border: 1px solid rgba(109, 0, 206, 0.15);
+	border: 1px solid rgba(223, 255, 87, 0.12);
 	border-radius: 1rem;
 	transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-:is(.dark, .theme-achillea, [data-theme="theme-achillea"]) .achillea-card {
-	background: rgba(18, 12, 28, 0.75);
-	border: 1px solid rgba(223, 255, 87, 0.12);
-}
-
 .achillea-card:hover {
-	border-color: rgba(109, 0, 206, 0.4);
-	transform: translateY(-2px);
-}
-
-:is(.dark, .theme-achillea, [data-theme="theme-achillea"]) .achillea-card:hover {
 	border-color: rgba(223, 255, 87, 0.35);
 	box-shadow: 0 4px 20px -2px rgba(223, 255, 87, 0.15);
+	transform: translateY(-2px);
 }
 
 /* ----------------------------------------------------------------------
@@ -219,10 +232,9 @@
 	will-change: transform, filter;
 	transition: filter 0.22s ease;
 	transform-origin: center center;
-	background-image: url("/achillea/site_bg_light_home.png");
-}
-
-:is(.dark, .theme-achillea, [data-theme="theme-achillea"]) .achillea-hero-bg {
+	/* Visuel sombre en base, pour la même raison que `.achillea-scope` : la
+	 * bascule clair/sombre pendait à des sélecteurs inexistants et le héros
+	 * restait clair sous le texte clair de la section. */
 	background-image: url("/achillea/site_bg_dark_home.png");
 }
 

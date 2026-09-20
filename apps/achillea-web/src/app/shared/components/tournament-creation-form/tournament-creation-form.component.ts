@@ -171,7 +171,7 @@ export class TournamentCreationForm implements OnInit {
 		this.startsAtControl.setValue(t.startsAt ? new Date(t.startsAt) : undefined);
 		this.grandFinalAtControl.setValue(t.grandFinalAt ? new Date(t.grandFinalAt) : undefined);
 		this.logoControl.setValue(t.logo);
-		this.afficheControl.setValue(t.affiche);
+		this.afficheControl.setValue(t.affiche ?? null);
 		this.planningControl.setValue(t.planning);
 		this.rulesetControl.setValue(t.ruleset);
 		this.groupStageEnabledControl.setValue(!!t.groupStageEnabled);

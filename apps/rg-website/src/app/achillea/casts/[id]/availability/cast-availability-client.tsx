@@ -16,7 +16,7 @@ import {
 export default function CastAvailabilityPage({ id }: { id: string }) {
 	const eventId = id;
 
-	const { user, isAuthenticated, login } = useAchilleaAuth();
+	const { user, isAuthenticated, login, isLoading: authLoading } = useAchilleaAuth();
 	const [statusValue, setStatusValue] = useState<CastAvailabilityStatus>(CastAvailabilityStatus.Available);
 	const [note, setNote] = useState<string>("");
 	const [submitting, setSubmitting] = useState<boolean>(false);
@@ -47,6 +47,21 @@ export default function CastAvailabilityPage({ id }: { id: string }) {
 			setSubmitting(false);
 		}
 	};
+
+	/*
+	 * La session arrive par un aller-retour réseau (`GET /auth/me`) : tant qu'il
+	 * n'a pas répondu, `isAuthenticated` vaut false. Rendre le mur tout de suite
+	 * annonce « Connexion requise » à un visiteur DÉJÀ connecté, à CHAQUE
+	 * chargement — c'est ce qui donne l'impression qu'Achilléa refuse l'accès.
+	 * Les pages d'administration attendaient déjà, celles-ci non.
+	 */
+	if (authLoading) {
+		return (
+			<div className="max-w-md mx-auto px-4 py-20 text-center text-sm text-muted-foreground">
+				Vérification de la session…
+			</div>
+		);
+	}
 
 	if (!isAuthenticated) {
 		return (

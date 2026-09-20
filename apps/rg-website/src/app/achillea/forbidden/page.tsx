@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { Button } from "@rosegriffon/ui";
 import { ShieldAlert, ArrowLeft } from "lucide-react";
+import { metadonneesAchillea } from "@/app/achillea/metadonnees";
 
-export const metadata = {
-	title: "Accès Refusé — Achilléa",
+export const metadata = metadonneesAchillea({
+	titre: "Accès refusé",
 	description: "Vous n'avez pas les autorisations requises pour afficher cette ressource.",
-};
+	chemin: "/achillea/forbidden",
+	indexable: false,
+});
 
 export default function AchilleaForbiddenPage() {
 	return (

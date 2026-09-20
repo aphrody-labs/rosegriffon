@@ -533,7 +533,12 @@ pub struct ClanApplicationResult {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClanDto {
 	pub id: f64,
-	pub founders: String,
+	/// Identifiants Discord des fondateurs.
+	///
+	/// L'API en renvoie un TABLEAU. Le contrat disait `string`, donc la
+	/// validation rejetait chaque clan : les 42 clans existaient, l'API les
+	/// servait, et la page affichait « 0 clan trouvé ».
+	pub founders: Vec<String>,
 	pub name: String,
 	#[serde(rename = "shortenedName")]
 	pub shortened_name: String,
@@ -543,7 +548,9 @@ pub struct ClanDto {
 	pub clan_avatar_url: String,
 	#[serde(rename = "clanBiography")]
 	pub clan_biography: String,
-	pub fame: f64,
+	/// Absent de la charge utile de `GET /clans` : optionnel.
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub fame: Option<f64>,
 	#[serde(rename = "xUrl", default, skip_serializing_if = "Option::is_none")]
 	pub x_url: Option<String>,
 	#[serde(rename = "instagramUrl", default, skip_serializing_if = "Option::is_none")]
@@ -807,7 +814,7 @@ pub struct DbQueryResult {
 pub struct DbRowsPage {
 	pub data: Vec<std::collections::HashMap<String, serde_json::Value>>,
 	pub columns: Vec<DbColumn>,
-	pub meta: serde_json::Value,
+	pub meta: PageMeta,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -987,14 +994,22 @@ pub struct LeagueMatchRow {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LeaguePointsConfig {
-	#[serde(rename = "winRegulation")]
-	pub win_regulation: f64,
-	#[serde(rename = "lossRegulation")]
-	pub loss_regulation: f64,
-	#[serde(rename = "winOvertime")]
-	pub win_overtime: f64,
-	#[serde(rename = "lossOvertime")]
-	pub loss_overtime: f64,
+	/// Graphie servie par l'API.
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub win: Option<f64>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub draw: Option<f64>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub loss: Option<f64>,
+	/// Graphie historique du contrat, conservée pour les appelants existants.
+	#[serde(rename = "winRegulation", default, skip_serializing_if = "Option::is_none")]
+	pub win_regulation: Option<f64>,
+	#[serde(rename = "lossRegulation", default, skip_serializing_if = "Option::is_none")]
+	pub loss_regulation: Option<f64>,
+	#[serde(rename = "winOvertime", default, skip_serializing_if = "Option::is_none")]
+	pub win_overtime: Option<f64>,
+	#[serde(rename = "lossOvertime", default, skip_serializing_if = "Option::is_none")]
+	pub loss_overtime: Option<f64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -1132,8 +1147,8 @@ pub struct LobbyDto {
 	pub lobby_matches: Vec<LobbyMatchDto>,
 	#[serde(rename = "hostUser", default, skip_serializing_if = "Option::is_none")]
 	pub host_user: Option<LobbyUserDto>,
-	#[serde(rename = "matchFormat")]
-	pub match_format: MatchFormat,
+	#[serde(rename = "matchFormat", default, skip_serializing_if = "Option::is_none")]
+	pub match_format: Option<MatchFormat>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -1274,26 +1289,28 @@ pub struct NewTournamentDto {
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub series: Option<TournamentSeries>,
 	pub organization: serde_json::Value,
-	pub managers: Vec<UserDto>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub managers: Option<Vec<UserDto>>,
 	#[serde(rename = "startsAt")]
 	pub starts_at: Timestamp,
 	#[serde(rename = "grandFinalAt")]
 	pub grand_final_at: Timestamp,
 	#[serde(rename = "tournamentType")]
 	pub tournament_type: StageType,
-	#[serde(rename = "participantsNumber")]
-	pub participants_number: f64,
-	#[serde(rename = "seedOrdering")]
-	pub seed_ordering: SeedOrdering,
-	#[serde(rename = "matchFormat")]
-	pub match_format: MatchFormat,
+	#[serde(rename = "participantsNumber", default, skip_serializing_if = "Option::is_none")]
+	pub participants_number: Option<f64>,
+	#[serde(rename = "seedOrdering", default, skip_serializing_if = "Option::is_none")]
+	pub seed_ordering: Option<SeedOrdering>,
+	#[serde(rename = "matchFormat", default, skip_serializing_if = "Option::is_none")]
+	pub match_format: Option<MatchFormat>,
 	#[serde(rename = "customFormatChildCount", default, skip_serializing_if = "Option::is_none")]
 	pub custom_format_child_count: Option<f64>,
 	#[serde(rename = "groupStageEnabled")]
 	pub group_stage_enabled: bool,
 	#[serde(rename = "groupStageType", default, skip_serializing_if = "Option::is_none")]
 	pub group_stage_type: Option<StageType>,
-	pub affiche: String,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub affiche: Option<String>,
 	pub logo: String,
 	pub ruleset: String,
 	pub planning: String,
@@ -1357,7 +1374,7 @@ pub struct OpenRegistrationsResult {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrganizationDto {
 	#[serde(default, skip_serializing_if = "Option::is_none")]
-	pub id: Option<String>,
+	pub id: Option<serde_json::Value>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub state: Option<OrganizationState>,
 	pub name: String,
@@ -1365,18 +1382,20 @@ pub struct OrganizationDto {
 	pub normalized_name: String,
 	pub logo: String,
 	pub description: String,
-	pub owner: UserDto,
-	#[serde(rename = "orgManagers")]
-	pub org_managers: Vec<UserDto>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub owner: Option<serde_json::Value>,
+	#[serde(rename = "orgManagers", default, skip_serializing_if = "Option::is_none")]
+	pub org_managers: Option<Vec<UserDto>>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub managers: Option<Vec<OrgManagerDto>>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub preapproved: Option<bool>,
-	#[serde(rename = "socialMedias")]
-	pub social_medias: Vec<SocialMediaDto>,
-	#[serde(rename = "broadcastMedias")]
-	pub broadcast_medias: Vec<SocialMediaDto>,
-	pub origin: Country,
+	#[serde(rename = "socialMedias", default, skip_serializing_if = "Option::is_none")]
+	pub social_medias: Option<Vec<SocialMediaDto>>,
+	#[serde(rename = "broadcastMedias", default, skip_serializing_if = "Option::is_none")]
+	pub broadcast_medias: Option<Vec<SocialMediaDto>>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub origin: Option<serde_json::Value>,
 	#[serde(rename = "createdAt", default, skip_serializing_if = "Option::is_none")]
 	pub created_at: Option<Timestamp>,
 	#[serde(rename = "updatedAt", default, skip_serializing_if = "Option::is_none")]
@@ -1396,7 +1415,7 @@ pub enum OrganizationState {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrganizationValidationDto {
 	#[serde(default, skip_serializing_if = "Option::is_none")]
-	pub id: Option<String>,
+	pub id: Option<serde_json::Value>,
 	pub reviewer: UserDto,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub name: Option<String>,
@@ -1437,11 +1456,18 @@ pub struct PagedList<T> where T: Serialize + serde::de::DeserializeOwned {
 /// Métadonnées de page renvoyées par l'API (style `Paginated<T>` historique).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PageMeta {
-	pub page: f64,
-	pub limit: f64,
+	/// Seul `total` est garanti.
+	///
+	/// Mesuré sur `GET /clans` : l'API renvoie `{ total, pageCount: null }`. Une
+	/// enveloppe de pagination ne doit jamais pouvoir invalider sa charge utile —
+	/// exiger ces champs effaçait les 42 clans pour une histoire de compteur.
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub page: Option<f64>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub limit: Option<f64>,
 	pub total: f64,
-	#[serde(rename = "pageCount")]
-	pub page_count: f64,
+	#[serde(rename = "pageCount", default, skip_serializing_if = "Option::is_none")]
+	pub page_count: Option<f64>,
 }
 
 /// Requête de pagination commune à toutes les listes.
@@ -2528,16 +2554,18 @@ pub struct Tournament {
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub series: Option<TournamentSeries>,
 	pub organization: OrganizationDto,
-	pub managers: Vec<UserDto>,
-	pub participants: Vec<ParticipantDto>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub managers: Option<Vec<UserDto>>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub participants: Option<Vec<ParticipantDto>>,
 	#[serde(rename = "tournamentType")]
 	pub tournament_type: StageType,
-	#[serde(rename = "participantsNumber")]
-	pub participants_number: f64,
-	#[serde(rename = "seedOrdering")]
-	pub seed_ordering: SeedOrdering,
-	#[serde(rename = "matchFormat")]
-	pub match_format: MatchFormat,
+	#[serde(rename = "participantsNumber", default, skip_serializing_if = "Option::is_none")]
+	pub participants_number: Option<f64>,
+	#[serde(rename = "seedOrdering", default, skip_serializing_if = "Option::is_none")]
+	pub seed_ordering: Option<SeedOrdering>,
+	#[serde(rename = "matchFormat", default, skip_serializing_if = "Option::is_none")]
+	pub match_format: Option<MatchFormat>,
 	#[serde(rename = "customFormatChildCount", default, skip_serializing_if = "Option::is_none")]
 	pub custom_format_child_count: Option<f64>,
 	#[serde(rename = "groupStageEnabled")]
@@ -2545,7 +2573,8 @@ pub struct Tournament {
 	#[serde(rename = "groupStageType", default, skip_serializing_if = "Option::is_none")]
 	pub group_stage_type: Option<StageType>,
 	pub logo: String,
-	pub affiche: String,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub affiche: Option<String>,
 	pub planning: String,
 	pub ruleset: String,
 	/// True une fois le bonus AP podium (top 4) versé.
@@ -2829,15 +2858,21 @@ pub struct UserDto {
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub r#type: Option<String>,
 	pub username: String,
-	pub sim: f64,
+	/// Champs présents uniquement sur la session de l'utilisateur courant.
+	///
+	/// `GET /clans` imbrique un président réduit (identité et profil public) qui
+	/// ne les porte pas. Les exiger faisait échouer la validation de la réponse
+	/// ENTIÈRE, donc de tous les clans.
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub sim: Option<f64>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub avatar: Option<String>,
 	#[serde(rename = "clanId", default, skip_serializing_if = "Option::is_none")]
 	pub clan_id: Option<f64>,
-	#[serde(rename = "soloRank")]
-	pub solo_rank: RankDto,
-	#[serde(rename = "duoRank")]
-	pub duo_rank: RankDto,
+	#[serde(rename = "soloRank", default, skip_serializing_if = "Option::is_none")]
+	pub solo_rank: Option<RankDto>,
+	#[serde(rename = "duoRank", default, skip_serializing_if = "Option::is_none")]
+	pub duo_rank: Option<RankDto>,
 	#[serde(rename = "lastInteract", default, skip_serializing_if = "Option::is_none")]
 	pub last_interact: Option<Timestamp>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
@@ -2978,12 +3013,12 @@ pub struct WireTournament {
 	pub grand_final_at: Timestamp,
 	#[serde(rename = "tournamentType")]
 	pub tournament_type: StageType,
-	#[serde(rename = "participantsNumber")]
-	pub participants_number: f64,
-	#[serde(rename = "seedOrdering")]
-	pub seed_ordering: SeedOrdering,
-	#[serde(rename = "matchFormat")]
-	pub match_format: MatchFormat,
+	#[serde(rename = "participantsNumber", default, skip_serializing_if = "Option::is_none")]
+	pub participants_number: Option<f64>,
+	#[serde(rename = "seedOrdering", default, skip_serializing_if = "Option::is_none")]
+	pub seed_ordering: Option<SeedOrdering>,
+	#[serde(rename = "matchFormat", default, skip_serializing_if = "Option::is_none")]
+	pub match_format: Option<MatchFormat>,
 	#[serde(rename = "customFormatChildCount", default, skip_serializing_if = "Option::is_none")]
 	pub custom_format_child_count: Option<f64>,
 	#[serde(rename = "groupStageEnabled")]
@@ -2991,7 +3026,8 @@ pub struct WireTournament {
 	#[serde(rename = "groupStageType", default, skip_serializing_if = "Option::is_none")]
 	pub group_stage_type: Option<StageType>,
 	pub logo: String,
-	pub affiche: String,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub affiche: Option<String>,
 	pub planning: String,
 	pub ruleset: String,
 	/// True une fois le bonus AP podium (top 4) versé.
@@ -3024,8 +3060,15 @@ pub struct WireTournament {
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub series: Option<EntityRef<WireTournamentSeries>>,
 	pub organization: EntityRef<OrganizationDto>,
-	pub managers: Vec<EntityRef<UserDto>>,
-	pub participants: Vec<EntityRef<WireParticipant>>,
+	/// Relations OPTIONNELLES sur la liste.
+	///
+	/// `GET /tournaments` ne les peuple pas — seul `GET /tournaments/:id` le
+	/// fait. Les exiger faisait rejeter les 9 tournois de la liste et affichait
+	/// « Aucun tournoi trouvé » sur une API qui en servait neuf.
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub managers: Option<Vec<EntityRef<UserDto>>>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub participants: Option<Vec<EntityRef<WireParticipant>>>,
 }
 
 /// `TournamentSeries` sans sa récursion de tournois peuplés.

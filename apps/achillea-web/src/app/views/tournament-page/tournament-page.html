@@ -416,14 +416,14 @@
 							</div>
 						</article>
 
-						@if (tournament.managers.length) {
+						@if (tournament.managers?.length) {
 						<article class="tp-card">
 							<h2 class="tp-card__title">
 								<i class="pi pi-shield" aria-hidden="true"></i>
 								Tournament organizers
 							</h2>
 							<ul class="tp-to-list">
-								@for (to of tournament.managers; track to.id) {
+								@for (to of tournament.managers ?? []; track to.id) {
 								<li>
 									<a class="tp-to-chip" [routerLink]="['/users', to.id]">
 										<app-user-avatar
@@ -636,10 +636,8 @@
 								<p class="tp-participants-sub">
 									{{ participants.length }} inscrit{{ participants.length > 1 ? "s" : "" }} @if
 									(isFull) { · <span class="tp-text-success">Complet</span>
-									} @else if (isRegistrationOpen) { · {{ tournament.participantsNumber -
-									participants.length }} place{{ tournament.participantsNumber - participants.length
-									> 1 ? "s" : "" }} restante{{ tournament.participantsNumber - participants.length >
-									1 ? "s" : "" }} }
+									} @else if (isRegistrationOpen) { · {{ remainingPlaces }} place{{ remainingPlaces
+									> 1 ? "s" : "" }} restante{{ remainingPlaces > 1 ? "s" : "" }} }
 								</p>
 							</div>
 							@if (isTournamentOrganizer) {
@@ -701,7 +699,7 @@
 												>{{ p.user.soloRank?.key || "Non classé" }}</span
 											>
 											@if (p.user.soloRank?.elo != null) {
-											<span class="tp-player__elo">{{ p.user.soloRank.elo }}</span>
+											<span class="tp-player__elo">{{ p.user.soloRank?.elo }}</span>
 											}
 										</span>
 										@if (p.user.id === userService.user()?.id) {

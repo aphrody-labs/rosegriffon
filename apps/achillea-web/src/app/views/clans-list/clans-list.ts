@@ -79,7 +79,10 @@ export class ClansList implements OnInit, AfterViewInit {
 							? a.experience.totalXp - b.experience.totalXp
 							: b.experience.totalXp - a.experience.totalXp;
 				} else if (this.sortValue() === "fame") {
-					res = this.sortOption() === "asc" ? a.fame - b.fame : b.fame - a.fame;
+					res =
+						this.sortOption() === "asc"
+							? (a.fame ?? 0) - (b.fame ?? 0)
+							: (b.fame ?? 0) - (a.fame ?? 0);
 				} else if (this.sortValue() === "foundation") {
 					res =
 						this.sortOption() === "asc"

@@ -1,10 +1,24 @@
+import { joindreWiki, WEBSITE_BASES } from "@rosegriffon/app-shell";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
+/**
+ * Préfixe de montage du wiki dans cette app (`/wiki`), lu dans le registre de
+ * routes partagé plutôt qu'écrit en dur : la même page existe à la racine
+ * d'`azalee.rosegriffon.fr`, où le préfixe est vide.
+ *
+ * LE BUG QUE ÇA CORRIGE
+ * Les quatre cartes pointaient sur `/tools/<outil>`. Mesuré en production sur
+ * `rosegriffon.fr/wiki/tools` : 4 des 204 liens internes du wiki qui passaient
+ * par une redirection 308 vers `/wiki/tools/<outil>`. Le lien canonique visait
+ * lui aussi `/tools`, c'est-à-dire une URL qui redirige.
+ */
+const outil = (chemin: string) => joindreWiki(WEBSITE_BASES.wiki, chemin);
+
 export const metadata: Metadata = {
-	alternates: { canonical: "/tools" },
+	alternates: { canonical: joindreWiki(WEBSITE_BASES.wiki, "/tools") },
 	description:
 		"Comparateur de personnages, générateur d'équipe aléatoire, traducteur de noms et plus pour Inazuma Eleven: Victory Road.",
 	title: "Outils | Inazuma Eleven Victory Road - Azalée",
@@ -22,28 +36,28 @@ const TOOLS: Array<{
 	{
 		container: "bg-primary-container text-on-primary-container",
 		description: "Stats, techniques et auras de deux joueurs côte à côte.",
-		href: "/tools/compare",
+		href: outil("/tools/compare"),
 		icon: "compare_arrows",
 		title: "Comparateur",
 	},
 	{
 		container: "bg-secondary-container text-on-secondary-container",
 		description: "11 joueurs, 1 coach, 3 manageuses. Filtrez par élément ou style de jeu.",
-		href: "/tools/random-team",
+		href: outil("/tools/random-team"),
 		icon: "casino",
 		title: "Équipe aléatoire",
 	},
 	{
 		container: "bg-tertiary-container text-on-tertiary-container",
 		description: "Trouvez les noms français, anglais et japonais de toutes les entités du jeu.",
-		href: "/tools/translator",
+		href: outil("/tools/translator"),
 		icon: "translate",
 		title: "Traducteur",
 	},
 	{
 		container: "bg-primary-container text-on-primary-container",
 		description: "Composez votre équipe idéale en glissant-déposant vos joueurs sur le terrain.",
-		href: "/tools/my-team",
+		href: outil("/tools/my-team"),
 		icon: "stadium",
 		title: "Mon Équipe",
 	},

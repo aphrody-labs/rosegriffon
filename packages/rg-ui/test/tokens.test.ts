@@ -128,6 +128,40 @@ describe("tokens exposés", () => {
 		}
 	});
 
+	test("un thème posé hors de <html> peint son propre fond", () => {
+		// Une classe de thème sur un conteneur ne posait QUE des variables :
+		// seul `body { @apply bg-background text-foreground }` peint. La zone de
+		// contenu du wiki (`.theme-azalee-dark`, posée par `client-layout.tsx`)
+		// prenait donc son texte d'Azalée sombre (#ede0db) et son fond du thème
+		// de <html> — mesuré en production sur `/wiki/tools` : #ede0db sur
+		// #f9f4ee (Roy), soit 1,19:1, et 21 éléments sous 4,5:1 sur `/wiki`.
+		//
+		// Le sélecteur EXACT compte : `:where(…)` garde la spécificité à zéro
+		// (les utilitaires `bg-*` gardent la main) et `:not(:root)` laisse `body`
+		// seul maître du fond quand le thème est sur <html>.
+		for (const nom of NOMS_THEMES) {
+			const regle = new RegExp(
+				`:where\\(\\.${nom}:not\\(:root\\)\\)\\s*\\{[^}]*` +
+					`background-color:\\s*var\\(--background\\);[^}]*` +
+					`color:\\s*var\\(--foreground\\);`
+			);
+			expect(css, nom).toMatch(regle);
+		}
+	});
+
+	test("aucun thème groupé par virgule dans un sélecteur :where", () => {
+		// `analyserBlocs` découpe le prélude sur les virgules : un
+		// `:where(.theme-roy, .theme-gaelle)` produirait les faux sélecteurs
+		// `:where(.theme-roy` et `.theme-gaelle)`, et `extraireTokens` pourrait
+		// retenir ce bloc vide comme jeu de tokens du thème.
+		const blocs = analyserBlocs(css);
+		for (const bloc of blocs) {
+			for (const selecteur of bloc.selecteurs) {
+				expect(selecteur.split("(").length).toBe(selecteur.split(")").length);
+			}
+		}
+	});
+
 	test("le pont shadcn est résolu, pas laissé en référence", () => {
 		// azalee-light écrit `--card: var(--md-sys-color-surface-container-low)`.
 		expect(THEMES["theme-azalee-light"].shadcn.card).toBe(

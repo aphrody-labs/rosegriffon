@@ -1,27 +1,35 @@
 import * as React from "react";
 
-// Material 3 Breakpoints (in pixels for web)
-// Compact: < 600px
-// Medium: 600px - 839px
-// Expanded: >= 840px
+// Classes de fenêtre Material 3 (pixels CSS / dp web).
+// Chaque valeur est la borne INCLUSIVE de la classe qu'elle nomme.
 export const BREAKPOINTS = {
-	COMPACT: 600,
-	MEDIUM: 840,
-	EXPANDED: 1200,
+	MEDIUM: 600,
+	EXPANDED: 840,
+	LARGE: 1200,
+	EXTRA_LARGE: 1600,
 } as const;
 
-export type Breakpoint = "compact" | "medium" | "expanded" | "large";
+export type Breakpoint = "compact" | "medium" | "expanded" | "large" | "extra-large";
+
+/** Résout une largeur disponible, indépendamment du navigateur ou du device. */
+export function breakpointForWidth(width: number): Breakpoint {
+	if (width < BREAKPOINTS.MEDIUM) return "compact";
+	if (width < BREAKPOINTS.EXPANDED) return "medium";
+	if (width < BREAKPOINTS.LARGE) return "expanded";
+	if (width < BREAKPOINTS.EXTRA_LARGE) return "large";
+	return "extra-large";
+}
 
 export function useIsMobile() {
 	const [isMobile, setIsMobile] = React.useState<boolean>(false);
 
 	React.useEffect(() => {
-		const mql = window.matchMedia(`(max-width: ${BREAKPOINTS.COMPACT - 1}px)`);
+		const mql = window.matchMedia(`(max-width: ${BREAKPOINTS.MEDIUM - 1}px)`);
 		const onChange = () => {
-			setIsMobile(window.innerWidth < BREAKPOINTS.COMPACT);
+			setIsMobile(window.innerWidth < BREAKPOINTS.MEDIUM);
 		};
 		mql.addEventListener("change", onChange);
-		setIsMobile(window.innerWidth < BREAKPOINTS.COMPACT);
+		setIsMobile(window.innerWidth < BREAKPOINTS.MEDIUM);
 		return () => mql.removeEventListener("change", onChange);
 	}, []);
 
@@ -33,16 +41,7 @@ export function useBreakpoint(): Breakpoint {
 
 	React.useEffect(() => {
 		const updateBreakpoint = () => {
-			const width = window.innerWidth;
-			if (width < BREAKPOINTS.COMPACT) {
-				setBreakpoint("compact");
-			} else if (width < BREAKPOINTS.MEDIUM) {
-				setBreakpoint("medium");
-			} else if (width < BREAKPOINTS.EXPANDED) {
-				setBreakpoint("expanded");
-			} else {
-				setBreakpoint("large");
-			}
+			setBreakpoint(breakpointForWidth(window.innerWidth));
 		};
 
 		updateBreakpoint();

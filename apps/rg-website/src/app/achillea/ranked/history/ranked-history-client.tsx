@@ -25,7 +25,7 @@ import {
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedHistoryPage() {
-	const { user, isAuthenticated, login } = useAchilleaAuth();
+	const { user, isAuthenticated, isLoading: authLoading, login } = useAchilleaAuth();
 	const [mode, setMode] = useState<number>(-1); // -1 = all, 1 = 1v1, 2 = 2v2
 	const [period, setPeriod] = useState<number>(0); // 0 = all, 7 = 7d, 30 = 30d
 	const [history, setHistory] = useState<RankedHistoryEntry[]>([]);
@@ -190,8 +190,16 @@ export default function RankedHistoryPage() {
 				</div>
 			</div>
 
-			{/* Non-authenticated state */}
-			{!isAuthenticated ? (
+			{/*
+			 * `isLoading` avant `!isAuthenticated` : pendant l'aller-retour
+			 * `GET /auth/me`, `isAuthenticated` vaut false et le mur s'affichait à
+			 * un joueur pourtant connecté.
+			 */}
+			{authLoading ? (
+				<div className="py-20 text-center text-sm text-muted-foreground">
+					Vérification de la session…
+				</div>
+			) : !isAuthenticated ? (
 				<div className="p-8 border border-border bg-card rounded-2xl text-center space-y-4">
 					<ShieldAlert className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
 					<h2 className="text-xl font-bold">Connexion requise</h2>

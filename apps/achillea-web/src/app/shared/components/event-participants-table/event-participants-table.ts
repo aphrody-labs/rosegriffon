@@ -130,8 +130,8 @@ export class EventParticipantsTable {
 
 	readonly freeSeeds = computed(() => freeSeeds(this.participants(), this.participantsCount));
 
-	get participantsCount() {
-		return this.event().participantsNumber;
+	get participantsCount(): number {
+		return this.event().participantsNumber ?? 0;
 	}
 
 	/** Seeding éditable tant que le bracket n'a pas démarré (inscriptions + préparation). */

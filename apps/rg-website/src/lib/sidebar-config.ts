@@ -6,8 +6,6 @@
 
 import {
 	BarChart3,
-	Building,
-	Handshake,
 	Heart,
 	Mail,
 	MapPin,
@@ -119,30 +117,10 @@ export const assoMenu: MenuSection = {
 	items: [
 		{
 			title: "Notre équipe",
-			collapsible: true,
+			url: "/notre-equipe",
 			icon: Users,
 			description: "Découvrez qui nous sommes",
-			ariaLabel: "Menu de l'équipe Rose Griffon",
-			items: [
-				{
-					title: "L'association",
-					url: "/notre-equipe/association",
-					icon: Building,
-					description: "Présentation officielle",
-				},
-				{
-					title: "Le Staff RG",
-					url: "/notre-equipe/staff",
-					icon: Users,
-					description: "Rencontrez notre équipe",
-				},
-				{
-					title: "Les partenaires",
-					url: "/notre-equipe/partenaires",
-					icon: Handshake,
-					description: "Nos précieux partenaires",
-				},
-			],
+			ariaLabel: "Découvrir l'équipe Rose Griffon",
 		},
 		{
 			title: "Projets",

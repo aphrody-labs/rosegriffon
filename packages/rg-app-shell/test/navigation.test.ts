@@ -10,12 +10,7 @@ import {
 	parcourirNav,
 	type NavItem,
 } from "../src/config/navigation";
-import {
-	AZALEE_BASES,
-	basesDepuisChemin,
-	joindreWiki,
-	WEBSITE_BASES,
-} from "../src/config/routes";
+import { AZALEE_BASES, basesDepuisChemin, joindreWiki, WEBSITE_BASES } from "../src/config/routes";
 import { DICTIONNAIRE_NAV_FR } from "../src/lib/translations";
 import { DEFAULT_THEMES } from "../src/components/ThemeToggle";
 import { THEMES } from "@rosegriffon/ui";
@@ -87,9 +82,15 @@ describe("estItemActif", () => {
 describe("parité azalee / website", () => {
 	const aplatir = (items: NavItem[]) => parcourirNav(items).map((i) => i.label);
 
-	test("les deux apps exposent exactement le même menu (mêmes libellés, même ordre)", () => {
-		expect(aplatir(website.navigationItems)).toEqual(aplatir(azalee.navigationItems));
-		expect(aplatir(website.mobileNavItems)).toEqual(aplatir(azalee.mobileNavItems));
+	test("website conserve les surfaces niers sans les réexposer sur azalee", () => {
+		const labelsAzalee = aplatir(azalee.navigationItems);
+		const labelsWebsite = aplatir(website.navigationItems);
+		for (const label of ["nav.section.media", "nav.tools", "nav.wiki.models"]) {
+			expect(labelsAzalee).not.toContain(label);
+			expect(labelsWebsite).toContain(label);
+		}
+		expect(aplatir(azalee.mobileNavItems)).not.toContain("nav.tools");
+		expect(aplatir(website.mobileNavItems)).toContain("nav.tools");
 		expect(aplatir(website.dashboardItems)).toEqual(aplatir(azalee.dashboardItems));
 	});
 
@@ -115,8 +116,12 @@ describe("parité azalee / website", () => {
 	});
 
 	test("l'administration est enracinée différemment mais structurée pareil", () => {
-		expect(cheminsCliquables(azalee.dashboardItems).every((c) => c.startsWith("/dashboard"))).toBe(true);
-		expect(cheminsCliquables(website.dashboardItems).every((c) => c.startsWith("/admin"))).toBe(true);
+		expect(cheminsCliquables(azalee.dashboardItems).every((c) => c.startsWith("/dashboard"))).toBe(
+			true
+		);
+		expect(cheminsCliquables(website.dashboardItems).every((c) => c.startsWith("/admin"))).toBe(
+			true
+		);
 	});
 });
 
@@ -170,7 +175,14 @@ describe("dictionnaire de navigation", () => {
  */
 describe("basesDepuisChemin", () => {
 	test("les routes de website rendent les bases de website", () => {
-		for (const chemin of ["/wiki", "/wiki/chara", "/admin", "/admin/users", "/achillea", "/achillea/clans"]) {
+		for (const chemin of [
+			"/wiki",
+			"/wiki/chara",
+			"/admin",
+			"/admin/users",
+			"/achillea",
+			"/achillea/clans",
+		]) {
 			expect(basesDepuisChemin(chemin)).toBe(WEBSITE_BASES);
 		}
 	});
@@ -228,4 +240,3 @@ describe("construireMobileNavUnifiee", () => {
 		}
 	});
 });
-

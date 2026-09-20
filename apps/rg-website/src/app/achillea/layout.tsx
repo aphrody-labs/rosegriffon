@@ -10,9 +10,15 @@ export const metadata: Metadata = {
 	},
 	description:
 		"La scène compétitive officielle Inazuma Eleven: Victory Road. Clans, classements classés ELO (1v1, 2v2), Astral League, tournois communautaires et bot Discord officiel.",
-	alternates: {
-		canonical: "https://rosegriffon.fr/achillea",
-	},
+	/*
+	 * PAS de `alternates.canonical` ici.
+	 *
+	 * `alternates` est hérité par tous les segments enfants : le canonical
+	 * `/achillea` qui vivait dans ce layout déclarait les 40 pages du domaine
+	 * comme de simples variantes de l'accueil, et demandait donc leur
+	 * désindexation. Chaque page porte désormais le sien via
+	 * `metadonneesAchillea()` (`./metadonnees.ts`).
+	 */
 	icons: {
 		icon: "/achillea/achillea_ico.png",
 		shortcut: "/achillea/achillea_ico.png",

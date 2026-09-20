@@ -1,7 +1,12 @@
 import { GoogleTagManager } from "@next/third-parties/google";
+import { ThemeToggle } from "@rosegriffon/app-shell";
+import { resolveLocale } from "@rosegriffon/i18n";
+import { isLocaleId } from "@rosegriffon/preferences";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies, headers } from "next/headers";
 
 import { LanguageProvider } from "@/components/providers/language-provider";
+import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AdSenseGate } from "@/components/AdSenseGate";
@@ -93,18 +98,24 @@ export const viewport: Viewport = {
 	width: "device-width",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const [cookieStore, headerStore] = await Promise.all([cookies(), headers()]);
+	const locale = resolveLocale({
+		acceptLanguage: headerStore.get("accept-language"),
+		cookieLocale: cookieStore.get("rg-locale")?.value,
+	});
+	const initialLanguage = isLocaleId(locale.locale) ? locale.locale : "fr";
 	const defaultOpen = true;
 	const user = null;
 	const profile = null;
 	const supabaseToken: string | null = null;
 
 	return (
-		<html lang="fr" className="dark" suppressHydrationWarning>
+		<html lang={initialLanguage} dir={locale.direction} className="dark" suppressHydrationWarning>
 			<head>
 				{/* Pré-application du thème avant hydratation (évite le FOUC).
 				    Le <html> est rendu en `dark` côté serveur (thème par défaut) ; sans
@@ -144,8 +155,7 @@ export default function RootLayout({
 									alternateName: "Association Rose Griffon",
 									url: "https://rosegriffon.fr",
 									logo: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
-									description:
-										"Association rassemblant la communauté Inazuma Eleven en France.",
+									description: "Association rassemblant la communauté Inazuma Eleven en France.",
 									founder: { "@id": "https://rosegriffon.fr/#yoyo" },
 									// Réseau Rose Griffon : 3 domaines siblings + tous les réseaux sociaux.
 									// sameAs identique sur website / azalee / achillea (entité cohérente).
@@ -164,9 +174,7 @@ export default function RootLayout({
 										"https://disboard.org/server/1072991720268111892",
 										"https://discord.do/fr/inazuma-eleven-fr-%E2%9A%BD-rose-griffon/",
 									],
-									subOrganization: [
-										{ "@id": "https://achillea.rosegriffon.fr/#website" },
-									],
+									subOrganization: [{ "@id": "https://achillea.rosegriffon.fr/#website" }],
 								},
 								{
 									"@type": "WebSite",
@@ -183,11 +191,13 @@ export default function RootLayout({
 					}}
 				/>
 			</head>
-			<body className={`
+			<body
+				className={`
      ${geistSans.variable}
      ${geistMono.variable}
      antialiased
-   `}>
+   `}
+			>
 				{/* Google Tag Manager — composant officiel de `@next/third-parties`.
 				    Il remplace un `<Script>` écrit à la main qui codait en dur le
 				    conteneur `GTM-WLLFJZF8` : l'identifiant vient désormais de
@@ -204,7 +214,7 @@ export default function RootLayout({
 				{/* Pas sur les pages plein écran : la bannière d'ancrage y recouvrait l'écran de jeu.
 				    Cf. `components/AdSenseGate.tsx`. */}
 				<AdSenseGate />
-				<LanguageProvider>
+				<LanguageProvider initialLanguage={initialLanguage}>
 					<ThemeProvider
 						attribute="class"
 						defaultTheme="dark"
@@ -214,7 +224,17 @@ export default function RootLayout({
 						disableTransitionOnChange
 					>
 						<SupabaseProvider initialToken={supabaseToken}>
-							<Shell user={user} profile={profile} defaultOpen={defaultOpen}>
+							<Shell
+								user={user}
+								profile={profile}
+								defaultOpen={defaultOpen}
+								themeToggleSlot={
+									<div className="flex items-center gap-1">
+										<LanguageSwitcher />
+										<ThemeToggle />
+									</div>
+								}
+							>
 								{children}
 							</Shell>
 						</SupabaseProvider>

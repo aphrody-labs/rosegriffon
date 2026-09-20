@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { Button } from "@rosegriffon/ui";
 import { FileQuestion, ArrowLeft } from "lucide-react";
+import { metadonneesAchillea } from "@/app/achillea/metadonnees";
 
-export const metadata = {
-	title: "Page Introuvable — Achilléa",
+export const metadata = metadonneesAchillea({
+	titre: "Page introuvable",
 	description: "La ressource Achilléa demandée n'existe pas ou a été déplacée.",
-};
+	chemin: null,
+	indexable: false,
+});
 
 export default function AchilleaNotFound() {
 	return (

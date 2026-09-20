@@ -1519,7 +1519,11 @@
 					"type": "number"
 				},
 				"founders": {
-					"type": "string"
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"description": "Identifiants Discord des fondateurs.\n\nL'API en renvoie un TABLEAU. Le contrat disait `string`, donc la\nvalidation rejetait chaque clan : les 42 clans existaient, l'API les\nservait, et la page affichait « 0 clan trouvé »."
 				},
 				"name": {
 					"type": "string"
@@ -1537,7 +1541,8 @@
 					"type": "string"
 				},
 				"fame": {
-					"type": "number"
+					"type": "number",
+					"description": "Absent de la charge utile de `GET /clans` : optionnel."
 				},
 				"xUrl": {
 					"anyOf": [
@@ -1630,7 +1635,6 @@
 				"normalizedShortName",
 				"clanAvatarUrl",
 				"clanBiography",
-				"fame",
 				"isRecruiting",
 				"isInactive",
 				"isHidden",
@@ -2226,27 +2230,7 @@
 					}
 				},
 				"meta": {
-					"type": "object",
-					"properties": {
-						"page": {
-							"type": "number"
-						},
-						"limit": {
-							"type": "number"
-						},
-						"total": {
-							"type": "number"
-						},
-						"pageCount": {
-							"type": "number"
-						}
-					},
-					"required": [
-						"page",
-						"limit",
-						"total",
-						"pageCount"
-					]
+					"$ref": "#/$defs/PageMeta"
 				}
 			},
 			"required": [
@@ -2661,8 +2645,19 @@
 		"LeaguePointsConfig": {
 			"type": "object",
 			"properties": {
-				"winRegulation": {
+				"win": {
+					"type": "number",
+					"description": "Graphie servie par l'API."
+				},
+				"draw": {
 					"type": "number"
+				},
+				"loss": {
+					"type": "number"
+				},
+				"winRegulation": {
+					"type": "number",
+					"description": "Graphie historique du contrat, conservée pour les appelants existants."
 				},
 				"lossRegulation": {
 					"type": "number"
@@ -2673,13 +2668,7 @@
 				"lossOvertime": {
 					"type": "number"
 				}
-			},
-			"required": [
-				"winRegulation",
-				"lossRegulation",
-				"winOvertime",
-				"lossOvertime"
-			]
+			}
 		},
 		"LeagueSeasonPayload": {
 			"type": "object",
@@ -3015,7 +3004,14 @@
 					]
 				},
 				"matchFormat": {
-					"$ref": "#/$defs/MatchFormat"
+					"anyOf": [
+						{
+							"$ref": "#/$defs/MatchFormat"
+						},
+						{
+							"type": "null"
+						}
+					]
 				}
 			},
 			"required": [
@@ -3024,8 +3020,7 @@
 				"state",
 				"lobbyUsers",
 				"lobbyMatches",
-				"hostUser",
-				"matchFormat"
+				"hostUser"
 			]
 		},
 		"LobbyMatchDTO": {
@@ -3316,13 +3311,34 @@
 					"$ref": "#/$defs/StageType"
 				},
 				"participantsNumber": {
-					"type": "number"
+					"anyOf": [
+						{
+							"type": "number"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"seedOrdering": {
-					"$ref": "#/$defs/SeedOrdering"
+					"anyOf": [
+						{
+							"$ref": "#/$defs/SeedOrdering"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"matchFormat": {
-					"$ref": "#/$defs/MatchFormat"
+					"anyOf": [
+						{
+							"$ref": "#/$defs/MatchFormat"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"customFormatChildCount": {
 					"anyOf": [
@@ -3348,7 +3364,14 @@
 					]
 				},
 				"affiche": {
-					"type": "string"
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"logo": {
 					"type": "string"
@@ -3408,15 +3431,10 @@
 				"name",
 				"description",
 				"organization",
-				"managers",
 				"startsAt",
 				"grandFinalAt",
 				"tournamentType",
-				"participantsNumber",
-				"seedOrdering",
-				"matchFormat",
 				"groupStageEnabled",
-				"affiche",
 				"logo",
 				"ruleset",
 				"planning"
@@ -3518,7 +3536,14 @@
 			"type": "object",
 			"properties": {
 				"id": {
-					"type": "string"
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "number"
+						}
+					]
 				},
 				"state": {
 					"$ref": "#/$defs/OrganizationState"
@@ -3536,7 +3561,14 @@
 					"type": "string"
 				},
 				"owner": {
-					"$ref": "#/$defs/UserDTO"
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"$ref": "#/$defs/UserDTO"
+						}
+					]
 				},
 				"orgManagers": {
 					"type": "array",
@@ -3566,7 +3598,14 @@
 					}
 				},
 				"origin": {
-					"$ref": "#/$defs/Country"
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"$ref": "#/$defs/Country"
+						}
+					]
 				},
 				"createdAt": {
 					"type": "string",
@@ -3581,12 +3620,7 @@
 				"name",
 				"normalizedName",
 				"logo",
-				"description",
-				"owner",
-				"orgManagers",
-				"socialMedias",
-				"broadcastMedias",
-				"origin"
+				"description"
 			]
 		},
 		"OrganizationState": {
@@ -3608,7 +3642,14 @@
 			"type": "object",
 			"properties": {
 				"id": {
-					"type": "string"
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "number"
+						}
+					]
 				},
 				"reviewer": {
 					"$ref": "#/$defs/UserDTO"
@@ -3760,7 +3801,8 @@
 			"type": "object",
 			"properties": {
 				"page": {
-					"type": "number"
+					"type": "number",
+					"description": "Seul `total` est garanti.\n\nMesuré sur `GET /clans` : l'API renvoie `{ total, pageCount: null }`. Une\nenveloppe de pagination ne doit jamais pouvoir invalider sa charge utile —\nexiger ces champs effaçait les 42 clans pour une histoire de compteur."
 				},
 				"limit": {
 					"type": "number"
@@ -3769,14 +3811,18 @@
 					"type": "number"
 				},
 				"pageCount": {
-					"type": "number"
+					"anyOf": [
+						{
+							"type": "number"
+						},
+						{
+							"type": "null"
+						}
+					]
 				}
 			},
 			"required": [
-				"page",
-				"limit",
-				"total",
-				"pageCount"
+				"total"
 			]
 		},
 		"PageQuery": {
@@ -6498,13 +6544,34 @@
 					"$ref": "#/$defs/StageType"
 				},
 				"participantsNumber": {
-					"type": "number"
+					"anyOf": [
+						{
+							"type": "number"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"seedOrdering": {
-					"$ref": "#/$defs/SeedOrdering"
+					"anyOf": [
+						{
+							"$ref": "#/$defs/SeedOrdering"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"matchFormat": {
-					"$ref": "#/$defs/MatchFormat"
+					"anyOf": [
+						{
+							"$ref": "#/$defs/MatchFormat"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"customFormatChildCount": {
 					"anyOf": [
@@ -6533,7 +6600,14 @@
 					"type": "string"
 				},
 				"affiche": {
-					"type": "string"
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"planning": {
 					"type": "string"
@@ -6631,15 +6705,9 @@
 				"startsAt",
 				"grandFinalAt",
 				"organization",
-				"managers",
-				"participants",
 				"tournamentType",
-				"participantsNumber",
-				"seedOrdering",
-				"matchFormat",
 				"groupStageEnabled",
 				"logo",
-				"affiche",
 				"planning",
 				"ruleset"
 			]
@@ -7205,7 +7273,8 @@
 					"type": "string"
 				},
 				"sim": {
-					"type": "number"
+					"type": "number",
+					"description": "Champs présents uniquement sur la session de l'utilisateur courant.\n\n`GET /clans` imbrique un président réduit (identité et profil public) qui\nne les porte pas. Les exiger faisait échouer la validation de la réponse\nENTIÈRE, donc de tous les clans."
 				},
 				"avatar": {
 					"type": "string"
@@ -7244,10 +7313,7 @@
 			},
 			"required": [
 				"id",
-				"username",
-				"sim",
-				"soloRank",
-				"duoRank"
+				"username"
 			]
 		},
 		"UserRef": {
@@ -7536,13 +7602,34 @@
 					"$ref": "#/$defs/StageType"
 				},
 				"participantsNumber": {
-					"type": "number"
+					"anyOf": [
+						{
+							"type": "number"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"seedOrdering": {
-					"$ref": "#/$defs/SeedOrdering"
+					"anyOf": [
+						{
+							"$ref": "#/$defs/SeedOrdering"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"matchFormat": {
-					"$ref": "#/$defs/MatchFormat"
+					"anyOf": [
+						{
+							"$ref": "#/$defs/MatchFormat"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"customFormatChildCount": {
 					"anyOf": [
@@ -7571,7 +7658,14 @@
 					"type": "string"
 				},
 				"affiche": {
-					"type": "string"
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					]
 				},
 				"planning": {
 					"type": "string"
@@ -7674,7 +7768,8 @@
 					"type": "array",
 					"items": {
 						"$ref": "#/$defs/EntityRef"
-					}
+					},
+					"description": "Relations OPTIONNELLES sur la liste.\n\n`GET /tournaments` ne les peuple pas — seul `GET /tournaments/:id` le\nfait. Les exiger faisait rejeter les 9 tournois de la liste et affichait\n« Aucun tournoi trouvé » sur une API qui en servait neuf."
 				},
 				"participants": {
 					"type": "array",
@@ -7694,17 +7789,11 @@
 				"startsAt",
 				"grandFinalAt",
 				"tournamentType",
-				"participantsNumber",
-				"seedOrdering",
-				"matchFormat",
 				"groupStageEnabled",
 				"logo",
-				"affiche",
 				"planning",
 				"ruleset",
-				"organization",
-				"managers",
-				"participants"
+				"organization"
 			]
 		},
 		"WireTournamentSeries": {

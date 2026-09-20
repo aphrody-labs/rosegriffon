@@ -443,13 +443,19 @@ data class ClanApplicationResult(
 @Serializable
 data class ClanDTO(
 	val id: Double,
-	val founders: String,
+	/// Identifiants Discord des fondateurs.
+	///
+	/// L'API en renvoie un TABLEAU. Le contrat disait `string`, donc la
+	/// validation rejetait chaque clan : les 42 clans existaient, l'API les
+	/// servait, et la page affichait « 0 clan trouvé ».
+	val founders: List<String>,
 	val name: String,
 	val shortenedName: String,
 	val normalizedShortName: String,
 	val clanAvatarUrl: String,
 	val clanBiography: String,
-	val fame: Double,
+	/// Absent de la charge utile de `GET /clans` : optionnel.
+	val fame: Double? = null,
 	val xUrl: String? = null,
 	val instagramUrl: String? = null,
 	val tiktokUrl: String? = null,
@@ -666,7 +672,7 @@ data class DbQueryResult(
 data class DbRowsPage(
 	val data: List<Map<String, JsonElement>>,
 	val columns: List<DbColumn>,
-	val meta: JsonElement,
+	val meta: PageMeta,
 )
 
 @Serializable
@@ -691,11 +697,16 @@ data class EnrichedUserDTO(
 	/// session : optionnel pour que `SessionUserDTO` reste assignable.
 	val type: String? = null,
 	val username: String,
-	val sim: Double,
+	/// Champs présents uniquement sur la session de l'utilisateur courant.
+	///
+	/// `GET /clans` imbrique un président réduit (identité et profil public) qui
+	/// ne les porte pas. Les exiger faisait échouer la validation de la réponse
+	/// ENTIÈRE, donc de tous les clans.
+	val sim: Double? = null,
 	val avatar: String? = null,
 	val clanId: Double? = null,
-	val soloRank: RankDTO,
-	val duoRank: RankDTO,
+	val soloRank: RankDTO? = null,
+	val duoRank: RankDTO? = null,
 	val lastInteract: String? = null,
 	val role: UserRole? = null,
 	val currentLevel: Double? = null,
@@ -839,10 +850,15 @@ data class LeagueMatchRow(
 
 @Serializable
 data class LeaguePointsConfig(
-	val winRegulation: Double,
-	val lossRegulation: Double,
-	val winOvertime: Double,
-	val lossOvertime: Double,
+	/// Graphie servie par l'API.
+	val win: Double? = null,
+	val draw: Double? = null,
+	val loss: Double? = null,
+	/// Graphie historique du contrat, conservée pour les appelants existants.
+	val winRegulation: Double? = null,
+	val lossRegulation: Double? = null,
+	val winOvertime: Double? = null,
+	val lossOvertime: Double? = null,
 )
 
 @Serializable
@@ -953,7 +969,7 @@ data class LobbyDTO(
 	val lobbyUsers: List<LobbyUserDTO>,
 	val lobbyMatches: List<LobbyMatchDTO>,
 	val hostUser: LobbyUserDTO?,
-	val matchFormat: MatchFormat,
+	val matchFormat: MatchFormat? = null,
 )
 
 @Serializable
@@ -1079,17 +1095,17 @@ data class NewTournamentDTO(
 	val description: String,
 	val series: TournamentSeries? = null,
 	val organization: JsonElement,
-	val managers: List<UserDTO>,
+	val managers: List<UserDTO>? = null,
 	val startsAt: String,
 	val grandFinalAt: String,
 	val tournamentType: StageType,
-	val participantsNumber: Double,
-	val seedOrdering: SeedOrdering,
-	val matchFormat: MatchFormat,
+	val participantsNumber: Double? = null,
+	val seedOrdering: SeedOrdering? = null,
+	val matchFormat: MatchFormat? = null,
 	val customFormatChildCount: Double? = null,
 	val groupStageEnabled: Boolean,
 	val groupStageType: StageType? = null,
-	val affiche: String,
+	val affiche: String? = null,
 	val logo: String,
 	val ruleset: String,
 	val planning: String,
@@ -1152,19 +1168,19 @@ data class OpenRegistrationsResult(
 
 @Serializable
 data class OrganizationDTO(
-	val id: String? = null,
+	val id: JsonElement? = null,
 	val state: OrganizationState? = null,
 	val name: String,
 	val normalizedName: String,
 	val logo: String,
 	val description: String,
-	val owner: UserDTO,
-	val orgManagers: List<UserDTO>,
+	val owner: JsonElement? = null,
+	val orgManagers: List<UserDTO>? = null,
 	val managers: List<OrgManagerDTO>? = null,
 	val preapproved: Boolean? = null,
-	val socialMedias: List<SocialMediaDTO>,
-	val broadcastMedias: List<SocialMediaDTO>,
-	val origin: Country,
+	val socialMedias: List<SocialMediaDTO>? = null,
+	val broadcastMedias: List<SocialMediaDTO>? = null,
+	val origin: JsonElement? = null,
 	val createdAt: String? = null,
 	val updatedAt: String? = null,
 )
@@ -1183,7 +1199,7 @@ enum class OrganizationState {
 /// Revue d'une demande de création / édition d'organisation.
 @Serializable
 data class OrganizationValidationDTO(
-	val id: String? = null,
+	val id: JsonElement? = null,
 	val reviewer: UserDTO,
 	val name: String?,
 	val logo: String?,
@@ -1213,10 +1229,15 @@ data class PagedList<T>(
 /// Métadonnées de page renvoyées par l'API (style `Paginated<T>` historique).
 @Serializable
 data class PageMeta(
-	val page: Double,
-	val limit: Double,
+	/// Seul `total` est garanti.
+	///
+	/// Mesuré sur `GET /clans` : l'API renvoie `{ total, pageCount: null }`. Une
+	/// enveloppe de pagination ne doit jamais pouvoir invalider sa charge utile —
+	/// exiger ces champs effaçait les 42 clans pour une histoire de compteur.
+	val page: Double? = null,
+	val limit: Double? = null,
 	val total: Double,
-	val pageCount: Double,
+	val pageCount: Double? = null,
 )
 
 /// Requête de pagination commune à toutes les listes.
@@ -2074,17 +2095,17 @@ data class Tournament(
 	val grandFinalAt: String,
 	val series: TournamentSeries? = null,
 	val organization: OrganizationDTO,
-	val managers: List<UserDTO>,
-	val participants: List<ParticipantDTO>,
+	val managers: List<UserDTO>? = null,
+	val participants: List<ParticipantDTO>? = null,
 	val tournamentType: StageType,
-	val participantsNumber: Double,
-	val seedOrdering: SeedOrdering,
-	val matchFormat: MatchFormat,
+	val participantsNumber: Double? = null,
+	val seedOrdering: SeedOrdering? = null,
+	val matchFormat: MatchFormat? = null,
 	val customFormatChildCount: Double? = null,
 	val groupStageEnabled: Boolean,
 	val groupStageType: StageType? = null,
 	val logo: String,
-	val affiche: String,
+	val affiche: String? = null,
 	val planning: String,
 	val ruleset: String,
 	/// True une fois le bonus AP podium (top 4) versé.
@@ -2315,11 +2336,16 @@ data class UserDTO(
 	/// session : optionnel pour que `SessionUserDTO` reste assignable.
 	val type: String? = null,
 	val username: String,
-	val sim: Double,
+	/// Champs présents uniquement sur la session de l'utilisateur courant.
+	///
+	/// `GET /clans` imbrique un président réduit (identité et profil public) qui
+	/// ne les porte pas. Les exiger faisait échouer la validation de la réponse
+	/// ENTIÈRE, donc de tous les clans.
+	val sim: Double? = null,
 	val avatar: String? = null,
 	val clanId: Double? = null,
-	val soloRank: RankDTO,
-	val duoRank: RankDTO,
+	val soloRank: RankDTO? = null,
+	val duoRank: RankDTO? = null,
 	val lastInteract: String? = null,
 	val role: UserRole? = null,
 	val currentLevel: Double? = null,
@@ -2437,14 +2463,14 @@ data class WireTournament(
 	val startsAt: String,
 	val grandFinalAt: String,
 	val tournamentType: StageType,
-	val participantsNumber: Double,
-	val seedOrdering: SeedOrdering,
-	val matchFormat: MatchFormat,
+	val participantsNumber: Double? = null,
+	val seedOrdering: SeedOrdering? = null,
+	val matchFormat: MatchFormat? = null,
 	val customFormatChildCount: Double? = null,
 	val groupStageEnabled: Boolean,
 	val groupStageType: StageType? = null,
 	val logo: String,
-	val affiche: String,
+	val affiche: String? = null,
 	val planning: String,
 	val ruleset: String,
 	/// True une fois le bonus AP podium (top 4) versé.
@@ -2466,8 +2492,13 @@ data class WireTournament(
 	val closedAt: String? = null,
 	val series: EntityRef<WireTournamentSeries>? = null,
 	val organization: EntityRef<OrganizationDTO>,
-	val managers: List<EntityRef<UserDTO>>,
-	val participants: List<EntityRef<WireParticipant>>,
+	/// Relations OPTIONNELLES sur la liste.
+	///
+	/// `GET /tournaments` ne les peuple pas — seul `GET /tournaments/:id` le
+	/// fait. Les exiger faisait rejeter les 9 tournois de la liste et affichait
+	/// « Aucun tournoi trouvé » sur une API qui en servait neuf.
+	val managers: List<EntityRef<UserDTO>>? = null,
+	val participants: List<EntityRef<WireParticipant>>? = null,
 )
 
 /// `TournamentSeries` sans sa récursion de tournois peuplés.

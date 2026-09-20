@@ -11,7 +11,7 @@
 		"moduleResolution": "bundler",
 		"jsx": "react-jsx",
 		"allowImportingTsExtensions": true,
-		"types": ["node", "react", "react-dom", "@webgpu/types"],
+		"types": ["node", "react", "react-dom"],
 		"paths": {
 			"@/*": ["./src/*", "./*"],
 			"@rosegriffon/db": ["../../packages/db/src/index.ts"],
@@ -38,7 +38,5 @@
 		".next/dev/types/**/*.ts",
 		"**/*.mts"
 	],
-	"exclude": [
-		"tests-e2e",
-		"tests","node_modules", ".next", "dist", ".turbo", "scripts"]
+	"exclude": ["tests-e2e", "tests", "node_modules", ".next", "dist", ".turbo", "scripts"]
 }

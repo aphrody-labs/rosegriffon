@@ -188,7 +188,7 @@ export class OrganizerForm implements OnInit {
 			description: data.description,
 			logo: data.logo,
 			origin: this.lg.getLanguageFromCode(data.origin as unknown as string),
-			owner: data.owner,
+			owner: typeof data.owner === "object" ? data.owner : undefined,
 		});
 
 		const getUrl = (list: SocialMediaDTO[], platform: SocialMedia): string => {
@@ -198,14 +198,14 @@ export class OrganizerForm implements OnInit {
 
 		// 3. Mapping des "Réseaux sociaux" (SocialMedias)
 		// On utilise setValue directement sur les contrôles individuels
-		this.twitterControl.setValue(getUrl(data.socialMedias, SocialMedia.X));
-		this.instagramControl.setValue(getUrl(data.socialMedias, SocialMedia.Instagram));
-		this.tiktokControl.setValue(getUrl(data.socialMedias, SocialMedia.TikTok));
+		this.twitterControl.setValue(getUrl(data.socialMedias ?? [], SocialMedia.X));
+		this.instagramControl.setValue(getUrl(data.socialMedias ?? [], SocialMedia.Instagram));
+		this.tiktokControl.setValue(getUrl(data.socialMedias ?? [], SocialMedia.TikTok));
 
 		// 4. Mapping des "Réseaux de diffusion" (BroadcastMedias)
 		// Attention à la typo 'broadcastMedials' présente dans ton DTO
-		this.twitchControl.setValue(getUrl(data.broadcastMedias, SocialMedia.Twitch));
-		this.youtubeControl.setValue(getUrl(data.broadcastMedias, SocialMedia.Youtube));
+		this.twitchControl.setValue(getUrl(data.broadcastMedias ?? [], SocialMedia.Twitch));
+		this.youtubeControl.setValue(getUrl(data.broadcastMedias ?? [], SocialMedia.Youtube));
 
 		// 5. Forcer la mise à jour des validateurs de groupe (optionnel mais recommandé)
 		this.updateSocialMedias();

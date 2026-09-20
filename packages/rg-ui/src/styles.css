@@ -734,6 +734,57 @@
 		--sidebar-ring: var(--md-sys-color-primary);
 	}
 
+	/* ─────────────────────────────────────────────────────────────────────────
+	 * Un thème posé AILLEURS que sur <html> doit peindre son propre fond.
+	 *
+	 * LE DÉFAUT QUE CES CINQ RÈGLES CORRIGENT
+	 * `apps/website/src/app/client-layout.tsx` pose la classe du domaine sur la
+	 * zone de contenu — `.theme-azalee-dark` sous `/wiki`, `.theme-achillea`
+	 * sous `/achillea` — pour que la section prenne son identité sans écraser la
+	 * préférence de thème de l'utilisateur. Mais ces classes ne redéclaraient
+	 * que des VARIABLES. Or une seule règle peint réellement la page :
+	 * `body { @apply bg-background text-foreground; }` dans les `globals.css`
+	 * des apps. Le conteneur restait donc transparent, le texte prenait le
+	 * `--foreground` du thème de section et le fond restait celui du thème de
+	 * `<html>` — deux thèmes différents pour le même bloc de texte.
+	 *
+	 * Mesuré en production sur `/wiki/tools` : titre `#ede0db` (`on-surface`
+	 * d'Azalée sombre) sur fond `#f9f4ee` (`surface` de Roy) = 1,19:1, et
+	 * 21 éléments sous 4,5:1 sur `/wiki`. Faire peindre le conteneur garantit
+	 * que le fond et le texte viennent TOUJOURS du même jeu de jetons, quelle
+	 * que soit la préférence posée sur `<html>`.
+	 *
+	 * POURQUOI `:where(… :not(:root))`
+	 *   - `:where()` met la spécificité à zéro : n'importe quelle utilitaire
+	 *     `bg-*` / `text-*` (et toute la couche `utilities`) continue de
+	 *     l'emporter, donc aucune page existante n'est repeinte contre son gré ;
+	 *   - `:not(:root)` exclut `<html>`, où le thème sert de source de variables
+	 *     et où `body` reste seul maître du fond de page ;
+	 *   - une règle par thème, sans virgule : le prélude d'un sélecteur groupé
+	 *     serait découpé par `analyserBlocs` (`scripts/generer-tokens.ts`) et
+	 *     produirait de faux blocs de thème.
+	 * ───────────────────────────────────────────────────────────────────────── */
+	:where(.theme-roy:not(:root)) {
+		background-color: var(--background);
+		color: var(--foreground);
+	}
+	:where(.theme-gaelle:not(:root)) {
+		background-color: var(--background);
+		color: var(--foreground);
+	}
+	:where(.theme-azalee-light:not(:root)) {
+		background-color: var(--background);
+		color: var(--foreground);
+	}
+	:where(.theme-azalee-dark:not(:root)) {
+		background-color: var(--background);
+		color: var(--foreground);
+	}
+	:where(.theme-achillea:not(:root)) {
+		background-color: var(--background);
+		color: var(--foreground);
+	}
+
 	html {
 		scroll-behavior: smooth;
 		text-rendering: optimizeLegibility;
