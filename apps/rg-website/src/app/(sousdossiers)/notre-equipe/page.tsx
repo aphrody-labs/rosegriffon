@@ -6,7 +6,7 @@ import { Skeleton } from "@rosegriffon/ui";
 import AssoMembersSection from "./_components/asso";
 import BoardMembersSection from "./_components/board";
 import TeamsSection from "./_components/teams";
-import PartenairesSection from "./partenaires/PartenairesSection";
+import PartenairesSection from "./_components/PartenairesSection";
 
 /**
  * Qui fait Rose Griffon — page UNIQUE.
