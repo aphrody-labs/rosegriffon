@@ -9,9 +9,13 @@ import { Suspense } from "react";
 export const revalidate = 60;
 
 import { AchilleaBanner } from "@/components/home/AchilleaBanner";
+import { AnimatedSection } from "@/components/home/AnimatedSection";
 import { AzaleeBanner } from "@/components/home/AzaleeBanner";
+import { LatestNewsSection } from "@/components/home/LatestNewsSection";
 import { NextEventBanner } from "@/components/home/NextEventBanner";
 import { RgtvBanner } from "@/components/home/RgtvBanner";
+import { WikiCarousel } from "@/components/home/WikiCarousel";
+import type { WikiSectionStats } from "@/components/home/WikiCarousel";
 import { FeaturedTweets } from "@/components/shared/FeaturedTweets";
 import { LatestChroniqueSection } from "@/components/shared/LatestChroniqueSection";
 import { MotionSection } from "@/components/shared/MotionSection";
@@ -21,6 +25,8 @@ import { OrganizationSchema, WebsiteSchema } from "@/components/shared/Structure
 import FusionBlock from "@/components/shared/FusionBlock";
 import { getCalendarEvents } from "@/lib/api/events";
 import { getPublicSetting } from "@/lib/api/settings";
+import { getPgPool } from "@/lib/db/pg";
+import { createClient } from "@/lib/supabase/server";
 
 // Lazy loading pour composants lourds (below-the-fold).
 // Les squelettes utilisent `bg-muted` : un dégradé `gray-*` resterait clair sur
@@ -90,6 +96,76 @@ export const metadata: Metadata = {
 	},
 };
 
+/**
+ * Vitrine du wiki Azalée sur la home unifiée.
+ *
+ * La landing `/wiki` a été supprimée (elle redirige vers `/`) : ses deux blocs
+ * utiles — compteurs + carousel de sections, et les dernières actualités
+ * Azalée — vivent désormais ici. Les lectures suivent la même répartition que
+ * l'ancienne landing : `articles`/`tweets` en Postgres direct, `inagle_*` via
+ * le client Supabase (proxy SQLite).
+ */
+async function chargerVitrineWiki() {
+	const supabase = await createClient();
+	const pool = getPgPool();
+
+	const [
+		{ rows: articlesEpingles },
+		{ rows: articlesRecents },
+		{ rows: tweetsRecents },
+		{ count: nbPersonnages },
+		{ count: nbTechniques },
+		{ count: nbObjets },
+		{ count: nbKeshins },
+		{ count: nbAmes },
+		{ count: nbPassifs },
+	] = await Promise.all([
+		pool.query(
+			`SELECT * FROM articles
+			 WHERE status = $1 AND app = $2
+			 ORDER BY published_at DESC
+			 LIMIT 1`,
+			["published", "azalee"]
+		),
+		pool.query(
+			`SELECT * FROM articles
+			 WHERE status = $1 AND app = $2
+			 ORDER BY published_at DESC
+			 LIMIT 3 OFFSET 1`,
+			["published", "azalee"]
+		),
+		pool.query(
+			`SELECT id, text, translation, created_at, author_username, author_name, media
+			 FROM tweets
+			 WHERE author_username = $1
+			 ORDER BY created_at DESC
+			 LIMIT 6`,
+			["Azalee_IE"]
+		),
+		supabase.from("inagle_characters").select("id", { count: "exact", head: true }),
+		supabase.from("inagle_skills").select("id", { count: "exact", head: true }),
+		supabase.from("inagle_items").select("id", { count: "exact", head: true }),
+		supabase.from("inagle_keshins_clean").select("id", { count: "exact", head: true }),
+		supabase.from("inagle_souls_clean").select("id", { count: "exact", head: true }),
+		supabase.from("inagle_passives").select("id", { count: "exact", head: true }),
+	]);
+
+	const stats: WikiSectionStats = {
+		characters: nbPersonnages ?? 0,
+		items: nbObjets ?? 0,
+		keshins: nbKeshins ?? 0,
+		passives: nbPassifs ?? 0,
+		skills: nbTechniques ?? 0,
+		souls: nbAmes ?? 0,
+	};
+
+	return {
+		articles: [...(articlesEpingles ?? []), ...(articlesRecents ?? [])].slice(0, 3),
+		stats,
+		tweets: tweetsRecents ?? [],
+	};
+}
+
 export default async function Home() {
 	// Fetch Settings
 	const [
@@ -123,6 +199,8 @@ export default async function Home() {
 		communityDescription,
 		// Events
 		events,
+		// Vitrine du wiki Azalée (ex-landing /wiki)
+		vitrineWiki,
 	] = await Promise.all([
 		// Intro Defaults
 		getPublicSetting("home_intro_title", "Qu'est-ce que Rose Griffon ?"),
@@ -172,6 +250,8 @@ export default async function Home() {
 		getPublicSetting("home_community_description", "Le cœur de la communauté"),
 		// Events
 		getCalendarEvents(),
+		// Vitrine wiki
+		chargerVitrineWiki(),
 	]);
 
 	// Logique pour trouver le prochain événement
@@ -259,6 +339,30 @@ export default async function Home() {
 							instagramLink={azaleeInstagram}
 						/>
 					</MotionSection>
+
+					{/*
+					 * Vitrine du wiki, rapatriée de l'ancienne landing `/wiki` :
+					 * dernières actualités Azalée puis compteurs + sections du wiki.
+					 */}
+					<AnimatedSection direction="up">
+						<section
+							className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
+							aria-labelledby="actus-azalee-heading"
+						>
+							<Suspense
+								fallback={<div className="h-96 animate-pulse rounded-3xl bg-muted" />}
+							>
+								<LatestNewsSection
+									articles={vitrineWiki.articles}
+									tweets={vitrineWiki.tweets}
+								/>
+							</Suspense>
+						</section>
+					</AnimatedSection>
+
+					<AnimatedSection direction="scale" delay={0.1}>
+						<WikiCarousel stats={vitrineWiki.stats} />
+					</AnimatedSection>
 
 					<MotionSection
 						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
