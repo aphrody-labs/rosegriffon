@@ -38,6 +38,15 @@ export {
 	type NavBases,
 } from "./config/routes";
 
+export {
+	BUDGET_CHROME_MOBILE,
+	coutChromeMobile,
+	decalageHaut,
+	HAUTEURS,
+	PLANS,
+	rem,
+} from "./config/metriques";
+
 // Icons & Translations
 export { iconMap, type IconName, type LucideIcon } from "./lib/icons";
 export { DICTIONNAIRE_NAV_FR, traduireNav } from "./lib/translations";

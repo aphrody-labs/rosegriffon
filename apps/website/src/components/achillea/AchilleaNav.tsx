@@ -2,185 +2,129 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
-import { useAchilleaAuth } from "@/lib/achillea";
-import { Button, Badge } from "@rosegriffon/ui";
+
+import { Button } from "@rosegriffon/ui";
+
 import { PrimeIcon } from "@/components/achillea/PrimeIcon";
+import { useAchilleaAuth } from "@/lib/achillea";
+import { cn } from "@/lib/utils";
 
 /**
- * Noms PrimeIcons, ceux-là mêmes qu'utilise le front Angular.
+ * Sous-barre contextuelle d'Achilléa — les sections du domaine, rien d'autre.
  *
- * Correspondance reprise de `shared/components/header/header.ts` : `pi-home`,
- * `pi-users`, `pi-bolt`, `pi-trophy`, `pi-star`, `pi-video`, `pi-id-card`,
- * `pi-wallet`, `pi-book`. Les remplacer par des équivalents Lucide donnait une
- * iconographie générique là où Achilléa a la sienne.
+ * ── CE QU'ELLE NE FAIT PLUS ─────────────────────────────────────────────────
+ * Elle était un en-tête complet de 64 px qui recopiait ce que le chrome Rose
+ * Griffon porte déjà : logo cliquable vers l'accueil, nom du site, badge de
+ * section, avatar, pseudo, bouton de déconnexion. Empilée sous la barre
+ * supérieure globale (56 px) et au-dessus de ses propres onglets mobiles, elle
+ * formait une TROISIÈME barre — l'audit de production relevait quatre couches
+ * et trois `<nav>` sur la même page.
+ *
+ * Pire, les neuf liens étaient rendus DEUX FOIS : une `<nav>` `hidden lg:flex`
+ * pour le bureau, une bande `lg:hidden` pour le mobile. Deux blocs de balisage
+ * à maintenir en parallèle pour une seule liste, et deux occasions de diverger.
+ *
+ * ── CE QU'ELLE FAIT ─────────────────────────────────────────────────────────
+ * Une seule bande d'onglets défilante, identique à toutes les tailles, haute de
+ * 2,75 rem. Le seul contrôle de compte restant est celui qu'on ne trouve nulle
+ * part ailleurs : la session ACHILLÉA, distincte de la session Rose Griffon
+ * tant que les comptes ne sont pas unifiés. Le nom du site, le retour à
+ * l'accueil et le thème restent du ressort du chrome global.
+ */
+
+/**
+ * Noms PrimeIcons, ceux-là mêmes qu'utilise le front Angular
+ * (`shared/components/header/header.ts`).
  */
 export const ACHILLEA_NAV_LINKS = [
-	{ label: "Accueil", path: "/achillea", icon: "home", exact: true },
-	{ label: "Clans", path: "/achillea/clans", icon: "users" },
-	{ label: "Ranked", path: "/achillea/ranked", icon: "bolt" },
-	{ label: "Tournois", path: "/achillea/tournaments", icon: "trophy" },
-	{ label: "Astral League", path: "/achillea/leagues/astral", icon: "star" },
-	{ label: "Casts", path: "/achillea/casts", icon: "video" },
-	{ label: "Licence", path: "/achillea/licence", icon: "id-card" },
-	{ label: "Wallet", path: "/achillea/wallet", icon: "wallet" },
-	{ label: "Guide", path: "/achillea/guide", icon: "book" },
-];
+	{ exact: true, icon: "home", label: "Accueil", path: "/achillea" },
+	{ icon: "users", label: "Clans", path: "/achillea/clans" },
+	{ icon: "bolt", label: "Classé", path: "/achillea/ranked" },
+	{ icon: "trophy", label: "Tournois", path: "/achillea/tournaments" },
+	{ icon: "star", label: "Astral League", path: "/achillea/leagues/astral" },
+	{ icon: "video", label: "Casts", path: "/achillea/casts" },
+	{ icon: "id-card", label: "Licence", path: "/achillea/licence" },
+	{ icon: "wallet", label: "Portefeuille", path: "/achillea/wallet" },
+	{ icon: "book", label: "Guide", path: "/achillea/guide" },
+] as const;
 
 export function AchilleaNav() {
-	const pathname = usePathname();
-	const { user, isAuthenticated, login, logout } = useAchilleaAuth();
-
+	const pathname = usePathname() ?? "";
+	const { isAuthenticated, login, logout, user } = useAchilleaAuth();
 	const isStaff = (user?.role ?? 0) >= 1;
 
+	const onglets: readonly { icon: string; label: string; path: string; exact?: boolean }[] = [
+		...ACHILLEA_NAV_LINKS,
+		...(isStaff
+			? [{ icon: "shield", label: "Admin", path: "/achillea/admins/dashboard" }]
+			: []),
+	];
+
 	return (
-		<header className="sticky top-0 z-40 w-full border-b border-outline/15 bg-surface/80 backdrop-blur-md">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-				{/* Brand Logo & Switcher */}
-				<div className="flex items-center gap-3">
-					<Link href="/achillea" className="flex items-center gap-2.5 group">
-						<div className="relative size-8 shrink-0">
-							<Image
-								src="/achillea/logo1.svg"
-								alt="Logo Achilléa"
-								fill
-								className="object-contain drop-shadow-[0_0_8px_rgba(var(--achillea-lime-rgb),0.5)]"
-							/>
-						</div>
-						<span className="font-black text-lg tracking-wider text-on-surface group-hover:text-primary transition-colors">
-							ACHILLÉA
-						</span>
-						<Badge
-							variant="secondary"
-							className="hidden sm:inline-flex text-[10px] uppercase font-bold bg-[var(--achillea-primary)]/15 text-[var(--achillea-primary)] border border-[var(--achillea-primary)]/30"
-						>
-							Esport
-						</Badge>
-					</Link>
-				</div>
-
-				{/* Desktop nav links */}
-				<nav className="hidden lg:flex items-center gap-1 overflow-x-auto py-1">
-					{ACHILLEA_NAV_LINKS.map((link) => {
-						const isActive = link.exact
-							? pathname === link.path
-							: pathname === link.path || pathname?.startsWith(`${link.path}/`);
-
-						return (
-							<Link
-								key={link.path}
-								href={link.path}
-								className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-									isActive
-										? "bg-primary text-on-primary shadow-sm"
-										: "text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/40"
-								}`}
-							>
-								<PrimeIcon name={link.icon} className="text-sm" />
-								<span>{link.label}</span>
-							</Link>
-						);
-					})}
-
-					{isStaff && (
-						<Link
-							href="/achillea/admins/dashboard"
-							className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-								pathname?.startsWith("/achillea/admins")
-									? "bg-[var(--achillea-primary)] text-white shadow-sm"
-									: "text-[var(--achillea-primary)] hover:bg-amber-500/10"
-							}`}
-						>
-							<PrimeIcon name="shield" className="text-sm" />
-							<span>Admin</span>
-						</Link>
-					)}
-				</nav>
-
-				{/* User Action */}
-				<div className="flex items-center gap-2 shrink-0">
-					{isAuthenticated && user ? (
-						<div className="flex items-center gap-2">
-							<Link
-								href={`/achillea/users/${user.id}`}
-								className="flex items-center gap-2 p-1 rounded-full hover:bg-surface-variant/50 transition-colors"
-							>
-								{user.avatar ? (
-									<img
-										src={user.avatar}
-										alt={user.username}
-										className="size-7 rounded-full object-cover border border-outline/30"
-									/>
-								) : (
-									<div className="size-7 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold">
-										{user.username.charAt(0).toUpperCase()}
-									</div>
-								)}
-								<span className="hidden sm:inline text-xs font-bold text-on-surface max-w-[100px] truncate">
-									{user.username}
-								</span>
-							</Link>
-
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={() => void logout()}
-								className="size-8 text-on-surface-variant hover:text-red-500"
-								title="Se déconnecter"
-								aria-label="Se déconnecter"
-							>
-								<PrimeIcon name="sign-out" className="text-sm" />
-							</Button>
-						</div>
-					) : (
-						<Button
-							size="sm"
-							onClick={() => login(pathname || "/achillea")}
-							className="bg-[var(--discord-blurple)] hover:bg-[var(--discord-blurple-hover)] text-white font-bold text-xs gap-1.5 rounded-xl shadow-sm"
-						>
-							<PrimeIcon name="sign-in" className="text-sm" />
-							<span>Discord</span>
-						</Button>
-					)}
-				</div>
-			</div>
-
-			{/* Sub-nav mobile bar */}
-			<div className="lg:hidden border-t border-outline/10 px-3 py-2 overflow-x-auto flex items-center gap-1.5 scrollbar-none">
-				{ACHILLEA_NAV_LINKS.map((link) => {
-					const isActive = link.exact
-						? pathname === link.path
-						: pathname === link.path || pathname?.startsWith(`${link.path}/`);
+		<div className="sticky top-0 z-30 flex h-11 items-center gap-2 border-b border-outline/10 bg-surface/85 px-3 backdrop-blur-md">
+			{/*
+			 * Défilement horizontal : sur mobile les neuf onglets dépassent. Le
+			 * masque de dégradé à droite signale qu'il en reste — l'audit relevait
+			 * « Licence », « Portefeuille » et « Guide » hors champ sans aucune
+			 * affordance, donc introuvables.
+			 */}
+			<nav
+				aria-label="Sections Achilléa"
+				className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto scrollbar-none [mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)]"
+			>
+				{onglets.map((onglet) => {
+					const actif = onglet.exact
+						? pathname === onglet.path
+						: pathname === onglet.path || pathname.startsWith(`${onglet.path}/`);
 
 					return (
 						<Link
-							key={link.path}
-							href={link.path}
-							className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium ${
-								isActive
-									? "bg-primary text-on-primary font-bold"
-									: "text-on-surface-variant hover:bg-surface-variant/30"
-							}`}
+							aria-current={actif ? "page" : undefined}
+							className={cn(
+								"inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors",
+								actif
+									? "bg-[var(--achillea-primary)] text-white"
+									: "text-on-surface-variant hover:bg-surface-variant/40 hover:text-on-surface"
+							)}
+							href={onglet.path}
+							key={onglet.path}
 						>
-							<PrimeIcon name={link.icon} className="text-xs" />
-							<span>{link.label}</span>
+							<PrimeIcon className="text-sm" name={onglet.icon} />
+							<span>{onglet.label}</span>
 						</Link>
 					);
 				})}
-				{isStaff && (
-					<Link
-						href="/achillea/admins/dashboard"
-						className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-[var(--achillea-primary)] ${
-							pathname?.startsWith("/achillea/admins")
-								? "bg-[var(--achillea-primary)] text-white font-bold"
-								: "hover:bg-amber-500/10"
-						}`}
+			</nav>
+
+			{/*
+			 * Session Achilléa. Elle reste distincte de la session Rose Griffon —
+			 * ce n'est donc pas un doublon du menu de compte global, et c'est le
+			 * seul endroit où elle est visible. Un contrôle unique, là où il y en
+			 * avait quatre.
+			 */}
+			<div className="shrink-0">
+				{isAuthenticated && user ? (
+					<Button
+						aria-label={`Session Achilléa : ${user.username}. Se déconnecter.`}
+						className="size-8 text-on-surface-variant hover:text-alerte"
+						onClick={() => void logout()}
+						size="icon"
+						title={`${user.username} — se déconnecter`}
+						variant="ghost"
 					>
-						<PrimeIcon name="shield" className="text-xs" />
-						<span>Admin</span>
-					</Link>
+						<PrimeIcon className="text-sm" name="sign-out" />
+					</Button>
+				) : (
+					<Button
+						className="h-8 gap-1.5 rounded-lg bg-[var(--discord-blurple)] px-2.5 text-xs font-bold text-white hover:bg-[var(--discord-blurple-hover)]"
+						onClick={() => login(pathname || "/achillea")}
+						size="sm"
+					>
+						<PrimeIcon className="text-sm" name="sign-in" />
+						<span className="max-sm:sr-only">Connexion</span>
+					</Button>
 				)}
 			</div>
-		</header>
+		</div>
 	);
 }
