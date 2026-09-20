@@ -203,15 +203,7 @@ export default async function Home() {
 			<WebsiteSchema />
 			<RealtimeSettingsListener />
 			<div className="flex flex-col min-h-screen">
-				<a
-					href="#main-content"
-					className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:rounded-lg focus:shadow-lg focus:outline-hidden focus:ring-2 focus:ring-primary"
-				>
-					Aller au contenu principal
-				</a>
-
 				<div
-					id="main-content"
 					className="flex flex-col gap-4 md:gap-6 lg:gap-8 pb-12 md:pb-16 lg:pb-20 pt-2 md:pt-4 will-change-scroll"
 				>
 					<MotionSection

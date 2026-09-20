@@ -96,7 +96,7 @@ function NavigationRailItem({
 			</span>
 			<span
 				data-slot="navigation-rail-item-label"
-				className="text-xs font-medium leading-4 tracking-[0.5px]"
+				className="text-xs font-medium leading-4 tracking-[0.5px] group-data-[active=true]/nav-rail-item:text-on-surface group-data-[active=true]/nav-rail-item:font-bold"
 			>
 				{label}
 			</span>

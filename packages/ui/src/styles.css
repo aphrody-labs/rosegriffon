@@ -744,3 +744,63 @@
 		opacity: 0.12;
 	}
 }
+
+@utility pt-safe {
+	padding-top: env(safe-area-inset-top);
+}
+
+@utility pb-safe {
+	padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility pl-safe {
+	padding-left: env(safe-area-inset-left);
+}
+
+@utility pr-safe {
+	padding-right: env(safe-area-inset-right);
+}
+
+@layer utilities {
+	/* ─── MD3 Motion — timing functions ───────────────────────────────── */
+	.motion-standard {
+		transition-timing-function: var(--md-sys-motion-easing-standard);
+	}
+	.motion-standard-accelerate {
+		transition-timing-function: var(--md-sys-motion-easing-standard-accelerate);
+	}
+	.motion-standard-decelerate {
+		transition-timing-function: var(--md-sys-motion-easing-standard-decelerate);
+	}
+	.motion-emphasized {
+		transition-timing-function: var(--md-sys-motion-easing-emphasized);
+	}
+	.motion-emphasized-accelerate {
+		transition-timing-function: var(--md-sys-motion-easing-emphasized-accelerate);
+	}
+	.motion-emphasized-decelerate {
+		transition-timing-function: var(--md-sys-motion-easing-emphasized-decelerate);
+	}
+
+	/* ─── Typographie expressive ──────────────────────────────────────── */
+	.font-expressive-title {
+		font-variation-settings:
+			"wdth" 115,
+			"wght" 600,
+			"opsz" 48;
+		letter-spacing: -0.02em;
+	}
+	.font-width-expanded {
+		font-variation-settings: "wdth" 150;
+	}
+
+	/* ─── Masquage de barre de défilement cross-browser ────────────────── */
+	.scrollbar-hide {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
+	}
+}
+

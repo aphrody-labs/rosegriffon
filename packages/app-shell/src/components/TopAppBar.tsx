@@ -198,7 +198,7 @@ export function DesktopTopBar({
 
 	return (
 		<header
-			className={`fixed top-0 left-0 right-0 z-[60] flex h-14 items-center justify-between px-4 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/5 ${
+			className={`fixed top-0 left-0 right-0 z-[60] flex h-14 items-center justify-between px-4 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/5 max-md:hidden ${
 				className ?? ""
 			}`}
 		>
@@ -284,7 +284,7 @@ export function DesktopTopBar({
 						loginSlot ?? (
 							<Link
 								href="/login"
-								className="h-9 px-4 rounded-full flex items-center gap-2 text-primary type-label-large hover:bg-primary/8 active:bg-primary/12 transition-colors duration-200"
+								className="h-9 px-4 rounded-full flex items-center gap-2 text-primary type-label-large hover:bg-primary/[0.08] active:bg-primary/[0.12] transition-colors duration-200"
 							>
 								<CircleUser size={20} aria-hidden="true" />
 								Connexion
