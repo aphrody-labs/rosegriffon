@@ -378,3 +378,78 @@ pourra plus utiliser (un futur `/wallet` côté boutique, par exemple).
 Le bon endroit est le vhost `infra/nginx/achillea.rosegriffon.conf` :
 `301 https://rosegriffon.fr/achillea$request_uri`. C'est exactement ce que fait
 déjà `azalee.rosegriffon.fr` → `/wiki`.
+
+---
+
+## 10. Unification des bases (fait le 20/9/2026)
+
+### Ce qui a été câblé
+
+`rg` et `achillea` sont **deux bases du même cluster Postgres 18**. Elles ne
+sont pas fusionnées : le schéma `public` d'`achillea` est exposé en lecture
+dans la base `rg`, sous le schéma `achillea`, via `postgres_fdw`.
+
+- Script : `scripts/ops/achillea-fdw.ts` (`--verifier`, `--retirer`).
+- Rôle dédié `achillea_reader`, `BYPASSRLS`, secret hors dépôt dans
+  `/etc/rose-griffon/achillea-fdw.env`.
+- 75 tables exposées. Schéma accordé à `rg` et `service_role` **uniquement** —
+  jamais `anon`/`authenticated`, jamais exposé par PostgREST.
+- Tâche `rg-cron` `sync:achillea` (4 h 20) : réaligne la **forme** du miroir
+  après les migrations d'Achilléa. Les **données** sont lues en direct, il n'y
+  a rien à copier.
+- Couche de lecture croisée : `apps/website/src/lib/achillea/admin-db.ts`.
+
+### Pourquoi pas une fusion de tables
+
+Une seule collision de nom existait (`user`), donc la fusion était techniquement
+possible. Elle a été écartée : elle imposerait une synchronisation permanente,
+une fenêtre de divergence, et un second propriétaire de la vérité pour des
+données dont `achillea-bot` reste l'unique écrivain. Le FDW donne la jointure
+sans copier un octet, et se retire d'un `DROP SCHEMA`.
+
+### Ce que ça débloque, chiffré
+
+| Mesure | Valeur |
+| --- | ---: |
+| Profils Rose Griffon | 1 812 |
+| Utilisateurs Achilléa | 3 850 |
+| **Comptes communs** (`profiles.discord_id` = `achillea."user".id`) | **538** |
+| Clans | 69 |
+
+Les 3 312 joueurs Achilléa sans profil RG sont la cible naturelle de la
+passerelle d'inscription. `discord_id` est la seule clé commune : pas d'e-mail
+partagé, pas d'identifiant interne unifié.
+
+### Deux incidents corrigés au passage
+
+1. **`stats:achillea` mesurait le vide.** La tâche tirait par SSH le journal
+   nginx du second VPS, alors qu'Achilléa a été rapatrié sur le serveur
+   principal : `achillea.rosegriffon.fr` et `ranked.rosegriffon.fr` sont servis
+   ici et leurs lignes sont dans le journal **local**. Le SSH réussissait —
+   il lisait un serveur où ces domaines n'existent plus — donc rien ne levait,
+   et `/var/lib/rg/achillea-audience.json` contenait `"domaines": []` depuis le
+   rapatriement. Corrigé : lecture locale, 392 requêtes remontées au premier
+   passage.
+
+2. **`rg-cron.service` était en boucle de redémarrage.** `nie-cron.service`
+   (dépôt `niers`) est un fork du même démon : mêmes ports par défaut **3005**
+   (HTTP), **3006** (annonces) et **4001** (IPC). La seconde unité à démarrer
+   perdait, et c'était `rg-cron` — donc **aucune tâche planifiée de Rose
+   Griffon ne tournait**. 3005 appartient à RG (`wg-forward@3005.service`,
+   page d'administration). Corrigé : les trois ports de `niers` sont devenus
+   configurables, et un drop-in `nie-cron.service.d/port.conf` les fixe à
+   3015 / 3016 / 4011. Les deux démons tournent désormais ensemble.
+
+### Reste à faire
+
+- **Assets** : 575 fichiers identiques en double sur les trois `public/`,
+  **74 Mo**. Presque tout est `azalee` ↔ `website` (553 / 588). Or
+  `azalee.rosegriffon.fr` répond déjà **301 vers `rosegriffon.fr/wiki`** :
+  `apps/azalee/public` ne sert plus aucun trafic public et n'est retenu que par
+  le test de synchronisation du chrome. La déduplication passe donc par le
+  retrait de l'app `azalee`, pas par une copie vers `packages/assets` — ce
+  dernier (`@rosegriffon/assets`, export `./public/*`) reste la destination des
+  assets réellement partagés.
+- **Pages d'administration** : la couche de données croisée existe
+  (`admin-db.ts`) ; les 14 onglets du backoffice Achilléa restent à fusionner
+  dans `/admin` (phase 3 du §5).
