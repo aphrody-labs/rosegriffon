@@ -3,12 +3,14 @@ import { describe, expect, test } from "bun:test";
 import {
 	cheminsCliquables,
 	construireNavigation,
+	construireNavigationUnifiee,
 	estItemActif,
 	estRouteActive,
 	parcourirNav,
 	type NavItem,
 } from "../src/config/navigation";
 import { AZALEE_BASES, joindreWiki, WEBSITE_BASES } from "../src/config/routes";
+import { DICTIONNAIRE_NAV_FR } from "../src/lib/translations";
 
 const azalee = construireNavigation(AZALEE_BASES);
 const website = construireNavigation(WEBSITE_BASES);
@@ -128,5 +130,24 @@ describe("cheminsCliquables", () => {
 				}
 			}
 		}
+	});
+});
+
+/**
+ * Un libellé non traduit se voit : la barre latérale affiche `nav.esport.clans`
+ * au lieu de « Clans ». Le dictionnaire français est le repli utilisé quand
+ * aucun `LanguageProvider` n'est monté — il doit donc couvrir TOUTE entrée que
+ * la navigation sait produire, sans exception.
+ */
+describe("dictionnaire de navigation", () => {
+	test("chaque libellé du menu unifié a une traduction française", () => {
+		const groupes = construireNavigationUnifiee(WEBSITE_BASES);
+		const libelles = groupes.flatMap(({ item }) => [
+			item.label,
+			...parcourirNav(item.children ?? []).map((enfant) => enfant.label),
+		]);
+
+		const manquants = [...new Set(libelles)].filter((cle) => !(cle in DICTIONNAIRE_NAV_FR));
+		expect(manquants).toEqual([]);
 	});
 });
