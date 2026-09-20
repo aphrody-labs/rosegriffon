@@ -50,6 +50,34 @@ Ces règles ne sont pas déclaratives : elles sont **tenues par des tests**.
 
 Un glissement casse la CI le jour même, pas six mois plus tard.
 
+## Ce que les tests garantissent
+
+La suite ne se contente pas de confirmer le code : elle est écrite pour le
+mettre en défaut. Chaque famille a été validée **par mutation** — on casse
+volontairement la source, on vérifie que le test tombe. Un test incapable
+d'échouer ne protège rien ; c'est exactement ce qui était arrivé au hook
+`bun.lock`, dont le garde ne s'est jamais déclenché pendant des mois.
+
+| Famille | Fichier | Ce qu'elle interdit |
+| --- | --- | --- |
+| Exhaustivité | `core/tests/exhaustivity.test.ts` | Un membre d'enum sans libellé, un enum entier oublié, deux membres au même libellé, un `switch` dont tous les `case` tombent dans le `default` |
+| Robustesse | `core/tests/robustness.test.ts` | Un `NaN`, un `Infinity`, un négatif ou un `null` qui traverse une fonction de domaine et finit à l'écran |
+| Portabilité | `core/tests/portability.test.ts` | Un `node:`, `bun:`, `@angular/`, `window` glissé dans le métier |
+| Pureté | `types/test/purity.test.ts` | Une fonction, une dépendance ou un libellé dans le contrat |
+| Solidité du généré | `contract/tests/soundness.test.ts` | Une collision de noms après conversion, un mot réservé non échappé, un type référencé mais jamais déclaré |
+| Invariants de surface | `client/tests/invariants.test.ts` | Une URL malformée, une méthode qui n'émet aucune requête, une exception sur un 500 |
+
+Les propriétés sont préférées aux cas : `winRate` n'est pas testé sur trois
+valeurs mais sur la propriété « reste dans `[0, 1]` pour toute entrée », ce qui
+couvre aussi ce qu'on n'a pas imaginé. C'est ainsi qu'ont été trouvés les onze
+bugs listés au `CHANGELOG`, dont cinq partageaient une même racine :
+`Math.max(0, Math.floor(x))` ne neutralise pas `NaN`.
+
+`@rosegriffon/achillea-core/numbers` est la réponse structurelle à cette
+famille : toute entrée numérique venue de l'extérieur y passe
+(`toFinite`, `toCount`, `toPositiveInt`, `clamp`, `euclideanMod`), et la règle
+tient en une phrase — `Number()` seul ne borne rien, `Number(null)` vaut `0`.
+
 ## Le contrat comme frontière réelle
 
 `packages/achillea-contract` lit les sources de `achillea-types` (AST
