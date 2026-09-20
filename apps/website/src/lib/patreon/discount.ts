@@ -26,6 +26,45 @@ export interface PatronDiscount {
 	currentlyEntitledCents: number | null;
 }
 
+/** Ligne `patreon_memberships` telle que la sélectionne `getPatronDiscount`. */
+export interface LigneAdhesionPatreon {
+	patron_status?: string | null;
+	tier_titles?: string[] | null;
+	currently_entitled_cents?: number | null;
+}
+
+/** État « pas de remise », rendu dès que l'adhésion est absente ou illisible. */
+export const REMISE_ABSENTE: PatronDiscount = {
+	active: false,
+	currentlyEntitledCents: null,
+	patronStatus: null,
+	percent: PATRON_DISCOUNT_PERCENT,
+	stripeCouponId: PATRON_STRIPE_COUPON_ID,
+	tierTitles: [],
+};
+
+/**
+ * Décision pure : cette ligne d'adhésion ouvre-t-elle droit à la remise ?
+ *
+ * Isolée de l'accès base pour être testable — c'est la fonction qui décide
+ * d'appliquer ou non −20 % sur un paiement réel. Seul `active_patron` compte :
+ * `declined_patron` et `former_patron` sont des adhésions qui ont existé, pas
+ * des adhésions en cours.
+ */
+export function remiseDepuisAdhesion(ligne: LigneAdhesionPatreon | null): PatronDiscount {
+	if (!ligne) {
+		return REMISE_ABSENTE;
+	}
+	return {
+		active: ligne.patron_status === "active_patron",
+		currentlyEntitledCents: ligne.currently_entitled_cents ?? null,
+		patronStatus: ligne.patron_status ?? null,
+		percent: PATRON_DISCOUNT_PERCENT,
+		stripeCouponId: PATRON_STRIPE_COUPON_ID,
+		tierTitles: ligne.tier_titles ?? [],
+	};
+}
+
 /**
  * Snapshot de l'état Patreon d'un user RG, utilisé pour décider d'appliquer
  * la réduction 20% sur la boutique Stripe.
@@ -35,14 +74,7 @@ export interface PatronDiscount {
  *   un badge contextuel ("Patron Niveau Evans → -20%").
  */
 export async function getPatronDiscount(userId: string): Promise<PatronDiscount> {
-	const empty: PatronDiscount = {
-		active: false,
-		currentlyEntitledCents: null,
-		patronStatus: null,
-		percent: PATRON_DISCOUNT_PERCENT,
-		stripeCouponId: PATRON_STRIPE_COUPON_ID,
-		tierTitles: [],
-	};
+	const empty = REMISE_ABSENTE;
 
 	const supabase = createAdminClient();
 	if (!supabase) {
@@ -61,14 +93,7 @@ export async function getPatronDiscount(userId: string): Promise<PatronDiscount>
 		return empty;
 	}
 
-	return {
-		active: data.patron_status === "active_patron",
-		currentlyEntitledCents: (data.currently_entitled_cents as number | null) ?? null,
-		patronStatus: data.patron_status ?? null,
-		percent: PATRON_DISCOUNT_PERCENT,
-		stripeCouponId: PATRON_STRIPE_COUPON_ID,
-		tierTitles: (data.tier_titles ?? []) as string[],
-	};
+	return remiseDepuisAdhesion(data as LigneAdhesionPatreon);
 }
 
 /**
