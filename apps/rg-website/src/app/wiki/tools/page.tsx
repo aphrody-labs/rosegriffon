@@ -1,4 +1,4 @@
-import { joindreWiki, WEBSITE_BASES } from "@rosegriffon/app-shell";
+import { wiki } from "@rosegriffon/app-shell";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
@@ -15,10 +15,10 @@ import { cn } from "@/lib/utils";
  * par une redirection 308 vers `/wiki/tools/<outil>`. Le lien canonique visait
  * lui aussi `/tools`, c'est-à-dire une URL qui redirige.
  */
-const outil = (chemin: string) => joindreWiki(WEBSITE_BASES.wiki, chemin);
+const outil = (chemin: string) => wiki(chemin);
 
 export const metadata: Metadata = {
-	alternates: { canonical: joindreWiki(WEBSITE_BASES.wiki, "/tools") },
+	alternates: { canonical: wiki("/tools") },
 	description:
 		"Comparateur de personnages, générateur d'équipe aléatoire, traducteur de noms et plus pour Inazuma Eleven: Victory Road.",
 	title: "Outils | Inazuma Eleven Victory Road - Azalée",

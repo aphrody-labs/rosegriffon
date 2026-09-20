@@ -29,7 +29,7 @@ export default async function PartenairesSection() {
 			{collaborateurs.length > 0 && (
 				<TeamStructuredData
 					pageName="Nos Partenaires"
-					url="https://rosegriffon.fr/notre-equipe/partenaires"
+					url="https://rosegriffon.fr/community"
 					members={collaborateurs.map((member) => ({
 						name: member.name,
 						role: member.role || undefined,

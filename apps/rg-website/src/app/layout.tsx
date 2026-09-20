@@ -9,7 +9,7 @@ import { Geist } from "next/font/google";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { resolveLocale } from "@rosegriffon/i18n";
 import { isLocaleId } from "@rosegriffon/preferences";
-import { WEBSITE_BASES, domaineDeLaRoute, type Domaine } from "@rosegriffon/app-shell";
+import { BASE_ESPORT, BASE_WIKI, domaineDeLaRoute, type Domaine } from "@rosegriffon/app-shell";
 import { ADSENSE_CLIENT, AdSenseScript, THEMES, type ThemeType } from "@rosegriffon/ui";
 
 import ClientLayout from "./client-layout";
@@ -52,14 +52,12 @@ const DOMAINE_RACINE: Domaine = "association";
  * script inline ne peut pas embarquer la fonction elle-même.
  *
  * `/news` y figure parce que `domaineDeLaRoute` le rattache explicitement au
- * wiki, alors qu'il ne porte pas le préfixe `WEBSITE_BASES.wiki`.
+ * wiki, alors qu'il ne porte pas le préfixe `BASE_WIKI`.
  */
-const SECTIONS = [WEBSITE_BASES.esport, WEBSITE_BASES.wiki, "/news"]
-	.filter((prefixe): prefixe is string => typeof prefixe === "string" && prefixe !== "")
-	.map((prefixe) => {
-		const domaine = domaineDeLaRoute(prefixe, WEBSITE_BASES);
-		return [prefixe, domaine, THEME_PAR_DOMAINE[domaine]] as const;
-	});
+const SECTIONS = [BASE_ESPORT, BASE_WIKI, "/news"].map((prefixe) => {
+	const domaine = domaineDeLaRoute(prefixe);
+	return [prefixe, domaine, THEME_PAR_DOMAINE[domaine]] as const;
+});
 
 /**
  * Script anti-scintillement — posé avant toute peinture, dans le `<head>`.
@@ -121,7 +119,7 @@ export const metadata: Metadata = {
 	alternates: {
 		// PAS de `canonical` ici. Les métadonnées Next sont héritées : un canonical
 		// posé sur le layout racine s'applique à toute page qui n'en déclare pas un,
-		// et /projets, /evenements, /notre-equipe, /legal/*, /shop, /shop/<produit>
+		// et /projets, /evenements, /community, /legal/*, /shop, /shop/<produit>
 		// et les chroniques annonçaient donc toutes « la page canonique, c'est
 		// l'accueil » — soit l'instruction explicite de ne pas les indexer. L'accueil
 		// pose le sien dans `app/page.tsx` ; chaque page publique pose le sien.

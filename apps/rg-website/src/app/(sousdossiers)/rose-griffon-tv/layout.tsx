@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 
-import { MobileBottomNavigationWrapper } from "@/components/layout/MobileBottomNavigationWrapper";
 
 export const metadata: Metadata = {
 	alternates: { canonical: "https://rosegriffon.fr/rose-griffon-tv" },
@@ -41,10 +40,7 @@ export const viewport: Viewport = {
 };
 
 export default function RoseGriffonTvLayout({ children }: { children: React.ReactNode }) {
-	return (
-		<>
-			{children}
-			<MobileBottomNavigationWrapper />
-		</>
-	);
+	// La barre du bas est déjà montée par `client-layout.tsx` sur les écrans
+	// compacts : la remonter ici en empilait deux.
+	return children;
 }

@@ -23,7 +23,7 @@ export function Footer({ className }: FooterProps = {}) {
 							L&apos;association
 						</h3>
 						<Link
-							href="/charte"
+							href="/charte-engagements"
 							className="text-sm text-on-surface-variant hover:text-primary hover:underline transition-colors rounded-sm"
 						>
 							Charte et engagements
@@ -36,21 +36,15 @@ export function Footer({ className }: FooterProps = {}) {
 						>
 							Numéro RNA
 						</Link>
+						{/* Les deux liens « Rose Griffon (site) » et « Achilléa — compétitif »
+						    pointaient en `target="_blank"` vers le site sur lequel on se
+						    trouve déjà : un pied de page hérité d'azalee.rosegriffon.fr,
+						    quand les trois sites étaient distincts. */}
 						<Link
-							href="https://rosegriffon.fr"
-							target="_blank"
-							rel="noopener noreferrer"
+							href="/community"
 							className="text-sm text-on-surface-variant hover:text-primary hover:underline transition-colors rounded-sm"
 						>
-							Rose Griffon (site)
-						</Link>
-						<Link
-							href="https://achillea.rosegriffon.fr"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-sm text-on-surface-variant hover:text-primary hover:underline transition-colors rounded-sm"
-						>
-							Achilléa — compétitif
+							Communauté
 						</Link>
 					</div>
 
@@ -60,13 +54,13 @@ export function Footer({ className }: FooterProps = {}) {
 							Contact
 						</h3>
 						<Link
-							href="/contact"
+							href="/a-propos/contact"
 							className="text-sm text-on-surface-variant hover:text-primary hover:underline transition-colors rounded-sm"
 						>
 							Nous contacter
 						</Link>
 						<Link
-							href="/soutenir"
+							href="/nous-soutenir"
 							className="text-sm text-on-surface-variant hover:text-primary hover:underline transition-colors rounded-sm"
 						>
 							Nous soutenir

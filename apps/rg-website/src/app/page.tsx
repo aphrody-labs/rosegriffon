@@ -1,408 +1,286 @@
 import type { Metadata } from "next";
-import dynamicImport from "next/dynamic";
-import { Suspense } from "react";
+import Link from "next/link";
 
-// ISR : HTML cached, regen toutes les 60s en arrière-plan.
-// Le user-menu et autres parties auth-aware vivent dans `client-layout.tsx`
-// (use client, hydraté côté client) — la home ne dépend que de settings + events
-// Et `RealtimeSettingsListener` propage les updates settings via Supabase Realtime.
-export const revalidate = 60;
-
-import { AchilleaBanner } from "@/components/home/AchilleaBanner";
-import { AnimatedSection } from "@/components/home/AnimatedSection";
-import { LatestNewsSection } from "@/components/home/LatestNewsSection";
-import { NextEventBanner } from "@/components/home/NextEventBanner";
-import { RgtvBanner } from "@/components/home/RgtvBanner";
-import { WikiCarousel } from "@/components/home/WikiCarousel";
-import type { WikiSectionStats } from "@/components/home/WikiCarousel";
-import { FeaturedTweets } from "@/components/shared/FeaturedTweets";
-import { LatestChroniqueSection } from "@/components/shared/LatestChroniqueSection";
-import { MotionSection } from "@/components/shared/MotionSection";
-import { RealtimeSettingsListener } from "@/components/shared/RealtimeSettingsListener";
+import { Compteur, TitreTuile, Tuile } from "@/components/home/tuiles";
 import { OrganizationSchema, WebsiteSchema } from "@/components/shared/StructuredData";
-import { PillarsDuo } from "@/components/home/PillarsDuo";
-
-import FusionBlock from "@/components/shared/FusionBlock";
+import { RealtimeSettingsListener } from "@/components/shared/RealtimeSettingsListener";
 import { getCalendarEvents } from "@/lib/api/events";
+import { INVITATION_DISCORD } from "@/lib/discord";
 import { getPublicSetting } from "@/lib/api/settings";
 import { getPgPool } from "@/lib/db/pg";
 import { createClient } from "@/lib/supabase/server";
 
-// Lazy loading pour composants lourds (below-the-fold).
-// Les squelettes utilisent `bg-muted` : un dégradé `gray-*` resterait clair sur
-// le thème Azalée sombre.
-const ProjectsSection = dynamicImport(() => import("@/components/shared/ProjectsSection"), {
-	loading: () => <div className="h-96 animate-pulse rounded-3xl bg-muted" />,
-});
-
-const DiscordSection = dynamicImport(() => import("@/components/shared/DiscordSection"), {
-	loading: () => <div className="h-64 animate-pulse rounded-3xl bg-muted sm:h-72" />,
-});
+// ISR : HTML mis en cache, régénéré toutes les 60 s en arrière-plan.
+export const revalidate = 60;
 
 export const metadata: Metadata = {
-	alternates: {
-		canonical: "https://rosegriffon.fr",
-	},
+	alternates: { canonical: "https://rosegriffon.fr" },
 	description:
-		"Association française Inazuma Eleven : événements, streaming et communauté passionnée depuis 2019. Rejoignez la communauté !",
+		"Association française Inazuma Eleven : wiki Victory Road, compétition, événements et communauté depuis 2019.",
 	keywords: [
 		"Rose Griffon",
 		"Inazuma Eleven",
 		"association",
 		"France",
-		"streaming",
+		"wiki",
 		"événements",
 		"communauté",
-		"RGTV",
 	],
 	openGraph: {
 		description:
-			"Association française Inazuma Eleven : événements, streaming et communauté passionnée depuis 2019",
-		images: [
-			{
-				// Fichier statique app/opengraph-image.png = capture HD plein écran de la home.
-				// Servi uniquement à /opengraph-image.png (sans extension = 404, cf. azalee idem).
-				url: "/opengraph-image.png",
-				width: 1200,
-				height: 630,
-				alt: "Rose Griffon - Association Inazuma Eleven",
-			},
-		],
+			"Association française Inazuma Eleven : wiki Victory Road, compétition, événements et communauté depuis 2019.",
+		images: [{ alt: "Rose Griffon", height: 630, url: "/opengraph-image.png", width: 1200 }],
 		locale: "fr_FR",
 		siteName: "Rose Griffon",
 		title: "Rose Griffon - Association Inazuma Eleven France",
 		type: "website",
 		url: "https://rosegriffon.fr",
 	},
-	robots: {
-		follow: true,
-		googleBot: {
-			follow: true,
-			index: true,
-			"max-image-preview": "large",
-			"max-snippet": -1,
-			"max-video-preview": -1,
-		},
-		index: true,
-	},
 	title: "Rose Griffon - Association Inazuma Eleven France",
 	twitter: {
 		card: "summary_large_image",
 		creator: "@rose_griffon",
-		description:
-			"Association française Inazuma Eleven : événements, streaming et communauté passionnée",
+		description: "Association française Inazuma Eleven : wiki, compétition, événements",
 		site: "@rose_griffon",
 		title: "Rose Griffon - Association Inazuma Eleven France",
 	},
 };
 
+interface EntreeArticle {
+	slug: string;
+	title: string;
+	published_at: string | null;
+	app: string;
+}
+
 /**
- * Vitrine du wiki Azalée sur la home unifiée.
+ * Accueil : un tableau de bord, pas une brochure.
  *
- * La landing `/wiki` a été supprimée (elle redirige vers `/`) : ses deux blocs
- * utiles — compteurs + carousel de sections, et les dernières actualités
- * Azalée — vivent désormais ici. Les lectures suivent la même répartition que
- * l'ancienne landing : `articles`/`tweets` en Postgres direct, `inagle_*` via
- * le client Supabase (proxy SQLite).
+ * TOUT TIENT DANS LA HAUTEUR DE LA FENÊTRE sur un écran large (`lg:h-[…]`,
+ * `lg:overflow-hidden`) : l'accueil est l'index de l'écosystème, pas un récit à
+ * dérouler. Chaque tuile est une destination réelle, aucune n'est décorative.
+ * Sous `lg`, la grille redevient une colonne — imposer une fenêtre fixe sur un
+ * téléphone tronquerait le contenu au lieu de le condenser.
+ *
+ * Le pied de page est masqué sur cette route (cf. `client-layout.tsx`) : la
+ * ligne de liens légaux en bas de grille le remplace.
  */
-async function chargerVitrineWiki() {
+async function chargerAccueil() {
 	const supabase = await createClient();
 	const pool = getPgPool();
 
 	const [
-		{ rows: articlesEpingles },
-		{ rows: articlesRecents },
-		{ rows: tweetsRecents },
+		{ rows: actualites },
 		{ count: nbPersonnages },
 		{ count: nbTechniques },
 		{ count: nbObjets },
-		{ count: nbKeshins },
-		{ count: nbAmes },
-		{ count: nbPassifs },
 	] = await Promise.all([
-		pool.query(
-			`SELECT * FROM articles
-			 WHERE status = $1 AND app = $2
-			 ORDER BY published_at DESC
-			 LIMIT 1`,
-			["published", "azalee"]
-		),
-		pool.query(
-			`SELECT * FROM articles
-			 WHERE status = $1 AND app = $2
-			 ORDER BY published_at DESC
-			 LIMIT 3 OFFSET 1`,
-			["published", "azalee"]
-		),
-		pool.query(
-			`SELECT id, text, translation, created_at, author_username, author_name, media
-			 FROM tweets
-			 WHERE author_username = $1
-			 ORDER BY created_at DESC
-			 LIMIT 6`,
-			["Azalee_IE"]
+		pool.query<EntreeArticle>(
+			`SELECT slug, title, published_at, app FROM articles
+			 WHERE status = $1 AND app = ANY($2::text[])
+			 ORDER BY published_at DESC NULLS LAST
+			 LIMIT 4`,
+			["published", ["azalee", "website"]]
 		),
 		supabase.from("inagle_characters").select("id", { count: "exact", head: true }),
 		supabase.from("inagle_skills").select("id", { count: "exact", head: true }),
 		supabase.from("inagle_items").select("id", { count: "exact", head: true }),
-		supabase.from("inagle_keshins_clean").select("id", { count: "exact", head: true }),
-		supabase.from("inagle_souls_clean").select("id", { count: "exact", head: true }),
-		supabase.from("inagle_passives").select("id", { count: "exact", head: true }),
 	]);
 
-	const stats: WikiSectionStats = {
-		characters: nbPersonnages ?? 0,
-		items: nbObjets ?? 0,
-		keshins: nbKeshins ?? 0,
-		passives: nbPassifs ?? 0,
-		skills: nbTechniques ?? 0,
-		souls: nbAmes ?? 0,
-	};
-
 	return {
-		articles: [...(articlesEpingles ?? []), ...(articlesRecents ?? [])].slice(0, 3),
-		stats,
-		tweets: tweetsRecents ?? [],
+		actualites,
+		stats: {
+			characters: nbPersonnages ?? 0,
+			items: nbObjets ?? 0,
+			skills: nbTechniques ?? 0,
+		},
 	};
 }
 
+/** Prochain événement à venir ou en cours, `null` s'il n'y en a pas. */
+function prochainEvenement(evenements: Awaited<ReturnType<typeof getCalendarEvents>>) {
+	const maintenant = Date.now();
+	return (
+		evenements
+			.map((e) => ({
+				debut: e.start?.dateTime || e.start?.date,
+				fin: e.end?.dateTime || e.end?.date,
+				resume: e.summary,
+			}))
+			.filter((e) => {
+				const cible = e.fin ?? e.debut;
+				return cible ? new Date(cible).getTime() >= maintenant : false;
+			})
+			.sort(
+				(a, b) => new Date(a.debut || 0).getTime() - new Date(b.debut || 0).getTime()
+			)[0] ?? null
+	);
+}
+
+const LIENS_LEGAUX = [
+	{ href: "/a-propos", libelle: "L'association" },
+	{ href: "/charte-engagements", libelle: "Charte" },
+	{ href: "/legal/mentions-legales", libelle: "Mentions légales" },
+	{ href: "/legal/confidentialite", libelle: "Confidentialité" },
+];
+
+const RACCOURCIS = [
+	{ href: "/news", libelle: "Actus" },
+	{ href: "/chroniques", libelle: "Chroniques" },
+	{ href: "/evenements", libelle: "Événements" },
+	{ href: "/shop", libelle: "Boutique" },
+	{ href: "/community", libelle: "Communauté" },
+	{ href: "/sondages", libelle: "Sondages" },
+	{ href: "/rose-griffon-tv", libelle: "RG TV" },
+	{ href: "/projets", libelle: "Projets" },
+];
+
 export default async function Home() {
-	// Fetch Settings
-	const [
-		// Intro
-		introTitle,
-		introText,
-		introImage,
-		// RGTV
-		rgtvTitle,
-		rgtvSubtitle,
-		rgtvDescription,
-		rgtvImage,
-		rgtvButtonText,
-		rgtvLink,
-		// Azalee
-		azaleeTitle,
-		azaleeTag,
-		azaleeDescription,
-		azaleeImage,
-		azaleeLogo,
-		azaleeTwitter,
-		azaleeInstagram,
-		// Achillea
-		achilleaDescription,
-		achilleaImage,
-		achilleaLink,
-		achilleaDiscord,
-		// Community
-		communityTitle,
-		communitySubtitle,
-		communityDescription,
-		// Events
-		events,
-		// Vitrine du wiki Azalée (ex-landing /wiki)
-		vitrineWiki,
-	] = await Promise.all([
-		// Intro Defaults
-		getPublicSetting("home_intro_title", "Qu'est-ce que Rose Griffon ?"),
-		getPublicSetting(
-			"home_intro_text",
-			"Rose Griffon est une association française régie par la loi de 1901, ayant pour vocation de rassembler les principaux acteurs de la communauté Inazuma Eleven ainsi que l'ensemble des passionnés sous une même bannière. Elle s'engage à valoriser à la fois la scène artistique liée à cette licence et son univers compétitif."
-		),
-		getPublicSetting("home_intro_image", "/RG_screens_twitch_ethan.webp"),
-		// RGTV Defaults
-		getPublicSetting("home_rgtv_title", "RG TV"),
-		getPublicSetting("home_rgtv_subtitle", "WebTV Officielle"),
-		getPublicSetting(
-			"home_rgtv_description",
-			"Votre rendez-vous quotidien Inazuma Eleven ! Retrouvez nos streamers sur Twitch et YouTube pour des sessions de jeu, des tournois commentés et de la bonne humeur."
-		),
-		getPublicSetting("home_rgtv_image", "/rgtv/affiche.webp"),
-		getPublicSetting("home_rgtv_button_text", "ACCÉDER À LA WEBTV"),
-		getPublicSetting("home_rgtv_link", "/rose-griffon-tv"),
-		// Azalee Defaults
-		getPublicSetting("home_azalee_title", "AZALÉE"),
-		getPublicSetting("home_azalee_tag", "Actualités"),
-		getPublicSetting(
-			"home_azalee_description",
-			"Le pilier médiatique de Rose Griffon. Ne ratez aucune info sur Victory Road : traductions exclusives, interviews, analyses et couverture complète de l'actualité de la licence."
-		),
-		getPublicSetting("home_azalee_image", "https://azalee.rosegriffon.fr/opengraph-image.png"),
-		getPublicSetting("home_azalee_logo", "/RG_Azalee-logo.webp"),
-		getPublicSetting("home_azalee_twitter", "https://x.com/Azalee_IE"),
-		getPublicSetting("home_azalee_instagram", "https://www.instagram.com/azaleefr/"),
-		// Achillea Defaults
-		getPublicSetting(
-			"home_achillea_description",
-			"Le carrefour de l'esport Inazuma Eleven ! Gestion de clans, tournois, matchs classés, ranking communautaire et bot officiel."
-		),
-		getPublicSetting("home_achillea_image", "https://achillea.rosegriffon.fr/opengraph-image"),
-		getPublicSetting("home_achillea_link", "https://achillea.rosegriffon.fr/"),
-		getPublicSetting(
-			"home_achillea_discord",
-			"https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055"
-		),
-		// Community Defaults
-		getPublicSetting("home_community_title", "Rejoignez la communauté"),
-		getPublicSetting(
-			"home_community_subtitle",
-			"Rose Griffon est partout ! Discutez sur Discord et suivez notre actualité sur les réseaux."
-		),
-		getPublicSetting("home_community_description", "Le cœur de la communauté"),
-		// Events
-		getCalendarEvents(),
-		// Vitrine wiki
-		chargerVitrineWiki(),
-	]);
+	const [introTitre, introTexte, discordInvitation, achilleaLien, evenements, donnees] =
+		await Promise.all([
+			getPublicSetting("home_intro_title", "L'écosystème Inazuma Eleven francophone"),
+			getPublicSetting(
+				"home_intro_text",
+				"Association loi 1901 depuis 2019 : le wiki de Victory Road, la scène compétitive, les événements et la communauté, au même endroit."
+			),
+			getPublicSetting("home_community_discord", INVITATION_DISCORD),
+			getPublicSetting("home_achillea_link", "/achillea"),
+			getCalendarEvents(),
+			chargerAccueil(),
+		]);
 
-	// Logique pour trouver le prochain événement
-	const now = new Date();
-	// Filtrer les événements futurs ou en cours
-	const upcomingEvents = events.filter((e) => {
-		// Utiliser la date de fin pour inclure les événements en cours
-		const endDate = e.end?.dateTime || e.end?.date;
-		const startDate = e.start?.dateTime || e.start?.date;
-
-		// Si pas de date de fin, utiliser la date de début
-		const targetDate = endDate ? new Date(endDate) : startDate ? new Date(startDate) : null;
-
-		return targetDate && targetDate >= now;
-	});
-
-	// Trier par date de début la plus proche
-	upcomingEvents.sort((a, b) => {
-		const aStart = new Date(a.start?.dateTime || a.start?.date || 0).getTime();
-		const bStart = new Date(b.start?.dateTime || b.start?.date || 0).getTime();
-		return aStart - bStart;
-	});
-
-	const nextEvent = upcomingEvents[0];
+	const evenement = prochainEvenement(evenements);
 
 	return (
 		<>
 			<OrganizationSchema />
 			<WebsiteSchema />
 			<RealtimeSettingsListener />
-			<div className="flex flex-col min-h-screen">
-				<div
-					className="flex flex-col gap-4 md:gap-6 lg:gap-8 pb-12 md:pb-16 lg:pb-20 pt-2 md:pt-4 will-change-scroll"
+
+			<div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-3 px-4 py-4 lg:h-[calc(100dvh-3.5rem)] lg:grid-cols-12 lg:grid-rows-[minmax(0,5fr)_minmax(0,4fr)_auto] lg:overflow-hidden lg:px-6">
+				{/* Identité */}
+				<Tuile className="justify-between lg:col-span-7 lg:row-span-1" label="Rose Griffon">
+					<div className="flex min-h-0 flex-col gap-3">
+						<h1 className="text-fluid-2xl font-bold leading-tight text-on-surface">
+							{introTitre}
+						</h1>
+						<p className="line-clamp-4 text-sm leading-relaxed text-on-surface-variant">
+							{introTexte}
+						</p>
+					</div>
+					<div className="flex flex-wrap gap-2">
+						<a
+							href={discordInvitation}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary"
+						>
+							Rejoindre le Discord
+						</a>
+						<Link
+							href="/wiki"
+							className="rounded-full border border-outline-variant/40 px-4 py-2 text-sm font-semibold text-on-surface"
+						>
+							Ouvrir le wiki
+						</Link>
+					</div>
+				</Tuile>
+
+				{/* Prochain événement */}
+				<Tuile
+					className="justify-between lg:col-span-5"
+					href="/evenements"
+					label="Prochain événement"
 				>
-					<MotionSection
-						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
-						aria-labelledby="about-heading"
-					>
-						{/* Affichage du prochain événement s'il existe */}
-						{nextEvent && <NextEventBanner event={nextEvent} />}
-
-						<FusionBlock isImageLeft image={introImage} isPriority>
-							<div className="space-y-2 sm:space-y-3 lg:space-y-4 flex flex-col justify-center h-full">
-								<h1
-									id="about-heading"
-									className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight text-foreground"
-								>
-									{introTitle}
-								</h1>
-								<p className="text-sm sm:text-base md:text-lg leading-relaxed text-muted-foreground">
-									{introText}
-								</p>
-							</div>
-						</FusionBlock>
-					</MotionSection>
-
-					{/* RGTV masqué de la homepage (réactivable en remettant true). */}
-					{false && (
-						<MotionSection
-							className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
-							aria-labelledby="rgtv-heading"
-						>
-							<RgtvBanner
-								title={rgtvTitle}
-								subtitle={rgtvSubtitle}
-								description={rgtvDescription}
-								image={rgtvImage}
-								buttonText={rgtvButtonText}
-								link={rgtvLink}
-							/>
-						</MotionSection>
-					)}
-
-					{/* Piliers duos : Azalée (Encyclopédie & Médias) + Achilléa (E-Sport & Compétition) avec priorité aux sites d'origine */}
-					<MotionSection
-						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
-						aria-labelledby="pillars-heading"
-					>
-						<PillarsDuo
-							wikiStats={vitrineWiki.stats}
-							azaleeTwitter={azaleeTwitter}
-							achilleaDiscord={achilleaDiscord}
-						/>
-					</MotionSection>
-
-					{/*
-					 * Vitrine du wiki, rapatriée de l'ancienne landing `/wiki` :
-					 * dernières actualités Azalée puis compteurs + sections du wiki.
-					 */}
-					<AnimatedSection direction="up">
-						<section
-							className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
-							aria-labelledby="actus-azalee-heading"
-						>
-							<Suspense
-								fallback={<div className="h-96 animate-pulse rounded-3xl bg-muted" />}
-							>
-								<LatestNewsSection
-									articles={vitrineWiki.articles}
-									tweets={vitrineWiki.tweets}
-								/>
-							</Suspense>
-						</section>
-					</AnimatedSection>
-
-					<AnimatedSection direction="scale" delay={0.1}>
-						<WikiCarousel stats={vitrineWiki.stats} />
-					</AnimatedSection>
-
-					<MotionSection
-						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
-						aria-labelledby="achillea-heading"
-					>
-						<AchilleaBanner
-							description={achilleaDescription}
-							image={achilleaImage}
-							link={achilleaLink}
-							discordLink={achilleaDiscord}
-						/>
-					</MotionSection>
-
-					<Suspense fallback={null}>
-						<LatestChroniqueSection />
-					</Suspense>
-
-					<MotionSection id="projets-section" aria-labelledby="projects-heading">
-						<ProjectsSection />
-					</MotionSection>
-
-					{/* Section Réseaux Sociaux & Communauté */}
-
-					<MotionSection
-						className="w-full space-y-4 md:space-y-8 lg:space-y-10"
-						aria-labelledby="community-heading"
-					>
-						{/* Implémentation unique du bloc Discord : titre, widget et CTA. */}
-						<DiscordSection
-							titre={communityTitle}
-							sousTitre={communitySubtitle}
-							accroche={communityDescription}
-						/>
-
-						{/* Tweets à la une */}
-
-						<div className="w-full">
-							<FeaturedTweets />
+					<TitreTuile>Prochain événement</TitreTuile>
+					{evenement ? (
+						<div className="flex min-h-0 flex-col gap-1">
+							<p className="line-clamp-2 text-lg font-semibold text-on-surface">
+								{evenement.resume ?? "Événement"}
+							</p>
+							<p className="text-sm text-on-surface-variant">
+								{new Intl.DateTimeFormat("fr-FR", {
+									dateStyle: "full",
+									timeStyle: evenement.debut?.includes("T") ? "short" : undefined,
+								}).format(new Date(evenement.debut ?? Date.now()))}
+							</p>
 						</div>
-					</MotionSection>
+					) : (
+						<p className="text-sm text-on-surface-variant">
+							Aucun événement programmé pour l&apos;instant.
+						</p>
+					)}
+					<span className="text-sm font-medium text-primary">Voir le calendrier</span>
+				</Tuile>
 
-					{/* Section Dernière Chronique */}
-				</div>
+				{/* Azalée */}
+				<Tuile className="lg:col-span-4" href="/wiki" label="Wiki Azalée">
+					<TitreTuile>Azalée — wiki Victory Road</TitreTuile>
+					<div className="grid grid-cols-3 gap-2">
+						<Compteur valeur={donnees.stats.characters} libelle="Joueurs" />
+						<Compteur valeur={donnees.stats.skills} libelle="Techniques" />
+						<Compteur valeur={donnees.stats.items} libelle="Objets" />
+					</div>
+					<p className="line-clamp-2 text-sm text-on-surface-variant">
+						Fiches, techniques, totems, quêtes et traductions d&apos;Inazuma Eleven: Victory Road.
+					</p>
+				</Tuile>
+
+				{/* Achilléa */}
+				<Tuile className="lg:col-span-3" href={achilleaLien} label="Achilléa">
+					<TitreTuile>Achilléa — compétition</TitreTuile>
+					<p className="line-clamp-4 text-sm text-on-surface-variant">
+						Clans, mode classé, tournois et classement communautaire de la scène française.
+					</p>
+					<span className="mt-auto text-sm font-medium text-primary">Voir l&apos;e-sport</span>
+				</Tuile>
+
+				{/* Actualités */}
+				<Tuile className="lg:col-span-5" label="Dernières actualités">
+					<TitreTuile>Dernières publications</TitreTuile>
+					<ul className="flex min-h-0 flex-col divide-y divide-outline-variant/10">
+						{donnees.actualites.map((article) => (
+							<li key={`${article.app}-${article.slug}`} className="min-w-0 py-1.5">
+								<Link
+									href={article.app === "azalee" ? `/news/${article.slug}` : `/chroniques/${article.slug}`}
+									className="flex items-baseline justify-between gap-3 hover:text-primary"
+								>
+									<span className="truncate text-sm text-on-surface">{article.title}</span>
+									<span className="shrink-0 text-[11px] text-on-surface-variant/60">
+										{article.published_at
+											? new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" }).format(
+													new Date(article.published_at)
+												)
+											: ""}
+									</span>
+								</Link>
+							</li>
+						))}
+					</ul>
+				</Tuile>
+
+				{/* Raccourcis + légal */}
+				<nav
+					aria-label="Raccourcis"
+					className="flex flex-wrap items-center gap-2 lg:col-span-12"
+				>
+					{RACCOURCIS.map((entree) => (
+						<Link
+							key={entree.href}
+							href={entree.href}
+							className="rounded-full border border-outline-variant/20 bg-surface-container-low px-3 py-1.5 text-sm text-on-surface-variant transition-colors hover:border-primary/40 hover:text-on-surface"
+						>
+							{entree.libelle}
+						</Link>
+					))}
+					<span className="ml-auto flex flex-wrap gap-3 text-[11px] text-on-surface-variant/60">
+						{LIENS_LEGAUX.map((entree) => (
+							<Link key={entree.href} href={entree.href} className="hover:text-on-surface">
+								{entree.libelle}
+							</Link>
+						))}
+					</span>
+				</nav>
 			</div>
 		</>
 	);

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import RgEmote from "@/components/shared/emotes/RgEmote";
+import { ID_SERVEUR_DISCORD, INVITATION_DISCORD } from "@/lib/discord";
 
 /**
  * Section « communauté Discord » — implémentation UNIQUE du bloc Discord.
@@ -20,11 +21,6 @@ import RgEmote from "@/components/shared/emotes/RgEmote";
  * constantes de marque exposées en tokens par `@rosegriffon/ui`.
  */
 
-/** Serveur Rose Griffon interrogé via le widget public de Discord. */
-const ID_SERVEUR_DISCORD = "1072991720268111892";
-
-/** Invitation unique de la communauté (le widget n'en renvoie pas toujours). */
-export const INVITATION_DISCORD = "https://discord.com/invite/rosegriffon";
 
 /** Points forts affichés sous la description. */
 const ATOUTS = ["Discussion", "Gaming", "Événements"] as const;

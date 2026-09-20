@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarInset, SidebarProvider, Toaster, useBreakpoint } from "@rosegriffon/ui";
-import { ThemeToggle, WEBSITE_BASES, domaineDeLaRoute } from "@rosegriffon/app-shell";
+import { ThemeToggle, domaineDeLaRoute } from "@rosegriffon/app-shell";
 import { resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
 
@@ -75,7 +75,7 @@ function SidebarWrapper({ children, isMedium }: { children: React.ReactNode; isM
  * d'un changement de thème après hydratation.
  */
 function classeThemeDuDomaine(pathname: string): string | undefined {
-	const domaine = domaineDeLaRoute(pathname, WEBSITE_BASES);
+	const domaine = domaineDeLaRoute(pathname);
 	if (domaine === "esport") return "theme-achillea";
 	if (domaine === "wiki") return "theme-azalee-dark";
 	return undefined;
@@ -89,7 +89,7 @@ function RoutedHeader({
 	showSidebarToggle?: boolean;
 }) {
 	const pathname = usePathname() || "/";
-	const activeDomaine = domaineDeLaRoute(pathname, WEBSITE_BASES);
+	const activeDomaine = domaineDeLaRoute(pathname);
 	const { user: rgUser } = useAuth();
 	const { profile: rgProfile } = useProfile();
 	const { user: achilleaUser } = useAchilleaAuth();
@@ -116,7 +116,6 @@ function RoutedHeader({
 
 	return (
 		<Header
-			bases={WEBSITE_BASES}
 			isMobile={isMobile}
 			showSearch={!isMobile}
 			showCart={false}
@@ -152,6 +151,10 @@ export default function ClientLayout({
 	const pathname = usePathname();
 	const isAdminPage = pathname?.startsWith("/admin");
 	const isShopPage = pathname?.startsWith("/shop");
+	// L'accueil est un tableau de bord tenant dans la hauteur de la fenêtre : un
+	// pied de page sous la grille rendrait la page défilante pour rien. Ses liens
+	// légaux sont repris en bas de la grille.
+	const isHomePage = pathname === "/";
 	const isAuthPage =
 		pathname?.startsWith("/login") ||
 		pathname?.startsWith("/register") ||
@@ -200,13 +203,13 @@ export default function ClientLayout({
 											<SkipToContent />
 
 											{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
-											{showRail && <WebsiteNavigationRail bases={WEBSITE_BASES} />}
+											{showRail && <WebsiteNavigationRail />}
 
 											{/* SIDEBAR — tiroir en compact, tiroir à la demande en medium
 								    (le bouton « Menu » du rail l'ouvre), panneau fixe en expanded.
 								    Elle doit être montée aussi en medium : sans elle, ce bouton
 								    basculait un état sans panneau et ne faisait rien. */}
-											{!shouldHideSidebar && <AppSidebar bases={WEBSITE_BASES} />}
+											{!shouldHideSidebar && <AppSidebar />}
 
 											<SidebarNavigationHandler />
 											<EdgeSwipeDetector />
@@ -259,11 +262,11 @@ export default function ClientLayout({
 										    son layout : sans cette garde, les six routes du tunnel
 										    d'achat empilaient deux `contentinfo` — rupture visuelle et
 										    liens légaux annoncés deux fois par les lecteurs d'écran. */}
-													{!isShopPage && <Footer />}
+													{!isShopPage && !isHomePage && <Footer />}
 													<MobileWatermark />
 													{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
 													{isCompact && !shouldHideSidebar && (
-														<MobileBottomNavigation bases={WEBSITE_BASES} />
+														<MobileBottomNavigation />
 													)}
 												</div>
 											</SidebarInset>

@@ -1,6 +1,6 @@
 "use client";
 
-import { joindreWiki, WEBSITE_BASES } from "@rosegriffon/app-shell";
+import { wiki } from "@rosegriffon/app-shell";
 import { ArrowLeftRight, Eye, EyeOff, Gamepad2, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -280,7 +280,7 @@ export function PlayersClient({
 					    en dur partait sur une redirection 308 vers `/wiki/tools/compare`.
 					    Le préfixe vient du registre de routes, jamais d'une chaîne codée. */}
 					<Link
-						href={joindreWiki(WEBSITE_BASES.wiki, "/tools/compare")}
+						href={wiki("/tools/compare")}
 						className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-primary transition-all normal-case tracking-normal ml-auto"
 					>
 						<ArrowLeftRight size={13} aria-hidden="true" />

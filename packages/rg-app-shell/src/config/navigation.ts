@@ -1,10 +1,4 @@
-import {
-	CHEMINS_ESPORT,
-	cheminsWikiPour,
-	joindreDomaine,
-	joindreWiki,
-	type NavBases,
-} from "./routes";
+import { BASE_ESPORT, BASE_WIKI, CHEMINS_ESPORT, CHEMINS_WIKI, esport, wiki } from "./routes";
 
 export interface NavItem {
 	label: string;
@@ -90,21 +84,16 @@ export function cheminsCliquables(items: NavItem[]): string[] {
  * `/settings`) restent à la racine dans les deux apps et ne doivent JAMAIS être
  * préfixées — `/wiki/news` et `/wiki/settings` n'existent pas côté website.
  */
-export function construireNavigationItems(bases: NavBases): NavItem[] {
-	const w = (chemin: string) => joindreWiki(bases.wiki, chemin);
+export function construireNavigationItems(): NavItem[] {
+	const w = wiki;
 
 	return [
 		{ icon: "home", label: "nav.home", path: w("/") },
 		{ icon: "sports_soccer", label: "nav.cross", path: w("/cross") },
-		{
-			children: [
-				{ label: "nav.news.articles", path: "/news", icon: "feed" },
-				{ label: "nav.news.patch_notes", path: w("/patch-notes"), icon: "update" },
-			],
-			icon: "newspaper",
-			label: "nav.news",
-			path: "/news",
-		},
+		// Les articles vivent dans la catégorie « Actualité » : les répéter ici
+		// donnait deux accordéons pour une même destination. Seules les notes de
+		// version restent, elles décrivent le jeu et non la vie du site.
+		{ icon: "update", label: "nav.news.patch_notes", path: w("/patch-notes") },
 		// — Base de données (wiki curé) —
 		{ commonSprite: "chara", icon: "groups", label: "nav.wiki.players", path: w("/chara") },
 		{
@@ -205,106 +194,42 @@ export function construireNavigationItems(bases: NavBases): NavItem[] {
 			path: w("/niveau"),
 		},
 		{ icon: "emoji_events", label: "nav.wiki.trophies", path: w("/succes") },
-		...(bases.surfacesNiers
-			? [
-					{
-						// Médias : illustrations curées, corpus complet des textures, banques sonores,
-						// cinématiques, et modèles 3D (esprits/armures + objets/animaux).
-						children: [
-							{ label: "nav.wiki.gallery", path: w("/gallery"), icon: "image" },
-							{ label: "nav.wiki.textures", path: w("/textures"), icon: "texture" },
-							{ label: "nav.wiki.sounds", path: w("/sons"), icon: "graphic_eq" },
-							{ label: "nav.wiki.videos", path: w("/videos"), icon: "movie" },
-							// `/keshin` a fusionné dans `/modeles` : une seule page couvre les 6 236 modèles du
-							// jeu (personnages, techniques, objets, esprits, armures, animaux). L'ancienne URL
-							// redirige, mais elle n'a plus à figurer au menu à côté de celle qui la contient.
-							{ label: "nav.wiki.models", path: w("/modeles"), icon: "deployed_code" },
-							// `/mode` figurait dans la sous-navigation média (`MediaShell`) mais nulle part
-							// dans le menu : la sixième collection n'était atteignable qu'en passant par une
-							// des cinq autres.
-							{ label: "nav.wiki.modes", path: w("/mode"), icon: "stadia_controller" },
-						],
-						icon: "perm_media",
-						label: "nav.section.media",
-						path: w("/gallery"),
-					},
-				]
-			: []),
-		...(bases.surfacesNiers
-			? [
-					{
-						children: [
-							{ label: "nav.tools.stats", path: w("/tools/stats"), icon: "calculate" },
-							{ label: "nav.tools.compare", path: w("/tools/compare"), icon: "compare_arrows" },
-							{ label: "nav.tools.random_team", path: w("/tools/random-team"), icon: "casino" },
-							{ label: "nav.tools.my_team", path: w("/tools/my-team"), icon: "stadium" },
-							{ label: "nav.tools.translator", path: w("/tools/translator"), icon: "translate" },
-							{ label: "nav.tools.save_reader", path: w("/save"), icon: "save" },
-							{ label: "nav.tools.demo", path: w("/demo"), icon: "view_in_ar" },
-						],
-						icon: "build",
-						label: "nav.tools",
-						path: w("/tools"),
-					},
-				]
-			: []),
+		{
+			// Médias : illustrations curées, corpus complet des textures, banques
+			// sonores, cinématiques, et modèles 3D (esprits/armures + objets/animaux).
+			children: [
+				{ label: "nav.wiki.gallery", path: w("/gallery"), icon: "image" },
+				{ label: "nav.wiki.textures", path: w("/textures"), icon: "texture" },
+				{ label: "nav.wiki.sounds", path: w("/sons"), icon: "graphic_eq" },
+				{ label: "nav.wiki.videos", path: w("/videos"), icon: "movie" },
+				// `/keshin` a fusionné dans `/modeles` : une seule page couvre les 6 236 modèles du
+				// jeu (personnages, techniques, objets, esprits, armures, animaux). L'ancienne URL
+				// redirige, mais elle n'a plus à figurer au menu à côté de celle qui la contient.
+				{ label: "nav.wiki.models", path: w("/modeles"), icon: "deployed_code" },
+				// `/mode` figurait dans la sous-navigation média (`MediaShell`) mais nulle part
+				// dans le menu : la sixième collection n'était atteignable qu'en passant par une
+				// des cinq autres.
+				{ label: "nav.wiki.modes", path: w("/mode"), icon: "stadia_controller" },
+			],
+			icon: "perm_media",
+			label: "nav.section.media",
+			path: w("/gallery"),
+		},
+		{
+			children: [
+				{ label: "nav.tools.stats", path: w("/tools/stats"), icon: "calculate" },
+				{ label: "nav.tools.compare", path: w("/tools/compare"), icon: "compare_arrows" },
+				{ label: "nav.tools.random_team", path: w("/tools/random-team"), icon: "casino" },
+				{ label: "nav.tools.my_team", path: w("/tools/my-team"), icon: "stadium" },
+				{ label: "nav.tools.translator", path: w("/tools/translator"), icon: "translate" },
+				{ label: "nav.tools.save_reader", path: w("/save"), icon: "save" },
+				{ label: "nav.tools.demo", path: w("/demo"), icon: "view_in_ar" },
+			],
+			icon: "build",
+			label: "nav.tools",
+			path: w("/tools"),
+		},
 		{ icon: "settings", label: "nav.settings", path: "/settings" },
-	];
-}
-
-/**
- * Barre de navigation basse (compact).
- *
- * `activePaths` liste les routes préfixées ET, quand l'app monte le wiki sous un
- * préfixe, leurs équivalents à la racine : `rosegriffon.fr` sert encore les
- * anciennes URL par redirection permanente, et l'onglet doit rester allumé le
- * temps que la redirection se résolve.
- */
-export function construireMobileNavItems(bases: NavBases): NavItem[] {
-	const w = (chemin: string) => joindreWiki(bases.wiki, chemin);
-	const cheminsWiki = cheminsWikiPour(bases);
-	const cheminsWikiActifs = [
-		...cheminsWiki
-			.filter(
-				(c) =>
-					c !== "/" &&
-					!c.startsWith("/tools") &&
-					c !== "/demo" &&
-					c !== "/save" &&
-					c !== "/patch-notes" &&
-					c !== "/cross"
-			)
-			.map(w),
-		...(bases.wiki ? cheminsWiki.filter((c) => c !== "/") : []),
-		w("/"),
-		"/search",
-	];
-
-	return [
-		{ icon: "home", label: "nav.home", path: w("/") },
-		{
-			activePaths: [...new Set(cheminsWikiActifs)],
-			icon: "search",
-			label: "nav.wiki",
-			path: "/search",
-		},
-		{
-			activePaths: ["/news", "/chroniques", w("/patch-notes"), "/patch-notes"],
-			icon: "newspaper",
-			label: "nav.news",
-			path: "/news",
-		},
-		...(bases.surfacesNiers
-			? [
-					{
-						activePaths: [w("/tools"), "/tools", w("/demo"), "/demo", w("/save"), "/save"],
-						icon: "build",
-						label: "nav.tools",
-						path: w("/tools"),
-					},
-				]
-			: []),
-		{ activePaths: ["/settings"], icon: "settings", label: "nav.settings", path: "/settings" },
 	];
 }
 
@@ -317,41 +242,36 @@ export function construireMobileNavItems(bases: NavBases): NavItem[] {
  * 4. Recherche (Global federated search)
  * 5. Paramètres / Compte
  */
-export function construireMobileNavUnifiee(bases: NavBases): NavItem[] {
-	const w = (chemin: string) => joindreWiki(bases.wiki, chemin);
-	const e = (chemin: string) => joindreDomaine(bases.esport ?? "/achillea", chemin);
-	const a = (chemin: string) => joindreDomaine(bases.association ?? "", chemin);
-
-	const cheminsWiki = cheminsWikiPour(bases);
+export function construireMobileNavUnifiee(): NavItem[] {
+	// Les chemins NON préfixés restent dans `activePaths` : `rosegriffon.fr`
+	// sert encore les anciennes URL d'azalee.rosegriffon.fr par redirection
+	// permanente, et l'onglet doit rester allumé le temps qu'elle se résolve.
 	const cheminsWikiActifs = [
-		...cheminsWiki.filter((c) => c !== "/").map(w),
-		...(bases.wiki ? cheminsWiki.filter((c) => c !== "/") : []),
-		w("/"),
+		...CHEMINS_WIKI.filter((c) => c !== "/").map(wiki),
+		...CHEMINS_WIKI.filter((c) => c !== "/"),
+		BASE_WIKI,
 	];
 
-	const cheminsEsportActifs = [
-		...CHEMINS_ESPORT.map(e),
-		...(bases.esport ? CHEMINS_ESPORT.map((c) => `/achillea${c === "/" ? "" : c}`) : []),
-	];
+	const cheminsEsportActifs = CHEMINS_ESPORT.map(esport);
 
 	return [
 		{
-			activePaths: ["/", a("/")],
+			activePaths: ["/"],
 			icon: "home",
 			label: "nav.home",
-			path: a("/"),
+			path: "/",
 		},
 		{
 			activePaths: [...new Set(cheminsWikiActifs)],
 			icon: "menu_book",
 			label: "nav.wiki",
-			path: w("/"),
+			path: BASE_WIKI,
 		},
 		{
 			activePaths: [...new Set(cheminsEsportActifs)],
 			icon: "sports_esports",
 			label: "nav.domaine.esport",
-			path: e("/"),
+			path: BASE_ESPORT,
 		},
 		{
 			activePaths: ["/search"],
@@ -368,77 +288,6 @@ export function construireMobileNavUnifiee(bases: NavBases): NavItem[] {
 	];
 }
 
-/** Navigation de l'espace d'administration, enracinée sur `bases.admin`. */
-export function construireDashboardItems(bases: NavBases): NavItem[] {
-	const a = (chemin: string) => `${bases.admin}${chemin}`;
-
-	return [
-		{ adminOnly: true, icon: "dashboard", label: "nav.dashboard.overview", path: bases.admin },
-		{
-			adminOnly: true,
-			children: [
-				{ label: "nav.dashboard.content.news", path: a("/news"), icon: "newspaper" },
-				{ label: "nav.dashboard.content.database", path: a("/database"), icon: "database" },
-				{
-					label: "nav.dashboard.content.verification",
-					path: a("/database/verification"),
-					icon: "verified",
-				},
-			],
-			icon: "edit_note",
-			groupOnly: true,
-			label: "nav.dashboard.content",
-			path: a("/content"),
-		},
-		{
-			adminOnly: true,
-			children: [{ label: "nav.dashboard.social.tweets", path: a("/tweets"), icon: "tag" }],
-			icon: "share",
-			groupOnly: true,
-			label: "nav.dashboard.social",
-			path: a("/social"),
-		},
-		{
-			adminOnly: true,
-			children: [
-				{
-					label: "nav.dashboard.tools.import_doc",
-					path: a("/import-google-doc"),
-					icon: "description",
-				},
-				{
-					label: "nav.dashboard.tools.import_sheet",
-					path: a("/import-sheet"),
-					icon: "table_chart",
-				},
-			],
-			icon: "build",
-			groupOnly: true,
-			label: "nav.dashboard.tools",
-			path: a("/tools"),
-		},
-		{
-			adminOnly: true,
-			children: [{ label: "nav.dashboard.security.audit", path: a("/audit"), icon: "policy" }],
-			icon: "shield",
-			groupOnly: true,
-			label: "nav.dashboard.security",
-			path: a("/security"),
-		},
-		{ adminOnly: true, icon: "group", label: "nav.dashboard.users", path: a("/users") },
-		{ adminOnly: true, icon: "settings", label: "nav.dashboard.settings", path: a("/settings") },
-	];
-}
-
-/** Construit les trois arbres d'un coup. */
-export function construireNavigation(bases: NavBases) {
-	return {
-		dashboardItems: construireDashboardItems(bases),
-		mobileNavItems: construireMobileNavItems(bases),
-		navigationItems: construireNavigationItems(bases),
-	};
-}
-
 // ─── NAVIGATION UNIFIÉE — TROIS DOMAINES ─────────────────────────────────────
 //
 // Depuis la fusion des trois sites sous `rosegriffon.fr`, un seul menu doit
@@ -450,28 +299,32 @@ export function construireNavigation(bases: NavBases) {
 // signature ni de résultat : les apps migrent quand elles veulent, et rien ne
 // casse entre-temps.
 
-/** Les trois domaines du réseau, dans l'ordre d'affichage du menu. */
+/**
+ * Les trois domaines du réseau — unité de THÈME, pas de menu.
+ *
+ * Le menu compte quatre catégories (cf. `GROUPES_NAV`) : « Actualité » est un
+ * regroupement éditorial, pas un univers visuel, et les articles gardent le
+ * thème de l'association.
+ */
 export const DOMAINES = ["association", "wiki", "esport"] as const;
 
 export type Domaine = (typeof DOMAINES)[number];
 
+/** Les quatre catégories de premier niveau du menu, dans l'ordre d'affichage. */
+export const GROUPES_NAV = ["actualite", "association", "wiki", "esport"] as const;
+
+export type GroupeNav = (typeof GROUPES_NAV)[number];
+
 export interface SousCategorieNav {
-	/** Domaine, pour cibler un style ou un thème par section. */
-	domaine: Domaine;
+	/** Catégorie de menu, pour cibler un style ou ouvrir le bon accordéon. */
+	domaine: GroupeNav;
 	/** Entrée racine repliable, avec ses enfants. */
 	item: NavItem;
 }
 
-/**
- * Menu de l'e-sport (Achilléa).
- *
- * Rend `null` si l'app ne monte pas ce domaine : mieux vaut une sous-catégorie
- * absente qu'une sous-catégorie pleine de liens morts. C'est le cas d'`azalee`,
- * qui ne sert que le wiki.
- */
-export function construireEsportItems(bases: NavBases): NavItem[] {
-	if (bases.esport === undefined) return [];
-	const e = (chemin: string) => joindreDomaine(bases.esport, chemin);
+/** Menu de l'e-sport (Achilléa). */
+export function construireEsportItems(): NavItem[] {
+	const e = esport;
 
 	return [
 		{
@@ -538,23 +391,20 @@ export function construireEsportItems(bases: NavBases): NavItem[] {
 	];
 }
 
-/** Menu du portail de l'association. */
-export function construireAssociationItems(bases: NavBases): NavItem[] {
-	if (bases.association === undefined) return [];
-	const a = (chemin: string) => joindreDomaine(bases.association, chemin);
-
+/**
+ * Menu « Actualité ».
+ *
+ * Quatrième catégorie de premier niveau, extraite de l'association : les
+ * articles, les chroniques, les événements et la webTV sont ce qu'on vient
+ * consulter RÉGULIÈREMENT, alors que la présentation de l'association se lit
+ * une fois. Les mélanger enfouissait le flux éditorial sous un accordéon
+ * institutionnel.
+ */
+export function construireActualiteItems(): NavItem[] {
 	return [
-		{ icon: "home", label: "nav.association.home", path: a("/") },
-		{
-			children: [
-				{ icon: "feed", label: "nav.association.news", path: a("/news") },
-				{ icon: "auto_stories", label: "nav.association.chronicles", path: a("/chroniques") },
-			],
-			icon: "newspaper",
-			label: "nav.association.editorial",
-			path: a("/chroniques"),
-		},
-		{ icon: "event", label: "nav.association.events", path: a("/evenements") },
+		{ icon: "feed", label: "nav.association.news", path: "/news" },
+		{ icon: "auto_stories", label: "nav.association.chronicles", path: "/chroniques" },
+		{ icon: "event", label: "nav.association.events", path: "/evenements" },
 		{
 			// L'image officielle de la webTV, pas un pictogramme générique : elle
 			// est livrée dans `public/rgtv/rgtv.webp` et porte l'identité de la
@@ -562,68 +412,62 @@ export function construireAssociationItems(bases: NavBases): NavItem[] {
 			icon: "live_tv",
 			imageUrl: "/rgtv/rgtv.webp",
 			label: "nav.association.rgtv",
-			path: a("/rose-griffon-tv"),
-		},
-		{
-			children: [
-				{ icon: "forum", label: "nav.association.community", path: a("/community") },
-				{ icon: "how_to_vote", label: "nav.association.polls", path: a("/sondages") },
-				{ icon: "celebration", label: "nav.association.iergday", path: a("/iergday") },
-			],
-			icon: "forum",
-			label: "nav.association.life",
-			path: a("/community"),
-		},
-		/*
-		 * L'association en UNE entrée.
-		 *
-		 * « À propos », « Notre équipe » et les partenaires décrivaient la même
-		 * chose découpée en trois pages, dont deux quasi vides (`notre-equipe`
-		 * fait 7 lignes). Trois entrées de menu pour un seul sujet, c'est trois
-		 * fois plus de place occupée et un choix à faire là où il n'y a rien à
-		 * choisir. `/a-propos` les réunit ; les projets et le soutien restent
-		 * distincts, ce sont de vraies destinations.
-		 */
-		{
-			children: [
-				{ icon: "rocket_launch", label: "nav.association.projects", path: a("/projets") },
-				{ icon: "volunteer_activism", label: "nav.association.support", path: a("/nous-soutenir") },
-			],
-			icon: "diversity_3",
-			label: "nav.association.about_us",
-			path: a("/a-propos"),
+			path: "/rose-griffon-tv",
 		},
 	];
 }
 
 /**
- * Menu complet, groupé en trois sous-catégories.
+ * Menu de l'association.
  *
- * Une sous-catégorie sans enfant est OMISE, pas rendue vide : une app qui ne
- * monte qu'un domaine (azalee) obtient un menu d'un seul groupe, et non trois
- * accordéons dont deux ne s'ouvrent sur rien.
+ * « Vie de la communauté » et « L'association » n'en font plus qu'UNE. Deux
+ * accordéons pour six destinations, c'est deux clics pour arriver à la page des
+ * membres là où un seul suffit — et la distinction entre « la communauté » et
+ * « l'association » n'existe que dans l'organigramme, pas pour le visiteur.
+ */
+export function construireAssociationItems(): NavItem[] {
+	return [
+		{ icon: "home", label: "nav.association.home", path: "/" },
+		{ icon: "diversity_3", label: "nav.association.about_us", path: "/a-propos" },
+		{ icon: "forum", label: "nav.association.community", path: "/community" },
+		{ icon: "how_to_vote", label: "nav.association.polls", path: "/sondages" },
+		{ icon: "celebration", label: "nav.association.iergday", path: "/iergday" },
+		{ icon: "rocket_launch", label: "nav.association.projects", path: "/projets" },
+		{ icon: "volunteer_activism", label: "nav.association.support", path: "/nous-soutenir" },
+	];
+}
+
+/**
+ * Menu complet, groupé en QUATRE catégories : actualité, association, wiki,
+ * e-sport.
  *
  * `groupOnly` sur l'entête : le groupe n'est pas une destination, seulement un
  * déclencheur de repli — sans ce drapeau la barre latérale en ferait un lien
  * vers une page qui n'existe pas.
  */
-export function construireNavigationUnifiee(bases: NavBases): SousCategorieNav[] {
-	const groupes: { domaine: Domaine; enfants: NavItem[]; icon: string; label: string }[] = [
+export function construireNavigationUnifiee(): SousCategorieNav[] {
+	const groupes: { domaine: GroupeNav; enfants: NavItem[]; icon: string; label: string }[] = [
+		{
+			domaine: "actualite",
+			enfants: construireActualiteItems(),
+			icon: "newspaper",
+			label: "nav.domaine.actualite",
+		},
 		{
 			domaine: "association",
-			enfants: construireAssociationItems(bases),
+			enfants: construireAssociationItems(),
 			icon: "diversity_3",
 			label: "nav.domaine.association",
 		},
 		{
 			domaine: "wiki",
-			enfants: construireNavigationItems(bases),
+			enfants: construireNavigationItems(),
 			icon: "menu_book",
 			label: "nav.domaine.wiki",
 		},
 		{
 			domaine: "esport",
-			enfants: construireEsportItems(bases),
+			enfants: construireEsportItems(),
 			icon: "sports_esports",
 			label: "nav.domaine.esport",
 		},
@@ -651,95 +495,22 @@ export function construireNavigationUnifiee(bases: NavBases): SousCategorieNav[]
  * de section. L'ordre du test compte : l'e-sport et le wiki sont préfixés, donc
  * testés d'abord ; l'association est la racine et récupère tout le reste.
  */
-export function domaineDeLaRoute(pathname: string, bases: NavBases): Domaine {
-	if (bases.esport && estRouteActive(pathname, bases.esport)) return "esport";
-	if (bases.wiki && estRouteActive(pathname, bases.wiki)) return "wiki";
+export function domaineDeLaRoute(pathname: string): Domaine {
+	if (estRouteActive(pathname, BASE_ESPORT)) return "esport";
+	if (estRouteActive(pathname, BASE_WIKI)) return "wiki";
 	if (pathname === "/news" || pathname.startsWith("/news/")) return "wiki";
 	return "association";
 }
 
-// ─── BARRE SUPÉRIEURE ET NAVIGATION MOBILE — PAGES VITALES ───────────────────
-//
-// PRINCIPE DE RÉPARTITION
-// Trois surfaces, trois rôles, et surtout trois BUDGETS d'espace différents :
-//
-//   - la barre supérieure et la barre du bas sont toujours visibles. Elles
-//     coûtent de la place sur CHAQUE page, donc elles ne portent que ce qui
-//     doit rester à un geste : les trois domaines et l'actualité ;
-//   - la barre latérale est dépliable. Elle peut porter l'arborescence
-//     complète, y compris les sous-catégories ;
-//   - le pied de page porte ce qui se consulte une fois : mentions légales,
-//     boutique, présentation de l'association.
-//
-// CE QUI SORT DE LA NAVIGATION
-// `/shop` et `/a-propos` quittent le menu. Ce ne sont pas des destinations de
-// parcours : on arrive sur la boutique depuis une campagne ou le pied de page,
-// et sur la présentation de l'association une fois, au premier passage. Les
-// laisser dans une barre toujours visible coûtait deux emplacements sur cinq
-// pour des pages consultées marginalement.
-
-/** Au plus cinq entrées : au-delà, les cibles tactiles passent sous 48 px. */
-const MAX_ONGLETS_MOBILE = 5;
-
 /**
- * Entrées de la barre supérieure : les trois domaines, plus l'actualité.
+ * Arbre rendu par les TROIS surfaces de navigation (barre latérale, rail,
+ * barre du bas).
  *
- * On n'y met JAMAIS de sous-niveau. Un menu déroulant dans une barre
- * permanente rend la cible instable au survol et ne survit pas au tactile ;
- * c'est le rôle de la barre latérale.
+ * Ce bloc de résolution était recopié à l'identique dans les trois composants,
+ * avec chacun sa branche `bases.esport !== undefined` et son repli vers
+ * `construireDashboardItems` — lequel n'était jamais rendu, l'administration
+ * ayant sa propre barre latérale (`AdminSidebar`). Une seule fonction, donc.
  */
-export function construireItemsBarreSuperieure(bases: NavBases): NavItem[] {
-	const items: NavItem[] = [
-		{ icon: "home", label: "nav.association.home", path: joindreDomaine(bases.association, "/") },
-	];
-
-	if (bases.wiki !== undefined) {
-		items.push({
-			activePaths: [joindreWiki(bases.wiki, "/")],
-			icon: "menu_book",
-			label: "nav.domaine.wiki",
-			path: joindreWiki(bases.wiki, "/"),
-		});
-	}
-
-	if (bases.esport !== undefined) {
-		items.push({
-			activePaths: [bases.esport],
-			icon: "sports_esports",
-			label: "nav.domaine.esport",
-			path: joindreDomaine(bases.esport, "/"),
-		});
-	}
-
-	items.push({
-		activePaths: ["/news", "/chroniques"],
-		icon: "newspaper",
-		label: "nav.association.editorial",
-		path: "/news",
-	});
-
-	return items;
-}
-
-/**
- * Onglets de la barre du bas, sur mobile.
- *
- * Mêmes destinations que la barre supérieure, plus le compte : sur mobile la
- * barre supérieure se réduit au titre et au menu, c'est donc la barre du bas
- * qui porte la navigation. Garder les deux surfaces cohérentes évite qu'une
- * entrée n'existe que dans une orientation d'écran.
- */
-export function construireOngletsMobile(bases: NavBases): NavItem[] {
-	const vitaux = construireItemsBarreSuperieure(bases);
-	const compte: NavItem = {
-		activePaths: ["/settings", "/profil"],
-		icon: "account_circle",
-		label: "nav.account",
-		path: "/settings",
-	};
-
-	// Le compte est le dernier onglet, toujours. S'il fallait couper, ce serait
-	// dans les domaines — jamais dans l'accès au compte, qui n'a pas d'autre
-	// point d'entrée sur mobile.
-	return [...vitaux.slice(0, MAX_ONGLETS_MOBILE - 1), compte];
+export function itemsDeNavigation(): NavItem[] {
+	return construireNavigationUnifiee().map((groupe) => groupe.item);
 }

@@ -4,26 +4,22 @@
  */
 export const DICTIONNAIRE_NAV_FR: Record<string, string> = {
 	// — Entêtes des trois domaines du réseau —
+	"nav.domaine.actualite": "Actualité",
 	"nav.domaine.association": "Association",
 	"nav.domaine.esport": "E-sport",
 	"nav.domaine.wiki": "Wiki",
 	// — Portail de l'association —
-	"nav.association.about": "À propos",
 	"nav.association.about_us": "L'association",
 	"nav.association.chronicles": "Chroniques",
 	"nav.association.community": "Communauté",
-	"nav.association.editorial": "Actualités",
 	"nav.association.events": "Événements",
 	"nav.association.home": "Accueil",
 	"nav.association.iergday": "IERG Day",
-	"nav.association.life": "Vie de la communauté",
 	"nav.association.news": "Articles",
 	"nav.association.polls": "Sondages",
 	"nav.association.projects": "Projets",
 	"nav.association.rgtv": "Rose Griffon TV",
-	"nav.association.shop": "Boutique",
 	"nav.association.support": "Nous soutenir",
-	"nav.association.team": "Notre équipe",
 	// — E-sport (Achilléa) —
 	"nav.esport.casts": "Casts",
 	"nav.esport.clans": "Clans",
@@ -65,10 +61,7 @@ export const DICTIONNAIRE_NAV_FR: Record<string, string> = {
 	"nav.dashboard.tools.import_doc": "Import Google Doc",
 	"nav.dashboard.tools.import_sheet": "Import Tableur",
 	"nav.dashboard.users": "Utilisateurs",
-	"nav.news": "Actualités",
-	"nav.news.articles": "Articles",
 	"nav.news.patch_notes": "Notes de patch",
-	"nav.news.topics": "Sujets",
 	"nav.search": "Recherche",
 	"nav.section.abilities": "Techniques & capacités",
 	"nav.section.clubs": "Équipes & clubs",

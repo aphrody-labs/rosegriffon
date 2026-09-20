@@ -1,6 +1,6 @@
 import type { ComponentType, SVGProps } from "react";
 
-import { PfpIcon } from "@/components/sidebar/atoms/PfpIcon";
+import { PfpIcon } from "@/components/icons/PfpIcon";
 
 import type { EMOTES } from "@/lib/emotes";
 import { Hash, Palette, Smile, Users } from "@/lib/icons-config";

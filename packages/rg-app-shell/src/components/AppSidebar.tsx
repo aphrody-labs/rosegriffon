@@ -20,20 +20,16 @@ import {
 	useSidebar,
 } from "@rosegriffon/ui";
 import {
-	construireDashboardItems,
-	construireNavigationItems,
-	construireNavigationUnifiee,
+	itemsDeNavigation,
 	estItemActif,
 	type NavItem,
 } from "../config/navigation";
-import { basesDepuisChemin, estSousAdministration, type NavBases } from "../config/routes";
 import { iconMap } from "../lib/icons";
 import { traduireNav } from "../lib/translations";
 
 export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 	items?: NavItem[];
 	isAdmin?: boolean;
-	bases?: NavBases;
 	t?: (key: string) => string;
 	renderIcon?: (item: NavItem) => React.ReactNode;
 	headerSlot?: React.ReactNode;
@@ -304,7 +300,6 @@ function RecursiveNavItem({
 export function AppSidebar({
 	items,
 	isAdmin = false,
-	bases: basesProp,
 	t,
 	renderIcon,
 	headerSlot,
@@ -313,18 +308,7 @@ export function AppSidebar({
 	...props
 }: AppSidebarProps) {
 	const pathname = usePathname() || "/";
-	const isDashboard = estSousAdministration(pathname);
-	// Source unique : `/achillea/**` doit rendre les bases de website, pas
-	// celles d'azalee (cf. `basesDepuisChemin`).
-	const bases = basesProp ?? basesDepuisChemin(pathname);
-
-	const defaultNavItems = isDashboard
-		? construireDashboardItems(bases)
-		: bases.esport !== undefined
-			? construireNavigationUnifiee(bases).map((g) => g.item)
-			: construireNavigationItems(bases);
-
-	const resolvedNavItems = items ?? defaultNavItems;
+	const resolvedNavItems = items ?? itemsDeNavigation();
 
 	const [mounted, setMounted] = React.useState(false);
 	React.useEffect(() => {

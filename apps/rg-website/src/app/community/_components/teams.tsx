@@ -56,7 +56,7 @@ async function TeamsSection() {
 		<section className="flex flex-col gap-10 lg:gap-12">
 			<TeamStructuredData
 				pageName="Le Staff RG"
-				url="https://rosegriffon.fr/notre-equipe/staff"
+				url="https://rosegriffon.fr/community"
 				members={allMembers}
 			/>
 			{/* Header Section */}

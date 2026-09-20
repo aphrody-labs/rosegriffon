@@ -11,18 +11,15 @@ export const dynamic = "force-dynamic";
 // Routes publiques réelles (hors auth/dashboard/admin/profil). Les chemins doivent exister
 // — un sitemap qui pointe vers des 404 dégrade le crawl. Priorités/fréquences indicatives.
 //
-// `/notre-equipe` n'y figure pas : la route ne rend rien, elle redirige vers
-// `/notre-equipe/association` (déjà listée). Annoncer une redirection dans un
-// plan de site fait dépenser du crawl pour rien.
+// `/notre-equipe` n'y figure plus : la page a fusionné dans `/community` et ne
+// fait que rediriger. Annoncer une redirection dans un plan de site fait
+// dépenser du crawl pour rien.
 const ROUTES: Array<{
 	path: string;
 	priority: number;
 	changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
 }> = [
 	{ path: "/", priority: 1, changeFrequency: "weekly" },
-	{ path: "/notre-equipe/association", priority: 0.6, changeFrequency: "monthly" },
-	{ path: "/notre-equipe/staff", priority: 0.6, changeFrequency: "monthly" },
-	{ path: "/notre-equipe/partenaires", priority: 0.6, changeFrequency: "monthly" },
 	{ path: "/a-propos", priority: 0.7, changeFrequency: "monthly" },
 	{ path: "/a-propos/rejoindre-rg", priority: 0.7, changeFrequency: "monthly" },
 	{ path: "/a-propos/contact", priority: 0.5, changeFrequency: "yearly" },
@@ -33,7 +30,7 @@ const ROUTES: Array<{
 	{ path: "/projets/outils/pfp", priority: 0.6, changeFrequency: "monthly" },
 	{ path: "/evenements", priority: 0.8, changeFrequency: "weekly" },
 	{ path: "/chroniques", priority: 0.8, changeFrequency: "weekly" },
-	{ path: "/community", priority: 0.6, changeFrequency: "weekly" },
+	{ path: "/community", priority: 0.8, changeFrequency: "weekly" },
 	{ path: "/sondages", priority: 0.6, changeFrequency: "weekly" },
 	{ path: "/iergday", priority: 0.7, changeFrequency: "daily" },
 	// Ces quatre pages publiques manquaient : aucune n'était annoncée nulle part.

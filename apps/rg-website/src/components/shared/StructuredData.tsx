@@ -260,7 +260,7 @@ interface TeamMemberSchema {
 interface TeamStructuredDataProps {
 	/** Titre de la page équipe (ex : "Le Staff RG"). */
 	pageName: string;
-	/** URL canonique de la page (ex : "https://rosegriffon.fr/notre-equipe/staff"). */
+	/** URL canonique de la page (ex : "https://rosegriffon.fr/community"). */
 	url: string;
 	members: TeamMemberSchema[];
 }

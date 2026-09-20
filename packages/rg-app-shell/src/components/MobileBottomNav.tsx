@@ -3,12 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-	construireMobileNavItems,
 	construireMobileNavUnifiee,
 	estRouteActive,
 	type NavItem,
 } from "../config/navigation";
-import { basesDepuisChemin, estSousAdministration, type NavBases } from "../config/routes";
 import { iconMap } from "../lib/icons";
 import { traduireNav } from "../lib/translations";
 
@@ -24,7 +22,6 @@ function safeHaptic() {
 
 export interface MobileBottomNavProps {
 	items?: (NavItem & { isAction?: boolean })[];
-	bases?: NavBases;
 	t?: (key: string) => string;
 	renderIcon?: (item: NavItem) => React.ReactNode;
 	className?: string;
@@ -122,44 +119,15 @@ function FABActionButton({
 
 export function MobileBottomNav({
 	items,
-	bases: basesProp,
 	t,
 	renderIcon,
 	className,
 }: MobileBottomNavProps = {}) {
 	const pathname = usePathname() || "/";
-	const isDashboard = estSousAdministration(pathname);
-	// Source unique : basesProp si fourni, sinon résolu par basesDepuisChemin
-	const bases = basesProp ?? basesDepuisChemin(pathname);
-
-	const dashboardMobileItems: (NavItem & { isAction?: boolean })[] = [
-		{ icon: "dashboard", label: "nav.dashboard.overview", path: bases.admin },
-		{
-			icon: "article",
-			label: "nav.dashboard.content.news",
-			path: `${bases.admin}/news`,
-		},
-		{
-			icon: "add",
-			isAction: true,
-			label: "nav.dashboard.add",
-			path: `${bases.admin}/news/new`,
-		},
-		{ icon: "group", label: "nav.dashboard.users", path: `${bases.admin}/users` },
-		{
-			icon: "settings",
-			label: "nav.dashboard.settings",
-			path: `${bases.admin}/settings`,
-		},
-	];
-
-	const defaultItems = isDashboard
-		? dashboardMobileItems
-		: bases.esport !== undefined
-			? construireMobileNavUnifiee(bases)
-			: construireMobileNavItems(bases);
-
-	const resolvedItems = items ?? defaultItems;
+	// L'administration a sa propre barre latérale : la barre du bas portait une
+	// liste d'actions `/admin/**` qu'aucun écran ne rendait (le chrome est masqué
+	// sous `/admin`).
+	const resolvedItems = items ?? construireMobileNavUnifiee();
 
 	return (
 		<nav
