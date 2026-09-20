@@ -40,6 +40,9 @@ export const MARQUE = {
 	succes: "#2e9e52",
 	info: "#0089ca",
 	alerte: "#e49e22",
+	surSucces: "#f9f8f5",
+	surInfo: "#f9f8f5",
+	surAlerte: "#251804",
 } as const;
 
 /** Couleurs imposées par des marques tierces (constantes, hors thème). */

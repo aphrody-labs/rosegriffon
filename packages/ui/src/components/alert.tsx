@@ -11,8 +11,11 @@ const alertVariants = cva(
 				default: "bg-background text-foreground",
 				destructive:
 					"border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
-				success: "border-success/50 text-success dark:border-success [&>svg]:text-success",
-				warning: "border-warning/50 text-warning dark:border-warning [&>svg]:text-warning",
+				// Les tokens du design system sont `succes` et `alerte` (nommage FR,
+				// cf. styles.css). `success`/`warning` n'existent pas : ces deux
+				// variantes rendaient une bordure et un texte transparents.
+				success: "border-succes/50 text-succes dark:border-succes [&>svg]:text-succes",
+				warning: "border-alerte/50 text-alerte dark:border-alerte [&>svg]:text-alerte",
 			},
 		},
 		defaultVariants: {

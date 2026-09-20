@@ -114,11 +114,20 @@ describe("tokens exposés", () => {
 		}
 	});
 
-	test("un thème hérite de :root les rôles qu'il ne redéclare pas", () => {
-		// `.theme-roy` ne déclare ni scrim ni shadow : la cascade doit les fournir.
-		const blocRoy = analyserBlocs(css).find((b) => b.selecteurs.includes(".theme-roy"));
-		expect(blocRoy?.declarations.has("--md-sys-color-scrim")).toBe(false);
-		expect(THEMES["theme-roy"].md3.scrim).toBe("#000000");
+	test("les 4 thèmes déclarent le même jeu de variables dans le CSS", () => {
+		// Pas seulement après cascade : un rôle qu'un seul thème omet n'est PAS
+		// surchargeable dans ce thème et reste figé sur la valeur du `:root`.
+		// C'est ce qui rendait `bg-scrim` inerte en Roy/Gaëlle et privait les
+		// thèmes Azalée de `--chart-*`.
+		const blocs = analyserBlocs(css);
+		const varsDuTheme = (nom: string) =>
+			[...(blocs.find((b) => b.selecteurs.includes(`.${nom}`))?.declarations.keys() ?? [])].sort();
+
+		const reference = varsDuTheme(NOMS_THEMES[0]!);
+		expect(reference.length).toBeGreaterThan(60);
+		for (const nom of NOMS_THEMES) {
+			expect(varsDuTheme(nom)).toEqual(reference);
+		}
 	});
 
 	test("le pont shadcn est résolu, pas laissé en référence", () => {

@@ -80,6 +80,12 @@
 	--text-fluid-headline-xl: clamp(1.75rem, 3vw + 0.5rem, 3.5rem); /* 28 → 56 */
 	--text-fluid-headline-lg: clamp(1.5rem, 2vw + 0.5rem, 2.5rem); /* 24 → 40 */
 	--text-fluid-headline-md: clamp(1.25rem, 1.2vw + 0.5rem, 2rem); /* 20 → 32 */
+	/* `headline-sm`, `title-md` et `title-sm` étaient déjà utilisés dans les
+	 * fiches du wiki alors qu'aucun token ne les définissait : la classe était
+	 * inerte et la taille retombait sur l'héritage du parent. */
+	--text-fluid-headline-sm: clamp(1.125rem, 0.8vw + 0.5rem, 1.5rem); /* 18 → 24 */
+	--text-fluid-title-md: clamp(1rem, 0.5vw + 0.5rem, 1.25rem); /* 16 → 20 */
+	--text-fluid-title-sm: clamp(0.875rem, 0.3vw + 0.5rem, 1rem); /* 14 → 16 */
 	--text-fluid-body-lg: clamp(1rem, 0.5vw + 0.875rem, 1.25rem); /* 16 → 20 */
 	--text-fluid-body-md: clamp(0.9375rem, 0.25vw + 0.875rem, 1rem); /* 15 → 16 */
 
@@ -152,6 +158,11 @@
 	--color-succes: var(--rg-succes);
 	--color-info: var(--rg-info);
 	--color-alerte: var(--rg-alerte);
+	/* Contrastes associés : sans eux, `bg-succes` n'avait aucun `text-*`
+	 * légitime et les composants retombaient sur `text-white` codé en dur. */
+	--color-on-succes: var(--rg-sur-succes);
+	--color-on-info: var(--rg-sur-info);
+	--color-on-alerte: var(--rg-sur-alerte);
 
 	/* ─── Éléments d'Inazuma Eleven ──────────────────────────────────────── */
 	/* Comme les marques tierces ci-dessous : ces quatre teintes ne sont pas des
@@ -234,6 +245,11 @@
 		--rg-succes: oklch(0.62 0.15 150);
 		--rg-info: oklch(0.6 0.14 240);
 		--rg-alerte: oklch(0.75 0.15 75);
+		/* `--rg-alerte` est un ambre clair : du blanc dessus tombe sous le ratio
+		 * 4.5:1. Il prend donc un texte sombre, les deux autres un texte clair. */
+		--rg-sur-succes: oklch(0.98 0.004 90);
+		--rg-sur-info: oklch(0.98 0.004 90);
+		--rg-sur-alerte: oklch(0.22 0.04 75);
 
 		/* ─── M3 sys-color — LIGHT scheme (35 tokens) ────────────────────── */
 		--md-sys-color-primary: oklch(0.5 0.22 0);
@@ -342,6 +358,11 @@
 		--md-sys-color-on-surface-variant: oklch(0.4 0.04 250);
 		--md-sys-color-outline: oklch(0.55 0.04 250);
 		--md-sys-color-outline-variant: oklch(0.85 0.02 250);
+		/* Roy et Gaëlle omettaient scrim/shadow : `bg-scrim` (overlays de
+		 * dialogue, tiroirs) n'y était donc pas surchargeable et restait figé sur
+		 * la valeur du :root. Les quatre thèmes couvrent maintenant les mêmes vars. */
+		--md-sys-color-scrim: oklch(0 0 0);
+		--md-sys-color-shadow: oklch(0 0 0);
 		--md-sys-color-surface-dim: oklch(0.88 0.01 80);
 		--md-sys-color-surface-bright: oklch(0.99 0.005 80);
 		--md-sys-color-surface-container-lowest: oklch(1 0 0);
@@ -417,6 +438,11 @@
 		--md-sys-color-on-surface-variant: oklch(0.4 0.08 25);
 		--md-sys-color-outline: oklch(0.55 0.06 25);
 		--md-sys-color-outline-variant: oklch(0.85 0.04 30);
+		/* Roy et Gaëlle omettaient scrim/shadow : `bg-scrim` (overlays de
+		 * dialogue, tiroirs) n'y était donc pas surchargeable et restait figé sur
+		 * la valeur du :root. Les quatre thèmes couvrent maintenant les mêmes vars. */
+		--md-sys-color-scrim: oklch(0 0 0);
+		--md-sys-color-shadow: oklch(0 0 0);
 		--md-sys-color-surface-dim: oklch(0.88 0.03 40);
 		--md-sys-color-surface-bright: oklch(0.97 0.02 40);
 		--md-sys-color-surface-container-lowest: oklch(1 0 0);
@@ -523,6 +549,15 @@
 		--border: var(--md-sys-color-outline-variant);
 		--input: var(--md-sys-color-outline);
 		--ring: var(--md-sys-color-primary);
+		/* Les thèmes Roy et Gaëlle définissent `--chart-*` mais pas les thèmes
+		 * Azalée : les graphiques retombaient alors sur le `:root` gris de
+		 * shadcn côté website, et sur RIEN côté azalee. Rampe catégorielle de 5
+		 * teintes distinctes, ancrée sur l'ambre de la marque Azalée. */
+		--chart-1: var(--md-sys-color-primary);
+		--chart-2: oklch(0.6 0.13 200);
+		--chart-3: oklch(0.58 0.15 145);
+		--chart-4: oklch(0.55 0.18 300);
+		--chart-5: oklch(0.6 0.16 25);
 		--sidebar: var(--md-sys-color-surface);
 		--sidebar-foreground: var(--md-sys-color-on-surface);
 		--sidebar-primary: var(--md-sys-color-primary);
@@ -592,6 +627,15 @@
 		--border: var(--md-sys-color-outline-variant);
 		--input: var(--md-sys-color-outline);
 		--ring: var(--md-sys-color-primary);
+		/* Les thèmes Roy et Gaëlle définissent `--chart-*` mais pas les thèmes
+		 * Azalée : les graphiques retombaient alors sur le `:root` gris de
+		 * shadcn côté website, et sur RIEN côté azalee. Rampe catégorielle de 5
+		 * teintes distinctes, ancrée sur l'ambre de la marque Azalée. */
+		--chart-1: var(--md-sys-color-primary);
+		--chart-2: oklch(0.74 0.12 200);
+		--chart-3: oklch(0.75 0.14 145);
+		--chart-4: oklch(0.72 0.15 300);
+		--chart-5: oklch(0.75 0.14 25);
 		--sidebar: var(--md-sys-color-surface);
 		--sidebar-foreground: var(--md-sys-color-on-surface);
 		--sidebar-primary: var(--md-sys-color-primary);

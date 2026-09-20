@@ -210,13 +210,13 @@ export function ChronicleMeta({
               ${
 								featuredImage
 									? "border-transparent"
-									: "border-border hover:border-rg-primary hover:bg-muted/30"
+									: "border-border hover:border-rg-rose hover:bg-muted/30"
 							}
             `}
 					>
 						{isUploading ? (
 							<div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/30">
-								<Loader2 className="size-8 animate-spin text-rg-primary" />
+								<Loader2 className="size-8 animate-spin text-rg-rose" />
 								<span className="text-sm text-muted-foreground mt-2">Upload en cours...</span>
 							</div>
 						) : featuredImage ? (

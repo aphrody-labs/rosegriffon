@@ -1136,7 +1136,7 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
 						onClick={regenerate}
 						disabled={animating}
 						aria-label="Régénérer l'équipe"
-						className="inline-flex items-center gap-2 h-14 px-4 sm:px-5 rounded-2xl bg-primary-container text-on-primary-container font-bold text-sm shadow-md active:scale-[0.98] transition-all disabled:opacity-50 hover:bg-primary-container-highest"
+						className="inline-flex items-center gap-2 h-14 px-4 sm:px-5 rounded-2xl bg-primary-container text-on-primary-container font-bold text-sm shadow-md active:scale-[0.98] transition-all disabled:opacity-50 hover:bg-surface-container-highest"
 					>
 						<Icon name="casino" size={20} className={cn(animating && "animate-spin")} />
 						<span className="hidden sm:inline">Régénérer</span>

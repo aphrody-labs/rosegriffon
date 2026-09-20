@@ -61,7 +61,7 @@ export default function ImageCropper({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-[600px]">
 				<DialogHeader>
-					<DialogTitle className="text-2xl font-bold text-rg-primary">Recadrer l'image</DialogTitle>
+					<DialogTitle className="text-2xl font-bold text-rg-rose">Recadrer l'image</DialogTitle>
 				</DialogHeader>
 
 				<div className="relative w-full h-[400px] bg-black/5 rounded-md overflow-hidden">
@@ -118,7 +118,7 @@ export default function ImageCropper({
 					</Button>
 					<Button
 						onClick={handleSave}
-						className="bg-linear-to-r from-rg-primary to-rg-secondary hover:opacity-90 text-white"
+						className="bg-linear-to-r from-rg-rose to-rg-or hover:opacity-90 text-white"
 					>
 						Valider
 					</Button>

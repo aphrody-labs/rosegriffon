@@ -286,7 +286,7 @@ export function TranslatorClient() {
 										{active.url !== "#" && (
 											<Link
 												href={active.url}
-												className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-hover group/link transition-colors"
+												className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 group/link transition-colors"
 											>
 												Voir la fiche complète
 												<Icon
