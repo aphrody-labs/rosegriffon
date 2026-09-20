@@ -19,11 +19,6 @@ export const metadata: Metadata = {
 	 * désindexation. Chaque page porte désormais le sien via
 	 * `metadonneesAchillea()` (`./metadonnees.ts`).
 	 */
-	icons: {
-		icon: "/achillea/achillea_ico.png",
-		shortcut: "/achillea/achillea_ico.png",
-		apple: "/achillea/achillea_ico.png",
-	},
 	openGraph: {
 		title: "Achilléa — E-Sport & Compétition Inazuma Eleven",
 		description:

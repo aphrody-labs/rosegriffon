@@ -7,6 +7,15 @@ export interface NavItem {
 	commonSprite?: string;
 	/** Clé d'une VRAIE icône de menu du jeu (cf. `config/game-icons.ts` des apps). */
 	gameIcon?: string;
+	/**
+	 * Clé d'une emote Rose Griffon (`lib/emotes.ts`) — Roy, Gaëlle, le griffon.
+	 *
+	 * La navigation rendait des pictogrammes lucide génériques : un même dessin
+	 * de « maison » pour l'accueil d'un site d'association Inazuma Eleven que
+	 * pour n'importe quel tableau de bord. Les emotes et les icônes du jeu sont
+	 * les images que cette communauté reconnaît ; elles passent devant.
+	 */
+	emote?: string;
 	icon: string;
 	adminOnly?: boolean;
 	defaultOpen?: boolean;
@@ -88,12 +97,12 @@ export function construireNavigationItems(): NavItem[] {
 	const w = wiki;
 
 	return [
-		{ icon: "home", label: "nav.home", path: w("/") },
-		{ icon: "sports_soccer", label: "nav.cross", path: w("/cross") },
+		{ imageUrl: "/RG_Azalee-logo.webp", icon: "home", label: "nav.home", path: w("/") },
+		{ commonSprite: "lien", icon: "sports_soccer", label: "nav.cross", path: w("/cross") },
 		// Les articles vivent dans la catégorie « Actualité » : les répéter ici
 		// donnait deux accordéons pour une même destination. Seules les notes de
 		// version restent, elles décrivent le jeu et non la vie du site.
-		{ icon: "update", label: "nav.news.patch_notes", path: w("/patch-notes") },
+		{ commonSprite: "breche", icon: "update", label: "nav.news.patch_notes", path: w("/patch-notes") },
 		// — Base de données (wiki curé) —
 		{ commonSprite: "chara", icon: "groups", label: "nav.wiki.players", path: w("/chara") },
 		{
@@ -105,7 +114,7 @@ export function construireNavigationItems(): NavItem[] {
 					icon: "sports_martial_arts",
 					commonSprite: "skill",
 				},
-				{ label: "nav.wiki.tactics", path: w("/tactic"), icon: "strategy" },
+				{ commonSprite: "justice", label: "nav.wiki.tactics", path: w("/tactic"), icon: "strategy" },
 				{
 					label: "nav.wiki.passives",
 					path: w("/passive"),
@@ -179,57 +188,28 @@ export function construireNavigationItems(): NavItem[] {
 					icon: "stars",
 					gameIcon: "star-token",
 				},
-				{ label: "nav.wiki.drops", path: w("/drops"), icon: "redeem" },
+				{ gameIcon: "creature", label: "nav.wiki.drops", path: w("/drops"), icon: "redeem" },
 			],
 			gameIcon: "chest",
 			icon: "backpack",
 			label: "nav.section.items",
 			path: w("/item"),
 		},
-		{ icon: "task_alt", label: "nav.wiki.quests", path: w("/quete") },
+		{ gameIcon: "road", icon: "task_alt", label: "nav.wiki.quests", path: w("/quete") },
 		{
 			// Table d'expérience du jeu (`inagle_exp_table`) : courbe + calculateurs.
+			commonSprite: "tension",
 			icon: "trending_up",
 			label: "nav.wiki.levels",
 			path: w("/niveau"),
 		},
-		{ icon: "emoji_events", label: "nav.wiki.trophies", path: w("/succes") },
-		{
-			// Médias : illustrations curées, corpus complet des textures, banques
-			// sonores, cinématiques, et modèles 3D (esprits/armures + objets/animaux).
-			children: [
-				{ label: "nav.wiki.gallery", path: w("/gallery"), icon: "image" },
-				{ label: "nav.wiki.textures", path: w("/textures"), icon: "texture" },
-				{ label: "nav.wiki.sounds", path: w("/sons"), icon: "graphic_eq" },
-				{ label: "nav.wiki.videos", path: w("/videos"), icon: "movie" },
-				// `/keshin` a fusionné dans `/modeles` : une seule page couvre les 6 236 modèles du
-				// jeu (personnages, techniques, objets, esprits, armures, animaux). L'ancienne URL
-				// redirige, mais elle n'a plus à figurer au menu à côté de celle qui la contient.
-				{ label: "nav.wiki.models", path: w("/modeles"), icon: "deployed_code" },
-				// `/mode` figurait dans la sous-navigation média (`MediaShell`) mais nulle part
-				// dans le menu : la sixième collection n'était atteignable qu'en passant par une
-				// des cinq autres.
-				{ label: "nav.wiki.modes", path: w("/mode"), icon: "stadia_controller" },
-			],
-			icon: "perm_media",
-			label: "nav.section.media",
-			path: w("/gallery"),
-		},
-		{
-			children: [
-				{ label: "nav.tools.stats", path: w("/tools/stats"), icon: "calculate" },
-				{ label: "nav.tools.compare", path: w("/tools/compare"), icon: "compare_arrows" },
-				{ label: "nav.tools.random_team", path: w("/tools/random-team"), icon: "casino" },
-				{ label: "nav.tools.my_team", path: w("/tools/my-team"), icon: "stadium" },
-				{ label: "nav.tools.translator", path: w("/tools/translator"), icon: "translate" },
-				{ label: "nav.tools.save_reader", path: w("/save"), icon: "save" },
-				{ label: "nav.tools.demo", path: w("/demo"), icon: "view_in_ar" },
-			],
-			icon: "build",
-			label: "nav.tools",
-			path: w("/tools"),
-		},
-		{ icon: "settings", label: "nav.settings", path: "/settings" },
+		{ gameIcon: "medal", icon: "emoji_events", label: "nav.wiki.trophies", path: w("/succes") },
+		// MÉDIAS ET OUTILS N'ONT PLUS À FIGURER ICI.
+		// Galerie, textures, sons, vidéos, modèles, modes, et les sept outils
+		// (stats, comparateur, équipe aléatoire, mon équipe, traducteur, lecteur
+		// de sauvegarde, démo) ont été migrés vers `niers`. Les laisser au menu
+		// d'Azalée proposait treize destinations qui ne sont plus les siennes.
+		{ gameIcon: "category", icon: "settings", label: "nav.settings", path: "/settings" },
 	];
 }
 
@@ -336,7 +316,7 @@ export function construireEsportItems(): NavItem[] {
 		},
 		{
 			children: [
-				{ icon: "groups", label: "nav.esport.clans.list", path: e("/clans") },
+				{ gameIcon: "emblem", icon: "groups", label: "nav.esport.clans.list", path: e("/clans") },
 				{ icon: "add_circle", label: "nav.esport.clans.create", path: e("/clans/create") },
 				{ icon: "shield", label: "nav.esport.clans.dashboard", path: e("/clans/dashboard") },
 			],
@@ -346,7 +326,7 @@ export function construireEsportItems(): NavItem[] {
 		},
 		{
 			children: [
-				{ icon: "swords", label: "nav.esport.ranked.play", path: e("/ranked") },
+				{ commonSprite: "contre", icon: "swords", label: "nav.esport.ranked.play", path: e("/ranked") },
 				{
 					icon: "leaderboard",
 					label: "nav.esport.ranked.leaderboard",
@@ -361,7 +341,12 @@ export function construireEsportItems(): NavItem[] {
 		},
 		{
 			children: [
-				{ icon: "emoji_events", label: "nav.esport.tournaments.list", path: e("/tournaments") },
+				{
+					gameIcon: "medal",
+					icon: "emoji_events",
+					label: "nav.esport.tournaments.list",
+					path: e("/tournaments"),
+				},
 				{
 					icon: "add_circle",
 					label: "nav.esport.tournaments.create",
@@ -384,35 +369,33 @@ export function construireEsportItems(): NavItem[] {
 			label: "nav.esport.leagues",
 			path: e("/leagues/astral"),
 		},
-		{ icon: "videocam", label: "nav.esport.casts", path: e("/casts") },
-		{ icon: "badge", label: "nav.esport.licence", path: e("/licence") },
-		{ icon: "account_balance_wallet", label: "nav.esport.wallet", path: e("/wallet") },
-		{ icon: "menu_book", label: "nav.esport.guide", path: e("/guide") },
+		// « Casts », « Licence » et « Portefeuille » quittent le menu : ce sont des
+		// écrans de service, atteints depuis le contexte qui les motive (une
+		// rencontre à caster, une inscription, un achat), jamais depuis une barre
+		// latérale. Les pages existent toujours.
+		{ gameIcon: "emote", icon: "menu_book", label: "nav.esport.guide", path: e("/guide") },
 	];
 }
 
 /**
- * Menu « Actualité ».
+ * Menu « Actualité » — le FLUX, rien d'autre.
  *
- * Quatrième catégorie de premier niveau, extraite de l'association : les
- * articles, les chroniques, les événements et la webTV sont ce qu'on vient
- * consulter RÉGULIÈREMENT, alors que la présentation de l'association se lit
- * une fois. Les mélanger enfouissait le flux éditorial sous un accordéon
- * institutionnel.
+ * Quatrième catégorie de premier niveau : ce qu'on vient consulter
+ * régulièrement, par opposition à la vie de l'association, qui se lit une fois.
+ * Les événements et la webTV en sont sortis — ce sont des activités de
+ * l'association, pas des publications.
+ *
+ * `/chroniques` n'y figure plus : le fil est unifié sous `/news`, où les
+ * chroniques sont un filtre et non un second site.
  */
 export function construireActualiteItems(): NavItem[] {
 	return [
-		{ icon: "feed", label: "nav.association.news", path: "/news" },
-		{ icon: "auto_stories", label: "nav.association.chronicles", path: "/chroniques" },
-		{ icon: "event", label: "nav.association.events", path: "/evenements" },
+		{ emote: "gaelle-fiere", icon: "feed", label: "nav.association.news", path: "/news" },
 		{
-			// L'image officielle de la webTV, pas un pictogramme générique : elle
-			// est livrée dans `public/rgtv/rgtv.webp` et porte l'identité de la
-			// chaîne. `imageUrl` a la priorité sur `icon` dans la barre latérale.
-			icon: "live_tv",
-			imageUrl: "/rgtv/rgtv.webp",
-			label: "nav.association.rgtv",
-			path: "/rose-griffon-tv",
+			emote: "roy-pensif",
+			icon: "auto_stories",
+			label: "nav.association.chronicles",
+			path: "/news?format=chronique",
 		},
 	];
 }
@@ -427,13 +410,28 @@ export function construireActualiteItems(): NavItem[] {
  */
 export function construireAssociationItems(): NavItem[] {
 	return [
-		{ icon: "home", label: "nav.association.home", path: "/" },
-		{ icon: "diversity_3", label: "nav.association.about_us", path: "/a-propos" },
-		{ icon: "forum", label: "nav.association.community", path: "/community" },
-		{ icon: "how_to_vote", label: "nav.association.polls", path: "/sondages" },
-		{ icon: "celebration", label: "nav.association.iergday", path: "/iergday" },
-		{ icon: "rocket_launch", label: "nav.association.projects", path: "/projets" },
-		{ icon: "volunteer_activism", label: "nav.association.support", path: "/nous-soutenir" },
+		{ imageUrl: "/RG_Logo_V2.5_NB.webp", icon: "home", label: "nav.association.home", path: "/" },
+		{ emote: "gaelle-salut", icon: "diversity_3", label: "nav.association.about_us", path: "/a-propos" },
+		{ emote: "rg-funny", icon: "forum", label: "nav.association.community", path: "/community" },
+		{ gameIcon: "nameplate", icon: "event", label: "nav.association.events", path: "/evenements" },
+		{
+			// L'image officielle de la webTV, pas un pictogramme générique : elle
+			// est livrée dans `public/rgtv/rgtv.webp` et porte l'identité de la
+			// chaîne. `imageUrl` a la priorité sur tout le reste.
+			icon: "live_tv",
+			imageUrl: "/rgtv/rgtv.webp",
+			label: "nav.association.rgtv",
+			path: "/rose-griffon-tv",
+		},
+		{ gameIcon: "ticket", icon: "how_to_vote", label: "nav.association.polls", path: "/sondages" },
+		{ emote: "roy-coeur", icon: "celebration", label: "nav.association.iergday", path: "/iergday" },
+		{ gameIcon: "house", icon: "rocket_launch", label: "nav.association.projects", path: "/projets" },
+		{
+			gameIcon: "moneybag",
+			icon: "volunteer_activism",
+			label: "nav.association.support",
+			path: "/nous-soutenir",
+		},
 	];
 }
 
@@ -446,30 +444,56 @@ export function construireAssociationItems(): NavItem[] {
  * vers une page qui n'existe pas.
  */
 export function construireNavigationUnifiee(): SousCategorieNav[] {
-	const groupes: { domaine: GroupeNav; enfants: NavItem[]; icon: string; label: string }[] = [
+	const groupes: {
+		domaine: GroupeNav;
+		enfants: NavItem[];
+		icon: string;
+		imageUrl?: string;
+		emote?: string;
+		label: string;
+		/**
+		 * Déplié au chargement.
+		 *
+		 * Les quatre groupes l'étaient, soit 66 liens dans la colonne dès
+		 * l'ouverture — le wiki en apporte 38 à lui seul. Actualité et
+		 * Association restent ouverts : ce sont les destinations du portail. Wiki
+		 * et E-sport sont des UNIVERS, avec leur propre page d'accueil et leur
+		 * propre navigation interne ; leur entrée de menu suffit, et elle porte
+		 * leur logo plutôt qu'un pictogramme.
+		 */
+		ouvertParDefaut: boolean;
+	}[] = [
 		{
 			domaine: "actualite",
+			emote: "gaelle-fiere",
 			enfants: construireActualiteItems(),
 			icon: "newspaper",
 			label: "nav.domaine.actualite",
+			ouvertParDefaut: true,
 		},
 		{
 			domaine: "association",
 			enfants: construireAssociationItems(),
 			icon: "diversity_3",
+			imageUrl: "/RG_Logo_V2.5_NB.webp",
 			label: "nav.domaine.association",
+			ouvertParDefaut: true,
 		},
 		{
 			domaine: "wiki",
 			enfants: construireNavigationItems(),
 			icon: "menu_book",
+			imageUrl: "/RG_Azalee-logo.webp",
 			label: "nav.domaine.wiki",
+			ouvertParDefaut: false,
 		},
 		{
 			domaine: "esport",
 			enfants: construireEsportItems(),
 			icon: "sports_esports",
+			imageUrl: "/achillea/logo1.svg",
 			label: "nav.domaine.esport",
+			ouvertParDefaut: false,
 		},
 	];
 
@@ -479,9 +503,11 @@ export function construireNavigationUnifiee(): SousCategorieNav[] {
 			domaine: groupe.domaine,
 			item: {
 				children: groupe.enfants,
-				defaultOpen: true,
+				defaultOpen: groupe.ouvertParDefaut,
+				...(groupe.emote ? { emote: groupe.emote } : {}),
 				groupOnly: true,
 				icon: groupe.icon,
+				...(groupe.imageUrl ? { imageUrl: groupe.imageUrl } : {}),
 				label: groupe.label,
 				path: `#${groupe.domaine}`,
 			},

@@ -285,14 +285,14 @@ export default async function SearchPage({
 										{articles.length}
 									</span>
 								</h2>
-								<Link href="/chroniques" className="text-xs font-bold text-rose-griffon hover:underline">
+								<Link href="/news?format=chronique" className="text-xs font-bold text-rose-griffon hover:underline">
 									Toutes les actualités →
 								</Link>
 							</div>
 
 							<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 								{articles.map((article) => (
-									<Link key={article.id} href={`/chroniques/${article.slug}`} className="group">
+									<Link key={article.id} href={`/news/${article.slug}`} className="group">
 										<Card className="h-full bg-surface-container-low hover:bg-surface-container border-outline-variant/15 transition-all duration-200 group-hover:border-rose-griffon/30">
 											<CardHeader className="p-4 pb-2">
 												<CardTitle className="text-sm font-bold line-clamp-2 group-hover:text-rose-griffon transition-colors">

@@ -29,7 +29,7 @@ const ROUTES: Array<{
 	{ path: "/projets/muraux", priority: 0.6, changeFrequency: "monthly" },
 	{ path: "/projets/outils/pfp", priority: 0.6, changeFrequency: "monthly" },
 	{ path: "/evenements", priority: 0.8, changeFrequency: "weekly" },
-	{ path: "/chroniques", priority: 0.8, changeFrequency: "weekly" },
+	{ path: "/news", priority: 0.9, changeFrequency: "daily" },
 	{ path: "/community", priority: 0.8, changeFrequency: "weekly" },
 	{ path: "/sondages", priority: 0.6, changeFrequency: "weekly" },
 	{ path: "/iergday", priority: 0.7, changeFrequency: "daily" },
@@ -48,27 +48,33 @@ const ROUTES: Array<{
 type ChroniqueRow = { slug: string; updated_at: string | null; published_at: string | null };
 
 /**
- * Chroniques publiées. Lecture Postgres directe (cf. `lib/db/pg.ts`) : le plan de
- * site ne doit pas dépendre de la disponibilité du Data API. Une erreur n'annule
- * pas le plan de site — on préfère un plan sans les articles à pas de plan du tout.
+ * TOUS les articles publiés, les deux corpus confondus.
+ *
+ * Le plan de site n'annonçait que les chroniques (`app = 'website'`) : les
+ * actualités d'Azalée, pourtant servies sous `/news/<slug>`, n'y figuraient
+ * pas. Depuis la fusion du fil, une seule requête les couvre.
+ *
+ * Lecture Postgres directe (cf. `lib/db/pg.ts`) : le plan de site ne doit pas
+ * dépendre de la disponibilité du Data API. Une erreur n'annule pas le plan —
+ * on préfère un plan sans les articles à pas de plan du tout.
  */
-async function chroniques(baseUrl: string): Promise<MetadataRoute.Sitemap> {
+async function articlesPublies(baseUrl: string): Promise<MetadataRoute.Sitemap> {
 	try {
 		const pool = getPgPool();
 		const { rows } = await pool.query<ChroniqueRow>(
-			"SELECT slug, updated_at, published_at FROM articles WHERE status = $1 AND app = $2 ORDER BY published_at DESC NULLS LAST",
-			["published", "website"]
+			"SELECT slug, updated_at, published_at FROM articles WHERE status = $1 AND app = ANY($2::text[]) ORDER BY published_at DESC NULLS LAST",
+			["published", ["azalee", "website"]]
 		);
 		return rows
 			.filter((row) => row.slug)
 			.map((row) => ({
-				url: `${baseUrl}/chroniques/${row.slug}`,
+				url: `${baseUrl}/news/${row.slug}`,
 				lastModified: new Date(row.updated_at || row.published_at || Date.now()),
 				changeFrequency: "monthly" as const,
 				priority: 0.7,
 			}));
 	} catch (error) {
-		console.error("sitemap: lecture des chroniques impossible", error);
+		console.error("sitemap: lecture des articles impossible", error);
 		return [];
 	}
 }
@@ -90,6 +96,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			changeFrequency,
 			priority,
 		})),
-		...(await chroniques(baseUrl)),
+		...(await articlesPublies(baseUrl)),
 	];
 }

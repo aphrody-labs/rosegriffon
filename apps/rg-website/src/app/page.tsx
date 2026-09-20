@@ -126,7 +126,7 @@ const LIENS_LEGAUX = [
 
 const RACCOURCIS = [
 	{ href: "/news", libelle: "Actus" },
-	{ href: "/chroniques", libelle: "Chroniques" },
+	{ href: "/news?format=chronique", libelle: "Chroniques" },
 	{ href: "/evenements", libelle: "Événements" },
 	{ href: "/shop", libelle: "Boutique" },
 	{ href: "/community", libelle: "Communauté" },
@@ -250,7 +250,7 @@ export default async function Home() {
 						{donnees.actualites.map((article) => (
 							<li key={`${article.app}-${article.slug}`} className="min-w-0 py-1.5">
 								<Link
-									href={article.app === "azalee" ? `/news/${article.slug}` : `/chroniques/${article.slug}`}
+									href={article.app === "azalee" ? `/news/${article.slug}` : `/news/${article.slug}`}
 									className="flex items-baseline justify-between gap-3 hover:text-primary"
 								>
 									<span className="truncate text-sm text-on-surface">{article.title}</span>

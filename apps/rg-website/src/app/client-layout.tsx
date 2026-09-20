@@ -15,6 +15,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import Footer from "@/components/layout/footer";
 import { Header } from "@/components/layout/Header";
 import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigation";
+import { NavIcone } from "@/components/layout/NavIcone";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 import SidebarNavigationHandler from "@/components/layout/SidebarNavigationHandler";
 import EdgeSwipeDetector from "@/components/shared/EdgeSwipeDetector";
@@ -203,13 +204,13 @@ export default function ClientLayout({
 											<SkipToContent />
 
 											{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
-											{showRail && <WebsiteNavigationRail />}
+											{showRail && <WebsiteNavigationRail renderIcon={NavIcone} />}
 
 											{/* SIDEBAR — tiroir en compact, tiroir à la demande en medium
 								    (le bouton « Menu » du rail l'ouvre), panneau fixe en expanded.
 								    Elle doit être montée aussi en medium : sans elle, ce bouton
 								    basculait un état sans panneau et ne faisait rien. */}
-											{!shouldHideSidebar && <AppSidebar />}
+											{!shouldHideSidebar && <AppSidebar renderIcon={NavIcone} />}
 
 											<SidebarNavigationHandler />
 											<EdgeSwipeDetector />
@@ -266,7 +267,7 @@ export default function ClientLayout({
 													<MobileWatermark />
 													{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
 													{isCompact && !shouldHideSidebar && (
-														<MobileBottomNavigation />
+														<MobileBottomNavigation renderIcon={NavIcone} />
 													)}
 												</div>
 											</SidebarInset>
