@@ -405,10 +405,25 @@ function partielSansDefauts(objet: z.ZodObject): z.ZodObject {
 	return z.object(forme).strict();
 }
 
-/** Retire l'enveloppe `.default()` / `.prefault()` d'un champ, s'il en a une. */
+/**
+ * Retire l'enveloppe `.default()` / `.prefault()` d'un champ, s'il en a une.
+ *
+ * Le défaut peut être enterré sous un `.transform()` : `flocons` s'écrit
+ * `z.array(flocon).default([]).transform(dédoublonner)`, ce qui donne un
+ * `ZodPipe` dont l'ENTRÉE porte le `.default([])`. Sans descendre dans ce tuyau,
+ * `salonsExclus` et `rolesExclus` conservaient leur défaut dans le schéma de
+ * modification partielle : couper les niveaux depuis le formulaire renvoyait
+ * `{ actif: false, salonsExclus: [], rolesExclus: [] }` et vidait les deux
+ * listes d'exclusion — exactement la perte de données que ce module documente
+ * vouloir éviter.
+ */
 function deballer(champ: z.ZodType): z.ZodType {
 	if (champ instanceof z.ZodDefault || champ instanceof z.ZodPrefault) {
-		return champ.unwrap() as z.ZodType;
+		return deballer(champ.unwrap() as z.ZodType);
+	}
+	if (champ instanceof z.ZodPipe) {
+		const entree = deballer(champ.in as z.ZodType);
+		return entree.pipe(champ.out as z.ZodType) as z.ZodType;
 	}
 	return champ;
 }
