@@ -161,10 +161,7 @@ async function main() {
 
 	// ─── DB update ─────────────────────────────────────────────
 
-	const dbUrl = (process.env.DATABASE_URL || envConfig.DATABASE_URL || "").replace(
-		"supabase-db:5432",
-		"db.isbkaeltubqittywibeh.supabase.co:5432"
-	);
+	const dbUrl = process.env.DATABASE_URL || envConfig.DATABASE_URL || "";
 	if (!dbUrl) {
 		console.log("\nNo DATABASE_URL — skipping DB update.");
 		return;

@@ -14,11 +14,11 @@ d'automatisation dans Niers.
 | Miroirs SQLite, `var/`, `target/`, `.next/`, cache modèle | machine qui exécute le service | services locaux | Artefacts régénérables, hors Git et hors synchronisation. |
 | CDN originaux et variantes | service partagé du VPS | RG et Niers | `rg-cdn.service` et `cdn-variants.service` restent actifs : les arrêter casserait les deux sites. |
 
-`niers/apps/azalee/data` est encore un chemin de compatibilité consommé par
+`niers/data/azalee` (ex-`niers/apps/azalee/data` : l'app `apps/azalee` de
+`niers` n'existe plus) est encore un chemin de compatibilité consommé par
 `azalee-api`, le MCP et certains scripts. Il ne s'agit pas d'une seconde
-source de code web : toute suppression de `niers/apps/azalee` devra d'abord
-remplacer ces références et rejouer les tests de service. Le nettoyage
-automatique ne supprime donc pas ce répertoire.
+source de code web. Le nettoyage automatique ne supprime donc pas ce
+répertoire.
 
 Les dépôts ne sont jamais fusionnés par un `pull` : chacun suit son propre
 remote et sa propre branche. Un changement transversal est un changement

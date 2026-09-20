@@ -10,12 +10,12 @@ finiraient par diverger.
 
 | Sujet                                                | Source de vérité                                        | Portage dans l'autre dépôt                                    |
 | ---------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------- |
-| Pages et composants web Azalée                       | `rg/apps/azalee`                                        | aucun copier-coller de l'ancienne app Niers                   |
+| Pages et composants web Azalée                       | `rg/apps/website`                                       | aucun copier-coller de l'ancienne app Niers                   |
 | Types de la fiche et mapping wiki                    | `rg/packages/{inagle,azalee}`                           | contrat partagé par les données Niers                         |
 | Migrations de la base utilisée par RG                | `rg/apps/website/supabase/migrations`                   | la migration homonyme de Niers reste son point d'entrée local |
 | Crawl, peuplement OC, manifeste d'assets             | `niers/scripts/donnees`, `niers/astro`, `niers/docs`    | consommé par RG via le miroir, jamais dupliqué                |
 | Formats `cfg.bin`, G4MD/G4MG/G4TX et modding NIE.exe | `niers/crates`, `niers/csharp`, `niers/scripts`         | aucune implémentation web parallèle                           |
-| Références artistiques Astro                         | `rg/apps/azalee/public/oc/astro-lor` pour le web publié | sources et manifeste conservés dans `niers/astro`             |
+| Références artistiques Astro                         | `rg/apps/website/public/oc/astro-lor` pour le web publié | sources et manifeste conservés dans `niers/astro`             |
 
 La migration `20260905000000_chara_wiki_sections.sql` existe dans les deux arbres parce que
 leurs commandes de migration ne partagent pas leur répertoire de travail. Les deux fichiers
@@ -39,7 +39,7 @@ parseur JSON que les projets existants.
 
 ## État réel du personnage original
 
-La fiche `/chara/astro-lor` est une donnée du wiki et peut être complète sans être un personnage
+La fiche `/wiki/chara/astro-lor` est une donnée du wiki et peut être complète sans être un personnage
 installable dans `nie.exe`. Le manifeste Niers (`astro/manifeste-assets.json`) mesure actuellement
 12 assets propres, dont 2 sources d'icône prêtes et 10 à produire. Le plan `docs/ASTRO-LOR.md`
 relève aussi deux verrous indépendants :

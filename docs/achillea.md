@@ -24,6 +24,11 @@ SEO aligné sur le monorepo RG, et intégration cross-site entre les **3 sites**
 > vérification des manifests, alias TypeScript, routes, migrations, variables, CI, Nginx,
 > systemd, scripts de déploiement et surfaces cross-site. Les métriques du §8 sont un
 > instantané de cet audit ; elles ne valent pas une sonde de production.
+> **Périmé depuis (20/9/2026)** : l'app Next `apps/azalee` mentionnée dans les §5/§8
+> ci-dessous a été fusionnée dans `apps/website` (`c8713476`) puis entièrement supprimée
+> (`d74cee35`) — toute mention d'`apps/azalee` ci-dessous est un instantané antérieur à
+> cette fusion, pas l'état actuel. La fusion des bases Achilléa/RG et la session unique sont
+> décrites dans `docs/achillea-migration-next.md` §10.
 
 ## Passerelle en service — guildes, rôles et salons (14/8/2026)
 

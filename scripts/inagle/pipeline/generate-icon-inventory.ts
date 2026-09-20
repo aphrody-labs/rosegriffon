@@ -81,7 +81,8 @@ async function main() {
 	const url =
 		process.env.NEXT_PUBLIC_SUPABASE_URL ||
 		process.env.SUPABASE_URL ||
-		"https://isbkaeltubqittywibeh.supabase.co";
+		process.env.SUPABASE_INTERNAL_URL ||
+		"http://127.0.0.1:8811";
 	const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 	if (!key) {
 		console.error("[ERREUR] SUPABASE_SERVICE_ROLE_KEY manquante");

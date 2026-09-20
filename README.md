@@ -31,7 +31,7 @@ rg/
 │   ├── assets/          # Assets statiques partagés
 │   ├── patreon-bun/     # Client API Patreon v2
 │   └── config/          # Presets tsconfig / eslint / oxlint / tailwind
-├── plugins/rose-griffon/# Plugin Claude Code : MCP, skills, agents, hook
+├── plugins/rose-griffon/# Plugin Claude Code : MCP, skills, agents
 ├── docs/                # Documentation technique
 ├── infra/               # Unités systemd et configurations nginx
 └── scripts/             # Scripts d'exploitation et de déploiement

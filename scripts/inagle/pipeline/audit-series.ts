@@ -353,10 +353,7 @@ async function main() {
 	for (const [s, n] of [...dist.entries()].sort((a, b) => b[1] - a[1]))
 		console.log(`  ${String(n).padStart(5)}  ${s}`);
 
-	const dbUrl = (process.env.DATABASE_URL || envConfig.DATABASE_URL || "").replace(
-		"supabase-db:5432",
-		"db.isbkaeltubqittywibeh.supabase.co:5432"
-	);
+	const dbUrl = process.env.DATABASE_URL || envConfig.DATABASE_URL || "";
 	if (!dbUrl) {
 		console.warn("\nPas de DATABASE_URL — audit BDD ignoré.");
 		await writeFile(OUTPUT_PATH, JSON.stringify({ characters }, null, 2));

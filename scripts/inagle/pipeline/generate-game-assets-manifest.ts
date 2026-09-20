@@ -149,10 +149,7 @@ async function main(): Promise<void> {
 
 	// 3) Upsert en masse.
 	dotenv.config({ path: join(REPO_ROOT, ".env.local") });
-	const dbUrl = (process.env.DATABASE_URL || "").replace(
-		"supabase-db:5432",
-		"db.isbkaeltubqittywibeh.supabase.co:5432"
-	);
+	const dbUrl = process.env.DATABASE_URL || "";
 	if (!dbUrl) {
 		throw new Error("DATABASE_URL absent");
 	}

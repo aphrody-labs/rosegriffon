@@ -4,7 +4,14 @@ Document de référence consolidé pour la chaîne de traitement des données du
 
 Références connexes existantes : `docs/inagle.md`, `docs/database.md`, `docs/wiki-filters.md`, `docs/lvl5.md`.
 
-PII : aucun email/nom réel de membre n'est exposé ; le handle public reste `yoyo` / `@yoyo__goat`. Les backups `apps/azalee/data/backups/*.sqlite` (emails membres) n'ont pas été lus ni touchés.
+> **Chemins périmés** : cet audit date d'avant la fusion du wiki dans Website
+> (`c8713476`) et la suppression de l'app autonome (`d74cee35`). Chaque
+> occurrence de `apps/azalee/...` ci-dessous doit se lire comme
+> `apps/website/...` (`wiki-service.ts`, `sqlite-client.ts`, etc. ont migré
+> vers `packages/azalee/src/**`, cf. `docs/azalee-lib.md` et `docs/azalee.md`
+> pour la table de correspondance et l'état courant).
+
+PII : aucun email/nom réel de membre n'est exposé ; le handle public reste `yoyo` / `@yoyo__goat`. Les backups `apps/website/data/backups/*.sqlite` (emails membres, gitignorés comme tout `*.sqlite`) n'ont pas été lus ni touchés.
 
 ## Pipeline end-to-end
 
@@ -36,9 +43,9 @@ Le flux part des binaires bruts du jeu (extraits de Steam via iecode) et finit d
                                  │ `nie-miroir.timer` (publisher niers) → miroir SQLite
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ azalee (Next 16, self-host VPS :3003) — wiki + cron                            │
+│ azalee (Next 16, apps/website, self-host VPS :3004) — wiki + cron              │
 │  /home/ubuntu/niers/var/mirror.sqlite  (miroir canonique, chemin épinglé)      │
-│  lib/supabase/sqlite-client.ts + lib/wiki-service.ts ──▶ SSR wiki              │
+│  packages/azalee/src/db/sqlite-client.ts + apps/website/src/lib/wiki-service.ts ──▶ SSR wiki │
 │  cron rg-cron : inagle push → publisher miroir → RAG (ie-crawl/zukan remap)   │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -155,8 +162,8 @@ API universelle de données de jeu pour IEVR. Package `@rosegriffon/inagle` v1.2
         ▼   `nie-miroir.timer` / `miroir-inagle.sh`
    /home/ubuntu/niers/var/mirror.sqlite  (MIROIR SQLite canonique, publié atomiquement)
         │
-        ▼   apps/azalee/lib/supabase/sqlite-client.ts + lib/wiki-service.ts
-   Wiki azalee (SSR Next 16, :3003)
+        ▼   packages/azalee/src/db/sqlite-client.ts + apps/website/src/lib/wiki-service.ts
+   Wiki azalee (SSR Next 16, apps/website, :3004)
 ```
 
 `DATA_ROOT` est résolu dans `src/core/paths.ts` : `DATA_PATH` env (azalee `.env` = `/home/ubuntu/niers/data`) → sinon `packages/inagle/data` → sinon `cwd/data`. Les chemins par catégorie sont dans `PATHS` ; les fichiers connus (versionnés) dans `FILES`. `resolveGameDataFile(relDir, baseName)` choisit la **version la plus haute** par tri numérique segment-par-segment (regex `^<base>_\d[\d.]*\.cfg\.bin\.json$`, qui empêche les collisions de préfixe comme `chara_param` captant `chara_param_table_config`).
@@ -229,7 +236,7 @@ Déclenché par cron : `packages/cron/src/tasks/db.ts` → `runInaglePush()` = `
 
 ### 2.8 Consommation par azalee + cron
 
-- **azalee n'importe PAS le runtime de parsing** (`createInagleService`) — il importe seulement les **types** et constantes (`apps/azalee/lib/wiki-service.ts` : `import type { BaseCharacter, Item, Skill, Team }`, `ElementNames`, `CATEGORY_NAMES`, et le JSON `change_aura_skills.json`). La donnée vient des **tables `inagle_*`** lues via `lib/supabase/sqlite-client.ts` (miroir canonique `/home/ubuntu/niers/var/mirror.sqlite`, override `SQLITE_DB_PATH`) ou Supabase. `lib/wiki-service.ts` est la couche d'accès (listes/filtres/getAura/getSkill…).
+- **azalee n'importe PAS le runtime de parsing** (`createInagleService`) — il importe seulement les **types** et constantes (`apps/website/src/lib/wiki-service.ts` : `import type { BaseCharacter, Item, Skill, Team }`, `ElementNames`, `CATEGORY_NAMES`, et le JSON `change_aura_skills.json`). La donnée vient des **tables `inagle_*`** lues via `packages/azalee/src/db/sqlite-client.ts` (miroir canonique `/home/ubuntu/niers/var/mirror.sqlite`, override `SQLITE_DB_PATH`) ou Supabase. `wiki-service.ts` est la couche d'accès (listes/filtres/getAura/getSkill…).
 - **cron** consomme inagle de deux façons : (a) exécute le push (`db.ts`) ; (b) importe des subpaths leaf (`@rosegriffon/inagle/zukan/order` pour `buildOrderMap`/`crawlZukanOrderPages`) et lit/écrit les tables `inagle_characters/inagle_skills/inagle_rag_chunks` pour le RAG et le remap zukan. Le `dist/` d'inagle doit exister (subpath exports) sinon `rg-cron` crash-loop.
 
 **Piège NULL `category_id`/`element_id`** : sur `inagle_skills`, `category_id` et `element_id` sont à **NULL** en base. La résolution se fait via les **colonnes texte FR** : `wiki-service.ts` filtre `query.eq("category", searchCat)` (ligne ~1497) après mapping `shoot/block/dribble/catch` → nom FR via `CATEGORY_NAMES`. À noter : pour les **auras** (`inagle_auras` etc.), `element_id` **est** peuplé et filtré via `.eq/.in("element_id", …)` avec `getElementIds()` (Néant mappe 0 ET 5) — spécifique aux auras, pas aux skills. Voir `docs/wiki-filters.md`.
@@ -253,9 +260,9 @@ Déclenché par cron : `packages/cron/src/tasks/db.ts` → `runInaglePush()` = `
 - skills/auras **partagent les slots** chara_param → séparation obligatoire via `buildAuraHashSet`.
 - cli-push **préserve** `sheet_data`/`zukan_order` avant delete+reinsert (donnée curatée communautaire/officielle).
 - `inagle_skills.category_id`/`element_id` = **NULL** → filtrer via colonne texte FR `category` ; les auras, elles, utilisent `element_id`.
-- ne jamais committer `apps/azalee/data/backups/*.sqlite` (PII emails, gitignoré).
+- ne jamais committer `apps/website/data/backups/*.sqlite` (PII emails, gitignoré).
 
-Fichiers clés : `packages/inagle/src/parsers/{chara-param,chara-base,skill-config,passive-skill-config,chara-exp-table,item-config,star-sign}.ts`, `src/entities/character.ts`, `src/stat-calculator.ts`, `src/skills/mapper-aura.ts`, `src/service.ts`, `src/cli-push.ts`, `src/core/{paths,data-loader,cfgbin-db}.ts`, `src/azalee-inagle-integration.test.ts` ; consommateurs : `apps/azalee/lib/{wiki-service.ts,supabase/sqlite-client.ts}`, `packages/cron/src/tasks/db.ts`.
+Fichiers clés : `packages/inagle/src/parsers/{chara-param,chara-base,skill-config,passive-skill-config,chara-exp-table,item-config,star-sign}.ts`, `src/entities/character.ts`, `src/stat-calculator.ts`, `src/skills/mapper-aura.ts`, `src/service.ts`, `src/cli-push.ts`, `src/core/{paths,data-loader,cfgbin-db}.ts`, `src/azalee-inagle-integration.test.ts` ; consommateurs : `apps/website/src/lib/wiki-service.ts`, `packages/azalee/src/db/sqlite-client.ts`, `packages/cron/src/tasks/db.ts`.
 
 ---
 

@@ -81,7 +81,7 @@ réécriture d'application, c'est le remplacement d'un adaptateur d'affichage.
 | Route publique | `apps/website/src/app/api/public/achillea/info/route.ts` | Première consommation en production. |
 | Entrée visuelle | `apps/website/src/components/home/AchilleaBanner.tsx` | Bloc Achilléa de la home unifiée. |
 | Design system | `packages/ui` (58 composants MD3) | Remplace PrimeNG. Tokens FR : `succes`, `alerte`, `info` — jamais `success`/`warning`. |
-| Chrome partagé | `packages/app-shell` | Navigation unique paramétrée par `NavBases`. C'est là qu'on ajoute l'entrée Achilléa, **pas** dans `apps/*/config/navigation.ts`. |
+| Chrome partagé | `packages/app-shell` | Navigation unique, source unique non paramétrée (`NavBases` a été retiré avec l'app azalee autonome). C'est là qu'on ajoute l'entrée Achilléa, **pas** dans `apps/*/config/navigation.ts`. |
 
 **Corollaire** : les ~4 746 lignes de `apps/achillea-web/src/app/shared/services/**`
 (16 services Angular) et les 35 modèles de `core/models/**` n'ont plus de logique
@@ -231,7 +231,8 @@ Les deux fronts coexistent sur la même API.
 
 ### Phase 0 — socle (sans écran)
 - `apps/website/src/app/achillea/layout.tsx` : chrome Achilléa via `app-shell`,
-  entrée de navigation ajoutée dans `NavBases`.
+  entrée de navigation ajoutée dans le registre unique de `packages/app-shell`
+  (voir `BASE_ESPORT` dans `src/config/routes.ts`, `NavBases` a été retiré).
 - Reprise de `src/assets/i18n/fr.json` et des assets `public/` d'Achilléa.
 - Thème : vérifier que les 4 thèmes déclarent le même jeu de variables
   (`packages/ui/test/tokens.test.ts`) après ajout éventuel de tokens Achilléa.
@@ -470,14 +471,12 @@ même chrome, pour le même compte Discord. Un membre sans Discord lié reçoit 
 
 ### Reste à faire
 
-- **Assets** : 575 fichiers identiques en double sur les trois `public/`,
-  **74 Mo**. Presque tout est `azalee` ↔ `website` (553 / 588). Or
-  `azalee.rosegriffon.fr` répond déjà **301 vers `rosegriffon.fr/wiki`** :
-  `apps/azalee/public` ne sert plus aucun trafic public et n'est retenu que par
-  le test de synchronisation du chrome. La déduplication passe donc par le
-  retrait de l'app `azalee`, pas par une copie vers `packages/assets` — ce
-  dernier (`@rosegriffon/assets`, export `./public/*`) reste la destination des
-  assets réellement partagés.
+- **Assets** : le doublon de 575 fichiers (**74 Mo**) entre `azalee` et
+  `website` a disparu avec le retrait complet de l'app `apps/azalee`
+  (`d74cee35`) ; `azalee.rosegriffon.fr` reste une redirection **301** vers
+  `rosegriffon.fr/wiki`, sans app ni `public/` propre. `packages/assets`
+  (`@rosegriffon/assets`, export `./public/*`) reste la destination des assets
+  réellement partagés.
 - **Pages d'administration** : la couche de données croisée existe
   (`admin-db.ts`) ; les 14 onglets du backoffice Achilléa restent à fusionner
   dans `/admin` (phase 3 du §5).
