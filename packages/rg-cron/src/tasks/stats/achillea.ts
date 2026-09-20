@@ -2,7 +2,7 @@
  * Rapatrie l'audience du second serveur (Achillea, ranked).
  *
  * POURQUOI UNE TÂCHE PLANIFIÉE
- * `achillea.rosegriffon.fr` et `ranked.rosegriffon.fr` sont servis par un autre
+ * Historiquement servis par un autre VPS, `achillea.rosegriffon.fr` et
  * VPS (51.255.162.6) : leur journal nginx n'est pas lisible depuis celui-ci. La
  * page de statistiques lit un fichier local ; cette tâche le remplit en tirant
  * le journal distant par SSH, puis en l'agrégeant ICI.
@@ -24,8 +24,18 @@ import { dirname } from "node:path";
 /** Où la page de statistiques du site va lire le résultat. */
 export const CHEMIN_CACHE = "/var/lib/rg/achillea-audience.json";
 
-const HOTE_DISTANT = "ubuntu@51.255.162.6";
-const JOURNAL_DISTANT = "/var/log/nginx/rg-stats.log";
+/**
+ * Journal nginx à agréger.
+ *
+ * Il était lu par SSH sur le second VPS. Achilléa a depuis été rapatrié sur le
+ * serveur principal : `achillea.rosegriffon.fr` et `ranked.rosegriffon.fr` sont
+ * servis ici (`/etc/nginx/conf.d/achillea.rosegriffon.conf`) et leurs lignes
+ * sont dans le journal LOCAL. Le SSH continuait de réussir — il tirait le
+ * journal d'un serveur où ces domaines n'existent plus — et rendait donc un
+ * agrégat vide sans jamais lever : `/var/lib/rg/achillea-audience.json`
+ * contenait `"domaines": []`, et l'onglet Statistiques n'affichait rien.
+ */
+const JOURNAL_LOCAL = "/var/log/nginx/rg-stats.log";
 
 /** Domaines rapatriés. Le second serveur en héberge d'autres, hors périmètre. */
 const DOMAINES = new Set(["achillea.rosegriffon.fr", "ranked.rosegriffon.fr"]);
@@ -82,20 +92,12 @@ export async function collecterAudienceAchillea(): Promise<{
 	domaines: number;
 	requetes: number;
 }> {
-	// `tail` borne le transfert à la source : inutile de faire transiter une
-	// journée entière de journal pour n'en garder que les dernières heures.
+	// `tail` borne la lecture : inutile de charger une journée entière de journal
+	// pour n'en garder que les dernières heures. Le fichier appartient à
+	// `nobody:adm` — `rg-cron` passe par `sudo -n`, autorisé sans mot de passe
+	// pour cette lecture précise.
 	const proc = Bun.spawn(
-		[
-			"ssh",
-			"-o",
-			"BatchMode=yes",
-			"-o",
-			"StrictHostKeyChecking=no",
-			"-o",
-			"ConnectTimeout=10",
-			HOTE_DISTANT,
-			`tail -n ${MAX_LIGNES} ${JOURNAL_DISTANT} 2>/dev/null || true`,
-		],
+		["sudo", "-n", "tail", "-n", String(MAX_LIGNES), JOURNAL_LOCAL],
 		{ stderr: "pipe", stdout: "pipe" }
 	);
 
@@ -103,7 +105,7 @@ export async function collecterAudienceAchillea(): Promise<{
 	const code = await proc.exited;
 	if (code !== 0) {
 		const erreur = await new Response(proc.stderr).text();
-		throw new Error(`ssh a échoué (code ${code}) : ${erreur.trim().slice(0, 200)}`);
+		throw new Error(`lecture du journal impossible (code ${code}) : ${erreur.trim().slice(0, 200)}`);
 	}
 
 	const debut = Date.now() - FENETRE_HEURES * 3600_000;
