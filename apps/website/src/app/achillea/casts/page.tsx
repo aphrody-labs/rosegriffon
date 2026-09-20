@@ -13,6 +13,7 @@ import {
 	Sparkles,
 } from "lucide-react";
 import { FaTwitch } from "react-icons/fa6";
+import { signalerException } from "@/lib/achillea/signaler";
 
 export default function CastsPublicPage() {
 	const [casters, setCasters] = useState<CasterPublic[]>([]);
@@ -31,7 +32,9 @@ export default function CastsPublicPage() {
 					setCasters(res.value);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("casts", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});

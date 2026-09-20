@@ -22,6 +22,7 @@ import {
 	CreditCard,
 	Info,
 } from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
 
 export default function WalletPage() {
 	const { user, isAuthenticated, login } = useAchilleaAuth();
@@ -52,7 +53,9 @@ export default function WalletPage() {
 					setTransactions(histRes.value.transactions);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("wallet", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});

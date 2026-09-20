@@ -16,6 +16,7 @@ import {
 	CheckCircle2,
 	Clock,
 } from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
 
 export default function TournamentsListPage() {
 	const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -37,7 +38,9 @@ export default function TournamentsListPage() {
 					setTournaments(list);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("tournaments", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});

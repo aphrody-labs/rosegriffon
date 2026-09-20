@@ -148,17 +148,21 @@ export const tournamentSchema: z.ZodType<WireTournament> = z.object({
 		.nullable()
 		.optional(),
 	organization: entityRef(organizationDtoSchema),
-	managers: z.array(entityRef(userDtoSchema)),
-	participants: z.array(z.lazy(() => entityRef(participantSchema))),
+	managers: z.array(entityRef(userDtoSchema)).optional(),
+	participants: z.array(z.lazy(() => entityRef(participantSchema))).optional(),
 	tournamentType: stageTypeSchema,
-	participantsNumber: z.number(),
-	seedOrdering: seedOrderingSchema,
-	matchFormat: matchFormatSchema,
+	// `null` tant que le format n'est pas figé : un tournoi en préparation n'a
+	// pas encore de nombre de participants.
+	participantsNumber: z.number().nullish(),
+	seedOrdering: seedOrderingSchema.nullish(),
+	matchFormat: matchFormatSchema.nullish(),
 	customFormatChildCount: z.number().nullable().optional(),
 	groupStageEnabled: z.boolean(),
 	groupStageType: stageTypeSchema.nullable().optional(),
 	logo: z.string(),
-	affiche: z.string(),
+	// L'affiche est `null` tant que l'organisateur n'en a pas posé une : la
+	// rendre obligatoire faisait tomber le tournoi entier faute d'image.
+	affiche: z.string().nullish(),
 	planning: z.string(),
 	ruleset: z.string(),
 	placementEloApplied: z.boolean().optional(),
@@ -244,7 +248,7 @@ export const lobbySchema = z.object({
 	lobbyUsers: z.array(lobbyUserSchema),
 	lobbyMatches: z.array(lobbyMatchSchema),
 	hostUser: lobbyUserSchema.nullable(),
-	matchFormat: matchFormatSchema,
+	matchFormat: matchFormatSchema.nullish(),
 }) satisfies z.ZodType<LobbyDTO>;
 
 // ── Circuit et hub statistiques ─────────────────────────────────────────────

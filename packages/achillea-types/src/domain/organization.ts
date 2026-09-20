@@ -4,19 +4,19 @@ import type { Country, SocialMediaDTO } from "./common";
 import type { UserDTO } from "./user";
 
 export interface OrganizationDTO {
-	id?: string;
+	id?: string | number;
 	state?: OrganizationState;
 	name: string;
 	normalizedName: string;
 	logo: string;
 	description: string;
-	owner: UserDTO;
-	orgManagers: UserDTO[];
+	owner?: string | UserDTO;
+	orgManagers?: UserDTO[];
 	managers?: OrgManagerDTO[];
 	preapproved?: boolean;
-	socialMedias: SocialMediaDTO[];
-	broadcastMedias: SocialMediaDTO[];
-	origin: Country;
+	socialMedias?: SocialMediaDTO[];
+	broadcastMedias?: SocialMediaDTO[];
+	origin?: string | Country;
 	createdAt?: Date;
 	updatedAt?: Date;
 }
@@ -30,7 +30,7 @@ export interface OrgManagerDTO {
 
 /** Revue d'une demande de création / édition d'organisation. */
 export interface OrganizationValidationDTO {
-	id?: string;
+	id?: string | number;
 	reviewer: UserDTO;
 	name: string | null;
 	logo: string | null;

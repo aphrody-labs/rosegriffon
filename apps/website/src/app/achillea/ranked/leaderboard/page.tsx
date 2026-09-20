@@ -22,6 +22,7 @@ import {
 	Swords,
 	ArrowLeft,
 } from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedLeaderboardPage() {
 	const [mode, setMode] = useState<1 | 2>(1);
@@ -44,7 +45,9 @@ export default function RankedLeaderboardPage() {
 					setData(res.value);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("ranked/leaderboard", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});

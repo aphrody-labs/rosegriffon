@@ -1,0 +1,15 @@
+{
+	"name": "@rosegriffon/hub",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Registre des applications du réseau Rose Griffon : identité, montage, API, thème et santé de chaque app",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"lint": "bunx oxlint -c ../../.oxlintrc.json src",
+		"type-check": "bun --bun tsc --noEmit",
+		"test": "bun test test"
+	}
+}

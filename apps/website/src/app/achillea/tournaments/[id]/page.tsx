@@ -162,9 +162,12 @@ export default function TournamentDetailPage({
 		minute: "2-digit",
 	});
 
-	const firstPrize = placementPrizeAp(tournament.participantsNumber, 1);
-	const secondPrize = placementPrizeAp(tournament.participantsNumber, 2);
-	const semiPrize = placementPrizeAp(tournament.participantsNumber, 3);
+	// `participantsNumber` est `null` tant que le format n'est pas figé : le
+	// barème de podium n'a alors pas de sens, on le calcule sur 0.
+	const nbParticipants = tournament.participantsNumber ?? 0;
+	const firstPrize = placementPrizeAp(nbParticipants, 1);
+	const secondPrize = placementPrizeAp(nbParticipants, 2);
+	const semiPrize = placementPrizeAp(nbParticipants, 3);
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 py-8 space-y-8">

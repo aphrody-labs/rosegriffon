@@ -129,8 +129,12 @@ export function sortClanMembers(members: readonly ClanMemberDTO[]): ClanMemberDT
 
 /** Part de la renommée du clan apportée par un membre, dans `[0, 1]`. */
 export function fameShare(member: ClanMemberDTO, clan: Pick<ClanDTO, "fame">): number {
-	if (clan.fame <= 0) return 0;
-	return Math.min(1, Math.max(0, member.clanFameContributed / clan.fame));
+	// `fame` est absent de `GET /clans` : sans renommée connue, aucune part ne
+	// peut être calculée. Rendre 0 est la seule réponse honnête — inventer un
+	// dénominateur produirait un pourcentage qui ne veut rien dire.
+	const renommee = clan.fame ?? 0;
+	if (renommee <= 0) return 0;
+	return Math.min(1, Math.max(0, member.clanFameContributed / renommee));
 }
 
 /** Un clan n'apparaît publiquement que validé, visible et non dissous. */

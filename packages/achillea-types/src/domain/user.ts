@@ -17,11 +17,18 @@ export interface UserDTO {
 	 */
 	type?: string;
 	username: string;
-	sim: number;
+	/**
+	 * Champs présents uniquement sur la session de l'utilisateur courant.
+	 *
+	 * `GET /clans` imbrique un président réduit (identité et profil public) qui
+	 * ne les porte pas. Les exiger faisait échouer la validation de la réponse
+	 * ENTIÈRE, donc de tous les clans.
+	 */
+	sim?: number;
 	avatar?: string;
 	clanId?: number;
-	soloRank: RankDTO;
-	duoRank: RankDTO;
+	soloRank?: RankDTO;
+	duoRank?: RankDTO;
 	lastInteract?: Date;
 	role?: UserRole;
 	currentLevel?: number;

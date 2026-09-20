@@ -24,6 +24,7 @@ import {
 	CheckCircle2,
 	AlertCircle,
 } from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
 
 export default function LicencePage() {
 	const { user, isAuthenticated, login } = useAchilleaAuth();
@@ -48,7 +49,9 @@ export default function LicencePage() {
 					setLicense(res.value.license);
 				}
 			})
-			.catch(() => {})
+			.catch((cause) => {
+				signalerException("licence", cause);
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});

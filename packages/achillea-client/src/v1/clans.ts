@@ -43,13 +43,13 @@ export const clanStateSchema = z.enum(ClanState) satisfies z.ZodType<ClanState>;
 
 export const clanDtoSchema = z.object({
 	id: z.number(),
-	founders: z.string(),
+	founders: z.array(z.string()),
 	name: z.string(),
 	shortenedName: z.string(),
 	normalizedShortName: z.string(),
 	clanAvatarUrl: z.string(),
 	clanBiography: z.string(),
-	fame: z.number(),
+	fame: z.number().optional(),
 	xUrl: z.string().nullable().optional(),
 	instagramUrl: z.string().nullable().optional(),
 	tiktokUrl: z.string().nullable().optional(),

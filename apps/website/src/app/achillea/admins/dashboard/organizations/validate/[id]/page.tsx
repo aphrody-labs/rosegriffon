@@ -133,7 +133,10 @@ export default function OrganizationValidationPage({
 							<div className="flex items-center justify-between">
 								<h2 className="text-xl font-bold">{org.name}</h2>
 								<span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-muted text-muted-foreground">
-									{org.origin?.name || org.origin?.code || "FR"}
+									{/* L'API sert tantôt un code nu (« fr »), tantôt le pays complet. */}
+									{typeof org.origin === "string"
+										? org.origin.toUpperCase()
+										: (org.origin?.name ?? org.origin?.code ?? "—")}
 								</span>
 							</div>
 							<p className="text-xs text-muted-foreground leading-relaxed">
@@ -144,7 +147,13 @@ export default function OrganizationValidationPage({
 						<div className="grid grid-cols-2 gap-3 text-xs">
 							<div className="p-3 rounded-xl bg-background border border-border">
 								<div className="text-muted-foreground">Propriétaire</div>
-								<div className="font-bold mt-0.5">{org.owner?.username || "Inconnu"}</div>
+								<div className="font-bold mt-0.5">
+									{/* Sur la liste, `owner` n'est qu'un identifiant Discord ;
+									    sur la fiche, c'est l'utilisateur complet. */}
+									{typeof org.owner === "string"
+										? org.owner
+										: (org.owner?.username ?? "Inconnu")}
+								</div>
 							</div>
 							<div className="p-3 rounded-xl bg-background border border-border">
 								<div className="text-muted-foreground">Identifiant</div>
