@@ -124,6 +124,54 @@ export const auth = betterAuth({
 		},
 	},
 
+	/**
+	 * IDENTITÉ NATIVE — la seule qui n'appartienne pas à un tiers.
+	 *
+	 * Jusqu'ici, aucune : pour entrer sur le site de l'association, il fallait un
+	 * compte Discord, Google ou Twitch. Un membre dont le compte Discord est
+	 * suspendu perdait l'accès au portail, au wiki ET à l'e-sport — sans recours,
+	 * pour une décision prise ailleurs.
+	 *
+	 * L'adresse e-mail rend le compte autonome. Les plateformes restent liables
+	 * (`accountLinking` ci-dessous) : elles apportent des capacités — rôles du
+	 * serveur, statut de mécène, progression Steam — mais ne conditionnent plus
+	 * l'accès. Cf. `@rosegriffon/identity`, qui porte cette distinction et
+	 * refuse de délier la dernière connexion authentifiante.
+	 */
+	emailAndPassword: {
+		enabled: true,
+		// Vérification exigée : sans elle, n'importe qui peut ouvrir un compte sur
+		// l'adresse d'un tiers, puis y rattacher ses propres plateformes.
+		requireEmailVerification: true,
+		// 12 caractères. Le défaut de Better Auth est 8 ; ce compte porte des
+		// commandes boutique et des données personnelles de membres.
+		minPasswordLength: 12,
+		sendResetPassword: async ({ user, url }: { user: { email: string }; url: string }) => {
+			await sendEmail({
+				html: `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1a1a1a">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" width="100%" style="max-width:480px;background:#ffffff;border-radius:16px;overflow:hidden">
+      <tr><td style="padding:32px 28px 16px">
+        <h1 style="margin:0 0 12px;font-size:20px;font-weight:700">Nouveau mot de passe</h1>
+        <p style="margin:0;font-size:15px;line-height:1.55;color:#4a4a4a">Une réinitialisation a été demandée pour <strong>${user.email}</strong>.</p>
+      </td></tr>
+      <tr><td style="padding:0 28px 28px" align="center">
+        <a href="${url}" style="display:inline-block;padding:13px 32px;background:#a14b3f;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;border-radius:999px">Choisir un mot de passe</a>
+        <p style="margin:18px 0 0;font-size:12px;line-height:1.5;color:#8a8a8a">Lien valable une heure. Si tu n'es pas à l'origine de cette demande, ignore ce message : ton mot de passe reste inchangé.</p>
+      </td></tr>
+      <tr><td style="padding:14px 28px;border-top:1px solid #ececec" align="center">
+        <p style="margin:0;font-size:11px;color:#8a8a8a">Rose Griffon</p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`,
+				subject: "Réinitialiser ton mot de passe — Rose Griffon",
+				to: user.email,
+			});
+		},
+	},
+
 	socialProviders: {
 		discord: {
 			clientId: process.env.DISCORD_CLIENT_ID!,

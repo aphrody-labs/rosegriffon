@@ -1,0 +1,393 @@
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { createAchilleaClient } from "@/lib/achillea";
+import type { LeagueSeasonPayload, LeagueMatchRow, LeagueStandingRow } from "@rosegriffon/achillea-types/domain/league";
+import {
+	Trophy,
+	ArrowLeft,
+	Calendar,
+	Users,
+	Sparkles,
+	Layers,
+	ChevronLeft,
+	ChevronRight,
+	Shield,
+	Loader2,
+	CheckCircle2,
+} from "lucide-react";
+import { signalerException } from "@/lib/achillea/signaler";
+
+export default function AstralLeaguePage() {
+	const [season, setSeason] = useState<LeagueSeasonPayload | null>(null);
+	const [loading, setLoading] = useState<boolean>(true);
+	const [activeTab, setActiveTab] = useState<"standings" | "matches" | "rules">("standings");
+	const [selectedMatchday, setSelectedMatchday] = useState<number>(1);
+
+	useEffect(() => {
+		let cancelled = false;
+		setLoading(true);
+		const client = createAchilleaClient();
+
+		client.leagues
+			.astral("astral")
+			.then((res) => {
+				if (cancelled) return;
+				if (res.ok && res.value) {
+					setSeason(res.value);
+				}
+			})
+			.catch((cause) => {
+				signalerException("leagues/astral", cause);
+			})
+			.finally(() => {
+				if (!cancelled) setLoading(false);
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	const standings = useMemo(() => {
+		if (!season?.standings) return [];
+		return [...season.standings].sort((a, b) => a.rank - b.rank);
+	}, [season]);
+
+	const teamsMap = useMemo(() => {
+		const map = new Map<string, string>();
+		if (!season?.teams) return map;
+		for (const t of season.teams) {
+			map.set(t.tag, t.name);
+		}
+		return map;
+	}, [season]);
+
+	const totalMatchdays = season?.meta?.matchdays ?? 7;
+
+	const matchdayResults = useMemo(() => {
+		if (!season?.results) return [];
+		return season.results.filter((m: LeagueMatchRow) => m.matchday === selectedMatchday);
+	}, [season, selectedMatchday]);
+
+	return (
+		<div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+			{/* Breadcrumb */}
+			<div className="space-y-1 border-b border-border pb-6">
+				<Link
+					href="/achillea"
+					className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition mb-2"
+				>
+					<ArrowLeft className="w-3.5 h-3.5" />
+					Retour au hub Achilléa
+				</Link>
+				<div className="flex items-center gap-2">
+					<span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+						<Trophy className="w-5 h-5" />
+					</span>
+					<h1 className="text-3xl font-bold tracking-tight">Astral League — Championnat Officiel</h1>
+				</div>
+				<p className="text-sm text-muted-foreground">
+					La ligue d'élite Inazuma Eleven: Victory Road. Saison régulière en format championnat et phases finales en play-offs.
+				</p>
+			</div>
+
+			{/* Hero Banner */}
+			<div className="border border-border bg-card rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-sm flex flex-col md:flex-row items-center gap-6">
+				<div className="relative w-32 h-32 shrink-0 flex items-center justify-center p-2 rounded-2xl bg-muted/40 border border-border">
+					<Image
+						src="/leagues/astral-logo-mark.png"
+						alt="Astral League Logo"
+						width={96}
+						height={96}
+						className="object-contain drop-shadow"
+						priority
+					/>
+				</div>
+
+				<div className="space-y-2 text-center md:text-left flex-1">
+					<div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+						<h2 className="text-2xl font-black">Astral League · Saison 1</h2>
+						<span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+							En cours
+						</span>
+					</div>
+					<p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
+						8 équipes sélectionnées s'affrontent sur 7 journées de championnat aller simple. Les 4 premières places au classement se qualifient pour le bracket final des Play-offs.
+					</p>
+
+					<div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2 text-xs font-medium text-muted-foreground">
+						<span className="flex items-center gap-1.5">
+							<Users className="w-4 h-4 text-primary" />
+							{season?.teams?.length ?? 8} équipes
+						</span>
+						<span>·</span>
+						<span className="flex items-center gap-1.5">
+							<Calendar className="w-4 h-4 text-primary" />
+							{totalMatchdays} journées
+						</span>
+						<span>·</span>
+						<span className="flex items-center gap-1.5">
+							<Sparkles className="w-4 h-4 text-amber-400" />
+							Top 4 Play-offs
+						</span>
+					</div>
+				</div>
+			</div>
+
+			{/* Tabs */}
+			<div className="flex items-center gap-2 border-b border-border pb-px">
+				<button
+					type="button"
+					onClick={() => setActiveTab("standings")}
+					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+						activeTab === "standings"
+							? "border-primary text-foreground"
+							: "border-transparent text-muted-foreground hover:text-foreground"
+					}`}
+				>
+					<Trophy className="w-3.5 h-3.5" />
+					Classement Général
+				</button>
+				<button
+					type="button"
+					onClick={() => setActiveTab("matches")}
+					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+						activeTab === "matches"
+							? "border-primary text-foreground"
+							: "border-transparent text-muted-foreground hover:text-foreground"
+					}`}
+				>
+					<Calendar className="w-3.5 h-3.5" />
+					Calendrier & Journées
+				</button>
+				<button
+					type="button"
+					onClick={() => setActiveTab("rules")}
+					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+						activeTab === "rules"
+							? "border-primary text-foreground"
+							: "border-transparent text-muted-foreground hover:text-foreground"
+					}`}
+				>
+					<Layers className="w-3.5 h-3.5" />
+					Format & Barème
+				</button>
+			</div>
+
+			{loading ? (
+				<div className="py-20 text-center space-y-3">
+					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
+					<p className="text-sm text-muted-foreground">Chargement des données de l'Astral League...</p>
+				</div>
+			) : (
+				<>
+					{/* Standings Tab */}
+					{activeTab === "standings" && (
+						<div className="border border-border rounded-2xl bg-card overflow-hidden shadow-sm">
+							<div className="overflow-x-auto">
+								<table className="w-full text-left text-xs">
+									<thead>
+										<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-[10px] tracking-wider">
+											<th className="py-3 px-4 w-12 text-center">Rang</th>
+											<th className="py-3 px-4">Équipe</th>
+											<th className="py-3 px-3 text-center">J</th>
+											<th className="py-3 px-3 text-center">V</th>
+											<th className="py-3 px-3 text-center">N</th>
+											<th className="py-3 px-3 text-center">D</th>
+											<th className="py-3 px-3 text-center">BP</th>
+											<th className="py-3 px-3 text-center">BC</th>
+											<th className="py-3 px-3 text-center">Diff</th>
+											<th className="py-3 px-4 text-right">Points</th>
+										</tr>
+									</thead>
+									<tbody className="divide-y divide-border/60">
+										{standings.map((row) => {
+											const isPlayoffSpot = row.rank <= 4;
+											const teamName = teamsMap.get(row.teamId) || row.teamId;
+
+											return (
+												<tr
+													key={row.teamId}
+													className={`transition hover:bg-muted/30 ${
+														isPlayoffSpot ? "bg-primary/[0.02]" : ""
+													}`}
+												>
+													<td className="py-3 px-4 text-center font-bold">
+														<span
+															className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-extrabold ${
+																row.rank === 1
+																	? "bg-amber-400 text-black"
+																	: row.rank === 2
+																	? "bg-slate-300 text-black"
+																	: row.rank === 3
+																	? "bg-amber-700 text-white"
+																	: isPlayoffSpot
+																	? "bg-primary/20 text-primary"
+																	: "text-muted-foreground"
+															}`}
+														>
+															{row.rank}
+														</span>
+													</td>
+													<td className="py-3 px-4 font-semibold text-foreground">
+														<div className="flex items-center gap-2">
+															<span className="font-mono text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+																{row.teamId}
+															</span>
+															<span>{teamName}</span>
+														</div>
+													</td>
+													<td className="py-3 px-3 text-center text-muted-foreground font-mono">
+														{row.played}
+													</td>
+													<td className="py-3 px-3 text-center font-semibold text-emerald-400 font-mono">
+														{row.wins}
+													</td>
+													<td className="py-3 px-3 text-center text-muted-foreground font-mono">
+														{row.draws}
+													</td>
+													<td className="py-3 px-3 text-center text-rose-400 font-mono">
+														{row.losses}
+													</td>
+													<td className="py-3 px-3 text-center text-muted-foreground font-mono">
+														{row.mapsFor}
+													</td>
+													<td className="py-3 px-3 text-center text-muted-foreground font-mono">
+														{row.mapsAgainst}
+													</td>
+													<td
+														className={`py-3 px-3 text-center font-mono font-semibold ${
+															row.mapDiff > 0
+																? "text-emerald-400"
+																: row.mapDiff < 0
+																? "text-rose-400"
+																: "text-muted-foreground"
+														}`}
+													>
+														{row.mapDiff > 0 ? `+${row.mapDiff}` : row.mapDiff}
+													</td>
+													<td className="py-3 px-4 text-right font-black text-amber-400 font-mono text-sm">
+														{row.points} pts
+													</td>
+												</tr>
+											);
+										})}
+									</tbody>
+								</table>
+							</div>
+
+							<div className="p-3 bg-muted/20 border-t border-border flex items-center gap-2 text-[11px] text-muted-foreground">
+								<span className="w-2.5 h-2.5 rounded-full bg-primary/40 inline-block" />
+								<span>Les 4 premières équipes sont qualifiées pour les Play-offs.</span>
+							</div>
+						</div>
+					)}
+
+					{/* Matches / Matchday Tab */}
+					{activeTab === "matches" && (
+						<div className="space-y-4">
+							{/* Matchday Selector */}
+							<div className="flex items-center justify-between p-3 rounded-2xl bg-card border border-border">
+								<button
+									type="button"
+									onClick={() => setSelectedMatchday((d) => Math.max(1, d - 1))}
+									disabled={selectedMatchday === 1}
+									className="p-1.5 rounded-lg border border-border hover:bg-muted disabled:opacity-40 transition"
+								>
+									<ChevronLeft className="w-4 h-4" />
+								</button>
+								<span className="font-bold text-sm">
+									Journée {selectedMatchday} sur {totalMatchdays}
+								</span>
+								<button
+									type="button"
+									onClick={() => setSelectedMatchday((d) => Math.min(totalMatchdays, d + 1))}
+									disabled={selectedMatchday >= totalMatchdays}
+									className="p-1.5 rounded-lg border border-border hover:bg-muted disabled:opacity-40 transition"
+								>
+									<ChevronRight className="w-4 h-4" />
+								</button>
+							</div>
+
+							{/* Matches list for current day */}
+							{matchdayResults.length === 0 ? (
+								<div className="border border-dashed border-border rounded-2xl p-12 text-center text-xs text-muted-foreground">
+									Aucune rencontre programmée pour cette journée.
+								</div>
+							) : (
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+									{matchdayResults.map((match: LeagueMatchRow, idx: number) => {
+										const homeName = teamsMap.get(match.homeId) || match.homeId;
+										const awayName = teamsMap.get(match.awayId) || match.awayId;
+
+										return (
+											<div
+												key={idx}
+												className="border border-border bg-card rounded-2xl p-4 flex items-center justify-between gap-4"
+											>
+												<div className="text-right flex-1 min-w-0">
+													<div className="font-bold text-xs truncate">{homeName}</div>
+													<div className="text-[10px] font-mono text-muted-foreground">
+														[{match.homeId}]
+													</div>
+												</div>
+
+												<div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background border border-border font-mono font-bold text-sm shrink-0">
+													<span>{match.homeScore}</span>
+													<span className="text-muted-foreground">-</span>
+													<span>{match.awayScore}</span>
+												</div>
+
+												<div className="text-left flex-1 min-w-0">
+													<div className="font-bold text-xs truncate">{awayName}</div>
+													<div className="text-[10px] font-mono text-muted-foreground">
+														[{match.awayId}]
+													</div>
+												</div>
+											</div>
+										);
+									})}
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* Rules Tab */}
+					{activeTab === "rules" && (
+						<div className="border border-border bg-card rounded-2xl p-6 space-y-4 text-xs text-muted-foreground leading-relaxed">
+							<h3 className="font-bold text-sm text-foreground">Barème de Points Astral League</h3>
+							<ul className="list-disc list-inside space-y-1.5">
+								<li>
+									<b className="text-foreground">Victoire dans le temps réglementaire</b> :{" "}
+									{season?.pointsConfig?.winRegulation ?? 3} points.
+								</li>
+								<li>
+									<b className="text-foreground">Victoire en prolongation</b> :{" "}
+									{season?.pointsConfig?.winOvertime ?? 2} points.
+								</li>
+								<li>
+									<b className="text-foreground">Défaite en prolongation</b> :{" "}
+									{season?.pointsConfig?.lossOvertime ?? 1} point.
+								</li>
+								<li>
+									<b className="text-foreground">Défaite dans le temps réglementaire</b> :{" "}
+									{season?.pointsConfig?.lossRegulation ?? 0} point.
+								</li>
+							</ul>
+
+							<h3 className="font-bold text-sm text-foreground pt-4 border-t border-border/60">
+								Phase Finale (Play-offs)
+							</h3>
+							<p>
+								Les 4 premières équipes accèdent à l'arbre des play-offs en match à élimination directe pour désigner le grand champion de la saison.
+							</p>
+						</div>
+					)}
+				</>
+			)}
+		</div>
+	);
+}
