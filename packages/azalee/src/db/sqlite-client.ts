@@ -181,6 +181,24 @@ function getDrizzle(): ProxyDb {
 	return _drizzle;
 }
 
+/**
+ * La valeur est-elle le marqueur de NULL laissé par le dump Postgres ?
+ *
+ * `COPY` écrit `\N` pour un NULL. L'import dans le miroir SQLite le conserve
+ * comme du TEXTE, et le ré-échappe au passage : la colonne contient `\\N`
+ * sur trois caractères, pas deux. La normalisation ne comparait qu'à la forme
+ * courte et ne correspondait donc JAMAIS — mesuré sur le miroir :
+ * 121 587 cellules pour les seules tables personnages, techniques, objets et
+ * passifs. Conséquence visible : l'API publique servait
+ * `"uniformNumber":"\\N"` au lieu de `null`.
+ *
+ * Les deux formes sont acceptées : le dump peut cesser de doubler l'échappement
+ * sans que la lecture ait à suivre.
+ */
+function estMarqueurNul(valeur: unknown): boolean {
+	return valeur === "\\N" || valeur === "\\\\N";
+}
+
 export class SqliteQueryBuilder {
 	private db: Database;
 	private table: string;
@@ -592,7 +610,7 @@ export class SqliteQueryBuilder {
 	private parseRow(row: Record<string, unknown>): Record<string, unknown> {
 		const parsed: Record<string, unknown> = {};
 		for (const [key, val] of Object.entries(row)) {
-			if (val === "\\N") {
+			if (estMarqueurNul(val)) {
 				parsed[key] = null;
 			} else if (key === "zukan_order" && typeof val === "string" && /^-?\d+$/.test(val)) {
 				parsed[key] = parseInt(val, 10);
