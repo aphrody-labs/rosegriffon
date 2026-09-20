@@ -7,6 +7,8 @@
  * quatre thèmes. `RG_Reika_zukan.webp` est l'icône zukan de Reika, la
  * mascotte d'Azalée (portrait recadré depuis `apps/azalee/public/reika.webp`).
  */
+import type { ThemeId } from "@rosegriffon/preferences";
+
 export const THEMES = {
 	roy: {
 		name: "Roy",
@@ -63,6 +65,19 @@ export const THEMES = {
 			text: "#F3EDF7",
 		},
 	},
-} as const;
+} as const satisfies Record<
+	ThemeId,
+	{
+		name: string;
+		icon: string;
+		colors: {
+			primary: string;
+			secondary: string;
+			accent: string;
+			background: string;
+			text: string;
+		};
+	}
+>;
 
-export type ThemeType = keyof typeof THEMES;
+export type ThemeType = ThemeId;

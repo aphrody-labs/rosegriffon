@@ -31,6 +31,8 @@ export interface NavBases {
 	esport?: string;
 	/** Préfixe de l'espace association (portail). Racine du site par défaut. */
 	association?: string;
+	/** Expose les surfaces techniques et médias désormais hébergées hors d'Azalée. */
+	surfacesNiers?: boolean;
 }
 
 export const AZALEE_BASES: NavBases = { admin: "/dashboard", wiki: "" };
@@ -39,6 +41,7 @@ export const WEBSITE_BASES: NavBases = {
 	association: "",
 	esport: "/achillea",
 	wiki: "/wiki",
+	surfacesNiers: true,
 };
 
 /**
@@ -100,6 +103,33 @@ export const CHEMINS_WIKI = [
 	"/save",
 	"/demo",
 ] as const;
+
+/** Routes lourdes migrées vers niers, encore montées sous `/wiki` par website. */
+export const CHEMINS_NIERS = [
+	"/gallery",
+	"/textures",
+	"/sons",
+	"/videos",
+	"/modeles",
+	"/keshin",
+	"/mode",
+	"/tools",
+	"/tools/stats",
+	"/tools/compare",
+	"/tools/random-team",
+	"/tools/my-team",
+	"/tools/translator",
+	"/save",
+	"/demo",
+] as const;
+
+export function cheminsWikiPour(bases: NavBases): readonly string[] {
+	return bases.surfacesNiers
+		? CHEMINS_WIKI
+		: CHEMINS_WIKI.filter(
+				(chemin) => !CHEMINS_NIERS.includes(chemin as (typeof CHEMINS_NIERS)[number])
+			);
+}
 
 /**
  * Routes servies à la racine dans LES DEUX apps : elles ne prennent jamais le

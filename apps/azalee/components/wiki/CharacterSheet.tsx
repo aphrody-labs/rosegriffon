@@ -1,7 +1,6 @@
 "use client";
 
 import {
-	ArrowLeftRight,
 	ChevronLeft,
 	ChevronRight,
 	CircleDot,
@@ -22,7 +21,6 @@ import { SafeImage } from "@/components/ui/SafeImage";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import {
 	getCharacterFaceUrl,
-	getCharacterModelFullGlbUrl,
 	getCharacterUniformUrl,
 	getEmblemImageUrl,
 	getSkillCategoryIconUrl,
@@ -31,7 +29,6 @@ import {
 import { japaneseToRomaji } from "@rosegriffon/azalee/text/japanese-romaji";
 import { TEAM_EMBLEM_MAP } from "@rosegriffon/azalee/game/team-emblem-map";
 import { cn } from "@/lib/utils";
-import CharacterModelViewer from "./CharacterModelViewer";
 import { FormSelector } from "./FormSelector";
 import type { MovesetSkill } from "./MovesetList";
 import { StatHeptagon } from "./StatHeptagon";
@@ -392,7 +389,6 @@ export function CharacterSheet({
 	// Modèle 3D GLB COMPLET (corps+face+uniforme) assemblé live par nie-model-serve,
 	// servi sur cdn.rosegriffon.fr/model-full/<code>.glb.
 	// null si aucun modèle exporté → pas de bouton 3D (fallback portrait image).
-	const modelGlbUrl = internalCode ? getCharacterModelFullGlbUrl(internalCode) : null;
 	// Une seule vue : le conteneur `u<8>_l.g4tx` porte le maillot (`_1`) et le MASQUE
 	// de pose de l'emblème (`_2`) — pas un dos. Le sélecteur devant/dos a donc disparu.
 	const uniformUrl = internalCode ? getCharacterUniformUrl(internalCode) : null;
@@ -441,12 +437,6 @@ export function CharacterSheet({
 							unoptimized
 							className="object-contain"
 						/>
-						{/* Bouton modèle 3D GLB — monté seulement si un modèle existe (anti-404). */}
-						{modelGlbUrl && (
-							<div className="absolute bottom-1 right-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/20">
-								<CharacterModelViewer glbUrl={modelGlbUrl} name={name} />
-							</div>
-						)}
 					</div>
 
 					{/* Character Info */}
@@ -621,17 +611,6 @@ export function CharacterSheet({
 									aria-label="Personnage suivant"
 								>
 									<ChevronRight size={18} aria-hidden="true" />
-								</NextLink>
-							)}
-
-							{slug && (
-								<NextLink
-									href={`/tools/compare?char1=${slug}`}
-									className="inline-flex items-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white text-xs font-bold ml-auto min-h-11 sm:min-h-0"
-									title="Comparer avec un autre personnage"
-								>
-									<ArrowLeftRight size={16} aria-hidden="true" />
-									Comparer
 								</NextLink>
 							)}
 						</div>

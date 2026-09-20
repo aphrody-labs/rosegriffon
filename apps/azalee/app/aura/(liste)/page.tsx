@@ -120,29 +120,6 @@ export default function AuraHubPage() {
 					</Link>
 				))}
 			</div>
-
-			{/* Accès galerie modèles 3D Keshin + Armures (assemblés live depuis les CPK). */}
-			<Link
-				href="/keshin"
-				className="group flex items-center gap-4 p-4 rounded-2xl bg-surface-container border border-outline-variant/20 hover:border-primary/40 hover:bg-surface-container-high transition-all duration-200 active:scale-[0.98]"
-			>
-				<div className="size-14 rounded-2xl flex items-center justify-center shrink-0 bg-primary/10 text-primary">
-					<CommonSpriteIcon name={"keshin" as SpriteCommonKey} scale={0.6} />
-				</div>
-				<div className="flex-1 min-w-0">
-					<h2 className="type-title-medium text-on-surface group-hover:text-primary transition-colors">
-						Modèles 3D — Esprits Guerriers &amp; Armures
-					</h2>
-					<p className="type-body-small text-on-surface-variant line-clamp-2">
-						Explorez les modèles 3D complets des Keshin et de leurs armures.
-					</p>
-				</div>
-				<ChevronRight
-					size={20}
-					className="text-on-surface-variant/40 group-hover:text-primary/60 transition-colors shrink-0"
-					aria-hidden="true"
-				/>
-			</Link>
 		</div>
 	);
 }

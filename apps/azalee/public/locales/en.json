@@ -4214,5 +4214,8 @@
 	"nav.wiki.modes": "Game modes",
 	"nav.wiki.game_menus": "Game Menus",
 	"nav.wiki.more": "More",
-	"nav.wiki.cpk_browser": "CPK Browser"
+	"nav.wiki.cpk_browser": "CPK Browser",
+	"ui.language.change": "Change language",
+	"ui.language.current": "Current language",
+	"ui.language.label": "Language"
 }

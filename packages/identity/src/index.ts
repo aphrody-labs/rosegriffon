@@ -18,9 +18,9 @@
  * Un compte, plusieurs connexions. L'adresse e-mail est l'identité NATIVE :
  * elle appartient à Rose Griffon, elle suffit à se connecter, et aucune
  * plateforme ne peut la révoquer. Tout le reste — Discord, Patreon, Twitch,
- * Google, Steam, Achilléa — vient s'y rattacher pour apporter une capacité
- * (rôles de serveur, statut de mécène, progression de jeu), jamais pour
- * conditionner l'accès.
+ * Google, Steam, Achilléa — vient s'y rattacher. Certaines liaisons ouvrent
+ * aussi une session, d'autres apportent seulement une capacité (statut de
+ * mécène, progression de jeu), mais aucune n'est nécessaire au compte natif.
  *
  * ── L'INVARIANT QUI MANQUAIT ────────────────────────────────────────────────
  * Un système multi-connexion sans garde-fou laisse l'utilisateur se verrouiller
@@ -46,15 +46,25 @@ export const CONNEXIONS = [
 
 export type Connexion = (typeof CONNEXIONS)[number];
 
+/** Fournisseurs extérieurs auxquels Rose Griffon peut être relié. */
+export type FournisseurTiers = Exclude<Connexion, "email" | "achillea">;
+
+/** Profil public, indépendant des pseudonymes propres aux fournisseurs. */
+export interface ProfilUtilisateur {
+	nomAffiche: string;
+	avatarUrl?: string;
+	biographie?: string;
+}
+
 export interface DescriptionConnexion {
 	id: Connexion;
 	nom: string;
 	/**
 	 * Permet-elle, à elle seule, de se connecter ?
 	 *
-	 * C'est la distinction qui compte. Patreon dit qui est mécène, Steam dit
-	 * quelle progression afficher : ni l'un ni l'autre ne doit pouvoir servir
-	 * de clé unique, sinon perdre l'accès au tiers revient à perdre le compte.
+	 * C'est la distinction qui compte. Discord, Twitch, Google et Patreon sont
+	 * des entrées OAuth actuellement exposées par le site. Steam et Achilléa ne
+	 * font qu'enrichir le profil et ne doivent jamais compter comme accès.
 	 */
 	authentifiante: boolean;
 	/**
@@ -68,7 +78,7 @@ export interface DescriptionConnexion {
 	apporte: string;
 }
 
-export const DESCRIPTIONS: Readonly<Record<Connexion, DescriptionConnexion>> = Object.freeze({
+export const DESCRIPTIONS = Object.freeze({
 	achillea: {
 		apporte: "Clans, mode classé, tournois et licence compétitive.",
 		authentifiante: false,
@@ -99,7 +109,7 @@ export const DESCRIPTIONS: Readonly<Record<Connexion, DescriptionConnexion>> = O
 	},
 	patreon: {
 		apporte: "Statut de mécène, avantages et réduction boutique.",
-		authentifiante: false,
+		authentifiante: true,
 		id: "patreon",
 		native: false,
 		nom: "Patreon",
@@ -118,31 +128,84 @@ export const DESCRIPTIONS: Readonly<Record<Connexion, DescriptionConnexion>> = O
 		native: false,
 		nom: "Twitch",
 	},
-});
+} satisfies Record<Connexion, DescriptionConnexion>);
 
-/** Une connexion rattachée à un compte. */
-export interface ConnexionLiee {
-	type: Connexion;
-	/** Identifiant chez le fournisseur. L'e-mail natif n'en a pas. */
-	identifiant?: string;
-	/** Libellé affichable (pseudo, adresse). */
+interface BaseConnexionLiee {
+	/** Libellé affichable (pseudo ou adresse). */
 	libelle?: string;
-	liee_le?: Date;
+	lieeLe?: Date;
+	/**
+	 * Une liaison révoquée ou expirée ne constitue pas une méthode d'accès.
+	 * L'absence de cette propriété signifie que la liaison est valide, ce qui
+	 * permet de représenter simplement les comptes OAuth déjà persistés.
+	 */
+	valide?: boolean;
+}
+
+/** Identité native Rose Griffon. Elle n'ouvre un accès qu'une fois vérifiée. */
+export interface ConnexionEmail extends BaseConnexionLiee {
+	type: "email";
+	adresse: string;
+	verifiee: boolean;
+	motDePasseConfigure: boolean;
+}
+
+/** Liaison à un fournisseur extérieur. */
+export interface ConnexionFournisseurTiers extends BaseConnexionLiee {
+	type: FournisseurTiers;
+	identifiant: string;
+}
+
+/** Liaison au profil compétitif interne Achilléa. */
+export interface ConnexionAchillea extends BaseConnexionLiee {
+	type: "achillea";
+	identifiant: string;
+}
+
+/** Une connexion rattachée à un compte Rose Griffon. */
+export type ConnexionLiee = ConnexionEmail | ConnexionFournisseurTiers | ConnexionAchillea;
+
+/** Compte unique partagé par le portail, le wiki et Achilléa. */
+export interface Compte {
+	id: string;
+	profil: ProfilUtilisateur;
+	connexions: readonly ConnexionLiee[];
+	creeLe?: Date;
+	misAJourLe?: Date;
+}
+
+function connexionEstValide(connexion: ConnexionLiee): boolean {
+	return connexion.valide !== false;
+}
+
+/** Une liaison permet-elle réellement d'ouvrir une session ? */
+export function connexionEstAuthentifiante(connexion: ConnexionLiee): boolean {
+	if (!connexionEstValide(connexion) || !DESCRIPTIONS[connexion.type].authentifiante) {
+		return false;
+	}
+
+	if (connexion.type === "email") {
+		return connexion.verifiee && connexion.motDePasseConfigure;
+	}
+
+	return true;
 }
 
 /** Les connexions du compte qui permettent, à elles seules, de se connecter. */
 export function connexionsAuthentifiantes(liees: readonly ConnexionLiee[]): ConnexionLiee[] {
-	return liees.filter((c) => DESCRIPTIONS[c.type]?.authentifiante);
+	return liees.filter(connexionEstAuthentifiante);
 }
 
 /** Le compte a-t-il une identité native, indépendante de toute plateforme ? */
 export function aIdentiteNative(liees: readonly ConnexionLiee[]): boolean {
-	return liees.some((c) => DESCRIPTIONS[c.type]?.native);
+	return liees.some(
+		(c) => c.type === "email" && connexionEstAuthentifiante(c) && DESCRIPTIONS[c.type].native
+	);
 }
 
-export type RefusDeliaison =
+export type ResultatDeliaison =
 	| { autorise: true }
-	| { autorise: false; motif: "non_liee" | "derniere_authentifiante" };
+	| { autorise: false; raison: "connexion_non_liee" | "derniere_methode_acces" };
 
 /**
  * Peut-on délier cette connexion sans verrouiller l'utilisateur dehors ?
@@ -152,31 +215,34 @@ export type RefusDeliaison =
  * propre compte — à ses commandes, à sa licence, à son clan — sans aucun moyen
  * de revenir. C'est une perte irréversible produite par un clic.
  *
- * Délier une connexion NON authentifiante (Patreon, Steam, Achilléa) est
+ * Délier une connexion NON authentifiante (Steam, Achilléa) est
  * toujours permis : elle n'ouvre aucune porte, elle ne fait qu'apporter une
  * capacité.
  */
-export function peutDelier(
-	liees: readonly ConnexionLiee[],
-	cible: Connexion
-): RefusDeliaison {
+export function peutDelier(compte: Compte, connexionADelier: Connexion): ResultatDeliaison {
+	const liees = compte.connexions;
+	const cible = connexionADelier;
 	if (!liees.some((c) => c.type === cible)) {
-		return { autorise: false, motif: "non_liee" };
+		return { autorise: false, raison: "connexion_non_liee" };
 	}
 
-	if (!DESCRIPTIONS[cible]?.authentifiante) return { autorise: true };
+	if (!DESCRIPTIONS[cible].authentifiante) return { autorise: true };
 
-	const restantes = connexionsAuthentifiantes(liees).filter((c) => c.type !== cible);
+	const restantes = connexionsAuthentifiantes(liees.filter((c) => c.type !== cible));
 	if (restantes.length === 0) {
-		return { autorise: false, motif: "derniere_authentifiante" };
+		return { autorise: false, raison: "derniere_methode_acces" };
 	}
 
 	return { autorise: true };
 }
 
 /** Message affichable pour un refus. */
-export function messageRefus(motif: RefusDeliaison extends { motif: infer M } ? M : never): string {
-	if (motif === "non_liee") return "Cette connexion n'est pas rattachée à ton compte.";
+export function messageRefus(
+	raison: Extract<ResultatDeliaison, { autorise: false }>["raison"]
+): string {
+	if (raison === "connexion_non_liee") {
+		return "Cette connexion n'est pas rattachée à ton compte.";
+	}
 	return "C'est ta seule façon de te connecter. Ajoute une adresse e-mail ou une autre connexion avant de la retirer.";
 }
 

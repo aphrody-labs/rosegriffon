@@ -188,12 +188,6 @@ export default async function HomePage() {
 					</section>
 				</AnimatedSection>
 
-				{/* Interactive Tools Preview */}
-				<AnimatedSection direction="up" delay={0.05}>
-					<section className="md:px-8 lg:px-12">
-					</section>
-				</AnimatedSection>
-
 				{/* Section Divider */}
 				<div className="flex items-center gap-4 px-8 md:hidden" aria-hidden="true">
 					<div className="flex-1 h-px bg-outline-variant/20" />

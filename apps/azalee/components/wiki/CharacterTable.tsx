@@ -15,13 +15,11 @@ import { isFemaleGender } from "@rosegriffon/azalee/game/gender";
 import type { GenderValue } from "@rosegriffon/azalee/game/gender";
 import {
 	getCharacterImageUrl,
-	getCharacterModelFullGlbUrl,
 	getEmblemImageUrl,
 	getSkillCategoryIconUrl,
 } from "@rosegriffon/azalee/images";
 import { TEAM_EMBLEM_MAP } from "@rosegriffon/azalee/game/team-emblem-map";
 import { cn } from "@/lib/utils";
-import CharacterModelViewer from "./CharacterModelViewer";
 import { CharacterStatsPopover } from "./CharacterStatsPopover";
 
 const ELEMENT_SPRITE_MAP: Record<string, SpriteCommonKey> = {
@@ -170,11 +168,6 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
 						const element = character.element || activeData.element || "Void";
 						const rarity = character.rarity || activeData.rarity || "N";
 						const stats = character.stats || activeData.stats;
-						// Modèle 3D GLB complet (corps+face+uniforme, nie-model-serve /model-full/).
-						const modelGlbUrl = getCharacterModelFullGlbUrl(
-							character.internalCode || (activeData as Record<string, any>).internalCode
-						);
-
 						// Localization logic for name/description
 						const name =
 							(language === "ja"
@@ -353,9 +346,6 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
 								{/* Stats */}
 								<TableCell className="text-center p-0">
 									{stats?.lv99 && <CharacterStatsPopover stats={stats.lv99} name={name} />}
-									{modelGlbUrl && (
-										<CharacterModelViewer glbUrl={modelGlbUrl} name={name} />
-									)}
 								</TableCell>
 
 								{/* Équipe */}

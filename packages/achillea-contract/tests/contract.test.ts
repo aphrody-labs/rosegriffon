@@ -139,7 +139,7 @@ describe("Rust", () => {
 
 	test("le renommage serde préserve le nom du fil", () => {
 		expect(rust).toContain('#[serde(rename = "soloRank")]');
-		expect(rust).toContain("pub solo_rank: RankDto,");
+		expect(rust).toContain("pub solo_rank: Option<RankDto>,");
 	});
 
 	test("les optionnels sont des Option sautés à la sérialisation", () => {

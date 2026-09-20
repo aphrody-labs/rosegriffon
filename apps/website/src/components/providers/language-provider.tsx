@@ -1,16 +1,26 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+	DEFAULT_LOCALE_REGISTRY,
+	createIntlFormatters,
+	directionForLocale,
+	type DateValue,
+} from "@rosegriffon/i18n";
+import type { LocaleId } from "@rosegriffon/preferences";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 // Import default locale directly to prevent hydration mismatch and flash of keys
 import frDictionary from "@/public/locales/fr.json";
 
-export type Language = "fr" | "en" | "ja";
+export type Language = LocaleId;
 
 interface LanguageContextType {
 	language: Language;
 	setLanguage: (lang: Language) => void;
 	t: (hash: string | number | undefined | null) => string;
+	formatDate: (value: DateValue, options?: Intl.DateTimeFormatOptions) => string;
+	formatNumber: (value: number | bigint, options?: Intl.NumberFormatOptions) => string;
+	formatList: (value: readonly string[], options?: Intl.ListFormatOptions) => string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	getLocalized: (obj: any, fieldPrefix?: string) => string;
 	isLoading: boolean;
@@ -18,35 +28,47 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-	const [language, setLanguageState] = useState<Language>("fr");
+const DEFAULT_LANGUAGE: Language = "fr";
+const LANGUAGE_COOKIE = "rg-locale";
+
+function persistLanguage(language: Language) {
+	try {
+		localStorage.setItem("app_language", language);
+	} catch {
+		// Le cookie reste la source portable quand le stockage local est bloqué.
+	}
+	try {
+		document.cookie = `${LANGUAGE_COOKIE}=${language}; Path=/; Max-Age=31536000; SameSite=Lax`;
+	} catch {
+		// L'état React continue de fonctionner dans un shell sans cookies.
+	}
+}
+
+export function LanguageProvider({
+	children,
+	initialLanguage = DEFAULT_LANGUAGE,
+}: {
+	children: ReactNode;
+	initialLanguage?: Language;
+}) {
+	const [language, setLanguageState] = useState<Language>(initialLanguage);
 	// Initialize with static FR dictionary
 	const [dictionary, setDictionary] = useState<Record<string, string>>(
 		frDictionary as Record<string, string>
 	);
 	const [isLoading, setIsLoading] = useState(false);
 
-	// Load language from localStorage (mount-only — hydration sync).
-	useEffect(() => {
-		const saved = localStorage.getItem("app_language") as Language;
-		if (saved && ["fr", "en", "ja"].includes(saved)) {
-			setLanguageState(saved);
-		}
-	}, []);
-
 	const setLanguage = (lang: Language) => {
 		setLanguageState(lang);
-		if (typeof window !== "undefined") {
-			localStorage.setItem("app_language", lang);
-		}
+		persistLanguage(lang);
 	};
 
-	// La langue déclarée par le document doit suivre celle qui est réellement
-	// affichée. `<html lang="fr">` est figé dans le gabarit racine : un lecteur
-	// d'écran annonçait du japonais avec une voix française, et le navigateur
-	// choisissait une police latine pour des kanji.
+	// Le serveur initialise déjà lang/dir depuis le cookie et Accept-Language.
+	// Cette synchronisation maintient le document juste lors d'un changement
+	// interactif, sans qu'un ancien localStorage puisse écraser la décision SSR.
 	useEffect(() => {
 		document.documentElement.lang = language;
+		document.documentElement.dir = directionForLocale(language);
 	}, [language]);
 
 	// Load dictionary dynamically for non-default languages
@@ -57,20 +79,33 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 			return;
 		}
 
+		const controller = new AbortController();
 		setIsLoading(true);
-		fetch(`/locales/${language}.json`)
-			.then((res) => res.json())
+		fetch(`/locales/${language}.json`, { signal: controller.signal })
+			.then((res) => {
+				if (!res.ok) throw new Error(`Locale ${language}: HTTP ${res.status}`);
+				return res.json();
+			})
 			.then((data) => {
-				setDictionary(data);
+				setDictionary({
+					...(frDictionary as Record<string, string>),
+					...(data as Record<string, string>),
+				});
 				setIsLoading(false);
 			})
 			.catch((error) => {
+				if (error instanceof DOMException && error.name === "AbortError") return;
 				console.error("Failed to load locale", error);
-				// Fallback to FR on error
 				setDictionary(frDictionary as Record<string, string>);
+				setLanguageState(DEFAULT_LANGUAGE);
+				persistLanguage(DEFAULT_LANGUAGE);
 				setIsLoading(false);
 			});
+
+		return () => controller.abort();
 	}, [language]);
+
+	const formatters = useMemo(() => createIntlFormatters(language), [language]);
 
 	const t = (hash: string | number | undefined | null) => {
 		if (hash === undefined || hash === null) {
@@ -107,13 +142,27 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 	};
 
 	return (
-		<LanguageContext.Provider value={{ getLocalized, isLoading, language, setLanguage, t }}>
+		<LanguageContext.Provider
+			value={{
+				formatDate: formatters.date,
+				formatList: formatters.list,
+				formatNumber: formatters.number,
+				getLocalized,
+				isLoading,
+				language,
+				setLanguage,
+				t,
+			}}
+		>
 			{children}
 		</LanguageContext.Provider>
 	);
 }
 
 const defaultLanguageContext: LanguageContextType = {
+	formatDate: createIntlFormatters(DEFAULT_LANGUAGE).date,
+	formatList: createIntlFormatters(DEFAULT_LANGUAGE).list,
+	formatNumber: createIntlFormatters(DEFAULT_LANGUAGE).number,
 	getLocalized: (obj: any, fieldPrefix: string = "name") => {
 		if (!obj) {
 			return "";

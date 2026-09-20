@@ -1,5 +1,6 @@
 "use client";
 
+import { joindreWiki, WEBSITE_BASES } from "@rosegriffon/app-shell";
 import { ArrowLeftRight, Eye, EyeOff, Gamepad2, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -128,6 +129,13 @@ export function PlayersClient({
 			case "team": {
 				return teams?.find((t) => t.id === value)?.name || value;
 			}
+			// Les 9 clés du groupe d'âge (`wiki.filters.age_group` + les 8
+			// `wiki.age_groups.*`) n'existaient que dans `apps/azalee/public/locales`
+			// et manquaient dans celles de ce site : `t()` retombe sur la clé brute,
+			// et `/wiki/chara` affichait donc « wiki.age_groups.child » dans les
+			// filtres — en capitales pour le titre (« WIKI.FILTERS.AGE_GROUP »)
+			// uniquement parce que son `<h4>` porte l'utilitaire `uppercase`, pas
+			// parce que la clé diffère. Traductions recopiées depuis azalee.
 			case "ageGroup": {
 				if (value === "Child") return t("wiki.age_groups.child");
 				if (value === "Elementary") return t("wiki.age_groups.elementary");
@@ -268,8 +276,11 @@ export function PlayersClient({
 						<Gamepad2 size={13} aria-hidden="true" />
 						<span className="hidden sm:inline">Jouables</span>
 					</button>
+					{/* Le wiki est monté sous `/wiki` dans cette app : un `/tools/compare`
+					    en dur partait sur une redirection 308 vers `/wiki/tools/compare`.
+					    Le préfixe vient du registre de routes, jamais d'une chaîne codée. */}
 					<Link
-						href="/tools/compare"
+						href={joindreWiki(WEBSITE_BASES.wiki, "/tools/compare")}
 						className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-primary transition-all normal-case tracking-normal ml-auto"
 					>
 						<ArrowLeftRight size={13} aria-hidden="true" />

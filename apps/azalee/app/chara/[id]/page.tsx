@@ -2,7 +2,6 @@ export const revalidate = 3600; // ISR: Revalidate every hour
 export const dynamic = "force-static";
 export const dynamicParams = true;
 
-import { ArrowLeftRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -577,13 +576,6 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 						{charName}
 					</span>
 				</nav>
-				<Link
-					href={`/tools/compare?char1=${baseChar.slug || id}`}
-					className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-primary transition-all"
-				>
-					<ArrowLeftRight size={16} aria-hidden="true" />
-					Comparer
-				</Link>
 			</div>
 
 			{/* Character Sheet - Game-style UI with level toggle */}
@@ -684,7 +676,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
 			{player.internalCode && (
 				<div className="mt-6">
-					<CharaAssetsSection internalCode={player.internalCode} displayName={charName} />
+					<CharaAssetsSection internalCode={player.internalCode} />
 				</div>
 			)}
 
@@ -756,8 +748,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 			    chaîne non vide a une `length`, passait donc la garde, puis tombait
 			    sur `.map is not a function` — au prerender, ce qui faisait échouer le
 			    build entier sur /chara/mark-evans. */}
-			{Array.isArray((player as any).wikiSections) &&
-				(player as any).wikiSections.length > 0 && (
+			{Array.isArray((player as any).wikiSections) && (player as any).wikiSections.length > 0 && (
 				<div className="bg-surface-container-low rounded-[20px] sm:rounded-[24px] border border-outline-variant/30 px-4 py-5 sm:px-8 sm:py-8 space-y-6 sm:space-y-10">
 					{(player as any).wikiSections.map((section: any, i: number) => (
 						<div key={i} className="space-y-2 sm:space-y-4">

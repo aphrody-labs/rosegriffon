@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { SidebarInset, SidebarProvider, Toaster, useBreakpoint, useSidebar } from "@rosegriffon/ui";
-import { WEBSITE_BASES, domaineDeLaRoute } from "@rosegriffon/app-shell";
+import { SidebarInset, SidebarProvider, Toaster, useBreakpoint } from "@rosegriffon/ui";
+import { ThemeToggle, WEBSITE_BASES, domaineDeLaRoute } from "@rosegriffon/app-shell";
 import { resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
 
@@ -15,27 +15,22 @@ import { AppSidebar } from "@/components/app-sidebar";
 import Footer from "@/components/layout/footer";
 import { Header } from "@/components/layout/Header";
 import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigation";
+import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 import SidebarNavigationHandler from "@/components/layout/SidebarNavigationHandler";
 import EdgeSwipeDetector from "@/components/shared/EdgeSwipeDetector";
 import MobileWatermark from "@/components/shared/MobileWatermark";
 import { AuthProvider as AuthProviderProfil } from "@/components/providers/AuthProvider";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
-import { LanguageProvider } from "@/components/providers/language-provider";
+import { LanguageProvider, type Language } from "@/components/providers/language-provider";
 import { ProfileProvider, useProfile } from "@/contexts/profile-context";
-import { ThemeProvider, useTheme } from "@/contexts/theme-context";
+import { ThemeProvider } from "@/contexts/theme-context";
 import { AchilleaAuthProvider, useAchilleaAuth } from "@/lib/achillea";
 import { Providers } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar-store";
 
-function SidebarWrapper({
-	children,
-	isMedium,
-}: {
-	children: React.ReactNode;
-	isMedium: boolean;
-}) {
+function SidebarWrapper({ children, isMedium }: { children: React.ReactNode; isMedium: boolean }) {
 	const { isOpen, setSidebarOpen } = useSidebarStore();
 	// En « medium » le rail occupe déjà la colonne : la sidebar y est un tiroir
 	// que l'on ouvre à la demande. Elle ne doit donc PAS suivre la préférence
@@ -110,7 +105,7 @@ function RoutedHeader({
 					avatar_url: achilleaUser.avatar
 						? resolveDiscordAvatarUrl(achilleaUser.id, achilleaUser.avatar)
 						: null,
-			  }
+				}
 			: null
 		: rgProfile;
 
@@ -131,6 +126,12 @@ function RoutedHeader({
 			logoSrc={logoSrc}
 			homeHref={homeHref}
 			accountHref={accountHref}
+			themeToggleSlot={
+				<div className="flex items-center gap-1">
+					<LanguageSwitcher />
+					<ThemeToggle />
+				</div>
+			}
 			user={user}
 			profile={profile}
 		/>
@@ -139,13 +140,14 @@ function RoutedHeader({
 
 export default function ClientLayout({
 	children,
+	initialLanguage,
 }: Readonly<{
 	children: React.ReactNode;
+	initialLanguage: Language;
 }>) {
 	const breakpoint = useBreakpoint();
 	const isCompact = breakpoint === "compact";
 	const isMedium = breakpoint === "medium";
-	const isExpanded = breakpoint === "expanded" || breakpoint === "large";
 
 	const pathname = usePathname();
 	const isAdminPage = pathname?.startsWith("/admin");
@@ -190,82 +192,86 @@ export default function ClientLayout({
 					 */}
 					<SupabaseProvider>
 						<AuthProviderProfil>
-						<ProfileProvider>
-						<LanguageProvider>
-							<AchilleaAuthProvider>
-								<SidebarWrapper isMedium={isMedium}>
-									{/* Accessibilité: lien pour sauter au contenu principal */}
-									<SkipToContent />
+							<ProfileProvider>
+								<LanguageProvider initialLanguage={initialLanguage}>
+									<AchilleaAuthProvider>
+										<SidebarWrapper isMedium={isMedium}>
+											{/* Accessibilité: lien pour sauter au contenu principal */}
+											<SkipToContent />
 
-									{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
-									{showRail && <WebsiteNavigationRail bases={WEBSITE_BASES} />}
+											{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
+											{showRail && <WebsiteNavigationRail bases={WEBSITE_BASES} />}
 
-								{/* SIDEBAR — tiroir en compact, tiroir à la demande en medium
+											{/* SIDEBAR — tiroir en compact, tiroir à la demande en medium
 								    (le bouton « Menu » du rail l'ouvre), panneau fixe en expanded.
 								    Elle doit être montée aussi en medium : sans elle, ce bouton
 								    basculait un état sans panneau et ne faisait rien. */}
-								{!shouldHideSidebar && <AppSidebar bases={WEBSITE_BASES} />}
+											{!shouldHideSidebar && <AppSidebar bases={WEBSITE_BASES} />}
 
-								<SidebarNavigationHandler />
-								<EdgeSwipeDetector />
+											<SidebarNavigationHandler />
+											<EdgeSwipeDetector />
 
-								{/* Pas de marge gauche manuelle en expanded : <Sidebar> pose déjà un
+											{/* Pas de marge gauche manuelle en expanded : <Sidebar> pose déjà un
 								    « gap » de --sidebar-width dans le flux, qui décale l'inset. En
 								    ajouter une seconde doublait le décalage et écrasait le contenu. */}
-								<SidebarInset
-									className={cn("transition-all duration-300 min-w-0", showRail && "ml-20")}
-								>
-									{/* La réserve en haut compense le Header fixe (4rem+safe-area en mobile, 14 (3.5rem) sur desktop/tablette).
+											<SidebarInset
+												className={cn("transition-all duration-300 min-w-0", showRail && "ml-20")}
+											>
+												{/* La réserve en haut compense le Header fixe (4rem+safe-area en mobile, 14 (3.5rem) sur desktop/tablette).
 									    La réserve en bas compense la barre de navigation basse (5rem+safe-area) uniquement montée en compact. */}
-									<div
-										className={cn(
-											"flex flex-col min-h-[100dvh] w-full",
-											!shouldHideSidebar && "pt-[calc(4rem+env(safe-area-inset-top))] md:pt-14",
-											isCompact && !shouldHideSidebar && "pb-[calc(5.5rem+env(safe-area-inset-bottom))]"
-										)}
-									>
-										{/* Le kit admin fournit son propre en-tête mobile : sans cette garde,
+												<div
+													className={cn(
+														"flex flex-col min-h-[100dvh] w-full",
+														!shouldHideSidebar &&
+															"pt-[calc(4rem+env(safe-area-inset-top))] md:pt-14",
+														isCompact &&
+															!shouldHideSidebar &&
+															"pb-[calc(5.5rem+env(safe-area-inset-bottom))]"
+													)}
+												>
+													{/* Le kit admin fournit son propre en-tête mobile : sans cette garde,
 										    les deux se superposaient sur /admin (z-40 contre z-30). */}
-										{/* Barre supérieure unifiée et routée selon le domaine actif */}
-										{!shouldHideSidebar &&
-											(isCompact ? (
-												<RoutedHeader isMobile showSidebarToggle={false} />
-											) : (
-												<RoutedHeader showSidebarToggle />
-											))}
-										<div className="flex-1 w-full">
-											{/* `SidebarInset` est déjà un <main> : ici un <div> (un <main>
+													{/* Barre supérieure unifiée et routée selon le domaine actif */}
+													{!shouldHideSidebar &&
+														(isCompact ? (
+															<RoutedHeader isMobile showSidebarToggle={false} />
+														) : (
+															<RoutedHeader showSidebarToggle />
+														))}
+													<div className="flex-1 w-full">
+														{/* `SidebarInset` est déjà un <main> : ici un <div> (un <main>
 											    imbriqué est invalide et casse la cible du lien d'évitement). */}
-											{/* La classe de thème du domaine est posée ICI, sur la zone
+														{/* La classe de thème du domaine est posée ICI, sur la zone
 											    de contenu : le chrome partagé (barre latérale, barres de
 											    navigation) garde le thème choisi par l'utilisateur, et
 											    seule la section prend l'identité de son domaine. */}
-											<div
-												id="main-content"
-												className={cn(
-													"min-h-full w-full flex-1 overflow-x-hidden",
-													classeThemeDuDomaine(pathname || "/")
-												)}
-											>
-												{children}
-											</div>
-										</div>
-										{/* /shop rend son propre pied de page (thémé DA boutique) dans
+														<div
+															id="main-content"
+															className={cn(
+																"min-h-full w-full flex-1 overflow-x-hidden",
+																classeThemeDuDomaine(pathname || "/")
+															)}
+														>
+															{children}
+														</div>
+													</div>
+													{/* /shop rend son propre pied de page (thémé DA boutique) dans
 										    son layout : sans cette garde, les six routes du tunnel
 										    d'achat empilaient deux `contentinfo` — rupture visuelle et
 										    liens légaux annoncés deux fois par les lecteurs d'écran. */}
-										{!isShopPage && <Footer />}
-										<MobileWatermark />
-										{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
-										{isCompact && !shouldHideSidebar && <MobileBottomNavigation bases={WEBSITE_BASES} />}
-									</div>
-								</SidebarInset>
-
-								</SidebarWrapper>
-							</AchilleaAuthProvider>
-						</LanguageProvider>
-						<Toaster richColors position="top-right" />
-						</ProfileProvider>
+													{!isShopPage && <Footer />}
+													<MobileWatermark />
+													{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
+													{isCompact && !shouldHideSidebar && (
+														<MobileBottomNavigation bases={WEBSITE_BASES} />
+													)}
+												</div>
+											</SidebarInset>
+										</SidebarWrapper>
+									</AchilleaAuthProvider>
+								</LanguageProvider>
+								<Toaster richColors position="top-right" />
+							</ProfileProvider>
 						</AuthProviderProfil>
 					</SupabaseProvider>
 				</AuthProvider>

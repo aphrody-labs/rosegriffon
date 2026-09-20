@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import Image from "next/image";
+import { metadonneesAchillea } from "@/app/achillea/metadonnees";
 import { createAchilleaClient } from "@/lib/achillea";
 import { TournamentState } from "@rosegriffon/achillea-types";
 import type { Tournament, ParticipantDTO } from "@rosegriffon/achillea-types";
@@ -8,11 +8,12 @@ import { PlayCircle, Video } from "lucide-react";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-	title: "Accueil E-Sport & Tournois",
+export const metadata = metadonneesAchillea({
+	titre: "Accueil E-Sport & Tournois",
 	description:
 		"Achilléa, le portail compétitif Inazuma Eleven: Victory Road. Inscriptions tournois, clans, ranked et lives.",
-};
+	chemin: "/achillea",
+});
 
 const FEATURED_STATES = [
 	TournamentState.ONGOING,

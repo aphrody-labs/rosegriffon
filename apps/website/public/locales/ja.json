@@ -4109,6 +4109,15 @@
   "wiki.filters.gender": "性別",
   "wiki.genders.male": "男子",
   "wiki.genders.female": "女子",
+  "wiki.filters.age_group": "年齢層",
+  "wiki.age_groups.child": "子供",
+  "wiki.age_groups.elementary": "小学生",
+  "wiki.age_groups.middle_school": "中学生",
+  "wiki.age_groups.high_school": "高校生",
+  "wiki.age_groups.college": "大学生",
+  "wiki.age_groups.adult": "大人",
+  "wiki.age_groups.elder": "年長者",
+  "wiki.age_groups.exobeing": "Exobeing",
   "wiki.filters.series": "シーズン / シリーズ",
   "wiki.filters.team": "チーム / 学校",
   "wiki.filters.playstyle": "プレースタイル",
@@ -4164,5 +4173,8 @@
   "nav.tools.random_team": "ランダムチーム",
   "nav.tools.my_team": "マイチーム",
   "nav.tools.translator": "翻訳",
-  "nav.settings": "設定"
+	"nav.settings": "設定",
+	"ui.language.change": "言語を変更",
+	"ui.language.current": "現在の言語",
+	"ui.language.label": "言語"
 }

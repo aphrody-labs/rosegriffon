@@ -9,7 +9,6 @@
 	},
 	"scripts": {
 		"lint": "bunx oxlint -c ../../.oxlintrc.json src",
-		"type-check": "bun --bun tsc --noEmit",
-		"test": "bun test test"
+		"type-check": "bun --bun tsc --noEmit"
 	}
 }

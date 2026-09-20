@@ -254,8 +254,14 @@ export class TournamentPage implements OnInit, OnDestroy {
 	}
 
 	protected get isFull(): boolean {
-		if (!this.tournament) return false;
-		return this.activeParticipants.length >= this.tournament.participantsNumber;
+		const capacity = this.tournament?.participantsNumber;
+		if (!capacity) return false;
+		return this.activeParticipants.length >= capacity;
+	}
+
+	/** Nombre de places affiché dans l'onglet des participants. */
+	protected get remainingPlaces(): number {
+		return (this.tournament?.participantsNumber ?? 0) - this.participants.length;
 	}
 
 	/** Clôture manuelle : réservée à un tournoi effectivement en cours. */

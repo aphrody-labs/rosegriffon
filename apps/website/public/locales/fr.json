@@ -4119,6 +4119,15 @@
 	"wiki.filters.gender": "Genre",
 	"wiki.genders.male": "Garçon",
 	"wiki.genders.female": "Fille",
+	"wiki.filters.age_group": "Groupe d'âge",
+	"wiki.age_groups.child": "Enfant",
+	"wiki.age_groups.elementary": "École primaire",
+	"wiki.age_groups.middle_school": "Collège",
+	"wiki.age_groups.high_school": "Lycée",
+	"wiki.age_groups.college": "Université",
+	"wiki.age_groups.adult": "Adulte",
+	"wiki.age_groups.elder": "Aîné",
+	"wiki.age_groups.exobeing": "Exobeing",
 	"wiki.filters.series": "Saison / Série",
 	"wiki.filters.team": "Équipe / École",
 	"wiki.filters.playstyle": "Style de jeu",
@@ -4185,5 +4194,8 @@
 	"nav.tools.random_team": "Équipe aléatoire",
 	"nav.tools.my_team": "Mon Équipe",
 	"nav.tools.translator": "Traducteur",
-	"nav.settings": "Paramètres"
+	"nav.settings": "Paramètres",
+	"ui.language.change": "Changer de langue",
+	"ui.language.current": "Langue actuelle",
+	"ui.language.label": "Langue"
 }

@@ -458,13 +458,19 @@ public struct ClanApplicationResult: Codable, Sendable {
 
 public struct ClanDTO: Codable, Sendable {
 	public let id: Double
-	public let founders: String
+	/// Identifiants Discord des fondateurs.
+	///
+	/// L'API en renvoie un TABLEAU. Le contrat disait `string`, donc la
+	/// validation rejetait chaque clan : les 42 clans existaient, l'API les
+	/// servait, et la page affichait « 0 clan trouvé ».
+	public let founders: [String]
 	public let name: String
 	public let shortenedName: String
 	public let normalizedShortName: String
 	public let clanAvatarUrl: String
 	public let clanBiography: String
-	public let fame: Double
+	/// Absent de la charge utile de `GET /clans` : optionnel.
+	public let fame: Double?
 	public let xUrl: String?
 	public let instagramUrl: String?
 	public let tiktokUrl: String?
@@ -649,7 +655,7 @@ public struct DbQueryResult: Codable, Sendable {
 public struct DbRowsPage: Codable, Sendable {
 	public let data: [[String: AnyCodable]]
 	public let columns: [DbColumn]
-	public let meta: AnyCodable
+	public let meta: PageMeta
 }
 
 public struct DbTableRow: Codable, Sendable {
@@ -671,11 +677,16 @@ public struct EnrichedUserDTO: Codable, Sendable {
 	/// session : optionnel pour que `SessionUserDTO` reste assignable.
 	public let type: String?
 	public let username: String
-	public let sim: Double
+	/// Champs présents uniquement sur la session de l'utilisateur courant.
+	///
+	/// `GET /clans` imbrique un président réduit (identité et profil public) qui
+	/// ne les porte pas. Les exiger faisait échouer la validation de la réponse
+	/// ENTIÈRE, donc de tous les clans.
+	public let sim: Double?
 	public let avatar: String?
 	public let clanId: Double?
-	public let soloRank: RankDTO
-	public let duoRank: RankDTO
+	public let soloRank: RankDTO?
+	public let duoRank: RankDTO?
 	public let lastInteract: String?
 	public let role: UserRole?
 	public let currentLevel: Double?
@@ -791,10 +802,15 @@ public struct LeagueMatchRow: Codable, Sendable {
 }
 
 public struct LeaguePointsConfig: Codable, Sendable {
-	public let winRegulation: Double
-	public let lossRegulation: Double
-	public let winOvertime: Double
-	public let lossOvertime: Double
+	/// Graphie servie par l'API.
+	public let win: Double?
+	public let draw: Double?
+	public let loss: Double?
+	/// Graphie historique du contrat, conservée pour les appelants existants.
+	public let winRegulation: Double?
+	public let lossRegulation: Double?
+	public let winOvertime: Double?
+	public let lossOvertime: Double?
 }
 
 public struct LeagueSeasonPayload: Codable, Sendable {
@@ -893,7 +909,7 @@ public struct LobbyDTO: Codable, Sendable {
 	public let lobbyUsers: [LobbyUserDTO]
 	public let lobbyMatches: [LobbyMatchDTO]
 	public let hostUser: LobbyUserDTO?
-	public let matchFormat: MatchFormat
+	public let matchFormat: MatchFormat?
 }
 
 public struct LobbyMatchDTO: Codable, Sendable {
@@ -987,17 +1003,17 @@ public struct NewTournamentDTO: Codable, Sendable {
 	public let description: String
 	public let series: TournamentSeries?
 	public let organization: AnyCodable
-	public let managers: [UserDTO]
+	public let managers: [UserDTO]?
 	public let startsAt: String
 	public let grandFinalAt: String
 	public let tournamentType: StageType
-	public let participantsNumber: Double
-	public let seedOrdering: SeedOrdering
-	public let matchFormat: MatchFormat
+	public let participantsNumber: Double?
+	public let seedOrdering: SeedOrdering?
+	public let matchFormat: MatchFormat?
 	public let customFormatChildCount: Double?
 	public let groupStageEnabled: Bool
 	public let groupStageType: StageType?
-	public let affiche: String
+	public let affiche: String?
 	public let logo: String
 	public let ruleset: String
 	public let planning: String
@@ -1045,19 +1061,19 @@ public struct OpenRegistrationsResult: Codable, Sendable {
 }
 
 public struct OrganizationDTO: Codable, Sendable {
-	public let id: String?
+	public let id: AnyCodable?
 	public let state: OrganizationState?
 	public let name: String
 	public let normalizedName: String
 	public let logo: String
 	public let description: String
-	public let owner: UserDTO
-	public let orgManagers: [UserDTO]
+	public let owner: AnyCodable?
+	public let orgManagers: [UserDTO]?
 	public let managers: [OrgManagerDTO]?
 	public let preapproved: Bool?
-	public let socialMedias: [SocialMediaDTO]
-	public let broadcastMedias: [SocialMediaDTO]
-	public let origin: Country
+	public let socialMedias: [SocialMediaDTO]?
+	public let broadcastMedias: [SocialMediaDTO]?
+	public let origin: AnyCodable?
 	public let createdAt: String?
 	public let updatedAt: String?
 }
@@ -1071,7 +1087,7 @@ public enum OrganizationState: Int, Codable, Sendable, CaseIterable {
 
 /// Revue d'une demande de création / édition d'organisation.
 public struct OrganizationValidationDTO: Codable, Sendable {
-	public let id: String?
+	public let id: AnyCodable?
 	public let reviewer: UserDTO
 	public let name: String?
 	public let logo: String?
@@ -1098,10 +1114,15 @@ public struct PagedList<T: Codable>: Codable, Sendable {
 
 /// Métadonnées de page renvoyées par l'API (style `Paginated<T>` historique).
 public struct PageMeta: Codable, Sendable {
-	public let page: Double
-	public let limit: Double
+	/// Seul `total` est garanti.
+	///
+	/// Mesuré sur `GET /clans` : l'API renvoie `{ total, pageCount: null }`. Une
+	/// enveloppe de pagination ne doit jamais pouvoir invalider sa charge utile —
+	/// exiger ces champs effaçait les 42 clans pour une histoire de compteur.
+	public let page: Double?
+	public let limit: Double?
 	public let total: Double
-	public let pageCount: Double
+	public let pageCount: Double?
 }
 
 /// Requête de pagination commune à toutes les listes.
@@ -1841,17 +1862,17 @@ public struct Tournament: Codable, Sendable {
 	public let grandFinalAt: String
 	public let series: TournamentSeries?
 	public let organization: OrganizationDTO
-	public let managers: [UserDTO]
-	public let participants: [ParticipantDTO]
+	public let managers: [UserDTO]?
+	public let participants: [ParticipantDTO]?
 	public let tournamentType: StageType
-	public let participantsNumber: Double
-	public let seedOrdering: SeedOrdering
-	public let matchFormat: MatchFormat
+	public let participantsNumber: Double?
+	public let seedOrdering: SeedOrdering?
+	public let matchFormat: MatchFormat?
 	public let customFormatChildCount: Double?
 	public let groupStageEnabled: Bool
 	public let groupStageType: StageType?
 	public let logo: String
-	public let affiche: String
+	public let affiche: String?
 	public let planning: String
 	public let ruleset: String
 	/// True une fois le bonus AP podium (top 4) versé.
@@ -2039,11 +2060,16 @@ public struct UserDTO: Codable, Sendable {
 	/// session : optionnel pour que `SessionUserDTO` reste assignable.
 	public let type: String?
 	public let username: String
-	public let sim: Double
+	/// Champs présents uniquement sur la session de l'utilisateur courant.
+	///
+	/// `GET /clans` imbrique un président réduit (identité et profil public) qui
+	/// ne les porte pas. Les exiger faisait échouer la validation de la réponse
+	/// ENTIÈRE, donc de tous les clans.
+	public let sim: Double?
 	public let avatar: String?
 	public let clanId: Double?
-	public let soloRank: RankDTO
-	public let duoRank: RankDTO
+	public let soloRank: RankDTO?
+	public let duoRank: RankDTO?
 	public let lastInteract: String?
 	public let role: UserRole?
 	public let currentLevel: Double?
@@ -2140,14 +2166,14 @@ public struct WireTournament: Codable, Sendable {
 	public let startsAt: String
 	public let grandFinalAt: String
 	public let tournamentType: StageType
-	public let participantsNumber: Double
-	public let seedOrdering: SeedOrdering
-	public let matchFormat: MatchFormat
+	public let participantsNumber: Double?
+	public let seedOrdering: SeedOrdering?
+	public let matchFormat: MatchFormat?
 	public let customFormatChildCount: Double?
 	public let groupStageEnabled: Bool
 	public let groupStageType: StageType?
 	public let logo: String
-	public let affiche: String
+	public let affiche: String?
 	public let planning: String
 	public let ruleset: String
 	/// True une fois le bonus AP podium (top 4) versé.
@@ -2169,8 +2195,13 @@ public struct WireTournament: Codable, Sendable {
 	public let closedAt: String?
 	public let series: EntityRef<WireTournamentSeries>?
 	public let organization: EntityRef<OrganizationDTO>
-	public let managers: [EntityRef<UserDTO>]
-	public let participants: [EntityRef<WireParticipant>]
+	/// Relations OPTIONNELLES sur la liste.
+	///
+	/// `GET /tournaments` ne les peuple pas — seul `GET /tournaments/:id` le
+	/// fait. Les exiger faisait rejeter les 9 tournois de la liste et affichait
+	/// « Aucun tournoi trouvé » sur une API qui en servait neuf.
+	public let managers: [EntityRef<UserDTO>]?
+	public let participants: [EntityRef<WireParticipant>]?
 }
 
 /// `TournamentSeries` sans sa récursion de tournois peuplés.

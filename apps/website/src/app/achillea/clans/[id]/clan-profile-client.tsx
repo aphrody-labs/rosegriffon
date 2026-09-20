@@ -271,11 +271,25 @@ export default function ClanProfilePage({ id }: { id: string }) {
 						</div>
 
 						{clan.isRecruiting && (
+							/*
+							 * La fiche du clan est publique — identité, effectif, membres,
+							 * réseaux. Seule la CANDIDATURE demande une session.
+							 *
+							 * Sans session on envoie directement vers la connexion : ouvrir le
+							 * formulaire de motivation pour rediriger à l'envoi ferait perdre
+							 * le message déjà écrit.
+							 */
 							<Button
-								onClick={() => setApplicationOpen(true)}
+								onClick={() =>
+									isAuthenticated
+										? setApplicationOpen(true)
+										: window.location.assign(
+												`/achillea/auth?returnUrl=/achillea/clans/${clanId}`,
+											)
+								}
 								className="rounded-xl font-bold text-xs shadow-md"
 							>
-								Postuler dans ce clan
+								{isAuthenticated ? "Postuler dans ce clan" : "Se connecter pour postuler"}
 							</Button>
 						)}
 					</div>

@@ -22,12 +22,17 @@ import {
 	Scale,
 } from "lucide-react";
 import { FaDiscord, FaXTwitter, FaYoutube, FaTiktok, FaTwitch } from "react-icons/fa6";
+import { metadonneesAchillea } from "@/app/achillea/metadonnees";
 
-export const metadata = {
-	title: "Guide Compétitif — Achilléa",
+export const metadata = metadonneesAchillea({
+	// Le suffixe « — Achilléa » était recopié dans chaque titre ALORS QUE le
+	// `title.template` du layout ajoute déjà « | Achilléa — Rose Griffon » :
+	// l'onglet affichait la marque deux fois.
+	titre: "Guide compétitif",
 	description:
 		"Règles officielles, création de clan, format des tournois et commandes Discord d'Achilléa.",
-};
+	chemin: "/achillea/guide",
+});
 
 export default function AchilleaGuidePage() {
 	return (

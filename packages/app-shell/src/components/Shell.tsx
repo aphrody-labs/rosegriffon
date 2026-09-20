@@ -58,7 +58,8 @@ export function Shell({
 
 	const isCompact = breakpoint === "compact";
 	const isMedium = breakpoint === "medium";
-	const isExpanded = breakpoint === "expanded" || breakpoint === "large";
+	const isExpanded =
+		breakpoint === "expanded" || breakpoint === "large" || breakpoint === "extra-large";
 
 	const isEditorPage =
 		pathname.includes("/news/") &&

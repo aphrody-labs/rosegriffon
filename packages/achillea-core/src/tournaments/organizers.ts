@@ -16,7 +16,7 @@ export interface OrganizerActor {
 
 export interface OrganizerScope {
 	organization?: {
-		owner?: { id?: string | null } | null;
+		owner?: string | { id?: string | null } | null;
 		managers?: Array<{
 			user?: { id?: string | null } | null;
 			id?: string | null;
@@ -44,7 +44,8 @@ export function isTournamentOrganizer(
 
 	if ((user?.role ?? 0) >= UserRole.SuperAdministrator) return true;
 
-	const ownerId = tournament?.organization?.owner?.id;
+	const owner = tournament?.organization?.owner;
+	const ownerId = typeof owner === "string" ? owner : owner?.id;
 	if (ownerId && ownerId === userId) return true;
 
 	const orgManagers = tournament?.organization?.managers;

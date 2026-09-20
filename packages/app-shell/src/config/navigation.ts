@@ -1,6 +1,6 @@
 import {
 	CHEMINS_ESPORT,
-	CHEMINS_WIKI,
+	cheminsWikiPour,
 	joindreDomaine,
 	joindreWiki,
 	type NavBases,
@@ -74,7 +74,13 @@ export function parcourirNav(items: NavItem[]): NavItem[] {
  * non-régression confronte aux routes présentes sur le disque.
  */
 export function cheminsCliquables(items: NavItem[]): string[] {
-	return [...new Set(parcourirNav(items).filter((i) => !i.groupOnly).map((i) => i.path))];
+	return [
+		...new Set(
+			parcourirNav(items)
+				.filter((i) => !i.groupOnly)
+				.map((i) => i.path)
+		),
+	];
 }
 
 /**
@@ -104,9 +110,19 @@ export function construireNavigationItems(bases: NavBases): NavItem[] {
 		{
 			// Techniques, tactiques, passifs (capacités hors hyper).
 			children: [
-				{ label: "nav.wiki.skills", path: w("/skill"), icon: "sports_martial_arts", commonSprite: "skill" },
+				{
+					label: "nav.wiki.skills",
+					path: w("/skill"),
+					icon: "sports_martial_arts",
+					commonSprite: "skill",
+				},
 				{ label: "nav.wiki.tactics", path: w("/tactic"), icon: "strategy" },
-				{ label: "nav.wiki.passives", path: w("/passive"), icon: "auto_awesome", commonSprite: "tension" },
+				{
+					label: "nav.wiki.passives",
+					path: w("/passive"),
+					icon: "auto_awesome",
+					commonSprite: "tension",
+				},
 			],
 			icon: "sports_martial_arts",
 			label: "nav.section.abilities",
@@ -115,11 +131,36 @@ export function construireNavigationItems(bases: NavBases): NavItem[] {
 		{
 			// Hyper-techniques (5 familles d'auras).
 			children: [
-				{ label: "nav.wiki.auras.keshin", path: w("/aura/esprits-guerriers"), icon: "swords", commonSprite: "keshin" },
-				{ label: "nav.wiki.auras.soul", path: w("/aura/totems"), icon: "pets", commonSprite: "soul" },
-				{ label: "nav.wiki.auras.miximax", path: w("/aura/miximax"), icon: "group_add", commonSprite: "miximax" },
-				{ label: "nav.wiki.auras.awakening", path: w("/aura/eveil"), icon: "wb_twilight", commonSprite: "eveil" },
-				{ label: "nav.wiki.auras.mode", path: w("/aura/changement-mode"), icon: "change_circle", commonSprite: "mode_change" },
+				{
+					label: "nav.wiki.auras.keshin",
+					path: w("/aura/esprits-guerriers"),
+					icon: "swords",
+					commonSprite: "keshin",
+				},
+				{
+					label: "nav.wiki.auras.soul",
+					path: w("/aura/totems"),
+					icon: "pets",
+					commonSprite: "soul",
+				},
+				{
+					label: "nav.wiki.auras.miximax",
+					path: w("/aura/miximax"),
+					icon: "group_add",
+					commonSprite: "miximax",
+				},
+				{
+					label: "nav.wiki.auras.awakening",
+					path: w("/aura/eveil"),
+					icon: "wb_twilight",
+					commonSprite: "eveil",
+				},
+				{
+					label: "nav.wiki.auras.mode",
+					path: w("/aura/changement-mode"),
+					icon: "change_circle",
+					commonSprite: "mode_change",
+				},
 			],
 			icon: "auto_awesome",
 			label: "nav.wiki.hyper_skills",
@@ -143,7 +184,12 @@ export function construireNavigationItems(bases: NavBases): NavItem[] {
 				{ label: "nav.wiki.items", path: w("/item"), icon: "backpack", gameIcon: "chest" },
 				{ label: "nav.wiki.shops", path: w("/boutique"), icon: "storefront", gameIcon: "moneybag" },
 				{ label: "nav.wiki.capsules", path: w("/capsule"), icon: "casino", gameIcon: "ticket" },
-				{ label: "nav.wiki.invocation", path: w("/invocation"), icon: "stars", gameIcon: "star-token" },
+				{
+					label: "nav.wiki.invocation",
+					path: w("/invocation"),
+					icon: "stars",
+					gameIcon: "star-token",
+				},
 				{ label: "nav.wiki.drops", path: w("/drops"), icon: "redeem" },
 			],
 			gameIcon: "chest",
@@ -159,41 +205,49 @@ export function construireNavigationItems(bases: NavBases): NavItem[] {
 			path: w("/niveau"),
 		},
 		{ icon: "emoji_events", label: "nav.wiki.trophies", path: w("/succes") },
-		{
-			// Médias : illustrations curées, corpus complet des textures, banques sonores,
-			// cinématiques, et modèles 3D (esprits/armures + objets/animaux).
-			children: [
-				{ label: "nav.wiki.gallery", path: w("/gallery"), icon: "image" },
-				{ label: "nav.wiki.textures", path: w("/textures"), icon: "texture" },
-				{ label: "nav.wiki.sounds", path: w("/sons"), icon: "graphic_eq" },
-				{ label: "nav.wiki.videos", path: w("/videos"), icon: "movie" },
-				// `/keshin` a fusionné dans `/modeles` : une seule page couvre les 6 236 modèles du
-				// jeu (personnages, techniques, objets, esprits, armures, animaux). L'ancienne URL
-				// redirige, mais elle n'a plus à figurer au menu à côté de celle qui la contient.
-				{ label: "nav.wiki.models", path: w("/modeles"), icon: "deployed_code" },
-				// `/mode` figurait dans la sous-navigation média (`MediaShell`) mais nulle part
-				// dans le menu : la sixième collection n'était atteignable qu'en passant par une
-				// des cinq autres.
-				{ label: "nav.wiki.modes", path: w("/mode"), icon: "stadia_controller" },
-			],
-			icon: "perm_media",
-			label: "nav.section.media",
-			path: w("/gallery"),
-		},
-		{
-			children: [
-				{ label: "nav.tools.stats", path: w("/tools/stats"), icon: "calculate" },
-				{ label: "nav.tools.compare", path: w("/tools/compare"), icon: "compare_arrows" },
-				{ label: "nav.tools.random_team", path: w("/tools/random-team"), icon: "casino" },
-				{ label: "nav.tools.my_team", path: w("/tools/my-team"), icon: "stadium" },
-				{ label: "nav.tools.translator", path: w("/tools/translator"), icon: "translate" },
-				{ label: "nav.tools.save_reader", path: w("/save"), icon: "save" },
-				{ label: "nav.tools.demo", path: w("/demo"), icon: "view_in_ar" },
-			],
-			icon: "build",
-			label: "nav.tools",
-			path: w("/tools"),
-		},
+		...(bases.surfacesNiers
+			? [
+					{
+						// Médias : illustrations curées, corpus complet des textures, banques sonores,
+						// cinématiques, et modèles 3D (esprits/armures + objets/animaux).
+						children: [
+							{ label: "nav.wiki.gallery", path: w("/gallery"), icon: "image" },
+							{ label: "nav.wiki.textures", path: w("/textures"), icon: "texture" },
+							{ label: "nav.wiki.sounds", path: w("/sons"), icon: "graphic_eq" },
+							{ label: "nav.wiki.videos", path: w("/videos"), icon: "movie" },
+							// `/keshin` a fusionné dans `/modeles` : une seule page couvre les 6 236 modèles du
+							// jeu (personnages, techniques, objets, esprits, armures, animaux). L'ancienne URL
+							// redirige, mais elle n'a plus à figurer au menu à côté de celle qui la contient.
+							{ label: "nav.wiki.models", path: w("/modeles"), icon: "deployed_code" },
+							// `/mode` figurait dans la sous-navigation média (`MediaShell`) mais nulle part
+							// dans le menu : la sixième collection n'était atteignable qu'en passant par une
+							// des cinq autres.
+							{ label: "nav.wiki.modes", path: w("/mode"), icon: "stadia_controller" },
+						],
+						icon: "perm_media",
+						label: "nav.section.media",
+						path: w("/gallery"),
+					},
+				]
+			: []),
+		...(bases.surfacesNiers
+			? [
+					{
+						children: [
+							{ label: "nav.tools.stats", path: w("/tools/stats"), icon: "calculate" },
+							{ label: "nav.tools.compare", path: w("/tools/compare"), icon: "compare_arrows" },
+							{ label: "nav.tools.random_team", path: w("/tools/random-team"), icon: "casino" },
+							{ label: "nav.tools.my_team", path: w("/tools/my-team"), icon: "stadium" },
+							{ label: "nav.tools.translator", path: w("/tools/translator"), icon: "translate" },
+							{ label: "nav.tools.save_reader", path: w("/save"), icon: "save" },
+							{ label: "nav.tools.demo", path: w("/demo"), icon: "view_in_ar" },
+						],
+						icon: "build",
+						label: "nav.tools",
+						path: w("/tools"),
+					},
+				]
+			: []),
 		{ icon: "settings", label: "nav.settings", path: "/settings" },
 	];
 }
@@ -208,9 +262,20 @@ export function construireNavigationItems(bases: NavBases): NavItem[] {
  */
 export function construireMobileNavItems(bases: NavBases): NavItem[] {
 	const w = (chemin: string) => joindreWiki(bases.wiki, chemin);
+	const cheminsWiki = cheminsWikiPour(bases);
 	const cheminsWikiActifs = [
-		...CHEMINS_WIKI.filter((c) => c !== "/" && !c.startsWith("/tools") && c !== "/demo" && c !== "/save" && c !== "/patch-notes" && c !== "/cross").map(w),
-		...(bases.wiki ? CHEMINS_WIKI.filter((c) => c !== "/") : []),
+		...cheminsWiki
+			.filter(
+				(c) =>
+					c !== "/" &&
+					!c.startsWith("/tools") &&
+					c !== "/demo" &&
+					c !== "/save" &&
+					c !== "/patch-notes" &&
+					c !== "/cross"
+			)
+			.map(w),
+		...(bases.wiki ? cheminsWiki.filter((c) => c !== "/") : []),
 		w("/"),
 		"/search",
 	];
@@ -229,12 +294,16 @@ export function construireMobileNavItems(bases: NavBases): NavItem[] {
 			label: "nav.news",
 			path: "/news",
 		},
-		{
-			activePaths: [w("/tools"), "/tools", w("/demo"), "/demo", w("/save"), "/save"],
-			icon: "build",
-			label: "nav.tools",
-			path: w("/tools"),
-		},
+		...(bases.surfacesNiers
+			? [
+					{
+						activePaths: [w("/tools"), "/tools", w("/demo"), "/demo", w("/save"), "/save"],
+						icon: "build",
+						label: "nav.tools",
+						path: w("/tools"),
+					},
+				]
+			: []),
 		{ activePaths: ["/settings"], icon: "settings", label: "nav.settings", path: "/settings" },
 	];
 }
@@ -253,9 +322,10 @@ export function construireMobileNavUnifiee(bases: NavBases): NavItem[] {
 	const e = (chemin: string) => joindreDomaine(bases.esport ?? "/achillea", chemin);
 	const a = (chemin: string) => joindreDomaine(bases.association ?? "", chemin);
 
+	const cheminsWiki = cheminsWikiPour(bases);
 	const cheminsWikiActifs = [
-		...CHEMINS_WIKI.filter((c) => c !== "/").map(w),
-		...(bases.wiki ? CHEMINS_WIKI.filter((c) => c !== "/") : []),
+		...cheminsWiki.filter((c) => c !== "/").map(w),
+		...(bases.wiki ? cheminsWiki.filter((c) => c !== "/") : []),
 		w("/"),
 	];
 
@@ -298,7 +368,6 @@ export function construireMobileNavUnifiee(bases: NavBases): NavItem[] {
 	];
 }
 
-
 /** Navigation de l'espace d'administration, enracinée sur `bases.admin`. */
 export function construireDashboardItems(bases: NavBases): NavItem[] {
 	const a = (chemin: string) => `${bases.admin}${chemin}`;
@@ -310,7 +379,11 @@ export function construireDashboardItems(bases: NavBases): NavItem[] {
 			children: [
 				{ label: "nav.dashboard.content.news", path: a("/news"), icon: "newspaper" },
 				{ label: "nav.dashboard.content.database", path: a("/database"), icon: "database" },
-				{ label: "nav.dashboard.content.verification", path: a("/database/verification"), icon: "verified" },
+				{
+					label: "nav.dashboard.content.verification",
+					path: a("/database/verification"),
+					icon: "verified",
+				},
 			],
 			icon: "edit_note",
 			groupOnly: true,
@@ -328,8 +401,16 @@ export function construireDashboardItems(bases: NavBases): NavItem[] {
 		{
 			adminOnly: true,
 			children: [
-				{ label: "nav.dashboard.tools.import_doc", path: a("/import-google-doc"), icon: "description" },
-				{ label: "nav.dashboard.tools.import_sheet", path: a("/import-sheet"), icon: "table_chart" },
+				{
+					label: "nav.dashboard.tools.import_doc",
+					path: a("/import-google-doc"),
+					icon: "description",
+				},
+				{
+					label: "nav.dashboard.tools.import_sheet",
+					path: a("/import-sheet"),
+					icon: "table_chart",
+				},
 			],
 			icon: "build",
 			groupOnly: true,
@@ -413,7 +494,11 @@ export function construireEsportItems(bases: NavBases): NavItem[] {
 		{
 			children: [
 				{ icon: "swords", label: "nav.esport.ranked.play", path: e("/ranked") },
-				{ icon: "leaderboard", label: "nav.esport.ranked.leaderboard", path: e("/ranked/leaderboard") },
+				{
+					icon: "leaderboard",
+					label: "nav.esport.ranked.leaderboard",
+					path: e("/ranked/leaderboard"),
+				},
 				{ icon: "military_tech", label: "nav.esport.ranked.tiers", path: e("/ranked/tiers") },
 				{ icon: "history", label: "nav.esport.ranked.history", path: e("/ranked/history") },
 			],
@@ -424,8 +509,16 @@ export function construireEsportItems(bases: NavBases): NavItem[] {
 		{
 			children: [
 				{ icon: "emoji_events", label: "nav.esport.tournaments.list", path: e("/tournaments") },
-				{ icon: "add_circle", label: "nav.esport.tournaments.create", path: e("/tournaments/create") },
-				{ icon: "trending_up", label: "nav.esport.tournaments.circuit", path: e("/tournaments/circuit/ranking") },
+				{
+					icon: "add_circle",
+					label: "nav.esport.tournaments.create",
+					path: e("/tournaments/create"),
+				},
+				{
+					icon: "trending_up",
+					label: "nav.esport.tournaments.circuit",
+					path: e("/tournaments/circuit/ranking"),
+				},
 			],
 			icon: "emoji_events",
 			label: "nav.esport.tournaments",
