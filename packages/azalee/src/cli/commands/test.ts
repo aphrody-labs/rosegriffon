@@ -23,8 +23,29 @@ import type { TestOptions } from "../types";
 /** Binaire du moteur d'audit `bxc` (repli HTTP si absent). */
 const BXC_PATH = "/home/ubuntu/.local/bin/bxc";
 
-/** Origine du serveur de développement testé. */
-const BASE_URL = "http://localhost:3000";
+/**
+ * Origines candidates pour la suite HTTP, dans l'ordre d'essai.
+ *
+ * La suite démarrait systématiquement `bun run dev` sur `apps/azalee` quand
+ * rien n'écoutait le port 3000, et attendait jusqu'à 180 secondes une première
+ * compilation Turbopack à froid. Depuis la fusion des sites, `apps/azalee` n'est
+ * plus servie — `azalee.rosegriffon.fr` redirige en 301 vers `/wiki` — et c'est
+ * `website-web.service` qui porte `/api/health` et `/api/news/feed`. Attendre
+ * un serveur de développement qui n'a plus de raison d'exister faisait échouer
+ * la suite sur une panne d'environnement, pas sur une régression.
+ *
+ * On teste donc ce qui TOURNE : le serveur de développement s'il est là, puis
+ * les deux emplacements bleu/vert du site. Le démarrage à froid reste le
+ * dernier recours.
+ */
+const ORIGINES_CANDIDATES = [
+	process.env["AZALEE_TEST_BASE_URL"],
+	"http://localhost:3000",
+	"http://127.0.0.1:3004",
+	"http://127.0.0.1:3014",
+].filter((origine): origine is string => Boolean(origine));
+
+const BASE_URL = ORIGINES_CANDIDATES[0] ?? "http://localhost:3000";
 
 /** Pages statiques dont le rendu doit répondre 200 sans erreur applicative. */
 const STATIC_PAGES = [
@@ -172,9 +193,25 @@ export function registerTestCommand(program: Command): void {
 					"Step 9: Combinaison en chaîne (Feu + GAR + Garçon + Normal + VR)",
 					"SELECT count(*) as count FROM inagle_characters WHERE element = 'Feu' AND position = 'Gardien' AND gender = 'M' AND rarity_label = 'Normal' AND series = 'Victory Road'",
 				);
+				// `json_each(teams)` lève « malformed JSON » dès qu'UNE ligne porte
+				// autre chose que du JSON, et il suffit d'une pour faire tomber la
+				// suite entière. Le miroir en contenait 6 166 : la colonne y vaut la
+				// chaîne littérale `\N` — le marqueur de NULL de `COPY` Postgres,
+				// jamais reconverti à l'import. Côté Postgres, la même colonne est
+				// NULL partout : `teams` n'est alimentée NULLE PART, et c'est
+				// `team_id` qui porte réellement l'appartenance (127 Raimon).
+				//
+				// Le garde `json_valid` n'est donc pas un contournement : il rend la
+				// requête indifférente à une colonne facultative, présente ou non,
+				// propre ou non. Le jour où `teams` sera peuplée, elle comptera en
+				// plus, sans rien changer ici.
 				runTestStep(
 					"Step 10: Filtre d'équipe (Raimon - 0xF01BB293)",
-					"SELECT count(*) as count FROM inagle_characters WHERE team_id = '0xF01BB293' OR EXISTS (SELECT 1 FROM json_each(teams) WHERE json_extract(value, '$.id') = '0xF01BB293')",
+					`SELECT count(*) as count FROM inagle_characters
+					 WHERE team_id = '0xF01BB293'
+					    OR (json_valid(teams) AND EXISTS (
+					          SELECT 1 FROM json_each(teams)
+					          WHERE json_extract(value, '$.id') = '0xF01BB293'))`,
 				);
 				runTestStep(
 					"Step 11: Combinaison alternative (Forêt + ATT + BASARA)",
@@ -189,19 +226,32 @@ export function registerTestCommand(program: Command): void {
 			}
 
 			// ─── Serveur Next : réutilisé s'il tourne, démarré sinon ───
-			const url = BASE_URL;
+			let url = BASE_URL;
 			let serverSpawned = false;
 			let devServerProcess: Bun.Subprocess | null = null;
 
-			const isServerRunning = async (): Promise<boolean> => {
+			/** Une origine répond-elle un `/api/health` sain ? */
+			const origineSaine = async (origine: string): Promise<boolean> => {
 				try {
-					const res = await fetch(`${url}/api/health`, { signal: AbortSignal.timeout(1500) });
+					const res = await fetch(`${origine}/api/health`, { signal: AbortSignal.timeout(1500) });
 					if (res.status !== 200) return false;
 					const json = (await res.json()) as { status?: string; checks?: { db?: string } };
 					return Boolean(json && json.status === "ok" && json.checks && json.checks.db === "ok");
 				} catch {
 					return false;
 				}
+			};
+
+			const isServerRunning = async (): Promise<boolean> => {
+				for (const origine of ORIGINES_CANDIDATES) {
+					if (await origineSaine(origine)) {
+						// On retient l'origine trouvée : les assertions qui suivent
+						// doivent interroger CELLE qui répond, pas la première de la liste.
+						url = origine;
+						return true;
+					}
+				}
+				return false;
 			};
 
 			const cleanup = () => {
@@ -229,7 +279,7 @@ export function registerTestCommand(program: Command): void {
 			try {
 				if (!(await isServerRunning())) {
 					console.log(
-						`${colors.cyan}Serveur local inactif sur http://localhost:3000. Démarrage de 'bun run dev'...${colors.reset}`,
+						`${colors.cyan}Aucune origine saine parmi ${ORIGINES_CANDIDATES.join(", ")}. Démarrage de 'bun run dev'...${colors.reset}`,
 					);
 					const homeBun = path.join(process.env.HOME || "/home/ubuntu", ".bun/bin/bun");
 					const bunPath = existsSync(homeBun) ? homeBun : "bun";
@@ -270,7 +320,7 @@ export function registerTestCommand(program: Command): void {
 					}
 					console.log(`${colors.green}Serveur local démarré et prêt!${colors.reset}\n`);
 				} else {
-					console.log(`${colors.green}Serveur local existant détecté sur http://localhost:3000.${colors.reset}\n`);
+					console.log(`${colors.green}Serveur détecté sur ${url}.${colors.reset}\n`);
 				}
 
 				// ─── SUITE 2 : endpoints API & GraphQL ───
