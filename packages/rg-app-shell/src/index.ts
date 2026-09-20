@@ -13,6 +13,7 @@ export {
 	AZALEE_BASES,
 	CHEMINS_RACINE,
 	CHEMINS_WIKI,
+	estSousAdministration,
 	joindreWiki,
 	WEBSITE_BASES,
 	type CheminRacine,

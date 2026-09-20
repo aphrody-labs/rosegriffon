@@ -113,10 +113,26 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 	);
 }
 
+const defaultLanguageContext: LanguageContextType = {
+	getLocalized: (obj: any, fieldPrefix: string = "name") => {
+		if (!obj) {
+			return "";
+		}
+		return obj[`${fieldPrefix}_FR`] || obj[fieldPrefix] || "";
+	},
+	isLoading: false,
+	language: "fr",
+	setLanguage: () => {},
+	t: (hash: string | number | undefined | null) => {
+		if (hash === undefined || hash === null) {
+			return "";
+		}
+		const key = hash.toString();
+		return (frDictionary as Record<string, string>)[key] || key;
+	},
+};
+
 export const useLanguage = () => {
 	const context = useContext(LanguageContext);
-	if (!context) {
-		throw new Error("useLanguage must be used within a LanguageProvider");
-	}
-	return context;
+	return context ?? defaultLanguageContext;
 };
