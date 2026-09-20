@@ -1,71 +1,22 @@
-import { UserDTO } from "../../shared/services/user-service";
-import { ClanMemberDistinction, ClanMemberRole } from "./ClanMember";
-import { Suggestion, SuggestionRank, UserRole } from "./Suggestion";
+export { MatchMode } from "@rosegriffon/achillea-types";
+export type {
+	CompetitionStats,
+	EnrichedUserDTO,
+	Rank,
+	RankDTO,
+	RankedModeStats,
+	SessionRankDTO,
+	SessionUserDTO,
+	UpdateUserProfilePayload,
+	User,
+	UserClanSummary,
+	UserRef,
+} from "@rosegriffon/achillea-types";
 
-export type User = {
-	id: string;
-	name: string;
-	rank: Rank;
-	logo: string;
-};
+import type { SessionUserDTO, Suggestion } from "@rosegriffon/achillea-types";
 
-export type Rank = {
-	label: string;
-	minElo: number;
-	maxElo: number;
-	gradient: string[];
-};
-
-/** Stats agrégées interclans / tournois (miroir de @achillea/types). */
-export type CompetitionStats = {
-	total: number;
-	wins: number;
-	losses: number;
-	draws?: number;
-	goalsScoredAvg: number;
-	goalsReceivedAvg: number;
-	personalTotal: number;
-	personalWins: number;
-	personalLosses: number;
-	personalDraws: number;
-};
-
-export type EnrichedUserDTO = UserDTO & {
-	clan?: {
-		id: number;
-		shortenedName: string;
-		name: string;
-		avatarUrl?: string;
-		role: ClanMemberRole;
-		distinctions: ClanMemberDistinction[];
-	};
-	interclans: CompetitionStats;
-	tournaments: CompetitionStats;
-	ranked: {
-		solo: RankedModeStats;
-		duo: RankedModeStats;
-	};
-	/** Éditable par le titulaire du profil (PUT /users/me/profile). */
-	bio: string | null;
-	twitchUrl: string | null;
-};
-
-export type RankedModeStats = {
-	mode: MatchMode;
-	total: number;
-	wins: number;
-	losses: number;
-	draws: number;
-	goalsScored: number;
-	goalsReceived: number;
-};
-
-export enum MatchMode {
-	ONE_VS_ONE = 2,
-	TWO_VS_TWO = 4,
-}
-
-export function suggestionToUserDTO(suggestion: Suggestion): UserDTO {
+/** Projette une suggestion de recherche en utilisateur de session. */
+export function suggestionToUserDTO(suggestion: Suggestion): SessionUserDTO {
 	return {
 		id: suggestion.id,
 		username: suggestion.label,
@@ -79,5 +30,5 @@ export function suggestionToUserDTO(suggestion: Suggestion): UserDTO {
 		hasTwitch: suggestion.hasTwitch,
 		hasChallonge: suggestion.hasChallonge,
 		hasYoutube: suggestion.hasYoutube,
-	} as UserDTO;
+	};
 }

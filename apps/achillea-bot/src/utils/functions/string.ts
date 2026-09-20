@@ -1,7 +1,7 @@
 import { constant } from "case";
 
-// Helpers purs portables ré-exportés depuis @achillea/core/validation.
-export { isValidUrl, numberAlign, validString } from "@achillea/core";
+// Helpers purs portables ré-exportés depuis @rosegriffon/achillea-core/validation.
+export { isValidUrl, numberAlign, validString } from "@rosegriffon/achillea-core";
 
 export function oneLine(strings: TemplateStringsArray, ...keys: any[]) {
 	return strings

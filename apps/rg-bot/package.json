@@ -16,7 +16,7 @@
 		"smoke:canvas": "bun src/scripts/smoke-canvas.ts"
 	},
 	"dependencies": {
-		"@achillea/client": "workspace:*",
+		"@rosegriffon/achillea-client": "workspace:*",
 		"@aphrody-code/canvas": "catalog:",
 		"@rosegriffon/azalee": "workspace:*",
 		"@rosegriffon/db": "workspace:*",

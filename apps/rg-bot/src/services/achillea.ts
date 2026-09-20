@@ -2,7 +2,7 @@
  * Compatibility facade for the versioned Achillea guild API client.
  *
  * Bot callers keep the historical French names and `Resultat` envelope while
- * transport and runtime validation live in `@achillea/client/v1`.
+ * transport and runtime validation live in `@rosegriffon/achillea-client/v1`.
  */
 
 import {
@@ -21,7 +21,7 @@ import {
 	type AchilleaGuildPage,
 	type AchilleaGuildStats,
 	type AchilleaRole,
-} from "@achillea/client/v1";
+} from "@rosegriffon/achillea-client/v1";
 
 export const IdentifiantDiscord = discordIdSchema;
 export const RoleAchillea = achilleaRoleSchema;

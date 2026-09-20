@@ -5,7 +5,7 @@ import {
 	placementPrizeAp,
 	progressiveEloDelta,
 	computeMatchElo,
-} from "@achillea/core";
+} from "@rosegriffon/achillea-core";
 import { LockMode } from "@mikro-orm/core";
 import { singleton } from "tsyringe";
 
@@ -68,7 +68,7 @@ export class EloService {
 		loserRating: number,
 		kFactor: number = DEFAULT_K_FACTOR
 	): EloCalculationResult {
-		// Logique pure déléguée à @achillea/core (identique au calcul historique).
+		// Logique pure déléguée à @rosegriffon/achillea-core (identique au calcul historique).
 		return computeMatchElo(winnerRating, loserRating, kFactor);
 	}
 

@@ -22,7 +22,7 @@ import {
 	type LeagueMatchResult,
 	type LeaguePointsConfig,
 	type LeagueStanding,
-} from "@achillea/core";
+} from "@rosegriffon/achillea-core";
 import { singleton } from "tsyringe";
 
 export interface LeagueSeasonPayload {

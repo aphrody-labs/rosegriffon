@@ -1,4 +1,1 @@
-export interface Column {
-	field: string;
-	header: string;
-}
+export type { Column } from "@rosegriffon/achillea-types";

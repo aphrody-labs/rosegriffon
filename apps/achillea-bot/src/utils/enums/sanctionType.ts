@@ -1,2 +1,2 @@
-// Source unique : @achillea/core (enums métier portables).
-export { SanctionType } from "@achillea/core";
+// Source unique : @rosegriffon/achillea-core (enums métier portables).
+export { SanctionType } from "@rosegriffon/achillea-core";

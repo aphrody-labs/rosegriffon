@@ -3,8 +3,8 @@
  *
  * Couvre uniquement les fonctions pures (aucune DB, aucun Discord, aucun binding natif) :
  *   - `expectedScore` / `eloDelta` / `applyEloUpdate` ré-exportés par le bot
- *     (`src/ranked/elo.ts` → `@achillea/core`), utilisés dans `ranked/persistence.ts`.
- *   - `computeMatchElo` + constantes (`@achillea/core/elo`), cœur de `EloService.calculate`.
+ *     (`src/ranked/elo.ts` → `@rosegriffon/achillea-core`), utilisés dans `ranked/persistence.ts`.
+ *   - `computeMatchElo` + constantes (`@rosegriffon/achillea-core/elo`), cœur de `EloService.calculate`.
  *
  * Cas vérifiés : sens du delta (gagnant +, perdant −), symétrie / conservation,
  * bornage (clamp à 0), influence du K-factor, suivi du peak_rating, scores égaux.
@@ -12,10 +12,10 @@
 
 import { describe, expect, test } from "bun:test";
 
-// Entrée prescrite côté bot (ranked) : ré-export pur depuis @achillea/core.
+// Entrée prescrite côté bot (ranked) : ré-export pur depuis @rosegriffon/achillea-core.
 import { applyEloUpdate, eloDelta, expectedScore } from "../../src/ranked/elo";
 // Cœur partagé : duel gagnant/perdant + constantes.
-import { computeMatchElo, DEFAULT_BASE_RATING, DEFAULT_K_FACTOR } from "@achillea/core/elo";
+import { computeMatchElo, DEFAULT_BASE_RATING, DEFAULT_K_FACTOR } from "@rosegriffon/achillea-core/elo";
 
 describe("expectedScore — probabilité de victoire", () => {
 	test("Elo égaux ⇒ 0.5 pile", () => {

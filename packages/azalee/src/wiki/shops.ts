@@ -127,7 +127,8 @@ export async function getShopsList(): Promise<ShopSummary[]> {
 	const byShop = new Map<number, { name_fr: string | null; name_en: string | null; name_ja: string | null; cats: Map<string, number>; count: number }>();
 
 	for (const r of rows) {
-		let entry = byShop.get(r.shop_id);
+		const shopIdNum = Number(r.shop_id);
+		let entry = byShop.get(shopIdNum);
 		if (!entry) {
 			entry = {
 				name_fr: r.name_fr,
@@ -136,7 +137,7 @@ export async function getShopsList(): Promise<ShopSummary[]> {
 				cats: new Map(),
 				count: 0,
 			};
-			byShop.set(r.shop_id, entry);
+			byShop.set(shopIdNum, entry);
 		}
 		entry.count++;
 		const item = r.item_db_id ? itemMap.get(r.item_db_id) : undefined;
@@ -145,8 +146,8 @@ export async function getShopsList(): Promise<ShopSummary[]> {
 	}
 
 	const list: ShopSummary[] = Array.from(byShop.entries()).map(([shopId, e]) => ({
-		shopId,
-		name: resolveShopName(shopId, e.name_fr),
+		shopId: Number(shopId),
+		name: resolveShopName(Number(shopId), e.name_fr),
 		nameEn: e.name_en || null,
 		nameJa: e.name_ja || null,
 		itemCount: e.count,
@@ -160,13 +161,14 @@ export async function getShopsList(): Promise<ShopSummary[]> {
 }
 
 /** Détail d'une boutique : métadonnées + liste complète des objets vendus. */
-export async function getShop(shopId: number): Promise<ShopDetail | null> {
-	if (!Number.isFinite(shopId)) return null;
+export async function getShop(shopId: number | string): Promise<ShopDetail | null> {
+	const numId = typeof shopId === "number" ? shopId : Number(shopId);
+	if (!Number.isFinite(numId)) return null;
 	const supabase = await createClient();
 	const { data, error } = await supabase
 		.from("inagle_shops")
 		.select("shop_id, name_fr, name_en, name_ja, item_db_id, item_name_fr, item_name_en, slot_index")
-		.eq("shop_id", shopId)
+		.eq("shop_id", numId)
 		.order("slot_index", { ascending: true });
 
 	if (error) {
@@ -216,8 +218,8 @@ export async function getShop(shopId: number): Promise<ShopDetail | null> {
 
 	const first = rows[0];
 	return {
-		shopId,
-		name: resolveShopName(shopId, first?.name_fr ?? null),
+		shopId: numId,
+		name: resolveShopName(numId, first?.name_fr ?? null),
 		nameEn: first?.name_en || null,
 		nameJa: first?.name_ja || null,
 		itemCount: items.length,

@@ -92,13 +92,15 @@ function dateParts(date: Date, timeZone: string): DatePieces {
 		if (part.type !== "literal") pieces[part.type] = part.value;
 	}
 
+	// Accès indexé et non par point : `noPropertyAccessFromIndexSignature` est
+	// actif chez certains consommateurs (app Angular), qui compilent ces sources.
 	return {
-		year: pieces.year ?? "0000",
-		month: pieces.month ?? "00",
-		day: pieces.day ?? "00",
+		year: pieces["year"] ?? "0000",
+		month: pieces["month"] ?? "00",
+		day: pieces["day"] ?? "00",
 		// `Intl` rend "24" à minuit en hour12:false sur certains runtimes : on borne à "00".
-		hour: pieces.hour === "24" ? "00" : (pieces.hour ?? "00"),
-		minute: pieces.minute ?? "00",
-		second: pieces.second ?? "00",
+		hour: pieces["hour"] === "24" ? "00" : (pieces["hour"] ?? "00"),
+		minute: pieces["minute"] ?? "00",
+		second: pieces["second"] ?? "00",
 	};
 }

@@ -1,5 +1,5 @@
 {
-	"name": "@achillea/types",
+	"name": "@rosegriffon/achillea-types",
 	"version": "0.0.0",
 	"private": true,
 	"description": "Contrats d'API partagés (DTO + enums) — source unique pour le bot et le web",
@@ -8,7 +8,9 @@
 	"types": "./src/index.ts",
 	"exports": {
 		".": "./src/index.ts",
-		"./enums/*": "./src/enums/*.ts"
+		"./enums": "./src/enums/index.ts",
+		"./enums/*": "./src/enums/*.ts",
+		"./domain/*": "./src/domain/*.ts"
 	},
 	"scripts": {
 		"lint": "bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction src test",
@@ -17,7 +19,9 @@
 	},
 	"devDependencies": {
 		"@types/bun": "catalog:",
+		"brackets-model": "catalog:",
 		"oxlint": "catalog:",
 		"typescript": "catalog:"
-	}
+	},
+	"sideEffects": false
 }

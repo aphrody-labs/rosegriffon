@@ -2,11 +2,15 @@
 	"extends": "@rosegriffon/config/tsconfig-nextjs.json",
 	"compilerOptions": {
 		"baseUrl": ".",
-		"types": ["google.maps", "bun"],
+		"noImplicitOverride": false,
+		"noUncheckedIndexedAccess": false,
+		"types": ["google.maps", "bun", "@webgpu/types"],
 		"tsBuildInfoFile": ".next/.tsbuildinfo",
 		"paths": {
-			"@/*": ["./src/*"],
+			"@/*": ["./src/*", "./*"],
 			"@public/*": ["./public/*"],
+			"@rosegriffon/azalee": ["../../packages/azalee/src/index.ts"],
+			"@rosegriffon/azalee/*": ["../../packages/azalee/src/*"],
 			"@rosegriffon/db": ["../../packages/db/src/index.ts"],
 			"@rosegriffon/db/*": ["../../packages/db/src/*"],
 			"@rosegriffon/types": ["../../packages/types/src/index.ts"],

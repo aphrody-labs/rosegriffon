@@ -1,5 +1,5 @@
 {
-	"name": "@achillea/client",
+	"name": "@rosegriffon/achillea-client",
 	"version": "0.1.0",
 	"private": true,
 	"description": "Versioned HTTP client and runtime contracts for the Achillea guild API",
@@ -16,6 +16,7 @@
 		"test": "bun test tests"
 	},
 	"dependencies": {
+		"@rosegriffon/achillea-types": "workspace:*",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

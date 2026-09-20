@@ -4,7 +4,7 @@ import {
 	circuitPointsToTier,
 	denseRankToTier,
 	goalAverage,
-} from "@achillea/core";
+} from "@rosegriffon/achillea-core";
 import { rel } from "@mikro-orm/core";
 import { BadRequest, Conflict, NotFound, NotImplemented, Unauthorized } from "@tsed/exceptions";
 import type { DataTypes, ValueToArray } from "brackets-manager";
@@ -2408,7 +2408,7 @@ export class TournamentsService {
 	}
 
 	/**
-	 * Classement circuit : cumul de points de circuit (voir `@achillea/core/tournaments`)
+	 * Classement circuit : cumul de points de circuit (voir `@rosegriffon/achillea-core/tournaments`)
 	 * sur tous les tournois élimination (simple/double) terminés. Distinct du bonus AP
 	 * podium versé en jeu — sert uniquement à l'affichage (page "Classement des tournois").
 	 *

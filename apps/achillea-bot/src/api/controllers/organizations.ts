@@ -80,20 +80,9 @@ export class OrganizationsController extends BaseController {
 		return paginate(items, total, pagination, page);
 	}
 
-	@Get("/:id")
-	async getOrganization(@PathParams("id") id: number, @Res() res: Response) {
-		try {
-			const organizationDTO = await this.organizationService.getSingleOrganization(id);
-			res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
-
-			return res.status(200).json({ success: true, data: organizationDTO });
-		} catch (err: any) {
-			console.error(err);
-
-			return res.status(err.status || 400).json({ success: false, error: err.message });
-		}
-	}
-
+	// DOIT rester déclarée AVANT `@Get("/:id")` : les routes sont montées dans
+	// l'ordre de déclaration, et `/:id` capturait « me » comme identifiant —
+	// la route ne répondait jamais.
 	@Get("/me")
 	@UseBefore(CookieAuthorize)
 	async getUserOrganizations(@Context() ctx: Context, @Res() res: Response) {
@@ -113,6 +102,20 @@ export class OrganizationsController extends BaseController {
 				success: false,
 				error: error.message || "Impossible de récupérer la liste de vos organisations.",
 			});
+		}
+	}
+
+	@Get("/:id")
+	async getOrganization(@PathParams("id") id: number, @Res() res: Response) {
+		try {
+			const organizationDTO = await this.organizationService.getSingleOrganization(id);
+			res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
+
+			return res.status(200).json({ success: true, data: organizationDTO });
+		} catch (err: any) {
+			console.error(err);
+
+			return res.status(err.status || 400).json({ success: false, error: err.message });
 		}
 	}
 

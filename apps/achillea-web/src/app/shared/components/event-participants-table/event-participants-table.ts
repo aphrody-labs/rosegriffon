@@ -5,6 +5,19 @@ import {
 	Tournament,
 	TournamentState,
 } from "../../../core/models/Tournament";
+// Règles d'inscription : source unique `@rosegriffon/achillea-core/participants`.
+import {
+	activeParticipants,
+	disqualifiedCount,
+	freeSeeds,
+	hasFreeSlot,
+	participantStatus,
+	rosterParticipants,
+	seedByElo,
+	seededCount,
+	sortBySeed,
+	waitlist,
+} from "@rosegriffon/achillea-core";
 import { TournamentsService } from "../../services/tournaments-service";
 import { getEloImagePath, sqlDateToUsableDate } from "../../../core/helpers/misc";
 import { Button } from "primeng/button";
@@ -94,59 +107,28 @@ export class EventParticipantsTable {
 	 * portent pas le champ : un inscrit sans statut est un inscrit actif.
 	 */
 	protected statusOf(p: ParticipantDTO): ParticipantStatus {
-		return p.status ?? ParticipantStatus.ACTIVE;
+		return participantStatus(p);
 	}
 
 	/** Inscrits occupant réellement une place + disqualifiés (gardés visibles). */
-	readonly rosterParticipants = computed(() =>
-		this.participants().filter((p) => this.statusOf(p) !== ParticipantStatus.WAITLISTED)
-	);
+	readonly rosterParticipants = computed(() => rosterParticipants(this.participants()));
 
-	readonly activeParticipants = computed(() =>
-		this.participants().filter((p) => this.statusOf(p) === ParticipantStatus.ACTIVE)
-	);
+	readonly activeParticipants = computed(() => activeParticipants(this.participants()));
 
 	/** Liste d'attente dans l'ordre de promotion (position calculée par l'API). */
-	readonly waitlist = computed(() =>
-		this.participants()
-			.filter((p) => this.statusOf(p) === ParticipantStatus.WAITLISTED)
-			.sort((a, b) => (a.waitlistPosition ?? 0) - (b.waitlistPosition ?? 0))
-	);
+	readonly waitlist = computed(() => waitlist(this.participants()));
 
-	readonly disqualifiedCount = computed(
-		() =>
-			this.participants().filter((p) => this.statusOf(p) === ParticipantStatus.DISQUALIFIED).length
-	);
+	readonly disqualifiedCount = computed(() => disqualifiedCount(this.participants()));
 
 	/** Reste-t-il une place ? Conditionne la promotion manuelle. */
-	readonly hasFreeSlot = computed(() => this.activeParticipants().length < this.participantsCount);
+	readonly hasFreeSlot = computed(() => hasFreeSlot(this.participants(), this.participantsCount));
 
 	/** Participants triés seed ASC (nulls en bas) pour un aperçu stable. */
-	readonly sortedForPreview = computed(() => {
-		return [...this.activeParticipants()].sort((a, b) => {
-			const sa = a.seed ?? Number.MAX_SAFE_INTEGER;
-			const sb = b.seed ?? Number.MAX_SAFE_INTEGER;
-			if (sa !== sb) return sa - sb;
-			return (a.user.username ?? "").localeCompare(b.user.username ?? "", "fr");
-		});
-	});
+	readonly sortedForPreview = computed(() => sortBySeed(this.activeParticipants()));
 
-	readonly seededCount = computed(
-		() => this.participants().filter((p) => p.seed != null && p.seed > 0).length
-	);
+	readonly seededCount = computed(() => seededCount(this.participants()));
 
-	readonly freeSeeds = computed(() => {
-		const taken = new Set(
-			this.participants()
-				.map((p) => p.seed)
-				.filter((s): s is number => s != null && s > 0)
-		);
-		const free: number[] = [];
-		for (let i = 1; i <= this.participantsCount; i++) {
-			if (!taken.has(i)) free.push(i);
-		}
-		return free;
-	});
+	readonly freeSeeds = computed(() => freeSeeds(this.participants(), this.participantsCount));
 
 	get participantsCount() {
 		return this.event().participantsNumber;
@@ -285,20 +267,14 @@ export class EventParticipantsTable {
 			return;
 		}
 
-		const preview: RankedPreviewRow[] = [...list]
-			.sort((a, b) => {
-				const ea = this.eloOf(a);
-				const eb = this.eloOf(b);
-				if (eb !== ea) return eb - ea;
-				return (a.user.username ?? "").localeCompare(b.user.username ?? "", "fr");
-			})
-			.map((p, i) => ({
-				seed: i + 1,
-				username: p.user.username,
-				elo: this.eloOf(p),
-				rankKey: this.rankKeyOf(p),
-				userId: p.user.id,
-				avatar: p.user.avatar,
+		const preview: RankedPreviewRow[] = seedByElo(list)
+			.map(({ seed, participant }) => ({
+				seed,
+				username: participant.user.username,
+				elo: this.eloOf(participant),
+				rankKey: this.rankKeyOf(participant),
+				userId: participant.user.id,
+				avatar: participant.user.avatar,
 			}))
 			.slice(0, this.participantsCount);
 

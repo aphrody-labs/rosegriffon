@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { useAuth } from "@/contexts/auth-context";
 import { authClient } from "@/lib/auth-client";
 import { createClient } from "@/lib/supabase/client";
 import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rosegriffon/db";
@@ -23,8 +24,7 @@ export function useSidebarAuth(): UseSidebarAuthReturn {
 	const queryClient = useQueryClient();
 	const _router = useRouter();
 
-	const { data: session, isPending: sessionPending } = authClient.useSession();
-	const user = session?.user ?? null;
+	const { user, isLoading: sessionPending } = useAuth();
 
 	const {
 		data: profile,

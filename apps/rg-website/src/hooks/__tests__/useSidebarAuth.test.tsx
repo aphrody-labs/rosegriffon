@@ -21,6 +21,20 @@ mock.module("@/lib/auth-client", () => ({
 	},
 }));
 
+mock.module("@/contexts/auth-context", () => ({
+	useAuth: () => {
+		const session = mockUseSession() as
+			| { data?: { user?: unknown }; isPending?: boolean; error?: unknown }
+			| undefined;
+		return {
+			user: (session?.data?.user as never) ?? null,
+			isLoading: session?.isPending ?? false,
+			error: session?.error ? String(session.error) : null,
+			logout: mock(),
+		};
+	},
+}));
+
 // useSidebarAuth appelle useRouter() de next/navigation : sans AppRouterContext
 // monte, le vrai hook throw « invariant expected app router to be mounted ».
 // Le router n'est pas utilise par le hook, on fournit un stub neutre.

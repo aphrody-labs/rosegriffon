@@ -368,8 +368,8 @@ export class TournamentCreationForm implements OnInit {
 		bypassRules: this.bypassRulesControl,
 	});
 
-	protected readonly tournamentTypeOptions = tournamentTypeOptions;
-	protected readonly matchFormatOptions = MATCH_FORMAT_OPTIONS;
+	protected readonly tournamentTypeOptions = [...tournamentTypeOptions];
+	protected readonly matchFormatOptions = [...MATCH_FORMAT_OPTIONS];
 	protected readonly console = console;
 
 	private dateWithinRangeValidator(months: number = 1): ValidatorFn {

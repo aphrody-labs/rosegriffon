@@ -172,7 +172,7 @@ export class TournamentRanking implements OnInit {
 		return "tier-plain";
 	}
 
-	/** Sentinel `GOAL_AVERAGE_PERFECT` (999, voir @achillea/core/tournaments) -> "∞". */
+	/** Sentinel `GOAL_AVERAGE_PERFECT` (999, voir @rosegriffon/achillea-core/tournaments) -> "∞". */
 	formatGoalAverage(value: number): string {
 		if (value >= 999) return "∞";
 		return value.toFixed(2);

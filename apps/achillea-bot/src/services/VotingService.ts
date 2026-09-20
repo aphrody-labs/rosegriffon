@@ -2,7 +2,7 @@ import type { EntityManager } from "@mikro-orm/core";
 import type { ButtonInteraction } from "discord.js";
 import { Client } from "@aphrody/discordx";
 
-import { evaluateProposalOutcome } from "@achillea/core";
+import { evaluateProposalOutcome } from "@rosegriffon/achillea-core";
 import { delay, inject } from "tsyringe";
 
 import { generalConfig } from "@/configs";
@@ -134,7 +134,7 @@ export class VotingService {
 		const approvals = votes.filter((v) => v.vote === VoteChoice.APPROVE).length;
 		const rejections = votes.filter((v) => v.vote === VoteChoice.REJECT).length;
 
-		// Décision pure déléguée à @achillea/core (MAJORITY / SUPERMAJORITY_2_3 /
+		// Décision pure déléguée à @rosegriffon/achillea-core (MAJORITY / SUPERMAJORITY_2_3 /
 		// UNANIMOUS + expiration). Renvoie null si la proposition reste en attente.
 		const outcome = evaluateProposalOutcome({
 			approvals,

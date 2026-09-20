@@ -1,11 +1,10 @@
 import { Component, Input, OnInit, signal, Signal, inject } from "@angular/core";
 import { ClanDTO, ClanState } from "../../../core/models/Clan";
 import {
-	ClanMemberDistinction,
 	ClanMemberDTO,
 	ClanMemberRole,
-	ClanMemberRoleName,
-	distinctionPriority,
+	clanMemberRoleLabel,
+	sortClanMembers as sortMembersByRank,
 } from "../../../core/models/ClanMember";
 import { Column } from "../../../core/models/Column";
 import { ActivatedRoute, RouterLink } from "@angular/router";
@@ -43,48 +42,15 @@ export class ClanMembers implements OnInit {
 		];
 	}
 
-	getMemberRoleName(memberRole: ClanMemberRole) {
-		return ClanMemberRoleName[memberRole];
+	// Libellé et tri viennent de `@rosegriffon/achillea-core` : la version locale
+	// traduisait `ContentCreator` en « Content Creator », clé absente de la table
+	// de priorité, ce qui reléguait ces membres en fin de liste.
+	protected getMemberRoleName(memberRole: ClanMemberRole): string {
+		return clanMemberRoleLabel(memberRole);
 	}
 
-	sortClanMembers(members: ClanMemberDTO[]): ClanMemberDTO[] {
-		return [...members].sort((a, b) => {
-			// 🔹 1. Compare by role (Captain first → higher number first)
-			if (a.clanRole !== b.clanRole) {
-				return b.clanRole - a.clanRole;
-			}
-
-			// 🔹 2. Compare by distinction (Staff > Player > Artist > Content Creator)
-			const getDistinctionScore = (m: ClanMemberDTO): number => {
-				// Each member can have multiple distinctions
-				const scores = m.distinctions.map((d) => {
-					// The distinctionPriority keys are in English ("Staff", "Player", etc.),
-					// but your enum values are in French ("Staff", "Joueur", "Artiste", "Créateur de contenu")
-					// → so we normalize here:
-					const translated = this.translateDistinctionToKey(d as ClanMemberDistinction);
-					return distinctionPriority[translated] ?? 999;
-				});
-				return Math.min(...scores);
-			};
-
-			return getDistinctionScore(a) - getDistinctionScore(b);
-		});
-	}
-
-	/** Converts enum values like "Joueur" -> "Player" to match priority map */
-	translateDistinctionToKey(distinction: ClanMemberDistinction): keyof typeof distinctionPriority {
-		switch (distinction) {
-			case ClanMemberDistinction.Staff:
-				return "Staff";
-			case ClanMemberDistinction.Player:
-				return "Player";
-			case ClanMemberDistinction.Artist:
-				return "Artist";
-			case ClanMemberDistinction.ContentCreator:
-				return "Content Creator";
-			default:
-				return "Player";
-		}
+	protected sortClanMembers(members: ClanMemberDTO[]): ClanMemberDTO[] {
+		return sortMembersByRank(members);
 	}
 
 	getDate(dateStr: string) {

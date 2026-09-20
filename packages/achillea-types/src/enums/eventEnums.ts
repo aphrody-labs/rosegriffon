@@ -151,7 +151,7 @@ export enum StageType {
 	double_elimination = "double_elimination",
 	/**
 	 * Championnat type Premier League (calendrier + classement par points),
-	 * distinct d'une coupe à élimination. Voir `@achillea/core/league`
+	 * distinct d'une coupe à élimination. Voir `@rosegriffon/achillea-core/league`
 	 * et `docs/asytral-league.md` (référence Asytral League).
 	 */
 	league = "league",

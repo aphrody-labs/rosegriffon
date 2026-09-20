@@ -1,5 +1,5 @@
 {
-	"name": "achillea-bot",
+	"name": "@rosegriffon/achillea-bot",
 	"version": "1.0.7",
 	"private": true,
 	"description": "Achillea Backend — Bot Discord + API REST + WebSocket pour la plateforme Achillea (Bun + Ts.ED + MikroORM 7)",
@@ -50,8 +50,8 @@
 		"elo:backfill-tournaments:apply": "bun scripts/backfill-tournament-elo.ts --apply"
 	},
 	"dependencies": {
-		"@achillea/core": "workspace:*",
-		"@achillea/types": "workspace:*",
+		"@rosegriffon/achillea-core": "workspace:*",
+		"@rosegriffon/achillea-types": "workspace:*",
 		"@aphrody/canvas": "0.1.99",
 		"@aphrody/discordx": "^0.1.0",
 		"@aphrody/importer": "^0.1.0",

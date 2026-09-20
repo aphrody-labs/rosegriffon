@@ -7,18 +7,26 @@ status: "stable"
 
 # Production status
 
-Last verified: **2026-09-08 UTC** on the Rose Griffon VPS.
+Last verified: **2026-09-20 UTC** on the Rose Griffon VPS.
 
 ## Live surfaces
 
-- `rosegriffon.fr`, `azalee.rosegriffon.fr`, `achillea.rosegriffon.fr`, and
-  `nie.aphrody.com` are served from the VPS behind nginx.
-- Postgres, PostgREST, Storage, Realtime, CDN, API, Auth, and site watchdogs are
-  active. `systemctl --failed` is empty.
-- Public site/API probes returned `200`; active Aphrody API/CDN endpoints negotiate
-  HTTP/2. Typical measured TTFB was 8–30 ms after the performance pass.
-- Achillea local Supabase is isolated on its dedicated ports. The verified local
-  inventory contains 109 tables and 379 Storage files.
+- `rosegriffon.fr` : application Next.js 16 unifiée (`apps/website`, `website-web.service` :3004 / `-b` :3014)
+  regroupant le portail Rose Griffon, le wiki complet Inazuma Eleven: Victory Road (`/wiki`), les actualités
+  et chroniques (`/news`, `/chroniques`), la boutique (`/shop`), l'espace communauté (`/community`),
+  l'administration (`/admin`) et l'authentification Better Auth.
+- `azalee.rosegriffon.fr` : basculé en redirection permanente HTTP 301 vers `rosegriffon.fr/wiki` via nginx,
+  avec `azalee-web.service` (:3003) en phase de transition sans régression.
+- `achillea.rosegriffon.fr` : tournois, classements ELO, licences et clans Achilléa (`apps/achillea-web`,
+  Angular 19 / PrimeNG, :8080) adossé à `achillea-bot` (:5001) et sa pile Supabase locale isolée.
+- `nie.aphrody.com` : servi depuis le VPS derrière nginx.
+- Postgres (port 5432), PostgREST (:8809), Storage (:8810), Realtime (:8812), CDN (:8804, :8788),
+  API headless Azalée (:8807), Auth, et bots Discord (`rg-bot.service`, `azalee-bot.service`,
+  `achillea-bot.service`) actifs. `systemctl --failed` est vide.
+- Toutes les sondes HTTP publiques et internes retournent `200 OK`.
+- Validation automatisée monorepo : 100% tests unitaires verts (18/18 tâches Turborepo, 850+ tests),
+  100% type-check vert (20/20 tâches Turborepo), 100% lint vert (14/14 tâches Turborepo), build de
+  production validé.
 
 ## Retired surfaces
 

@@ -1,4 +1,4 @@
-import { ESCALATION_WINDOW_SEC, evaluateEscalation } from "@achillea/core";
+import { ESCALATION_WINDOW_SEC, evaluateEscalation } from "@rosegriffon/achillea-core";
 import type { Job } from "bullmq";
 import { Client } from "@aphrody/discordx";
 import { singleton } from "tsyringe";
@@ -197,7 +197,7 @@ export class SanctionService {
 			$or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }],
 		});
 
-		// Décision d'escalade : règle pure déléguée à @achillea/core.
+		// Décision d'escalade : règle pure déléguée à @rosegriffon/achillea-core.
 		const decision = evaluateEscalation(activeWarns);
 		if (!decision) return null;
 

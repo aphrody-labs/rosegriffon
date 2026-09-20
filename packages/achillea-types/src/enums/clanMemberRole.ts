@@ -5,12 +5,9 @@ export enum ClanMemberRole {
 	Captain,
 }
 
-export const ClanMemberRoleName: Record<ClanMemberRole, string> = {
-	[ClanMemberRole.Trial]: "Membre à l'essai",
-	[ClanMemberRole.Member]: "Membre",
-	[ClanMemberRole.SubCaptain]: "Vice-Président",
-	[ClanMemberRole.Captain]: "Président",
-};
+// Les libellés d'affichage vivent dans `@rosegriffon/achillea-core/labels`
+// (`CLAN_MEMBER_ROLE_LABELS`) : le contrat décrit des données échangées, pas du
+// texte destiné à un humain — sinon il cesse d'être traduisible mécaniquement.
 
 export enum ClanMemberDistinction {
 	Player = "Joueur",
