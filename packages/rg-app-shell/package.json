@@ -8,16 +8,39 @@
 		".": "./src/index.ts",
 		"./navigation": "./src/config/navigation.ts",
 		"./routes": "./src/config/routes.ts",
-		"./routes-next": "./src/lib/routes-next.ts"
+		"./routes-next": "./src/lib/routes-next.ts",
+		"./footer": "./src/components/Footer.tsx",
+		"./sidebar": "./src/components/AppSidebar.tsx",
+		"./navigation-rail": "./src/components/NavigationRail.tsx",
+		"./mobile-nav": "./src/components/MobileBottomNav.tsx",
+		"./top-app-bar": "./src/components/TopAppBar.tsx",
+		"./shell": "./src/components/Shell.tsx"
 	},
 	"scripts": {
 		"lint": "bunx oxlint -c ../../.oxlintrc.json src",
 		"type-check": "bun --bun tsc --noEmit",
 		"test": "bun test test"
 	},
+	"dependencies": {
+		"@rosegriffon/ui": "workspace:*",
+		"clsx": "catalog:",
+		"lucide-react": "catalog:",
+		"next-themes": "catalog:",
+		"tailwind-merge": "catalog:"
+	},
+	"peerDependencies": {
+		"next": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:"
+	},
 	"devDependencies": {
 		"@rosegriffon/config": "workspace:*",
 		"@types/bun": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"next": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:",
 		"typescript": "catalog:"
 	}
 }

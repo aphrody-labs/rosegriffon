@@ -19,7 +19,9 @@
 			"@rosegriffon/types": ["../../packages/types/src/index.ts"],
 			"@rosegriffon/types/*": ["../../packages/types/src/*"],
 			"@rosegriffon/auth": ["../../packages/auth/src/index.ts"],
-			"@rosegriffon/auth/*": ["../../packages/auth/src/*"]
+			"@rosegriffon/auth/*": ["../../packages/auth/src/*"],
+			"@rosegriffon/app-shell": ["../../packages/app-shell/src/index.ts"],
+			"@rosegriffon/app-shell/*": ["../../packages/app-shell/src/*"]
 		},
 		"incremental": true,
 		"plugins": [
