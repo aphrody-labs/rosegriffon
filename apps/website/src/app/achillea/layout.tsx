@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./achillea.css";
+import "./primeicons.css";
 import { AchilleaNav } from "@/components/achillea/AchilleaNav";
 
 export const metadata: Metadata = {
