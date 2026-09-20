@@ -8,7 +8,7 @@
 		".": "./src/index.ts",
 		"./navigation": "./src/config/navigation.ts",
 		"./routes": "./src/config/routes.ts",
-		"./theme": "./src/config/theme.ts"
+		"./routes-next": "./src/lib/routes-next.ts"
 	},
 	"scripts": {
 		"lint": "bunx oxlint -c ../../.oxlintrc.json src",

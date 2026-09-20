@@ -254,6 +254,21 @@ export const contactMenu: MenuSection = {
 };
 
 /**
+ * Un composant React est-il utilisable comme icône ?
+ *
+ * `typeof icon === "function"` ne suffit PAS : les icônes de `lucide-react`
+ * passent par `React.forwardRef`, qui rend un OBJET porteur de `$$typeof`, pas
+ * une fonction. Les deux gardes ci-dessous rejetaient donc l'intégralité du
+ * menu réellement livré — une validation qui ne valide rien ne protège rien.
+ */
+function estComposant(valeur: unknown): boolean {
+	if (typeof valeur === "function") {
+		return true;
+	}
+	return typeof valeur === "object" && valeur !== null && "$$typeof" in valeur;
+}
+
+/**
  * Validation utilitaire pour les items avec support des nouvelles propriétés
  */
 export function isValidMenuItem(item: unknown): item is MenuItem {
@@ -263,7 +278,7 @@ export function isValidMenuItem(item: unknown): item is MenuItem {
 	const m = item as Record<string, unknown>;
 	return (
 		typeof m.title === "string" &&
-		typeof m.icon === "function" &&
+		estComposant(m.icon) &&
 		(m.url === undefined || typeof m.url === "string") &&
 		(m.collapsible === undefined || typeof m.collapsible === "boolean") &&
 		(m.description === undefined || typeof m.description === "string") &&
@@ -280,7 +295,7 @@ export function isValidSubMenuItem(item: unknown): item is SubMenuItem {
 	return (
 		typeof m.title === "string" &&
 		typeof m.url === "string" &&
-		typeof m.icon === "function" &&
+		estComposant(m.icon) &&
 		(m.description === undefined || typeof m.description === "string") &&
 		(m.shortcut === undefined || typeof m.shortcut === "string")
 	);
