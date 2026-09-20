@@ -59,15 +59,14 @@ interface BaseCharacterTableProps {
  *
  * LE BUG QUE ÇA CORRIGE
  * Les `href` étaient écrits en dur (`/chara/<slug>`). Or ce composant est servi
- * par DEUX apps : à la racine d'`azalee.rosegriffon.fr`, où `/chara/<slug>` est
- * correct, et sous `/wiki` de `rosegriffon.fr`, où la bonne cible est
+ * sous `/wiki` dans Website ; le domaine Azalée historique redirige vers cette
+ * route canonique, où la bonne cible est
  * `/wiki/chara/<slug>`. Mesuré en production sur `rosegriffon.fr/wiki/chara` :
  * les 200 fiches de la page pointaient toutes sur `/chara/<slug>` et repassaient
  * donc par une redirection 308 évitable (200 des 204 sauts relevés sur le wiki).
  *
- * `basesDepuisChemin` déduit le montage du chemin courant au lieu de le coder en
- * dur : le fichier reste identique octet à octet dans les deux arbres, ce
- * qu'exige `packages/app-shell/test/synchronisation-chrome.test.ts`.
+ * `basesDepuisChemin` conserve cette résolution dans la configuration partagée
+ * plutôt que de laisser des chemins locaux codés en dur.
  */
 function useLienWiki(): (chemin: string) => string {
 	const pathname = usePathname();

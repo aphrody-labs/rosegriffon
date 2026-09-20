@@ -51,7 +51,7 @@ export async function runInaglePush(): Promise<{ success: boolean; error?: strin
  * Republie le miroir SQLite des tables `inagle_*` — les données extraites du jeu.
  *
  * Le miroir a déménagé dans `niers/var/` : il n'est plus écrit sous
- * `apps/azalee/data/backups`, et c'est `scripts/donnees/miroir-inagle.sh` qui le publie,
+ * le répertoire canonique niers, et c'est `scripts/donnees/miroir-inagle.sh` qui le publie,
  * avec sa validation de dump et sa bascule atomique. Le démon d'ici ne fait plus que le
  * déclencher. (L'unité `nie-miroir.timer` le fait aussi, chaque nuit à 04:10 UTC.)
  */

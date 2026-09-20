@@ -7,7 +7,7 @@
 // RAG unifié — store vectoriel LOCAL (bun:sqlite). Remplace le store pgvector
 // Supabase (`inagle_rag_chunks` + RPC `rag_hybrid_search`) qui avait fait
 // dépasser le quota storage du plan free (606 Mo DB, 592 Mo pour ce seul
-// store) et cassé azalee-web/website-web/rg-cron pendant 7+ jours.
+// store) et cassé website-web/rg-cron pendant 7+ jours.
 //
 // Recherche hybride reproduite en local :
 //   - dense : cosine (= dot product, embeddings L2-normalisés) par balayage
@@ -19,7 +19,7 @@
 // Dimension 384 native (e5-small du sidecar rg-rag-embed), sans le zero-pad
 // vers 1024 qui n'existait que pour coller au type `halfvec(1024)` pgvector.
 //
-// Fichier partagé par deux process séparés (rg-cron = écrivain, azalee-web =
+// Fichier partagé par deux process séparés (rg-cron = écrivain, website-web =
 // lecteur) → WAL + busy_timeout pour l'accès concurrent multi-process.
 
 // `import type` (PAS un import de valeur) : s'efface entièrement à la compilation,
@@ -28,7 +28,7 @@
 // /_global-error) : un import de VALEUR ferait planter "Collecting page data" dès
 // que /api/rag/search ou /api/graphql sont dans le trace, `bun:sqlite` n'existant
 // pas sous Node. `getDb()` charge le vrai constructeur en lazy, guardé `typeof Bun`
-// (jamais atteint au build ni sous Node runtime — azalee-web/rg-cron tournent tous
+// (jamais atteint au build ni sous Node runtime — website-web/rg-cron tournent tous
 // deux sous Bun en prod, cf. lib/supabase/sqlite-client.ts pour le même pattern).
 import type { Database } from "bun:sqlite";
 import { existsSync, mkdirSync } from "node:fs";
@@ -84,7 +84,7 @@ function resolveStorePath(): string {
 		path.resolve(process.cwd(), "var/rag/rag-store.sqlite"),
 		"/home/ubuntu/niers/var/rag/rag-store.sqlite",
 		path.resolve(process.cwd(), "data/rag/rag-store.sqlite"),
-		path.resolve(process.cwd(), "apps/azalee/data/rag/rag-store.sqlite"),
+		path.resolve(process.cwd(), "apps/website/data/rag/rag-store.sqlite"),
 	];
 	for (const c of candidates) {
 		if (existsSync(path.dirname(c))) return c;
@@ -98,7 +98,7 @@ function getDb(): Database {
 	if (db) return db;
 	if (typeof Bun === "undefined") {
 		throw new Error(
-			"[rag-store] bun:sqlite indisponible (runtime Node) — le store RAG local ne tourne que sous Bun (azalee-web / rg-cron)."
+			"[rag-store] bun:sqlite indisponible (runtime Node) — le store RAG local ne tourne que sous Bun (website-web / rg-cron)."
 		);
 	}
 	const p = resolveStorePath();

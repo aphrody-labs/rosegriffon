@@ -86,8 +86,8 @@ publique stable `https://ranked.rosegriffon.fr/api`, indépendante de l'IP du VP
 
 | Site | Domaine | Stack | Rôle |
 | --- | --- | --- | --- |
-| **website** | `rosegriffon.fr` | Next.js 16 (`apps/website`) | site principal RG : shop, chroniques, articles |
-| **azalee** | `azalee.rosegriffon.fr` | Next.js 16 (`apps/azalee`) | wiki Inazuma (personnages, items, keshins…) |
+| **website** | `rosegriffon.fr` | Next.js 16 (`apps/website`) | site principal RG et wiki Azalée sous `/wiki` |
+| **azalee** | `azalee.rosegriffon.fr` | redirection HTTP permanente | compatibilité vers `rosegriffon.fr/wiki`, aucun build autonome |
 | **achillea** | `achillea.rosegriffon.fr` | Angular 21 (repo `rose-griffon/achillea`) | dashboard communautaire : clans, tournois, ranked, casts |
 
 Infra partagée : `api.rosegriffon.fr` (stub nginx, `/health`), `cdn.rosegriffon.fr` (service CDN d'images

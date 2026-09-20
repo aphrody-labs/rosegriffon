@@ -130,7 +130,7 @@ export function PlayersClient({
 				return teams?.find((t) => t.id === value)?.name || value;
 			}
 			// Les 9 clés du groupe d'âge (`wiki.filters.age_group` + les 8
-			// `wiki.age_groups.*`) n'existaient que dans `apps/azalee/public/locales`
+			// `wiki.age_groups.*`) provenaient de l'ancien frontend autonome
 			// et manquaient dans celles de ce site : `t()` retombe sur la clé brute,
 			// et `/wiki/chara` affichait donc « wiki.age_groups.child » dans les
 			// filtres — en capitales pour le titre (« WIKI.FILTERS.AGE_GROUP »)

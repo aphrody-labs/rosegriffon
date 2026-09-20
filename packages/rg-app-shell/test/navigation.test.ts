@@ -10,12 +10,11 @@ import {
 	parcourirNav,
 	type NavItem,
 } from "../src/config/navigation";
-import { AZALEE_BASES, basesDepuisChemin, joindreWiki, WEBSITE_BASES } from "../src/config/routes";
+import { basesDepuisChemin, joindreWiki, WEBSITE_BASES } from "../src/config/routes";
 import { DICTIONNAIRE_NAV_FR } from "../src/lib/translations";
 import { DEFAULT_THEMES } from "../src/components/ThemeToggle";
 import { THEMES } from "@rosegriffon/ui";
 
-const azalee = construireNavigation(AZALEE_BASES);
 const website = construireNavigation(WEBSITE_BASES);
 
 describe("joindreWiki", () => {
@@ -79,34 +78,7 @@ describe("estItemActif", () => {
 	});
 });
 
-describe("parité azalee / website", () => {
-	const aplatir = (items: NavItem[]) => parcourirNav(items).map((i) => i.label);
-
-	test("website conserve les surfaces niers sans les réexposer sur azalee", () => {
-		const labelsAzalee = aplatir(azalee.navigationItems);
-		const labelsWebsite = aplatir(website.navigationItems);
-		for (const label of ["nav.section.media", "nav.tools", "nav.wiki.models"]) {
-			expect(labelsAzalee).not.toContain(label);
-			expect(labelsWebsite).toContain(label);
-		}
-		expect(aplatir(azalee.mobileNavItems)).not.toContain("nav.tools");
-		expect(aplatir(website.mobileNavItems)).toContain("nav.tools");
-		expect(aplatir(website.dashboardItems)).toEqual(aplatir(azalee.dashboardItems));
-	});
-
-	test("chaque entrée du wiki est préfixée `/wiki` côté website", () => {
-		const parLabel = new Map(parcourirNav(azalee.navigationItems).map((i) => [i.label, i.path]));
-		for (const item of parcourirNav(website.navigationItems)) {
-			const cheminAzalee = parLabel.get(item.label)!;
-			// Les routes de service restent à la racine dans les deux apps.
-			if (item.path === cheminAzalee) {
-				expect(["/news", "/settings", "/search"]).toContain(item.path);
-				continue;
-			}
-			expect(item.path.startsWith("/wiki")).toBe(true);
-		}
-	});
-
+describe("navigation de la source unique Website", () => {
 	test("aucune route de service n'est préfixée par le wiki", () => {
 		const chemins = cheminsCliquables(website.navigationItems);
 		expect(chemins).not.toContain("/wiki/news");
@@ -115,10 +87,7 @@ describe("parité azalee / website", () => {
 		expect(chemins).toContain("/settings");
 	});
 
-	test("l'administration est enracinée différemment mais structurée pareil", () => {
-		expect(cheminsCliquables(azalee.dashboardItems).every((c) => c.startsWith("/dashboard"))).toBe(
-			true
-		);
+	test("l'administration est entièrement enracinée sous `/admin`", () => {
 		expect(cheminsCliquables(website.dashboardItems).every((c) => c.startsWith("/admin"))).toBe(
 			true
 		);
@@ -127,7 +96,7 @@ describe("parité azalee / website", () => {
 
 describe("cheminsCliquables", () => {
 	test("exclut les entêtes de groupe, qui ne pointent nulle part", () => {
-		for (const nav of [azalee.dashboardItems, website.dashboardItems]) {
+		for (const nav of [website.dashboardItems]) {
 			const chemins = cheminsCliquables(nav);
 			for (const groupe of parcourirNav(nav).filter((i) => i.groupOnly)) {
 				expect(chemins).not.toContain(groupe.path);
@@ -136,7 +105,7 @@ describe("cheminsCliquables", () => {
 	});
 
 	test("ne rend aucun chemin vide ni relatif", () => {
-		for (const nav of [azalee, website]) {
+		for (const nav of [website]) {
 			for (const items of [nav.navigationItems, nav.mobileNavItems, nav.dashboardItems]) {
 				for (const chemin of cheminsCliquables(items)) {
 					expect(chemin.startsWith("/")).toBe(true);
@@ -187,16 +156,16 @@ describe("basesDepuisChemin", () => {
 		}
 	});
 
-	test("tout le reste rend les bases d'azalee, qui sert le wiki à la racine", () => {
+	test("toutes les routes rendent les bases de l'unique Website", () => {
 		for (const chemin of ["/", "/chara", "/dashboard", "/equipe"]) {
-			expect(basesDepuisChemin(chemin)).toBe(AZALEE_BASES);
+			expect(basesDepuisChemin(chemin)).toBe(WEBSITE_BASES);
 		}
 	});
 
 	test("compare par segment, jamais par préfixe de chaîne", () => {
 		// `/wikipedia` n'est pas dans `/wiki`, `/achilleaxyz` pas dans `/achillea`.
-		expect(basesDepuisChemin("/wikipedia")).toBe(AZALEE_BASES);
-		expect(basesDepuisChemin("/achilleaxyz")).toBe(AZALEE_BASES);
+		expect(basesDepuisChemin("/wikipedia")).toBe(WEBSITE_BASES);
+		expect(basesDepuisChemin("/achilleaxyz")).toBe(WEBSITE_BASES);
 	});
 });
 

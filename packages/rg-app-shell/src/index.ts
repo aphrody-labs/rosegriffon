@@ -21,7 +21,6 @@ export {
 	type SousCategorieNav,
 } from "./config/navigation";
 export {
-	AZALEE_BASES,
 	basesDepuisChemin,
 	CHEMINS_ASSOCIATION,
 	CHEMINS_ESPORT,

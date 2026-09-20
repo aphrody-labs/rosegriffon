@@ -10,12 +10,11 @@ import {
 	domaineDeLaRoute,
 } from "../src/config/navigation";
 import { listerMotifsRoutes, motifAccepte, routeExiste } from "../src/lib/routes-next";
-import { AZALEE_BASES, WEBSITE_BASES } from "../src/config/routes";
+import { WEBSITE_BASES } from "../src/config/routes";
 
 const RACINE = join(import.meta.dir, "../../..");
 
 const APPS = [
-	{ app: join(RACINE, "apps/azalee/app"), bases: AZALEE_BASES, nom: "azalee" },
 	{ app: join(RACINE, "apps/website/src/app"), bases: WEBSITE_BASES, nom: "website" },
 ] as const;
 
@@ -106,11 +105,6 @@ describe("navigation unifiée : trois domaines", () => {
 	test("les trois sous-catégories sont présentes côté website", () => {
 		const groupes = construireNavigationUnifiee(WEBSITE_BASES);
 		expect(groupes.map((g) => g.domaine)).toEqual(["association", "wiki", "esport"]);
-	});
-
-	test("azalee ne monte que le wiki : une seule sous-catégorie, pas trois vides", () => {
-		const groupes = construireNavigationUnifiee(AZALEE_BASES);
-		expect(groupes.map((g) => g.domaine)).toEqual(["wiki"]);
 	});
 
 	test("les entêtes de groupe ne sont pas des destinations", () => {

@@ -6,7 +6,7 @@
  * test ou dans n'importe quel script.
  *
  * Une application hôte peut injecter son propre client — c'est ce que fait
- * `apps/azalee`, qui fournit le client Supabase enveloppé d'un `Proxy` routant
+ * Website, qui fournit le client Supabase enveloppé d'un `Proxy` routant
  * les tables `inagle_*` vers le miroir et **tout le reste** (éditorial, social,
  * `tweets`…) vers PostgREST. Sans injection, seules les tables présentes dans le
  * miroir répondent.

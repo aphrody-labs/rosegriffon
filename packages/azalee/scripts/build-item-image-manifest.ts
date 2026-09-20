@@ -39,7 +39,7 @@ const OUT = path.join(DATA_DIR, "item-image-manifest.json");
 
 const mirror = resolveMirrorPath();
 if (!mirror) {
-	console.error("[item-manifest] miroir SQLite introuvable (apps/azalee/data/backups/).");
+	console.error("[item-manifest] miroir SQLite introuvable (apps/website/data/backups/).");
 	process.exit(1);
 }
 

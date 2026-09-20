@@ -1,13 +1,13 @@
 /**
  * Source de vérité UNIQUE pour l'origin public d'Azalée.
  *
- * Azalée tourne en self-host sur le VPS via `azalee-web.service` (Next 16
- * standalone, `HOSTNAME=0.0.0.0`, `PORT=3003`) DERRIÈRE nginx. Le host interne
- * vu par Next est donc `0.0.0.0:3003` / `127.0.0.1:3003`. Toute URL absolue
+ * Azalée est servie par l'unique application `website-web.service` derrière
+ * nginx. Le host interne vu par Next peut donc être une adresse de boucle locale.
+ * Toute URL absolue
  * construite depuis `request.url` / `request.nextUrl.origin` / `url.origin`
  * hérite de ce host interne → un `NextResponse.redirect(new URL("/dashboard",
- * request.url))` renvoie l'utilisateur sur `https://0.0.0.0:3003/dashboard`
- * au lieu de `https://azalee.rosegriffon.fr/dashboard`.
+ * request.url))` peut renvoyer l'utilisateur vers l'adresse interne
+ * au lieu de l'URL publique attendue.
  *
  * On centralise ici l'origin public déterministe : var d'env explicite avec
  * défaut prod codé en dur. Utiliser `getPublicOrigin()` / `absoluteUrl()`
@@ -15,7 +15,7 @@
  * emails, magic-link, etc.).
  */
 
-const FALLBACK_ORIGIN = "https://azalee.rosegriffon.fr";
+const FALLBACK_ORIGIN = "https://rosegriffon.fr";
 
 function normalizeOrigin(value: string | undefined | null): string | null {
 	if (!value || value === "undefined" || value === "null") {
@@ -34,12 +34,12 @@ function normalizeOrigin(value: string | undefined | null): string | null {
 }
 
 /**
- * Origin public canonique d'Azalée (ex. `https://azalee.rosegriffon.fr`).
+ * Origin public canonique de l'application unifiée (ex. `https://rosegriffon.fr`).
  *
  * Priorité :
  *   1. `NEXT_PUBLIC_SITE_URL` (inliné au build + dispo runtime)
  *   2. `BETTER_AUTH_URL` (runtime, déjà la base Better Auth)
- *   3. défaut prod `https://azalee.rosegriffon.fr`
+ *   3. défaut prod `https://rosegriffon.fr`
  *
  * Ne dérive JAMAIS du host de la requête (= `0.0.0.0:3003` en self-host).
  */

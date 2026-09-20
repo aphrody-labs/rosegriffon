@@ -192,12 +192,13 @@ doit être suivie de `/health`, d'une requête GLB réelle et d'une mesure
 bun scripts/ops/repo-sync.ts --repo all --pull --commit --push
 git -C /home/ubuntu/rg status --short --branch
 git -C /home/ubuntu/niers status --short --branch
-systemctl is-active azalee-web.service nie-model-serve.service rg-cdn.service cdn-variants.service
-curl --fail --silent https://azalee.rosegriffon.fr/api/health
+systemctl is-active website-web.service nie-model-serve.service rg-cdn.service cdn-variants.service
+curl --fail --silent https://rosegriffon.fr/wiki
+curl --head https://azalee.rosegriffon.fr/
 curl --fail --silent https://cdn.rosegriffon.fr/health
 ```
 
-Pour Azalée, rejouer ensuite les tests avatar, le type-check, le lint/build et
+Pour le wiki Azalée intégré, rejouer ensuite les tests pertinents de Website, le type-check, le lint/build et
 le smoke navigateur (imports PNG/GLB, export, sauvegarde/restauration,
 partage). Une compilation verte n'est pas une preuve de rendu WebGPU ni de
 fichier média 200. Pour Niers, utiliser les tests ciblés documentés dans

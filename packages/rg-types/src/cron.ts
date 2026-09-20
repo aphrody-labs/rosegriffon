@@ -115,7 +115,7 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
 		famille: "donnees",
 		niveau: "interdit",
 		motifInterdiction:
-			"réécrit la production ET échange le miroir servi par azalee-web — une bévue de frappe ne doit pas pouvoir la lancer",
+			"réécrit la production ET échange le miroir servi par Website — une bévue de frappe ne doit pas pouvoir la lancer",
 		dureeIndicative: "plusieurs minutes",
 	},
 	{

@@ -87,7 +87,7 @@ const DELAI_RECHERCHE_MS = 15_000;
  */
 const CHEMINS_INDEX: readonly string[] = [
 	Bun.env.RAG_STORE_PATH,
-	"/home/ubuntu/rg/apps/azalee/data/rag/rag-store.sqlite",
+	"/home/ubuntu/rg/apps/website/data/rag/rag-store.sqlite",
 ]
 	.filter((c): c is string => typeof c === "string" && c.trim().length > 0)
 	.map((c) => c.trim());

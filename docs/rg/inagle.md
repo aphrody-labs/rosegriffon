@@ -8,7 +8,7 @@ Ce document présente l'architecture globale, le pipeline de données, l'alignem
 
 ## 1. Vue d'Ensemble & Architecture
 
-`@rosegriffon/inagle` sert de couche d'abstraction de données (Data Access Layer) partagée par l'application Next.js ([@rosegriffon/azalee-web](file:///apps/azalee)) et les tâches périodiques du démon de fond ([@rosegriffon/cron](file:///packages/cron)).
+`@rosegriffon/inagle` sert de couche d'abstraction de données (Data Access Layer) partagée par le wiki de l'application Next.js ([`apps/website`](../apps/website)) et les tâches périodiques du démon de fond (`packages/cron`).
 
 ### Structure du Code source ([packages/inagle/src](file:///packages/inagle/src))
 ```

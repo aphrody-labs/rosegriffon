@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 /**
  * Préfixe de montage du wiki dans cette app (`/wiki`), lu dans le registre de
  * routes partagé plutôt qu'écrit en dur : la même page existe à la racine
- * d'`azalee.rosegriffon.fr`, où le préfixe est vide.
+ * de Website, sous le préfixe `/wiki`.
  *
  * LE BUG QUE ÇA CORRIGE
  * Les quatre cartes pointaient sur `/tools/<outil>`. Mesuré en production sur

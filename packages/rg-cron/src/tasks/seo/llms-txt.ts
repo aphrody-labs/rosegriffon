@@ -15,8 +15,8 @@
  *   - `llm.txt`       : alias de `llms.txt` (référencé par les métadonnées du
  *                       website, alternates.types["text/markdown"]).
  *
- * Les fichiers sont écrits dans apps/website/public et apps/azalee/public, donc
- * servis statiquement à la racine de chaque domaine. La régénération
+ * Les fichiers sont écrits dans apps/website/public, source statique unique des
+ * surfaces Rose Griffon et Azalée. La régénération
  * via cron garde la date `Généré le …` fraîche (signal de fraîcheur).
  *
  * Ce qui est garanti : des fichiers à jour et conformes au standard, lisibles
@@ -32,7 +32,6 @@ import { join } from "node:path";
 // (packages/cron/src/tasks/seo/llms-txt.ts → remonter de 5 niveaux).
 const MONOREPO_ROOT = join(import.meta.dir, "..", "..", "..", "..", "..");
 const WEBSITE_PUBLIC = join(MONOREPO_ROOT, "apps", "website", "public");
-const AZALEE_PUBLIC = join(MONOREPO_ROOT, "apps", "azalee", "public");
 
 const DEV_CREDIT = "yoyo — https://x.com/yoyo__goat";
 
@@ -311,28 +310,26 @@ export async function runSeoLlmsTxt(): Promise<{ success: boolean; error?: strin
 		const azaleeIndex = azaleeLlms();
 		const websiteFull = websiteLlmsFull();
 		const azaleeFull = azaleeLlmsFull();
+		const unifiedIndex = `${websiteIndex}\n${azaleeIndex}`;
+		const unifiedFull = `${websiteFull}\n${azaleeFull}`;
 
 		const targets: Array<{ path: string; content: string }> = [
 			// Website : llm.txt est l'alias référencé par les métadonnées Next.
-			{ path: join(WEBSITE_PUBLIC, "llms.txt"), content: websiteIndex },
-			{ path: join(WEBSITE_PUBLIC, "llm.txt"), content: websiteIndex },
-			{ path: join(WEBSITE_PUBLIC, "llms-full.txt"), content: websiteFull },
+			{ path: join(WEBSITE_PUBLIC, "llms.txt"), content: unifiedIndex },
+			{ path: join(WEBSITE_PUBLIC, "llm.txt"), content: unifiedIndex },
+			{ path: join(WEBSITE_PUBLIC, "llms-full.txt"), content: unifiedFull },
 			// Website — versions markdown (.md) + HTML (.html) fetchables par les IA.
-			{ path: join(WEBSITE_PUBLIC, "llm.md"), content: websiteIndex },
-			{ path: join(WEBSITE_PUBLIC, "llms.md"), content: websiteIndex },
-			{ path: join(WEBSITE_PUBLIC, "llms-full.md"), content: websiteFull },
-			{ path: join(WEBSITE_PUBLIC, "llm.html"), content: llmsToHtml(websiteIndex, "Rose Griffon — llm.txt") },
-			{ path: join(WEBSITE_PUBLIC, "llms-full.html"), content: llmsToHtml(websiteFull, "Rose Griffon — llms-full") },
-			// Azalée.
-			{ path: join(AZALEE_PUBLIC, "llms.txt"), content: azaleeIndex },
-			{ path: join(AZALEE_PUBLIC, "llm.txt"), content: azaleeIndex },
-			{ path: join(AZALEE_PUBLIC, "llms-full.txt"), content: azaleeFull },
-			// Azalée — versions markdown (.md) + HTML (.html).
-			{ path: join(AZALEE_PUBLIC, "llm.md"), content: azaleeIndex },
-			{ path: join(AZALEE_PUBLIC, "llms.md"), content: azaleeIndex },
-			{ path: join(AZALEE_PUBLIC, "llms-full.md"), content: azaleeFull },
-			{ path: join(AZALEE_PUBLIC, "llm.html"), content: llmsToHtml(azaleeIndex, "Azalée — llm.txt") },
-			{ path: join(AZALEE_PUBLIC, "llms-full.html"), content: llmsToHtml(azaleeFull, "Azalée — llms-full") },
+			{ path: join(WEBSITE_PUBLIC, "llm.md"), content: unifiedIndex },
+			{ path: join(WEBSITE_PUBLIC, "llms.md"), content: unifiedIndex },
+			{ path: join(WEBSITE_PUBLIC, "llms-full.md"), content: unifiedFull },
+			{
+				path: join(WEBSITE_PUBLIC, "llm.html"),
+				content: llmsToHtml(unifiedIndex, "Rose Griffon et Azalée — llm.txt"),
+			},
+			{
+				path: join(WEBSITE_PUBLIC, "llms-full.html"),
+				content: llmsToHtml(unifiedFull, "Rose Griffon et Azalée — llms-full"),
+			},
 		];
 
 		for (const { path, content } of targets) {

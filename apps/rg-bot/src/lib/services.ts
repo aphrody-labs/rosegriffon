@@ -145,11 +145,11 @@ export const SERVICES: Readonly<Record<NomService, DescriptionService>> = {
 	wiki: {
 		nom: "wiki",
 		titre: "Wiki Azalée",
-		base: local(3003, "AZALEE_WEB_URL"),
+		base: local(3004, "WEBSITE_INTERNAL_URL"),
 		sante: "/api/health",
 		publique: publique("AZALEE_URL", "https://azalee.rosegriffon.fr"),
-		unite: "azalee-web.service",
-		role: "l'application Next du wiki",
+		unite: "website-web.service",
+		role: "le wiki `/wiki` de l'application Website unifiée",
 	},
 	site: {
 		nom: "site",

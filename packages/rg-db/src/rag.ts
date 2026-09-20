@@ -10,7 +10,7 @@
 //
 // Migré depuis pgvector Supabase (`inagle_rag_chunks` + RPC `rag_hybrid_search`)
 // le 2026-08-06 : ce store à lui seul pesait 592 Mo sur les 606 Mo du quota
-// storage du plan free, restant le projet (azalee-web/website-web/rg-cron en
+// storage du plan free, laissant website-web/rg-cron en
 // échec pendant 7+ jours). Voir docs/rag-unified.md.
 //
 // Additif : ne remplace PAS `getEmbedding`/`vectorStore` de ./redis. Le store

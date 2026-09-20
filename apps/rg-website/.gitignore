@@ -86,5 +86,5 @@ gha-creds-*.json
 
 # Banque audio Inazuma Cross (305 .wav, 59 Mo) : extraite de l'APK, référencée
 # nulle part dans le code et embarquée telle quelle dans le build standalone.
-# Archivée hors dépôt (/home/ubuntu/rg-assets-archive). Idem côté apps/azalee.
+# Archivée hors dépôt (/home/ubuntu/rg-assets-archive).
 /public/inazuma-cross/audio/
