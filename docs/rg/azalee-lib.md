@@ -26,8 +26,12 @@ une webview et une surface serveur qui ne dépend que de Bun.
 
 ## Ce qui a bougé
 
-Le paquet npm reprend le nom historique `@rosegriffon/azalee` ; l'application Next
-est renommée **`@rosegriffon/azalee-web`** (dossier `apps/azalee` inchangé).
+Le paquet npm reprend le nom historique `@rosegriffon/azalee` ; à l'époque de cette
+extraction, l'application Next avait été renommée `@rosegriffon/azalee-web` (dossier
+`apps/azalee` inchangé). Cette application a depuis été entièrement retirée : le wiki
+est fusionné dans `apps/website` (voir [azalee.md](azalee.md)). Le tableau ci-dessous
+reste la référence des chemins **d'origine** (`apps/azalee/...`, aujourd'hui disparus)
+vers leur destination actuelle dans `packages/azalee`.
 
 | Ancien chemin | Nouveau chemin |
 | --- | --- |

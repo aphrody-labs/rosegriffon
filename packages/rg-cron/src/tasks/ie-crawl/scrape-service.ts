@@ -154,11 +154,12 @@ const AGENT_UTILISATEUR =
  * Le paquet npm `@aphrody/bxc` 0.6.7 ne l'embarque pas ; le profil `http` lève
  * donc « libcurl-impersonate not found » tant que `LIBCURL_IMPERSONATE_PATH`
  * n'est pas posé. La bibliothèque existe sur ce VPS, héritée de l'installation
- * bxc locale : on l'utilise si elle est là, on refuse proprement sinon.
+ * bxc, déplacée sous `aphrody/var/bxc/` lors de la fusion de bxc dans aphrody :
+ * on l'utilise si elle est là, on refuse proprement sinon.
  */
 const CHEMINS_CURL_IMPERSONATE = [
-	"/home/ubuntu/bxc/vendor/curl-impersonate/libcurl-impersonate.so",
-	"/home/ubuntu/bxc/vendor/curl-impersonate/libcurl-impersonate.so.4",
+	"/home/ubuntu/aphrody/var/bxc/vendor/curl-impersonate/libcurl-impersonate.so",
+	"/home/ubuntu/aphrody/var/bxc/vendor/curl-impersonate/libcurl-impersonate.so.4",
 ];
 
 // ─── Réponses et erreurs ─────────────────────────────────────────────────────

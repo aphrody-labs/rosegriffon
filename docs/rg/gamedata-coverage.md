@@ -57,24 +57,26 @@
 ## Surfaçage azalee (contenu jeu → page wiki)
 
 Le `/goal` ne s'arrête pas à la DB : la donnée doit être **navigable**. État du surfaçage des tables
-`inagle_*` dans des pages azalee (vérifié 2026-06-06, routes réelles sous `apps/azalee/app/`).
+`inagle_*` dans des pages azalee (vérifié 2026-06-06, routes réelles sous `apps/azalee/app/` à
+l'époque de l'audit ; le wiki est depuis fusionné dans `apps/website/src/app/wiki/**` et chaque
+route ci-dessous est préfixée par `/wiki`).
 
 | Table `inagle_*` | Page azalee | Statut |
 | --- | --- | --- |
-| `inagle_characters` | `/chara` (+ `/chara/[id]`) | **SURFACÉ** |
-| `inagle_skills` | `/skill` (+ détail) | **SURFACÉ** |
-| `inagle_auras` | `/aura` (+ détail) | **SURFACÉ** |
-| `inagle_items` | `/item` (+ détail) | **SURFACÉ** |
-| `inagle_keshins/souls/miximax/awakenings` | `/keshin` | **SURFACÉ** |
-| `inagle_special_tactics`/`super_tactics`/`team_build` | `/tactic` | **SURFACÉ** |
-| `inagle_passives` (1716) | **`/passive`** (+ `/passive/[id]`) — via export `nie-data` `data/passives-full.json` | **SURFACÉ (récent)** |
-| `inagle_teams` (208) | **`/equipe`** (+ `/equipe/[id]`) | **SURFACÉ (récent)** |
-| `inagle_shops` (2331) | **`/boutique`** (+ détail) | **SURFACÉ (récent)** |
-| `inagle_quests` (182) | **`/quete`** (+ détail) | **SURFACÉ (récent)** |
-| coachs/entraîneurs | **`/entraineur`** (+ détail) | **SURFACÉ (récent)** |
-| `inagle_stadiums` (81) | **`/stade`** (+ détail) | **SURFACÉ (récent)** |
-| `inagle_drop_rates`/`inagle_drops_*` | **`/drops`** (explorer taux) | **SURFACÉ (récent)** |
-| `inagle_capsules` + costumes | **`/capsule`** (+ détail) | **SURFACÉ (récent)** |
+| `inagle_characters` | `/wiki/chara` (+ `/wiki/chara/[id]`) | **SURFACÉ** |
+| `inagle_skills` | `/wiki/skill` (+ détail) | **SURFACÉ** |
+| `inagle_auras` | `/wiki/aura` (+ détail) | **SURFACÉ** |
+| `inagle_items` | `/wiki/item` (+ détail) | **SURFACÉ** |
+| `inagle_keshins/souls/miximax/awakenings` | `/wiki/keshin` | **SURFACÉ** |
+| `inagle_special_tactics`/`super_tactics`/`team_build` | `/wiki/tactic` | **SURFACÉ** |
+| `inagle_passives` (1716) | **`/wiki/passive`** (+ `/wiki/passive/[id]`) — via export `nie-data` `data/passives-full.json` | **SURFACÉ (récent)** |
+| `inagle_teams` (208) | **`/wiki/equipe`** (+ `/wiki/equipe/[id]`) | **SURFACÉ (récent)** |
+| `inagle_shops` (2331) | **`/wiki/boutique`** (+ détail) | **SURFACÉ (récent)** |
+| `inagle_quests` (182) | **`/wiki/quete`** (+ détail) | **SURFACÉ (récent)** |
+| coachs/entraîneurs | **`/wiki/entraineur`** (+ détail) | **SURFACÉ (récent)** |
+| `inagle_stadiums` (81) | **`/wiki/stade`** (+ détail) | **SURFACÉ (récent)** |
+| `inagle_drop_rates`/`inagle_drops_*` | **`/wiki/drops`** (explorer taux) | **SURFACÉ (récent)** |
+| `inagle_capsules` + costumes | **`/wiki/capsule`** (+ détail) | **SURFACÉ (récent)** |
 | `inagle_uniforms` (384) | (servi via modèles 3D `/model-full`, pas de page dédiée) | indirect |
 | `inagle_emblems`, `inagle_nameplates`, `inagle_tricks`, `inagle_skill_technic`, `inagle_boost_groups`, `inagle_telop_waza`, `inagle_video_waza` | — | **PAS DE PAGE** (en DB, non surfacé) |
 | `inagle_constellations` (30), `inagle_star_signs` (5080) | — | **PAS DE PAGE** (cf. RESTANT) |
@@ -88,10 +90,11 @@ Le `/goal` ne s'arrête pas à la DB : la donnée doit être **navigable**. Éta
 
 ## État CPK-mirror (navigateur de fichiers)
 
-**FAIT** — azalee surface aussi l'**arbre des fichiers** des CPK (pas seulement les données parsées) :
-route `/cpk/[[...path]]` + API `/api/cpk` miroitent les **250 800 fichiers** (common 193 540 / dx11 57 260,
-source Redis db3 `iev:file:index`). Index tracké `apps/azalee/data/cpk-index.ndjson.gz` (~3,9 Mo) →
-matérialisé en SQLite runtime sur `/tmp`. Contenu décodé live par le CDN : g4tx→png (:8788), g4md/g4mg→GLB
+**FAIT côté données/API, sans page dédiée** — l'**arbre des fichiers** des CPK (pas seulement les
+données parsées) reste exposé via l'API `/api/cpk` (pas de page `/cpk/[[...path]]`, l'explorateur UI a
+été retiré, `84461f04`) : miroir des **250 800 fichiers** (common 193 540 / dx11 57 260, source Redis
+db3 `iev:file:index`). Index tracké `apps/website/data/cpk-index.ndjson.gz` (~3,9 Mo) → matérialisé en
+SQLite runtime sur `/tmp`. Contenu décodé live par le CDN : g4tx→png (:8788), g4md/g4mg→GLB
 **texturé complet** (corps+visage+uniforme) via `nie-model-serve` :8790 `/model-full/<code>.glb`. Doc dédiée :
 `docs/cpk-browser.md`. C'est la concrétisation « extraction totale → exploration totale » du `/goal`.
 
@@ -102,7 +105,7 @@ matérialisé en SQLite runtime sur `/tmp`. Contenu décodé live par le CDN : g
 2. **Constellations / star-signs** : `inagle_constellations` (**30**) + `inagle_star_signs` (**5080**) en DB,
    pas de page (pool drop par signe = donnée riche non exposée).
 3. **Héros** : ~**126** héros (Hero/légendaires) — à vérifier/séparer dans une vue dédiée (actuellement noyés
-   dans `/chara`).
+   dans `/wiki/chara`).
 4. **Trophées** : `inagle_trophies` (**228**) mappés côté succès Steam mais **pas de page wiki** trophées.
 5. **Telop / video waza** : `inagle_telop_waza` (926) + `inagle_video_waza` (4) en DB, servis comme bannières
    sur certaines fiches (`/tactic`) mais pas de galerie/section dédiée.

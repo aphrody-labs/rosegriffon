@@ -65,7 +65,7 @@ Variables d'environnement :
 
 | Variable | Valeur |
 | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | l'origine de l'app (`https://azalee.rosegriffon.fr`, `https://rosegriffon.fr`) |
+| `NEXT_PUBLIC_SUPABASE_URL` | l'origine de l'app (`https://rosegriffon.fr`) |
 | `SUPABASE_INTERNAL_URL` | `http://127.0.0.1:8811` |
 | `DATABASE_URL` | `postgresql://rg:<motdepasse>@127.0.0.1:5432/rg` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET` | inchangées |

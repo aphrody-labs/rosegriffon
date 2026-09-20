@@ -19,7 +19,7 @@ Référence canonique des deux arbres d'assets personnages d'**Inazuma Eleven: V
 | **`iev:cpk:<id>:toc`** | HASH | TOC déchiffré par CPK | 921 TOC |
 | **`var/model-crc-manifest.ndjson`** | CRC32→cpk→path | Index des **modèles** g4md/g4mg | 24 624 (18 457 sous `common/chr`, 2621 g4md uniforme) |
 | **`var/g4tx-xval.ndjson`** | cross-val dims (Rust↔C#) | Validation g4tx | 1038 (271 `chr/_face`) |
-| Miroir SQLite (`apps/azalee/data/backups/mirror.sqlite`) | `inagle_characters.internal_code`, `inagle_uniforms`, `inagle_teams` | Roster + liaison | 6148 perso |
+| Miroir SQLite (`apps/website/data/mirror.sqlite`) | `inagle_characters.internal_code`, `inagle_uniforms`, `inagle_teams` | Roster + liaison | 6148 perso |
 
 `niers.sqlite` = index RE du **binaire** nie.exe (functions/rtti/xref), **PAS** un index d'assets.
 Le streaming live g4tx→png passe par `iecode-cdn:8788` (cf. `docs/` CDN).

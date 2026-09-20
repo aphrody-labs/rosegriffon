@@ -37,9 +37,13 @@ export const RACINE_VERSIONS = (Bun.env.RG_RELEASES_ROOT ?? "/home/ubuntu/rg-rel
 	""
 );
 
-/** Les deux applications Next servies par nginx, dans l'ordre d'affichage. */
+/**
+ * L'unique application Next servie par nginx. Le wiki `/wiki` a vécu dans une
+ * app `azalee` séparée, avec sa propre release ; depuis la fusion dans
+ * `apps/website`, les deux domaines publics servent la MÊME release — inutile
+ * de la lire deux fois sous deux clefs différentes.
+ */
 export const APPLICATIONS_DEPLOYEES = [
-	{ clef: "azalee", titre: "Wiki Azalée", service: "wiki" as const },
 	{ clef: "website", titre: "Site Rose Griffon", service: "site" as const },
 ] as const;
 

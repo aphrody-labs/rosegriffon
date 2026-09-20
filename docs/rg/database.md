@@ -1,41 +1,50 @@
 # Architecture de Base de Données & Cache Hybride (docs/database.md)
 
-Ce document décrit l'architecture de la base de données du projet **Rose Griffon** (particulièrement pour l'application **Azalée**), le flux de sauvegarde et de mise en cache, ainsi qu'une analyse de la gestion native du SQL par le runtime **Bun**.
+Ce document décrit l'architecture de la base de données du projet **Rose Griffon** (particulièrement pour le wiki **Azalée**, servi par `apps/website`), le flux de sauvegarde et de mise en cache, ainsi qu'une analyse de la gestion native du SQL par le runtime **Bun**.
+
+Depuis le 11/8/2026, la pile est **entièrement self-hostée sur le VPS** (plus de
+projet Supabase Cloud, plus d'URL `*.supabase.co`) : voir
+[self-host-supabase.md](self-host-supabase.md) pour le détail des services de
+remplacement (PostgREST, Storage, Realtime) et [deploy.md](deploy.md) pour la
+publication.
 
 ---
 
 ## 1. Architecture Hybride d'Azalée
 
-Afin d'obtenir une latence minimale, de réduire la charge réseau et de sécuriser l'application en cas de coupure de service externe, Azalée utilise une architecture hybride :
+Afin d'obtenir une latence minimale, de réduire la charge réseau et de rester
+lisible même en cas d'incident sur les services applicatifs, Azalée utilise une
+architecture hybride :
 
 ```mermaid
 graph TD
     subgraph Client
         Browser[Navigateur / Utilisateur]
     end
-    subgraph Apps Next.js (VPS)
-        Next[Next.js Server / Bun]
-        SQLite[Fichier SQLite Local <br> data/backups/latest.sqlite]
-    end
-    subgraph Cloud
-        SupaPG[Supabase Postgres Cloud]
+    subgraph VPS
+        Next[Next.js Server / Bun — apps/website]
+        SQLite[Miroir SQLite local <br> apps/website/data/mirror.sqlite]
+        PG[PostgreSQL 18 local — base rg]
         BetterAuth[Better Auth Engine]
     end
 
     Browser -->|Navigation Wiki| Next
     Next -->|Lectures statiques 0.5ms| SQLite
-    Next -->|Auth / Profils / Écritures| SupaPG
-    BetterAuth -->|Sessions / Users| SupaPG
+    Next -->|Auth / Profils / Écritures| PG
+    BetterAuth -->|Sessions / Users| PG
 ```
 
 ### A. Flux de données
 
 1. **Données statiques du Wiki (Personnages, Techniques, Objets, Drops)** :
-   - Stockées originellement sur Supabase Cloud.
-   - Exportées localement sur le VPS dans un fichier SQLite portable via le script de backup.
-   - **Recommandation** : Brancher les lectures de `api-client.ts` directement sur le fichier SQLite local pour éliminer 100% de la latence réseau en production.
+   - Sources dans les tables `inagle_*` de la base `rg` (PostgreSQL local).
+   - Matérialisées dans un miroir SQLite portable (`apps/website/data/mirror.sqlite`),
+     produit par le dépôt `niers` puis consommé en lecture directe par les
+     packages de données et Website (0 latence réseau).
 2. **Données dynamiques (Utilisateurs, Sessions, Favoris, Logs d'audit)** :
-   - Gérées en temps réel via Supabase Cloud PostgreSQL et l'instance Better Auth.
+   - Gérées en temps réel via PostgreSQL local et Better Auth, exposées en
+     compatibilité Supabase par PostgREST/Storage/Realtime self-hostés
+     (voir [self-host-supabase.md](self-host-supabase.md)).
 
 ---
 
@@ -73,34 +82,23 @@ L'API `import { sql } from "bun"` unifie l'accès à PostgreSQL, MySQL et SQLite
 
 ## 3. Procédure de Synchronisation & Sauvegarde
 
-### A. Sauvegarde Supabase → SQLite local
+### A. Miroir SQLite du wiki
 
-Pour générer ou mettre à jour la base de données SQLite locale de production sur le VPS, lancez :
+Le miroir `apps/website/data/mirror.sqlite` est produit côté dépôt `niers`
+(matérialisation des tables `inagle_*`) puis republié avec la release, via
+`scripts/ops/release-stack.ts` (étape `nie-mirror`, désactivable avec
+`--skip-mirror`). Il n'y a plus de script de bascule Supabase Cloud → SQLite :
+la base source est déjà locale.
 
-```bash
-bun run backup:supabase
-```
+### B. Sauvegarde Postgres complète
 
-Ce script (`scripts/ops/backup-supabase-to-sqlite.ts`) :
-
-1. Découvre dynamiquement les tables publiques et leurs colonnes via une connexion PostgreSQL directe.
-2. Crée les tables SQLite correspondantes avec les affinités de types adéquates.
-3. Transfère les lignes par paquets de 5 000 via des transactions optimisées en mode WAL (Write-Ahead Logging).
-
-### B. Sauvegarde Logique Postgres complète (Supabase CLI)
-
-En cas de besoin de sauvegarde complète de sécurité de la base Postgres distante vers une base locale PostgreSQL 18 :
+La base `rg` (PostgreSQL 18 local, y compris le schéma `achillea` depuis sa
+fusion) est sauvegardée par [`scripts/ops/sauvegarde.ts`](../scripts/ops/sauvegarde.ts) :
 
 ```bash
-# 1. Extraction (Dump)
-export DB_URL="postgresql://postgres:[PASSWORD]@db.isbkaeltubqittywibeh.supabase.co:5432/postgres"
-supabase db dump --db-url "$DB_URL" -f roles.sql --role-only
-supabase db dump --db-url "$DB_URL" -f schema.sql
-supabase db dump --db-url "$DB_URL" -f data.sql --use-copy --data-only
-
-# 2. Restauration
-export LOCAL_DB_URL="postgresql://postgres:[LOCAL_PASSWORD]@localhost:5432/azalee_local"
-psql -d "$LOCAL_DB_URL" -f roles.sql
-psql -d "$LOCAL_DB_URL" -f schema.sql
-psql -d "$LOCAL_DB_URL" --command 'SET session_replication_role = replica' -f data.sql
+bun scripts/ops/sauvegarde.ts
 ```
+
+Les dumps vérifiés sont conservés sous `/var/backups/postgres`. Il n'existe
+plus de base distante à extraire : toute restauration se fait vers/depuis
+l'instance PostgreSQL locale.
