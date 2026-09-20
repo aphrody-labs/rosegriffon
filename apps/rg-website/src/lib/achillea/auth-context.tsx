@@ -9,6 +9,7 @@ import {
 	type ReactNode,
 } from "react";
 import type { SessionUserDTO } from "@rosegriffon/achillea-types/domain/user";
+import { safeReturnUrl } from "./auth-session";
 import { createAchilleaClient } from "./client";
 
 export type AchilleaAuthStatus = "unknown" | "loading" | "authenticated" | "anonymous" | "error";
@@ -53,7 +54,10 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 
 	const login = useCallback((returnUrl = "/achillea") => {
 		const client = createAchilleaClient();
-		const targetUrl = client.auth.discordLoginUrl(returnUrl);
+		// L'API redirige vers cette valeur APRÈS l'OAuth : non validée, elle
+		// ouvre une redirection externe derrière un vrai écran Discord.
+		// `discordLoginUrl` ne filtre rien — la garde doit être ici.
+		const targetUrl = client.auth.discordLoginUrl(safeReturnUrl(returnUrl));
 		window.location.assign(targetUrl);
 	}, []);
 

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
 	cheminsCliquables,
+	construireMobileNavUnifiee,
 	construireNavigation,
 	construireNavigationUnifiee,
 	estItemActif,
@@ -16,6 +17,8 @@ import {
 	WEBSITE_BASES,
 } from "../src/config/routes";
 import { DICTIONNAIRE_NAV_FR } from "../src/lib/translations";
+import { DEFAULT_THEMES } from "../src/components/ThemeToggle";
+import { THEMES } from "@rosegriffon/ui";
 
 const azalee = construireNavigation(AZALEE_BASES);
 const website = construireNavigation(WEBSITE_BASES);
@@ -184,3 +187,45 @@ describe("basesDepuisChemin", () => {
 		expect(basesDepuisChemin("/achilleaxyz")).toBe(AZALEE_BASES);
 	});
 });
+
+/**
+ * Le sélecteur de thème recopiait sa liste : trois entrées contre cinq au
+ * catalogue, et un identifiant `"dark"` qui ne désignait aucun thème. Azalée
+ * clair et Achilléa n'étaient donc pas choisissables, alors qu'ils existent
+ * dans `styles.css`. Ce test empêche la liste de redivergir.
+ */
+describe("sélecteur de thème", () => {
+	test("propose exactement les thèmes du catalogue", () => {
+		expect(DEFAULT_THEMES.map((t) => t.id).sort()).toEqual(Object.keys(THEMES).sort());
+	});
+
+	test("aucun identifiant fantôme", () => {
+		for (const theme of DEFAULT_THEMES) {
+			expect(Object.keys(THEMES)).toContain(theme.id);
+			expect(theme.label.length).toBeGreaterThan(0);
+		}
+	});
+});
+
+describe("construireMobileNavUnifiee", () => {
+	test("produit exactement 5 onglets pour website", () => {
+		const items = construireMobileNavUnifiee(WEBSITE_BASES);
+		expect(items).toHaveLength(5);
+		expect(items.map((i) => i.icon)).toEqual([
+			"home",
+			"menu_book",
+			"sports_esports",
+			"search",
+			"settings",
+		]);
+	});
+
+	test("chaque onglet mène à un chemin valide", () => {
+		const items = construireMobileNavUnifiee(WEBSITE_BASES);
+		for (const item of items) {
+			expect(item.path.startsWith("/")).toBe(true);
+			expect(item.activePaths?.length).toBeGreaterThan(0);
+		}
+	});
+});
+

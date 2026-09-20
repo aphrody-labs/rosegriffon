@@ -1,4 +1,5 @@
 import {
+	CHEMINS_ESPORT,
 	CHEMINS_WIKI,
 	joindreDomaine,
 	joindreWiki,
@@ -237,6 +238,66 @@ export function construireMobileNavItems(bases: NavBases): NavItem[] {
 		{ activePaths: ["/settings"], icon: "settings", label: "nav.settings", path: "/settings" },
 	];
 }
+
+/**
+ * Navigation mobile unifiée à 5 onglets pour les apps multi-domaines (website).
+ *
+ * 1. Accueil (Association)
+ * 2. Wiki (Encyclopédie Azalée)
+ * 3. E-Sport (Achilléa)
+ * 4. Recherche (Global federated search)
+ * 5. Paramètres / Compte
+ */
+export function construireMobileNavUnifiee(bases: NavBases): NavItem[] {
+	const w = (chemin: string) => joindreWiki(bases.wiki, chemin);
+	const e = (chemin: string) => joindreDomaine(bases.esport ?? "/achillea", chemin);
+	const a = (chemin: string) => joindreDomaine(bases.association ?? "", chemin);
+
+	const cheminsWikiActifs = [
+		...CHEMINS_WIKI.filter((c) => c !== "/").map(w),
+		...(bases.wiki ? CHEMINS_WIKI.filter((c) => c !== "/") : []),
+		w("/"),
+	];
+
+	const cheminsEsportActifs = [
+		...CHEMINS_ESPORT.map(e),
+		...(bases.esport ? CHEMINS_ESPORT.map((c) => `/achillea${c === "/" ? "" : c}`) : []),
+	];
+
+	return [
+		{
+			activePaths: ["/", a("/")],
+			icon: "home",
+			label: "nav.home",
+			path: a("/"),
+		},
+		{
+			activePaths: [...new Set(cheminsWikiActifs)],
+			icon: "menu_book",
+			label: "nav.wiki",
+			path: w("/"),
+		},
+		{
+			activePaths: [...new Set(cheminsEsportActifs)],
+			icon: "sports_esports",
+			label: "nav.domaine.esport",
+			path: e("/"),
+		},
+		{
+			activePaths: ["/search"],
+			icon: "search",
+			label: "nav.search",
+			path: "/search",
+		},
+		{
+			activePaths: ["/settings", "/login", "/profile"],
+			icon: "settings",
+			label: "nav.settings",
+			path: "/settings",
+		},
+	];
+}
+
 
 /** Navigation de l'espace d'administration, enracinée sur `bases.admin`. */
 export function construireDashboardItems(bases: NavBases): NavItem[] {

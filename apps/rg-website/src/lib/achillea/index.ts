@@ -7,6 +7,7 @@
  */
 
 export { achilleaApiUrl, createAchilleaClient } from "./client";
+export { safeReturnUrl } from "./auth-session";
 export { badgeVariant, toneClassName } from "./tone";
 export type { BadgeVariant, Tone } from "./tone";
 export { AchilleaAuthProvider, useAchilleaAuth } from "./auth-context";

@@ -6,7 +6,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSidebar } from "@rosegriffon/ui";
+import type { NavBases } from "../config/routes";
 import { ThemeToggle } from "./ThemeToggle";
+import { UnifiedSearchBar } from "./UnifiedSearchBar";
+import { UniverseSwitch } from "./UniverseSwitch";
 
 export interface UserProfile {
 	username?: string | null;
@@ -20,6 +23,8 @@ export interface TopAppBarProps {
 	homeHref?: string;
 	adminHref?: string;
 	isAdmin?: boolean;
+	bases?: NavBases;
+	showUniverseSwitch?: boolean;
 	user?: unknown | null;
 	profile?: UserProfile | null;
 	searchSlot?: React.ReactNode;
@@ -38,7 +43,7 @@ export interface TopAppBarProps {
 
 const DEFAULT_TITLE_MAP: Record<string, string> = {
 	"/wiki": "Encyclopédie",
-	"/search": "Encyclopédie",
+	"/search": "Recherche",
 	"/news": "Actualités",
 	"/patch-notes": "Patch Notes",
 	"/chara": "Joueurs",
@@ -53,6 +58,15 @@ const DEFAULT_TITLE_MAP: Record<string, string> = {
 	"/settings": "Paramètres",
 	"/dashboard": "Administration",
 	"/admin": "Administration",
+	"/achillea": "E-Sport",
+	"/achillea/clans": "Clans E-Sport",
+	"/achillea/ranked": "Mode Classé",
+	"/achillea/tournaments": "Tournois E-Sport",
+	"/achillea/leagues": "Astral League",
+	"/chroniques": "Chroniques",
+	"/evenements": "Événements",
+	"/community": "Communauté",
+	"/a-propos": "À propos",
 };
 
 export function resolvePageTitle(pathname: string, titleMap = DEFAULT_TITLE_MAP): string {
@@ -68,11 +82,13 @@ export function resolvePageTitle(pathname: string, titleMap = DEFAULT_TITLE_MAP)
 }
 
 export function MobileHeader({
-	appName = "Azalée",
+	appName = "Rose Griffon",
 	logoSrc = "/logo.webp",
 	homeHref = "/",
 	adminHref = "/dashboard",
 	isAdmin = false,
+	bases,
+	showUniverseSwitch = false,
 	user = null,
 	profile = null,
 	notificationsSlot,
@@ -176,14 +192,17 @@ export function MobileHeader({
 }
 
 export function DesktopTopBar({
-	appName = "Azalée",
+	appName = "Rose Griffon",
 	logoSrc = "/logo.webp",
 	homeHref = "/",
 	adminHref = "/dashboard",
 	isAdmin = false,
+	bases,
+	showUniverseSwitch = true,
 	user = null,
 	profile = null,
 	searchSlot,
+	showSearch = true,
 	notificationsSlot,
 	themeToggleSlot,
 	loginSlot,
@@ -202,8 +221,8 @@ export function DesktopTopBar({
 				className ?? ""
 			}`}
 		>
-			{/* Left: Burger + Logo + (Optional) Title */}
-			<div className="flex items-center gap-1 min-w-[200px]">
+			{/* Left: Burger + Logo + UniverseSwitch + (Optional) Title */}
+			<div className="flex items-center gap-1.5 min-w-[220px]">
 				<button
 					onClick={toggleSidebar}
 					className="size-10 rounded-full flex items-center justify-center text-on-surface hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
@@ -212,7 +231,7 @@ export function DesktopTopBar({
 				>
 					<Menu size={24} aria-hidden="true" />
 				</button>
-				<Link href={homeHref} className="flex items-center gap-2 group px-3">
+				<Link href={homeHref} className="flex items-center gap-2 group px-2">
 					<div className="relative size-7 shrink-0 transition-transform group-hover:scale-105">
 						<Image src={logoSrc} fill sizes="28px" alt={appName} className="object-contain" />
 					</div>
@@ -221,19 +240,25 @@ export function DesktopTopBar({
 					</span>
 				</Link>
 
+				{showUniverseSwitch && (
+					<div className="ml-2 hidden xl:flex items-center">
+						<UniverseSwitch bases={bases} />
+					</div>
+				)}
+
 				{title && (
 					<div className="flex items-center gap-2 ml-2 animate-in fade-in slide-in-from-left-2 duration-300">
 						<span className="size-1 rounded-full bg-outline-variant/40" />
-						<span className="font-bold text-sm text-on-surface-variant tracking-wide opacity-80 mt-0.5">
+						<span className="font-bold text-sm text-on-surface-variant tracking-wide opacity-80 mt-0.5 truncate max-w-[160px]">
 							{title}
 						</span>
 					</div>
 				)}
 			</div>
 
-			{/* Center: Search Bar Slot */}
-			<div className="flex items-center justify-center flex-1 max-w-[600px] px-8">
-				{searchSlot}
+			{/* Center: Search Bar Slot or default UnifiedSearchBar */}
+			<div className="flex items-center justify-center flex-1 max-w-[560px] px-4">
+				{showSearch && (searchSlot ?? <UnifiedSearchBar />)}
 			</div>
 
 			{/* Right: Actions */}

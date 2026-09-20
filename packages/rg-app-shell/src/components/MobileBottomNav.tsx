@@ -4,10 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
 	construireMobileNavItems,
+	construireMobileNavUnifiee,
 	estRouteActive,
 	type NavItem,
 } from "../config/navigation";
-import { basesDepuisChemin, estSousAdministration } from "../config/routes";
+import { basesDepuisChemin, estSousAdministration, type NavBases } from "../config/routes";
 import { iconMap } from "../lib/icons";
 import { traduireNav } from "../lib/translations";
 
@@ -23,6 +24,7 @@ function safeHaptic() {
 
 export interface MobileBottomNavProps {
 	items?: (NavItem & { isAction?: boolean })[];
+	bases?: NavBases;
 	t?: (key: string) => string;
 	renderIcon?: (item: NavItem) => React.ReactNode;
 	className?: string;
@@ -120,15 +122,15 @@ function FABActionButton({
 
 export function MobileBottomNav({
 	items,
+	bases: basesProp,
 	t,
 	renderIcon,
 	className,
 }: MobileBottomNavProps = {}) {
 	const pathname = usePathname() || "/";
 	const isDashboard = estSousAdministration(pathname);
-	// Source unique : `/achillea/**` doit rendre les bases de website, pas
-	// celles d'azalee (cf. `basesDepuisChemin`).
-	const bases = basesDepuisChemin(pathname);
+	// Source unique : basesProp si fourni, sinon résolu par basesDepuisChemin
+	const bases = basesProp ?? basesDepuisChemin(pathname);
 
 	const dashboardMobileItems: (NavItem & { isAction?: boolean })[] = [
 		{ icon: "dashboard", label: "nav.dashboard.overview", path: bases.admin },
@@ -151,7 +153,13 @@ export function MobileBottomNav({
 		},
 	];
 
-	const resolvedItems = items ?? (isDashboard ? dashboardMobileItems : construireMobileNavItems(bases));
+	const defaultItems = isDashboard
+		? dashboardMobileItems
+		: bases.esport !== undefined
+			? construireMobileNavUnifiee(bases)
+			: construireMobileNavItems(bases);
+
+	const resolvedItems = items ?? defaultItems;
 
 	return (
 		<nav

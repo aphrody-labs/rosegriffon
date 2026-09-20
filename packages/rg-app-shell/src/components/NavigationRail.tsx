@@ -6,16 +6,18 @@ import { NavigationRail as UiNavigationRail, NavigationRailItem } from "@rosegri
 import {
 	construireDashboardItems,
 	construireNavigationItems,
+	construireNavigationUnifiee,
 	estItemActif,
 	type NavItem,
 } from "../config/navigation";
-import { basesDepuisChemin, estSousAdministration } from "../config/routes";
+import { basesDepuisChemin, estSousAdministration, type NavBases } from "../config/routes";
 import { iconMap } from "../lib/icons";
 import { traduireNav } from "../lib/translations";
 
 export interface NavigationRailProps {
 	items?: NavItem[];
 	isAdmin?: boolean;
+	bases?: NavBases;
 	t?: (key: string) => string;
 	renderIcon?: (item: NavItem) => React.ReactNode;
 	className?: string;
@@ -24,19 +26,21 @@ export interface NavigationRailProps {
 export function NavigationRail({
 	items,
 	isAdmin = false,
+	bases: basesProp,
 	t,
 	renderIcon,
 	className,
 }: NavigationRailProps = {}) {
 	const pathname = usePathname() || "/";
 	const isDashboard = estSousAdministration(pathname);
-	// Source unique : `/achillea/**` doit rendre les bases de website, pas
-	// celles d'azalee (cf. `basesDepuisChemin`).
-	const bases = basesDepuisChemin(pathname);
+	// Source unique : basesProp si fourni, sinon déduit
+	const bases = basesProp ?? basesDepuisChemin(pathname);
 
 	const defaultNavItems = isDashboard
 		? construireDashboardItems(bases)
-		: construireNavigationItems(bases);
+		: bases.esport !== undefined
+			? construireNavigationUnifiee(bases).map((g) => g.item)
+			: construireNavigationItems(bases);
 
 	const resolvedItems = items ?? defaultNavItems;
 

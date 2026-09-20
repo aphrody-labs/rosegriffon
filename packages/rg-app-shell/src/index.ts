@@ -5,6 +5,7 @@ export {
 	construireDashboardItems,
 	construireEsportItems,
 	construireMobileNavItems,
+	construireMobileNavUnifiee,
 	construireNavigation,
 	construireNavigationItems,
 	construireNavigationUnifiee,
@@ -60,3 +61,5 @@ export {
 } from "./components/TopAppBar";
 export { ThemeToggle, DEFAULT_THEMES, type ThemeOption } from "./components/ThemeToggle";
 export { Shell, AppShell, type ShellProps } from "./components/Shell";
+export { UnifiedSearchBar, type UnifiedSearchBarProps } from "./components/UnifiedSearchBar";
+export { UniverseSwitch, type UniverseSwitchProps } from "./components/UniverseSwitch";
