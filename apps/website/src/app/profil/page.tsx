@@ -28,6 +28,6 @@ export default async function ProfilPage() {
 	if (profile?.username) {
 		redirect(`/profil/${profile.username}`);
 	} else {
-		redirect("/dashboard/account");
+		redirect("/settings");
 	}
 }

@@ -22,5 +22,5 @@ export default async function DashboardPage() {
 	if (username) {
 		redirect(`/profil/${username}`);
 	}
-	redirect("/dashboard/account");
+	redirect("/settings");
 }

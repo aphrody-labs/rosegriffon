@@ -60,7 +60,7 @@ export function ProfileIdentity({ website, twitterHandle, isOwnProfile }: Profil
 
 			{isOwnProfile && (
 				<Button asChild variant="outline" size="sm" className="ml-auto h-9 gap-1.5">
-					<Link href="/dashboard/account">
+					<Link href="/settings">
 						<Edit className="size-3.5" aria-hidden="true" />
 						Modifier mon profil
 					</Link>

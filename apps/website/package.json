@@ -75,6 +75,7 @@
 		"@rosegriffon/achillea-client": "workspace:*",
 		"@rosegriffon/achillea-core": "workspace:*",
 		"@rosegriffon/achillea-types": "workspace:*",
+		"@rosegriffon/app-shell": "workspace:*",
 		"@rosegriffon/assets": "workspace:*",
 		"@rosegriffon/auth": "workspace:*",
 		"@rosegriffon/azalee": "workspace:*",

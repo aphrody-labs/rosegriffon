@@ -532,7 +532,8 @@ async function searchSupabase(query: string, entityType?: string): Promise<Trans
 								name_roma: japaneseToRomaji(t.name_ja),
 								type: "team",
 								typeLabel: ENTITY_TYPE_CONFIG.team.label,
-								url: `/team/${t.id}`,
+								// `/team` n'existe dans aucune des deux apps : la route est `/equipe/[id]`
+								url: `/equipe/${t.id}`,
 							});
 						}
 					}

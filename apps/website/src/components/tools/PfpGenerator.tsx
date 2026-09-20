@@ -15,7 +15,7 @@ import { Download, Image as ImageIcon, User as UserIcon } from "lucide-react";
 import NextImage from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { updateAvatarUrl } from "@/app/dashboard/account/actions";
+import { updateAvatarUrl } from "@/app/settings/actions";
 
 import { useSidebarAuth } from "@/hooks/useSidebarAuth";
 import { createClient } from "@/lib/supabase/client";

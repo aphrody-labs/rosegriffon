@@ -256,6 +256,7 @@
         "@react-three/drei": "^10.7.7",
         "@react-three/fiber": "^9.6.1",
         "@react-three/postprocessing": "^3.0.4",
+        "@rosegriffon/app-shell": "workspace:*",
         "@rosegriffon/assets": "workspace:*",
         "@rosegriffon/auth": "workspace:*",
         "@rosegriffon/azalee": "workspace:*",
@@ -442,6 +443,7 @@
         "@rosegriffon/achillea-client": "workspace:*",
         "@rosegriffon/achillea-core": "workspace:*",
         "@rosegriffon/achillea-types": "workspace:*",
+        "@rosegriffon/app-shell": "workspace:*",
         "@rosegriffon/assets": "workspace:*",
         "@rosegriffon/auth": "workspace:*",
         "@rosegriffon/azalee": "workspace:*",
@@ -604,6 +606,15 @@
         "@types/bun": "catalog:",
         "brackets-model": "catalog:",
         "oxlint": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/app-shell": {
+      "name": "@rosegriffon/app-shell",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@rosegriffon/config": "workspace:*",
+        "@types/bun": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -2324,6 +2335,8 @@
     "@rosegriffon/achillea-types": ["@rosegriffon/achillea-types@workspace:packages/achillea-types"],
 
     "@rosegriffon/achillea-web": ["@rosegriffon/achillea-web@workspace:apps/achillea-web"],
+
+    "@rosegriffon/app-shell": ["@rosegriffon/app-shell@workspace:packages/app-shell"],
 
     "@rosegriffon/assets": ["@rosegriffon/assets@workspace:packages/assets"],
 

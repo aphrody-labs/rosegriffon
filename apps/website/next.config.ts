@@ -26,6 +26,7 @@ const nextConfig: NextConfig = {
 	transpilePackages: [
 		"@rosegriffon/azalee",
 		"@rosegriffon/ui",
+		"@rosegriffon/app-shell",
 		"@rosegriffon/db",
 		"@rosegriffon/types",
 		"@rosegriffon/config",
@@ -213,6 +214,15 @@ const nextConfig: NextConfig = {
 			{ destination: "/admin/zukan-review", permanent: true, source: "/dashboard/zukan-review" },
 			{ destination: "/admin/users", permanent: true, source: "/dashboard/admin/users" },
 			{ destination: "/admin/users", permanent: true, source: "/dashboard/users" },
+			// `/dashboard/settings` n'avait AUCUNE redirection alors que la barre du
+			// tableau de bord et la barre basse y menaient toutes les deux : 404.
+			{ destination: "/admin/settings", permanent: true, source: "/dashboard/settings" },
+			// Réglages du compte unifiés avec azalee sur `/settings`.
+			{ destination: "/settings", permanent: true, source: "/dashboard/account" },
+			{ destination: "/settings", permanent: true, source: "/dashboard/account/:path*" },
+			// Le pied de page partagé avec le wiki pointe vers `/contact`, qui
+			// n'existait que côté azalee — un lien mort sur chaque page.
+			{ destination: "/a-propos/contact", permanent: true, source: "/contact" },
 		];
 	},
 
