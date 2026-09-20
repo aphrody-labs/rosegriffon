@@ -6,7 +6,7 @@ import { lato, notoSans, poppins, roboto } from "@/lib/fonts";
 import { Geist } from "next/font/google";
 
 import { GoogleTagManager } from "@next/third-parties/google";
-import { ADSENSE_CLIENT, AdSenseScript } from "@rosegriffon/ui";
+import { ADSENSE_CLIENT, AdSenseScript, THEMES } from "@rosegriffon/ui";
 
 import ClientLayout from "./client-layout";
 
@@ -100,11 +100,21 @@ export default function RootLayout({
 	return (
 		<html lang="fr" suppressHydrationWarning>
 			<head>
-				{/* Pré-application du thème avant hydration (évite le FOUC).
-            next-themes prend le relais une fois monté. */}
+				{/*
+				 * Pré-application du thème avant hydratation (évite le FOUC) ;
+				 * `next-themes` prend le relais une fois monté.
+				 *
+				 * La liste est DÉRIVÉE du catalogue `THEMES`, elle n'est plus recopiée.
+				 * Elle l'était, et elle avait divergé : le script n'acceptait que
+				 * `roy`, `gaelle`, `azalee-light` et `azalee-dark`. Un visiteur ayant
+				 * choisi le thème Achilléa voyait donc son choix REFUSÉ au chargement
+				 * — `indexOf(t) === -1` — et la page repeinte en `roy`, y compris sur
+				 * `/achillea`. Le thème existait dans `styles.css` et dans le
+				 * sélecteur, mais ne survivait pas à un rechargement.
+				 */}
 				<script
 					dangerouslySetInnerHTML={{
-						__html: `(function(){try{var k='rg-theme',d='roy',s=['roy','gaelle','azalee-light','azalee-dark'];var t=localStorage.getItem(k);if(!t||s.indexOf(t)===-1)t=d;document.documentElement.classList.add(t);}catch(e){}})();`,
+						__html: `(function(){try{var k='rg-theme',d='roy',s=${JSON.stringify(Object.keys(THEMES))};var t=localStorage.getItem(k);if(!t||s.indexOf(t)===-1)t=d;document.documentElement.classList.add(t);}catch(e){}})();`,
 					}}
 				/>
 				<link rel="preconnect" href="https://cdn.discordapp.com" />

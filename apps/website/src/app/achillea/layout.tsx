@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./achillea.css";
+import { AchilleaNav } from "@/components/achillea/AchilleaNav";
 
 export const metadata: Metadata = {
 	title: {
@@ -49,6 +50,17 @@ export default function AchilleaLayout({
 }) {
 	return (
 		<div className="achillea-scope min-h-full">
+			{/*
+			 * Sous-navigation Achilléa, À L'INTÉRIEUR du shell Rose Griffon.
+			 *
+			 * `AchilleaNav` existait — 193 lignes — mais n'était importée nulle
+			 * part : le portage ne rendait qu'un `<div>` nu. Achilléa n'avait donc
+			 * AUCUNE navigation propre, alors que le front Angular monte
+			 * `shared/components/header/` globalement. Le menu latéral de RG mène
+			 * aux sections, celui-ci porte l'identité et les accès rapides du
+			 * domaine compétitif — les deux sont complémentaires, pas redondants.
+			 */}
+			<AchilleaNav />
 			{children}
 		</div>
 	);

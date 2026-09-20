@@ -10,6 +10,7 @@ import {
 	winRatePercent,
 } from "@/lib/achillea";
 import { Sparkline } from "@/components/achillea/Sparkline";
+import { useRankedQueue } from "@/lib/achillea/use-ranked-queue";
 import type { RankedProfile, RankedTrend, RankedChallengeLink } from "@rosegriffon/achillea-types";
 import {
 	Swords,
@@ -36,8 +37,16 @@ export default function RankedHubPage() {
 	const [loadingProfile, setLoadingProfile] = useState<boolean>(true);
 
 	// Matchmaking search state
-	const [isSearching, setIsSearching] = useState<boolean>(false);
-	const [searchSeconds, setSearchSeconds] = useState<number>(0);
+	// File d'attente RÉELLE (Colyseus). L'état local qui vivait ici ne faisait
+	// que simuler une recherche : aucun serveur n'était contacté.
+	const {
+		annuler: annulerRecherche,
+		ecoulees: searchSeconds,
+		erreur: erreurFile,
+		etaSecondes,
+		recherche: isSearching,
+		rejoindre: rejoindreFile,
+	} = useRankedQueue();
 
 	// Challenge link state
 	const [challengeLink, setChallengeLink] = useState<RankedChallengeLink | null>(null);
@@ -81,20 +90,6 @@ export default function RankedHubPage() {
 	}, [isAuthenticated, mode]);
 
 	// Search matchmaking counter
-	useEffect(() => {
-		let timer: NodeJS.Timeout | null = null;
-		if (isSearching) {
-			timer = setInterval(() => {
-				setSearchSeconds((s) => s + 1);
-			}, 1000);
-		} else {
-			setSearchSeconds(0);
-		}
-		return () => {
-			if (timer) clearInterval(timer);
-		};
-	}, [isSearching]);
-
 	const formatTimer = (totalSecs: number) => {
 		const m = Math.floor(totalSecs / 60)
 			.toString()
@@ -382,8 +377,8 @@ export default function RankedHubPage() {
 
 							<button
 								type="button"
-								onClick={() => setIsSearching(true)}
-								className="inline-flex items-center gap-2 px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition shadow-lg hover:shadow-amber-500/20 active:scale-95"
+								onClick={() => void rejoindreFile(mode === 2 ? "2v2" : "1v1")}
+								className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--achillea-primary)] hover:bg-[var(--achillea-primary-400)] text-white font-bold text-sm rounded-xl transition shadow-lg active:scale-95"
 							>
 								<Search className="w-4 h-4" />
 								Rechercher un adversaire
@@ -401,25 +396,25 @@ export default function RankedHubPage() {
 								<h3 className="text-lg font-bold">Recherche d'adversaire en cours...</h3>
 								<div className="text-2xl font-mono font-bold text-amber-400">{formatTimer(searchSeconds)}</div>
 								<p className="text-xs text-muted-foreground">
-									Élargissement progressif de la fenêtre ELO pour garantir une partie équilibrée.
+									{etaSecondes === null
+										? "En attente d'une estimation du serveur…"
+										: `Attente estimée : ~${etaSecondes} s`}
 								</p>
 							</div>
+
+							{erreurFile ? (
+								<p className="text-xs font-medium text-destructive">{erreurFile}</p>
+							) : null}
 
 							<div className="flex items-center justify-center gap-3">
 								<button
 									type="button"
-									onClick={() => setIsSearching(false)}
+									onClick={() => void annulerRecherche()}
 									className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg border border-destructive/40 text-destructive hover:bg-destructive/10 transition"
 								>
 									<XCircle className="w-4 h-4" />
 									Annuler la recherche
 								</button>
-								<Link
-									href="/achillea/ranked/match"
-									className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition shadow-sm"
-								>
-									Simuler match trouvé
-								</Link>
 							</div>
 						</div>
 					)}

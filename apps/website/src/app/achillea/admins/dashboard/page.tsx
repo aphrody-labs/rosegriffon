@@ -41,6 +41,22 @@ type AdminTab =
 	| "wallets"
 	| "bot";
 
+/**
+ * Met en forme une durée de fonctionnement.
+ *
+ * L'API rend des secondes. Les afficher brutes (« 384210 ») n'apprend rien à
+ * qui surveille un service ; « 4 j 10 h » se lit d'un coup d'œil.
+ */
+function formaterDuree(secondes: number): string {
+	if (!Number.isFinite(secondes) || secondes < 0) return "—";
+	const jours = Math.floor(secondes / 86_400);
+	const heures = Math.floor((secondes % 86_400) / 3_600);
+	const minutes = Math.floor((secondes % 3_600) / 60);
+	if (jours > 0) return `${jours} j ${heures} h`;
+	if (heures > 0) return `${heures} h ${minutes} min`;
+	return `${minutes} min`;
+}
+
 export default function AchilleaAdminDashboardPage() {
 	const { user, isAuthenticated, isLoading: authLoading } = useAchilleaAuth();
 	const [activeTab, setActiveTab] = useState<AdminTab>("overview");
@@ -542,22 +558,47 @@ export default function AchilleaAdminDashboardPage() {
 									API Achilléa & Base de Données
 								</CardTitle>
 							</CardHeader>
+							{/*
+							 * Ces trois indicateurs étaient écrits en dur : « Opérationnel »
+							 * et « Connecté » s'affichaient en vert même API morte. Un
+							 * tableau de bord qui ment sur l'état du système est pire que
+							 * pas de tableau de bord : il retarde le diagnostic.
+							 *
+							 * Ils sont désormais déduits de `ops` — la réponse même de
+							 * l'API. Si elle n'a pas répondu, `ops` est `null` et l'on
+							 * affiche « Injoignable », ce qui est la seule chose que l'on
+							 * sache alors avec certitude.
+							 */}
 							<CardContent className="p-5 pt-2 text-xs space-y-2">
 								<div className="flex justify-between py-1 border-b border-border/40">
 									<span className="text-muted-foreground">Statut API</span>
-									<span className="text-emerald-400 font-semibold flex items-center gap-1">
-										<CheckCircle2 className="size-3" /> Opérationnel
-									</span>
+									{ops ? (
+										<span className="text-emerald-400 font-semibold flex items-center gap-1">
+											<CheckCircle2 className="size-3" /> Opérationnel
+										</span>
+									) : (
+										<span className="text-destructive font-semibold flex items-center gap-1">
+											<XCircle className="size-3" /> Injoignable
+										</span>
+									)}
 								</div>
 								<div className="flex justify-between py-1 border-b border-border/40">
-									<span className="text-muted-foreground">Base PostgreSQL</span>
-									<span className="text-emerald-400 font-semibold flex items-center gap-1">
-										<CheckCircle2 className="size-3" /> Connecté
+									<span className="text-muted-foreground">Dernière mesure</span>
+									<span className="font-mono text-[11px]">
+										{ops?.generatedAt
+											? new Date(ops.generatedAt).toLocaleTimeString("fr-FR")
+											: "—"}
 									</span>
 								</div>
 								<div className="flex justify-between py-1">
-									<span className="text-muted-foreground">Origine autorisée</span>
-									<code className="text-primary font-mono text-[11px]">.rosegriffon.fr</code>
+									<span className="text-muted-foreground">Mode maintenance</span>
+									{ops?.bot?.maintenance ? (
+										<span className="text-amber-400 font-semibold flex items-center gap-1">
+											<AlertTriangle className="size-3" /> Actif
+										</span>
+									) : (
+										<span className="font-semibold">Inactif</span>
+									)}
 								</div>
 							</CardContent>
 						</Card>
@@ -570,21 +611,33 @@ export default function AchilleaAdminDashboardPage() {
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="p-5 pt-2 text-xs space-y-2">
+								{/* `ops.bot.online` était disponible et ignoré : l'état de la
+								    passerelle Discord s'affichait « Connecté » en dur. */}
 								<div className="flex justify-between py-1 border-b border-border/40">
 									<span className="text-muted-foreground">Gateway Discord</span>
-									<span className="text-emerald-400 font-semibold flex items-center gap-1">
-										<CheckCircle2 className="size-3" /> Connecté
-									</span>
+									{ops?.bot?.online ? (
+										<span className="text-emerald-400 font-semibold flex items-center gap-1">
+											<CheckCircle2 className="size-3" /> Connecté
+										</span>
+									) : (
+										<span className="text-destructive font-semibold flex items-center gap-1">
+											<XCircle className="size-3" /> Déconnecté
+										</span>
+									)}
 								</div>
 								<div className="flex justify-between py-1 border-b border-border/40">
-									<span className="text-muted-foreground">Latence</span>
-									<span className="font-mono text-emerald-400 font-semibold">
-										&lt; 40 ms
+									<span className="text-muted-foreground">Temps de fonctionnement</span>
+									<span className="font-mono font-semibold">
+										{typeof ops?.bot?.uptime === "number"
+											? formaterDuree(ops.bot.uptime)
+											: "—"}
 									</span>
 								</div>
 								<div className="flex justify-between py-1">
 									<span className="text-muted-foreground">Serveurs surveillés</span>
-									<span className="font-mono font-semibold">{ops?.bot?.guilds ?? 1}</span>
+									<span className="font-mono font-semibold">
+										{typeof ops?.bot?.guilds === "number" ? ops.bot.guilds : "—"}
+									</span>
 								</div>
 							</CardContent>
 						</Card>

@@ -26,24 +26,40 @@ const STATE_PRIORITY: Record<string, number> = {
 	[TournamentState.PREREGISTERING]: 2,
 };
 
-const PLAYLISTS = [
-	{
-		id: "PLcKB9TqcHTYUw8SoFrbhBl6aQU3GZiZdr",
-		title: "Astral Cup",
-		description: "Tournoi accrédité Achilléa",
-		thumbnail: "https://i.ytimg.com/vi/BooGtg46kZQ/mqdefault.jpg",
-		url: "https://www.youtube.com/playlist?list=PLcKB9TqcHTYUw8SoFrbhBl6aQU3GZiZdr",
-		count: 15,
-	},
-	{
-		id: "PLcKB9TqcHTYWBZ0ua3NQJCA-wFGUeVCLp",
-		title: "The Bloom Combine",
-		description: "Tournoi entre 64 joueurs",
-		thumbnail: "https://i.ytimg.com/vi/25oRrdeMfFs/mqdefault.jpg",
-		url: "https://www.youtube.com/playlist?list=PLcKB9TqcHTYWBZ0ua3NQJCA-wFGUeVCLp",
-		count: 14,
-	},
-];
+/**
+ * Playlists Achilléa, servies par `/api/public/achillea/playlists`.
+ *
+ * Elles étaient codées en dur ici, compteurs compris (« 15 vidéos »,
+ * « 14 vidéos ») — des chiffres figés au moment où quelqu'un les a écrits. Le
+ * front Angular appelait bien l'API YouTube et ne retombait sur cette liste
+ * qu'en cas d'échec ; le portage avait gardé le repli et supprimé l'appel.
+ *
+ * La route serveur ne rend que ce que YouTube confirme. Si la chaîne n'est pas
+ * configurée, elle rend une liste vide et la section disparaît : une vitrine
+ * absente vaut mieux qu'une vitrine qui affiche de faux compteurs.
+ */
+interface PlaylistAchillea {
+	id: string;
+	titre: string;
+	description: string;
+	miniature: string;
+	url: string;
+	videos: number | null;
+}
+
+async function chargerPlaylists(): Promise<PlaylistAchillea[]> {
+	try {
+		const base = process.env["NEXT_PUBLIC_SITE_URL"] ?? "http://127.0.0.1:3004";
+		const reponse = await fetch(`${base}/api/public/achillea/playlists`, {
+			next: { revalidate: 3600 },
+		});
+		if (!reponse.ok) return [];
+		const corps = (await reponse.json()) as { playlists?: PlaylistAchillea[] };
+		return corps.playlists ?? [];
+	} catch {
+		return [];
+	}
+}
 
 async function loadTournamentData() {
 	try {
@@ -87,8 +103,10 @@ async function loadTournamentData() {
 }
 
 export default async function AchilleaHomePage() {
-	const { featured, featuredParticipants, otherActive } =
-		await loadTournamentData();
+	const [{ featured, featuredParticipants, otherActive }, playlists] = await Promise.all([
+		loadTournamentData(),
+		chargerPlaylists(),
+	]);
 
 	return (
 		<div className="space-y-12">
@@ -99,7 +117,9 @@ export default async function AchilleaHomePage() {
 				otherActive={otherActive}
 			/>
 
-			{/* Playlists YouTube */}
+			{/* Playlists YouTube — masquées tant que la chaîne n'est pas configurée :
+			    un cadre vide serait plus gênant qu'une section absente. */}
+			{playlists.length === 0 ? null : (
 			<section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 				<div className="flex items-center gap-2.5">
 					<div className="size-8 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center font-bold">
@@ -116,7 +136,7 @@ export default async function AchilleaHomePage() {
 				</div>
 
 				<div className="grid sm:grid-cols-2 gap-4">
-					{PLAYLISTS.map((pl) => (
+					{playlists.map((pl) => (
 						<a
 							key={pl.id}
 							href={pl.url}
@@ -126,8 +146,8 @@ export default async function AchilleaHomePage() {
 						>
 							<div className="relative aspect-video w-36 sm:w-44 rounded-xl overflow-hidden bg-surface-variant shrink-0">
 								<Image
-									src={pl.thumbnail}
-									alt={pl.title}
+									src={pl.miniature}
+									alt={pl.titre}
 									fill
 									unoptimized
 									className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -135,14 +155,16 @@ export default async function AchilleaHomePage() {
 								<div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/10 transition-colors">
 									<PlayCircle className="size-8 text-white drop-shadow-md" />
 								</div>
-								<span className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-									{pl.count} vidéos
-								</span>
+								{pl.videos === null ? null : (
+									<span className="absolute bottom-1.5 right-1.5 bg-scrim/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+										{pl.videos} vidéos
+									</span>
+								)}
 							</div>
 
 							<div className="flex-1 min-w-0 flex flex-col justify-center space-y-1">
 								<h3 className="font-bold text-sm sm:text-base text-on-surface group-hover:text-primary transition-colors truncate">
-									{pl.title}
+									{pl.titre}
 								</h3>
 								<p className="text-xs text-on-surface-variant line-clamp-2">
 									{pl.description}
@@ -152,6 +174,7 @@ export default async function AchilleaHomePage() {
 					))}
 				</div>
 			</section>
+			)}
 		</div>
 	);
 }
