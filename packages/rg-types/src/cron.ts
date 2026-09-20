@@ -48,7 +48,6 @@ export const TACHES_CRON = [
 	"seo:indexnow",
 	"seo:llms-txt",
 	"stats:achillea",
-	"sync:achillea",
 ] as const;
 
 export type TacheCron = (typeof TACHES_CRON)[number];
@@ -326,16 +325,6 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
 		planification: "45 5 * * *",
 		famille: "seo",
 		niveau: "admin",
-		motifInterdiction: null,
-		dureeIndicative: "quelques secondes",
-	},
-	{
-		nom: "sync:achillea",
-		titre: "Miroir de la base Achilléa",
-		role: "réimporte le schéma `achillea` dans la base `rg` (postgres_fdw)",
-		planification: "20 4 * * *",
-		famille: "donnees",
-		niveau: "admin-strict",
 		motifInterdiction: null,
 		dureeIndicative: "quelques secondes",
 	},

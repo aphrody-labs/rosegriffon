@@ -10,8 +10,8 @@
  * ne trouvait rien alors que le wiki a la fiche.
  *
  * Une seule requête couvre désormais les trois domaines. C'est possible parce
- * que les données d'Achilléa sont lisibles depuis la base `rg` via le miroir
- * `postgres_fdw` (`scripts/ops/achillea-fdw.ts`) : sans lui, il faudrait trois
+ * que les données d'Achilléa vivent dans le schéma `achillea` de la base `rg`
+ * (`scripts/ops/achillea-merge.ts`) : sans cette fusion, il faudrait trois
  * allers-retours et un tri en mémoire.
  *
  * ── MODULE PUR ──────────────────────────────────────────────────────────────
@@ -80,9 +80,8 @@ export const BASES_PAR_DEFAUT: BasesRecherche = {
 /**
  * Les sources interrogées.
  *
- * L'e-sport lit le schéma `achillea`, qui est un miroir en LECTURE de l'autre
- * base. Y ajouter une table impose de vérifier qu'elle est bien exposée par le
- * miroir : `bun packages/cron/src/index.ts --run sync:achillea` la réimporte.
+ * L'e-sport lit le schéma `achillea` de la MÊME base : depuis la fusion, ce ne
+ * sont plus des tables étrangères mais les tables réelles où le bot écrit.
  */
 const SOURCES: readonly Source[] = [
 	{

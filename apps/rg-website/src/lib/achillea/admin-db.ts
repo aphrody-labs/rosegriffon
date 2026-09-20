@@ -12,17 +12,16 @@ import "server-only";
  * imposerait de tirer 3 850 utilisateurs et 1 812 profils pour les recouper en
  * mémoire, à chaque affichage.
  *
- * Depuis le câblage `postgres_fdw` (`scripts/ops/achillea-fdw.ts`), le schéma
- * `achillea` est lisible depuis la base `rg` : la jointure se fait dans
- * Postgres, en une requête. Les données ne sont pas dupliquées — elles sont
- * lues en direct dans la base d'Achilléa, dont `achillea-bot` reste l'unique
- * écrivain.
+ * Depuis la fusion des bases (`scripts/ops/achillea-merge.ts`), le schéma
+ * `achillea` EST dans la base `rg`, avec de vraies tables : la jointure se fait
+ * dans Postgres, en une requête, sans passer par une connexion distante.
+ * `achillea-bot` reste l'unique écrivain de ces tables.
  *
  * ACCÈS
- * Le schéma n'est accordé qu'à `rg` et `service_role`, jamais à `anon` ni
- * `authenticated`, et n'est pas exposé par PostgREST. Ces fonctions lisent des
- * données personnelles : elles ne doivent être appelées qu'après la garde de
- * session des pages `/admin`.
+ * Ces fonctions lisent des données personnelles : elles ne doivent être
+ * appelées qu'après la garde de session des pages `/admin`. Le schéma porte
+ * ses 67 politiques RLS, reprises telles quelles de l'ancienne base — c'est
+ * elle la barrière, jamais le GRANT.
  */
 
 import { getPgPool } from "@/lib/db/pg";
@@ -47,14 +46,13 @@ export interface VolumesAchillea {
 }
 
 /**
- * Indique si le miroir est câblé.
+ * Indique si le schéma Achilléa est présent dans la base.
  *
  * Sans ce test, chaque page d'administration planterait avec une erreur
- * Postgres brute le jour où le schéma est retiré (`--retirer`) ou pas encore
- * posé sur une machine de développement. On préfère une page qui dit « miroir
- * absent » à une trace d'exception.
+ * Postgres brute sur une base de développement où la fusion n'a pas été jouée.
+ * On préfère une page qui dit « données absentes » à une trace d'exception.
  */
-export async function miroirDisponible(): Promise<boolean> {
+export async function schemaAchilleaPresent(): Promise<boolean> {
 	const pool = getPgPool();
 	const { rows } = await pool.query<{ present: boolean }>(
 		`SELECT EXISTS (
