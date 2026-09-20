@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarInset, SidebarProvider, Toaster, useBreakpoint, useSidebar } from "@rosegriffon/ui";
-import { WEBSITE_BASES } from "@rosegriffon/app-shell";
+import { WEBSITE_BASES, domaineDeLaRoute } from "@rosegriffon/app-shell";
+import { resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
 
 /** Largeur de la sidebar desktop — source unique (CSS var + décalage du bouton). */
@@ -17,10 +18,13 @@ import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigati
 import SidebarNavigationHandler from "@/components/layout/SidebarNavigationHandler";
 import EdgeSwipeDetector from "@/components/shared/EdgeSwipeDetector";
 import MobileWatermark from "@/components/shared/MobileWatermark";
-import { AuthProvider } from "@/contexts/auth-context";
+import { AuthProvider as AuthProviderProfil } from "@/components/providers/AuthProvider";
+import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
+import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { LanguageProvider } from "@/components/providers/language-provider";
-import { ProfileProvider } from "@/contexts/profile-context";
-import { ThemeProvider } from "@/contexts/theme-context";
+import { ProfileProvider, useProfile } from "@/contexts/profile-context";
+import { ThemeProvider, useTheme } from "@/contexts/theme-context";
+import { AchilleaAuthProvider, useAchilleaAuth } from "@/lib/achillea";
 import { Providers } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar-store";
@@ -59,6 +63,84 @@ function SidebarWrapper({
 	);
 }
 
+function DomainThemeRouter({ pathname }: { pathname: string }) {
+	const activeDomaine = domaineDeLaRoute(pathname, WEBSITE_BASES);
+	const { theme, setTheme } = useTheme();
+	const prevDomaineRef = useRef<string | null>(null);
+
+	useEffect(() => {
+		if (prevDomaineRef.current === activeDomaine) return;
+		prevDomaineRef.current = activeDomaine;
+
+		if (activeDomaine === "esport") {
+			if (theme !== "achillea") {
+				setTheme("achillea");
+			}
+		} else if (activeDomaine === "wiki") {
+			if (!theme?.startsWith("azalee")) {
+				setTheme("azalee-dark");
+			}
+		} else {
+			if (theme === "achillea" || theme?.startsWith("azalee")) {
+				setTheme("roy");
+			}
+		}
+	}, [activeDomaine, theme, setTheme]);
+
+	return null;
+}
+
+function RoutedHeader({
+	isMobile,
+	showSidebarToggle,
+}: {
+	isMobile?: boolean;
+	showSidebarToggle?: boolean;
+}) {
+	const pathname = usePathname() || "/";
+	const activeDomaine = domaineDeLaRoute(pathname, WEBSITE_BASES);
+	const { user: rgUser } = useAuth();
+	const { profile: rgProfile } = useProfile();
+	const { user: achilleaUser } = useAchilleaAuth();
+
+	const isEsport = activeDomaine === "esport";
+	const isWiki = activeDomaine === "wiki";
+
+	const user = isEsport ? achilleaUser : rgUser;
+	const profile = isEsport
+		? achilleaUser
+			? {
+					username: achilleaUser.username,
+					avatar_url: achilleaUser.avatar
+						? resolveDiscordAvatarUrl(achilleaUser.id, achilleaUser.avatar)
+						: null,
+			  }
+			: null
+		: rgProfile;
+
+	const appName = isEsport ? "Achilléa" : isWiki ? "Azalée" : "Rose Griffon";
+	const logoSrc = isEsport ? "/achillea/logo1.svg" : isWiki ? "/RG_Azalee-logo.webp" : "/logo.webp";
+	const homeHref = isEsport ? "/achillea" : isWiki ? "/wiki" : "/";
+	const accountHref = isEsport ? "/achillea/wallet" : "/settings";
+
+	return (
+		<Header
+			bases={WEBSITE_BASES}
+			isMobile={isMobile}
+			showSearch={!isMobile}
+			showCart={false}
+			showSidebarToggle={showSidebarToggle}
+			showUniverseSwitch
+			appName={appName}
+			logoSrc={logoSrc}
+			homeHref={homeHref}
+			accountHref={accountHref}
+			user={user}
+			profile={profile}
+		/>
+	);
+}
+
 export default function ClientLayout({
 	children,
 }: Readonly<{
@@ -87,73 +169,100 @@ export default function ClientLayout({
 		<ThemeProvider>
 			<Providers>
 				<AuthProvider>
-					<ProfileProvider>
+					{/*
+					 * DEUX contextes d'authentification coexistent, et un seul était
+					 * monté. `@/contexts/auth-context` porte la session minimale
+					 * (`user`, `isLoading`) ; `@/components/providers/AuthProvider`
+					 * porte en plus le profil, `isAdmin` et `refreshProfile`, et c'est
+					 * LUI que consomment les huit composants d'actualités
+					 * (commentaires, réactions, marque-pages, cloche, opt-in push).
+					 * Faute d'être monté, leur `useAuth()` levait
+					 * « useAuth must be used within an AuthProvider » et chaque article
+					 * portant ces blocs tombait dans la frontière d'erreur.
+					 *
+					 * Les fusionner est la vraie cible ; les monter tous les deux
+					 * rétablit le service sans toucher aux composants partagés avec
+					 * `apps/azalee`, que le test de synchronisation du chrome exige
+					 * identiques octet à octet.
+					 */}
+					{/*
+					 * `AuthProviderProfil` lit le profil via `useSupabase()`, donc il
+					 * exige un `SupabaseProvider` AU-DESSUS de lui. Celui-ci n'était
+					 * monté que dans `wiki/layout.tsx` : le monter ici est la
+					 * condition pour que le contexte de profil existe sur tout le site,
+					 * et pas seulement sous `/wiki`.
+					 */}
+					<SupabaseProvider>
+						<AuthProviderProfil>
+						<ProfileProvider>
 						<LanguageProvider>
-							<SidebarWrapper isMedium={isMedium}>
-								{/* Accessibilité: lien pour sauter au contenu principal */}
-								<SkipToContent />
+							<AchilleaAuthProvider>
+								<DomainThemeRouter pathname={pathname || "/"} />
+								<SidebarWrapper isMedium={isMedium}>
+									{/* Accessibilité: lien pour sauter au contenu principal */}
+									<SkipToContent />
 
-								{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
-								{showRail && <WebsiteNavigationRail bases={WEBSITE_BASES} />}
+									{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
+									{showRail && <WebsiteNavigationRail bases={WEBSITE_BASES} />}
 
-							{/* SIDEBAR — tiroir en compact, tiroir à la demande en medium
-							    (le bouton « Menu » du rail l'ouvre), panneau fixe en expanded.
-							    Elle doit être montée aussi en medium : sans elle, ce bouton
-							    basculait un état sans panneau et ne faisait rien. */}
-							{!shouldHideSidebar && <AppSidebar bases={WEBSITE_BASES} />}
+								{/* SIDEBAR — tiroir en compact, tiroir à la demande en medium
+								    (le bouton « Menu » du rail l'ouvre), panneau fixe en expanded.
+								    Elle doit être montée aussi en medium : sans elle, ce bouton
+								    basculait un état sans panneau et ne faisait rien. */}
+								{!shouldHideSidebar && <AppSidebar bases={WEBSITE_BASES} />}
 
-							<SidebarNavigationHandler />
-							<EdgeSwipeDetector />
+								<SidebarNavigationHandler />
+								<EdgeSwipeDetector />
 
-							{/* Pas de marge gauche manuelle en expanded : <Sidebar> pose déjà un
-							    « gap » de --sidebar-width dans le flux, qui décale l'inset. En
-							    ajouter une seconde doublait le décalage et écrasait le contenu. */}
-							<SidebarInset
-								className={cn("transition-all duration-300 min-w-0", showRail && "ml-20")}
-							>
-								{/* La réserve en haut compense le Header fixe (4rem+safe-area en mobile, 14 (3.5rem) sur desktop/tablette).
-								    La réserve en bas compense la barre de navigation basse (5rem+safe-area) uniquement montée en compact. */}
-								<div
-									className={cn(
-										"flex flex-col min-h-[100dvh] w-full",
-										!shouldHideSidebar && "pt-[calc(4rem+env(safe-area-inset-top))] md:pt-14",
-										isCompact && !shouldHideSidebar && "pb-[calc(5.5rem+env(safe-area-inset-bottom))]"
-									)}
+								{/* Pas de marge gauche manuelle en expanded : <Sidebar> pose déjà un
+								    « gap » de --sidebar-width dans le flux, qui décale l'inset. En
+								    ajouter une seconde doublait le décalage et écrasait le contenu. */}
+								<SidebarInset
+									className={cn("transition-all duration-300 min-w-0", showRail && "ml-20")}
 								>
-									{/* Le kit admin fournit son propre en-tête mobile : sans cette garde,
-									    les deux se superposaient sur /admin (z-40 contre z-30). */}
-									{/* Barre supérieure montée à TOUTES les tailles — même système que
-									    le wiki. Elle n'existait qu'en mobile : sur desktop il n'y avait
-									    ni recherche, ni statut de direct, et la bascule de menu se
-									    réduisait à une pastille flottante de 20 px. */}
-									{!shouldHideSidebar &&
-										(isCompact ? (
-											<Header bases={WEBSITE_BASES} isMobile showSearch={false} showCart={false} />
-										) : (
-											<Header bases={WEBSITE_BASES} showSidebarToggle />
-										))}
-									<div className="flex-1 w-full">
-										{/* `SidebarInset` est déjà un <main> : ici un <div> (un <main>
-										    imbriqué est invalide et casse la cible du lien d'évitement). */}
-										<div id="main-content" className="min-h-full w-full flex-1 overflow-x-hidden">
-											{children}
+									{/* La réserve en haut compense le Header fixe (4rem+safe-area en mobile, 14 (3.5rem) sur desktop/tablette).
+									    La réserve en bas compense la barre de navigation basse (5rem+safe-area) uniquement montée en compact. */}
+									<div
+										className={cn(
+											"flex flex-col min-h-[100dvh] w-full",
+											!shouldHideSidebar && "pt-[calc(4rem+env(safe-area-inset-top))] md:pt-14",
+											isCompact && !shouldHideSidebar && "pb-[calc(5.5rem+env(safe-area-inset-bottom))]"
+										)}
+									>
+										{/* Le kit admin fournit son propre en-tête mobile : sans cette garde,
+										    les deux se superposaient sur /admin (z-40 contre z-30). */}
+										{/* Barre supérieure unifiée et routée selon le domaine actif */}
+										{!shouldHideSidebar &&
+											(isCompact ? (
+												<RoutedHeader isMobile showSidebarToggle={false} />
+											) : (
+												<RoutedHeader showSidebarToggle />
+											))}
+										<div className="flex-1 w-full">
+											{/* `SidebarInset` est déjà un <main> : ici un <div> (un <main>
+											    imbriqué est invalide et casse la cible du lien d'évitement). */}
+											<div id="main-content" className="min-h-full w-full flex-1 overflow-x-hidden">
+												{children}
+											</div>
 										</div>
+										{/* /shop rend son propre pied de page (thémé DA boutique) dans
+										    son layout : sans cette garde, les six routes du tunnel
+										    d'achat empilaient deux `contentinfo` — rupture visuelle et
+										    liens légaux annoncés deux fois par les lecteurs d'écran. */}
+										{!isShopPage && <Footer />}
+										<MobileWatermark />
+										{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
+										{isCompact && !shouldHideSidebar && <MobileBottomNavigation bases={WEBSITE_BASES} />}
 									</div>
-									{/* /shop rend son propre pied de page (thémé DA boutique) dans
-									    son layout : sans cette garde, les six routes du tunnel
-									    d'achat empilaient deux `contentinfo` — rupture visuelle et
-									    liens légaux annoncés deux fois par les lecteurs d'écran. */}
-									{!isShopPage && <Footer />}
-									<MobileWatermark />
-									{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
-									{isCompact && !shouldHideSidebar && <MobileBottomNavigation bases={WEBSITE_BASES} />}
-								</div>
-							</SidebarInset>
+								</SidebarInset>
 
-							</SidebarWrapper>
+								</SidebarWrapper>
+							</AchilleaAuthProvider>
 						</LanguageProvider>
 						<Toaster richColors position="top-right" />
-					</ProfileProvider>
+						</ProfileProvider>
+						</AuthProviderProfil>
+					</SupabaseProvider>
 				</AuthProvider>
 			</Providers>
 		</ThemeProvider>

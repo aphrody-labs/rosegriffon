@@ -534,5 +534,6 @@ export function construireNavigationUnifiee(bases: NavBases): SousCategorieNav[]
 export function domaineDeLaRoute(pathname: string, bases: NavBases): Domaine {
 	if (bases.esport && estRouteActive(pathname, bases.esport)) return "esport";
 	if (bases.wiki && estRouteActive(pathname, bases.wiki)) return "wiki";
+	if (pathname === "/news" || pathname.startsWith("/news/")) return "wiki";
 	return "association";
 }

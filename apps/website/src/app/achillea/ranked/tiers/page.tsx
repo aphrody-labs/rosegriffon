@@ -128,7 +128,7 @@ export default function RankedTiersPage() {
 			{/* Tiers Grid */}
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 				{tiers.map((tier, idx) => {
-					const badgePath = rankImagePath(tier.key);
+					const badgePath = rankImagePath(tier.key, "/ranks");
 					const gradient =
 						tier.gradient?.length >= 2
 							? `linear-gradient(135deg, ${tier.gradient.join(", ")})`

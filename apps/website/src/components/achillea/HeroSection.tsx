@@ -219,17 +219,19 @@ export function HeroSection({
 			onPointerLeave={onPointerLeave}
 			className="relative overflow-hidden pt-10 pb-16 px-4 sm:px-6 lg:px-8 border-b border-outline/15 min-h-[600px] flex flex-col justify-center"
 		>
-			{/* Parallax Background Layer */}
+			{/* Parallax Background Layer with Official Achilléa Art */}
 			<div
-				className={`absolute inset-0 pointer-events-none transition-transform duration-75 ${
+				className={`absolute inset-0 pointer-events-none transition-transform duration-75 overflow-hidden ${
 					bgPunch ? "scale-[1.03] filter brightness-110" : ""
 				}`}
 				style={{
 					transform: `translate3d(${parallax.x}px, ${parallax.y}px, 0) scale(1.08)`,
 				}}
 			>
+				<div className="achillea-hero-bg" />
+				<div className="achillea-hero-vignette" />
 				<div
-					className="absolute inset-0 opacity-15 mix-blend-overlay"
+					className="absolute inset-0 opacity-15 mix-blend-overlay pointer-events-none"
 					style={{ backgroundImage: "url(/images/noise.svg)" }}
 				/>
 				<div className="absolute -right-24 -top-24 size-[480px] bg-[#6d00ce] rounded-full blur-[140px] opacity-25" />
@@ -246,14 +248,12 @@ export function HeroSection({
 			{ripples.map((r) => (
 				<span
 					key={r.id}
-					className={`absolute pointer-events-none rounded-full animate-ping z-10 ${
-						r.variant === "violet" ? "bg-[#6d00ce]/40" : "bg-[#DFFF57]/40"
+					className={`hero-ripple ${
+						r.variant === "violet" ? "hero-ripple--violet" : "hero-ripple--ink"
 					}`}
 					style={{
-						left: r.x - 20,
-						top: r.y - 20,
-						width: 40,
-						height: 40,
+						left: r.x,
+						top: r.y,
 					}}
 				/>
 			))}

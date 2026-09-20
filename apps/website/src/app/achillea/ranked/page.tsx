@@ -125,7 +125,7 @@ export default function RankedHubPage() {
 	};
 
 	const tierKey = profile?.tier?.key ?? "Fer";
-	const tierBadgePath = rankImagePath(tierKey);
+	const tierBadgePath = rankImagePath(tierKey, "/ranks");
 	const gradientStops = profile?.tier?.gradient?.length
 		? `linear-gradient(135deg, ${profile.tier.gradient.join(", ")})`
 		: "linear-gradient(135deg, #959595, #494949)";

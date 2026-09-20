@@ -1,4 +1,65 @@
-/* Achilléa Design Tokens & Rank Stops */
+/* ----------------------------------------------------------------------
+ * Achilléa — Direction Artistique & Typographies
+ * -------------------------------------------------------------------- */
+
+@font-face {
+	font-family: "Achillea Display";
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("/achillea/fonts/Dirtyline-36DOT.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Achillea Title";
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("/achillea/fonts/HUMANE.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Achillea Title";
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url("/achillea/fonts/HUMANE-Bold.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Achillea Title Alt";
+	font-style: normal;
+	font-weight: 400 700;
+	font-display: swap;
+	src: url("/achillea/fonts/NeueMetanaNext.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Achillea Mono";
+	font-style: normal;
+	font-weight: 400 700;
+	font-display: swap;
+	src: url("/achillea/fonts/LiberationMono.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Achillea Display Num";
+	font-style: normal;
+	font-weight: 900;
+	font-display: swap;
+	src: url("/achillea/fonts/Satoshi-Black.woff2") format("woff2");
+}
+
+.font-achillea-display { font-family: "Achillea Display", "Achillea Title", sans-serif; }
+.font-achillea-title { font-family: "Achillea Title", sans-serif; }
+.font-achillea-title-alt { font-family: "Achillea Title Alt", sans-serif; }
+.font-achillea-mono { font-family: "Achillea Mono", monospace; }
+.font-achillea-num { font-family: "Achillea Display Num", sans-serif; }
+
+/* ----------------------------------------------------------------------
+ * Achilléa Design Tokens & Backgrounds Pixel-Perfect
+ * -------------------------------------------------------------------- */
+
 .achillea-scope {
 	--achillea-rank-1-stops: #959595, #919191, #d4d4d4, #494949, #797979;
 	--achillea-rank-2-stops: #b17253, #8c4a34, #cb8254, #6d483d, #8c503c;
@@ -11,8 +72,24 @@
 	--achillea-rank-9-stops: #7edcb5, #b4ffe7, #4bc2b1, #368464, #3f9e9d;
 	--achillea-rank-10-stops: #f010ff, #f66aff, #d700af, #930e9c, #c731b2;
 	--achillea-rank-11-stops: #ffa910, #e18204, #ffe150, #a15b0e, #dab338;
+
+	position: relative;
+	background-color: #f3f1f8;
+	background-image: url("/achillea/site_bg_light.png");
+	background-position: center top;
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-attachment: fixed;
+	min-height: 100%;
 }
 
+:is(.dark, .theme-achillea, [data-theme="theme-achillea"]) .achillea-scope {
+	background-color: #0d0814;
+	background-image: url("/achillea/site_bg_dark.png");
+	color: #f3f1f8;
+}
+
+/* Gradients de Paliers ELO */
 .rank-gradient-1 { background: linear-gradient(135deg, var(--achillea-rank-1-stops)); }
 .rank-gradient-2 { background: linear-gradient(135deg, var(--achillea-rank-2-stops)); }
 .rank-gradient-3 { background: linear-gradient(135deg, var(--achillea-rank-3-stops)); }
@@ -24,3 +101,121 @@
 .rank-gradient-9 { background: linear-gradient(135deg, var(--achillea-rank-9-stops)); }
 .rank-gradient-10 { background: linear-gradient(135deg, var(--achillea-rank-10-stops)); }
 .rank-gradient-11 { background: linear-gradient(135deg, var(--achillea-rank-11-stops)); }
+
+/* Effets de lueur et bordures néon Achilléa */
+.achillea-glow-violet {
+	box-shadow: 0 0 25px -5px rgba(109, 0, 206, 0.4);
+}
+
+.achillea-glow-lime {
+	box-shadow: 0 0 25px -5px rgba(223, 255, 87, 0.4);
+}
+
+.achillea-card {
+	background: rgba(255, 255, 255, 0.85);
+	backdrop-filter: blur(12px);
+	border: 1px solid rgba(109, 0, 206, 0.15);
+	border-radius: 1rem;
+	transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:is(.dark, .theme-achillea, [data-theme="theme-achillea"]) .achillea-card {
+	background: rgba(18, 12, 28, 0.75);
+	border: 1px solid rgba(223, 255, 87, 0.12);
+}
+
+.achillea-card:hover {
+	border-color: rgba(109, 0, 206, 0.4);
+	transform: translateY(-2px);
+}
+
+:is(.dark, .theme-achillea, [data-theme="theme-achillea"]) .achillea-card:hover {
+	border-color: rgba(223, 255, 87, 0.35);
+	box-shadow: 0 4px 20px -2px rgba(223, 255, 87, 0.15);
+}
+
+/* ----------------------------------------------------------------------
+ * Hero Section — Interactive Parallax Art, Vignette & Ripples
+ * -------------------------------------------------------------------- */
+.achillea-hero-bg {
+	position: absolute;
+	inset: -3%;
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+	will-change: transform, filter;
+	transition: filter 0.22s ease;
+	transform-origin: center center;
+	background-image: url("/achillea/site_bg_light_home.png");
+}
+
+:is(.dark, .theme-achillea, [data-theme="theme-achillea"]) .achillea-hero-bg {
+	background-image: url("/achillea/site_bg_dark_home.png");
+}
+
+.achillea-hero-vignette {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background:
+		radial-gradient(ellipse 70% 60% at 70% 45%, transparent 35%, rgba(0, 0, 0, 0.22) 100%),
+		linear-gradient(
+			180deg,
+			rgba(0, 0, 0, 0.12) 0%,
+			transparent 18%,
+			transparent 78%,
+			rgba(0, 0, 0, 0.28) 100%
+		);
+}
+
+.hero-ripple {
+	position: absolute;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	pointer-events: none;
+	transform: translate(-50%, -50%) scale(0);
+	opacity: 0.85;
+	animation: achillea-ripple-expand 0.72s cubic-bezier(0.15, 0.75, 0.25, 1) forwards;
+	z-index: 10;
+}
+
+.hero-ripple--ink {
+	border: 1.5px solid rgba(255, 255, 255, 0.75);
+	box-shadow:
+		0 0 12px rgba(255, 255, 255, 0.35),
+		inset 0 0 8px rgba(255, 255, 255, 0.2);
+	background: radial-gradient(
+		circle,
+		rgba(255, 255, 255, 0.14) 0%,
+		rgba(255, 255, 255, 0.04) 40%,
+		transparent 70%
+	);
+}
+
+.hero-ripple--violet {
+	border: 1.5px solid rgba(168, 85, 247, 0.7);
+	box-shadow: 0 0 18px rgba(139, 92, 246, 0.45);
+	background: radial-gradient(
+		circle,
+		rgba(168, 85, 247, 0.18) 0%,
+		rgba(139, 92, 246, 0.06) 45%,
+		transparent 72%
+	);
+	animation-delay: 0.05s;
+	animation-duration: 0.9s;
+}
+
+@keyframes achillea-ripple-expand {
+	0% {
+		transform: translate(-50%, -50%) scale(0.15);
+		opacity: 0.9;
+	}
+	70% {
+		opacity: 0.45;
+	}
+	100% {
+		transform: translate(-50%, -50%) scale(18);
+		opacity: 0;
+	}
+}
