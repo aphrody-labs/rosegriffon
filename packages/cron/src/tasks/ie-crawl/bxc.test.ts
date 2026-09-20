@@ -10,9 +10,18 @@
  *
  * Ces tests sortent réellement sur Internet : c'est le but (un moteur de
  * scraping qui ne parle qu'à des maquettes ne prouve rien). Ils ne doivent en
- * revanche JAMAIS échouer « au hasard » sur une machine sans réseau : une sonde
- * unique est exécutée au chargement du fichier et, si elle échoue, toute la
- * suite est SAUTÉE (`describe.skipIf`) au lieu de tomber en erreur.
+ * revanche JAMAIS échouer « au hasard » sur une machine qui n'a pas de quoi les
+ * exécuter. DEUX sondes sont donc jouées au chargement du fichier :
+ *
+ *   1. le réseau est-il joignable ? sinon tout le fichier est sauté ;
+ *   2. le moteur bxc sait-il réellement ouvrir une page ? sinon seuls les tests
+ *      qui pilotent un navigateur sont sautés, ceux qui ne font que du `fetch`
+ *      restent joués.
+ *
+ * La seconde sonde manquait : sur une machine où `@aphrody/bxc` ne résout pas
+ * de binaire Chrome (paquet installé sans son pont Rust, conteneur de CI sans
+ * navigateur), les deux tests de navigation tombaient en erreur alors que rien
+ * du code de ce dépôt n'était en cause.
  *
  * Rappel : `bunfig.toml` précharge `happydom.ts` pour tous les tests. Ce
  * préchargement rend explicitement à Bun ses primitives réseau natives, sans
@@ -55,6 +64,27 @@ if (!enLigne) {
 	);
 }
 
+/**
+ * Sonde du moteur : ouvre puis referme une page. Toute erreur (binaire Chrome
+ * introuvable, pont Rust absent, CDP injoignable) vaut « pas de navigateur ».
+ */
+async function navigateurUtilisable(): Promise<boolean> {
+	try {
+		const page = (await Browser.newPage({ profile: PROFIL_PAR_DEFAUT })) as Page;
+		await page.close().catch(() => undefined);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+const navigateurPret = enLigne && (await navigateurUtilisable());
+if (enLigne && !navigateurPret) {
+	console.warn(
+		"[Test BXC] Moteur bxc indisponible sur cette machine — tests de navigation sautés, tests réseau conservés."
+	);
+}
+
 /** Récupère le contenu d'une URL et referme la page quoi qu'il arrive. */
 async function avecPage<T>(profil: ProfilBxc, action: (page: Page) => Promise<T>): Promise<T> {
 	const page = (await Browser.newPage({ profile: profil })) as Page;
@@ -72,7 +102,7 @@ describe.skipIf(!enLigne)("Intégration du moteur BXC", () => {
 		profil = (process.env.BXC_PROFILE as ProfilBxc | undefined) ?? PROFIL_PAR_DEFAUT;
 	});
 
-	it(
+	it.skipIf(!navigateurPret)(
 		"démarre le navigateur et lit le contenu rendu de example.com",
 		async () => {
 			const { contenu, titre } = await avecPage(profil, async (page) => {
@@ -92,7 +122,7 @@ describe.skipIf(!enLigne)("Intégration du moteur BXC", () => {
 		60_000
 	);
 
-	it(
+	it.skipIf(!navigateurPret)(
 		"atteint l'index des topics Inazuma Eleven: Victory Road",
 		async () => {
 			const contenu = await avecPage(profil, async (page) => {
