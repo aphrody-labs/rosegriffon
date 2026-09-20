@@ -23,10 +23,8 @@
 	},
 	"dependencies": {
 		"@rosegriffon/ui": "workspace:*",
-		"clsx": "catalog:",
 		"lucide-react": "catalog:",
-		"next-themes": "catalog:",
-		"tailwind-merge": "catalog:"
+		"next-themes": "catalog:"
 	},
 	"peerDependencies": {
 		"next": "catalog:",

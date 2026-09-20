@@ -57,4 +57,14 @@ describe("central auth session contract", () => {
 		expect(clear).toEqual({ httpOnly: true, secure: true, sameSite: "lax", path: "/" });
 		expect(set.maxAge).toBeGreaterThan(0);
 	});
+
+	test("sets domain when SESSION_COOKIE_DOMAIN is configured", () => {
+		process.env.SESSION_COOKIE_DOMAIN = ".rosegriffon.fr";
+		try {
+			const set = sessionCookieOptions(true);
+			expect(set.domain).toBe(".rosegriffon.fr");
+		} finally {
+			delete process.env.SESSION_COOKIE_DOMAIN;
+		}
+	});
 });

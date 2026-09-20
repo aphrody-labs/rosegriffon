@@ -1,5 +1,5 @@
 import { DashboardGrid, QuickActionCard } from "@rosegriffon/ui";
-import { BarChart3, BookOpen, Calendar, Database, Image as ImageIcon, Settings, Shield, Users } from "lucide-react";
+import { BarChart3, BookOpen, Calendar, Database, Image as ImageIcon, Settings, Shield, Trophy, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface QuickAction {
@@ -11,6 +11,13 @@ interface QuickAction {
 }
 
 const ACTIONS: QuickAction[] = [
+	{
+		accent: "text-amber-400",
+		description: "Compétitions, tournois, litiges, clans, ELO",
+		href: "/achillea/admins/dashboard",
+		icon: Trophy,
+		title: "Achilléa Esport",
+	},
 	{
 		accent: "text-info",
 		description: "Comptes, rôles, sanctions",

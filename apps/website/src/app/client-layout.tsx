@@ -76,8 +76,10 @@ export default function ClientLayout({
 		pathname?.startsWith("/register") ||
 		pathname?.startsWith("/auth");
 	const isWikiPage = pathname?.startsWith("/wiki");
+	const isAchilleaPage = pathname?.startsWith("/achillea");
 
-	const shouldHideSidebar = isAdminPage || isShopPage || isAuthPage || isWikiPage;
+	const shouldHideSidebar =
+		isAdminPage || isShopPage || isAuthPage || isWikiPage || isAchilleaPage;
 
 	// Le rail n'existe qu'au breakpoint « medium » ET hors pages sans chrome :
 	// toute réservation de place doit suivre exactement cette condition.

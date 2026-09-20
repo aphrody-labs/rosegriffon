@@ -137,12 +137,16 @@ export function getCookieValue(header: string | null | undefined, name: string):
 }
 
 export function sessionCookieOptions(secure: boolean) {
+	const domain =
+		process.env.SESSION_COOKIE_DOMAIN ??
+		(secure && process.env.NODE_ENV === "production" ? ".rosegriffon.fr" : undefined);
 	return {
 		httpOnly: true,
 		secure,
 		sameSite: "lax" as const,
 		maxAge: SESSION_TTL_SECONDS * 1000,
 		path: "/",
+		...(domain ? { domain } : {}),
 	};
 }
 

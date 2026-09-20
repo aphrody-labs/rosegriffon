@@ -9,6 +9,21 @@
 export { achilleaApiUrl, createAchilleaClient } from "./client";
 export { badgeVariant, toneClassName } from "./tone";
 export type { BadgeVariant, Tone } from "./tone";
+export { AchilleaAuthProvider, useAchilleaAuth } from "./auth-context";
+export type { AchilleaAuthContextType, AchilleaAuthStatus } from "./auth-context";
+export {
+	clampParallax,
+	canSpawnFx,
+	createBurstParticles,
+	stepParticles,
+	capParticles,
+	lerp,
+	isHeroUiTarget,
+	HERO_UI_HIT_SELECTOR,
+	HERO_PARTICLE_COLORS_DARK,
+	HERO_PARTICLE_COLORS_LIGHT,
+} from "./hero-bg-fx";
+export type { HeroParticle, Rgb } from "./hero-bg-fx";
 
 // Règles métier réutilisables telles quelles côté React.
 export {
@@ -17,6 +32,8 @@ export {
 	formatAchCurrency,
 	isClanRecruiting,
 	isTournamentOrganizer,
+	licenseStatusLabel,
+	licenseStatusTone,
 	matchFormatLabel,
 	participantStatusLabel,
 	participantStatusTone,
@@ -39,3 +56,4 @@ export type {
 	Tournament,
 	UserDTO,
 } from "@rosegriffon/achillea-types";
+

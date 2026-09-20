@@ -12,6 +12,7 @@ import {
 	Image as ImageIcon,
 	Settings,
 	Shield,
+	Trophy,
 	Users,
 } from "lucide-react";
 import type { NavItem } from "@rosegriffon/ui";
@@ -57,6 +58,19 @@ const adminNavItems: NavItem[] = [
 			{ title: "Planning Streams", href: "/admin/stream-schedule" },
 		],
 		title: "Événements",
+	},
+	{
+		badge: "Esport",
+		href: "/admin/achillea",
+		icon: Trophy,
+		submenu: [
+			{ title: "Rapprochement & FDW", href: "/admin/achillea" },
+			{ title: "Backoffice Achilléa", href: "/achillea/admins/dashboard" },
+			{ title: "Litiges Ranked", href: "/achillea/admins/ranked-disputes" },
+			{ title: "Sanctions", href: "/achillea/admins/sanctions" },
+			{ title: "Validation Orgs", href: "/achillea/organizations/validate" },
+		],
+		title: "Achilléa Esport",
 	},
 	{ href: "/admin/media", icon: ImageIcon, title: "Médias" },
 	{ href: "/admin/iergday", icon: Hash, title: "Campagne hashtag" },

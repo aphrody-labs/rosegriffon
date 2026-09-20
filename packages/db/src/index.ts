@@ -12,4 +12,5 @@ export * from "./profiles";
 export * from "./storage";
 export * from "./services/stats";
 export * from "./redis";
+export * from "./achillea";
 export type * from "./types";
