@@ -111,14 +111,13 @@ export default function ClientLayout({
 							<SidebarInset
 								className={cn("transition-all duration-300 min-w-0", showRail && "ml-20")}
 							>
-								{/* La réserve de 4rem en bas ne vaut que si la barre de navigation
-								    basse est réellement montée (compact). Elle était coupée à `lg:`
-								    (1024px) alors que la barre disparaît dès 600px : 4rem de vide
-								    en bas de page sur toute la plage tablette. */}
+								{/* La réserve en haut compense le Header fixe (4rem+safe-area en mobile, 14 (3.5rem) sur desktop/tablette).
+								    La réserve en bas compense la barre de navigation basse (5rem+safe-area) uniquement montée en compact. */}
 								<div
 									className={cn(
 										"flex flex-col min-h-[100dvh] w-full",
-										isCompact && !shouldHideSidebar && "pb-[calc(4rem+env(safe-area-inset-bottom))]"
+										!shouldHideSidebar && "pt-[calc(4rem+env(safe-area-inset-top))] md:pt-14",
+										isCompact && !shouldHideSidebar && "pb-[calc(5.5rem+env(safe-area-inset-bottom))]"
 									)}
 								>
 									{/* Le kit admin fournit son propre en-tête mobile : sans cette garde,

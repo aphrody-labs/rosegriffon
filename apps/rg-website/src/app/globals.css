@@ -18,6 +18,7 @@
  * (page « Mon compte », largeurs de sidebar en variables CSS…) ne sont jamais
  * générés. Azalée déclare la même source. */
 @source "../../../../packages/ui/src";
+@source "../../../../packages/app-shell/src";
 
 /* Font Faces from Supabase Assets */
 @font-face {

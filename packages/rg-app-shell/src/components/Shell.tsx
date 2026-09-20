@@ -153,7 +153,8 @@ export function Shell({
 						/>
 					)}
 
-					<main
+					{/* SidebarInset est déjà le landmark <main> ; le conteneur intérieur est un <div> portant id="main-content" pour le lien d'évitement. */}
+					<div
 						id="main-content"
 						className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide flex flex-col ${
 							isCompact && !isDashboard ? "pt-[calc(4rem+env(safe-area-inset-top))]" : "pt-0"
@@ -169,7 +170,7 @@ export function Shell({
 							{children}
 						</div>
 						<Footer />
-					</main>
+					</div>
 				</SidebarInset>
 			</div>
 
