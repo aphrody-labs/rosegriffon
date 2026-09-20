@@ -107,6 +107,13 @@ function RecursiveNavItem({
 }) {
 	const isActive = estItemActif(pathname, item);
 	const [isOpen, setIsOpen] = React.useState(isActive || Boolean(item.defaultOpen));
+
+	React.useEffect(() => {
+		if (isActive) {
+			setIsOpen(true);
+		}
+	}, [isActive]);
+
 	const { state, isMobile } = useSidebar();
 	const isCollapsed = state === "collapsed" && !isMobile;
 

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { AchilleaAuthProvider } from "@/lib/achillea";
 import "./achillea.css";
 
 export const metadata: Metadata = {
@@ -11,6 +10,11 @@ export const metadata: Metadata = {
 		"La scène compétitive officielle Inazuma Eleven: Victory Road. Clans, classements classés ELO (1v1, 2v2), Astral League, tournois communautaires et bot Discord officiel.",
 	alternates: {
 		canonical: "https://rosegriffon.fr/achillea",
+	},
+	icons: {
+		icon: "/achillea/achillea_ico.png",
+		shortcut: "/achillea/achillea_ico.png",
+		apple: "/achillea/achillea_ico.png",
 	},
 	openGraph: {
 		title: "Achilléa — E-Sport & Compétition Inazuma Eleven",
@@ -44,10 +48,8 @@ export default function AchilleaLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<AchilleaAuthProvider>
-			<div className="achillea-scope min-h-full">
-				{children}
-			</div>
-		</AchilleaAuthProvider>
+		<div className="achillea-scope min-h-full">
+			{children}
+		</div>
 	);
 }

@@ -10,7 +10,6 @@ export const revalidate = 60;
 
 import { AchilleaBanner } from "@/components/home/AchilleaBanner";
 import { AnimatedSection } from "@/components/home/AnimatedSection";
-import { AzaleeBanner } from "@/components/home/AzaleeBanner";
 import { LatestNewsSection } from "@/components/home/LatestNewsSection";
 import { NextEventBanner } from "@/components/home/NextEventBanner";
 import { RgtvBanner } from "@/components/home/RgtvBanner";
@@ -21,6 +20,7 @@ import { LatestChroniqueSection } from "@/components/shared/LatestChroniqueSecti
 import { MotionSection } from "@/components/shared/MotionSection";
 import { RealtimeSettingsListener } from "@/components/shared/RealtimeSettingsListener";
 import { OrganizationSchema, WebsiteSchema } from "@/components/shared/StructuredData";
+import { PillarsDuo } from "@/components/home/PillarsDuo";
 
 import FusionBlock from "@/components/shared/FusionBlock";
 import { getCalendarEvents } from "@/lib/api/events";
@@ -325,18 +325,15 @@ export default async function Home() {
 						</MotionSection>
 					)}
 
+					{/* Piliers duos : Azalée (Encyclopédie & Médias) + Achilléa (E-Sport & Compétition) avec priorité aux sites d'origine */}
 					<MotionSection
 						className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 w-full"
-						aria-labelledby="azalee-heading"
+						aria-labelledby="pillars-heading"
 					>
-						<AzaleeBanner
-							title={azaleeTitle}
-							tag={azaleeTag}
-							description={azaleeDescription}
-							image={azaleeImage}
-							logo={azaleeLogo}
-							twitterLink={azaleeTwitter}
-							instagramLink={azaleeInstagram}
+						<PillarsDuo
+							wikiStats={vitrineWiki.stats}
+							azaleeTwitter={azaleeTwitter}
+							achilleaDiscord={achilleaDiscord}
 						/>
 					</MotionSection>
 
