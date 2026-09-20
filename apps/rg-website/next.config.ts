@@ -228,6 +228,9 @@ const nextConfig: NextConfig = {
 			// Le pied de page partagé avec le wiki pointe vers `/contact`, qui
 			// n'existait que côté azalee — un lien mort sur chaque page.
 			{ destination: "/a-propos/contact", permanent: true, source: "/contact" },
+			// Forme d'URL de réinitialisation utilisée par azalee : les deux apps
+			// partagent le chrome et les courriels, les deux formes doivent aboutir.
+			{ destination: "/reset-password", permanent: false, source: "/auth/reset-password" },
 		];
 	},
 

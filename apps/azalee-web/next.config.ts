@@ -157,6 +157,12 @@ const nextConfig: NextConfig = {
 
 	async redirects() {
 		return [
+			// Formes d'URL d'authentification alignées sur rosegriffon.fr : les deux
+			// apps partagent le même chrome et les mêmes courriels transactionnels,
+			// un lien émis par l'une doit aboutir sur l'autre.
+			{ destination: "/auth/reset-password", permanent: false, source: "/reset-password" },
+			// Azalee traite l'oubli de mot de passe dans le formulaire de connexion.
+			{ destination: "/login", permanent: false, source: "/forgot-password" },
 			{
 				destination: "/cross",
 				permanent: true,
