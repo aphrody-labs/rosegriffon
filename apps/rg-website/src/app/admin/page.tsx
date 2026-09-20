@@ -24,7 +24,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { describeMimeType, listRecentDriveFiles } from "@/lib/google/drive";
 
 import { QuickActions } from "./_components/quick-actions";
-import { SignupsChart } from "./_components/signups-chart";
+import { SignupsChartLoader } from "./_components/signups-chart-loader";
 import type { SignupPoint } from "./_components/signups-chart";
 
 function buildDailySignups(rows: { created_at: string | null }[]): SignupPoint[] {
@@ -273,7 +273,7 @@ export default async function AdminDashboardPage() {
 				/>
 			</DashboardGrid>
 
-			<SignupsChart data={signupsTimeline} />
+			<SignupsChartLoader data={signupsTimeline} />
 
 			<section aria-labelledby="recent-title" className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
 				<h2 id="recent-title" className="sr-only">
