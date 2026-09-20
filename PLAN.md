@@ -1,0 +1,179 @@
+# PLAN — Source Ultime de Vérité & Architecture Unifiée Rose Griffon
+
+> **Statut : Document de référence absolu**  
+> **Dernière mise à jour : 20/09/2026**  
+> **Mode : Autonome (YOLO 100% / No Human in the Loop)**  
+> **Applicabilité : Multi-agents (Claude Code, Antigravity AGY, Codex)**
+
+---
+
+## 1. Vision & Architecture du Réseau
+
+Le monorepo `rg` (`/home/ubuntu/rg`) unifie l'ensemble des services web, données et bots de l'écosystème Rose Griffon sur une infrastructure VPS auto-hébergée (PostgreSQL 18 local, PostgREST :8809, Storage :8810, Realtime :8812, CDN :8804/:8805, API :8807).
+
+### 1.1 — Les Trois Piliers Unifiés sous `rosegriffon.fr` (`apps/website`)
+
+Le site unique `rosegriffon.fr` héberge désormais les trois univers du réseau dans un chrome applicatif unifié :
+
+| Pilier | Préfixe | Description | Marque & Identité |
+|---|---|---|---|
+| **Association** | `/` (racine) | Le portail officiel de l'association Rose Griffon : actualités, chroniques, projets communautaires, événements, RG TV, boutique solidaire, recrutement et vie associative. | Marine `#0a152c`, Rose `#f13f8a`, Or `#d8b349`, Brique `#98483c` |
+| **Wiki Azalée** | `/wiki` | L'encyclopédie et base de données de référence sur *Inazuma Eleven: Victory Road* : 6 000+ joueurs, techniques, tactiques, passifs, hyper-techniques (esprits guerriers, totems, miximax, éveils, modes), clubs, objets, simulateurs et modèles 3D. *(azalee.rosegriffon.fr redirige 301 vers /wiki)* | Ambre `#f2a93b` / `#ffc66c`, Vermillon `#a92335` |
+| **E-sport Achilléa** | `/achillea` | La scène compétitive officielle : tournois communautaires, Astral League, clans, ranked ELO (1v1, 2v2) avec 11 paliers, files d'attente temps réel, licence compétiteur, portefeuille ACH, casts et arbitrage. *(achillea.rosegriffon.fr redirige 301 vers /achillea)* | Violet cyber `#6d00ce` / `#b875ff`, Lime fluo `#dfff57`, Fond `#0d0814` |
+
+---
+
+## 2. Redesign Complet de la Navigation et du Layout
+
+### 2.1 — Unification Absolue des Barres et Menus
+
+Fini le découpage hérité où chaque univers masquait les barres des autres (`shouldHideSidebar = isWikiPage || isAchilleaPage`). L'ensemble du réseau partage désormais une même architecture responsive Material Design 3 :
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TopAppBar Unifiée (fixe h-14)                                              │
+│ [Burger] [Logo Rose Griffon] [Badge Univers]    [SearchBar Unifiée ⌘K]   [Thème] [Notifs] [Profil]│
+├───────────────┬─────────────────────────────────────────────────────────────┤
+│ Sidebar /     │ Contenu Principal                                           │
+│ NavigationRail│                                                             │
+│               │ ├── Hub de l'univers actif (hero, actualités, classements)  │
+│ ▾ Association │ ├── Modules et données interconnectées                      │
+│ ▾ Wiki Azalée │ └── Pied de page unifié                                     │
+│ ▾ Achilléa    │                                                             │
+│               │                                                             │
+├───────────────┴─────────────────────────────────────────────────────────────┤
+│ MobileBottomNav Unifiée (écrans compacts < 600px, fixe h-20)               │
+│ [ Accueil ]   [ Wiki Azalée ]   [ E-Sport ]   [ Recherche ]   [ Menu/Compte ]│
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 2.2 — Arborescence Déclarative de la Sidebar (`packages/app-shell`)
+
+La barre latérale unifiée (`AppSidebar`) regroupe les trois sous-catégories majeures sous forme de sections repliables (`Collapsible` M3), avec ouverture automatique sur l'univers actif (`domaineDeLaRoute`) :
+
+#### Sous-catégorie 1 : Association (Rose Griffon)
+- **Accueil** (`/`)
+- **Actualités & Chroniques** (`/news`, `/chroniques`)
+- **Événements** (`/evenements`)
+- **Projets** (`/projets` : Emotes, Nostalgie...)
+- **Rose Griffon TV** (`/rose-griffon-tv`)
+- **Boutique solidaire** (`/shop`)
+- **Vie associative** (`/community`, `/sondages`, `/iergday`)
+- **À propos & Contact** (`/a-propos`, `/notre-equipe`, `/nous-soutenir`)
+
+#### Sous-catégorie 2 : Wiki Azalée (Encyclopédie Inazuma Eleven)
+- **Accueil Encyclopédie** (`/wiki`)
+- **Joueurs** (`/wiki/chara`)
+- **Techniques & Capacités** (`/wiki/skill`, `/wiki/tactic`, `/wiki/passive`)
+- **Hyper-techniques** (`/wiki/aura` : Esprits guerriers, Totems, Miximax, Éveils, Modes)
+- **Clubs & Entraîneurs** (`/wiki/equipe`, `/wiki/entraineur`, `/wiki/stade`)
+- **Objets & Obtention** (`/wiki/item`, `/wiki/boutique`, `/wiki/capsule`, `/wiki/invocation`, `/wiki/drops`)
+- **Niveaux & Quêtes** (`/wiki/niveau`, `/wiki/quete`, `/wiki/succes`)
+- **Médias & Modèles 3D** (`/wiki/gallery`, `/wiki/textures`, `/wiki/sons`, `/wiki/videos`, `/wiki/modeles`, `/wiki/mode`)
+- **Outils communautaires** (`/wiki/tools`, `/wiki/cross`, `/wiki/save`, `/wiki/patch-notes`)
+
+#### Sous-catégorie 3 : E-Sport Achilléa (Compétition)
+- **Accueil Compétitif** (`/achillea`)
+- **Mode Classé** (`/achillea/ranked`, `/achillea/ranked/leaderboard`, `/achillea/ranked/tiers`, `/achillea/ranked/history`)
+- **Tournois & Circuits** (`/achillea/tournaments`, `/achillea/tournaments/circuit/ranking`, `/achillea/tournaments/create`)
+- **Astral League** (`/achillea/leagues/astral`)
+- **Clans** (`/achillea/clans`, `/achillea/clans/dashboard`, `/achillea/clans/create`)
+- **Casts & Casters** (`/achillea/casts`)
+- **Licence Compétiteur** (`/achillea/licence`, `/achillea/licence/verify`)
+- **Portefeuille ACH** (`/achillea/wallet`)
+- **Guide & Brand Kit** (`/achillea/guide`, `/achillea/guide/brand`)
+- **Administration & Arbitrage** (`/achillea/admins/dashboard` — accessible si rôle Staff/Admin)
+
+---
+
+## 3. TopAppBar, MobileNavBar et SearchBar Fédérée
+
+### 3.1 — TopAppBar Unifiée (`TopAppBar` / `DesktopTopBar` / `MobileHeader`)
+- **Logo & Badge d'univers** :
+  - Détection dynamique de l'univers via `domaineDeLaRoute(pathname)`.
+  - Pill visuel interactif : **Association** (Marine/Rose), **Wiki** (Ambre Azalée), **E-Sport** (Cyber Violet/Lime).
+  - Clic sur le badge permet de basculer instantanément d'un univers à l'autre.
+- **SearchBar unifiée au centre** :
+  - Rendu natif dans `DesktopTopBar`.
+  - Raccourci global clavier `⌘K` / `Ctrl+K`.
+- **Actions rapides à droite** :
+  - Lien Administration (si rôle Admin/Modérateur).
+  - Notifications contextuelles.
+  - Basculeur de thèmes fluide (`ThemeToggle`) supportant les 5 thèmes officiels.
+  - Bouton Compte / Connexion universelle (auth Rose Griffon + session Discord Achilléa).
+
+### 3.2 — MobileBottomNav Unifiée
+Sur mobile (< 600px), une barre tactile à 5 onglets stratégiques :
+1. **Accueil** (`/`) — Hub Rose Griffon
+2. **Wiki** (`/wiki`) — Encyclopédie Inazuma
+3. **E-Sport** (`/achillea`) — Tournois & Ranked
+4. **Recherche** (`/search`) — Recherche globale
+5. **Menu / Profil** — Tiroir de navigation complet
+
+### 3.3 — SearchBar Unifiée (Multi-Domaine)
+La recherche fédérée (`/search` et palette `⌘K`) interroge simultanément :
+1. **Association** : Articles, chroniques, projets associatifs.
+2. **Wiki Azalée** : Joueurs, techniques, objets, auras, clubs, modèles 3D.
+3. **E-sport Achilléa** : Tournois en cours, clans, joueurs classés, ligues.
+Affichage par onglets instantanés : **Tous**, **Wiki**, **E-Sport**, **Actualités**.
+
+---
+
+## 4. Design System, Thème Achilléa & Tailwind v4
+
+### 4.1 — Les Cinq Thèmes Officiels (`packages/ui`)
+Les thèmes sont appliqués par classe CSS sur `<html>` (`theme-roy`, `theme-gaelle`, `theme-azalee-light`, `theme-azalee-dark`, `theme-achillea`) :
+
+1. **Roy** : Inazuma Bleu/Doré (`#0e5794` / `#e0b771`, fond `#f9f4ee`)
+2. **Gaëlle** : Vermillon/Orange (`#b32228` / `#fca676`, fond `#ffe8e0`)
+3. **Azalée clair** : Ambre M3 (`#f2a93b` / `#a92335`, fond `#fff8f5`)
+4. **Azalée sombre** : Ambre nocturne (`#ffc66c` / `#ffb2be`, fond `#1a120d`)
+5. **Achilléa** : Cyber-gaming esport (`#b875ff` / `#6d00ce` violet, `#dfff57` lime fluo, fond `#0d0814`)
+
+### 4.2 — Palette Ranking 11 Paliers Achilléa
+Chaque palier expose ses 5 stops hexadécimaux et sa classe utilitaire dégradée :
+- `rank-gradient-1` (Fer `#959595`)
+- `rank-gradient-2` (Bronze `#b17253`)
+- `rank-gradient-3` (Argent `#7facb8`)
+- `rank-gradient-4` (Or `#c2ad88`)
+- `rank-gradient-5` (Platine `#897e8b`)
+- `rank-gradient-6` (Diamant `#88f6ff`)
+- `rank-gradient-7` (Émeraude `#2d925c`)
+- `rank-gradient-8` (Rubis `#ff5648`)
+- `rank-gradient-9` (Divin `#7edcb5`)
+- `rank-gradient-10` (Supernova `#f010ff`)
+- `rank-gradient-11` (Légendaire `#ffa910`)
+
+---
+
+## 5. Données, Pipelines & Interconnexions
+
+### 5.1 — Base de Données Unifiée
+- `rg` et `achillea` résident sur le même cluster PostgreSQL 18 local.
+- Les 75 tables d'Achilléa sont exposées en lecture directe dans la base `rg` sous le schéma `achillea` via `postgres_fdw` (`scripts/ops/achillea-fdw.ts`).
+- Tâche planifiée `rg-cron` `sync:achillea` synchronise la structure automatiquement.
+- Clé de réconciliation universelle : `profiles.discord_id = achillea."user".id` (538 comptes communs actifs dès l'ouverture).
+
+### 5.2 — Passerelles Croisées UI / UX
+- Fiche Joueur Wiki (`/wiki/chara/[id]`) affiche les statistiques ELO et tournois si le joueur est enregistré en compétitif.
+- Profil Compétiteur (`/achillea/users/[id]`) relie le profil membre RG, les rôles Discord et les contributions au wiki.
+- Barre de recherche unique déclenchant des suggestions intelligentes inter-domaines.
+
+---
+
+## 6. Migration des Tests et Assurance Qualité
+
+### 6.1 — Batterie de Tests Unitaires & Intégration
+1. **Tokens & Thèmes** : `bun test packages/ui/test/tokens.test.ts` (vérifie la non-dérive stricte CSS → TS et la couverture complète des 68 variables M3/shadcn sur les 5 thèmes).
+2. **Navigation & Routes** : `bun test packages/app-shell/test/navigation.test.ts` et `packages/app-shell/test/liens.test.ts` (garantit l'absence totale de 404 sur les liens du menu et la conformité des 3 domaines).
+3. **Métier Achilléa migré** : `bun test apps/website/src/lib/achillea` (couvre `hero-bg-fx`, calculs ELO, permissions Tournament Organizer, URLs d'API, tonalités de badges).
+4. **Vérification globale** : `bun run type-check && bun run build`.
+
+---
+
+## 7. Purge et Nettoyage de la Documentation
+
+Les anciens documents temporaires, obsolètes ou contradictoires de `docs/` ont été purgés pour faire de ce `PLAN.md` la référence unique :
+- Retrait des anciens plans de bascule temporaires (ex. `PLAN-SECURITE-BASCULE.md`, `PLAN-SESSION-3D.md`, `azalee-plan-correctifs.md`).
+- Retrait des manifests JSON d'importation brute temporaires (`achillea-phase0-import-manifest.json`, `achillea-phase0-source-map.md`, `achillea-phase0-dependencies.md`).
+- Centralisation de toute la stratégie dans `PLAN.md` et son découpage d'exécution `PARTITION.md`.

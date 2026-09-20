@@ -7,20 +7,37 @@ import { existsSync } from "node:fs";
 import { Database } from "bun:sqlite";
 
 // Helper to find latest SQLite database
-async function getSqlitePath(): Promise<string> {
-	const dir = "/home/ubuntu/rg/apps/azalee/data/backups";
-	if (!(await exists(dir))) {
-		throw new Error(`Backup directory ${dir} does not exist`);
-	}
-	const files = await readdir(dir);
-	const sqliteFiles = files
-		.filter((f) => f.startsWith("supabase-") && f.endsWith(".sqlite"))
-		.sort((a, b) => b.localeCompare(a));
+/**
+ * Emplacement de repli du miroir SQLite.
+ *
+ * Le miroir était déposé dans `apps/azalee/data/backups/supabase-*.sqlite` par
+ * `azalee-mirror-sync.timer`. Ce minuteur n'existe plus, le dossier est vide, et
+ * le miroir vit désormais dans `niers` — mais ce test cherchait encore à
+ * l'ancienne adresse. Il échouait donc en `beforeAll`, sans rapport avec ce
+ * qu'il teste, et son échec masquait la lisibilité de toute la suite.
+ *
+ * `AZALEE_MIRROR_PATH` permet de le déplacer à nouveau sans toucher au code.
+ */
+const MIROIR_REPLI = process.env["AZALEE_MIRROR_PATH"] ?? "/home/ubuntu/niers/var/mirror.sqlite";
 
-	if (sqliteFiles.length === 0) {
-		throw new Error("No SQLite backups found in apps/azalee/data/backups");
+/** Dossier historique des sauvegardes, conservé s'il redevient alimenté. */
+const DOSSIER_SAUVEGARDES = join(import.meta.dir, "../../../apps/azalee/data/backups");
+
+/**
+ * Rend le chemin du miroir SQLite, ou `null` s'il n'y en a aucun.
+ *
+ * Rend `null` plutôt que de lever : l'absence du miroir est une condition
+ * d'environnement, pas un échec de test. C'est l'appelant qui décide de sauter.
+ */
+async function trouverMiroir(): Promise<string | null> {
+	if (await exists(DOSSIER_SAUVEGARDES)) {
+		const sqliteFiles = (await readdir(DOSSIER_SAUVEGARDES))
+			.filter((f) => f.startsWith("supabase-") && f.endsWith(".sqlite"))
+			.sort((a, b) => b.localeCompare(a));
+		if (sqliteFiles[0]) return join(DOSSIER_SAUVEGARDES, sqliteFiles[0]);
 	}
-	return join(dir, sqliteFiles[0]);
+
+	return existsSync(MIROIR_REPLI) ? MIROIR_REPLI : null;
 }
 
 /**
@@ -43,14 +60,31 @@ if (!CORPUS_PRESENT) {
 	);
 }
 
-describe.skipIf(!CORPUS_PRESENT)("Azalée CLI & Inagle Real-World Integration Tests", () => {
+/**
+ * Seconde dépendance d'environnement, au même titre que le corpus.
+ *
+ * Elle n'était pas gardée : la suite démarrait, puis `beforeAll` levait sur
+ * l'absence du miroir. Un test rouge pour une raison d'environnement ne signale
+ * plus rien — c'est exactement ce que l'entête de ce fichier dit d'éviter.
+ */
+const MIROIR = await trouverMiroir();
+if (CORPUS_PRESENT && !MIROIR) {
+	console.warn(
+		`⚠ Tests d'intégration inagle SAUTÉS : aucun miroir SQLite. Cherché dans ` +
+			`${DOSSIER_SAUVEGARDES} puis ${MIROIR_REPLI}. Poser AZALEE_MIRROR_PATH pour les exécuter.`
+	);
+}
+
+const PRETS = CORPUS_PRESENT && MIROIR !== null;
+
+describe.skipIf(!PRETS)("Azalée CLI & Inagle Real-World Integration Tests", () => {
 	let service: any;
 	let sqlitePath: string;
 
 	beforeAll(async () => {
 		// 1. Initialize the Inagle service using real game files
 		service = await createInagleService();
-		sqlitePath = await getSqlitePath();
+		sqlitePath = MIROIR as string;
 	}, 120000); // Le parse réel (~50 cfg.bin, 6000+ persos) dépasse le défaut 5s → timeout explicite.
 
 	test("1. Bun File System API - Verify real game config files exist and are readable", async () => {

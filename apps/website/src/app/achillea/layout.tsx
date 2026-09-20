@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { AchilleaAuthProvider } from "@/lib/achillea";
-import { AchilleaNav } from "@/components/achillea/AchilleaNav";
 import "./achillea.css";
 
 export const metadata: Metadata = {
@@ -46,11 +45,8 @@ export default function AchilleaLayout({
 }) {
 	return (
 		<AchilleaAuthProvider>
-			<div className="achillea-scope min-h-screen bg-background text-foreground flex flex-col">
-				<AchilleaNav />
-				<main id="main-content" className="flex-1">
-					{children}
-				</main>
+			<div className="achillea-scope min-h-full">
+				{children}
 			</div>
 		</AchilleaAuthProvider>
 	);

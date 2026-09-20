@@ -74,6 +74,7 @@ export function useTheme() {
 		isRoy: ctx.theme === "roy",
 		isGaelle: ctx.theme === "gaelle",
 		isAzalee: ctx.theme?.startsWith("azalee") ?? false,
+		isAchillea: ctx.theme === "achillea",
 		// TOUJOURS une palette définie. Au rendu serveur (et avant hydratation)
 		// `ctx.theme` est `undefined` : la version optionnelle renvoyait
 		// `undefined`, et tout consommateur qui lit `colors.primary` — la page

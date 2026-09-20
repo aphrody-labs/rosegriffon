@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
-import { Shell } from "@/components/Shell";
 
 export const metadata: Metadata = {
 	title: {
@@ -20,8 +19,8 @@ export default function WikiLayout({
 	return (
 		<LanguageProvider>
 			<SupabaseProvider>
-				<div className="wiki-scope">
-					<Shell>{children}</Shell>
+				<div className="wiki-scope min-h-full">
+					{children}
 				</div>
 			</SupabaseProvider>
 		</LanguageProvider>

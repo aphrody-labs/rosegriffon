@@ -1,17 +1,18 @@
 # Documentation — monorepo Rose Griffon
 
-Index de la documentation partagée. Convention du dépôt : `*.md` est gitignoré
-**sauf** `docs/**`, les `README.md` de paquet et quelques exceptions listées
-dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
+> 🌟 **SOURCE UNIQUE DE VÉRITÉ** : Le document de référence canonique pour toute la navigation, l'architecture unifiée des trois univers (**Association**, **Wiki Azalée**, **E-Sport Achilléa**), le design system unifié et le plan d'exécution est [`/PLAN.md`](../PLAN.md) à la racine du monorepo.
+> La répartition autonome no-human-in-the-loop entre agents est définie dans [`/PARTITION.md`](../PARTITION.md).
 
-> Les **conventions** (commits en français sur une ligne, Bun obligatoire,
-> pièges critiques) vivent dans le `CLAUDE.md` racine, non versionné. Cet
-> index ne les duplique pas.
+Index de la documentation partagée. Convention du dépôt : `*.md` est gitignoré
+**sauf** `docs/**`, `PLAN.md`, `PARTITION.md`, les `README.md` de paquet et quelques exceptions listées
+dans `.gitignore`.
 
 ## Architecture et données
 
 | Doc | Portée |
 | --- | --- |
+| [PLAN.md](../PLAN.md) | **Source Unique de Vérité** : Navigation unifiée, 3 univers (Asso/Wiki/E-Sport), tokens `theme-achillea`, layouts & tests. |
+| [PARTITION.md](../PARTITION.md) | Partitionnement des responsabilités no-human-in-the-loop entre Claude Code et Antigravity (AGY). |
 | [REPO_MAP.md](REPO_MAP.md) | Cartographie du monorepo : applications, paquets, dépendances croisées. Généré par `bun run docs:map`. |
 | [database.md](database.md) | Base de données et cache hybride : Postgres self-host ↔ miroir SQLite embarqué. |
 | [decision-archi-donnees-azalee.md](decision-archi-donnees-azalee.md) | Décision d'architecture : passage de la couche données d'Azalée sur Drizzle. |
@@ -23,7 +24,6 @@ dans `.gitignore` — c'est donc ici que vit toute la doc de fond.
 | --- | --- |
 | [azalee-lib.md](azalee-lib.md) | `@rosegriffon/azalee` : cœur du wiki en bibliothèque Bun (racine client-safe, `/server`, `/remote`). |
 | [azalee-tauri.md](azalee-tauri.md) | Recette d'intégration Tauri : sidecar Bun compilé, CSP, cycle de vie, mode dégradé. |
-| [azalee-plan-correctifs.md](azalee-plan-correctifs.md) | Audit vérifié du wiki (navigation, URLs, référencement, interface, trous de données) et plan de correction, avec ce qui est livré et ce qui reste. |
 | [wiki-filters.md](wiki-filters.md) | Filtres du wiki et contournement des colonnes NULL de `inagle_skills`. |
 | [cpk-browser.md](cpk-browser.md) | Navigateur des 250 800 fichiers des archives CPK : index, routes, prévisualisation. |
 | [tools/README.md](tools/README.md) | Outils communautaires (comparateur, équipe aléatoire, traducteur). |

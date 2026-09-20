@@ -79,6 +79,9 @@ copilot-instructions.md
 *.md
 *.txt
 !README.md
+# Source ultime de vérité et partition de travail partagée entre agents (AGY & Claude)
+!PLAN.md
+!PARTITION.md
 # Prompt d'amorçage des agents : versionné, contrairement à CLAUDE.md (local).
 !PROMPT.md
 !CHANGELOG.md
