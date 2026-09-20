@@ -10,7 +10,19 @@ Group=ubuntu
 EnvironmentFile=/etc/rose-griffon/achillea-postgrest.env
 Environment=PGRST_SERVER_HOST=127.0.0.1
 Environment=PGRST_SERVER_PORT=8820
-Environment=PGRST_DB_SCHEMAS=public
+# `achillea`, pas `public` : la base `achillea` a été fusionnée dans le schéma
+# `achillea` de la base `rg`. Exposer `public` publierait ici le schéma du site
+# principal (comptes, commandes, wiki) sur le port d'Achilléa.
+#
+# ATTENTION — cette ligne ne décide de rien à elle seule : `PGRST_DB_SCHEMAS` est
+# AUSSI déclaré dans `/etc/rose-griffon/achillea-postgrest.env`, et c'est le FICHIER
+# qui gagne. Contrairement à ce que l'ordre des lignes laisse croire, systemd applique
+# tous les `EnvironmentFile=` APRÈS tous les `Environment=`, même quand le fichier est
+# déclaré plus haut dans l'unité — vérifié sur cette machine avec une unité jetable.
+# Modifier cette ligne seule n'a donc AUCUN effet : il faut éditer le fichier de
+# secrets. La ligne reste ici pour que l'unité ne mente pas sur ce qui est servi, et
+# pour donner une valeur de repli si le fichier venait à perdre la variable.
+Environment=PGRST_DB_SCHEMAS=achillea
 Environment=PGRST_DB_ANON_ROLE=anon
 ExecStart=/usr/local/bin/postgrest
 Restart=always

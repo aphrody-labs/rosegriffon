@@ -50,7 +50,9 @@
     "build:js": "bun build src/index.ts --outdir dist --target bun --format esm",
     "build:types": "bun --bun tsc --emitDeclarationOnly --noCheck",
     "build": "bun run build:js && bun run build:types",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "bun run build",
+    "type-check": "bun --bun tsc --noEmit",
+    "lint": "bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction src"
   },
   "devDependencies": {
     "@types/bun": "catalog:",

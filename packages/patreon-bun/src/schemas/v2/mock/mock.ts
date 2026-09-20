@@ -96,12 +96,22 @@ export interface PatreonMockHandlerCallbackOptions {
 	path: string;
 	method: string;
 	origin?: string;
-	body?:
-		| import("undici-types").BodyInit
-		| import("undici-types").Dispatcher.DispatchOptions["body"]
-		| undefined;
-	headers?: import("undici-types").Headers | Headers | Record<string, string>;
+	// `undici-types` est un paquet optionnel : on s'appuie sur les globales WHATWG de Bun.
+	// `{ toString(): string }` couvre les corps de requête exotiques (flux Node) que seul
+	// `toString()` consomme ici.
+	body?: Bun.BodyInit | { toString(): string } | null | undefined;
+	headers?: Headers | Record<string, string>;
 }
+
+/**
+ * Équivalent local de `MockInterceptor.MockReplyOptionsCallback` d'undici, reproduit ici pour
+ * éviter une dépendance sur le paquet optionnel `undici-types`.
+ */
+export type MockReplyOptionsCallback = (options: PatreonMockHandlerCallbackOptions) => {
+	statusCode: number;
+	data?: unknown;
+	responseOptions?: { headers?: Record<string, string> };
+};
 
 export interface PatreonMockHandlerDefaultResponse {
 	/**
@@ -502,8 +512,8 @@ export class PatreonMock {
 	}
 
 	/**
-	 * Note: Uses the `undici-types` package for typing.
-	 * If you don't have `undici`, `@types/node` or `undici-types` installed, ts will be not be able to import the types.
+	 * Note: the returned callback matches undici's `MockInterceptor.MockReplyOptionsCallback`
+	 * signature without importing the optional `undici-types` package.
 	 *
 	 * Creates a callback for an intercepted request on a mock agent.
 	 *
@@ -531,7 +541,7 @@ export class PatreonMock {
 					responseOptions: { headers },
 				})
 			);
-		}) satisfies import("undici-types/mock-interceptor").MockInterceptor.MockReplyOptionsCallback;
+		}) satisfies MockReplyOptionsCallback;
 	}
 
 	/**

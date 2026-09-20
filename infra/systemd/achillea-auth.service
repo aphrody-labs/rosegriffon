@@ -1,4 +1,32 @@
 [Unit]
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │ UNITÉ RETIRÉE — ARRÊTÉE ET DÉSACTIVÉE LE 2026-09-20. NE PAS RÉACTIVER.   │
+# └──────────────────────────────────────────────────────────────────────────┘
+# Achilléa n'a plus de session propre : elle dérive du compte Rose Griffon
+# (cf. « feat(achillea): une seule session, derivee du compte rose griffon »).
+# GoTrue n'a donc plus aucun appelant — ni dans `apps/achillea-web`, ni dans
+# `apps/achillea-bot`, ni dans `packages/achillea-*` — et les DEUX passerelles
+# répondent déjà `410` sur `/auth/v1/` : la façade publique
+# (`infra/nginx/achillea.rosegriffon.conf`) et sa copie loopback
+# (`infra/nginx/achillea-supabase-internal.conf`, :8823).
+#
+# CE QUI L'AVAIT RESSUSCITÉ — à savoir pour ne pas le refaire
+# L'arrêt manuel du 2026-09-20 15:48 n'a tenu que 50 secondes :
+# `rg-watchdog@achillea-auth.timer` tournait encore, et le watchdog « relance le
+# service s'il est simplement arrêté ». Le service est donc reparti à 15:49, en
+# écoute sur :8824, alors même que l'unité était `disabled`. Désactiver un service
+# surveillé SANS désactiver sa sonde ne le retire pas : cela fabrique un service
+# `disabled` mais `active`, que plus rien ne redémarre au prochain reboot.
+# Le timer de surveillance a été désactivé en même temps que le service.
+#
+# État attendu sur la machine :
+#   systemctl is-enabled achillea-auth.service            # disabled
+#   systemctl is-active  achillea-auth.service            # inactive
+#   systemctl is-enabled rg-watchdog@achillea-auth.timer  # disabled
+#
+# Le fichier reste versionné parce que le schéma `auth` existe toujours dans la
+# base (23 tables, comptes historiques) : la ré-instanciation doit rester possible
+# tant que ces données ne sont pas migrées ou supprimées.
 Description=Achillea Supabase Auth (GoTrue, isolated)
 After=docker.service postgresql.service network-online.target
 Requires=docker.service postgresql.service

@@ -1,4 +1,19 @@
 [Unit]
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │ UNITÉ RETIRÉE — MASQUÉE EN PRODUCTION, NE PAS RÉACTIVER.                 │
+# └──────────────────────────────────────────────────────────────────────────┘
+# Le transport HTTP public de MCP est retiré depuis le 2026-09-08 : nginx répond
+# `410` sur `https://api.rosegriffon.fr/mcp`, et l'unité est MASQUÉE sur la machine
+# (`/etc/systemd/system/rg-mcp.service -> /dev/null`). `packages/mcp` reste utilisé,
+# mais en **stdio local** par l'agent — sans listener réseau.
+#
+# Le fichier est conservé pour mémoire du gréement, PAS comme mode d'emploi : la
+# section « Installation » plus bas rouvrirait un accès réseau équivalent à un accès
+# SSH. Vérifier l'état attendu :
+#   systemctl is-enabled rg-mcp.service   # doit répondre : masked
+# Voir `docs/PROD-STATUS.md` et `docs/mcp.md`.
+#
+# ── Description historique ────────────────────────────────────────────────────
 # rg-mcp — serveur MCP du monorepo Rose Griffon (@rose-griffon/mcp),
 # exposé derrière nginx sur https://api.rosegriffon.fr/mcp.
 #

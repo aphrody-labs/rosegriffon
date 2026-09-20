@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./achillea.css";
 import "./primeicons.css";
-import { AchilleaNav } from "@/components/achillea/AchilleaNav";
 
 export const metadata: Metadata = {
 	title: {
@@ -53,16 +52,17 @@ export default function AchilleaLayout({
 	return (
 		<div className="achillea-scope min-h-full">
 			{/*
-			 * Sous-navigation Achilléa, À L'INTÉRIEUR du shell Rose Griffon.
+			 * PLUS DE SECONDE BARRE.
 			 *
-			 * `AchilleaNav` existait — 193 lignes — mais n'était importée nulle
-			 * part : le portage ne rendait qu'un `<div>` nu. Achilléa n'avait donc
-			 * AUCUNE navigation propre, alors que le front Angular monte
-			 * `shared/components/header/` globalement. Le menu latéral de RG mène
-			 * aux sections, celui-ci porte l'identité et les accès rapides du
-			 * domaine compétitif — les deux sont complémentaires, pas redondants.
+			 * `AchilleaNav` rendait ici une barre d'onglets de neuf entrées, sous
+			 * la barre supérieure du site et à côté d'une barre latérale qui
+			 * portait DÉJÀ les mêmes destinations. Trois surfaces de navigation
+			 * empilées sur un même écran, dont deux disaient la même chose, plus
+			 * un second bouton « Connexion » pour un compte désormais unique.
+			 *
+			 * Le menu latéral ouvre son groupe « E-sport » dès qu'on est sous
+			 * `/achillea/**` : la navigation du domaine est là, une seule fois.
 			 */}
-			<AchilleaNav />
 			{children}
 		</div>
 	);

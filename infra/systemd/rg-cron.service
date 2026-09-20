@@ -16,6 +16,15 @@ Wants=network-online.target
 Type=simple
 User=ubuntu
 Group=ubuntu
+# `adm` : la tâche `stats:achillea` lit le journal d'audience nginx
+# (`/var/log/nginx/rg-stats.log`, en `nobody:adm`, mode 640). Elle passait par
+# `sudo -n tail`, ce qui ne pouvait PAS fonctionner ici : le durcissement plus bas
+# pose `NoNewPrivileges=true`, `RestrictSUIDSGID=true` et un `CapabilityBoundingSet`
+# vide, qui interdisent tous les trois l'élévation setuid dont sudo a besoin. La
+# tâche échouait donc à chaque passage sur « sudo: The "no new privileges" flag is
+# set ». Le groupe suffit : le fichier devient lisible directement, sans élévation
+# et sans relâcher une seule ligne de durcissement.
+SupplementaryGroups=adm
 WorkingDirectory=/home/ubuntu/rg/packages/cron
 EnvironmentFile=/home/ubuntu/rg/.env.local
 Environment=NODE_ENV=production
@@ -34,6 +43,17 @@ Environment=AZALEE_URL=https://azalee.rosegriffon.fr
 Environment=WEBSITE_URL=https://rosegriffon.fr
 Environment=API_URL=https://api.rosegriffon.fr
 Environment=CDN_URL=https://cdn.rosegriffon.fr
+
+# Racine BXC. OBLIGATOIRE, et solidaire de l'entrée `/home/ubuntu/aphrody/var/bxc`
+# de `ReadWritePaths=` plus bas : sans ces variables, `@aphrody/bxc` retombe sur son
+# défaut POSIX `~/.bxc`, que `ProtectHome=read-only` interdit de créer. Le démon
+# mourait alors au DÉMARRAGE en `EROFS` sur `mkdir` (`resolveCookiePath`), donc en
+# boucle de redémarrage, toutes ses tâches avec lui. Les mêmes valeurs sont posées
+# pour les unités bxc par `/etc/systemd/system/bxc*.service.d/aphrody-root.conf`.
+# Déplacer la racine BXC impose de changer les deux endroits ensemble.
+Environment=BXC_DIR=/home/ubuntu/aphrody/var/bxc
+Environment=BXC_DATA_DIR=/home/ubuntu/aphrody/var/bxc/data
+Environment=BXC_COOKIES_DIR=/home/ubuntu/aphrody/var/bxc/cookies
 
 # `@aphrody-code/bxc` (npm:@aphrody/bxc, tâche `crawl`/zukan) tente en dernier
 # recours `cargo run --manifest-path rust-bridge/Cargo.toml` pour localiser
@@ -79,7 +99,11 @@ ProtectHome=read-only
 #   y lance le push d'inagle et la republication du miroir SQLite (`scripts/donnees/
 #   miroir-inagle.sh`), qui écrit dans `var/miroir/`. Sans cette entrée, `ProtectSystem=strict`
 #   la fait échouer en EROFS.
-ReadWritePaths=/home/ubuntu/rg /home/ubuntu/niers/var /tmp /home/ubuntu/.bxc /var/www/cdn/static/azalee/public /var/www/cdn/static/website/public /var/lib/rg
+# `/home/ubuntu/aphrody/var/bxc` (et non plus `/home/ubuntu/.bxc`) : BXC range son
+#   état sous la racine Aphrody, comme le déclarent les drop-ins `bxc*.service.d/
+#   aphrody-root.conf` (`BXC_DIR`). L'ancien chemin n'existe plus ; le laisser ici
+#   faisait échouer la tâche `crawl` en EROFS sous `ProtectSystem=strict`.
+ReadWritePaths=/home/ubuntu/rg /home/ubuntu/niers/var /tmp /home/ubuntu/aphrody/var/bxc /var/www/cdn/static/azalee/public /var/www/cdn/static/website/public /var/lib/rg
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelTunables=true

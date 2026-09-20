@@ -224,8 +224,11 @@ export function validateManifest(manifest: AchilleaServiceManifest): string[] {
 		errors.push("local Supabase database must use the dedicated local socket contract");
 	if (localTarget.storageRoot !== "/var/www/achillea-storage")
 		errors.push("local Supabase storage root must stay isolated");
-	if (localTarget.authApi.status !== "active")
-		errors.push("local Supabase auth API must be active");
+	// `retired`, pas `active` : Achilléa n'a plus de session propre, elle dérive du
+	// compte Rose Griffon. Exiger `active` ici obligerait à garder GoTrue en vie pour
+	// satisfaire un test, alors que plus aucun appelant ne l'utilise.
+	if (localTarget.authApi.status !== "retired")
+		errors.push("local Supabase auth API must be retired");
 	const localPorts = localTarget.services.map(({ port }) => port);
 	if (!unique(localPorts.map(String))) errors.push("local Supabase ports must be unique");
 	const allApplicationPorts = manifest.services.flatMap(({ port }) =>
@@ -432,15 +435,22 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		"127.0.0.1:8820",
 		"127.0.0.1:8821",
 		"127.0.0.1:8822",
-		"127.0.0.1:8824",
+		// `127.0.0.1:8824` n'est plus attendu : la passerelle interne ne proxifie plus
+		// GoTrue, elle le retire. Exiger le port ici faisait échouer ce contrôle depuis
+		// la mise hors service du 2026-09-20.
 	]) {
 		if (!has(internalNginx, fragment))
 			errors.push(`Achillea internal Supabase nginx config is missing ${fragment}`);
 	}
 	if (has(internalNginx, "listen 0.0.0.0"))
 		errors.push("Achillea internal Supabase nginx must stay private");
+	// La passerelle loopback doit retirer `/auth/v1/` EXACTEMENT comme la façade
+	// publique. Les laisser diverger produirait un 410 côté public et un 502 côté
+	// interne au premier redémarrage de la machine.
 	if (!has(internalNginx, "location /auth/v1/"))
-		errors.push("Achillea internal Supabase nginx must proxy the real auth API");
+		errors.push("Achillea internal Supabase nginx must declare the retired auth route");
+	if (!has(internalNginx, "return 410"))
+		errors.push("Achillea internal Supabase nginx must return 410 on the retired auth API");
 
 	for (const fragment of [
 		"server 127.0.0.1:4000",

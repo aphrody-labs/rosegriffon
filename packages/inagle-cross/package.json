@@ -8,7 +8,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "type-check": "bun --bun tsc --noEmit"
+    "type-check": "bun --bun tsc --noEmit",
+    "lint": "bunx oxlint -c ../../.oxlintrc.json src"
   },
   "dependencies": {
     "zod": "catalog:"

@@ -10,10 +10,8 @@ export const ResponseHeaders = {
 
 export type PatreonHeadersData = Record<Lowercase<keyof typeof ResponseHeaders>, string | null>;
 
-export type RestHeaders =
-	| import("undici-types").Headers
-	| import("http").IncomingHttpHeaders
-	| Record<string, string>;
+// Bun expose les `Headers` WHATWG en global : pas besoin du paquet optionnel `undici-types`.
+export type RestHeaders = Headers | import("http").IncomingHttpHeaders | Record<string, string>;
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 export function resolveHeaders(headers: RestHeaders): Record<string, string> {

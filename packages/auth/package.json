@@ -13,7 +13,8 @@
   },
   "scripts": {
     "type-check": "bun --bun tsc --noEmit",
-    "test": "bun test src"
+    "test": "bun test src",
+    "lint": "bunx oxlint -c ../../.oxlintrc.json src"
   },
   "dependencies": {
     "@rosegriffon/db": "workspace:*",

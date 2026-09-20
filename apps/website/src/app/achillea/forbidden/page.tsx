@@ -33,7 +33,7 @@ export default function AchilleaForbiddenPage() {
 							Accueil Achilléa
 						</Button>
 					</Link>
-					<Link href="/achillea/auth">
+					<Link href="/login?redirect=/achillea">
 						<Button className="gap-2">Changer de compte</Button>
 					</Link>
 				</div>

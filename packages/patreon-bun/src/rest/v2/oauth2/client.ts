@@ -382,10 +382,11 @@ export class PatreonOauthClient {
 		else throw new Error(msg);
 	}
 
+	// Un jeton créateur n'expire pas : il est renvoyé tel quel, d'où l'union dans le type de retour.
 	protected static async validateToken(
 		client: PatreonOauthClient,
 		token: Oauth2CreatorToken | Oauth2StoredToken | string | undefined = client.cachedToken
-	): Promise<Oauth2StoredToken | undefined> {
+	): Promise<Oauth2CreatorToken | Oauth2StoredToken | undefined> {
 		if (token != undefined && typeof token === "object" && !PatreonOauthClient.isExpired(token))
 			return token;
 		if (token == undefined) throw new Error("No token found to validate!");

@@ -317,6 +317,7 @@
         "@rosegriffon/inagle-cross": "workspace:*",
         "@rosegriffon/patreon-bun": "workspace:*",
         "@rosegriffon/preferences": "workspace:*",
+        "@rosegriffon/search": "workspace:*",
         "@rosegriffon/types": "workspace:*",
         "@rosegriffon/ui": "workspace:*",
         "@sentry/nextjs": "catalog:",
@@ -536,6 +537,7 @@
         "wanakana": "catalog:",
       },
       "devDependencies": {
+        "@happy-dom/global-registrator": "^20.10.1",
         "@rosegriffon/config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/node": "catalog:",
@@ -608,11 +610,13 @@
         "@supabase/supabase-js": "catalog:",
         "cheerio": "catalog:",
         "commander": "catalog:",
+        "dotenv": "catalog:",
         "fengari": "catalog:",
         "hono": "catalog:",
         "jsonwebtoken": "catalog:",
         "kuroshiro": "catalog:",
         "kuroshiro-analyzer-kuromoji": "catalog:",
+        "pg": "catalog:",
         "picocolors": "catalog:",
         "web-tree-sitter": "catalog:",
         "zod": "catalog:",
@@ -683,6 +687,9 @@
       "devDependencies": {
         "@rosegriffon/config": "workspace:*",
         "typescript": "catalog:",
+      },
+      "peerDependencies": {
+        "@rosegriffon/db": "workspace:*",
       },
     },
     "packages/ui": {

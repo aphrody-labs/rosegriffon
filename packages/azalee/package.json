@@ -87,6 +87,7 @@
     "wanakana": "catalog:"
   },
   "devDependencies": {
+    "@happy-dom/global-registrator": "^20.10.1",
     "@rosegriffon/config": "workspace:*",
     "@types/bun": "catalog:",
     "@types/node": "catalog:",

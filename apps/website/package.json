@@ -16,8 +16,6 @@
 		"analyze": "ANALYZE=true next build",
 		"type-check": "bun --bun tsc --noEmit",
 		"clean": "rm -rf .next .turbo dist",
-		"pre-deploy": "bun scripts/pre-deploy-check.js",
-		"submit-sitemap": "bun scripts/submit-sitemap.js",
 		"supabase:types": "supabase gen types typescript --project-id isbkaeltubqittywibeh > src/types/supabase.ts"
 	},
 	"dependencies": {
@@ -86,6 +84,7 @@
 		"@rosegriffon/inagle-cross": "workspace:*",
 		"@rosegriffon/patreon-bun": "workspace:*",
 		"@rosegriffon/preferences": "workspace:*",
+		"@rosegriffon/search": "workspace:*",
 		"@rosegriffon/types": "workspace:*",
 		"@rosegriffon/ui": "workspace:*",
 		"@sentry/nextjs": "catalog:",

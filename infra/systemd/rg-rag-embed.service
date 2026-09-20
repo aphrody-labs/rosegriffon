@@ -1,4 +1,16 @@
 [Unit]
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │ UNITÉ RETIRÉE — MASQUÉE EN PRODUCTION, NE PAS RÉACTIVER.                 │
+# └──────────────────────────────────────────────────────────────────────────┘
+# La surface RAG est retirée depuis le 2026-09-08, en même temps que `rag-api` :
+# `api.rosegriffon.fr/rag/` répond `410`. Cette unité est MASQUÉE sur la machine
+# (`/etc/systemd/system/rg-rag-embed.service -> /dev/null`), comme son timer de
+# surveillance (`rg-watchdog@rg-rag-embed.timer`).
+#
+# Son `ExecStart` pointe d'ailleurs hors dépôt (`/home/ubuntu/.rg-rag-embed/`) : rien
+# ici n'est reconstructible depuis `rg`. Vérifier l'état attendu :
+#   systemctl is-enabled rg-rag-embed.service   # doit répondre : masked
+# Voir `docs/PROD-STATUS.md`.
 Description=RG RAG embedding sidecar (multilingual-e5-small, local)
 After=network.target
 

@@ -239,8 +239,8 @@
 			}
 		],
 		"authApi": {
-			"status": "active",
-			"reason": "GoTrue Achillea isole est publie via /auth/v1 et utilise la base auth locale."
+			"status": "retired",
+			"reason": "Achillea has no session of its own: it derives from the Rose Griffon account. GoTrue (achillea-auth.service, :8824) was stopped and disabled on 2026-09-20, along with its watchdog timer, and both gateways return 410 on /auth/v1/. The auth schema is kept in the database until its historical accounts are migrated."
 		}
 	},
 	"productionChecks": [
@@ -248,7 +248,6 @@
 		"http://127.0.0.1:4002/api/health",
 		"tcp://127.0.0.1:4005",
 		"https://achillea.rosegriffon.fr/",
-		"https://achillea.rosegriffon.fr/auth/v1/health",
 		"https://ranked.rosegriffon.fr/api/health"
 	]
 }
