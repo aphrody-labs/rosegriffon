@@ -323,6 +323,42 @@ export function registerTestCommand(program: Command): void {
 					console.log(`${colors.green}Serveur détecté sur ${url}.${colors.reset}\n`);
 				}
 
+				/**
+				 * Préfixe sous lequel le wiki est monté sur l'origine testée.
+				 *
+				 * Les routes ci-dessous (`/chara`, `/skill`, `/aura`…) sont écrites
+				 * SANS préfixe, parce qu'`apps/azalee` servait le wiki à sa racine.
+				 * Depuis la fusion, `rosegriffon.fr` le monte sous `/wiki` et `/chara`
+				 * y répond 308. Toute la suite de rendu tombait donc en cascade, non
+				 * pas parce que les pages sont cassées, mais parce qu'elles ont
+				 * déménagé.
+				 *
+				 * On sonde plutôt que de supposer : une seule requête décide, et la
+				 * suite fonctionne sur les deux montages sans branche conditionnelle
+				 * ailleurs.
+				 */
+				const prefixeWiki = await (async () => {
+					try {
+						const res = await fetch(`${url}/chara`, {
+							redirect: "manual",
+							signal: AbortSignal.timeout(5000),
+						});
+						return res.status === 200 ? "" : "/wiki";
+					} catch {
+						return "";
+					}
+				})();
+				if (prefixeWiki) {
+					console.log(`${colors.cyan}Wiki monté sous ${prefixeWiki} sur cette origine.${colors.reset}`);
+				}
+
+				/** Applique le préfixe aux routes du wiki, jamais aux routes racine. */
+				const cheminTeste = (chemin: string): string => {
+					const RACINES = ["/news", "/settings", "/search", "/login", "/legal", "/contact", "/soutenir", "/charte", "/maintenance"];
+					const estRacine = RACINES.some((r) => chemin === r || chemin.startsWith(`${r}/`));
+					return estRacine || chemin === "/" ? chemin : `${prefixeWiki}${chemin}`;
+				};
+
 				// ─── SUITE 2 : endpoints API & GraphQL ───
 				console.log(`${colors.bold}${colors.blue}SUITE 2: API & GRAPHQL ENDPOINTS (HTTP)${colors.reset}`);
 
@@ -450,14 +486,21 @@ export function registerTestCommand(program: Command): void {
 						const res = await fetch(url);
 						stdout = JSON.stringify({
 							httpStatus: res.status,
-							hostname: "localhost",
+							hostname: new URL(url).hostname,
 							frontend: [{ name: "Next.js", confidence: 1.0 }],
 						});
 					}
 					const duration = (performance.now() - start).toFixed(1);
 					const data = jsonDeBxc(stdout) as any;
 					if (data.httpStatus !== 200) throw new Error(`Bxc httpStatus: ${data.httpStatus}`);
-					if (data.hostname !== "localhost") throw new Error(`Bxc hostname: ${data.hostname}`);
+					// L'hôte attendu suit l'origine RÉELLEMENT testée. Le comparer à
+					// « localhost » en dur faisait échouer l'audit dès que la suite
+					// visait un emplacement bleu/vert du site (`127.0.0.1:3004`), pour
+					// une raison qui n'a rien à voir avec ce que l'audit vérifie.
+					const hoteAttendu = new URL(url).hostname;
+					if (data.hostname !== hoteAttendu) {
+						throw new Error(`Bxc hostname: ${data.hostname} (attendu ${hoteAttendu})`);
+					}
 
 					const nextJsDetect = data.frontend?.find((tech: any) => tech.name === "Next.js");
 					if (!nextJsDetect) throw new Error("Next.js non détecté par Bxc");
@@ -508,9 +551,9 @@ export function registerTestCommand(program: Command): void {
 					const start = performance.now();
 					let stdout: string;
 					try {
-						stdout = runCapture([BXC_PATH, "recon", `${url}/contact`, "--json"]);
+						stdout = runCapture([BXC_PATH, "recon", `${url}${cheminTeste("/contact")}`, "--json"]);
 					} catch {
-						const res = await fetch(`${url}/contact`);
+						const res = await fetch(`${url}${cheminTeste("/contact")}`);
 						const html = await res.text();
 						stdout = JSON.stringify({
 							httpStatus: res.status,
@@ -554,7 +597,7 @@ export function registerTestCommand(program: Command): void {
 				// 2. Filtres de la liste de personnages
 				{
 					const start = performance.now();
-					const res = await fetch(`${url}/chara`);
+					const res = await fetch(`${url}${cheminTeste("/chara")}`);
 					const html = await res.text();
 					const duration = (performance.now() - start).toFixed(1);
 					const hasFw = html.includes("Attaquant") || html.includes("FW");
@@ -570,7 +613,7 @@ export function registerTestCommand(program: Command): void {
 				// 3. Onglets de la fiche détaillée
 				{
 					const start = performance.now();
-					const res = await fetch(`${url}/chara/buddy-0x6A6392AD`);
+					const res = await fetch(`${url}${cheminTeste("/chara/buddy-0x6A6392AD")}`);
 					const html = await res.text();
 					const duration = (performance.now() - start).toFixed(1);
 					const hasTabs = html.includes('role="tab"') || html.includes("role='tab'");
@@ -598,7 +641,7 @@ export function registerTestCommand(program: Command): void {
 				for (const p of allPages) {
 					const start = performance.now();
 					try {
-						const res = await fetch(`${url}${p.path}`);
+						const res = await fetch(`${url}${cheminTeste(p.path)}`);
 						const text = await res.text();
 						const duration = (performance.now() - start).toFixed(1);
 
