@@ -329,7 +329,7 @@ async function main() {
 	const PACKAGE_ROOT = resolve(__dirname, "../..");
 	const envCandidates = [
 		resolve(PACKAGE_ROOT, ".env"),
-		resolve(PACKAGE_ROOT, "../../apps/azalee/.env"),
+		resolve(PACKAGE_ROOT, "../../apps/website/.env"),
 	];
 	const envPath = envCandidates.find((p) => existsSync(p)) ?? envCandidates[0];
 	const envConfig = existsSync(envPath) ? dotenv.parse(await readFile(envPath)) : {};

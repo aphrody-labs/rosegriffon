@@ -13,8 +13,8 @@
  *
  * L'ordre de résolution est explicite → variable d'environnement → chemins
  * conventionnels, ce qui permet à la lib de fonctionner à l'identique sous
- * `next build` (cwd = `apps/azalee`), sous le serveur standalone (cwd =
- * `.next/standalone/apps/azalee`), en CLI et en test (cwd = racine du dépôt).
+ * `next build` (cwd = `apps/website`), sous le serveur standalone (cwd =
+ * `.next/standalone/apps/website`), en CLI et en test (cwd = racine du dépôt).
  */
 
 import { existsSync, readdirSync } from "node:fs";
@@ -57,7 +57,7 @@ export function resetAzaleeConfig(): void {
 
 /**
  * Racine du package (`packages/azalee`), déduite de l'emplacement de ce module.
- * Sert de dernier recours pour remonter jusqu'à `apps/azalee/data` en monorepo.
+ * Sert de dernier recours pour remonter jusqu'à `apps/website/data` en monorepo.
  */
 function packageRoot(): string {
 	// `import.meta.dir` (Bun) / `import.meta.url` (Node) → `<pkg>/src`.
@@ -74,15 +74,13 @@ function dataDirCandidates(): string[] {
 	return [
 		explicit.dataDir,
 		process.env.AZALEE_DATA_DIR,
-		// Serveur standalone Next (cwd = `.next/standalone/apps/azalee`) et
-		// `next build` (cwd = `apps/azalee`).
+		// Serveur standalone Next (cwd = `.next/standalone/apps/website`) et
+		// `next build` (cwd = `apps/website`).
 		path.resolve(process.cwd(), "data"),
 		// Exécution depuis la racine du monorepo (CLI, tests, scripts).
 		path.resolve(process.cwd(), "apps/website/data"),
-		path.resolve(process.cwd(), "apps/azalee/data"),
-		// Depuis `packages/azalee` : ../../apps/website/data ou ../../apps/azalee/data.
+		// Depuis `packages/azalee` : ../../apps/website/data.
 		path.resolve(root, "../../apps/website/data"),
-		path.resolve(root, "../../apps/azalee/data"),
 	].filter((p): p is string => Boolean(p));
 }
 

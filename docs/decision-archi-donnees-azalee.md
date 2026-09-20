@@ -19,7 +19,13 @@ Statut : ADOPTÉE — 2026-09-05. Cible : `apps/azalee` (wiki IEVR, self-host VP
 
 ## 1. Contexte
 
-Azalée est un wiki IEVR public, read-heavy, servi en self-host sur 1 VPS via `azalee-web.service` (Next 16 standalone, port 3003, build = `bash scripts/ship-azalee.sh` qui contourne le crash SIGILL/code 132 de Next16+Bun à l'exit). La donnée de jeu = ~44-63 tables `inagle_*` STATIQUES (ne changent qu'à un re-dump du jeu) : ~6148 personnages (5204 base_slug), ~1002 skills, ~1668 items, auras/keshins/tactics, etc. → des milliers de pages adressables.
+> **Mise à jour 2026-09-20 :** la topologie frontend décrite dans la décision
+> originale est retirée. Azalée est maintenant servie par `apps/website` sous
+> `/wiki`, avec le seul build Website. Les choix de couche de données ci-dessous
+> restent une trace de décision, mais aucune mention d'`azalee-web` ne constitue
+> une instruction d'exploitation actuelle. Voir [azalee.md](azalee.md).
+
+Azalée est un wiki IEVR public, read-heavy, intégré à l'application Website. La donnée de jeu = ~44-63 tables `inagle_*` STATIQUES (ne changent qu'à un re-dump du jeu) : ~6148 personnages (5204 base_slug), ~1002 skills, ~1668 items, auras/keshins/tactics, etc. → des milliers de pages adressables.
 
 Source de vérité = inagle (TS) → Supabase ; le publisher `niers` en extrait le miroir de lecture canonique. État réel constaté dans le code :
 
@@ -43,7 +49,7 @@ Maintenabilité (tuer le PostgREST maison) · Fraîcheur/automatisation (fini le
 
 **On retient (e) l'hybride.** Trois chantiers orthogonaux, chacun adossé à une recherche :
 
-1. **Couche data → Drizzle ORM** (tue les 494 LOC d'émulation PostgREST). Seule option couvrant nativement la contrainte dual-runtime d'azalée : `drizzle-orm/node-sqlite` (DatabaseSync) au BUILD sous `/usr/bin/node` v22 (next-build.sh l.25/37, Bun crashe le prerender) ET `drizzle-orm/bun-sqlite` au RUNTIME sous azalee-web.service, MÊME schéma, swap derrière le garde `typeof Bun` DÉJÀ présent (sqlite-client.ts l.55-85). Schéma introspecté une fois via `drizzle-kit pull` (donnée statique → 0 churn entre dumps).
+1. **Couche data → Drizzle ORM** (tue les 494 LOC d'émulation PostgREST). Le schéma partagé couvre les lecteurs Node/Bun derrière le garde `typeof Bun`; le runtime frontend actuel est Website.
 2. **Sync → industrialiser le miroir** (tue le snapshot périmé) : épingler `SQLITE_DB_PATH` (chemin stable `mirror.sqlite`) + publisher systemd quotidien post-`inagle push` (dump validé → swap atomique → purge de rétention). Le lecteur rouvre son handle sans redémarrage.
 3. **Rendu → ISR** (tue le rendu dynamique de donnée immuable) : pages-détail wiki de `force-dynamic` vers `revalidate=3600` + invalidation on-demand, `dynamicParams=true`, pré-rendu borné (PAS de SSG complet : milliers de pages × build SIGILL = inacceptable).
 

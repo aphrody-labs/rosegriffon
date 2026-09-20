@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 /**
- * deploy.ts — publication bleu/vert d'Azalée et du site principal, **sans coupure**.
+ * deploy.ts — publication bleu/vert du site principal, **sans coupure**.
  *
  * Pourquoi ce script existe
  * -------------------------
- * `ship-azalee.sh` / `ship-website.sh` faisaient `systemctl restart` : entre l'arrêt et
+ * L'ancien script Website faisait `systemctl restart` : entre l'arrêt et
  * le premier octet servi par le nouveau processus Next, nginx n'a plus personne au bout
  * du proxy → page de maintenance (azalée) ou 502 (site) pendant plusieurs secondes, et
  * les fragments `/_next/static/*` de l'ancien build disparaissent sous les onglets déjà
@@ -13,7 +13,7 @@
  *
  * Topologie
  * ---------
- *   slot A = service de production (`azalee-web` :3003, `website-web` :3004)
+ *   slot A = service de production (`website-web` :3004)
  *   slot B = doublure de bascule et de prévisualisation (`…-b` :3013 / :3014)
  *
  * Chaque slot lit une **version figée** :
@@ -67,15 +67,14 @@
  *
  * Usage
  * -----
- *   bun run deploy                      # azalée + site, build compris
- *   bun run deploy azalee               # une seule surface
+ *   bun run deploy                      # Website, build compris
  *   bun run deploy -- --no-build        # publie les artefacts déjà bâtis
  *   bun run deploy -- --no-gate         # saute le type-check préalable
- *   bun scripts/ops/deploy.ts preview azalee    # → URL d'activation du cookie
- *   bun scripts/ops/deploy.ts promote azalee    # passe la prévisualisation en prod
- *   bun scripts/ops/deploy.ts preview-off azalee
- *   bun scripts/ops/deploy.ts reload azalee     # même version, sans coupure
- *   bun scripts/ops/deploy.ts rollback azalee   # version précédente
+ *   bun scripts/ops/deploy.ts preview website    # → URL d'activation du cookie
+ *   bun scripts/ops/deploy.ts promote website    # passe la prévisualisation en prod
+ *   bun scripts/ops/deploy.ts preview-off website
+ *   bun scripts/ops/deploy.ts reload website     # même version, sans coupure
+ *   bun scripts/ops/deploy.ts rollback website   # version précédente
  *   bun scripts/ops/deploy.ts status --json
  *   bun scripts/ops/deploy.ts install           # unités systemd + amonts nginx
  *
@@ -161,33 +160,6 @@ interface AppConfig {
 }
 
 const APPS: Record<string, AppConfig> = {
-	azalee: {
-		key: "azalee",
-		standaloneDir: "azalee",
-		workspace: "@rosegriffon/azalee-web",
-		appDir: `${ROOT}/apps/azalee`,
-		title: "wiki Azalée",
-		slots: {
-			a: { unit: "azalee-web.service", port: 3003 },
-			b: { unit: "azalee-web-b.service", port: 3013 },
-		},
-		upstream: "azalee_web",
-		previewUpstream: "azalee_preview",
-		backendVariable: "azalee_backend",
-		siteConf: "/etc/nginx/conf.d/azalee.rosegriffon.conf",
-		upstreamOptions: "max_fails=3 fail_timeout=15s",
-		publicUrl: "https://azalee.rosegriffon.fr/",
-		probes: ["/api/health", "/", "/chara", "/skill", "/news", "/gallery"],
-		extraDirs: [".next/static", "public", "data"],
-		// Le miroir SQLite est permuté chaque nuit dans le dépôt (`azalee-mirror-sync`)
-		// et épinglé en absolu par `SQLITE_DB_PATH` : la version le vise par lien plutôt
-		// que d'en figer une copie devenue périmée au premier dump.
-		linkedPaths: ["data/backups"],
-		buildCommand: [BUN_BIN, "--env-file=../../.env.local", "run", "build"],
-		buildEnv: { SENTRY_SKIP_UPLOAD: "1", NEXT_TELEMETRY_DISABLED: "1" },
-		memoryFloorMiB: 2048,
-		bootTimeoutMs: 240_000,
-	},
 	website: {
 		key: "website",
 		standaloneDir: "website",
@@ -1589,7 +1561,7 @@ async function retireLegacyDropIns(app: AppConfig): Promise<void> {
 // Point d'entrée
 // ─────────────────────────────────────────────────────────────────────────────
 
-const USAGE = `Usage : bun scripts/ops/deploy.ts <commande> [azalee|website|all] [options]
+const USAGE = `Usage : bun scripts/ops/deploy.ts <commande> [website|all] [options]
 
 Commandes
   deploy       type-check, build, publie et bascule sans coupure (défaut)
@@ -1637,47 +1609,8 @@ async function main(): Promise<number> {
 		return 0;
 	}
 
-	const cible = positional[0] ?? "all";
-
-	// `azalee` a MIGRÉ vers le dépôt `niers` : il s'y construit et s'y déploie désormais.
-	//
-	// La table `APPS` ci-dessus le décrit encore, et son `appDir` pointe le `apps/azalee`
-	// de CE dépôt-ci. Publier depuis ici produisait donc une version issue du mauvais
-	// arbre, sans le moindre avertissement — c'est ce qui s'est passé : les six dernières
-	// versions mises en ligne portent des commits qui n'existent que dans `rg`, alors que
-	// le travail se fait dans `niers`. Rien ne le signalait, puisque le déploiement
-	// réussissait.
-	//
-	// On refuse donc la cible plutôt que de compter sur la discipline de l'appelant.
-	//
-	// Mais on ne refuse QUE ce qui publie. `status`, `releases` et surtout `rollback`
-	// portent sur des versions DÉJÀ en ligne, produites d'ici : les bloquer retirerait le
-	// diagnostic et le secours sur la production au moment précis où on en a besoin. C'est
-	// aussi pourquoi `azalee` reste décrite dans `APPS`.
-	const REDIRIGEES: Record<string, string> = {
-		azalee: "bun /home/ubuntu/niers/scripts/ops/deploy.ts",
-	};
-	const PUBLIENT = new Set(["deploy", "preview", "promote", "reload"]);
-	const publie = PUBLIENT.has(command);
-	if (publie && cible !== "all" && REDIRIGEES[cible]) {
-		process.stderr.write(
-			`\`${cible}\` ne se déploie plus depuis ce dépôt : il a migré vers \`niers\`.\n` +
-				`Utiliser : ${REDIRIGEES[cible]} ${[command, ...positional, ...options].join(" ")}\n`,
-		);
-		return 2;
-	}
-
-	const apps = (cible === "all" ? Object.values(APPS) : [APPS[cible]]).filter((app) => {
-		// `all` est la cible PAR DÉFAUT (aucun argument) : sans ce filtre, un `deploy` nu
-		// lancé ici republierait azalée depuis le mauvais arbre. En lecture (`status`,
-		// `releases`), on la garde au contraire dans la liste — c'est ce qui permet de voir
-		// l'état réel de la production depuis n'importe lequel des deux dépôts.
-		if (publie && app && REDIRIGEES[app.key]) {
-			process.stderr.write(`↷ ${app.key} ignoré : déployé depuis \`niers\`, pas d'ici.\n`);
-			return false;
-		}
-		return true;
-	});
+	const cible = positional[0] ?? "website";
+	const apps = cible === "all" ? Object.values(APPS) : [APPS[cible]];
 	if (apps.length === 0) {
 		process.stderr.write(`Aucune application à déployer depuis ce dépôt.\n`);
 		return 2;

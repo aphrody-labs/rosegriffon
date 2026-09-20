@@ -24,8 +24,8 @@ export interface CatalogAsset {
 function resolveSourcePath(): string | null {
 	const candidates = [
 		path.resolve(process.cwd(), "data/cross/catalog-index.ndjson.gz"),
-		path.resolve(process.cwd(), "apps/azalee/data/cross/catalog-index.ndjson.gz"),
-		"/home/ubuntu/rg/apps/azalee/data/cross/catalog-index.ndjson.gz",
+		path.resolve(process.cwd(), "apps/website/data/cross/catalog-index.ndjson.gz"),
+		"/home/ubuntu/rg/apps/website/data/cross/catalog-index.ndjson.gz",
 	];
 	for (const c of candidates) {
 		if (existsSync(c)) return c;

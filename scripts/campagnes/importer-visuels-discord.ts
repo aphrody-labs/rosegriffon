@@ -338,7 +338,7 @@ async function televerser(nom: string, octets: Uint8Array): Promise<void> {
 		},
 		// Corps BRUT (pas de multipart) : le service lit alors `content-type` tel quel
 		// et indexe `mimetype: "image/webp"`. `.slice()` → copie `Uint8Array<ArrayBuffer>`,
-		// seul `BlobPart` valide (même idiome que `apps/azalee/lib/cutin/decode.ts`).
+		// seul `BlobPart` valide pour préserver les octets décodés.
 		body: new Blob([octets.slice()]),
 	});
 	if (!reponse.ok) {

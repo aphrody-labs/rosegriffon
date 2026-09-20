@@ -21,7 +21,7 @@ import { Database } from "bun:sqlite";
 const MIROIR_REPLI = process.env["AZALEE_MIRROR_PATH"] ?? "/home/ubuntu/niers/var/mirror.sqlite";
 
 /** Dossier historique des sauvegardes, conservé s'il redevient alimenté. */
-const DOSSIER_SAUVEGARDES = join(import.meta.dir, "../../../apps/azalee/data/backups");
+const DOSSIER_SAUVEGARDES = join(import.meta.dir, "../../../apps/website/data/backups");
 
 /**
  * Rend le chemin du miroir SQLite, ou `null` s'il n'y en a aucun.

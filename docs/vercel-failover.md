@@ -1,8 +1,9 @@
-# Secours Vercel de Rose Griffon et Azalée
+# Secours Vercel de Website
 
 ## Portée
 
-Le secours Vercel couvre `apps/website` et `apps/azalee`. Il ne remplace pas les
+Le secours Vercel couvre uniquement `apps/website`, qui inclut le wiki Azalée
+sous `/wiki`. Il n'existe aucun projet ou build Vercel Azalée distinct. Il ne remplace pas les
 services persistants du VPS : PostgreSQL/PostgREST, Storage, Realtime SSE, CDN
 dynamique, RAG, MCP, bots Discord, cron et génération de modèles NIE.
 
@@ -39,8 +40,8 @@ SMTP, Stripe, Supabase compatible et Sentry. Ne pas copier les chemins locaux
 
 Après validation des URLs Vercel :
 
-1. ajouter `rosegriffon.fr`, `www.rosegriffon.fr` et
-   `azalee.rosegriffon.fr` aux projets correspondants ;
+1. ajouter `rosegriffon.fr` et `www.rosegriffon.fr` au projet Website ; conserver
+   `azalee.rosegriffon.fr` comme redirection permanente vers `/wiki` ;
 2. appliquer les enregistrements DNS proposés par Vercel chez OVH ;
 3. conserver `api`, `cdn`, `supabase`, `db`, `storage`, `realtime`, `mcp` et les
    workers sur le VPS ;

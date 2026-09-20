@@ -23,11 +23,11 @@ if git diff --name-only | grep -q "characters.json"; then
     git commit -m "chore(inagle): auto-align characters.json with latest DB corrections"
     
     # Rebuild Next.js standalone server
-    CI=true bun run build
+    CI=true bun --filter @rosegriffon/website build
     
     # Republication sans coupure (bascule bleu/vert) au lieu d'un restart brutal.
     echo "🔄 Publication de la nouvelle version..."
-    bun /home/ubuntu/rg/scripts/ops/deploy.ts deploy azalee --no-build --no-gate
+    bun /home/ubuntu/rg/scripts/ops/deploy.ts deploy website --no-build --no-gate
     echo "✅ Nouvelle version en ligne."
 else
     echo "✨ No changes detected in characters.json. Skipping build and restart."

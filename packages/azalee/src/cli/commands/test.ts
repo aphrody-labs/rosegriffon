@@ -52,42 +52,42 @@ const STATIC_PAGES = [
 	{ name: "home", path: "/" },
 	{ name: "contact", path: "/contact" },
 	{ name: "soutenir", path: "/soutenir" },
-	{ name: "passive", path: "/passive" },
+	{ name: "passive", path: "/wiki/passive" },
 	{ name: "search", path: "/search" },
-	{ name: "tools", path: "/tools" },
-	{ name: "tools-translator", path: "/tools/translator" },
-	{ name: "tools-random-team", path: "/tools/random-team" },
-	{ name: "tools-compare", path: "/tools/compare" },
-	{ name: "tools-my-team", path: "/tools/my-team" },
-	{ name: "tactic-list", path: "/tactic" },
-	{ name: "chara-list", path: "/chara" },
+	{ name: "tools", path: "/wiki/tools" },
+	{ name: "tools-translator", path: "/wiki/tools/translator" },
+	{ name: "tools-random-team", path: "/wiki/tools/random-team" },
+	{ name: "tools-compare", path: "/wiki/tools/compare" },
+	{ name: "tools-my-team", path: "/wiki/tools/my-team" },
+	{ name: "tactic-list", path: "/wiki/tactic" },
+	{ name: "chara-list", path: "/wiki/chara" },
 	{ name: "charte", path: "/charte" },
-	{ name: "item-list", path: "/item" },
+	{ name: "item-list", path: "/wiki/item" },
 	{ name: "legal-cgu", path: "/legal/cgu" },
 	{ name: "legal-mentions-legales", path: "/legal/mentions-legales" },
 	{ name: "legal-confidentialite", path: "/legal/confidentialite" },
-	{ name: "aura-list", path: "/aura" },
+	{ name: "aura-list", path: "/wiki/aura" },
 	{ name: "news-list", path: "/news" },
 	{ name: "login", path: "/login" },
 	{ name: "maintenance", path: "/maintenance" },
-	{ name: "skill-list", path: "/skill" },
+	{ name: "skill-list", path: "/wiki/skill" },
 ];
 
 /** Pages dynamiques témoins (une par type de fiche). */
 const DYNAMIC_PAGES = [
-	{ name: "character-detail", path: "/chara/buddy-0x6A6392AD" },
+	{ name: "character-detail", path: "/wiki/chara/buddy-0x6A6392AD" },
 	// Techniques et tactiques s'adressent par leur CODE INTERNE (`wh*`/`rh*`), pas par un
 	// identifiant hexadécimal : les deux témoins précédents répondaient 404 depuis que la
 	// liste ne publie plus que les codes.
-	{ name: "skill-detail", path: "/skill/whd00180" },
-	{ name: "item-detail", path: "/item/0x5F0F1EAC" },
-	{ name: "tactic-detail", path: "/tactic/wht10010" },
-	{ name: "aura-detail", path: "/aura/esprits-guerriers/keshin_0x0181A884" },
+	{ name: "skill-detail", path: "/wiki/skill/whd00180" },
+	{ name: "item-detail", path: "/wiki/item/0x5F0F1EAC" },
+	{ name: "tactic-detail", path: "/wiki/tactic/wht10010" },
+	{ name: "aura-detail", path: "/wiki/aura/esprits-guerriers/keshin_0x0181A884" },
 	// `/news/welcome` n'existe plus : l'article témoin avait été supprimé, et la suite
 	// entière échouait sur ce 404. Celui-ci est l'article de fond du wiki, celui vers
 	// lequel la page d'accueil pointe.
 	{ name: "news-detail", path: "/news/critique-communautaire-de-inazuma-eleven-victory-road" },
-	{ name: "patch-notes-detail", path: "/patch-notes/ps-steam_ver_1_4_2" },
+	{ name: "patch-notes-detail", path: "/wiki/patch-notes/ps-steam_ver_1_4_2" },
 ];
 
 /** Résultat de rendu d'une route. */
@@ -112,7 +112,7 @@ export function registerTestCommand(program: Command): void {
 				const child = Bun.spawn(["bunx", "playwright", "test"], {
 					stdout: "inherit",
 					stderr: "inherit",
-					cwd: path.resolve(process.cwd(), "apps/azalee"),
+					cwd: path.resolve(process.cwd(), "apps/website"),
 				});
 				process.exit(await child.exited);
 			}
@@ -292,7 +292,7 @@ export function registerTestCommand(program: Command): void {
 						return "/home/ubuntu/rg";
 					})();
 					devServerProcess = Bun.spawn([bunPath, "run", "dev"], {
-						cwd: path.resolve(monorepoRoot, "apps/azalee"),
+						cwd: path.resolve(monorepoRoot, "apps/website"),
 						stdout: "ignore",
 						stderr: "ignore",
 						env: { ...process.env, PORT: "3000" },

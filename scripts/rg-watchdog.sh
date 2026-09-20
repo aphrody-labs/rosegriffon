@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # rg-watchdog.sh — auto-réparation générique d'un service HTTP de production.
 #
-# POURQUOI CE SCRIPT REMPLACE azalee-watchdog.sh
+# POURQUOI CE SCRIPT EST GÉNÉRIQUE
 # `Restart=always` ne couvre que les crashs : il ne voit pas le cas « process vivant
 # mais figé » (thrash mémoire, boucle d'événements bloquée) qui produit un 504
 # persistant. Un watchdog existait pour ça, mais pour azalée seule — l'audit du
@@ -63,7 +63,6 @@ CIBLE="${1:-}"
 # mémoire : sinon il est recalculé sur `MemoryMax` (85 %), à défaut sur `MemoryHigh`
 # (90 %), directement depuis systemd.
 case "$CIBLE" in
-	azalee-web)      PORT=3003; SEUIL_GIB=10;  SANTE="/";       RELEASES=/home/ubuntu/rg-releases/azalee ;;
 	website-web)     PORT=3004; SEUIL_GIB=3.4; SANTE="/";       RELEASES=/home/ubuntu/rg-releases/website ;;
 	azalee-api)      PORT=8807; SEUIL_GIB=1.6; SANTE="/";       RELEASES="" ;;
 	nie-model-serve) PORT=8790; SEUIL_GIB=8.5; SANTE="/health"; RELEASES="" ;;

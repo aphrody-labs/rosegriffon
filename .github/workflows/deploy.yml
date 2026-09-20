@@ -22,8 +22,8 @@ on:
       app:
         description: Surface à publier
         type: choice
-        options: [all, azalee, website]
-        default: all
+        options: [website]
+        default: website
       mode:
         description: Nature de la publication
         type: choice
@@ -60,7 +60,7 @@ jobs:
     timeout-minutes: 60
     env:
       MCP_URL: https://mcp.rosegriffon.fr/mcp
-      APP: ${{ inputs.app || 'all' }}
+      APP: ${{ inputs.app || 'website' }}
       MODE: ${{ inputs.mode || 'deploy' }}
       BUILD: ${{ inputs.build == null && 'true' || inputs.build }}
       RELEASE: ${{ inputs.release }}

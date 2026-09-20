@@ -140,7 +140,7 @@ scratch/
 data/backups/
 **/data/backups/
 # `/data` à la RACINE = artefacts générés (glossary.json, dumps, bases de
-# travail). Ancré : `apps/azalee/data/` reste versionné, lui.
+# travail). Les données publiées vivent sous `apps/website/data/`.
 /data/
 *.sqlite
 *.sqlite3

@@ -95,7 +95,7 @@ Environment=BOT_SYNC_MEMBRES=0
 #     Ne poser `AZALEE_WEBSITE_URL` que pour viser une préversion.
 #  2. `WEBSITE_API_URL` garderait de toute façon son défaut
 #     (`https://rosegriffon.fr`, cf. `src/lib/api.ts`) : les routes
-#     `/api/bot/v1/*` n'existent QUE sur le site principal — `apps/azalee/app/api`
+#     `/api/bot/v1/*` n'existent QUE sur le site principal — `apps/website/src/app/api`
 #     n'en a aucune. Le pointer sur azalee.rosegriffon.fr donnerait des 404.
 #  3. `AZALEE_API_URL` a déjà le bon défaut dans `src/lib/azalee.ts` :
 #     `http://127.0.0.1:8807`, l'API headless en boucle locale.

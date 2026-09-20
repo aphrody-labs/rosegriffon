@@ -2,10 +2,10 @@
 /**
  * invalidate-cdn.ts — Invalidation bornée du cache CDN de production (azalee).
  *
- * Surface CDN azalee (cf. apps/azalee/CLAUDE.md « Pipeline images » + « Service Worker ») :
+ * Surface CDN Azalée servie par Website (« Pipeline images » + « Service Worker ») :
  *   1. CDN statique nginx  : cdn.rosegriffon.fr/static/azalee/menu/  (~47k webp pré-extraits)
  *   2. G4TX live-decode    : cache disque des variantes, CÔTÉ CDN (origin séparé)
- *   3. Service Worker      : apps/azalee/public/sw.js, constante CACHE_NAME — DOIT être
+ *   3. Service Worker      : apps/website/public/sw.js, constante CACHE_NAME — DOIT être
  *      bumpée après tout update d'assets/manifest, sinon les clients servent du stale.
  *
  * Leviers exposés (TOUS bornés et SÛRS) :
@@ -24,7 +24,7 @@ import { resolve } from "node:path";
 
 // Racine du monorepo (ce fichier vit dans scripts/ops/).
 const REPO_ROOT = resolve(import.meta.dir, "..", "..");
-const SW_PATH = resolve(REPO_ROOT, "apps/azalee/public/sw.js");
+const SW_PATH = resolve(REPO_ROOT, "apps/website/public/sw.js");
 
 // ── Parsing minimal des arguments (sans dépendance) ──────────────────────────
 interface CliArgs {
@@ -139,10 +139,10 @@ async function runBumpSw(apply: boolean): Promise<boolean> {
 // Le cache des variantes G4TX vit normalement CÔTÉ CDN (origin séparé). On tente
 // de découvrir un répertoire de cache *local* ; à défaut → no-op sûr.
 const G4TX_CACHE_CANDIDATES = [
-	"apps/azalee/.cache/g4tx",
-	"apps/azalee/.g4tx-cache",
-	"apps/azalee/public/g4tx",
-	"apps/azalee/data/cache/g4tx",
+	"apps/website/.cache/g4tx",
+	"apps/website/.g4tx-cache",
+	"apps/website/public/g4tx",
+	"apps/website/data/cache/g4tx",
 	".cache/g4tx",
 ];
 
@@ -237,7 +237,7 @@ async function main() {
 				"  bun scripts/ops/invalidate-cdn.ts --purge-g4tx '<glob>' [--apply]",
 				"",
 				"Flags :",
-				"  --bump-sw            incrémente CACHE_NAME (vN→vN+1) dans apps/azalee/public/sw.js",
+				"  --bump-sw            incrémente CACHE_NAME (vN→vN+1) dans apps/website/public/sw.js",
 				"  --purge-g4tx <glob>  purge les variantes G4TX en cache disque local (no-op si absent)",
 				"  --dry-run            défaut : affiche sans muter",
 				"  --apply              exécute réellement les mutations",
@@ -263,7 +263,7 @@ async function main() {
 	console.log("── Rappels (hors scope, à faire manuellement si nécessaire) ─");
 	console.log("   • Restart/reload nginx (CDN statique) : NON exécuté par ce script.");
 	console.log("   • Purge cache CDN G4TX côté origin : NON exécutée (réseau prod hors scope).");
-	console.log("   • Redéploiement azalee (sw.js bumpé) : bash scripts/ship-azalee.sh");
+	console.log("   • Redéploiement du frontend unifié : bun run deploy website");
 
 	if (!allOk) process.exit(1);
 }

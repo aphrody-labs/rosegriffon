@@ -170,7 +170,7 @@ export function libelleCategorieObjet(categorie: string | null | undefined): str
 }
 
 /**
- * Icône d'élément servie par Azalée (`apps/azalee/public/spirit_type/`).
+ * Icône d'élément servie par Website (`apps/website/public/spirit_type/`).
  *
  * Volontairement PAS le portrait du personnage : le dump `icon_chr/face/*` n'est
  * pas servi (404 mesuré le 12/8/2026, le décodeur CPK live était en cours de

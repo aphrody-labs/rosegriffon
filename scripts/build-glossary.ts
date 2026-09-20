@@ -171,7 +171,7 @@ export async function main() {
 
 	// 3. Load UI Translation Locales
 	console.log("Processing UI translation locales...");
-	const localesDir = "/home/ubuntu/rg/apps/azalee/public/locales";
+	const localesDir = "/home/ubuntu/rg/apps/website/public/locales";
 	const frLocaleFile = Bun.file(join(localesDir, "fr.json"));
 	const enLocaleFile = Bun.file(join(localesDir, "en.json"));
 	const jaLocaleFile = Bun.file(join(localesDir, "ja.json"));

@@ -30,10 +30,10 @@ import Kuroshiro from "kuroshiro";
 // @ts-expect-error — no types for kuroshiro-analyzer-kuromoji
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji";
 
-// Bun auto-load .env — fallback manuel vers apps/azalee/.env si DATABASE_URL absent
+// Bun auto-load .env — fallback manuel vers apps/website/.env si DATABASE_URL absent
 if (!process.env.DATABASE_URL) {
 	const PACKAGE_ROOT = path.resolve(import.meta.dir, "../..");
-	const fallback = path.resolve(PACKAGE_ROOT, "../../apps/azalee/.env");
+	const fallback = path.resolve(PACKAGE_ROOT, "../../apps/website/.env");
 	const file = Bun.file(fallback);
 	if (await file.exists()) {
 		const content = await file.text();

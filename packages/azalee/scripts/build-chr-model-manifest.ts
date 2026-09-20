@@ -9,7 +9,7 @@
  *
  * ⚠ L'ancien manifeste était gravement périmé (waza=5 alors que 272 existent réellement) → la
  * galerie ne montrait qu'une poignée de techniques. Régénérer après tout rebuild de
- * `cpk-index.ndjson.gz` :  bun apps/azalee/scripts/build-chr-model-manifest.ts
+ * `cpk-index.ndjson.gz` : bun packages/azalee/scripts/build-chr-model-manifest.ts
  */
 import { gunzipSync } from "node:zlib";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -22,7 +22,7 @@ const DATA_DIR = path.resolve(import.meta.dir, "../src/data");
 const INDEX =
 	resolveDataFile("cpk-index.ndjson.gz") ??
 	(() => {
-		throw new Error("cpk-index.ndjson.gz introuvable — lancer apps/azalee/scripts/build-cpk-index.ts");
+		throw new Error("cpk-index.ndjson.gz introuvable sous apps/website/data");
 	})();
 const OUT = path.join(DATA_DIR, "chr-model-manifest.json");
 

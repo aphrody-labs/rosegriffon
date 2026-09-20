@@ -18,7 +18,7 @@ import { resolveMirrorPath } from "../../config";
 /** Racine du monorepo (les scripts orchestrés y sont ancrés). */
 const REPO_ROOT = "/home/ubuntu/rg";
 /** Fichier d'environnement chargé par le pousseur inagle. */
-const AZALEE_ENV = `${REPO_ROOT}/apps/azalee/.env`;
+const AZALEE_ENV = `${REPO_ROOT}/apps/website/.env`;
 /** Racine des dumps de jeu. */
 const DATA_ROOT_DEFAULT =
 	process.env.DATA_ROOT || process.env.DATA_PATH || "/home/ubuntu/niers/data";
@@ -31,7 +31,7 @@ const MIRROR_MAX_AGE_H = 48;
 function mirrorRefreshCommand(): string {
 	return existsSync(NIERS_MIRROR_PUBLISHER)
 		? NIERS_MIRROR_PUBLISHER
-		: `bun --filter @rosegriffon/azalee-web backup:supabase`;
+		: `echo "Canonical mirror publisher missing: ${NIERS_MIRROR_PUBLISHER}" >&2; exit 1`;
 }
 
 /**
@@ -83,7 +83,7 @@ export function registerDataCommand(program: Command): void {
 		)
 		.option("--apply", "Applique les migrations via psql (rose_griffon local)")
 		.action((opts: DataMigrateOptions) => {
-			const dir = `${REPO_ROOT}/apps/azalee/better-auth_migrations`;
+			const dir = `${REPO_ROOT}/apps/website/supabase/migrations`;
 			let files: string[] = [];
 			try {
 				files = readdirSync(dir)
@@ -131,16 +131,16 @@ export function registerDataCommand(program: Command): void {
 			const flags = `${opts.full ? " --full" : ""}${opts.deletes ? " --deletes" : ""}`;
 			const ok = runDataStep(
 				"data sync (Supabase ↔ SQLite)",
-				`bun apps/azalee/scripts/ops/sync-supabase-to-sqlite.ts${flags}`
+				`${mirrorRefreshCommand()}${flags}`
 			);
 			process.exit(ok ? 0 : 1);
 		});
 
 	dataCmd
 		.command("typecheck")
-		.description("Type-check strict (azalee + inagle, tsc --noEmit)")
+		.description("Type-check strict (website + inagle, tsc --noEmit)")
 		.action(() => {
-			const a = runDataStep("typecheck azalee", `bun --filter @rosegriffon/azalee-web type-check`);
+			const a = runDataStep("typecheck website", `bun --filter @rosegriffon/website type-check`);
 			const b = runDataStep("typecheck inagle", `bun --filter @rosegriffon/inagle type-check`);
 			process.exit(a && b ? 0 : 1);
 		});
@@ -180,10 +180,10 @@ export function registerDataCommand(program: Command): void {
 				"inagle entries/characters.json",
 				existsSync(`${REPO_ROOT}/packages/inagle/src/entries/characters.json`)
 			);
-			check("snapshot schéma DB", existsSync(`${REPO_ROOT}/apps/azalee/data/schema-snapshot`));
+			check("snapshot schéma DB", existsSync(`${REPO_ROOT}/apps/website/data/schema-snapshot`));
 			check(
 				"standalone embarque un miroir",
-				existsSync(`${REPO_ROOT}/apps/azalee/.next/standalone/apps/azalee/data/backups`)
+				existsSync(`${REPO_ROOT}/apps/website/.next/standalone/apps/website/data/backups`)
 			);
 			console.log(
 				ok
@@ -204,7 +204,7 @@ export function registerDataCommand(program: Command): void {
 					{ DATA_ROOT: DATA_ROOT_DEFAULT, DATA_PATH: DATA_ROOT_DEFAULT },
 				],
 				["load", mirrorRefreshCommand(), {}],
-				["typecheck azalee", `bun --filter @rosegriffon/azalee-web type-check`, {}],
+				["typecheck website", `bun --filter @rosegriffon/website type-check`, {}],
 				["typecheck inagle", `bun --filter @rosegriffon/inagle type-check`, {}],
 			];
 			for (const [label, cmd, env] of steps) {

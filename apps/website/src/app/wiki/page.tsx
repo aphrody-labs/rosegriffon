@@ -108,7 +108,7 @@ export default async function WikiHomePage() {
 			 * Hero interactif de l'encyclopédie Azalée.
 			 *
 			 * LA GOUTTIÈRE QUI MANQUAIT
-			 * `LandingHero` est un composant partagé avec `apps/azalee`, où le
+			 * `LandingHero` est le composant d'accueil du wiki unifié, où le
 			 * `Shell` d'`@rosegriffon/app-shell` enveloppe les pages dans
 			 * `px-4 md:px-8 lg:px-12` : son `-mx-4 md:-mx-8 lg:-mx-12` annule
 			 * exactement cette gouttière pour obtenir un plein cadre. Ici, la zone

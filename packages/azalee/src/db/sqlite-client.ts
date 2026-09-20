@@ -57,7 +57,7 @@ function fingerprintOf(path: string): string {
 /**
  * Invalide le handle si le miroir a été remplacé sous nos pieds.
  *
- * `azalee-web` est redémarré par la synchronisation, mais pas les autres
+ * `website-web` est redémarré par la synchronisation, mais pas les autres
  * consommateurs de la lib (`azalee-api`, `rg-mcp`, un CLI qui tourne longtemps,
  * un sidecar Tauri) : sans cette vérification, ils continuaient à servir le
  * snapshot ouvert au démarrage — et après deux nuits, un fichier supprimé.
@@ -102,7 +102,7 @@ function getSqliteDb(): Database {
 	_lastFreshnessCheck = Date.now();
 
 	if (typeof Bun !== "undefined") {
-		// Runtime Bun (prod `azalee-web.service`) → bun:sqlite natif.
+		// Runtime Bun (services de données et CLI) → bun:sqlite natif.
 		// eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy load bun:sqlite sous garde Bun
 		const { Database: DBConstructor } = require("bun:sqlite");
 		const db = new DBConstructor(dbPath, { readonly: true }) as SqliteLike;

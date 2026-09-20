@@ -1,5 +1,5 @@
 // Données crawlées du site officiel https://www.inazuma-cross.jp/ + tweets réels @inazuma_cross.
-// Source canonique : apps/azalee/data/inazuma-cross.json (tracké, sans PII).
+// Source canonique : apps/website/data/inazuma-cross.json (tracké, sans PII).
 // Traduction FR (champs *Fr) STRICTEMENT FACTUELLE : chaque bloc est la traduction d'un texte réel
 // (JP) du site officiel ou d'un vrai tweet. Le site officiel n'a pas de version FR.
 import raw from "@/data/inazuma-cross.json";

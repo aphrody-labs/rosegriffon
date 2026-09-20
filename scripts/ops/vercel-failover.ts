@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 /**
- * Prépare et déclenche le secours Vercel des deux frontends Rose Griffon.
+ * Prépare et déclenche le secours Vercel du frontend unifié Rose Griffon.
  * Les services stateful restent sur le VPS ou doivent être migrés séparément.
  */
 
@@ -15,7 +15,6 @@ const mode = process.argv[2] ?? "preflight";
 
 const projects = [
 	{ app: "apps/website", project: "rosegriffon-fr", domain: "rosegriffon.fr" },
-	{ app: "apps/azalee", project: "azalee-rosegriffon", domain: "azalee.rosegriffon.fr" },
 ] as const;
 
 async function run(args: string[], allowFailure = false): Promise<string> {

@@ -4,7 +4,7 @@
  *
  * Les deux dépôts restent séparés, mais une publication suit un seul ordre :
  * synchronisation Git → données/manifests → formats → WASM → serveur modèle →
- * migrations de miroir → gates Azalée → build bleu/vert → nginx/CDN → sondes.
+ * migrations de miroir → gates Website → unique build Next bleu/vert → nginx/CDN → sondes.
  * Le mode par défaut est la vérification. Une mutation exige --apply (ou un
  * mode preview/deploy/promote explicite) et chaque commande est un argv séparé,
  * jamais une chaîne shell fournie par l'environnement.
@@ -25,7 +25,7 @@ interface Options {
 	formats: boolean;
 	wasm: boolean;
 	model: boolean;
-	azalee: boolean;
+	website: boolean;
 	mirror: boolean;
 	cdn: boolean;
 	nginx: boolean;
@@ -87,7 +87,7 @@ function parseArgs(argv: string[]): Options {
 		formats: true,
 		wasm: true,
 		model: true,
-		azalee: true,
+		website: true,
 		mirror: true,
 		cdn: true,
 		nginx: true,
@@ -105,7 +105,7 @@ function parseArgs(argv: string[]): Options {
 		else if (argument === "--skip-formats") options.formats = false;
 		else if (argument === "--skip-wasm") options.wasm = false;
 		else if (argument === "--skip-model") options.model = false;
-		else if (argument === "--skip-azalee") options.azalee = false;
+		else if (argument === "--skip-website") options.website = false;
 		else if (argument === "--skip-mirror") options.mirror = false;
 		else if (argument === "--skip-cdn") options.cdn = false;
 		else if (argument === "--skip-nginx") options.nginx = false;
@@ -222,9 +222,9 @@ async function main(): Promise<number> {
 		if (options.mode === "promote") {
 			await runStep(
 				results,
-				"azalee-promote",
+				"website-promote",
 				options.rgRoot,
-				[BUN, `${options.rgRoot}/scripts/ops/deploy.ts`, "promote", "azalee"],
+				[BUN, `${options.rgRoot}/scripts/ops/deploy.ts`, "promote", "website"],
 				true,
 				options
 			);
@@ -347,33 +347,33 @@ async function main(): Promise<number> {
 		);
 	} else await skipStep(results, "nie-model", "désactivé par --skip-model");
 
-	if (options.azalee) {
+	if (options.website) {
 		await runStep(
 			results,
-			"azalee-typecheck",
+			"website-typecheck",
 			options.rgRoot,
-			[BUN, "run", "--filter", "@rosegriffon/azalee-web", "type-check"],
+			[BUN, "run", "--filter", "@rosegriffon/website", "type-check"],
 			false,
 			options
 		);
 		await runStep(
 			results,
-			"azalee-lint",
+			"website-lint",
 			options.rgRoot,
-			[BUN, "run", "--filter", "@rosegriffon/azalee-web", "lint"],
+			[BUN, "run", "--filter", "@rosegriffon/website", "lint"],
 			false,
 			options
 		);
 		const deployMode = options.mode === "preview" ? "preview" : "deploy";
 		await runStep(
 			results,
-			`azalee-${deployMode}`,
+			`website-${deployMode}`,
 			options.rgRoot,
-			[BUN, `${options.rgRoot}/scripts/ops/deploy.ts`, deployMode, "azalee", "--no-gate"],
+			[BUN, `${options.rgRoot}/scripts/ops/deploy.ts`, deployMode, "website", "--no-gate"],
 			true,
 			options
 		);
-	} else await skipStep(results, "azalee", "désactivé par --skip-azalee");
+	} else await skipStep(results, "website", "désactivé par --skip-website");
 	if (options.nginx) {
 		await runStep(results, "nginx-test", options.rgRoot, ["sudo", "nginx", "-t"], false, options);
 		await runStep(
@@ -448,7 +448,7 @@ const USAGE = `Usage : bun scripts/ops/release-stack.ts [mode] [options]
 Modes (check par défaut)
   --mode check       sondes et nginx -t, aucune écriture
   --preview          gates + build + publication slot B, sans promotion
-  --deploy           gates + build + bascule Azalée en production
+  --deploy           gates + unique build Website + bascule en production
   --promote          promeut la preview existante, sans rebuild
   --apply             alias de --deploy
 
@@ -459,7 +459,7 @@ Options
   --skip-formats     ne lance pas le gate nie-formats
   --skip-wasm        ne compile pas nie-wasm
   --skip-model       ne compile/redémarre pas nie-model-serve
-  --skip-azalee      ne type-check/lint/build pas Azalée
+  --skip-website     ne type-check/lint/build pas Website
 	--skip-mirror      ne republie pas le miroir SQLite (après --skip-data ou reprise)
   --skip-cdn         ne bump/purge pas le cache CDN
   --skip-nginx       ne teste/recharge pas nginx

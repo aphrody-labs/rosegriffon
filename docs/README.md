@@ -22,11 +22,9 @@ dans `.gitignore`.
 
 | Doc | Portée |
 | --- | --- |
+| [azalee.md](azalee.md) | Contrat canonique de la surface web : Azalée vit dans `apps/website` sous `/wiki`, avec un seul build et aucune unité web autonome. |
 | [azalee-lib.md](azalee-lib.md) | `@rosegriffon/azalee` : cœur du wiki en bibliothèque Bun (racine client-safe, `/server`, `/remote`). |
-| [azalee-tauri.md](azalee-tauri.md) | Recette d'intégration Tauri : sidecar Bun compilé, CSP, cycle de vie, mode dégradé. |
 | [wiki-filters.md](wiki-filters.md) | Filtres du wiki et contournement des colonnes NULL de `inagle_skills`. |
-| [cpk-browser.md](cpk-browser.md) | Navigateur des 250 800 fichiers des archives CPK : index, routes, prévisualisation. |
-| [tools/README.md](tools/README.md) | Outils communautaires (comparateur, équipe aléatoire, traducteur). |
 
 ## Données du jeu (extraction)
 

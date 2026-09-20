@@ -59,7 +59,7 @@ function mirrorPath(): string {
 	if (MIRROR_ARG) return MIRROR_ARG;
 	const fs = require("node:fs");
 	const candidates = [
-		["/home/ubuntu/rg/apps/azalee/data/backups", /^supabase-.*\.sqlite$/],
+		["/home/ubuntu/rg/apps/website/data/backups", /^supabase-.*\.sqlite$/],
 		["/home/ubuntu/niers/var/miroir", /^inagle-.*\.sqlite$/],
 	] as const;
 	for (const [dir, pattern] of candidates) {

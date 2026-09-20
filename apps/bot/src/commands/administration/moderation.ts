@@ -303,7 +303,7 @@ async function conclure(
  * 20 colonnes, aucune `banned_at` ni `is_banned`). Le bannissement du site est
  * la valeur `banned` de `profiles.role` — c'est ce qu'écrivent l'administration
  * du site (`apps/website/src/app/api/admin/users/[id]/route.ts`) et le tableau
- * de bord d'Azalée (`apps/azalee/app/dashboard/users/actions.ts`). On écrit donc
+ * de bord d'Azalée dans Website. On écrit donc
  * la même chose, pas une colonne inventée.
  *
  * Rend la phrase à afficher : l'échec du bannissement de compte n'annule jamais

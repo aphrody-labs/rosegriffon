@@ -372,20 +372,19 @@ describe("trierPostsParDate", () => {
 });
 
 describe("analyserLiveEnv", () => {
-	test("lit le live.env réel du slot azalee", () => {
-		// Contenu exact de /home/ubuntu/rg-releases/azalee/live.env le 13/8/2026.
+	test("lit le live.env du slot Website unifié", () => {
 		expect(
 			analyserLiveEnv(
 				"# Généré par scripts/ops/deploy.ts — slot actuellement servi par nginx.\n" +
 					"LIVE_SLOT=a\n" +
-					"LIVE_UNIT=azalee-web.service\n" +
-					"LIVE_PORT=3003\n" +
+					"LIVE_UNIT=website-web.service\n" +
+					"LIVE_PORT=3004\n" +
 					"LIVE_RELEASE=2026-08-13T00-34-03-769-Va8uc-iExl92JKgLHQVQ0\n"
 			)
 		).toEqual({
 			LIVE_SLOT: "a",
-			LIVE_UNIT: "azalee-web.service",
-			LIVE_PORT: "3003",
+			LIVE_UNIT: "website-web.service",
+			LIVE_PORT: "3004",
 			LIVE_RELEASE: "2026-08-13T00-34-03-769-Va8uc-iExl92JKgLHQVQ0",
 		});
 	});

@@ -15,8 +15,8 @@ Last verified: **2026-09-20 UTC** on the Rose Griffon VPS.
   regroupant le portail Rose Griffon, le wiki complet Inazuma Eleven: Victory Road (`/wiki`), les actualités
   et chroniques (`/news`, `/chroniques`), la boutique (`/shop`), l'espace communauté (`/community`),
   l'administration (`/admin`) et l'authentification Better Auth.
-- `azalee.rosegriffon.fr` : basculé en redirection permanente HTTP 301 vers `rosegriffon.fr/wiki` via nginx,
-  avec `azalee-web.service` (:3003) en phase de transition sans régression.
+- `azalee.rosegriffon.fr` : domaine historique sans application ni service propre ; nginx applique une
+  redirection permanente vers `https://rosegriffon.fr/wiki`.
 - `achillea.rosegriffon.fr` : tournois, classements ELO, licences et clans Achilléa (`apps/achillea-web`,
   Angular 19 / PrimeNG, :8080) adossé à `achillea-bot` (:5001) et sa pile Supabase locale isolée.
 - `nie.aphrody.com` : servi depuis le VPS derrière nginx.
@@ -29,6 +29,10 @@ Last verified: **2026-09-20 UTC** on the Rose Griffon VPS.
   production validé.
 
 ## Retired surfaces
+
+- The standalone Azalée Next application and its `azalee-web` A/B units are
+  retired. Do not build, deploy, restart, monitor, or recreate them. The wiki is
+  released exclusively with `apps/website`.
 
 - The BXC public site is a future project, not a production service. Its systemd
   units, crawlers, scheduler, and public origin are disabled. The public vhost

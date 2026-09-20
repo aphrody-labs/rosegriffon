@@ -2,11 +2,9 @@
  * Navigation de website — le wiki est monté sous `/wiki` de `rosegriffon.fr`,
  * l'administration sous `/admin`.
  *
- * La structure du menu vit dans `@rosegriffon/app-shell` : elle est partagée mot
- * pour mot avec `apps/azalee`, qui sert le même wiki à la racine. Seules les
- * bases de montage diffèrent, et elles sont déclarées ici. Ne PAS réintroduire
- * de liste d'items en dur : les deux copies manuelles précédentes avaient dérivé
- * (entrées oubliées d'un côté, chemins non préfixés de l'autre = 404).
+ * La structure du menu vit dans `@rosegriffon/app-shell`. Ne pas réintroduire
+ * de liste d'items locale : Website est l'unique frontend et monte le wiki sous
+ * `/wiki`.
  */
 import { construireNavigation, WEBSITE_BASES } from "@rosegriffon/app-shell";
 

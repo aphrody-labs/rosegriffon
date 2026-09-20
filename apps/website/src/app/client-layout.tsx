@@ -180,7 +180,7 @@ export default function ClientLayout({
 					 *
 					 * Les fusionner est la vraie cible ; les monter tous les deux
 					 * rétablit le service sans toucher aux composants partagés avec
-					 * `apps/azalee`, que le test de synchronisation du chrome exige
+					 * l'ancien frontend autonome, avant l'unification dans Website
 					 * identiques octet à octet.
 					 */}
 					{/*

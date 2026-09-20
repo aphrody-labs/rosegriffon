@@ -23,9 +23,9 @@ import { extname, join, relative } from "node:path";
 
 // --- Dossiers cibles par défaut (relatifs à la racine du monorepo) -----------
 const DEFAULT_DIRS = [
-	"apps/azalee/data/images/menu",
+	"apps/website/data/images/menu",
 	"apps/website/public",
-	"apps/azalee/public",
+	"apps/website/public",
 ];
 
 // Extensions raster candidates à la recompression.

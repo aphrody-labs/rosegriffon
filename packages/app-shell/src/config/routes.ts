@@ -1,11 +1,7 @@
 /**
  * Registre canonique des routes du chrome applicatif.
  *
- * Le wiki Azalée est servi à DEUX emplacements : à la racine sur
- * `azalee.rosegriffon.fr` et sous `/wiki` sur `rosegriffon.fr`. Les deux apps
- * maintenaient jusqu'ici deux copies manuelles de `config/navigation.ts` qui ne
- * différaient QUE par ce préfixe — et qui dérivaient à chaque ajout de page
- * (entrées oubliées d'un côté, chemins non préfixés de l'autre = 404).
+ * Le wiki Azalée est servi sous `/wiki` par l'unique application Website.
  *
  * Ce module isole donc ce qui varie (`NavBases`) de ce qui ne varie pas (la
  * structure du menu), pour que les deux barres latérales, les deux rails et les
@@ -15,9 +11,9 @@
 
 /** Emplacements où l'app monte ses trois domaines et l'administration. */
 export interface NavBases {
-	/** Préfixe du wiki : `""` (azalee, à la racine) ou `"/wiki"` (website). */
+	/** Préfixe du wiki. */
 	wiki: string;
-	/** Racine de l'administration : `"/dashboard"` (azalee) ou `"/admin"` (website). */
+	/** Racine de l'administration. */
 	admin: string;
 	/**
 	 * Préfixe de l'e-sport (Achilléa).
@@ -35,7 +31,6 @@ export interface NavBases {
 	surfacesNiers?: boolean;
 }
 
-export const AZALEE_BASES: NavBases = { admin: "/dashboard", wiki: "" };
 export const WEBSITE_BASES: NavBases = {
 	admin: "/admin",
 	association: "",
@@ -217,46 +212,17 @@ export function joindreDomaine(base: string | undefined, chemin: string): string
 /**
  * Le chemin est-il dans l'espace d'administration ?
  *
- * Les deux apps l'enracinent différemment (`/dashboard` côté azalee, `/admin`
- * côté website) et le chrome partagé doit le reconnaître dans les deux cas :
- * la barre latérale du wiki bascule sur le menu d'administration ici, et une
- * version qui ne testait qu'une seule racine laissait l'autre app afficher le
- * menu public par-dessus la barre d'administration.
+ * Website est l'unique application et monte l'administration sous `/admin`.
  */
 export function estSousAdministration(pathname: string): boolean {
-	return [AZALEE_BASES.admin, WEBSITE_BASES.admin].some(
-		(base) => pathname === base || pathname.startsWith(`${base}/`)
-	);
+	const base = WEBSITE_BASES.admin;
+	return pathname === base || pathname.startsWith(`${base}/`);
 }
 
 /**
- * Déduit les bases de navigation du chemin courant.
- *
- * LE BUG QUE ÇA CORRIGE
- * Les trois composants de chrome — barre latérale, rail, barre du bas —
- * répétaient à l'identique `pathname.startsWith("/wiki") || startsWith("/admin")`
- * pour décider s'ils étaient dans `website` ou dans `azalee`. Trois copies d'une
- * heuristique qui ne connaissait que deux préfixes : depuis la fusion des trois
- * sites, une route `/achillea/**` ne correspond à aucun des deux et retombait
- * donc silencieusement sur `AZALEE_BASES` — c'est-à-dire un wiki monté à la
- * racine. La barre latérale affichait alors des liens `/chara`, `/skill`,
- * `/equipe` qui n'existent pas sur `rosegriffon.fr` : des 404 servis par le
- * menu lui-même, et seulement sur l'e-sport.
- *
- * La décision vit désormais ici, en un seul endroit, et couvre les trois
- * domaines. `azalee` reste le cas par défaut parce que c'est la seule app qui
- * sert le wiki à la racine : tout chemin non préfixé y est légitime.
+ * Retourne les bases de l'unique application Website.
  */
 export function basesDepuisChemin(pathname: string): NavBases {
-	const prefixesWebsite = [
-		WEBSITE_BASES.wiki,
-		WEBSITE_BASES.admin,
-		WEBSITE_BASES.esport ?? "",
-	].filter(Boolean);
-
-	const estWebsite = prefixesWebsite.some(
-		(prefixe) => pathname === prefixe || pathname.startsWith(`${prefixe}/`)
-	);
-
-	return estWebsite ? WEBSITE_BASES : AZALEE_BASES;
+	void pathname;
+	return WEBSITE_BASES;
 }

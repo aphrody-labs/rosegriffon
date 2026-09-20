@@ -56,7 +56,7 @@ export function crc32Std(input: string): string {
 function readCpkPaths(): string[] {
 	const src = resolveDataFile(CPK_INDEX);
 	if (!src) {
-		throw new Error(`[menu-manifest] ${CPK_INDEX} introuvable (apps/azalee/data/).`);
+		throw new Error(`[menu-manifest] ${CPK_INDEX} introuvable (apps/website/data/).`);
 	}
 	const text = gunzipSync(readFileSync(src)).toString("utf8");
 	const out: string[] = [];

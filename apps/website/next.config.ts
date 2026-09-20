@@ -323,7 +323,7 @@ const nextConfig: NextConfig = {
 		// Sans ces deux listes, Next génère les 8 `deviceSizes` et 8 `imageSizes`
 		// par défaut pour CHAQUE image : autant de variantes à optimiser et à
 		// garder en cache pour des largeurs que le site ne demande jamais. Même
-		// jeu de largeurs que `apps/azalee`, qui est aussi celui pré-chauffé dans
+		// jeu de largeurs commun au wiki, également pré-chauffé dans
 		// le cache disque du CDN.
 		deviceSizes: [768, 1024, 1920],
 		imageSizes: [96, 256, 384, 512],

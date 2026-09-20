@@ -58,7 +58,7 @@ function titleOf(name: string): string {
 
 const src = resolveDataFile(CPK_INDEX);
 if (!src) {
-	console.error(`[gallery-manifest] ${CPK_INDEX} introuvable (apps/azalee/data/).`);
+	console.error(`[gallery-manifest] ${CPK_INDEX} introuvable (apps/website/data/).`);
 	process.exit(1);
 }
 

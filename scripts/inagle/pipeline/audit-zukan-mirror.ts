@@ -22,7 +22,7 @@ const AUDIT_OUT = "/home/ubuntu/niers/data/zukan-audit-mirror.json";
 
 function mirrorPath(): string {
 	const fs = require("node:fs");
-	const dir = "/home/ubuntu/rg/apps/azalee/data/backups";
+	const dir = "/home/ubuntu/rg/apps/website/data/backups";
 	const files = fs
 		.readdirSync(dir)
 		.filter((f: string) => /^supabase-.*\.sqlite$/.test(f))

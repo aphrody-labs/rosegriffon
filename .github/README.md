@@ -50,8 +50,8 @@ proposées en pull request, à relire et fusionner à la main.
 
 ## Ce qui tient lieu de garde-fou aujourd'hui
 
-Le déploiement ne passe pas par GitHub : `scripts/ship-website.sh` et
-`scripts/ship-azalee.sh` construisent et redémarrent les services sur le VPS,
+Le déploiement ne passe pas par GitHub : `scripts/ops/deploy.ts` construit et
+bascule le Website unifié sur le VPS,
 avec un contrôle de santé HTTP avant de rendre la main. Les vérifications se
 font donc localement, avant de pousser :
 

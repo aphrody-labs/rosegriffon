@@ -10,7 +10,6 @@ tourner. Tout est en **Bun**, tout tourne sur un seul VPS.
 rg/
 ├── apps/
 │   ├── website/         # Application unifiée Rose Griffon (rosegriffon.fr) : portail, wiki (/wiki), chroniques & news, admin (/admin)
-│   ├── azalee/          # Archivé / fusionné dans apps/website (redirections 301 azalee.rosegriffon.fr -> rosegriffon.fr/wiki)
 │   ├── achillea-web/    # Application Angular 19 / PrimeNG : tournois, classements, licences (achillea.rosegriffon.fr)
 │   ├── achillea-bot/    # Bot Discord et API tournois Achilléa
 │   ├── bot/             # Bot Discord unifié (rg-bot & azalee-bot)
@@ -64,20 +63,19 @@ bun test <chemin>       # depuis le paquet concerné
 En développement :
 
 ```bash
-bun run azalee:dev      # wiki
-bun run website:dev     # site principal
+bun run website:dev     # portail et wiki Azalée sous /wiki
 bun packages/azalee/src/cli.ts --help    # CLI de données du jeu
 bun packages/mcp/src/cli.ts --list       # inventaire du serveur MCP
 ```
 
 ## Déploiement
 
-Les deux applications sont auto-hébergées sur le VPS derrière nginx, et se
-publient d'une seule commande :
+Le portail et le wiki Azalée forment une seule application Next auto-hébergée,
+`apps/website`. Il n'existe ni build, ni release, ni service web Azalée autonome.
+La publication complète utilise une seule commande :
 
 ```bash
-bun run deploy                   # wiki + site, sans coupure de service
-bun run deploy azalee            # une seule surface
+bun run deploy website           # portail + /wiki, un seul build Next
 bun run deploy:status            # version servie, slots, mémoire, santé publique
 ```
 
@@ -86,8 +84,9 @@ est sondé, puis nginx bascule — le site ne tombe à aucun moment (mesuré :
 1 558 requêtes pendant un déploiement complet, 0 erreur). `preview` /
 `promote` permettent de valider une version sur le domaine public, derrière un
 cookie, avant de la passer en production ; `rollback` revient à la précédente.
-`bash scripts/ship-azalee.sh` et `ship-website.sh` restent valables : ils
-délèguent à cette mécanique.
+Le domaine historique `azalee.rosegriffon.fr` ne possède aucun runtime : nginx le
+redirige vers `https://rosegriffon.fr/wiki`. Voir le
+[contrat de surface Azalée](docs/azalee.md).
 
 La même mécanique se pilote à distance par le serveur MCP (`deploy_status` en
 lecture, `deploy_run` en portée `admin`) ou par
@@ -139,6 +138,8 @@ L'index complet est dans [`docs/README.md`](docs/README.md). Points d'entrée
 les plus utiles :
 
 - [`docs/azalee-lib.md`](docs/azalee-lib.md) — la bibliothèque du wiki ;
+- [`docs/azalee.md`](docs/azalee.md) — surface web unique, domaine historique et
+  invariant d'un seul build Next ;
 - [`docs/deploy.md`](docs/deploy.md) — exploitation et déploiement ;
 - [`docs/deploiement-sans-coupure.md`](docs/deploiement-sans-coupure.md) — la
   publication bleu/vert, la prévisualisation et le retour arrière ;

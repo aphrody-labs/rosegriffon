@@ -38,7 +38,7 @@ import { parseG4tx } from "../src/icon-index/g4tx-header";
 import type { IconIndexEntry } from "../src/icon-index/shared";
 
 const REPO_ROOT = path.resolve(import.meta.dir, "../../..");
-const CPK_INDEX = path.join(REPO_ROOT, "apps/azalee/data/cpk-index.ndjson.gz");
+const CPK_INDEX = path.join(REPO_ROOT, "apps/website/data/cpk-index.ndjson.gz");
 
 /** Préfixe du namespace icône dans l'index CPK. */
 const ICON_PREFIX = "data/dx11/menu/200_icon/";
@@ -54,7 +54,7 @@ function arg(name: string, fallback: string): string {
 	return i >= 0 ? (process.argv[i + 1] ?? fallback) : fallback;
 }
 
-const OUT = path.resolve(arg("out", path.join(REPO_ROOT, "apps/azalee/data/icon-texture-index.ndjson.gz")));
+const OUT = path.resolve(arg("out", path.join(REPO_ROOT, "apps/website/data/icon-texture-index.ndjson.gz")));
 const SERVICE = arg("service", process.env.NIE_MODEL_SERVE_URL ?? "http://127.0.0.1:8790");
 const CONCURRENCY = Number(arg("concurrency", "8"));
 const DRY_RUN = process.argv.includes("--dry-run");

@@ -22,7 +22,7 @@
 # rien ne le signale ailleurs que dans la console d'un visiteur.
 #
 # GOOGLE ADSENSE
-# Les hôtes publicitaires sont alignés sur ceux de apps/azalee/next.config.ts, où la
+# Les hôtes publicitaires sont alignés sur ceux de apps/website/next.config.ts, où la
 # même politique tourne en mode bloquant. `frame-src` n'est donc plus `'none'` : une
 # annonce s'affiche dans une iframe, et l'interdire laisse l'emplacement vide sans
 # autre trace qu'un « Refused to frame » en console. Le contenu des créations est

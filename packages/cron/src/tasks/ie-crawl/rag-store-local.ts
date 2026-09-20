@@ -7,7 +7,7 @@
 // Store vectoriel LOCAL (bun:sqlite, `@rosegriffon/db/rag-store`).
 // Remplace le store pgvector Supabase (`inagle_rag_chunks` + RPC
 // `rag_hybrid_search`) qui avait fait dépasser le quota storage du plan free
-// (592 Mo à lui seul) et cassé azalee-web/website-web/rg-cron pendant 7+
+// (592 Mo à lui seul) et cassé website-web/rg-cron pendant 7+
 // jours (migré le 2026-08-06, cf. docs/rag-unified.md).
 // Le store Redis (`@rosegriffon/db/redis`) reste branché en parallèle (cache
 // généraliste, pas le RAG).
