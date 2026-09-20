@@ -75,7 +75,7 @@ export default async function AccountPage({
 			userId={user.id}
 			email={user.email}
 			initialTab={resolveAccountTab(tab, TABS)}
-			backHref={username ? `/profil/${username}` : "/dashboard"}
+			backHref={username ? `/profil/${username}` : "/"}
 			avatarUrl={str("avatar_url") || null}
 			username={username || null}
 			role={str("role") || null}

@@ -15,7 +15,7 @@ const QUICK_LINKS: QuickLink[] = [
 	{
 		accent: "text-sky-500",
 		description: "Avatar, bio, réseaux sociaux",
-		href: "/dashboard/account",
+		href: "/settings",
 		icon: Settings,
 		title: "Mon Compte",
 	},

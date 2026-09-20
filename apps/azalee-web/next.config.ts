@@ -111,6 +111,7 @@ const nextConfig: NextConfig = {
 	transpilePackages: [
 		"@rosegriffon/azalee",
 		"@rosegriffon/ui",
+		"@rosegriffon/app-shell",
 		"@rosegriffon/db",
 		"@rosegriffon/types",
 		"@rosegriffon/config",

@@ -113,7 +113,7 @@ export function AccountClient({
 	/** Rattache un fournisseur social et laisse Better Auth rediriger. */
 	const link = async (provider: "discord" | "google" | "twitch") => {
 		const { error } = await authClient.linkSocial({
-			callbackURL: "/dashboard/account?tab=connections",
+			callbackURL: "/settings?tab=connections",
 			provider,
 		});
 		if (error) {
@@ -142,7 +142,7 @@ export function AccountClient({
 			// Patreon passe par le plugin genericOAuth, pas par `linkSocial`.
 			onLink: async () => {
 				const res = await authClient.signIn.social({
-					callbackURL: "/dashboard/account?tab=connections",
+					callbackURL: "/settings?tab=connections",
 					provider: "patreon",
 				});
 				const error = (res as { error?: { message?: string } | null })?.error;
@@ -220,7 +220,7 @@ export function AccountClient({
 									currentEmail={email}
 									onChangeEmail={async (newEmail) => {
 										const { error } = await authClient.changeEmail({
-											callbackURL: "/dashboard/account?tab=security",
+											callbackURL: "/settings?tab=security",
 											newEmail,
 										});
 										return { error: error?.message ?? null };

@@ -1,0 +1,23 @@
+{
+	"name": "@rosegriffon/app-shell",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Chrome applicatif partagé (navigation, sidebar, app bar, footer) entre website et azalee",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./navigation": "./src/config/navigation.ts",
+		"./routes": "./src/config/routes.ts",
+		"./theme": "./src/config/theme.ts"
+	},
+	"scripts": {
+		"lint": "bunx oxlint -c ../../.oxlintrc.json src",
+		"type-check": "bun --bun tsc --noEmit",
+		"test": "bun test test"
+	},
+	"devDependencies": {
+		"@rosegriffon/config": "workspace:*",
+		"@types/bun": "catalog:",
+		"typescript": "catalog:"
+	}
+}

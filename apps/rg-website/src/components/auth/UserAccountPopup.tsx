@@ -113,7 +113,7 @@ export function UserAccountPopup({ user, profile, loading = false }: UserAccount
 					</DropdownMenuItem>
 
 					<DropdownMenuItem asChild>
-						<Link href="/dashboard/account" className="flex cursor-pointer items-center gap-2">
+						<Link href="/settings" className="flex cursor-pointer items-center gap-2">
 							<Settings className="size-4" />
 							<span>Paramètres</span>
 						</Link>

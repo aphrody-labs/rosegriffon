@@ -67,7 +67,7 @@ export async function updateProfile(
 		return { error: "Erreur lors de la mise à jour du profil." };
 	}
 
-	revalidatePath("/dashboard/account");
+	revalidatePath("/settings");
 	revalidatePath(`/profil/${parsed.data.username}`);
 	return {};
 }
@@ -127,7 +127,7 @@ export async function updateAddress(
 		return { error: "Erreur lors de l'enregistrement de l'adresse." };
 	}
 
-	revalidatePath("/dashboard/account");
+	revalidatePath("/settings");
 	return {};
 }
 
@@ -155,7 +155,7 @@ export async function updateAvatarUrl(avatarUrl: string): Promise<{ error?: stri
 		return { error: "Impossible d'enregistrer le nouvel avatar." };
 	}
 
-	revalidatePath("/dashboard/account");
+	revalidatePath("/settings");
 	const { data: profile } = await admin
 		.from("profiles")
 		.select("username")
