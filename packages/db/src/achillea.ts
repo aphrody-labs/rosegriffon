@@ -1,12 +1,12 @@
 /**
- * Connecteur et configuration de la base de données Achilléa.
+ * Connecteur et configuration des données Achilléa.
  *
- * Les deux bases vivent sur le même cluster PostgreSQL :
- * - `rg` (Supabase principal Rose Griffon)
- * - `achillea` (PostgreSQL / MikroORM compétitif)
- *
- * Le schéma étranger `rg.achillea` (alimenté par `postgres_fdw` et synchronisé via `sync:achillea`)
- * permet à Rose Griffon de requêter directement les tables compétitives.
+ * UNE SEULE BASE. Achilléa a longtemps vécu dans une base `achillea` distincte,
+ * exposée à `rg` par `postgres_fdw` : des tables étrangères, lisibles mais
+ * jamais écrivables, et une identité coupée en deux. Depuis la fusion
+ * (`scripts/ops/achillea-merge.ts`), `achillea` est un SCHÉMA de la base `rg`,
+ * avec de vraies tables — le bot Achilléa y écrit, le site y lit, dans la même
+ * transaction.
  */
 
 export const ACHILLEA_SCHEMA = "achillea" as const;
@@ -15,7 +15,8 @@ export function getAchilleaDatabaseUrl(): string {
 	return (
 		process.env["ACHILLEA_DATABASE_URL"] ||
 		process.env["DATABASE_URL"] ||
-		"postgresql://postgres:postgres@localhost:5432/achillea"
+		// Une seule base : le schéma `achillea` vit dans `rg`.
+		"postgresql://postgres:postgres@localhost:5432/rg"
 	);
 }
 

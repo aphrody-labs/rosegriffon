@@ -61,179 +61,50 @@ fixés par l'unité versionnée, pas par le fichier secret. Cela empêche les tr
 de contourner Nginx en écoutant sur l'interface publique. En production, `RANKED_ENTRY`
 désigne exclusivement l'artefact construit `build/ranked/main.js`, jamais la source TypeScript.
 
-Le mot de passe PostgreSQL reste nécessaire dans `DATABASE_URL` pour MikroORM et `Bun.SQL`,
-même si une clé personnelle ou une clé API Supabase est disponible. La cible doit être le
-projet Achillea, jamais la base RG. Le pooler et le port retenu doivent correspondre aux
-paramètres affichés par ce projet Supabase ; TLS est imposé pour les hôtes Supabase.
+Le mot de passe PostgreSQL reste nécessaire dans `DATABASE_URL` pour MikroORM et `Bun.SQL`.
+La cible est désormais la base `rg`, schéma `achillea` (cf. section suivante) : le garde-fou
+n'est plus « ne jamais écrire dans rg » mais « ne jamais écrire hors du schéma achillea »,
+imposé par le chemin de recherche du rôle. TLS reste imposé pour les hôtes Supabase
+distants.
 
-### Dump borné de la base Achillea
+### Une seule base : le schéma `achillea` de `rg`
 
-[`scripts/achillea/dump-database.ts`](../scripts/achillea/dump-database.ts) encapsule
-`pg_dump --format=custom`. Il refuse les hôtes locaux, privés, par IP, non-Supabase ou dont
-le host/user ne porte pas le project ref Achillea attendu. Il n'accepte jamais l'URL en
-argument et ne place jamais le mot de passe dans la ligne de commande ou les logs : un
-`PGPASSFILE` temporaire en mode `0600` est créé puis supprimé.
+Achilléa a vécu successivement sur Supabase Cloud, puis dans une base `achillea`
+dédiée du cluster local, exposée à `rg` par `postgres_fdw` — des tables
+étrangères, lisibles mais jamais écrivables, et une identité coupée en deux.
+Depuis [`scripts/ops/achillea-merge.ts`](../scripts/ops/achillea-merge.ts), ses
+69 tables sont de VRAIES tables du schéma `achillea` de la base `rg`.
 
-Le secret local doit définir `ACHILLEA_DATABASE_URL` (prioritaire) ou `DATABASE_URL`, avec
-`sslmode=require`. `ACHILLEA_SUPABASE_PROJECT_REF` permet de remplacer la référence attendue
-pour une branche/projet Achillea explicitement approuvé. `ACHILLEA_BACKUP_DIR` peut déplacer
-la sortie, mais le wrapper refuse toute destination dans le dépôt et les répertoires trop
-larges. Par défaut, les archives vont dans `/home/ubuntu/achillea-backups`, dossier `0700`,
-avec un fichier final `0600` horodaté.
+Ce que ça change concrètement :
+
+- une seule base à sauvegarder (`scripts/ops/sauvegarde.ts` la couvrait déjà,
+  elle couvre maintenant tout) ;
+- les jointures `public.profiles ⋈ achillea."user"` se font dans Postgres, sans
+  connexion distante ni fenêtre de divergence ;
+- la tâche nocturne `sync:achillea`, qui ne réalignait que la FORME des tables
+  étrangères, n'a plus d'objet et a été retirée.
+
+Les 67 politiques RLS ont été reprises telles quelles : c'est toujours elles la
+barrière, jamais le GRANT. Le chemin de recherche est posé sur les rôles
+(`alter role … in database rg set search_path = achillea, public`), pas dans la
+configuration de MikroORM : les 56 migrations d'Achilléa écrivent des noms non
+qualifiés, et l'application n'a pas changé d'une ligne.
 
 ```bash
-set -a
-. "$HOME/.bash_secrets"
-set +a
-bun scripts/achillea/dump-database.ts --check
-bun scripts/achillea/dump-database.ts
+bun scripts/ops/achillea-merge.ts --verify   # inventaire comparé, aucune écriture
+bun scripts/ops/achillea-merge.ts --copy     # (re)copie le schéma et les données
+bun scripts/ops/achillea-merge.ts --cutover  # bascule les services sur `rg`
 ```
 
-La première commande est un dry-run local : validation de cible, destination et présence de
-`pg_dump`, sans connexion ni fichier. La seconde réalise le dump ; elle ne doit être lancée
-qu'après rotation des identifiants divulgués et validation de la cible affichée par
-`--check`. Le wrapper ne sauvegarde pas les rôles globaux, conformément au périmètre d'un
-`pg_dump` de base.
+La base `achillea` n'est PAS supprimée : elle reste le repli immédiat — remettre
+l'ancienne `DATABASE_URL` dans `/etc/rose-griffon/achillea.env` et relancer le
+service suffit à revenir en arrière.
 
-## Migration Cloud vers la pile locale isolée
+`achillea-auth` (GoTrue dédié, port 8824) est arrêté et désactivé : son schéma
+`auth` ne contenait qu'un utilisateur et aucun appel `/auth/v1/` n'est jamais
+arrivé. L'authentification d'Achilléa est un JWT maison signé par l'API, pas
+GoTrue.
 
-La cible préparée est une nouvelle base PostgreSQL nommée exactement `achillea`. Les outils
-refusent `rg`, `rose_griffon`, `postgres` et `template*`, ainsi que toute cible réseau autre
-que le socket local ou `127.0.0.1`. La pile RG existante sur `8809`–`8812` reste intacte.
-
-| Composant local Achillea | Adresse réservée                              | Isolation                                  |
-| ------------------------ | --------------------------------------------- | ------------------------------------------ |
-| PostgreSQL               | socket `/var/run/postgresql`, base `achillea` | base dédiée obligatoire                    |
-| PostgREST                | `127.0.0.1:8820`                              | `/etc/rose-griffon/achillea-postgrest.env` |
-| Storage                  | `127.0.0.1:8821`                              | DB dédiée et `/var/www/achillea-storage`   |
-| Realtime                 | `127.0.0.1:8822`                              | DB dédiée                                  |
-| passerelle interne       | `127.0.0.1:8823`                              | aucun port public                          |
-
-Les unités et le fragment Nginx de `infra/` sont seulement des candidats versionnés. Ce lot
-ne les installe, ne les active et ne les redémarre pas.
-
-### Procédure opérateur avec arrêt avant mutation
-
-1. Révoquer toutes les valeurs divulguées, récupérer le nouveau mot de passe PostgreSQL du
-   projet Cloud Achillea dédié et définir `ACHILLEA_DATABASE_URL` avec `sslmode=require`
-   dans `$HOME/.bash_secrets` en mode `0600`. Une clé `sbp_…` ne remplace pas ce mot de passe.
-2. Charger le fichier puis exécuter uniquement les contrôles sans connexion/mutation :
-
-   ```bash
-   set -a
-   . "$HOME/.bash_secrets"
-   set +a
-   bun scripts/achillea/dump-database.ts --check
-   bun scripts/achillea/database-inventory.ts --source --check \
-     --output /home/ubuntu/achillea-backups/source-inventory.json
-   ```
-
-3. Pendant une fenêtre sans écritures Cloud, capturer l'inventaire source puis le dump. Les
-   sommes de lignes et empreintes sont sensibles comme des métadonnées et restent hors Git,
-   en `0600` dans un dossier `0700`.
-
-   ```bash
-   bun scripts/achillea/database-inventory.ts --source \
-     --output /home/ubuntu/achillea-backups/source-inventory.json
-   bun scripts/achillea/dump-database.ts
-   ```
-
-4. Créer séparément une base locale **vide** `achillea`. Ne pas réutiliser RG/Azalée. Sur le
-   VPS audité, aucun rôle PostgreSQL `ubuntu` n'existe : le défaut sûr est donc le rôle
-   système PostgreSQL `postgres`, appelé explicitement via `sudo -u postgres`. Le dump doit
-   être copié dans un répertoire privé lisible par ce rôle système, sans assouplir son mode :
-
-   ```bash
-   sudo install -d -o postgres -g postgres -m 0700 /var/lib/postgresql/achillea-import
-   sudo install -o postgres -g postgres -m 0600 \
-     /home/ubuntu/achillea-backups/achillea-AAAA.dump \
-     /var/lib/postgresql/achillea-import/achillea-AAAA.dump
-   sudo -u postgres createdb --owner=postgres achillea
-   ```
-
-   `createdb` est une étape opérateur mutante et n'a pas été lancée par ce lot. Le dump ne
-   contient pas les rôles globaux : inventorier et créer explicitement les rôles listés par
-   l'archive (`anon`, `authenticated`, `authenticator`, `service_role` et rôles Supabase
-   observés), puis vérifier la disponibilité des extensions. Le wrapper ne crée ni base, ni
-   rôle, ni extension et n'élève pas de privilège.
-
-5. Valider l'archive, puis lancer le preflight en lecture seule de la cible :
-
-   ```bash
-   export ACHILLEA_LOCAL_PGDATABASE=achillea
-   export ACHILLEA_LOCAL_PGHOST=/var/run/postgresql
-   export ACHILLEA_LOCAL_PGPORT=5432
-   export ACHILLEA_LOCAL_PGUSER=postgres
-   sudo -u postgres env \
-     ACHILLEA_LOCAL_PGDATABASE="$ACHILLEA_LOCAL_PGDATABASE" \
-     ACHILLEA_LOCAL_PGHOST="$ACHILLEA_LOCAL_PGHOST" \
-     ACHILLEA_LOCAL_PGPORT="$ACHILLEA_LOCAL_PGPORT" \
-     ACHILLEA_LOCAL_PGUSER="$ACHILLEA_LOCAL_PGUSER" \
-     /home/ubuntu/.bun/bin/bun scripts/achillea/migrate-local-database.ts --check \
-     --dump /var/lib/postgresql/achillea-import/achillea-AAAA.dump
-   sudo -u postgres env \
-     ACHILLEA_LOCAL_PGDATABASE=achillea ACHILLEA_LOCAL_PGHOST=/var/run/postgresql \
-     ACHILLEA_LOCAL_PGPORT=5432 ACHILLEA_LOCAL_PGUSER=postgres \
-     /home/ubuntu/.bun/bin/bun scripts/achillea/migrate-local-database.ts --preflight \
-     --dump /var/lib/postgresql/achillea-import/achillea-AAAA.dump
-   ```
-
-   Le preflight exige une cible vide, tous les rôles nécessaires et toutes les extensions
-   disponibles. `pg_restore` utilisera ensuite `--single-transaction --exit-on-error
---no-owner`, ce qui annule la restauration au premier échec plutôt que de laisser une
-   base partielle. La commande suivante affiche seulement le plan :
-
-   ```bash
-   sudo -u postgres env ACHILLEA_LOCAL_PGDATABASE=achillea \
-     ACHILLEA_LOCAL_PGHOST=/var/run/postgresql ACHILLEA_LOCAL_PGUSER=postgres \
-     /home/ubuntu/.bun/bin/bun scripts/achillea/migrate-local-database.ts --restore \
-     --dump /var/lib/postgresql/achillea-import/achillea-AAAA.dump
-   ```
-
-6. La seule commande qui écrit en base porte deux confirmations explicites. Elle est réservée
-   à une fenêtre approuvée ; elle n'a pas été exécutée par ce lot :
-
-   ```bash
-   sudo -u postgres env ACHILLEA_LOCAL_PGDATABASE=achillea \
-     ACHILLEA_LOCAL_PGHOST=/var/run/postgresql ACHILLEA_LOCAL_PGUSER=postgres \
-     /home/ubuntu/.bun/bin/bun scripts/achillea/migrate-local-database.ts --restore --execute \
-     --dump /var/lib/postgresql/achillea-import/achillea-AAAA.dump
-   ```
-
-7. Toujours sous gel des écritures, capturer la cible et exiger une comparaison vide :
-
-   ```bash
-   sudo -u postgres env ACHILLEA_LOCAL_PGDATABASE=achillea \
-     ACHILLEA_LOCAL_PGHOST=/var/run/postgresql ACHILLEA_LOCAL_PGUSER=postgres \
-     /home/ubuntu/.bun/bin/bun scripts/achillea/database-inventory.ts --target \
-     --output /var/lib/postgresql/achillea-import/target-inventory.json
-   sudo install -o ubuntu -g ubuntu -m 0600 \
-     /var/lib/postgresql/achillea-import/target-inventory.json \
-     /home/ubuntu/achillea-backups/target-inventory.json
-   bun scripts/achillea/database-inventory.ts --compare \
-     --source-file /home/ubuntu/achillea-backups/source-inventory.json \
-     --target-file /home/ubuntu/achillea-backups/target-inventory.json
-   ```
-
-   Le comparateur vérifie chaque table non-système par nombre de lignes et une empreinte
-   indépendante de l'ordre. Toute table absente, supplémentaire ou différente bloque la
-   bascule.
-
-### Deux gates qui restent bloquantes
-
-- Le dump PostgreSQL transporte les métadonnées `storage.objects`, pas les octets des objets
-  Cloud. Ceux-ci doivent être copiés séparément, bucket par bucket, vers
-  `/var/www/achillea-storage`, puis vérifiés par nombre, taille et checksum. `images` doit
-  rester public et `ranked-proofs` privé. Sans identifiants Cloud rotatés et inventaire objet
-  validé, aucune copie n'est autorisée.
-- Le schéma `auth` est restauré, mais cette configuration ne fournit pas encore de service
-  GoTrue Achillea isolé. La passerelle interne n'expose volontairement aucun `/auth/v1/`.
-  OAuth, JWT/JWKS, refresh token et login doivent réussir sur un service Auth dédié avant
-  toute bascule de `SUPABASE_URL`.
-
-Après ces gates seulement, appliquer le SQL Storage à la base **Achillea**, renseigner les
-trois fichiers secrets externes, tester les services sur loopback, puis planifier une bascule
-et un retour arrière. Ne jamais modifier les fichiers ou unités Supabase RG existants.
 
 ## Configuration publique du navigateur
 

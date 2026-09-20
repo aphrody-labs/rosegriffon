@@ -199,8 +199,9 @@
 	},
 	"localSupabaseTarget": {
 		"status": "active",
-		"database": "achillea",
-		"forbiddenDatabases": ["rg", "rose_griffon", "postgres", "template0", "template1"],
+		"database": "rg",
+		"schema": "achillea",
+		"forbiddenSchemas": ["public", "auth", "storage", "graphql", "extensions"],
 		"databaseHost": "/var/run/postgresql",
 		"databasePort": 5432,
 		"storageRoot": "/var/www/achillea-storage",

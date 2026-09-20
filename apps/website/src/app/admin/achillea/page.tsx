@@ -16,21 +16,21 @@ import {
 	Radio,
 } from "lucide-react";
 import { AdminPageHeader, Card, CardHeader, CardTitle, CardContent, Badge, Button } from "@rosegriffon/ui";
-import { miroirDisponible, recouperComptes, volumesAchillea } from "@/lib/achillea/admin-db";
+import { recouperComptes, schemaAchilleaPresent, volumesAchillea } from "@/lib/achillea/admin-db";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminAchilleaPage() {
-	const fdwActive = await miroirDisponible();
+	const donneesPresentes = await schemaAchilleaPresent();
 
 	let comptes = null;
 	let volumes = null;
 
-	if (fdwActive) {
+	if (donneesPresentes) {
 		try {
 			[comptes, volumes] = await Promise.all([recouperComptes(), volumesAchillea()]);
 		} catch {
-			// En cas d'indisponibilité momentanée du miroir distant
+			// Lecture impossible : la page reste affichable, sans les compteurs.
 		}
 	}
 
@@ -38,8 +38,8 @@ export default async function AdminAchilleaPage() {
 		<div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 			<AdminPageHeader
 				icon={<Trophy className="size-5 text-amber-400" />}
-				title="Achilléa Esport & Rapprochement FDW"
-				description="Supervision de la ligue esport, état du miroir Postgres FDW et recoupement des comptes Rose Griffon."
+				title="Achilléa Esport & rapprochement des comptes"
+				description="Supervision de la ligue esport et recoupement des comptes Rose Griffon et Achilléa."
 				actions={
 					<Button asChild size="sm">
 						<Link
@@ -53,13 +53,13 @@ export default async function AdminAchilleaPage() {
 				}
 			/>
 
-			{/* Statut du pont Postgres FDW */}
+			{/* Statut du schéma fusionné */}
 			<div className="rounded-2xl border border-border/80 bg-card p-5 shadow-xs">
 				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 					<div className="flex items-center gap-3">
 						<div
 							className={`p-2.5 rounded-xl border ${
-								fdwActive
+								donneesPresentes
 									? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
 									: "bg-rose-500/10 text-rose-400 border-rose-500/20"
 							}`}
@@ -68,24 +68,19 @@ export default async function AdminAchilleaPage() {
 						</div>
 						<div>
 							<div className="flex items-center gap-2">
-								<h3 className="font-bold text-sm">Miroir PostgreSQL FDW</h3>
-								<Badge variant={fdwActive ? "default" : "destructive"}>
-									{fdwActive ? "Connecté (75 tables)" : "Déconnecté"}
+								<h3 className="font-bold text-sm">Schéma achillea</h3>
+								<Badge variant={donneesPresentes ? "default" : "destructive"}>
+									{donneesPresentes ? "Fusionné dans rg" : "Absent"}
 								</Badge>
 							</div>
 							<p className="text-xs text-muted-foreground mt-0.5">
-								{fdwActive
-									? "Schéma distant achillea.public monté en lecture locale sans duplication de données."
-									: "Le schéma FDW n'est pas actif. Lancez bun scripts/ops/achillea-fdw.ts pour le provisionner."}
+								{donneesPresentes
+									? "Les tables d'Achilléa vivent dans la base rg : une seule base, une seule sauvegarde, des jointures directes avec les profils."
+									: "Le schéma achillea n'est pas présent. Lancez bun scripts/ops/achillea-merge.ts --copy pour le provisionner."}
 							</p>
 						</div>
 					</div>
 
-					<div className="flex items-center gap-2">
-						<Badge variant="outline" className="font-mono text-xs">
-							sync:achillea (4h20)
-						</Badge>
-					</div>
 				</div>
 			</div>
 

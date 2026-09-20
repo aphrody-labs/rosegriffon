@@ -69,7 +69,8 @@ export interface AchilleaServiceManifest {
 	localSupabaseTarget: {
 		status: string;
 		database: string;
-		forbiddenDatabases: string[];
+		schema: string;
+		forbiddenSchemas: string[];
 		databaseHost: string;
 		databasePort: number;
 		storageRoot: string;
@@ -206,11 +207,18 @@ export function validateManifest(manifest: AchilleaServiceManifest): string[] {
 
 	const localTarget = manifest.localSupabaseTarget;
 	if (localTarget.status !== "active") errors.push("local Supabase target must be active");
-	if (localTarget.database !== "achillea")
-		errors.push("local Supabase database must be exactly achillea");
-	for (const forbidden of ["rg", "rose_griffon", "postgres", "template0", "template1"]) {
-		if (!localTarget.forbiddenDatabases.includes(forbidden))
-			errors.push(`local Supabase forbidden databases must include ${forbidden}`);
+	// Depuis `scripts/ops/achillea-merge.ts`, Achilléa vit dans le SCHÉMA
+	// `achillea` de la base `rg` : une seule base, une seule sauvegarde, des
+	// jointures directes avec les profils. Le garde-fou a donc changé d'objet —
+	// ce n'est plus « ne jamais écrire dans rg », c'est « ne jamais écrire hors
+	// du schéma achillea ».
+	if (localTarget.database !== "rg")
+		errors.push("local Supabase database must be exactly rg");
+	if (localTarget.schema !== "achillea")
+		errors.push("local Supabase schema must be exactly achillea");
+	for (const forbidden of ["public", "auth", "storage", "graphql", "extensions"]) {
+		if (!localTarget.forbiddenSchemas.includes(forbidden))
+			errors.push(`local Supabase forbidden schemas must include ${forbidden}`);
 	}
 	if (localTarget.databaseHost !== "/var/run/postgresql" || localTarget.databasePort !== 5432)
 		errors.push("local Supabase database must use the dedicated local socket contract");
@@ -275,9 +283,6 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		postgresConfig,
 		imageStorage,
 		rankedStorage,
-		dumpScript,
-		migrationScript,
-		inventoryScript,
 		postgrestSystemd,
 		storageSystemd,
 		realtimeSystemd,
@@ -299,9 +304,6 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		read("apps/achillea-bot/src/configs/postgres.ts"),
 		read("apps/achillea-bot/src/services/SupabaseImageStorage.ts"),
 		read("apps/achillea-bot/src/ranked/storage.ts"),
-		read("scripts/achillea/dump-database.ts"),
-		read("scripts/achillea/migrate-local-database.ts"),
-		read("scripts/achillea/database-inventory.ts"),
 		read("infra/systemd/achillea-postgrest.service"),
 		read("infra/systemd/achillea-storage.service"),
 		read("infra/systemd/achillea-realtime.service"),
@@ -396,40 +398,6 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 	}
 	if (/create policy|grant\s+(?:insert|update|delete)/i.test(storageSql))
 		errors.push("Supabase Storage SQL must not grant browser write access");
-	for (const fragment of [
-		"ACHILLEA_DATABASE_URL",
-		"ACHILLEA_SUPABASE_PROJECT_REF",
-		"PGPASSFILE",
-		"--format=custom",
-		"0o700",
-		"0o600",
-		"await link(plan.temporaryPath, plan.finalPath)",
-	]) {
-		if (!has(dumpScript, fragment)) errors.push(`database dump wrapper is missing ${fragment}`);
-	}
-	for (const fragment of [
-		'new Set(["rg", "rose_griffon", "postgres", "template0", "template1"])',
-		'target.database !== "achillea"',
-		"--single-transaction",
-		"--exit-on-error",
-		"--no-owner",
-		'process.argv.includes("--execute")',
-		"La base achillea cible n'est pas vide",
-	]) {
-		if (!has(migrationScript, fragment))
-			errors.push(`local database migration wrapper is missing ${fragment}`);
-	}
-	for (const fragment of [
-		"PGPASSFILE",
-		'process.argv.includes("--compare")',
-		"rowCount: string",
-		"checksum: string",
-		'target.database !== "achillea"',
-		"0o600",
-	]) {
-		if (!has(inventoryScript, fragment))
-			errors.push(`database inventory wrapper is missing ${fragment}`);
-	}
 	for (const [contents, fragments, label] of [
 		[
 			postgrestSystemd,
