@@ -751,7 +751,13 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 			</div>
 
 			{/* Wiki Sections (History, Recruitment, etc.) */}
-			{(player as any).wikiSections && (player as any).wikiSections.length > 0 && (
+			{/* `Array.isArray` et pas `.length > 0` : le champ remonte parfois sous
+			    forme de CHAÎNE (colonne texte non désérialisée côté miroir). Une
+			    chaîne non vide a une `length`, passait donc la garde, puis tombait
+			    sur `.map is not a function` — au prerender, ce qui faisait échouer le
+			    build entier sur /chara/mark-evans. */}
+			{Array.isArray((player as any).wikiSections) &&
+				(player as any).wikiSections.length > 0 && (
 				<div className="bg-surface-container-low rounded-[20px] sm:rounded-[24px] border border-outline-variant/30 px-4 py-5 sm:px-8 sm:py-8 space-y-6 sm:space-y-10">
 					{(player as any).wikiSections.map((section: any, i: number) => (
 						<div key={i} className="space-y-2 sm:space-y-4">
