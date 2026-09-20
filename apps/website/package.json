@@ -15,8 +15,7 @@
 		"format:check": "oxfmt --check .",
 		"analyze": "ANALYZE=true next build",
 		"type-check": "bun --bun tsc --noEmit",
-		"clean": "rm -rf .next .turbo dist",
-		"supabase:types": "supabase gen types typescript --project-id isbkaeltubqittywibeh > src/types/supabase.ts"
+		"clean": "rm -rf .next .turbo dist"
 	},
 	"dependencies": {
 		"@better-auth/agent-auth": "catalog:",

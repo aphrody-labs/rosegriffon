@@ -50,13 +50,14 @@ Applications autonomes prêtes à être déployées :
 * **Version :** `0.1.0`
 
 * **Scripts disponibles :**
+  - `bun run type-check` : `bun --bun tsc --noEmit`
   - `bun run test` : `bun test .`
   - `bun run start` : `bun server.ts`
   - `bun run dev` : `bun --watch server.ts`
 
 * **Dépendances internes & externes :**
   - **Dependencies :** Aucune
-  - **DevDependencies :** Aucune
+  - **DevDependencies :** `@types/bun`, `typescript`
 
 ---
 
@@ -160,12 +161,9 @@ Applications autonomes prêtes à être déployées :
   - `bun run analyze` : `ANALYZE=true next build`
   - `bun run type-check` : `bun --bun tsc --noEmit`
   - `bun run clean` : `rm -rf .next .turbo dist`
-  - `bun run pre-deploy` : `bun scripts/pre-deploy-check.js`
-  - `bun run submit-sitemap` : `bun scripts/submit-sitemap.js`
-  - `bun run supabase:types` : `supabase gen types typescript --project-id isbkaeltubqittywibeh > src/types/supabase.ts`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@better-auth/agent-auth`, `@colyseus/sdk`, `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `@envelop/graphql-jit`, `@googlemaps/js-api-loader`, `@graphql-yoga/plugin-response-cache`, `@hookform/resolvers`, `@lexical/code`, `@lexical/file`, `@lexical/html`, `@lexical/link`, `@lexical/list`, `@lexical/markdown`, `@lexical/react`, `@lexical/rich-text`, `@lexical/table`, `@lexical/utils`, `@markdoc/markdoc`, `@next/third-parties`, `@origin-space/image-cropper`, `@pixiv/three-vrm`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-aspect-ratio`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-context-menu`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-hover-card`, `@radix-ui/react-label`, `@radix-ui/react-menubar`, `@radix-ui/react-navigation-menu`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-scroll-area`, `@radix-ui/react-select`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `@react-three/drei`, `@react-three/fiber`, `@react-three/postprocessing`, `@rosegriffon/achillea-client`, `@rosegriffon/achillea-core`, `@rosegriffon/achillea-types`, `@rosegriffon/app-shell`, `@rosegriffon/assets`, `@rosegriffon/auth`, `@rosegriffon/azalee`, `@rosegriffon/db`, `@rosegriffon/i18n`, `@rosegriffon/inagle`, `@rosegriffon/inagle-cross`, `@rosegriffon/patreon-bun`, `@rosegriffon/preferences`, `@rosegriffon/types`, `@rosegriffon/ui`, `@sentry/nextjs`, `@spacedrive/primitives`, `@spacedrive/tokens`, `@stripe/stripe-js`, `@supabase/ssr`, `@supabase/supabase-js`, `@tanstack/query-sync-storage-persister`, `@tanstack/react-query`, `@tanstack/react-query-persist-client`, `@tanstack/react-table`, `@theatre/core`, `@theatre/r3f`, `@tiptap/core`, `@tiptap/extension-placeholder`, `@tiptap/starter-kit`, `@types/nodemailer`, `@types/pg`, `@types/pica`, `bcryptjs`, `better-auth`, `browser-image-compression`, `cheerio`, `class-variance-authority`, `clsx`, `cmdk`, `csv-parse`, `date-fns`, `discord-api-types`, `discord.js`, `drizzle-orm`, `embla-carousel-react`, `googleapis`, `graphql`, `graphql-yoga`, `html-to-image`, `input-otp`, `jsonwebtoken`, `kysely`, `lexical`, `lucide-react`, `motion`, `mp4-muxer`, `next`, `next-themes`, `node-ipinfo`, `nodemailer`, `pg`, `pica`, `radix-ui`, `react`, `react-arborist`, `react-day-picker`, `react-dom`, `react-dropzone`, `react-easy-crop`, `react-hook-form`, `react-icons`, `react-image-crop`, `react-konva`, `react-quill-new`, `react-resizable-panels`, `react-tweet`, `react-twitch-embed`, `recharts`, `schema-dts`, `sonner`, `stripe`, `swr`, `tailwind-merge`, `three`, `tw-animate-css`, `use-image`, `vaul`, `wanakana`, `web-push`, `zod`, `zustand`
+  - **Dependencies :** `@better-auth/agent-auth`, `@colyseus/sdk`, `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `@envelop/graphql-jit`, `@googlemaps/js-api-loader`, `@graphql-yoga/plugin-response-cache`, `@hookform/resolvers`, `@lexical/code`, `@lexical/file`, `@lexical/html`, `@lexical/link`, `@lexical/list`, `@lexical/markdown`, `@lexical/react`, `@lexical/rich-text`, `@lexical/table`, `@lexical/utils`, `@markdoc/markdoc`, `@next/third-parties`, `@origin-space/image-cropper`, `@pixiv/three-vrm`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-aspect-ratio`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-context-menu`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-hover-card`, `@radix-ui/react-label`, `@radix-ui/react-menubar`, `@radix-ui/react-navigation-menu`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-scroll-area`, `@radix-ui/react-select`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `@react-three/drei`, `@react-three/fiber`, `@react-three/postprocessing`, `@rosegriffon/achillea-client`, `@rosegriffon/achillea-core`, `@rosegriffon/achillea-types`, `@rosegriffon/app-shell`, `@rosegriffon/assets`, `@rosegriffon/auth`, `@rosegriffon/azalee`, `@rosegriffon/db`, `@rosegriffon/i18n`, `@rosegriffon/inagle`, `@rosegriffon/inagle-cross`, `@rosegriffon/patreon-bun`, `@rosegriffon/preferences`, `@rosegriffon/search`, `@rosegriffon/types`, `@rosegriffon/ui`, `@sentry/nextjs`, `@spacedrive/primitives`, `@spacedrive/tokens`, `@stripe/stripe-js`, `@supabase/ssr`, `@supabase/supabase-js`, `@tanstack/query-sync-storage-persister`, `@tanstack/react-query`, `@tanstack/react-query-persist-client`, `@tanstack/react-table`, `@theatre/core`, `@theatre/r3f`, `@tiptap/core`, `@tiptap/extension-placeholder`, `@tiptap/starter-kit`, `@types/nodemailer`, `@types/pg`, `@types/pica`, `bcryptjs`, `better-auth`, `browser-image-compression`, `cheerio`, `class-variance-authority`, `clsx`, `cmdk`, `csv-parse`, `date-fns`, `discord-api-types`, `discord.js`, `drizzle-orm`, `embla-carousel-react`, `googleapis`, `graphql`, `graphql-yoga`, `html-to-image`, `input-otp`, `jsonwebtoken`, `kysely`, `lexical`, `lucide-react`, `motion`, `mp4-muxer`, `next`, `next-themes`, `node-ipinfo`, `nodemailer`, `pg`, `pica`, `radix-ui`, `react`, `react-arborist`, `react-day-picker`, `react-dom`, `react-dropzone`, `react-easy-crop`, `react-hook-form`, `react-icons`, `react-image-crop`, `react-konva`, `react-quill-new`, `react-resizable-panels`, `react-tweet`, `react-twitch-embed`, `recharts`, `schema-dts`, `sonner`, `stripe`, `swr`, `tailwind-merge`, `three`, `tw-animate-css`, `use-image`, `vaul`, `wanakana`, `web-push`, `zod`, `zustand`
   - **DevDependencies :** `@next/bundle-analyzer`, `@rosegriffon/config`, `@tailwindcss/postcss`, `@tailwindcss/typography`, `@testing-library/jest-dom`, `@testing-library/react`, `@theatre/studio`, `@types/google.maps`, `@types/jsonwebtoken`, `@types/node`, `@types/react`, `@types/react-dom`, `@types/three`, `@types/web-push`, `@vitejs/plugin-react`, `@webgpu/types`, `babel-plugin-react-compiler`, `drizzle-kit`, `jsdom`, `oxlint`, `shadcn`, `sharp`, `tailwindcss`, `tailwindcss-animate`, `typescript`, `vitest`
 
 ---
@@ -176,12 +174,13 @@ Applications autonomes prêtes à être déployées :
 * **Version :** `0.1.0`
 
 * **Scripts disponibles :**
+  - `bun run type-check` : `bun --bun tsc --noEmit`
   - `bun run start` : `bun server.ts`
   - `bun run dev` : `bun --watch server.ts`
 
 * **Dépendances internes & externes :**
   - **Dependencies :** `pg`
-  - **DevDependencies :** Aucune
+  - **DevDependencies :** `@types/bun`, `@types/pg`, `typescript`
 
 ---
 
@@ -191,13 +190,14 @@ Applications autonomes prêtes à être déployées :
 * **Version :** `0.1.0`
 
 * **Scripts disponibles :**
+  - `bun run type-check` : `bun --bun tsc --noEmit`
   - `bun run test` : `bun test .`
   - `bun run start` : `bun server.ts`
   - `bun run dev` : `bun --watch server.ts`
 
 * **Dépendances internes & externes :**
   - **Dependencies :** Aucune
-  - **DevDependencies :** Aucune
+  - **DevDependencies :** `@types/bun`, `typescript`
 
 ---
 
@@ -246,7 +246,7 @@ Packages partagés consommés par les applications :
 
 * **Dépendances internes & externes :**
   - **Dependencies :** `@rosegriffon/db`, `@rosegriffon/inagle`, `@supabase/supabase-js`, `commander`, `drizzle-orm`, `wanakana`
-  - **DevDependencies :** `@rosegriffon/config`, `@types/bun`, `@types/node`, `oxlint`, `typescript`
+  - **DevDependencies :** `@happy-dom/global-registrator`, `@rosegriffon/config`, `@types/bun`, `@types/node`, `oxlint`, `typescript`
 
 ---
 
@@ -260,6 +260,7 @@ Packages partagés consommés par les applications :
 * **Scripts disponibles :**
   - `bun run type-check` : `bun --bun tsc --noEmit`
   - `bun run test` : `bun test src`
+  - `bun run lint` : `bunx oxlint -c ../../.oxlintrc.json src`
 
 * **Dépendances internes & externes :**
   - **Dependencies :** `@rosegriffon/db`, `@rosegriffon/types`, `@supabase/supabase-js`, `better-auth`, `zod`
@@ -273,7 +274,7 @@ Packages partagés consommés par les applications :
 * **Version :** `0.1.2`
 
 * **Scripts disponibles :**
-  - Aucun script disponible.
+  - `bun run lint` : `bunx oxlint -c ../../.oxlintrc.json .`
 
 * **Dépendances internes & externes :**
   - **Dependencies :** Aucune
@@ -321,7 +322,7 @@ Packages partagés consommés par les applications :
 
 ### 📁 [@rosegriffon/app-shell](file:///packages/app-shell)
 * **Chemin :** `packages/app-shell`
-* **Description :** Chrome applicatif partagé (navigation, sidebar, app bar, footer) entre website et azalee
+* **Description :** Chrome applicatif partagé de website (navigation, barre latérale, barre supérieure, pied de page)
 * **Version :** `0.1.0`
 * **Points d'entrée clés :**
   - [`src/index.ts`](file:///packages/app-shell/src/index.ts)
@@ -346,6 +347,8 @@ Packages partagés consommés par les applications :
 
 * **Scripts disponibles :**
   - `bun run test` : `bun test src`
+  - `bun run lint` : `bunx oxlint -c ../../.oxlintrc.json src`
+  - `bun run type-check` : `bun --bun tsc --noEmit`
 
 * **Dépendances internes & externes :**
   - **Dependencies :** `zod`
@@ -362,6 +365,7 @@ Packages partagés consommés par les applications :
 
 * **Scripts disponibles :**
   - `bun run type-check` : `bun --bun tsc --noEmit`
+  - `bun run lint` : `bunx oxlint -c ../../.oxlintrc.json src`
 
 * **Dépendances internes & externes :**
   - **Dependencies :** `zod`
@@ -380,6 +384,7 @@ Packages partagés consommés par les applications :
   - `bun run types:gen` : `bun scripts/types-gen.ts`
   - `bun run type-check` : `bun --bun tsc --noEmit`
   - `bun run test` : `bun test`
+  - `bun run lint` : `bunx oxlint -c ../../.oxlintrc.json src`
 
 * **Dépendances internes & externes :**
   - **Dependencies :** `@rosegriffon/types`, `@supabase/ssr`, `@supabase/supabase-js`
@@ -397,10 +402,7 @@ Packages partagés consommés par les applications :
 * **Scripts disponibles :**
   - `bun run build` : `bun --bun tsc -p tsconfig.build.json`
   - `bun run cli` : `bun src/cli.ts`
-  - `bun run entries` : `bun src/scripts/generate-entries.ts`
   - `bun run push` : `bun src/cli.ts push`
-  - `bun run serve` : `bun src/scripts/serve-data.ts`
-  - `bun run compile` : `bun src/scripts/build-standalone.ts`
   - `bun run prepublishOnly` : `bun run build`
   - `bun run test` : `bun test`
   - `bun run lint` : `bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction src`
@@ -408,7 +410,7 @@ Packages partagés consommés par les applications :
   - `bun run type-check` : `bun --bun tsc -p tsconfig.build.json --noEmit`
 
 * **Dépendances internes & externes :**
-  - **Dependencies :** `@aphrody-code/bxc`, `@aphrody-code/zukan`, `@leeoniya/ufuzzy`, `@streamparser/json`, `@supabase/supabase-js`, `cheerio`, `commander`, `fengari`, `hono`, `jsonwebtoken`, `kuroshiro`, `kuroshiro-analyzer-kuromoji`, `picocolors`, `web-tree-sitter`, `zod`, `zod-to-json-schema`
+  - **Dependencies :** `@aphrody-code/bxc`, `@aphrody-code/zukan`, `@leeoniya/ufuzzy`, `@streamparser/json`, `@supabase/supabase-js`, `cheerio`, `commander`, `dotenv`, `fengari`, `hono`, `jsonwebtoken`, `kuroshiro`, `kuroshiro-analyzer-kuromoji`, `pg`, `picocolors`, `web-tree-sitter`, `zod`, `zod-to-json-schema`
   - **DevDependencies :** `@types/bun`, `@types/jsonwebtoken`, `@types/node`, `@types/pg`, `typescript`, `vitest`
 
 ---
@@ -569,6 +571,8 @@ Packages partagés consommés par les applications :
   - `bun run build:types` : `bun --bun tsc --emitDeclarationOnly --noCheck`
   - `bun run build` : `bun run build:js && bun run build:types`
   - `bun run prepublishOnly` : `bun run build`
+  - `bun run type-check` : `bun --bun tsc --noEmit`
+  - `bun run lint` : `bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction src`
 
 * **Dépendances internes & externes :**
   - **Dependencies :** Aucune
@@ -648,6 +652,7 @@ graph TD
     _rosegriffon_website --> _rosegriffon_inagle_cross
     _rosegriffon_website --> _rosegriffon_patreon_bun
     _rosegriffon_website --> _rosegriffon_preferences
+    _rosegriffon_website --> _rosegriffon_search
     _rosegriffon_website --> _rosegriffon_types
     _rosegriffon_website --> _rosegriffon_ui
     _rosegriffon_azalee --> _rosegriffon_db
