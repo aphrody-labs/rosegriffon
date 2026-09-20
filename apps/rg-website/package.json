@@ -22,6 +22,7 @@
 	},
 	"dependencies": {
 		"@better-auth/agent-auth": "catalog:",
+		"@colyseus/sdk": "^0.17.42",
 		"@dnd-kit/core": "catalog:",
 		"@dnd-kit/sortable": "catalog:",
 		"@dnd-kit/utilities": "catalog:",

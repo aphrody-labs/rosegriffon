@@ -49,7 +49,7 @@ export function AchilleaNav() {
 								src="/achillea/logo1.svg"
 								alt="Logo Achilléa"
 								fill
-								className="object-contain drop-shadow-[0_0_8px_rgba(223,255,87,0.5)]"
+								className="object-contain drop-shadow-[0_0_8px_rgba(var(--achillea-lime-rgb),0.5)]"
 							/>
 						</div>
 						<span className="font-black text-lg tracking-wider text-on-surface group-hover:text-primary transition-colors">
@@ -57,7 +57,7 @@ export function AchilleaNav() {
 						</span>
 						<Badge
 							variant="secondary"
-							className="hidden sm:inline-flex text-[10px] uppercase font-bold bg-[#6d00ce]/15 text-[#6d00ce] border border-[#6d00ce]/30"
+							className="hidden sm:inline-flex text-[10px] uppercase font-bold bg-[var(--achillea-primary)]/15 text-[var(--achillea-primary)] border border-[var(--achillea-primary)]/30"
 						>
 							Esport
 						</Badge>
@@ -93,8 +93,8 @@ export function AchilleaNav() {
 							href="/achillea/admins/dashboard"
 							className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
 								pathname?.startsWith("/achillea/admins")
-									? "bg-amber-600 text-white shadow-sm"
-									: "text-amber-500 hover:bg-amber-500/10"
+									? "bg-[var(--achillea-primary)] text-white shadow-sm"
+									: "text-[var(--achillea-primary)] hover:bg-amber-500/10"
 							}`}
 						>
 							<ShieldAlert className="size-3.5" />
@@ -142,7 +142,7 @@ export function AchilleaNav() {
 						<Button
 							size="sm"
 							onClick={() => login(pathname || "/achillea")}
-							className="bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-xs gap-1.5 rounded-xl shadow-sm"
+							className="bg-[var(--discord-blurple)] hover:bg-[var(--discord-blurple-hover)] text-white font-bold text-xs gap-1.5 rounded-xl shadow-sm"
 						>
 							<LogIn className="size-3.5" />
 							<span>Discord</span>
@@ -177,9 +177,9 @@ export function AchilleaNav() {
 				{isStaff && (
 					<Link
 						href="/achillea/admins/dashboard"
-						className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-amber-500 ${
+						className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-[var(--achillea-primary)] ${
 							pathname?.startsWith("/achillea/admins")
-								? "bg-amber-600 text-white font-bold"
+								? "bg-[var(--achillea-primary)] text-white font-bold"
 								: "hover:bg-amber-500/10"
 						}`}
 					>

@@ -2,6 +2,36 @@
  * Achilléa — Direction Artistique & Typographies
  * -------------------------------------------------------------------- */
 
+/*
+ * `Inter` est la police de CORPS d'Achilléa (`styles.css:12-26` du front
+ * Angular, appliquée sur `html, body`). Le portage l'avait omise alors que le
+ * fichier est livré : tout le texte courant retombait donc sur la police du
+ * shell Rose Griffon (Poppins), ce qui suffit à faire mentir la maquette.
+ */
+@font-face {
+	font-family: "Achillea Sans";
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: url("/achillea/fonts/InterVariable.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Achillea Sans";
+	font-style: italic;
+	font-weight: 100 900;
+	font-display: swap;
+	src: url("/achillea/fonts/InterVariable-Italic.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Achillea Body";
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("/achillea/fonts/MSGothic.woff2") format("woff2");
+}
+
 @font-face {
 	font-family: "Achillea Display";
 	font-style: normal;
@@ -55,6 +85,49 @@
 .font-achillea-title-alt { font-family: "Achillea Title Alt", sans-serif; }
 .font-achillea-mono { font-family: "Achillea Mono", monospace; }
 .font-achillea-num { font-family: "Achillea Display Num", sans-serif; }
+.font-achillea-body { font-family: "Achillea Body", "Achillea Sans", sans-serif; }
+
+/*
+ * APPLICATION RÉELLE DES POLICES
+ *
+ * Les six `@font-face` ci-dessus étaient déclarées, les cinq classes définies,
+ * et AUCUNE n'était utilisée dans les 52 fichiers du portage : les fichiers
+ * woff2 étaient téléchargés pour rien et Achilléa s'affichait intégralement
+ * dans la police du shell Rose Griffon. Le front Angular, lui, pose
+ * `font-family: "Inter"` sur `html, body` (`styles.css:156-170`) et
+ * `"Achillea Title"` sur les titres de tournoi et de ligue
+ * (`tournament-page.css:178`, `asytral-league.css:145`).
+ *
+ * On reproduit cette hiérarchie au niveau du SCOPE plutôt que classe par
+ * classe : le rendu suit la maquette sans avoir à toucher 44 pages, et le
+ * reste du site n'est pas affecté puisque tout est confiné à
+ * `.achillea-scope`.
+ */
+.achillea-scope {
+	font-family: "Achillea Sans", var(--font-poppins), system-ui, sans-serif;
+}
+
+/*
+ * Titres en `Achillea Title` (HUMANE), avec les métriques de l'original :
+ * échelle fluide et léger interlettrage positif. HUMANE est une condensée très
+ * haute — sans `line-height` resserré elle ouvre des trous verticaux que la
+ * maquette n'a pas.
+ */
+.achillea-scope h1,
+.achillea-scope h2 {
+	font-family: "Achillea Title", "Achillea Sans", sans-serif;
+	letter-spacing: 0.02em;
+	line-height: 1.05;
+}
+
+/* Les chiffres de score et d'ELO sont monospacés dans l'original
+ * (`tournament-page.css:1530,1587`) : sans cela, un classement qui se
+ * rafraîchit fait danser les colonnes. */
+.achillea-scope .tabular-nums,
+.achillea-scope [data-achillea-score] {
+	font-family: "Achillea Mono", ui-monospace, monospace;
+	font-variant-numeric: tabular-nums;
+}
 
 /* ----------------------------------------------------------------------
  * Achilléa Design Tokens & Backgrounds Pixel-Perfect
@@ -218,4 +291,41 @@
 		transform: translate(-50%, -50%) scale(18);
 		opacity: 0;
 	}
+}
+
+/* ----------------------------------------------------------------------
+ * Rampe de marque, reprise du preset PrimeNG réel
+ *
+ * Source : `apps/achillea-web/src/app/app.config.ts:35-47` — `definePreset`
+ * au-dessus d'Aura. La rampe `primary` y est IDENTIQUE en clair et en sombre,
+ * et `#6d00ce` en est le pas 500 : c'est la couleur de marque d'Achilléa.
+ *
+ * Le portage l'avait perdue : elle ne survivait que sous forme de huit
+ * littéraux `bg-[#6d00ce]` dispersés dans le TSX, plus des `bg-amber-*` sans
+ * rapport avec la charte. Une couleur de marque recopiée à la main dans huit
+ * fichiers est une couleur qui dérive au premier ajustement.
+ * -------------------------------------------------------------------- */
+.achillea-scope {
+	--achillea-primary-50: #eee8ff;
+	--achillea-primary-100: #e0d4ff;
+	--achillea-primary-200: #c0a4ff;
+	--achillea-primary-300: #a675ff;
+	--achillea-primary-400: #9039ff;
+	--achillea-primary-500: #6d00ce;
+	--achillea-primary-600: #5900ab;
+	--achillea-primary-700: #450086;
+	--achillea-primary-800: #310063;
+	--achillea-primary-900: #210046;
+	--achillea-primary-950: #13002d;
+
+	/* Alias de marque. `--achillea-lime-rgb` est donné en composantes pour
+	 * pouvoir servir dans un `rgba()` de `drop-shadow`, que Tailwind ne sait
+	 * pas composer depuis une couleur hexadécimale. */
+	--achillea-primary: var(--achillea-primary-500);
+	--achillea-lime: #dfff57;
+	--achillea-lime-rgb: 223, 255, 87;
+
+	/* Bleu Discord officiel, et son état survolé. */
+	--discord-blurple: #5865f2;
+	--discord-blurple-hover: #4752c4;
 }
