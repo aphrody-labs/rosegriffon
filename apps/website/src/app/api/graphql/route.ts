@@ -1,6 +1,5 @@
-// oxlint-disable react-hooks/rules-of-hooks -- `useGraphQlJit` et `useResponseCache` sont des
-// greffons GraphQL Yoga, pas des crochets React : la règle ne va que sur leur préfixe `use`.
-import { useGraphQlJit } from "@envelop/graphql-jit";
+// oxlint-disable react-hooks/rules-of-hooks -- `useResponseCache` est un greffon
+// GraphQL Yoga, pas un crochet React : la règle ne va que sur son préfixe `use`.
 import { useResponseCache } from "@graphql-yoga/plugin-response-cache";
 import { createSchema, createYoga } from "graphql-yoga";
 import { ragSearch, type RagSourceKind } from "@rosegriffon/db/rag";
@@ -297,7 +296,17 @@ const { handleRequest } = createYoga({
 	graphqlEndpoint: "/api/graphql",
 	fetchAPI: { Response },
 	plugins: [
-		useGraphQlJit(),
+		// `useGraphQlJit()` a été RETIRÉ : il rendait l'API GraphQL entièrement
+		// inutilisable en production. Le compilateur `graphql-jit` levait
+		// `unsupported type: String!` au moment de compiler le schéma, donc AVANT
+		// d'exécuter quoi que ce soit — même `{ __typename }` répondait 500. Un
+		// greffon d'optimisation qui fait tomber 100 % des requêtes coûte
+		// infiniment plus que les millisecondes qu'il fait gagner.
+		//
+		// Le cache de réponse ci-dessous couvre déjà le vrai coût de ces requêtes
+		// (15 minutes sur des données de jeu qui ne bougent qu'au dump nocturne).
+		// Ne le réintroduire qu'avec une requête de bout en bout qui prouve que la
+		// compilation passe sur CE schéma.
 		useResponseCache({
 			session: () => null, // Global cache
 			ttl: 900_000, // 15 minutes
