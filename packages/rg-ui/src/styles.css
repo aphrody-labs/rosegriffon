@@ -10,11 +10,12 @@
  *   - typescale (15 rôles officiels)
  *   - state-layer utility
  *
- * Thèmes unifiés (4) — appliqués via classe sur <html> ou ancêtre :
+ * Thèmes unifiés (5) — appliqués via classe sur <html> ou ancêtre :
  *   - .theme-roy           — Inazuma character, light, accent bleu/doré
  *   - .theme-gaelle        — Inazuma character, light, vermillon/orange
  *   - .theme-azalee-light  — Wiki Azalée, light, seed MD3 #F89C5A
  *   - .theme-azalee-dark   — Wiki Azalée, dark, seed MD3 #F89C5A
+ *   - .theme-achillea      — Compétitif Achilléa, dark cyber violet/néon lime
  *
  * Pont shadcn → MD3 : chaque thème mappe les vars shadcn (--primary, --background,
  * --card, --foreground, …) vers les sys-color MD3 actifs, pour que les composants
@@ -250,6 +251,19 @@
 		--rg-sur-succes: oklch(0.98 0.004 90);
 		--rg-sur-info: oklch(0.98 0.004 90);
 		--rg-sur-alerte: oklch(0.22 0.04 75);
+
+		/* ─── Palette ranking Achilléa — 11 paliers ────────────────────────── */
+		--achillea-rank-1-stops: #959595, #919191, #d4d4d4, #494949, #797979;
+		--achillea-rank-2-stops: #b17253, #8c4a34, #cb8254, #6d483d, #8c503c;
+		--achillea-rank-3-stops: #7facb8, #546b71, #90aeb6, #6e8389, #cbe0e6;
+		--achillea-rank-4-stops: #c2ad88, #76685b, #7d735d, #554f42, #898063;
+		--achillea-rank-5-stops: #897e8b, #8a8297, #5b5663, #898195, #c5b4c9;
+		--achillea-rank-6-stops: #88f6ff, #547e8e, #5db0d0, #c3fbff, #5cd2dc;
+		--achillea-rank-7-stops: #2d925c, #23574a, #3f9c85, #54d38f, #25896f;
+		--achillea-rank-8-stops: #ff5648, #f5232a, #ff8485, #a6181e, #d0313a;
+		--achillea-rank-9-stops: #7edcb5, #b4ffe7, #4bc2b1, #368464, #3f9e9d;
+		--achillea-rank-10-stops: #f010ff, #f66aff, #d700af, #930e9c, #c731b2;
+		--achillea-rank-11-stops: #ffa910, #e18204, #ffe150, #a15b0e, #dab338;
 
 		/* ─── M3 sys-color — LIGHT scheme (35 tokens) ────────────────────── */
 		--md-sys-color-primary: oklch(0.5 0.22 0);
@@ -646,6 +660,80 @@
 		--sidebar-ring: var(--md-sys-color-primary);
 	}
 
+	:root.theme-achillea,
+	.theme-achillea,
+	:root.achillea,
+	.achillea {
+		--md-sys-color-primary: #b875ff;
+		--md-sys-color-on-primary: #2c005e;
+		--md-sys-color-primary-container: #4f0099;
+		--md-sys-color-on-primary-container: #eedcff;
+		--md-sys-color-secondary: #dfff57;
+		--md-sys-color-on-secondary: #1f2700;
+		--md-sys-color-secondary-container: #354000;
+		--md-sys-color-on-secondary-container: #efffad;
+		--md-sys-color-tertiary: #7edcb5;
+		--md-sys-color-on-tertiary: #003827;
+		--md-sys-color-tertiary-container: #00513b;
+		--md-sys-color-on-tertiary-container: #9af9d1;
+		--md-sys-color-error: #ffb4ab;
+		--md-sys-color-on-error: #690005;
+		--md-sys-color-error-container: #93000a;
+		--md-sys-color-on-error-container: #ffdad6;
+		--md-sys-color-background: #0d0814;
+		--md-sys-color-on-background: #f3edf7;
+		--md-sys-color-surface: #0d0814;
+		--md-sys-color-on-surface: #f3edf7;
+		--md-sys-color-surface-variant: #271e31;
+		--md-sys-color-on-surface-variant: #cbc1d4;
+		--md-sys-color-outline: #948b9d;
+		--md-sys-color-outline-variant: #494352;
+		--md-sys-color-scrim: #000000;
+		--md-sys-color-shadow: #000000;
+		--md-sys-color-inverse-surface: #f3edf7;
+		--md-sys-color-inverse-on-surface: #0d0814;
+		--md-sys-color-inverse-primary: #6d00ce;
+		--md-sys-color-surface-dim: #0d0814;
+		--md-sys-color-surface-bright: #32273e;
+		--md-sys-color-surface-container-lowest: #08040d;
+		--md-sys-color-surface-container-low: #150d20;
+		--md-sys-color-surface-container: #1b1227;
+		--md-sys-color-surface-container-high: #241834;
+		--md-sys-color-surface-container-highest: #2e2041;
+		--background: var(--md-sys-color-surface);
+		--foreground: var(--md-sys-color-on-surface);
+		--card: var(--md-sys-color-surface-container-low);
+		--card-foreground: var(--md-sys-color-on-surface);
+		--popover: var(--md-sys-color-surface-container-high);
+		--popover-foreground: var(--md-sys-color-on-surface);
+		--primary: var(--md-sys-color-primary);
+		--primary-foreground: var(--md-sys-color-on-primary);
+		--secondary: var(--md-sys-color-secondary-container);
+		--secondary-foreground: var(--md-sys-color-on-secondary-container);
+		--muted: var(--md-sys-color-surface-container);
+		--muted-foreground: var(--md-sys-color-on-surface-variant);
+		--accent: var(--md-sys-color-tertiary-container);
+		--accent-foreground: var(--md-sys-color-on-tertiary-container);
+		--destructive: var(--md-sys-color-error);
+		--destructive-foreground: var(--md-sys-color-on-error);
+		--border: var(--md-sys-color-outline-variant);
+		--input: var(--md-sys-color-outline);
+		--ring: var(--md-sys-color-primary);
+		--chart-1: var(--md-sys-color-primary);
+		--chart-2: #dfff57;
+		--chart-3: #7edcb5;
+		--chart-4: #f010ff;
+		--chart-5: #ffa910;
+		--sidebar: var(--md-sys-color-surface);
+		--sidebar-foreground: var(--md-sys-color-on-surface);
+		--sidebar-primary: var(--md-sys-color-primary);
+		--sidebar-primary-foreground: var(--md-sys-color-on-primary);
+		--sidebar-accent: var(--md-sys-color-tertiary-container);
+		--sidebar-accent-foreground: var(--md-sys-color-on-tertiary-container);
+		--sidebar-border: var(--md-sys-color-outline-variant);
+		--sidebar-ring: var(--md-sys-color-primary);
+	}
+
 	html {
 		scroll-behavior: smooth;
 		text-rendering: optimizeLegibility;
@@ -802,5 +890,18 @@
 	.scrollbar-hide::-webkit-scrollbar {
 		display: none;
 	}
+
+	/* ─── Achilléa Ranking Gradients ──────────────────────────────────── */
+	.rank-gradient-1 { background: linear-gradient(135deg, var(--achillea-rank-1-stops)); }
+	.rank-gradient-2 { background: linear-gradient(135deg, var(--achillea-rank-2-stops)); }
+	.rank-gradient-3 { background: linear-gradient(135deg, var(--achillea-rank-3-stops)); }
+	.rank-gradient-4 { background: linear-gradient(135deg, var(--achillea-rank-4-stops)); }
+	.rank-gradient-5 { background: linear-gradient(135deg, var(--achillea-rank-5-stops)); }
+	.rank-gradient-6 { background: linear-gradient(135deg, var(--achillea-rank-6-stops)); }
+	.rank-gradient-7 { background: linear-gradient(135deg, var(--achillea-rank-7-stops)); }
+	.rank-gradient-8 { background: linear-gradient(135deg, var(--achillea-rank-8-stops)); }
+	.rank-gradient-9 { background: linear-gradient(135deg, var(--achillea-rank-9-stops)); }
+	.rank-gradient-10 { background: linear-gradient(135deg, var(--achillea-rank-10-stops)); }
+	.rank-gradient-11 { background: linear-gradient(135deg, var(--achillea-rank-11-stops)); }
 }
 

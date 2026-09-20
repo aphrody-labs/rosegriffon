@@ -53,7 +53,7 @@ describe("analyse de styles.css", () => {
 		expect(blocs.some((b) => b.selecteurs.some((s) => s === "from" || s === "to"))).toBe(false);
 	});
 
-	test("descend dans @layer base pour trouver les 4 thèmes", () => {
+	test("descend dans @layer base pour trouver les thèmes", () => {
 		const blocs = analyserBlocs(css);
 		for (const nom of NOMS_THEMES) {
 			expect(blocs.some((b) => b.selecteurs.includes(`.${nom}`))).toBe(true);
@@ -104,17 +104,15 @@ describe("tokens exposés", () => {
 		expect(valeurs.filter((v) => v.includes("var("))).toEqual([]);
 	});
 
-	test("les 4 thèmes exposent les mêmes rôles MD3", () => {
+	test("les thèmes unifiés exposent les mêmes rôles MD3", () => {
 		const reference = Object.keys(THEMES["theme-roy"].md3).sort();
-		// 36 rôles : l'en-tête de styles.css en annonce 35, mais `on-background`
-		// est bien présent dans les 4 thèmes — c'est le commentaire qui a dérivé.
 		expect(reference.length).toBe(36);
 		for (const nom of NOMS_THEMES) {
 			expect(Object.keys(THEMES[nom].md3).sort()).toEqual(reference);
 		}
 	});
 
-	test("les 4 thèmes déclarent le même jeu de variables dans le CSS", () => {
+	test("les thèmes unifiés déclarent le même jeu de variables dans le CSS", () => {
 		// Pas seulement après cascade : un rôle qu'un seul thème omet n'est PAS
 		// surchargeable dans ce thème et reste figé sur la valeur du `:root`.
 		// C'est ce qui rendait `bg-scrim` inerte en Roy/Gaëlle et privait les

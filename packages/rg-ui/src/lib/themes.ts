@@ -52,6 +52,17 @@ export const THEMES = {
 			text: "#EDE0DB",
 		},
 	},
+	achillea: {
+		name: "Achilléa",
+		icon: "/achillea/logo1.svg",
+		colors: {
+			primary: "#6D00CE",
+			secondary: "#DFFF57",
+			accent: "#DFFF57",
+			background: "#0D0814",
+			text: "#F3EDF7",
+		},
+	},
 } as const;
 
 export type ThemeType = keyof typeof THEMES;

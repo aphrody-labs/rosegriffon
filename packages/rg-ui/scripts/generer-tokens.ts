@@ -194,6 +194,7 @@ export const NOMS_THEMES = [
 	"theme-gaelle",
 	"theme-azalee-light",
 	"theme-azalee-dark",
+	"theme-achillea",
 ] as const;
 export type NomTheme = (typeof NOMS_THEMES)[number];
 

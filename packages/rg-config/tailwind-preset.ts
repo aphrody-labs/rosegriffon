@@ -8,6 +8,11 @@ export const rgColors = {
 	// Branding Rose Griffon
 	rose: "#e91e63",
 	griffon: "#d4af37",
+	// Branding Azalée
+	azalee: "#f89c5a",
+	// Branding Achilléa
+	achilleaViolet: "#6d00ce",
+	achilleaLime: "#dfff57",
 	// Sémantique
 	success: "#22c55e",
 	warning: "#f59e0b",
