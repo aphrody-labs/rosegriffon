@@ -14,7 +14,8 @@
     "./storage": "./src/storage.ts",
     "./stats": "./src/services/stats.ts",
     "./types": "./src/types.ts",
-    "./platform": "./src/platform.ts"
+    "./platform": "./src/platform.ts",
+    "./achillea": "./src/achillea.ts"
   },
   "publishConfig": {
     "access": "public",
