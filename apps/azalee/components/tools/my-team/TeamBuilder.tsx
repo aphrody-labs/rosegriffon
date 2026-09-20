@@ -13,7 +13,6 @@ import {
 } from "@dnd-kit/core";
 import type { CollisionDetection, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { toPng } from "html-to-image";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -655,6 +654,10 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 			return;
 		}
 		try {
+			// `html-to-image` n'est utile qu'ici, au clic « exporter ». Importé au
+			// niveau module, il partait dans le bundle de la page pour tous les
+			// visiteurs qui n'exportent jamais leur équipe.
+			const { toPng } = await import("html-to-image");
 			const dataUrl = await toPng(fieldRef.current, {
 				backgroundColor: "#064e3b",
 				cacheBust: true,

@@ -73,6 +73,11 @@ const nextConfig: NextConfig = {
 		optimizePackageImports: [
 			"lucide-react",
 			"date-fns",
+			// Barils de workspace : sans cette entrée, un `import { cn } from
+			// "@/lib/utils"` (qui ré-exporte le baril complet) tirait les ~90
+			// composants du paquet UI dans le graphe du module appelant.
+			"@rosegriffon/ui",
+			"@rosegriffon/azalee",
 			"motion",
 			"react-hook-form",
 			"@hookform/resolvers",
@@ -292,6 +297,15 @@ const nextConfig: NextConfig = {
 		// sans cette liste l'optimiseur renvoie 400 INVALID_IMAGE_OPTIMIZE_REQUEST
 		// (toutes les photos d'équipe cassées). On autorise les qualités employées.
 		qualities: [70, 75, 90, 95, 100],
+		// Sans ces deux listes, Next génère les 8 `deviceSizes` et 8 `imageSizes`
+		// par défaut pour CHAQUE image : autant de variantes à optimiser et à
+		// garder en cache pour des largeurs que le site ne demande jamais. Même
+		// jeu de largeurs que `apps/azalee`, qui est aussi celui pré-chauffé dans
+		// le cache disque du CDN.
+		deviceSizes: [768, 1024, 1920],
+		imageSizes: [96, 256, 384, 512],
+		// 24h au lieu des 60s par défaut : le CDN sert des assets versionnés.
+		minimumCacheTTL: 86400,
 		...(CDN_LOADER && {
 			loader: "custom",
 			loaderFile: "./cdn-loader.ts",

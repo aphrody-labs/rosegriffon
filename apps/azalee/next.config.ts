@@ -261,6 +261,11 @@ const nextConfig: NextConfig = {
 		optimizePackageImports: [
 			"lucide-react",
 			"date-fns",
+			// Barils de workspace : sans cette entrée, un `import { cn } from
+			// "@/lib/utils"` (qui ré-exporte le baril complet) tirait les ~90
+			// composants du paquet UI dans le graphe du module appelant.
+			"@rosegriffon/ui",
+			"@rosegriffon/azalee",
 			"recharts",
 			"react-hook-form",
 			"zod",
