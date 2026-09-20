@@ -306,8 +306,7 @@ Ce plan ne déplace **que** le rendu.
   seulement `bun --filter @rosegriffon/website type-check`.
 - Tokens de couleur FR (`succes`/`alerte`/`info`), overlays `bg-scrim/xx`.
 - Biome peut revert un `Edit` sur `*.tsx` : vérifier au `grep` après coup.
-- `bun.lock` en `lockfileVersion 1` (Bun 1.3.14) — ne pas régénérer avec un
-  Bun 1.4-canary.
+- `bun.lock` en `lockfileVersion 2` (Bun 1.4.0 en CI) — ne pas le rétrograder.
 - Jamais de `rm -rf .next` sur une app servie par un service systemd.
 - Déploiement : `bun run deploy website` (bleu/vert), un seul build à la fois.
 
