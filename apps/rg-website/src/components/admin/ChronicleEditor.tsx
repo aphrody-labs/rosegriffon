@@ -338,7 +338,7 @@ export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEdit
 							size="sm"
 							onClick={handlePublish}
 							disabled={isSaving}
-							className="bg-linear-to-r from-rg-primary to-rg-secondary hover:opacity-90 text-white text-xs sm:text-sm"
+							className="bg-linear-to-r from-rg-rose to-rg-or hover:opacity-90 text-white text-xs sm:text-sm"
 						>
 							<Send className="size-3 sm:h-4 sm:w-4 sm:mr-2" />
 							<span className="hidden sm:inline">

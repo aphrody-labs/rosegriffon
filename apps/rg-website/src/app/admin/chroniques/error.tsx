@@ -22,7 +22,7 @@ export default function ChroniquesError({
 	return (
 		<div className="container max-w-4xl py-10 space-y-6">
 			<div className="flex flex-col items-center justify-center text-center space-y-4">
-				<h2 className="text-2xl font-bold tracking-tight text-rg-primary">
+				<h2 className="text-2xl font-bold tracking-tight text-rg-rose">
 					Une erreur est survenue
 				</h2>
 				<p className="text-muted-foreground max-w-lg">

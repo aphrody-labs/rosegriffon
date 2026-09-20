@@ -9,7 +9,7 @@ export default function ChroniqueNotFound() {
 				<FileQuestion className="size-12 text-muted-foreground" />
 			</div>
 			<div className="space-y-2">
-				<h2 className="text-2xl font-bold tracking-tight text-rg-primary">Chronique introuvable</h2>
+				<h2 className="text-2xl font-bold tracking-tight text-rg-rose">Chronique introuvable</h2>
 				<p className="text-muted-foreground">
 					La chronique que vous recherchez n'existe pas ou a été supprimée.
 				</p>

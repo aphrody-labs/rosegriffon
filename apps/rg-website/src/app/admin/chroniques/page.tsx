@@ -68,7 +68,7 @@ export default async function ChroniquesAdminPage({
 					<Button
 						asChild
 						size="sm"
-						className="bg-linear-to-r from-rg-primary to-rg-secondary hover:opacity-90 text-white w-full sm:w-auto"
+						className="bg-linear-to-r from-rg-rose to-rg-or hover:opacity-90 text-white w-full sm:w-auto"
 					>
 						<Link href="/admin/chroniques/new" className="flex items-center justify-center">
 							<Plus className="size-4 sm:mr-2" />

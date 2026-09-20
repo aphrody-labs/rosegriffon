@@ -43,7 +43,10 @@
 	right: calc(var(--sidebar-width) * -1);
 }
 
-@custom-variant dark (&:is(.dark, .dark *));
+/* Les composants partagés utilisent `dark:` ; sans les alias `.azalee-dark`
+ * et `.theme-azalee-dark` publiés par @rosegriffon/ui, ces variantes ne se
+ * déclenchaient pas sous le thème sombre d'Azalée. */
+@custom-variant dark (&:is(.dark, .dark *, .azalee-dark, .azalee-dark *, .theme-azalee-dark, .theme-azalee-dark *));
 
 /* Zones sûres iOS. `pt-safe` / `pb-safe` étaient déjà utilisées par l'en-tête
  * mobile et la barre basse alors qu'aucun plugin ni token ne les générait :
@@ -96,7 +99,11 @@
  * un `:root` non-layered figerait la palette et le sélecteur de thème
  * n'aurait plus aucun effet visible. */
 @layer base {
-	:root {
+	:root,
+	:root.azalee-light,
+	.azalee-light,
+	:root.theme-azalee-light,
+	.theme-azalee-light {
 		--md-sys-color-primary: #f2a93b;
 		--md-sys-color-on-primary: #2a1519;
 		--md-sys-color-primary-container: #ffe08b;
@@ -170,11 +177,23 @@
 		--sidebar-accent-foreground: 25 24% 11%;
 		--sidebar-border: 22 31% 85%;
 		--sidebar-ring: 36 89% 59%;
+		/* Palette catégorielle des graphiques. Alignée sur `.theme-azalee-light`
+		 * de @rosegriffon/ui : azalee applique la classe `dark`/rien, pas
+		 * `theme-azalee-*`, donc elle doit être posée ici aussi. */
+		--chart-1: var(--md-sys-color-primary);
+		--chart-2: oklch(0.6 0.13 200);
+		--chart-3: oklch(0.58 0.15 145);
+		--chart-4: oklch(0.55 0.18 300);
+		--chart-5: oklch(0.6 0.16 25);
 	}
 
 	/* ── Dark Theme ────────────────────────────────────────── */
 
-	:root.dark {
+	:root.dark,
+	:root.azalee-dark,
+	.azalee-dark,
+	:root.theme-azalee-dark,
+	.theme-azalee-dark {
 		--md-sys-color-primary: #ffc66c;
 		--md-sys-color-on-primary: #412d00;
 		--md-sys-color-primary-container: #5d4200;
@@ -265,6 +284,12 @@
 			#3d332d 89%,
 			var(--md-sys-color-primary)
 		);
+		/* Idem, remonté en clarté pour rester lisible sur surface sombre. */
+		--chart-1: var(--md-sys-color-primary);
+		--chart-2: oklch(0.74 0.12 200);
+		--chart-3: oklch(0.75 0.14 145);
+		--chart-4: oklch(0.72 0.15 300);
+		--chart-5: oklch(0.75 0.14 25);
 	}
 
 	/* Les thèmes RG partagés (`@rosegriffon/ui/styles.css`) exposent leurs tokens
@@ -419,6 +444,13 @@
 	--color-sidebar-primary: hsl(var(--sidebar-primary));
 	--color-sidebar-foreground: hsl(var(--sidebar-foreground));
 	--color-sidebar: hsl(var(--sidebar));
+	/* Palette des graphiques : le pont manquait entièrement, aucune utility
+	 * `bg-chart-N`/`fill-chart-N` n'était générée dans cette app. */
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
 
 	/* MD3 Motion (used) */
 	--ease-emphasized: cubic-bezier(0.3, 0, 0, 1);

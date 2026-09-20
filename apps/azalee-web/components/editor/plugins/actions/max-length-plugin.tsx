@@ -35,7 +35,7 @@ export function MaxLengthPlugin({ maxLength }: { maxLength: number }) {
 				isOverLimit
 					? "bg-error-container text-on-error-container border-error"
 					: lastContentLength > maxLength * 0.9
-						? "bg-warning-container text-on-warning-container border-warning"
+						? "bg-alerte/15 text-on-surface border-alerte"
 						: "bg-surface-container-highest text-on-surface-variant border-outline-variant/30"
 			)}
 		>

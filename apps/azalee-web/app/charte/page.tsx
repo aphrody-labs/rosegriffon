@@ -53,7 +53,7 @@ export default function CharteEngagementsPage() {
 					</Card>
 
 					{/* Refus de l'IA */}
-					<Card className="border-l-8 border-l-warning bg-surface-container-low shadow-sm">
+					<Card className="border-l-8 border-l-alerte bg-surface-container-low shadow-sm">
 						<CardHeader>
 							<CardTitle className="flex items-center justify-between type-title-large">
 								Refus de l&apos;IA générative comme substitut à la création humaine
