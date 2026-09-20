@@ -3,16 +3,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getDiscordClient, GUILD_ID, syncAllMembers, syncAllRoles, syncStaffPhotos } from "../lib/discord.js";
+import {
+	getDiscordClient,
+	GUILD_ID,
+	GUILDES_SUIVIES,
+	syncAllMembers,
+	syncAllRoles,
+	syncStaffPhotos,
+} from "../lib/discord.js";
 import { sql } from "../lib/db.js";
 
 /**
- * Exécute la synchronisation globale de Discord (membres, rôles et photos d'équipe).
- * Enregistre un rapport détaillé dans `discord_sync_logs`.
+ * Synchronisation Discord — TOUS les serveurs suivis.
+ *
+ * La tâche ne connaissait qu'un serveur, celui de Rose Griffon. Elle balaie
+ * désormais aussi celui d'Achilléa : le bot y est membre, avec l'intent
+ * « Server Members », et la page communauté affiche la hiérarchie réelle des
+ * deux — rôles, positions, permissions.
+ *
+ * Le partage des responsabilités est strict : chaque serveur alimente
+ * `discord_appartenances` et `discord_roles`, mais SEUL celui de Rose Griffon
+ * alimente `discord_members`, les avatars du site et la pré-création des
+ * profils. Ce sont des mécanismes d'identité, pas d'appartenance.
+ *
+ * Un serveur en échec n'arrête pas les autres : le rapport le dit, et les
+ * données du serveur suivant sont quand même rafraîchies.
  */
 export async function runDiscordSync(): Promise<{ success: boolean; error?: string }> {
 	console.log("[Cron Discord] Démarrage de la synchronisation Discord...");
-	
+
 	const client = getDiscordClient();
 	if (!client) {
 		const msg = "Client Discord non initialisé (vérifiez DISCORD_BOT_TOKEN).";
@@ -26,73 +45,81 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
 		return { success: false, error: msg };
 	}
 
-	const startTime = new Date();
-	let totalMembers = 0;
-	let updatedCount = 0;
-	let errorCount = 0;
-	let logMessage = "";
+	const debut = new Date();
+	let totalMembres = 0;
+	let totalMisAJour = 0;
+	let totalErreurs = 0;
+	const resume: string[] = [];
+	const echecs: string[] = [];
 
-	try {
-		const guild = await client.guilds.fetch(GUILD_ID);
-		if (!guild) {
-			throw new Error(`Serveur Discord non trouvé pour l'ID : ${GUILD_ID}`);
-		}
-
-		console.log(`[Cron Discord] Synchro du serveur : ${guild.name} (${guild.id})`);
-
-		// 1. Synchronisation des rôles du serveur
-		console.log("[Cron Discord] Étape 1/3 : Synchronisation des rôles...");
-		const roleReport = await syncAllRoles(guild);
-		console.log(`[Cron Discord] Rôles : ${roleReport.upserted}/${roleReport.fetched} synchronisés en ${roleReport.durationMs}ms`);
-		if (roleReport.errors.length > 0) {
-			console.warn(`[Cron Discord] ${roleReport.errors.length} erreurs lors de la synchro des rôles.`);
-		}
-
-		// 2. Synchronisation de tous les membres du serveur
-		console.log("[Cron Discord] Étape 2/3 : Synchronisation des membres...");
-		const memberReport = await syncAllMembers(guild);
-		totalMembers = memberReport.fetched;
-		updatedCount = memberReport.upserted;
-		errorCount = memberReport.errors.length;
-		console.log(`[Cron Discord] Membres : ${memberReport.upserted}/${memberReport.fetched} synchronisés en ${memberReport.durationMs}ms`);
-		if (memberReport.errors.length > 0) {
-			console.error(`[Cron Discord] ${memberReport.errors.length} erreurs lors de la synchro des membres.`);
-			for (const e of memberReport.errors.slice(0, 5)) {
-				console.error(`  - Membre ID ${e.discordId} : ${e.reason}`);
+	for (const serveur of GUILDES_SUIVIES) {
+		try {
+			const guild = await client.guilds.fetch(serveur.id);
+			if (!guild) {
+				throw new Error(`serveur introuvable (${serveur.id})`);
 			}
-		}
 
-		// 3. Synchronisation des photos d'équipe
-		console.log("[Cron Discord] Étape 3/3 : Synchronisation des avatars du staff...");
-		const staffReport = await syncStaffPhotos(client);
-		console.log(`[Cron Discord] Staff : ${staffReport.updated}/${staffReport.total} mis à jour, ${staffReport.unchanged} inchangés en ${staffReport.durationMs}ms`);
-		if (staffReport.errors.length > 0) {
-			console.error(`[Cron Discord] ${staffReport.errors.length} erreurs lors de la synchro du staff.`);
-			for (const e of staffReport.errors.slice(0, 3)) {
-				console.error(`  - Staff ${e.name} : ${e.reason}`);
+			console.log(`[Cron Discord] ${serveur.nom} (${guild.id}) — rôles...`);
+			const rapportRoles = await syncAllRoles(guild);
+			console.log(
+				`[Cron Discord] ${serveur.nom} — rôles : ${rapportRoles.upserted}/${rapportRoles.fetched} en ${rapportRoles.durationMs} ms`
+			);
+
+			console.log(`[Cron Discord] ${serveur.nom} — membres...`);
+			const rapportMembres = await syncAllMembers(guild);
+			console.log(
+				`[Cron Discord] ${serveur.nom} — membres : ${rapportMembres.upserted}/${rapportMembres.fetched}, ${rapportMembres.partis} parti(s) en ${rapportMembres.durationMs} ms`
+			);
+			for (const e of rapportMembres.errors.slice(0, 3)) {
+				console.error(`  - ${serveur.nom} / membre ${e.discordId} : ${e.reason}`);
 			}
+
+			totalMembres += rapportMembres.fetched;
+			totalMisAJour += rapportMembres.upserted;
+			totalErreurs += rapportMembres.errors.length + rapportRoles.errors.length;
+			resume.push(
+				`${serveur.nom} : ${rapportMembres.upserted}/${rapportMembres.fetched} membres, ${rapportRoles.upserted} rôles`
+			);
+		} catch (err) {
+			const motif = err instanceof Error ? err.message : String(err);
+			console.error(`[Cron Discord] ${serveur.nom} : ${motif}`);
+			echecs.push(`${serveur.nom} : ${motif}`);
+			totalErreurs++;
 		}
-
-		logMessage = `Synchronisation complète réussie. Rôles: ${roleReport.upserted}/${roleReport.fetched}. Membres: ${memberReport.upserted}/${memberReport.fetched}. Staff: ${staffReport.updated}/${staffReport.total} mis à jour.`;
-
-		// Enregistrement du log de synchro dans la base de données
-		await sql`
-			INSERT INTO discord_sync_logs (status, total_members, updated_count, error_count, message, created_at)
-			VALUES ('success', ${totalMembers}, ${updatedCount}, ${errorCount}, ${logMessage}, NOW())
-		`.catch(err => console.error("[Cron Discord] Impossible de sauvegarder le log de synchro:", err));
-
-		return { success: true };
-	} catch (err: any) {
-		const errMsg = err.message || String(err);
-		console.error("[Cron Discord] Erreur critique lors de la synchronisation :", err);
-
-		await sql`
-			INSERT INTO discord_sync_logs (status, total_members, updated_count, error_count, message, created_at)
-			VALUES ('error', ${totalMembers}, ${updatedCount}, ${errorCount + 1}, ${errMsg}, NOW())
-		`.catch(dbErr => console.error("[Cron Discord] Impossible de sauvegarder le log d'erreur:", dbErr));
-
-		return { success: false, error: errMsg };
 	}
+
+	// Les avatars du staff ne dépendent pas d'un serveur : le service lit la
+	// table `team_members`, qui n'a pas de notion de guilde.
+	try {
+		const rapportStaff = await syncStaffPhotos(client);
+		console.log(
+			`[Cron Discord] Staff : ${rapportStaff.updated}/${rapportStaff.total} mis à jour, ${rapportStaff.unchanged} inchangés en ${rapportStaff.durationMs} ms`
+		);
+		resume.push(`staff : ${rapportStaff.updated}/${rapportStaff.total}`);
+		totalErreurs += rapportStaff.errors.length;
+	} catch (err) {
+		const motif = err instanceof Error ? err.message : String(err);
+		console.error(`[Cron Discord] avatars du staff : ${motif}`);
+		echecs.push(`staff : ${motif}`);
+		totalErreurs++;
+	}
+
+	const message = [resume.join(" · "), ...echecs.map((e) => `ÉCHEC ${e}`)]
+		.filter(Boolean)
+		.join(" | ");
+
+	await sql`
+		INSERT INTO discord_sync_logs (status, total_members, updated_count, error_count, message, created_at)
+		VALUES (${echecs.length === 0 ? "success" : "error"}, ${totalMembres}, ${totalMisAJour}, ${totalErreurs}, ${message}, NOW())
+	`.catch((err) => console.error("[Cron Discord] log de synchro non enregistré :", err));
+
+	console.log(
+		`[Cron Discord] terminé en ${Date.now() - debut.getTime()} ms — ${message}`
+	);
+
+	return echecs.length === 0
+		? { success: true }
+		: { success: false, error: echecs.join(" | ") };
 }
 
 /**

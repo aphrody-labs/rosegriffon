@@ -48,6 +48,7 @@ export const TACHES_CRON = [
 	"seo:indexnow",
 	"seo:llms-txt",
 	"stats:achillea",
+	"sync:achillea",
 ] as const;
 
 export type TacheCron = (typeof TACHES_CRON)[number];
@@ -324,6 +325,16 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
 		role: "regénère `llms.txt` et `llm.txt` dans le dépôt local",
 		planification: "45 5 * * *",
 		famille: "seo",
+		niveau: "admin",
+		motifInterdiction: null,
+		dureeIndicative: "quelques secondes",
+	},
+	{
+		nom: "sync:achillea",
+		titre: "Projection Discord vers Achilléa",
+		role: "recopie les rôles et membres relevés par `discord:sync` dans les tables du bot Achilléa",
+		planification: "*/30 * * * *",
+		famille: "donnees",
 		niveau: "admin",
 		motifInterdiction: null,
 		dureeIndicative: "quelques secondes",

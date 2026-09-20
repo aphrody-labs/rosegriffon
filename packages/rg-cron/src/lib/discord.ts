@@ -10,6 +10,25 @@ import { resolveGuildId } from "@rosegriffon/types/discord";
 export const GUILD_ID = resolveGuildId(Bun.env as Record<string, string | undefined>);
 export const DISCORD_TOKEN = Bun.env.DISCORD_BOT_TOKEN || Bun.env.DISCORD_TOKEN;
 
+/**
+ * Les serveurs Discord que la synchronisation balaie.
+ *
+ * Le bot Rose Griffon est membre des DEUX — vérifié sur
+ * `GET /users/@me/guilds` — et son intent « Server Members » est actif sur les
+ * deux : un seul jeton suffit, il n'y a pas à emprunter celui d'Achilléa.
+ *
+ * `GUILD_ID` reste le serveur Rose Griffon : c'est lui qui porte l'identité du
+ * site (avatars, pré-création des profils, multicomptes), et lui seul alimente
+ * `discord_members`. Les autres serveurs ne remplissent que
+ * `discord_appartenances`.
+ */
+export const GUILDES_SUIVIES = [
+	{ id: GUILD_ID ?? "1072991720268111892", cle: "rose-griffon", nom: "Rose Griffon" },
+	{ id: "1055585286320554055", cle: "achillea", nom: "Achilléa" },
+] as const;
+
+export type CleGuilde = (typeof GUILDES_SUIVIES)[number]["cle"];
+
 export interface DiscordTelemetry {
 	onlineCount: number;
 	idleCount: number;
@@ -375,6 +394,39 @@ async function upsertRow(row: MemberRow): Promise<void> {
   `;
 }
 
+/**
+ * Écrit l'appartenance à un serveur donné.
+ *
+ * Même ligne source que `upsertRow`, autre question : `discord_members` dit
+ * « qui est cette personne pour Rose Griffon », `discord_appartenances` dit
+ * « de quels serveurs elle est membre, avec quels rôles ».
+ */
+async function upsertAppartenance(guildId: string, row: MemberRow): Promise<void> {
+	const rolesLiteral = toPgTextArray(row.roles || []);
+	await sql`
+    INSERT INTO discord_appartenances (
+      guild_id, discord_id, username, display_name, nickname,
+      avatar_url, joined_at, premium_since, roles, is_bot, updated_at, left_at
+    ) VALUES (
+      ${guildId}, ${row.discord_id}, ${row.username}, ${row.display_name}, ${row.nickname},
+      ${row.avatar_url}, ${row.joined_at}, ${row.premium_since}, ${rolesLiteral}::text[],
+      ${row.is_bot}, NOW(), NULL
+    )
+    ON CONFLICT (guild_id, discord_id) DO UPDATE SET
+      username = EXCLUDED.username,
+      display_name = EXCLUDED.display_name,
+      nickname = EXCLUDED.nickname,
+      avatar_url = EXCLUDED.avatar_url,
+      joined_at = COALESCE(EXCLUDED.joined_at, discord_appartenances.joined_at),
+      premium_since = EXCLUDED.premium_since,
+      roles = EXCLUDED.roles,
+      is_bot = EXCLUDED.is_bot,
+      updated_at = NOW(),
+      -- Un membre revu est un membre revenu : le départ précédent est effacé.
+      left_at = NULL
+  `;
+}
+
 async function syncUserImage(discordId: string, avatarUrl: string | null): Promise<void> {
 	if (!avatarUrl) return;
 	await sql`
@@ -415,12 +467,22 @@ export async function syncAllMembers(guild: Guild): Promise<SyncReport> {
 	const linkedAccounts = await sql`SELECT account_id FROM account WHERE provider_id = 'discord'`;
 	const linkedDiscordIds = new Set(linkedAccounts.map((a: any) => a.account_id));
 
+	// `discord_members` et la pré-création des profils ne valent QUE pour le
+	// serveur Rose Griffon : ce sont des mécanismes d'identité du site, pas
+	// d'appartenance. Les appliquer au serveur Achilléa créerait des profils
+	// Rose Griffon pour des gens qui n'y ont jamais mis les pieds, et marquerait
+	// « partis » tous les membres de l'autre serveur à chaque balayage.
+	const estServeurPrincipal = guild.id === (GUILD_ID ?? GUILDES_SUIVIES[0].id);
+
 	for (const member of members.values()) {
 		try {
 			const row = memberToRow(member);
-			await upsertRow(row);
-			if (linkedDiscordIds.has(row.discord_id)) {
-				await syncUserImage(row.discord_id, row.avatar_url);
+			await upsertAppartenance(guild.id, row);
+			if (estServeurPrincipal) {
+				await upsertRow(row);
+				if (linkedDiscordIds.has(row.discord_id)) {
+					await syncUserImage(row.discord_id, row.avatar_url);
+				}
 			}
 			upserted++;
 		} catch (err) {
@@ -436,20 +498,29 @@ export async function syncAllMembers(guild: Guild): Promise<SyncReport> {
 	// enregistrés, et le démon manque forcément ceux de ses coupures.
 	let partis = 0;
 	try {
-		const sortis = await sql`
-			UPDATE discord_members
+		const sortisGuilde = await sql`
+			UPDATE discord_appartenances
 			   SET left_at = now()
-			 WHERE left_at IS NULL
+			 WHERE guild_id = ${guild.id}
+			   AND left_at IS NULL
 			   AND updated_at < ${new Date(start).toISOString()}::timestamptz
 			RETURNING discord_id`;
-		partis = sortis.length;
-		if (partis > 0) {
+		partis = sortisGuilde.length;
+
+		if (estServeurPrincipal) {
 			await sql`
-				DELETE FROM profiles
-				 WHERE claimed_at IS NULL
-				   AND discord_id IN (
-				       SELECT discord_id FROM discord_members WHERE left_at IS NOT NULL
-				   )`;
+				UPDATE discord_members
+				   SET left_at = now()
+				 WHERE left_at IS NULL
+				   AND updated_at < ${new Date(start).toISOString()}::timestamptz`;
+			if (partis > 0) {
+				await sql`
+					DELETE FROM profiles
+					 WHERE claimed_at IS NULL
+					   AND discord_id IN (
+					       SELECT discord_id FROM discord_members WHERE left_at IS NOT NULL
+					   )`;
+			}
 		}
 	} catch (err) {
 		console.error("[discord] réconciliation des départs impossible:", err);
@@ -458,13 +529,15 @@ export async function syncAllMembers(guild: Guild): Promise<SyncReport> {
 	// L'invariant « tout membre actuel a un profil » est maintenu ici plutôt que
 	// par un trigger : un trigger tournerait à chaque ligne de chaque balayage et
 	// ferait échouer la synchro entière à la moindre exception.
-	try {
-		const [res] = await sql`SELECT * FROM rg_precreer_profils_discord()`;
-		if (res?.crees) {
-			console.log(`[discord] ${res.crees} profil(s) pré-créé(s)`);
+	if (estServeurPrincipal) {
+		try {
+			const [res] = await sql`SELECT * FROM rg_precreer_profils_discord()`;
+			if (res?.crees) {
+				console.log(`[discord] ${res.crees} profil(s) pré-créé(s)`);
+			}
+		} catch (err) {
+			console.error("[discord] pré-création des profils impossible:", err);
 		}
-	} catch (err) {
-		console.error("[discord] pré-création des profils impossible:", err);
 	}
 
 	return {
@@ -626,6 +699,19 @@ export async function syncAllRoles(guild: Guild): Promise<RoleSyncReport> {
 				reason: err instanceof Error ? err.message : String(err),
 			});
 		}
+	}
+
+	// Un rôle supprimé sur Discord restait en base indéfiniment : la table en
+	// comptait 95 pour 91 rôles réels, et la hiérarchie affichée inventait donc
+	// des échelons qui n'existent plus.
+	try {
+		const vivants = [...roles.keys()];
+		await sql`
+			DELETE FROM discord_roles
+			 WHERE guild_id = ${guild.id}
+			   AND role_id <> ALL (${toPgTextArray(vivants)}::text[])`;
+	} catch (err) {
+		console.error("[discord] purge des rôles disparus impossible:", err);
 	}
 
 	return {

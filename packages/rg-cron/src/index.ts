@@ -26,6 +26,7 @@ import { runSeoLlmsTxt } from "./tasks/seo/llms-txt";
 import { collecterAudienceAchillea } from "./tasks/stats/achillea";
 import { rafraichirVideosTechniques } from "./tasks/zukan-videos";
 import { initDiscord, getDiscordTelemetry, onTelemetryUpdate, getDiscordClient, GUILD_ID } from "./lib/discord";
+import { runAchilleaSync } from "./tasks/achillea-sync";
 import { runDiscordSync, runDiscordChannelScan } from "./tasks/discord";
 import {
 	armerSalonsDeCategories,
@@ -479,6 +480,8 @@ if (indexRun >= 0) {
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
 	} else if (task === "zukan:videos" || task === "zukan-videos") {
 		await executeTask("zukan:videos", rafraichirVideosTechniques);
+	} else if (task === "sync:achillea" || task === "sync" || task === "achillea") {
+		await executeTask("sync:achillea", runAchilleaSync);
 	} else if (task === "stats:achillea" || task === "stats") {
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else if (task === "seo") {
@@ -495,6 +498,7 @@ if (indexRun >= 0) {
 		await executeTask("crawl", runIeCrawl);
 		await executeTask("reminders", () => triggerPatreonReminders("announce"));
 		await executeTask("discord:sync", runDiscordSync);
+		await executeTask("sync:achillea", runAchilleaSync);
 		await executeTask("discord:scan", runDiscordChannelScan);
 		await executeTask("discord:messages", runDiscordMessagesSync);
 		await executeTask("discord:polls", () => runDiscordPollsImport());
@@ -507,7 +511,7 @@ if (indexRun >= 0) {
 		await executeTask("stats:achillea", collecterAudienceAchillea);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, sync:achillea, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -525,9 +529,13 @@ Bun.cron("*/30 * * * *", async () => {
 	await executeTask("warm", warmCaches);
 });
 
-// 2b. Synchronisation Discord (membres, rôles, staff) : toutes les 30 minutes
+// 2b. Synchronisation Discord (membres, rôles, staff) des DEUX serveurs suivis,
+// puis projection vers les tables d'Achilléa : toutes les 30 minutes.
+// L'ordre compte — la projection recopie ce que la collecte vient d'écrire, et
+// ne parle jamais à Discord elle-même.
 Bun.cron("*/30 * * * *", async () => {
 	await executeTask("discord:sync", runDiscordSync);
+	await executeTask("sync:achillea", runAchilleaSync);
 });
 
 // 2c. Veille des salons Discord suivis : toutes les 5 minutes.
@@ -821,6 +829,8 @@ const server = Bun.serve({
 				reminders: () => triggerPatreonReminders("announce"),
 				warm: warmCaches,
 				discord: runDiscordSync,
+				"sync:achillea": runAchilleaSync,
+				"sync-achillea": runAchilleaSync,
 				"discord:scan": runDiscordChannelScan,
 				"discord-scan": runDiscordChannelScan,
 				"discord:messages": runDiscordMessagesSync,
