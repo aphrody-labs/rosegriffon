@@ -9,7 +9,12 @@ import {
 	parcourirNav,
 	type NavItem,
 } from "../src/config/navigation";
-import { AZALEE_BASES, joindreWiki, WEBSITE_BASES } from "../src/config/routes";
+import {
+	AZALEE_BASES,
+	basesDepuisChemin,
+	joindreWiki,
+	WEBSITE_BASES,
+} from "../src/config/routes";
 import { DICTIONNAIRE_NAV_FR } from "../src/lib/translations";
 
 const azalee = construireNavigation(AZALEE_BASES);
@@ -149,5 +154,33 @@ describe("dictionnaire de navigation", () => {
 
 		const manquants = [...new Set(libelles)].filter((cle) => !(cle in DICTIONNAIRE_NAV_FR));
 		expect(manquants).toEqual([]);
+	});
+});
+
+/**
+ * Déduction des bases depuis le chemin.
+ *
+ * Trois composants dépendaient d'une heuristique recopiée qui ne connaissait
+ * que `/wiki` et `/admin` : une route `/achillea/**` retombait sur les bases
+ * d'azalee et la barre latérale servait alors des liens wiki non préfixés —
+ * des 404 produits par le menu lui-même.
+ */
+describe("basesDepuisChemin", () => {
+	test("les routes de website rendent les bases de website", () => {
+		for (const chemin of ["/wiki", "/wiki/chara", "/admin", "/admin/users", "/achillea", "/achillea/clans"]) {
+			expect(basesDepuisChemin(chemin)).toBe(WEBSITE_BASES);
+		}
+	});
+
+	test("tout le reste rend les bases d'azalee, qui sert le wiki à la racine", () => {
+		for (const chemin of ["/", "/chara", "/dashboard", "/equipe"]) {
+			expect(basesDepuisChemin(chemin)).toBe(AZALEE_BASES);
+		}
+	});
+
+	test("compare par segment, jamais par préfixe de chaîne", () => {
+		// `/wikipedia` n'est pas dans `/wiki`, `/achilleaxyz` pas dans `/achillea`.
+		expect(basesDepuisChemin("/wikipedia")).toBe(AZALEE_BASES);
+		expect(basesDepuisChemin("/achilleaxyz")).toBe(AZALEE_BASES);
 	});
 });

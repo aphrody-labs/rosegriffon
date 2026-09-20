@@ -19,6 +19,7 @@ export {
 } from "./config/navigation";
 export {
 	AZALEE_BASES,
+	basesDepuisChemin,
 	CHEMINS_ASSOCIATION,
 	CHEMINS_ESPORT,
 	CHEMINS_RACINE,

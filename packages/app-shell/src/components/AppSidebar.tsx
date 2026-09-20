@@ -25,7 +25,7 @@ import {
 	estItemActif,
 	type NavItem,
 } from "../config/navigation";
-import { AZALEE_BASES, WEBSITE_BASES, estSousAdministration } from "../config/routes";
+import { basesDepuisChemin, estSousAdministration } from "../config/routes";
 import { iconMap } from "../lib/icons";
 import { traduireNav } from "../lib/translations";
 
@@ -283,8 +283,9 @@ export function AppSidebar({
 }: AppSidebarProps) {
 	const pathname = usePathname() || "/";
 	const isDashboard = estSousAdministration(pathname);
-	const isWebsiteHost = pathname.startsWith("/wiki") || pathname.startsWith("/admin");
-	const bases = isWebsiteHost ? WEBSITE_BASES : AZALEE_BASES;
+	// Source unique : `/achillea/**` doit rendre les bases de website, pas
+	// celles d'azalee (cf. `basesDepuisChemin`).
+	const bases = basesDepuisChemin(pathname);
 
 	const defaultNavItems = isDashboard
 		? construireDashboardItems(bases)
