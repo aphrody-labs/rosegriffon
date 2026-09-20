@@ -16,7 +16,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@rosegriffon/ui";
-import { CalendarClock } from "@/lib/icons-config";
+import { CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, STATUS_OPTIONS } from "../constants";
 

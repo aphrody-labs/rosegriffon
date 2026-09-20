@@ -7,9 +7,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SkipToContent } from "@/components/accessibility/SkipToContent";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/wiki-sidebar";
 import { LoginDialog } from "@/components/auth/login-dialog";
-import { Footer } from "@/components/layout/Footer";
+import { Footer } from "@/components/layout/AzaleeFooter";
 import { MaterialBottomNav } from "@/components/navigation/MaterialBottomNav";
 import { NotificationBell } from "@/components/news/NotificationBell";
 import { AuthProvider, useAuth } from "@/components/providers/AuthProvider";
@@ -513,13 +513,13 @@ function InstallBanner({ onDismiss, onInstall }: { onDismiss: () => void; onInst
 
 export function Shell({
 	children,
-	user,
-	profile,
+	user = null,
+	profile = null,
 	defaultOpen = true,
 }: {
 	children: React.ReactNode;
-	user: BetterAuthUser | null;
-	profile: AzaleeProfile | null;
+	user?: BetterAuthUser | null;
+	profile?: AzaleeProfile | null;
 	defaultOpen?: boolean;
 }) {
 	const pathname = usePathname();

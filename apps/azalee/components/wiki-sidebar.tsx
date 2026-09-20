@@ -20,6 +20,7 @@ import {
 	SidebarRail,
 	useSidebar,
 } from "@rosegriffon/ui";
+import { estSousAdministration } from "@rosegriffon/app-shell";
 import { dashboardItems, estItemActif, navigationItems } from "@/config/navigation";
 import type { NavItem } from "@/config/navigation";
 import type { GameIconKey } from "@/config/game-icons";
@@ -34,7 +35,7 @@ export function AppSidebar({ className, ...props }: React.ComponentProps<typeof 
 	const { isAdmin } = useAuth();
 	const { state: _state } = useSidebar();
 	const pathname = usePathname();
-	const isDashboard = pathname.startsWith("/dashboard");
+	const isDashboard = estSousAdministration(pathname);
 	const currentNavItems = isDashboard ? dashboardItems : navigationItems;
 	const [mounted, setMounted] = React.useState(false);
 

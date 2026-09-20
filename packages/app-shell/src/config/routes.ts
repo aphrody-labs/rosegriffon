@@ -93,3 +93,18 @@ export const CHEMINS_RACINE = ["/news", "/settings", "/search", "/login"] as con
 
 export type CheminWiki = (typeof CHEMINS_WIKI)[number];
 export type CheminRacine = (typeof CHEMINS_RACINE)[number];
+
+/**
+ * Le chemin est-il dans l'espace d'administration ?
+ *
+ * Les deux apps l'enracinent différemment (`/dashboard` côté azalee, `/admin`
+ * côté website) et le chrome partagé doit le reconnaître dans les deux cas :
+ * la barre latérale du wiki bascule sur le menu d'administration ici, et une
+ * version qui ne testait qu'une seule racine laissait l'autre app afficher le
+ * menu public par-dessus la barre d'administration.
+ */
+export function estSousAdministration(pathname: string): boolean {
+	return [AZALEE_BASES.admin, WEBSITE_BASES.admin].some(
+		(base) => pathname === base || pathname.startsWith(`${base}/`)
+	);
+}
