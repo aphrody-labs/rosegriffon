@@ -9,6 +9,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
+	THEMES,
 } from "@rosegriffon/ui";
 
 export interface ThemeOption {
@@ -18,11 +19,24 @@ export interface ThemeOption {
 	image?: string;
 }
 
-export const DEFAULT_THEMES: ThemeOption[] = [
-	{ id: "dark", label: "Azalée", image: "/emote/RG_Reika_zukan.webp" },
-	{ id: "roy", label: "Roy", image: "/emote/RG_Roy_salut.webp" },
-	{ id: "gaelle", label: "Gaëlle", image: "/emote/RG_Gaelle_salut.webp" },
-];
+/**
+ * Thèmes proposés par le sélecteur, DÉRIVÉS du catalogue de `@rosegriffon/ui`.
+ *
+ * Cette liste était recopiée à la main, et elle avait dérivé : trois entrées
+ * quand le catalogue en déclarait cinq, et surtout un identifiant `"dark"` qui
+ * ne correspond à AUCUN thème — `next-themes` posait donc la classe `.dark`,
+ * qui n'existe qu'en repli générique, au lieu de `.theme-azalee-dark`. Azalée
+ * clair et Achilléa, eux, étaient tout simplement absents du sélecteur : les
+ * déclarer dans `styles.css` ne suffisait pas à les rendre choisissables.
+ *
+ * Ajouter un thème au catalogue l'ajoute désormais au sélecteur, sans toucher
+ * ce fichier. C'est le seul moyen de garantir qu'ils ne redivergent pas.
+ */
+export const DEFAULT_THEMES: ThemeOption[] = Object.entries(THEMES).map(([id, theme]) => ({
+	id,
+	image: theme.icon,
+	label: theme.name,
+}));
 
 export function ThemeToggle({
 	themes = DEFAULT_THEMES,

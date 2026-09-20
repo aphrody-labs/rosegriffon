@@ -22,16 +22,18 @@ import {
 import {
 	construireDashboardItems,
 	construireNavigationItems,
+	construireNavigationUnifiee,
 	estItemActif,
 	type NavItem,
 } from "../config/navigation";
-import { basesDepuisChemin, estSousAdministration } from "../config/routes";
+import { basesDepuisChemin, estSousAdministration, type NavBases } from "../config/routes";
 import { iconMap } from "../lib/icons";
 import { traduireNav } from "../lib/translations";
 
 export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 	items?: NavItem[];
 	isAdmin?: boolean;
+	bases?: NavBases;
 	t?: (key: string) => string;
 	renderIcon?: (item: NavItem) => React.ReactNode;
 	headerSlot?: React.ReactNode;
@@ -158,6 +160,19 @@ function RecursiveNavItem({
 	);
 
 	if (item.children && !isCollapsed) {
+		const isPillar = depth === 0 && item.groupOnly;
+		const pillarColor = item.path === "#association"
+			? "text-rose-griffon"
+			: item.path === "#esport"
+				? "text-achillea-violet dark:text-achillea-lime"
+				: "text-secondary";
+
+		const pillarBg = item.path === "#association"
+			? "bg-rose-griffon/10 text-rose-griffon border-rose-griffon/20"
+			: item.path === "#esport"
+				? "bg-achillea-violet/10 dark:bg-achillea-lime/10 text-achillea-violet dark:text-achillea-lime border-achillea-violet/25 dark:border-achillea-lime/25"
+				: "bg-secondary/10 text-secondary border-secondary/20";
+
 		return (
 			<Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
 				<SidebarMenuItem>
@@ -166,10 +181,18 @@ function RecursiveNavItem({
 							<SidebarMenuButton
 								isActive={isActive}
 								tooltip={traduireNav(item.label, t)}
-								className={`${buttonClass} w-full`}
+								className={
+									isPillar
+										? `relative overflow-hidden w-full transition-all duration-200 group rounded-xl px-3 py-2.5 h-auto flex items-center justify-between mt-3 mb-1 first:mt-0 font-extrabold text-xs tracking-wider uppercase border outline-hidden focus-visible:ring-2 focus-visible:ring-primary ${
+												isActive
+													? `${pillarBg} font-black`
+													: "border-outline-variant/15 text-on-surface-variant bg-surface-container-low/50 hover:bg-surface-container hover:text-on-surface"
+										  }`
+										: `${buttonClass} w-full`
+								}
 								aria-expanded={isOpen}
 							>
-								<div className={iconClass}>
+								<div className={isPillar ? `flex items-center justify-center size-5 ${pillarColor}` : iconClass}>
 									<NavIcon
 										item={item}
 										isActive={Boolean(isActive)}
@@ -180,14 +203,14 @@ function RecursiveNavItem({
 									/>
 								</div>
 								<span
-									className={`whitespace-nowrap transition-all duration-300 font-medium truncate flex-1 text-left text-sm ${
-										isActive ? "font-bold" : ""
-									}`}
+									className={`whitespace-nowrap transition-all duration-300 truncate flex-1 text-left ${
+										isPillar ? "font-extrabold text-xs tracking-wider" : "text-sm font-medium"
+									} ${isActive ? "font-bold" : ""}`}
 								>
 									{traduireNav(item.label, t)}
 								</span>
 								<ChevronRight
-									size={18}
+									size={16}
 									className={`shrink-0 text-on-surface-variant/50 transition-transform duration-200 ${
 										isOpen ? "rotate-90" : ""
 									}`}
@@ -274,6 +297,7 @@ function RecursiveNavItem({
 export function AppSidebar({
 	items,
 	isAdmin = false,
+	bases: basesProp,
 	t,
 	renderIcon,
 	headerSlot,
@@ -285,11 +309,13 @@ export function AppSidebar({
 	const isDashboard = estSousAdministration(pathname);
 	// Source unique : `/achillea/**` doit rendre les bases de website, pas
 	// celles d'azalee (cf. `basesDepuisChemin`).
-	const bases = basesDepuisChemin(pathname);
+	const bases = basesProp ?? basesDepuisChemin(pathname);
 
 	const defaultNavItems = isDashboard
 		? construireDashboardItems(bases)
-		: construireNavigationItems(bases);
+		: bases.esport !== undefined
+			? construireNavigationUnifiee(bases).map((g) => g.item)
+			: construireNavigationItems(bases);
 
 	const resolvedNavItems = items ?? defaultNavItems;
 
