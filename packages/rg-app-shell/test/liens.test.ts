@@ -3,7 +3,12 @@ import { join } from "node:path";
 
 import { describe, expect, test } from "bun:test";
 
-import { cheminsCliquables, construireNavigation } from "../src/config/navigation";
+import {
+	cheminsCliquables,
+	construireNavigation,
+	construireNavigationUnifiee,
+	domaineDeLaRoute,
+} from "../src/config/navigation";
 import { listerMotifsRoutes, motifAccepte, routeExiste } from "../src/lib/routes-next";
 import { AZALEE_BASES, WEBSITE_BASES } from "../src/config/routes";
 
@@ -81,4 +86,52 @@ describe("aucune entrée de menu ne mène à un 404", () => {
 			expect(morts).toEqual([]);
 		});
 	}
+});
+
+/**
+ * Non-régression des liens de la navigation UNIFIÉE (trois domaines).
+ *
+ * Le menu à trois sous-catégories — Association, Wiki, E-sport — a été écrit
+ * après la fusion des trois sites sous `rosegriffon.fr`. Ses entrées e-sport
+ * pointent vers `/achillea/**`, routes arrivées avec le portage du front
+ * Angular : elles n'ont AUCUNE garantie d'exister tant qu'un test ne les
+ * confronte pas à l'arborescence réelle.
+ *
+ * C'est le même contrat que pour le wiki : un lien ajouté sans page fait
+ * échouer les tests, pas la production.
+ */
+describe("navigation unifiée : trois domaines", () => {
+	const app = join(RACINE, "apps/website/src/app");
+
+	test("les trois sous-catégories sont présentes côté website", () => {
+		const groupes = construireNavigationUnifiee(WEBSITE_BASES);
+		expect(groupes.map((g) => g.domaine)).toEqual(["association", "wiki", "esport"]);
+	});
+
+	test("azalee ne monte que le wiki : une seule sous-catégorie, pas trois vides", () => {
+		const groupes = construireNavigationUnifiee(AZALEE_BASES);
+		expect(groupes.map((g) => g.domaine)).toEqual(["wiki"]);
+	});
+
+	test("les entêtes de groupe ne sont pas des destinations", () => {
+		for (const { item } of construireNavigationUnifiee(WEBSITE_BASES)) {
+			expect(item.groupOnly).toBe(true);
+		}
+	});
+
+	test("chaque lien cliquable du menu unifié correspond à une route réelle", () => {
+		const motifs = listerMotifsRoutes(app);
+		const items = construireNavigationUnifiee(WEBSITE_BASES).flatMap((g) => g.item.children ?? []);
+		const morts = cheminsCliquables(items).filter((chemin) => !routeExiste(motifs, chemin));
+		expect(morts).toEqual([]);
+	});
+
+	test("domaineDeLaRoute classe chaque route dans son domaine", () => {
+		expect(domaineDeLaRoute("/achillea/clans", WEBSITE_BASES)).toBe("esport");
+		expect(domaineDeLaRoute("/wiki/chara", WEBSITE_BASES)).toBe("wiki");
+		expect(domaineDeLaRoute("/chroniques", WEBSITE_BASES)).toBe("association");
+		expect(domaineDeLaRoute("/", WEBSITE_BASES)).toBe("association");
+		// Piège du préfixe de chaîne : `/achilleaxyz` n'est pas dans `/achillea`.
+		expect(domaineDeLaRoute("/achilleaxyz", WEBSITE_BASES)).toBe("association");
+	});
 });

@@ -13,16 +13,33 @@
  * construction.
  */
 
-/** Emplacements où l'app monte le wiki et l'administration. */
+/** Emplacements où l'app monte ses trois domaines et l'administration. */
 export interface NavBases {
 	/** Préfixe du wiki : `""` (azalee, à la racine) ou `"/wiki"` (website). */
 	wiki: string;
 	/** Racine de l'administration : `"/dashboard"` (azalee) ou `"/admin"` (website). */
 	admin: string;
+	/**
+	 * Préfixe de l'e-sport (Achilléa).
+	 *
+	 * OPTIONNEL À DESSEIN : la navigation unifiée est arrivée après les deux
+	 * apps, et les rendre obligatoires aurait cassé tous les appelants d'un
+	 * coup. Une base absente signifie « ce domaine n'est pas monté ici » — la
+	 * sous-catégorie correspondante disparaît du menu au lieu de produire des
+	 * liens vers des pages inexistantes.
+	 */
+	esport?: string;
+	/** Préfixe de l'espace association (portail). Racine du site par défaut. */
+	association?: string;
 }
 
 export const AZALEE_BASES: NavBases = { admin: "/dashboard", wiki: "" };
-export const WEBSITE_BASES: NavBases = { admin: "/admin", wiki: "/wiki" };
+export const WEBSITE_BASES: NavBases = {
+	admin: "/admin",
+	association: "",
+	esport: "/achillea",
+	wiki: "/wiki",
+};
 
 /**
  * Compose un chemin du wiki avec le préfixe de l'app.
@@ -91,8 +108,81 @@ export const CHEMINS_WIKI = [
  */
 export const CHEMINS_RACINE = ["/news", "/settings", "/search", "/login"] as const;
 
+/**
+ * Routes de l'e-sport (Achilléa), exprimées SANS préfixe.
+ *
+ * Même raison d'être que `CHEMINS_WIKI` : la structure ne bouge pas, seul le
+ * point de montage varie. Achilléa a vécu à la racine d'`achillea.rosegriffon.fr`
+ * avant d'être monté sous `/achillea` ; exprimer les chemins relativement évite
+ * de figer le second dans le menu.
+ *
+ * Seules les routes RÉELLEMENT servies figurent ici : `liens.test.ts` confronte
+ * chaque entrée aux pages présentes sous `app/**`, et un lien sans page fait
+ * échouer les tests plutôt que la production.
+ */
+export const CHEMINS_ESPORT = [
+	"/",
+	"/clans",
+	"/clans/create",
+	"/clans/dashboard",
+	"/ranked",
+	"/ranked/leaderboard",
+	"/ranked/tiers",
+	"/ranked/history",
+	"/ranked/match",
+	"/tournaments",
+	"/tournaments/create",
+	"/tournaments/circuit/ranking",
+	"/leagues/astral",
+	"/casts",
+	"/licence",
+	"/wallet",
+	"/organizations/create",
+	"/guide",
+	"/guide/brand",
+] as const;
+
+/**
+ * Routes de l'espace association (portail Rose Griffon), SANS préfixe.
+ *
+ * L'association est montée à la racine du site : son préfixe est `""`. Le champ
+ * existe quand même, pour que le jour où le portail passe sous un préfixe, le
+ * menu suive sans réécriture.
+ */
+export const CHEMINS_ASSOCIATION = [
+	"/",
+	"/chroniques",
+	"/news",
+	"/evenements",
+	"/shop",
+	"/community",
+	"/sondages",
+	"/iergday",
+	"/rose-griffon-tv",
+	"/notre-equipe",
+	"/projets",
+	"/a-propos",
+	"/nous-soutenir",
+	"/charte-engagements",
+	"/cellule-de-mediation",
+	"/emotes-showcase",
+	"/epita-map",
+] as const;
+
 export type CheminWiki = (typeof CHEMINS_WIKI)[number];
 export type CheminRacine = (typeof CHEMINS_RACINE)[number];
+export type CheminEsport = (typeof CHEMINS_ESPORT)[number];
+export type CheminAssociation = (typeof CHEMINS_ASSOCIATION)[number];
+
+/**
+ * Compose un chemin d'un domaine avec son préfixe.
+ *
+ * Généralise `joindreWiki` aux trois domaines. Même piège : une base vide doit
+ * rendre `/` et non `""`, qui n'est pas une URL valide pour `next/link`.
+ */
+export function joindreDomaine(base: string | undefined, chemin: string): string {
+	return joindreWiki(base ?? "", chemin);
+}
 
 /**
  * Le chemin est-il dans l'espace d'administration ?
