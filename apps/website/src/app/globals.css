@@ -987,3 +987,27 @@
 	display: inline-block;
 	border-radius: 0.5rem;
 }
+
+/*
+ * Accueil : un tableau de bord qui tient dans la fenêtre.
+ *
+ * La règle demande DEUX conditions, pas une : assez large ET assez haute. Un
+ * écran large mais court — 1366×650, un portable sur station d'accueil — n'a
+ * pas la place, et `overflow: hidden` y couperait le contenu au lieu de le
+ * condenser. Sous l'un ou l'autre seuil, la grille redevient une colonne qui
+ * défile normalement.
+ *
+ * Écrite ici plutôt qu'en variante Tailwind arbitraire : `@media` à deux
+ * conditions demande un espace avant `and`, que la syntaxe des variantes rend
+ * par un souligné — illisible, et silencieusement faux si on l'oublie.
+ *
+ * 3.5rem = hauteur de la barre supérieure (`HAUTEURS.barreSuperieure` de
+ * `@rosegriffon/app-shell`).
+ */
+@media (min-width: 64rem) and (min-height: 44rem) {
+	.tableau-de-bord-accueil {
+		height: calc(100dvh - 3.5rem);
+		grid-template-rows: minmax(0, 5fr) minmax(0, 4fr) auto;
+		overflow: hidden;
+	}
+}
