@@ -8,11 +8,6 @@ export const metadata: Metadata = {
 	},
 	description:
 		"Base de données complète Inazuma Eleven: Victory Road. Personnages, techniques, objets, quêtes et encyclopédie.",
-	icons: {
-		icon: "/icon.webp",
-		shortcut: "/icon.webp",
-		apple: "/icon.webp",
-	},
 };
 
 export default function WikiLayout({ children }: { children: React.ReactNode }) {

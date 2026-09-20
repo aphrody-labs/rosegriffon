@@ -32,6 +32,23 @@ export default async function NewsFeedPage({
 	const rawQuery = (searchParamsValue.q as string | undefined) || "";
 	const searchQuery = sanitizeNewsSearchQuery(rawQuery);
 
+	/**
+	 * FIL UNIFIÉ — `/news` porte les deux corpus.
+	 *
+	 * Le site tenait deux journaux : `/news` (articles Azalée, `app = 'azalee'`)
+	 * et `/chroniques` (articles de l'association, `app = 'website'`). Deux
+	 * listes, deux pages d'article, deux entrées de menu, deux mises en page —
+	 * pour trois articles publiés en tout. Le lecteur devait deviner lequel des
+	 * deux portait ce qu'il cherchait.
+	 *
+	 * `?format=` reste un FILTRE, pas une seconde page : `chronique` ne montre
+	 * que les articles de l'association, `actu` que ceux d'Azalée, et l'absence
+	 * de paramètre montre tout — c'est la vue par défaut.
+	 */
+	const format = searchParamsValue.format as string | undefined;
+	const appsDuFil =
+		format === "chronique" ? ["website"] : format === "actu" ? ["azalee"] : ["azalee", "website"];
+
 	let featuredArticles: FeedItem[] = [];
 	const featuredIds = new Set<string>();
 
@@ -45,10 +62,10 @@ export default async function NewsFeedPage({
 		const { rows: featured } = await pool.query(
 			`SELECT id, title, slug, excerpt, created_at, published_at, featured_image_url, category, author_id
 			 FROM articles
-			 WHERE status = $1 AND app = $2
+			 WHERE status = $1 AND app = ANY($2::text[])
 			 ORDER BY published_at DESC NULLS LAST, created_at DESC
 			 LIMIT 1`,
-			["published", "azalee"]
+			["published", appsDuFil]
 		);
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,8 +102,8 @@ export default async function NewsFeedPage({
 	// matche l'ordre attendu côté client (équivalent au double `.order()` PostgREST).
 	const articlesPromise = includeArticles
 		? (async () => {
-				const conditions: string[] = ["status = $1", "app = $2"];
-				const params: unknown[] = ["published", "azalee"];
+				const conditions: string[] = ["status = $1", "app = ANY($2::text[])"];
+				const params: unknown[] = ["published", appsDuFil];
 
 				if (searchQuery) {
 					params.push(searchQuery);

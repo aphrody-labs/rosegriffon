@@ -77,7 +77,7 @@ export async function GET(request: Request) {
 				image: article.featured_image_url,
 				slug: article.slug,
 				title: article.title,
-				url: `https://rosegriffon.fr/chroniques/${article.slug}`,
+				url: `https://rosegriffon.fr/news/${article.slug}`,
 			};
 		});
 

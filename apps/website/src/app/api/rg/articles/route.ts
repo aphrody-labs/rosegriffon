@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 					? article.featured_image_url
 					: `${baseUrl}${article.featured_image_url}`
 				: null,
-			url: `${baseUrl}/chroniques/${article.slug}`,
+			url: `${baseUrl}/news/${article.slug}`,
 		}));
 
 		return NextResponse.json({

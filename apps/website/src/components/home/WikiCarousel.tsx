@@ -79,7 +79,7 @@ const WIKI_SECTIONS: Array<{
 	{
 		description: "Chroniques et actualités du bouquet",
 		gradientColors: "bg-linear-to-r from-slate-600 to-gray-500",
-		href: "/chroniques",
+		href: "/news?format=chronique",
 		icon: "newspaper",
 		title: "Chroniques",
 	},

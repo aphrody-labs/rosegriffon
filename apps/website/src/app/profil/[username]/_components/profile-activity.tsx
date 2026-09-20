@@ -31,7 +31,7 @@ export function ProfileActivity({ activities }: { activities: Activity[] }) {
 					{activities.map((activity) => (
 						<li key={activity.id}>
 							<Link
-								href={`/chroniques/${activity.slug}`}
+								href={`/news/${activity.slug}`}
 								className="group block focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:rounded-lg"
 							>
 								<Card className="transition-all group-hover:border-primary/40 group-hover:shadow-md">

@@ -102,8 +102,11 @@ function estimateReadTime(content: string): number {
 async function getNews(slug: string, isPreview = false) {
 	const pool = getPgPool();
 
-	const params: unknown[] = [slug, "azalee"];
-	let sql = "SELECT * FROM articles WHERE slug = $1 AND app = $2";
+	// `slug` est UNIQUE sur toute la table, tous corpus confondus : la page sert
+	// donc aussi bien une actualité Azalée qu'une chronique de l'association,
+	// depuis que `/chroniques` a fusionné ici.
+	const params: unknown[] = [slug, ["azalee", "website"]];
+	let sql = "SELECT * FROM articles WHERE slug = $1 AND app = ANY($2::text[])";
 	if (!isPreview) {
 		params.push("published");
 		sql += ` AND status = $${params.length}`;
@@ -188,9 +191,9 @@ async function getNews(slug: string, isPreview = false) {
 async function getNewsMeta(slug: string, isPreview = false) {
 	const pool = getPgPool();
 
-	const params: unknown[] = [slug, "azalee"];
+	const params: unknown[] = [slug, ["azalee", "website"]];
 	let sql =
-		"SELECT id, slug, title, excerpt, meta_title, meta_description, featured_image_url, featured_image_alt, status, category, published_at, updated_at, created_at, author_id FROM articles WHERE slug = $1 AND app = $2";
+		"SELECT id, slug, title, excerpt, meta_title, meta_description, featured_image_url, featured_image_alt, status, category, published_at, updated_at, created_at, author_id FROM articles WHERE slug = $1 AND app = ANY($2::text[])";
 	if (!isPreview) {
 		params.push("published");
 		sql += ` AND status = $${params.length}`;

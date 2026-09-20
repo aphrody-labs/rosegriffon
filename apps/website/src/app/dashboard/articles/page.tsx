@@ -229,7 +229,7 @@ export default async function ArticlesPage() {
 										<div className="flex gap-2">
 											{article.status === "published" && (
 												<Button variant="outline" size="sm" asChild>
-													<Link href={`/chroniques/${article.slug}`} target="_blank">
+													<Link href={`/news/${article.slug}`} target="_blank">
 														<Eye className="size-4" />
 													</Link>
 												</Button>
