@@ -61,9 +61,13 @@ const DEFAULT_TITLE_MAP: Record<string, string> = {
 	"/achillea/ranked": "Mode Classé",
 	"/achillea/tournaments": "Tournois E-Sport",
 	"/achillea/leagues": "Astral League",
-	"/chroniques": "Chroniques",
 	"/evenements": "Événements",
 	"/community": "Communauté",
+	"/shop": "Boutique",
+	"/sondages": "Sondages",
+	"/projets": "Projets",
+	"/rose-griffon-tv": "Rose Griffon TV",
+	"/profil": "Profil",
 	"/a-propos": "À propos",
 };
 

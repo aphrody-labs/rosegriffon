@@ -2,7 +2,7 @@ import type { Job } from "bullmq";
 import { Queue, Worker } from "bullmq";
 import { Client } from "@aphrody/discordx";
 
-import { redisConnection } from "@/configs";
+import { PREFIXE_FILES, redisConnection } from "@/configs";
 import { Service } from "@/decorators";
 
 import { ClanJobs } from "../jobs/ClanJobs";
@@ -22,9 +22,15 @@ export class WorkerService {
 
 	async init() {
 		// 🧱 Initialize queues
-		this.queues.set("main", new Queue("main", { connection: redisConnection }));
-		this.queues.set("clan", new Queue("clan", { connection: redisConnection }));
-		this.queues.set("sanctions", new Queue("sanctions", { connection: redisConnection }));
+		// `prefix` en plus de la base logique : les files s'appelaient `bull:main`,
+		// `bull:clan`, `bull:sanctions` — trois noms qu'un autre service BullMQ du
+		// même serveur Redis aurait pris pour les siens.
+		for (const nom of ["main", "clan", "sanctions"] as const) {
+			this.queues.set(
+				nom,
+				new Queue(nom, { connection: redisConnection, prefix: PREFIXE_FILES })
+			);
+		}
 
 		// 🧩 Register job processors
 		const clanJobs = new ClanJobs(this.db, this.client);
@@ -47,7 +53,7 @@ export class WorkerService {
 							console.warn(`⚠️ Unknown job on main queue: ${job.name}`);
 					}
 				}),
-			{ connection: redisConnection }
+			{ connection: redisConnection, prefix: PREFIXE_FILES }
 		);
 
 		// CLAN QUEUE worker
@@ -61,7 +67,7 @@ export class WorkerService {
 						console.warn(`⚠️ Unknown job on clan queue: ${job.name}`);
 					}
 				}),
-			{ connection: redisConnection }
+			{ connection: redisConnection, prefix: PREFIXE_FILES }
 		);
 
 		// SANCTIONS QUEUE worker
@@ -75,7 +81,7 @@ export class WorkerService {
 						console.warn(`⚠️ Unknown job on sanctions queue: ${job.name}`);
 					}
 				}),
-			{ connection: redisConnection }
+			{ connection: redisConnection, prefix: PREFIXE_FILES }
 		);
 
 		// Event listeners (optional but strongly recommended)

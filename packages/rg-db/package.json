@@ -24,7 +24,8 @@
   "scripts": {
     "types:gen": "bun scripts/types-gen.ts",
     "type-check": "bun --bun tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "lint": "bunx oxlint -c ../../.oxlintrc.json src"
   },
   "dependencies": {
     "@rosegriffon/types": "workspace:*",

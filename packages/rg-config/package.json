@@ -8,6 +8,9 @@
     "tailwind-preset.ts"
   ],
   "type": "module",
+  "scripts": {
+    "lint": "bunx oxlint -c ../../.oxlintrc.json ."
+  },
   "exports": {
     "./tsconfig-base.json": "./tsconfig-base.json",
     "./tsconfig-nextjs.json": "./tsconfig-nextjs.json",

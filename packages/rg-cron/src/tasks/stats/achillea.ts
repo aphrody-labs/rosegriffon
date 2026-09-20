@@ -94,12 +94,18 @@ export async function collecterAudienceAchillea(): Promise<{
 }> {
 	// `tail` borne la lecture : inutile de charger une journée entière de journal
 	// pour n'en garder que les dernières heures. Le fichier appartient à
-	// `nobody:adm` — `rg-cron` passe par `sudo -n`, autorisé sans mot de passe
-	// pour cette lecture précise.
-	const proc = Bun.spawn(
-		["sudo", "-n", "tail", "-n", String(MAX_LIGNES), JOURNAL_LOCAL],
-		{ stderr: "pipe", stdout: "pipe" }
-	);
+	// `nobody:adm` en mode 640 : il est lu grâce au groupe `adm`, que l'unité
+	// accorde via `SupplementaryGroups=adm`.
+	//
+	// PAS de `sudo` ici. L'appel passait auparavant par `sudo -n`, ce qui ne pouvait
+	// pas aboutir : `rg-cron.service` pose `NoNewPrivileges=true`,
+	// `RestrictSUIDSGID=true` et un `CapabilityBoundingSet` vide, qui interdisent
+	// l'élévation setuid. La tâche échouait à chaque passage sur « sudo: The "no new
+	// privileges" flag is set ». Le groupe rend l'élévation inutile.
+	const proc = Bun.spawn(["tail", "-n", String(MAX_LIGNES), JOURNAL_LOCAL], {
+		stderr: "pipe",
+		stdout: "pipe",
+	});
 
 	const sortie = await new Response(proc.stdout).text();
 	const code = await proc.exited;

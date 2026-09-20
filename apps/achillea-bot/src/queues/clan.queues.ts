@@ -1,8 +1,8 @@
 import { Queue } from "bullmq";
 
-import { redisConnection } from "@/configs";
+import { PREFIXE_FILES, redisConnection } from "@/configs";
 
-export const clanQueue = new Queue("clan", { connection: redisConnection });
+export const clanQueue = new Queue("clan", { connection: redisConnection, prefix: PREFIXE_FILES });
 
 // Schedule a job that will run in 24 hours
 export async function scheduleClanCheck(clanId: number) {

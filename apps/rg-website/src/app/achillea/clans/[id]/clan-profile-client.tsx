@@ -89,7 +89,7 @@ export default function ClanProfilePage({ id }: { id: string }) {
 
 	const handleApply = async () => {
 		if (!isAuthenticated) {
-			window.location.href = `/achillea/auth?returnUrl=/achillea/clans/${clanId}`;
+			window.location.href = `/login?redirect=${encodeURIComponent(`/achillea/clans/${clanId}`)}`;
 			return;
 		}
 		setApplying(true);
@@ -284,7 +284,7 @@ export default function ClanProfilePage({ id }: { id: string }) {
 									isAuthenticated
 										? setApplicationOpen(true)
 										: window.location.assign(
-												`/achillea/auth?returnUrl=/achillea/clans/${clanId}`,
+												`/login?redirect=${encodeURIComponent(`/achillea/clans/${clanId}`)}`,
 											)
 								}
 								className="rounded-xl font-bold text-xs shadow-md"

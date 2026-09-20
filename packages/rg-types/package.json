@@ -23,7 +23,9 @@
 		"./schemas": "./src/schemas.ts"
 	},
 	"scripts": {
-		"test": "bun test src"
+		"test": "bun test src",
+		"lint": "bunx oxlint -c ../../.oxlintrc.json src",
+		"type-check": "bun --bun tsc --noEmit"
 	},
 	"publishConfig": {
 		"access": "public",
@@ -31,6 +33,9 @@
 	},
 	"dependencies": {
 		"zod": "catalog:"
+	},
+	"peerDependencies": {
+		"@rosegriffon/db": "workspace:*"
 	},
 	"devDependencies": {
 		"@rosegriffon/config": "workspace:*",

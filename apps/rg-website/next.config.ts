@@ -70,6 +70,16 @@ const nextConfig: NextConfig = {
 	],
 
 	experimental: {
+		/**
+		 * Transitions de vue natives entre les pages.
+		 *
+		 * Le site est une application unique depuis la fusion des trois fronts,
+		 * mais chaque navigation le faisait clignoter comme trois sites collés :
+		 * le contenu disparaissait d'un coup, le chrome se repeignait. L'API
+		 * View Transitions du navigateur enchaîne les deux états ; là où elle
+		 * n'existe pas, la navigation reste exactement ce qu'elle était.
+		 */
+		viewTransition: true,
 		optimizePackageImports: [
 			"lucide-react",
 			"date-fns",
@@ -148,6 +158,12 @@ const nextConfig: NextConfig = {
 			// table : une chronique se sert telle quelle sous `/news/<slug>`.
 			{ destination: "/news?format=chronique", permanent: true, source: "/chroniques" },
 			{ destination: "/news/:slug", permanent: true, source: "/chroniques/:slug" },
+			// UNE SEULE PAGE DE CONNEXION.
+			// `/achillea/auth` proposait un second écran « Connexion Discord »
+			// pour le même compte Discord : depuis que la session e-sport dérive
+			// de la session Rose Griffon (`/api/achillea/session`), il n'y a plus
+			// qu'une porte d'entrée.
+			{ destination: "/login?redirect=/achillea", permanent: true, source: "/achillea/auth" },
 			{ destination: "/community", permanent: true, source: "/notre-equipe" },
 			{ destination: "/community", permanent: true, source: "/notre-equipe/:path*" },
 			{
