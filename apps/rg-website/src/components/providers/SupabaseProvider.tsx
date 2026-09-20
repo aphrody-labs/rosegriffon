@@ -119,26 +119,10 @@ export function SupabaseProvider({
 	return <SupabaseContext.Provider value={client}>{children}</SupabaseContext.Provider>;
 }
 
-let fallbackClient: SupabaseClient | null = null;
-
-function getFallbackClient(): SupabaseClient {
-	if (!fallbackClient) {
-		const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
-		const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-		fallbackClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-			auth: {
-				persistSession: false,
-				autoRefreshToken: false,
-			},
-		});
-	}
-	return fallbackClient;
-}
-
 export function useSupabaseClient(): SupabaseClient {
 	const client = useContext(SupabaseContext);
 	if (!client) {
-		return getFallbackClient();
+		throw new Error("useSupabaseClient must be used within a SupabaseProvider");
 	}
 	return client;
 }
