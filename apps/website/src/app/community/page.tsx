@@ -2,39 +2,46 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { Skeleton } from "@rosegriffon/ui";
+import { Input, Skeleton } from "@rosegriffon/ui";
 
 import DiscordSection from "@/components/shared/DiscordSection";
-
-import { parseSearchParams } from "@/lib/validations";
+import { SERVEURS_DISCORD, serveurDiscord } from "@/lib/discord";
+import type { CleServeur } from "@/lib/discord/hierarchie";
 import { cn } from "@/lib/utils";
 
 import AssoMembersSection from "./_components/asso";
 import BoardMembersSection from "./_components/board";
-import { MembersDirectory } from "./_components/members";
+import { HierarchieServeur, ResumeServeur } from "./_components/hierarchie-serveur";
 import PartenairesSection from "./_components/PartenairesSection";
 import TeamsSection from "./_components/teams";
 
 /**
- * La communauté Rose Griffon — page UNIQUE.
+ * Qui fait Rose Griffon — page UNIQUE, deux lectures.
  *
- * POURQUOI LA FUSION
- * `/notre-equipe` (bureau, association, équipes, partenaires) et `/community`
- * (annuaire du Discord) répondaient à la même question — « qui est Rose
- * Griffon ? » — depuis deux entrées de menu, deux hero sections et deux jeux de
- * métadonnées. Elles vivent désormais sous une seule URL, en deux onglets
- * rendus côté serveur (`?vue=`) : pas de JavaScript pour changer d'onglet, et
- * chaque vue reste partageable et indexable.
+ * LA SÉPARATION
+ * « Communauté » et « Staff » répondent à deux questions différentes : « qui
+ * est là » et « qui décide ». Elles étaient mélangées dans un même flux, où
+ * quatre sections dérivées (admins, modération, équipe Azalée, boosters)
+ * répétaient les cartes d'une liste complète affichée trois écrans plus bas.
  *
- * `/notre-equipe` et ses anciennes sous-pages redirigent en 308 (next.config).
+ * LES COMPOSANTS, EUX, SONT UNIFIÉS
+ * Une seule `CarteMembre`, une seule `GrilleMembres`, une seule
+ * `HierarchieServeur` — la vue « Staff » n'est que le même rendu filtré sur les
+ * permissions réelles. Un membre du staff apparaît DANS les deux vues, comme
+ * sur Discord : la vue staff est une autre lecture, pas une soustraction.
+ *
+ * LA HIÉRARCHIE EST FACTUELLE
+ * Sections = rôles détachés du serveur, ordre = positions Discord, staff =
+ * permissions réellement accordées. Rien n'est codé en dur : la page suivait
+ * jusqu'ici quatre identifiants de rôles recopiés et un barème inventé.
  */
 export const metadata: Metadata = {
 	alternates: { canonical: "https://rosegriffon.fr/community" },
 	description:
-		"Le bureau, les équipes, les partenaires et les membres du Discord qui font vivre Rose Griffon.",
+		"Les membres des serveurs Rose Griffon et Achilléa, leur hiérarchie réelle, le bureau de l'association et ses équipes.",
 	openGraph: {
 		description:
-			"Le bureau, les équipes, les partenaires et les membres du Discord qui font vivre Rose Griffon.",
+			"Les membres des serveurs Rose Griffon et Achilléa, leur hiérarchie réelle, le bureau de l'association et ses équipes.",
 		images: [
 			{
 				alt: "Rose Griffon - Association Inazuma Eleven",
@@ -50,25 +57,61 @@ export const metadata: Metadata = {
 	title: "Communauté | Rose Griffon",
 };
 
-// Les membres sont lus À LA REQUÊTE : figer la page au build servirait une
-// liste vide le jour où la lecture échoue au prerender.
+// Lecture À LA REQUÊTE : figer la page au build servirait un annuaire vide le
+// jour où la lecture échoue au prerender.
 export const dynamic = "force-dynamic";
 
 const VUES = [
-	{ cle: "equipe", libelle: "L'équipe" },
-	{ cle: "membres", libelle: "Les membres" },
+	{ cle: "communaute", libelle: "Communauté" },
+	{ cle: "staff", libelle: "Staff" },
 ] as const;
+
+type Vue = (typeof VUES)[number]["cle"];
 
 function SquelettedeSection() {
 	return (
 		<div className="space-y-4">
-			<Skeleton className="h-8 w-56" />
-			<div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-				{Array.from({ length: 8 }, (_, index) => (
-					<Skeleton className="h-40 rounded-2xl" key={index} />
+			<Skeleton className="h-6 w-48" />
+			<div className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:grid-cols-6">
+				{Array.from({ length: 12 }, (_, index) => (
+					<Skeleton className="h-16 rounded-xl" key={index} />
 				))}
 			</div>
 		</div>
+	);
+}
+
+/** Onglets rendus côté serveur : changer de vue ne coûte pas un octet de JS. */
+function Onglets<T extends string>({
+	entrees,
+	actif,
+	lien,
+	compact,
+}: {
+	entrees: readonly { cle: T; libelle: string }[];
+	actif: T;
+	lien: (cle: T) => string;
+	compact?: boolean;
+}) {
+	return (
+		<nav className="flex gap-1 rounded-full bg-surface-container p-1">
+			{entrees.map((entree) => (
+				<Link
+					key={entree.cle}
+					href={lien(entree.cle)}
+					aria-current={actif === entree.cle ? "page" : undefined}
+					className={cn(
+						"rounded-full font-medium transition-colors",
+						compact ? "px-3 py-1 text-xs" : "px-4 py-1.5 text-sm",
+						actif === entree.cle
+							? "bg-primary text-on-primary"
+							: "text-on-surface-variant hover:text-on-surface"
+					)}
+				>
+					{entree.libelle}
+				</Link>
+			))}
+		</nav>
 	);
 }
 
@@ -78,9 +121,26 @@ export default async function CommunityPage({
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
 	const params = await searchParams;
-	const query = typeof params.q === "string" ? params.q : "";
-	const { page: currentPage } = parseSearchParams(params);
-	const vue = params.vue === "membres" || query ? "membres" : "equipe";
+	const recherche = typeof params.q === "string" ? params.q.trim() : "";
+	const vue: Vue = params.vue === "staff" ? "staff" : "communaute";
+	const serveur = serveurDiscord(typeof params.serveur === "string" ? params.serveur : "");
+	const cleServeur = serveur.cle as CleServeur;
+
+	const lienVue = (cle: Vue) =>
+		cle === "communaute"
+			? `/community?serveur=${serveur.cle}`
+			: `/community?vue=${cle}&serveur=${serveur.cle}`;
+	const lienServeur = (cle: string) =>
+		vue === "communaute" ? `/community?serveur=${cle}` : `/community?vue=${vue}&serveur=${cle}`;
+
+	const selecteurServeur = (
+		<Onglets
+			entrees={SERVEURS_DISCORD.map((s) => ({ cle: s.cle, libelle: s.nom }))}
+			actif={serveur.cle}
+			lien={lienServeur}
+			compact
+		/>
+	);
 
 	return (
 		<div className="container mx-auto flex flex-col gap-8 px-4 py-10 lg:px-8">
@@ -88,48 +148,71 @@ export default async function CommunityPage({
 				<div className="space-y-1">
 					<h1 className="text-fluid-2xl font-bold text-foreground">Communauté</h1>
 					<p className="max-w-2xl text-sm text-muted-foreground">
-						Le bureau, les équipes et les partenaires de l&apos;association, et les coachs du
-						Discord.
+						Les membres des deux serveurs, leur hiérarchie telle qu&apos;elle existe sur Discord,
+						et les équipes de l&apos;association.
 					</p>
 				</div>
-
-				<nav aria-label="Vues de la page" className="flex gap-1 rounded-full bg-surface-container p-1">
-					{VUES.map((entree) => (
-						<Link
-							key={entree.cle}
-							href={entree.cle === "equipe" ? "/community" : "/community?vue=membres"}
-							aria-current={vue === entree.cle ? "page" : undefined}
-							className={cn(
-								"rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-								vue === entree.cle
-									? "bg-primary text-on-primary"
-									: "text-on-surface-variant hover:text-on-surface"
-							)}
-						>
-							{entree.libelle}
-						</Link>
-					))}
-				</nav>
+				<Onglets entrees={VUES} actif={vue} lien={lienVue} />
 			</header>
 
-			{vue === "membres" ? (
-				<div className="flex flex-col gap-8">
-					{/* Le bloc Discord vivait sur l'accueil, où il arrivait après quatre
-					    écrans de défilement. Il est ici à sa place : au-dessus des gens
-					    qu'il permet de rejoindre. */}
-					<DiscordSection
-						titre="Rejoignez la communauté"
-						sousTitre="Discutez, jouez et suivez l'actualité avec les autres coachs."
-						accroche="Le cœur de la communauté"
-					/>
-					<Suspense fallback={<SquelettedeSection />}>
-						<MembersDirectory query={query} currentPage={currentPage} />
-					</Suspense>
+			{vue === "communaute" ? (
+				<div className="flex flex-col gap-10">
+					{/* Les DEUX serveurs, côte à côte : Rose Griffon rassemble, Achilléa
+					    fait jouer. Le bloc Discord était écrit pour un seul serveur — son
+					    identifiant, son texte et son emote dans le corps du composant. */}
+					<div className="grid gap-4 lg:grid-cols-2">
+						{SERVEURS_DISCORD.map((entree) => (
+							<DiscordSection key={entree.cle} serveur={entree} compact />
+						))}
+					</div>
+
+					<section className="flex flex-col gap-4">
+						<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+							<div className="space-y-1">
+								<h2 className="text-lg font-bold text-on-surface">Hiérarchie — {serveur.nom}</h2>
+								<Suspense fallback={<Skeleton className="h-4 w-56" />}>
+									<ResumeServeur cle={cleServeur} />
+								</Suspense>
+							</div>
+							{selecteurServeur}
+						</div>
+
+						<form action="/community" className="max-w-md">
+							<input type="hidden" name="serveur" value={serveur.cle} />
+							<Input
+								name="q"
+								defaultValue={recherche}
+								placeholder={`Chercher un membre sur ${serveur.nom}`}
+								className="h-10 rounded-full"
+							/>
+						</form>
+
+						<Suspense key={`${serveur.cle}-${recherche}`} fallback={<SquelettedeSection />}>
+							<HierarchieServeur cle={cleServeur} recherche={recherche} />
+						</Suspense>
+					</section>
 				</div>
 			) : (
 				<div className="flex flex-col gap-12">
-					{/* Chaque section garde son `Suspense` : une source lente ne retient
-					    pas les autres. */}
+					<section className="flex flex-col gap-4">
+						<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+							<div className="space-y-1">
+								<h2 className="text-lg font-bold text-on-surface">Staff Discord — {serveur.nom}</h2>
+								<p className="text-xs text-on-surface-variant/70">
+									Déduit des permissions réellement accordées aux rôles, pas d&apos;une liste tenue
+									à la main.
+								</p>
+							</div>
+							{selecteurServeur}
+						</div>
+						<Suspense key={serveur.cle} fallback={<SquelettedeSection />}>
+							<HierarchieServeur cle={cleServeur} staffSeulement />
+						</Suspense>
+					</section>
+
+					{/* L'association, elle, n'est pas un serveur Discord : son bureau et ses
+					    équipes vivent dans `team_members`. Chaque section garde son
+					    `Suspense` — une source lente ne retient pas les autres. */}
 					<Suspense fallback={<SquelettedeSection />}>
 						<BoardMembersSection />
 					</Suspense>

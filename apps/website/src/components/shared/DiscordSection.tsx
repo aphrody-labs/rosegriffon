@@ -4,8 +4,7 @@ import { Button, DiscordIcon } from "@rosegriffon/ui";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import RgEmote from "@/components/shared/emotes/RgEmote";
-import { ID_SERVEUR_DISCORD, INVITATION_DISCORD } from "@/lib/discord";
+import { serveurDiscord, type ServeurDiscord } from "@/lib/discord";
 
 /**
  * Section « communauté Discord » — implémentation UNIQUE du bloc Discord.
@@ -22,8 +21,7 @@ import { ID_SERVEUR_DISCORD, INVITATION_DISCORD } from "@/lib/discord";
  */
 
 
-/** Points forts affichés sous la description. */
-const ATOUTS = ["Discussion", "Gaming", "Événements"] as const;
+
 
 /** Pastilles de présence — tokens sémantiques, jamais `bg-green-500` & co. */
 const COULEUR_STATUT: Record<string, string> = {
@@ -49,14 +47,21 @@ interface DonneesWidget {
 }
 
 interface DiscordSectionProps {
-	/** Titre de la section (réglage `home_community_title`). */
-	titre: string;
-	/** Phrase d'accroche sous le titre (réglage `home_community_subtitle`). */
-	sousTitre: string;
-	/** Surtitre de la carte (réglage `home_community_description`). */
-	accroche: string;
+	/**
+	 * Serveur à afficher. Le composant ne connaissait que Rose Griffon — son
+	 * identifiant, son invitation, son texte et son emote étaient écrits dans le
+	 * corps. Achilléa a son propre serveur, sa propre communauté et sa propre
+	 * hiérarchie : le même bloc devait pouvoir le montrer sans être recopié.
+	 */
+	serveur?: ServeurDiscord;
+	/** Titre de la section ; omis, le bloc n'a pas d'en-tête. */
+	titre?: string;
+	/** Phrase d'accroche sous le titre. */
+	sousTitre?: string;
 	/** Lien d'invitation, surchargeable depuis les réglages. */
 	lienInvitation?: string;
+	/** Rendu resserré : deux serveurs côte à côte plutôt qu'un pleine largeur. */
+	compact?: boolean;
 }
 
 /** Colonne de droite : membres en ligne, via le widget public du serveur. */
@@ -150,11 +155,13 @@ function WidgetDiscord({
 }
 
 export default function DiscordSection({
+	serveur = serveurDiscord("rose-griffon"),
 	titre,
 	sousTitre,
-	accroche,
-	lienInvitation = INVITATION_DISCORD,
+	lienInvitation,
+	compact = false,
 }: DiscordSectionProps) {
+	const invitation = lienInvitation ?? serveur.invitation;
 	const [donnees, setDonnees] = useState<DonneesWidget | null>(null);
 	const [chargement, setChargement] = useState(true);
 	const [erreur, setErreur] = useState(false);
@@ -165,7 +172,7 @@ export default function DiscordSection({
 		const recuperer = async () => {
 			try {
 				const reponse = await fetch(
-					`https://discord.com/api/guilds/${ID_SERVEUR_DISCORD}/widget.json`
+					`https://discord.com/api/guilds/${serveur.guildId}/widget.json`
 				);
 				if (!reponse.ok) {
 					throw new Error(`Widget Discord indisponible (${reponse.status})`);
@@ -203,38 +210,47 @@ export default function DiscordSection({
 		return () => {
 			annule = true;
 		};
-	}, []);
+	}, [serveur.guildId]);
 
 	return (
-		<div className="w-full space-y-6 md:space-y-8">
-			<div className="mx-auto max-w-7xl space-y-2 px-4 text-center">
-				<h2 id="community-heading" className="text-2xl font-bold text-foreground md:text-3xl">
-					{titre}
-				</h2>
-				<p className="mx-auto max-w-2xl text-base text-muted-foreground md:text-lg">{sousTitre}</p>
-			</div>
+		<div className="w-full space-y-4">
+			{(titre || sousTitre) && (
+				<div className="mx-auto max-w-7xl space-y-2 px-4 text-center">
+					{titre && (
+						<h2 id="community-heading" className="text-2xl font-bold text-foreground md:text-3xl">
+							{titre}
+						</h2>
+					)}
+					{sousTitre && (
+						<p className="mx-auto max-w-2xl text-base text-muted-foreground">{sousTitre}</p>
+					)}
+				</div>
+			)}
 
-			<div className="mx-auto w-full max-w-7xl px-4">
-				<div className="grid w-full overflow-hidden rounded-3xl border border-border bg-card shadow-lg transition-shadow duration-300 hover:shadow-xl lg:grid-cols-2">
+			<div className={compact ? "w-full" : "mx-auto w-full max-w-7xl px-4"}>
+				<div
+					className={`grid w-full overflow-hidden rounded-2xl border border-border bg-card ${
+						compact ? "" : "lg:grid-cols-2"
+					}`}
+				>
 					{/* Contenu éditorial */}
-					<div className="order-2 flex flex-col justify-center gap-4 p-6 sm:p-8 lg:order-1 lg:p-10">
+					<div className="order-2 flex flex-col justify-center gap-3 p-5 lg:order-1 lg:p-8">
 						<div className="flex items-center gap-3">
 							<div className="rounded-xl bg-discord/10 p-2.5">
-								<RgEmote name="roy-salut" size={32} animated className="size-8" />
+								<DiscordIcon className="size-5 text-discord" />
 							</div>
 							<div className="min-w-0">
-								<h3 className="text-xl font-bold text-discord">Discord</h3>
-								<p className="truncate text-xs font-medium text-muted-foreground">{accroche}</p>
+								<h3 className="truncate text-lg font-bold text-foreground">{serveur.nom}</h3>
+								<p className="truncate text-xs font-medium text-discord">Discord</p>
 							</div>
 						</div>
 
-						<p className="text-base leading-relaxed text-muted-foreground">
-							Rejoignez notre serveur Discord pour discuter avec la communauté Rose Griffon,
-							participer à nos événements et rester informés de toutes nos actualités en temps réel.
+						<p className="text-sm leading-relaxed text-muted-foreground">
+							{serveur.description}
 						</p>
 
 						<ul className="flex flex-wrap gap-2">
-							{ATOUTS.map((atout) => (
+							{serveur.atouts.map((atout) => (
 								<li
 									key={atout}
 									className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
@@ -249,21 +265,25 @@ export default function DiscordSection({
 								asChild
 								className="h-10 w-full bg-discord font-bold text-rg-sur-marine hover:bg-discord/90 sm:w-auto"
 							>
-								<a href={lienInvitation} target="_blank" rel="noopener noreferrer">
+								<a href={invitation} target="_blank" rel="noopener noreferrer">
 									<DiscordIcon className="mr-2 size-4" />
-									Rejoindre le serveur
+									Rejoindre {serveur.nom}
 								</a>
 							</Button>
 						</div>
 					</div>
 
 					{/* Widget des membres en ligne */}
-					<div className="order-1 h-[22rem] border-b border-border bg-muted sm:h-[26rem] lg:order-2 lg:h-[31.25rem] lg:border-b-0 lg:border-l">
+					<div
+						className={`order-1 border-b border-border bg-muted lg:order-2 lg:border-b-0 ${
+							compact ? "h-[18rem]" : "h-[22rem] sm:h-[26rem] lg:h-[31.25rem] lg:border-l"
+						}`}
+					>
 						<WidgetDiscord
 							donnees={donnees}
 							chargement={chargement}
 							erreur={erreur}
-							lienInvitation={lienInvitation}
+							lienInvitation={invitation}
 						/>
 					</div>
 				</div>
