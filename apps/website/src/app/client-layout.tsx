@@ -63,31 +63,27 @@ function SidebarWrapper({
 	);
 }
 
-function DomainThemeRouter({ pathname }: { pathname: string }) {
-	const activeDomaine = domaineDeLaRoute(pathname, WEBSITE_BASES);
-	const { theme, setTheme } = useTheme();
-	const prevDomaineRef = useRef<string | null>(null);
-
-	useEffect(() => {
-		if (prevDomaineRef.current === activeDomaine) return;
-		prevDomaineRef.current = activeDomaine;
-
-		if (activeDomaine === "esport") {
-			if (theme !== "achillea") {
-				setTheme("achillea");
-			}
-		} else if (activeDomaine === "wiki") {
-			if (!theme?.startsWith("azalee")) {
-				setTheme("azalee-dark");
-			}
-		} else {
-			if (theme === "achillea" || theme?.startsWith("azalee")) {
-				setTheme("roy");
-			}
-		}
-	}, [activeDomaine, theme, setTheme]);
-
-	return null;
+/**
+ * Classe de thème à appliquer sur la zone de contenu, selon le domaine.
+ *
+ * POURQUOI PAS `setTheme()`
+ * La version précédente appelait `setTheme("achillea")` en entrant sur
+ * `/achillea` et `setTheme("roy")` en en sortant. `next-themes` PERSISTE ce
+ * choix : une seule visite sur l'e-sport écrasait définitivement la préférence
+ * de l'utilisateur, et le retour au portail la remplaçait par `roy` — donc
+ * quelqu'un qui avait choisi « Gaëlle » la perdait en traversant le site. Une
+ * navigation ne doit pas réécrire un réglage de compte.
+ *
+ * Poser la classe sur le conteneur donne le même rendu — les trois jeux de
+ * jetons sont définis sur `.theme-*`, pas seulement sur `:root` — sans toucher
+ * à `localStorage`, sans effet de bord au retour, et sans le scintillement
+ * d'un changement de thème après hydratation.
+ */
+function classeThemeDuDomaine(pathname: string): string | undefined {
+	const domaine = domaineDeLaRoute(pathname, WEBSITE_BASES);
+	if (domaine === "esport") return "theme-achillea";
+	if (domaine === "wiki") return "theme-azalee-dark";
+	return undefined;
 }
 
 function RoutedHeader({
@@ -197,7 +193,6 @@ export default function ClientLayout({
 						<ProfileProvider>
 						<LanguageProvider>
 							<AchilleaAuthProvider>
-								<DomainThemeRouter pathname={pathname || "/"} />
 								<SidebarWrapper isMedium={isMedium}>
 									{/* Accessibilité: lien pour sauter au contenu principal */}
 									<SkipToContent />
@@ -241,7 +236,17 @@ export default function ClientLayout({
 										<div className="flex-1 w-full">
 											{/* `SidebarInset` est déjà un <main> : ici un <div> (un <main>
 											    imbriqué est invalide et casse la cible du lien d'évitement). */}
-											<div id="main-content" className="min-h-full w-full flex-1 overflow-x-hidden">
+											{/* La classe de thème du domaine est posée ICI, sur la zone
+											    de contenu : le chrome partagé (barre latérale, barres de
+											    navigation) garde le thème choisi par l'utilisateur, et
+											    seule la section prend l'identité de son domaine. */}
+											<div
+												id="main-content"
+												className={cn(
+													"min-h-full w-full flex-1 overflow-x-hidden",
+													classeThemeDuDomaine(pathname || "/")
+												)}
+											>
 												{children}
 											</div>
 										</div>

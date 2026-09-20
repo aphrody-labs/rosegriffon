@@ -136,6 +136,26 @@ const nextConfig: NextConfig = {
 				permanent: true,
 				source: "/azalee",
 			},
+			// Les trois pages d'équipe ont fusionné dans `/notre-equipe`.
+			// Une `redirect()` de composant serveur rend une redirection MOLLE
+			// (200 puis bascule côté client) : un moteur d'indexation voit une
+			// page qui existe encore, et le jus des anciennes URL n'est pas
+			// transféré. Ces trois-là sont indexées : il leur faut un vrai 308.
+			{
+				destination: "/notre-equipe",
+				permanent: true,
+				source: "/notre-equipe/association",
+			},
+			{
+				destination: "/notre-equipe",
+				permanent: true,
+				source: "/notre-equipe/staff",
+			},
+			{
+				destination: "/notre-equipe",
+				permanent: true,
+				source: "/notre-equipe/partenaires",
+			},
 			{
 				destination: "/nous-soutenir",
 				permanent: true,
