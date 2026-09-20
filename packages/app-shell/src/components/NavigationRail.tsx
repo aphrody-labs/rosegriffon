@@ -4,20 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavigationRail as UiNavigationRail, NavigationRailItem } from "@rosegriffon/ui";
 import {
-	construireDashboardItems,
-	construireNavigationItems,
-	construireNavigationUnifiee,
+	itemsDeNavigation,
 	estItemActif,
 	type NavItem,
 } from "../config/navigation";
-import { basesDepuisChemin, estSousAdministration, type NavBases } from "../config/routes";
 import { iconMap } from "../lib/icons";
 import { traduireNav } from "../lib/translations";
 
 export interface NavigationRailProps {
 	items?: NavItem[];
 	isAdmin?: boolean;
-	bases?: NavBases;
 	t?: (key: string) => string;
 	renderIcon?: (item: NavItem) => React.ReactNode;
 	className?: string;
@@ -26,23 +22,12 @@ export interface NavigationRailProps {
 export function NavigationRail({
 	items,
 	isAdmin = false,
-	bases: basesProp,
 	t,
 	renderIcon,
 	className,
 }: NavigationRailProps = {}) {
 	const pathname = usePathname() || "/";
-	const isDashboard = estSousAdministration(pathname);
-	// Source unique : basesProp si fourni, sinon déduit
-	const bases = basesProp ?? basesDepuisChemin(pathname);
-
-	const defaultNavItems = isDashboard
-		? construireDashboardItems(bases)
-		: bases.esport !== undefined
-			? construireNavigationUnifiee(bases).map((g) => g.item)
-			: construireNavigationItems(bases);
-
-	const resolvedItems = items ?? defaultNavItems;
+	const resolvedItems = items ?? itemsDeNavigation();
 
 	const filteredNavItems = resolvedItems.filter((item) => {
 		if (item.adminOnly) {

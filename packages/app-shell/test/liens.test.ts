@@ -5,18 +5,16 @@ import { describe, expect, test } from "bun:test";
 
 import {
 	cheminsCliquables,
-	construireNavigation,
+	construireMobileNavUnifiee,
 	construireNavigationUnifiee,
 	domaineDeLaRoute,
+	itemsDeNavigation,
 } from "../src/config/navigation";
 import { listerMotifsRoutes, motifAccepte, routeExiste } from "../src/lib/routes-next";
-import { WEBSITE_BASES } from "../src/config/routes";
 
 const RACINE = join(import.meta.dir, "../../..");
 
-const APPS = [
-	{ app: join(RACINE, "apps/website/src/app"), bases: WEBSITE_BASES, nom: "website" },
-] as const;
+const APP = join(RACINE, "apps/website/src/app");
 
 describe("motifAccepte", () => {
 	test("segment littéral", () => {
@@ -48,84 +46,58 @@ describe("motifAccepte", () => {
 });
 
 describe("inventaire des routes", () => {
-	for (const { nom, app } of APPS) {
-		test(`${nom} : l'arborescence app/ est lisible et non vide`, () => {
-			expect(existsSync(app)).toBe(true);
-			const motifs = listerMotifsRoutes(app);
-			expect(motifs.length).toBeGreaterThan(50);
-			// Les route groups ne doivent jamais fuiter dans une URL.
-			expect(motifs.filter((m) => m.includes("("))).toEqual([]);
-		});
-	}
+	test("l'arborescence app/ est lisible et non vide", () => {
+		expect(existsSync(APP)).toBe(true);
+		const motifs = listerMotifsRoutes(APP);
+		expect(motifs.length).toBeGreaterThan(50);
+		// Les route groups ne doivent jamais fuiter dans une URL.
+		expect(motifs.filter((m) => m.includes("("))).toEqual([]);
+	});
 });
 
 /**
- * Non-régression des liens : chaque entrée cliquable du menu doit correspondre à
- * une route réelle. C'est ce test qui a révélé que `/settings` et
- * `/dashboard/settings` étaient des 404 côté website alors que la barre latérale
- * et le clic sur l'avatar y menaient.
- */
-describe("aucune entrée de menu ne mène à un 404", () => {
-	for (const { nom, app, bases } of APPS) {
-		const motifs = listerMotifsRoutes(app);
-		const nav = construireNavigation(bases);
-
-		test(`${nom} : navigation principale`, () => {
-			const morts = cheminsCliquables(nav.navigationItems).filter((c) => !routeExiste(motifs, c));
-			expect(morts).toEqual([]);
-		});
-
-		test(`${nom} : navigation mobile`, () => {
-			const morts = cheminsCliquables(nav.mobileNavItems).filter((c) => !routeExiste(motifs, c));
-			expect(morts).toEqual([]);
-		});
-
-		test(`${nom} : administration`, () => {
-			const morts = cheminsCliquables(nav.dashboardItems).filter((c) => !routeExiste(motifs, c));
-			expect(morts).toEqual([]);
-		});
-	}
-});
-
-/**
- * Non-régression des liens de la navigation UNIFIÉE (trois domaines).
+ * Non-régression des liens du menu unifié.
  *
- * Le menu à trois sous-catégories — Association, Wiki, E-sport — a été écrit
- * après la fusion des trois sites sous `rosegriffon.fr`. Ses entrées e-sport
- * pointent vers `/achillea/**`, routes arrivées avec le portage du front
- * Angular : elles n'ont AUCUNE garantie d'exister tant qu'un test ne les
- * confronte pas à l'arborescence réelle.
- *
- * C'est le même contrat que pour le wiki : un lien ajouté sans page fait
- * échouer les tests, pas la production.
+ * Un lien ajouté sans page fait échouer les tests, pas la production.
  */
-describe("navigation unifiée : trois domaines", () => {
-	const app = join(RACINE, "apps/website/src/app");
-
-	test("les trois sous-catégories sont présentes côté website", () => {
-		const groupes = construireNavigationUnifiee(WEBSITE_BASES);
-		expect(groupes.map((g) => g.domaine)).toEqual(["association", "wiki", "esport"]);
+describe("navigation unifiée : quatre catégories", () => {
+	test("les quatre catégories sont présentes, dans l'ordre", () => {
+		const groupes = construireNavigationUnifiee();
+		expect(groupes.map((g) => g.domaine)).toEqual([
+			"actualite",
+			"association",
+			"wiki",
+			"esport",
+		]);
 	});
 
 	test("les entêtes de groupe ne sont pas des destinations", () => {
-		for (const { item } of construireNavigationUnifiee(WEBSITE_BASES)) {
+		for (const { item } of construireNavigationUnifiee()) {
 			expect(item.groupOnly).toBe(true);
 		}
 	});
 
 	test("chaque lien cliquable du menu unifié correspond à une route réelle", () => {
-		const motifs = listerMotifsRoutes(app);
-		const items = construireNavigationUnifiee(WEBSITE_BASES).flatMap((g) => g.item.children ?? []);
+		const motifs = listerMotifsRoutes(APP);
+		const items = itemsDeNavigation().flatMap((groupe) => groupe.children ?? []);
 		const morts = cheminsCliquables(items).filter((chemin) => !routeExiste(motifs, chemin));
 		expect(morts).toEqual([]);
 	});
 
+	test("chaque onglet de la barre mobile correspond à une route réelle", () => {
+		const motifs = listerMotifsRoutes(APP);
+		const morts = cheminsCliquables(construireMobileNavUnifiee()).filter(
+			(chemin) => !routeExiste(motifs, chemin)
+		);
+		expect(morts).toEqual([]);
+	});
+
 	test("domaineDeLaRoute classe chaque route dans son domaine", () => {
-		expect(domaineDeLaRoute("/achillea/clans", WEBSITE_BASES)).toBe("esport");
-		expect(domaineDeLaRoute("/wiki/chara", WEBSITE_BASES)).toBe("wiki");
-		expect(domaineDeLaRoute("/chroniques", WEBSITE_BASES)).toBe("association");
-		expect(domaineDeLaRoute("/", WEBSITE_BASES)).toBe("association");
+		expect(domaineDeLaRoute("/achillea/clans")).toBe("esport");
+		expect(domaineDeLaRoute("/wiki/chara")).toBe("wiki");
+		expect(domaineDeLaRoute("/chroniques")).toBe("association");
+		expect(domaineDeLaRoute("/")).toBe("association");
 		// Piège du préfixe de chaîne : `/achilleaxyz` n'est pas dans `/achillea`.
-		expect(domaineDeLaRoute("/achilleaxyz", WEBSITE_BASES)).toBe("association");
+		expect(domaineDeLaRoute("/achilleaxyz")).toBe("association");
 	});
 });

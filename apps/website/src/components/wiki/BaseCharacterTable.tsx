@@ -1,6 +1,6 @@
 "use client";
 
-import { basesDepuisChemin, joindreWiki } from "@rosegriffon/app-shell";
+import { wiki } from "@rosegriffon/app-shell";
 import type { BaseCharacter } from "@rosegriffon/inagle";
 import { CircleDot, Sparkles } from "lucide-react";
 import Image from "next/image";
@@ -65,13 +65,11 @@ interface BaseCharacterTableProps {
  * les 200 fiches de la page pointaient toutes sur `/chara/<slug>` et repassaient
  * donc par une redirection 308 évitable (200 des 204 sauts relevés sur le wiki).
  *
- * `basesDepuisChemin` conserve cette résolution dans la configuration partagée
- * plutôt que de laisser des chemins locaux codés en dur.
+ * `wiki()` conserve cette résolution dans la configuration partagée plutôt que
+ * de laisser des chemins locaux codés en dur.
  */
 function useLienWiki(): (chemin: string) => string {
-	const pathname = usePathname();
-	const bases = basesDepuisChemin(pathname ?? "/");
-	return (chemin: string) => joindreWiki(bases.wiki, chemin);
+	return wiki;
 }
 
 /**

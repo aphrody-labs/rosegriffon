@@ -1,40 +1,39 @@
 // Navigation & Route Configurations
 export {
 	cheminsCliquables,
+	construireActualiteItems,
 	construireAssociationItems,
-	construireDashboardItems,
 	construireEsportItems,
-	construireMobileNavItems,
 	construireMobileNavUnifiee,
-	construireNavigation,
 	construireNavigationItems,
-	construireItemsBarreSuperieure,
 	construireNavigationUnifiee,
-	construireOngletsMobile,
 	DOMAINES,
 	domaineDeLaRoute,
 	estItemActif,
 	estRouteActive,
+	GROUPES_NAV,
+	itemsDeNavigation,
 	parcourirNav,
 	type Domaine,
+	type GroupeNav,
 	type NavItem,
 	type SousCategorieNav,
 } from "./config/navigation";
 export {
-	basesDepuisChemin,
+	BASE_ADMIN,
+	BASE_ESPORT,
+	BASE_WIKI,
 	CHEMINS_ASSOCIATION,
 	CHEMINS_ESPORT,
 	CHEMINS_RACINE,
 	CHEMINS_WIKI,
+	esport,
 	estSousAdministration,
-	joindreDomaine,
-	joindreWiki,
-	WEBSITE_BASES,
+	wiki,
 	type CheminAssociation,
 	type CheminEsport,
 	type CheminRacine,
 	type CheminWiki,
-	type NavBases,
 } from "./config/routes";
 
 export {
@@ -70,6 +69,5 @@ export {
 	type UserProfile,
 } from "./components/TopAppBar";
 export { ThemeToggle, DEFAULT_THEMES, type ThemeOption } from "./components/ThemeToggle";
-export { Shell, AppShell, type ShellProps } from "./components/Shell";
 export { UnifiedSearchBar, type UnifiedSearchBarProps } from "./components/UnifiedSearchBar";
 export { UniverseSwitch, type UniverseSwitchProps } from "./components/UniverseSwitch";

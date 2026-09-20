@@ -4,10 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 import { domaineDeLaRoute, type Domaine } from "../config/navigation";
-import { basesDepuisChemin, type NavBases } from "../config/routes";
+import { BASE_ESPORT, BASE_WIKI } from "../config/routes";
 
 export interface UniverseSwitchProps extends React.ComponentProps<"nav"> {
-	bases?: NavBases;
 	className?: string;
 }
 
@@ -20,22 +19,16 @@ interface UniverseTab {
 	hoverClass: string;
 }
 
-export function UniverseSwitch({ bases: basesProp, className, ...props }: UniverseSwitchProps) {
+export function UniverseSwitch({ className, ...props }: UniverseSwitchProps) {
 	const pathname = usePathname() || "/";
-	const bases = basesProp ?? basesDepuisChemin(pathname);
-	const activeDomaine = domaineDeLaRoute(pathname, bases);
-
-	// Si l'app ne monte pas l'e-sport (ex: azalee autonome), pas besoin du switch complet
-	if (bases.esport === undefined) {
-		return null;
-	}
+	const activeDomaine = domaineDeLaRoute(pathname);
 
 	const tabs: UniverseTab[] = [
 		{
 			id: "association",
 			label: "Association",
 			shortLabel: "Asso",
-			path: bases.association ?? "/",
+			path: "/",
 			activeClass: "bg-rose-griffon text-white shadow-xs",
 			hoverClass: "hover:text-rose-griffon hover:bg-rose-griffon/10",
 		},
@@ -43,7 +36,7 @@ export function UniverseSwitch({ bases: basesProp, className, ...props }: Univer
 			id: "wiki",
 			label: "Encyclopédie",
 			shortLabel: "Wiki",
-			path: bases.wiki ?? "/wiki",
+			path: BASE_WIKI,
 			activeClass: "bg-secondary text-secondary-foreground shadow-xs",
 			hoverClass: "hover:text-secondary hover:bg-secondary/10",
 		},
@@ -51,7 +44,7 @@ export function UniverseSwitch({ bases: basesProp, className, ...props }: Univer
 			id: "esport",
 			label: "E-Sport",
 			shortLabel: "E-Sport",
-			path: bases.esport ?? "/achillea",
+			path: BASE_ESPORT,
 			activeClass: "bg-achillea-violet text-white dark:bg-achillea-lime dark:text-black shadow-xs",
 			hoverClass: "hover:text-achillea-violet hover:bg-achillea-violet/10 dark:hover:text-achillea-lime",
 		},

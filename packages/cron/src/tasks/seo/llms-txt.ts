@@ -54,7 +54,7 @@ Généré le : ${nowStamp()}
 ## Pages principales
 
 - [Accueil](https://rosegriffon.fr/) : présentation de l'association Rose Griffon.
-- [Notre équipe](https://rosegriffon.fr/notre-equipe) : association, staff, partenaires.
+- [Communauté](https://rosegriffon.fr/community) : bureau, équipes, partenaires et membres du Discord.
 - [À propos](https://rosegriffon.fr/a-propos) : qui sommes-nous, comment rejoindre.
 - [Projets](https://rosegriffon.fr/projets) : projets créatifs de la communauté (Nostalgie, émotes, muraux, outils).
 - [Événements](https://rosegriffon.fr/evenements) : tournois, rencontres et événements communautaires.
@@ -98,12 +98,10 @@ contenus (articles, outils, ressources) autour de la licence Inazuma Eleven.
 - [Charte & engagements](https://rosegriffon.fr/charte-engagements)
 - [Cellule de médiation](https://rosegriffon.fr/cellule-de-mediation)
 
-## Équipe
+## Communauté
 
-- [Notre équipe](https://rosegriffon.fr/notre-equipe)
-- [Association](https://rosegriffon.fr/notre-equipe/association)
-- [Staff](https://rosegriffon.fr/notre-equipe/staff)
-- [Partenaires](https://rosegriffon.fr/notre-equipe/partenaires)
+- [Communauté](https://rosegriffon.fr/community)
+- [Membres du Discord](https://rosegriffon.fr/community?vue=membres)
 
 ## Projets
 

@@ -6,9 +6,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSidebar } from "@rosegriffon/ui";
-import type { NavBases } from "../config/routes";
 import { ThemeToggle } from "./ThemeToggle";
 import { UnifiedSearchBar } from "./UnifiedSearchBar";
+import { BASE_ADMIN } from "../config/routes";
 import { UniverseSwitch } from "./UniverseSwitch";
 
 export interface UserProfile {
@@ -23,7 +23,6 @@ export interface TopAppBarProps {
 	homeHref?: string;
 	adminHref?: string;
 	isAdmin?: boolean;
-	bases?: NavBases;
 	showUniverseSwitch?: boolean;
 	user?: unknown | null;
 	profile?: UserProfile | null;
@@ -56,7 +55,6 @@ const DEFAULT_TITLE_MAP: Record<string, string> = {
 	"/equipe": "Équipes",
 	"/tools": "Outils",
 	"/settings": "Paramètres",
-	"/dashboard": "Administration",
 	"/admin": "Administration",
 	"/achillea": "E-Sport",
 	"/achillea/clans": "Clans E-Sport",
@@ -85,9 +83,8 @@ export function MobileHeader({
 	appName = "Rose Griffon",
 	logoSrc = "/logo.webp",
 	homeHref = "/",
-	adminHref = "/dashboard",
+	adminHref = BASE_ADMIN,
 	isAdmin = false,
-	bases,
 	showUniverseSwitch = false,
 	user = null,
 	profile = null,
@@ -195,9 +192,8 @@ export function DesktopTopBar({
 	appName = "Rose Griffon",
 	logoSrc = "/logo.webp",
 	homeHref = "/",
-	adminHref = "/dashboard",
+	adminHref = BASE_ADMIN,
 	isAdmin = false,
-	bases,
 	showUniverseSwitch = true,
 	user = null,
 	profile = null,
@@ -242,7 +238,7 @@ export function DesktopTopBar({
 
 				{showUniverseSwitch && (
 					<div className="ml-2 hidden xl:flex items-center">
-						<UniverseSwitch bases={bases} />
+						<UniverseSwitch />
 					</div>
 				)}
 
