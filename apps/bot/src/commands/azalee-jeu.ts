@@ -928,7 +928,7 @@ const VUES_PAGINEES: Record<
 @Discord()
 @SlashGroup({
 	name: "azalee",
-	description: "Encyclopédie du jeu Inazuma Eleven: Victory Road (wiki Azalée)",
+	description: "Wiki du jeu Inazuma Eleven: Victory Road (wiki Azalée)",
 })
 @SlashGroup("azalee")
 export class AzaleeJeuCommand {

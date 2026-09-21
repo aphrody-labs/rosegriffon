@@ -97,10 +97,12 @@ import {
 	// Misc
 	Search,
 	// Admin & Settings
+	Server,
 	Settings,
 	Share2,
 	Shield,
 	ShieldCheck,
+	Swords,
 	// Store & Commerce
 	ShoppingBag,
 	ShoppingCart,
@@ -397,11 +399,13 @@ export {
 	Scale,
 	ScrollText,
 	Search,
+	// Admin
+	Server,
 	Settings,
 	Share2,
-	// Admin
 	Shield,
 	ShieldCheck,
+	Swords,
 	// Store
 	ShoppingBag,
 	ShoppingCart,

@@ -9,7 +9,7 @@ import { getPgPool } from "@/lib/db/pg";
 
 export const metadata: Metadata = {
 	alternates: { canonical: "https://rosegriffon.fr/search" },
-	description: "Recherche unifiée dans tout le réseau Rose Griffon : Association, Encyclopédie Wiki et E-Sport Achilléa.",
+	description: "Recherche unifiée dans tout le réseau Rose Griffon : Association, Wiki Azalée et E-Sport Achilléa.",
 	robots: { follow: true, index: false },
 	title: "Recherche unifiée | Rose Griffon",
 };
@@ -134,7 +134,7 @@ export default async function SearchPage({
 						Recherche Unifiée
 					</h1>
 					<p className="text-sm text-on-surface-variant">
-						Explorez les articles de l'Association, l'Encyclopédie Wiki et l'E-Sport Achilléa.
+						Explorez les articles de l'Association, le Wiki Azalée et l'E-Sport Achilléa.
 					</p>
 				</div>
 
@@ -217,7 +217,7 @@ export default async function SearchPage({
 							<div className="flex items-center justify-between">
 								<h2 className="text-lg font-black flex items-center gap-2 text-secondary">
 									<BookOpen className="size-5" />
-									Encyclopédie Wiki
+									Wiki Azalée
 									<span className="text-xs font-bold px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
 										{wikiResults.length}
 									</span>

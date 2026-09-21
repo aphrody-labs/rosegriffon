@@ -204,12 +204,6 @@ export function construireNavigationItems(): NavItem[] {
 			path: w("/niveau"),
 		},
 		{ gameIcon: "medal", icon: "emoji_events", label: "nav.wiki.trophies", path: w("/succes") },
-		// MÉDIAS ET OUTILS N'ONT PLUS À FIGURER ICI.
-		// Galerie, textures, sons, vidéos, modèles, modes, et les sept outils
-		// (stats, comparateur, équipe aléatoire, mon équipe, traducteur, lecteur
-		// de sauvegarde, démo) ont été migrés vers `niers`. Les laisser au menu
-		// d'Azalée proposait treize destinations qui ne sont plus les siennes.
-		{ gameIcon: "category", icon: "settings", label: "nav.settings", path: "/settings" },
 	];
 }
 
@@ -217,7 +211,7 @@ export function construireNavigationItems(): NavItem[] {
  * Navigation mobile unifiée à 5 onglets pour les apps multi-domaines (website).
  *
  * 1. Accueil (Association)
- * 2. Wiki (Encyclopédie Azalée)
+ * 2. Wiki (Wiki Azalée)
  * 3. E-Sport (Achilléa)
  * 4. Recherche (Global federated search)
  * 5. Paramètres / Compte
@@ -391,41 +385,43 @@ export function construireEsportItems(): NavItem[] {
 export function construireActualiteItems(): NavItem[] {
 	return [
 		{ emote: "gaelle-fiere", icon: "feed", label: "nav.association.news", path: "/news" },
-		{
-			emote: "roy-pensif",
-			icon: "auto_stories",
-			label: "nav.association.chronicles",
-			path: "/news?format=chronique",
-		},
 	];
 }
 
 /**
  * Menu de l'association.
  *
- * « Vie de la communauté » et « L'association » n'en font plus qu'UNE. Deux
- * accordéons pour six destinations, c'est deux clics pour arriver à la page des
- * membres là où un seul suffit — et la distinction entre « la communauté » et
- * « l'association » n'existe que dans l'organigramme, pas pour le visiteur.
+ * « Vie de la communauté » et « L'association » n'en font plus qu'UNE. Les
+ * sous-projets (RGTV, IERGDay) sont regroupés sous « Projets ». Le doublon
+ * de chroniques et la coquille inutile de la page association sont retirés.
  */
 export function construireAssociationItems(): NavItem[] {
 	return [
 		{ imageUrl: "/RG_Logo_V2.5.webp", icon: "home", label: "nav.association.home", path: "/" },
-		{ emote: "gaelle-salut", icon: "diversity_3", label: "nav.association.about_us", path: "/a-propos" },
 		{ emote: "rg-funny", icon: "forum", label: "nav.association.community", path: "/community" },
+		{ emote: "gaelle-salut", icon: "groups", label: "nav.association.team", path: "/notre-equipe" },
 		{ gameIcon: "nameplate", icon: "event", label: "nav.association.events", path: "/evenements" },
-		{
-			// L'image officielle de la webTV, pas un pictogramme générique : elle
-			// est livrée dans `public/rgtv/rgtv.webp` et porte l'identité de la
-			// chaîne. `imageUrl` a la priorité sur tout le reste.
-			icon: "live_tv",
-			imageUrl: "/rgtv/rgtv.webp",
-			label: "nav.association.rgtv",
-			path: "/rose-griffon-tv",
-		},
 		{ gameIcon: "ticket", icon: "how_to_vote", label: "nav.association.polls", path: "/sondages" },
-		{ emote: "roy-coeur", icon: "celebration", label: "nav.association.iergday", path: "/iergday" },
-		{ gameIcon: "house", icon: "rocket_launch", label: "nav.association.projects", path: "/projets" },
+		{
+			children: [
+				{
+					icon: "live_tv",
+					imageUrl: "/rgtv/rgtv.webp",
+					label: "nav.association.rgtv",
+					path: "/rose-griffon-tv",
+				},
+				{
+					emote: "roy-coeur",
+					icon: "celebration",
+					label: "nav.association.iergday",
+					path: "/iergday",
+				},
+			],
+			gameIcon: "house",
+			icon: "rocket_launch",
+			label: "nav.association.projects",
+			path: "/projets",
+		},
 		{
 			gameIcon: "moneybag",
 			icon: "volunteer_activism",

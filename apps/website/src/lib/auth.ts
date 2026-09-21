@@ -218,6 +218,9 @@ export const auth = betterAuth({
 	trustedOrigins: [
 		"https://rosegriffon.fr",
 		"https://www.rosegriffon.fr",
+		"https://achillea.rosegriffon.fr",
+		"https://ranked.rosegriffon.fr",
+		"https://azalee.rosegriffon.fr",
 		process.env.BETTER_AUTH_URL ?? "https://rosegriffon.fr",
 		"http://localhost:3000",
 		"http://localhost:3001",

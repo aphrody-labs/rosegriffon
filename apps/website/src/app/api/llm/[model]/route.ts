@@ -9,7 +9,7 @@ export const revalidate = 86400; // 24 h
 const SITE = {
 	name: "Azalée",
 	url: "https://azalee.rosegriffon.fr",
-	tagline: "Wiki / encyclopédie francophone de Inazuma Eleven: Victory Road",
+	tagline: "Wiki francophone de Inazuma Eleven: Victory Road",
 	parent: "https://rosegriffon.fr",
 	sitemap: "https://azalee.rosegriffon.fr/sitemap.xml",
 	dev: { name: "yoyo", x: "https://x.com/yoyo__goat" },

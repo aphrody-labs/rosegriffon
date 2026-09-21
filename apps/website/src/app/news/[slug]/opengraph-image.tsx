@@ -43,7 +43,7 @@ export default async function Image({ params }: OgImageProps) {
 			.from("articles")
 			.select("title, category, featured_image_url, published_at, author_id")
 			.eq("slug", slug)
-			.eq("app", "azalee")
+			.in("app", ["azalee", "website"])
 			.single();
 
 		if (data) {
@@ -51,7 +51,14 @@ export default async function Image({ params }: OgImageProps) {
 			category = data.category || null;
 			featuredImageUrl = data.featured_image_url || null;
 			publishedAt = data.published_at || null;
-			authorName = data.author?.full_name || "Azalée";
+			if (data.author_id) {
+				const { data: profile } = await (supabase as any)
+					.from("profiles")
+					.select("full_name, username")
+					.eq("id", data.author_id)
+					.maybeSingle();
+				authorName = profile?.full_name || profile?.username || "Rose Griffon";
+			}
 		}
 	} catch {
 		// Fallback gracieux

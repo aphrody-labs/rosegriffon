@@ -179,7 +179,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 						/>
 
 						<p className="mt-4 text-[1.5rem] leading-tight font-black text-white text-center drop-shadow-lg">
-							L&apos;encyclopédie
+							Le Wiki
 							<br />
 							<span className="bg-clip-text text-transparent bg-linear-to-r from-[#F07D7D] via-[#F4D03F] to-[#F07D7D] bg-300% animate-gradient">
 								Inazuma Eleven
@@ -219,7 +219,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
 				{/* Left: Text & CTA (layer 3 — foreground, -75px) */}
 				<motion.div
 					style={foregroundStyle}
-					className="flex flex-col items-start text-left space-y-5 max-w-xl min-w-0 animate-[fadeSlideUp_0.8s_ease-out_0.2s_both]"
+					className="flex flex-col items-start text-left gap-5 max-w-xl min-w-0 animate-[fadeSlideUp_0.8s_ease-out_0.2s_both]"
 				>
 					<Image
 						src="/ie.webp"

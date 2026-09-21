@@ -14,6 +14,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
 	try {
 		const { id } = await params;
+		if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+			return NextResponse.json(
+				{ error: "Identifiant utilisateur invalide", success: false },
+				{ status: 400 }
+			);
+		}
 		const body = await request.json();
 		const { role, full_name, email_notifications } = body ?? {};
 
@@ -38,14 +44,29 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 			return NextResponse.json({ error: "Service indisponible" }, { status: 503 });
 		}
 
+		if (email_notifications !== undefined) {
+			// email_notifications appartient à user_preferences, pas à profiles
+			await (supabase as any)
+				.from("user_preferences")
+				.upsert(
+					{
+						email_notifications,
+						updated_at: new Date().toISOString(),
+						user_id: id,
+					},
+					{ onConflict: "user_id" }
+				);
+		}
+
+		const profileUpdates: Record<string, unknown> = {
+			updated_at: new Date().toISOString(),
+		};
+		if (role !== undefined) profileUpdates.role = role;
+		if (full_name !== undefined) profileUpdates.full_name = full_name;
+
 		const { data: user, error } = await supabase
 			.from("profiles")
-			.update({
-				...(role !== undefined && { role }),
-				...(full_name !== undefined && { full_name }),
-				...(email_notifications !== undefined && { email_notifications }),
-				updated_at: new Date().toISOString(),
-			})
+			.update(profileUpdates)
 			.eq("id", id)
 			.select()
 			.single();
@@ -85,6 +106,12 @@ export async function DELETE(
 
 	try {
 		const { id } = await params;
+		if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+			return NextResponse.json(
+				{ error: "Identifiant utilisateur invalide", success: false },
+				{ status: 400 }
+			);
+		}
 		const supabase = createAdminClient();
 		if (!supabase) {
 			return NextResponse.json({ error: "Service indisponible" }, { status: 503 });

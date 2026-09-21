@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import type { ClanDTO, ClanMemberDTO, ClanApplicationDTO, ClanInviteDTO } from "@rosegriffon/achillea-types";
+import { ClanMemberDistinction } from "@rosegriffon/achillea-types/enums/clanMemberRole";
 import {
 	Shield,
 	Users,
@@ -19,6 +20,8 @@ import {
 	Mail,
 	UserCheck,
 	Save,
+	Send,
+	Bell,
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
@@ -31,6 +34,11 @@ export default function ClanDashboardPage() {
 	const [invites, setInvites] = useState<ClanInviteDTO[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [activeTab, setActiveTab] = useState<"members" | "applications" | "invites" | "settings">("members");
+
+	// Invites state
+	const [inviteUserId, setInviteUserId] = useState<string>("");
+	const [inviting, setInviting] = useState<boolean>(false);
+	const [inviteError, setInviteError] = useState<string | null>(null);
 
 	// Settings state
 	const [bio, setBio] = useState<string>("");
@@ -119,6 +127,39 @@ export default function ClanDashboardPage() {
 		const client = createAchilleaClient({ credentials: "include" });
 		await client.clans.rejectApplication(app);
 		setApplications((prev) => prev.filter((a) => a.id !== app.id));
+	};
+
+	const handleCreateInvite = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!inviteUserId.trim()) return;
+		setInviting(true);
+		setInviteError(null);
+		const client = createAchilleaClient({ credentials: "include" });
+		try {
+			const res = await client.clans.createInvite(inviteUserId.trim(), [ClanMemberDistinction.Player]);
+			if (res.ok) {
+				setInviteUserId("");
+				const ref = await client.clans.invites();
+				if (ref.ok) setInvites(ref.value);
+			} else {
+				setInviteError(res.detail || "Échec de l'envoi de l'invitation.");
+			}
+		} catch {
+			setInviteError("Erreur réseau lors de l'invitation.");
+		} finally {
+			setInviting(false);
+		}
+	};
+
+	const handleRevokeInvite = async (inv: ClanInviteDTO) => {
+		const client = createAchilleaClient({ credentials: "include" });
+		await client.clans.revokeInvite(inv);
+		setInvites((prev) => prev.filter((i) => i.id !== inv.id));
+	};
+
+	const handleNotifyInvite = async (inv: ClanInviteDTO) => {
+		const client = createAchilleaClient({ credentials: "include" });
+		await client.clans.notifyInvite(inv);
 	};
 
 	/*
@@ -367,40 +408,107 @@ export default function ClanDashboardPage() {
 
 					{/* Invites Tab */}
 					{activeTab === "invites" && (
-						<div className="border border-border rounded-2xl bg-card overflow-hidden">
-							<div className="p-4 border-b border-border bg-muted/20">
-								<h3 className="font-bold text-xs uppercase text-muted-foreground">
-									Invitations envoyées
-								</h3>
-							</div>
-
-							{invites.length === 0 ? (
-								<div className="py-12 text-center text-xs text-muted-foreground">
-									Aucune invitation en cours.
+						<div className="space-y-6">
+							{/* Formulaire d'envoi d'invitation */}
+							<form
+								onSubmit={handleCreateInvite}
+								className="border border-border rounded-2xl bg-card p-5 space-y-4 shadow-xs"
+							>
+								<div className="flex items-center gap-2 border-b border-border/60 pb-3">
+									<UserPlus className="w-4 h-4 text-primary" />
+									<h3 className="font-bold text-xs uppercase tracking-wider text-foreground">
+										Inviter un compétiteur dans le clan
+									</h3>
 								</div>
-							) : (
-								<div className="divide-y divide-border/60">
-									{invites.map((inv) => (
-										<div
-											key={inv.id}
-											className="p-4 flex items-center justify-between gap-4"
-										>
-											<div className="flex items-center gap-3">
-												<UserAvatar
-													avatar={inv.user?.avatar}
-													displayName={inv.user?.username || "Invité"}
-													className="w-8 h-8"
-												/>
-												<div className="font-semibold text-xs">{inv.user?.username}</div>
+
+								<div className="flex flex-col sm:flex-row gap-3">
+									<input
+										type="text"
+										value={inviteUserId}
+										onChange={(e) => setInviteUserId(e.target.value)}
+										placeholder="Identifiant Discord du joueur (ex: 394820194829104820)"
+										className="flex-1 px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-hidden focus:ring-1 focus:ring-primary font-mono"
+									/>
+									<button
+										type="submit"
+										disabled={inviting || !inviteUserId.trim()}
+										className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground font-bold text-xs rounded-xl hover:bg-primary/90 disabled:opacity-50 transition shadow-xs"
+									>
+										{inviting ? (
+											<Loader2 className="w-3.5 h-3.5 animate-spin" />
+										) : (
+											<Send className="w-3.5 h-3.5" />
+										)}
+										Envoyer l&apos;invitation
+									</button>
+								</div>
+
+								{inviteError && (
+									<p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl">
+										{inviteError}
+									</p>
+								)}
+							</form>
+
+							{/* Liste des invitations émises */}
+							<div className="border border-border rounded-2xl bg-card overflow-hidden shadow-xs">
+								<div className="p-4 border-b border-border bg-muted/20 flex items-center justify-between">
+									<h3 className="font-bold text-xs uppercase text-muted-foreground">
+										Invitations en cours ({invites.length})
+									</h3>
+								</div>
+
+								{invites.length === 0 ? (
+									<div className="py-12 text-center text-xs text-muted-foreground">
+										Aucune invitation en cours.
+									</div>
+								) : (
+									<div className="divide-y divide-border/60">
+										{invites.map((inv) => (
+											<div
+												key={inv.id}
+												className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/20 transition"
+											>
+												<div className="flex items-center gap-3">
+													<UserAvatar
+														avatar={inv.user?.avatar}
+														displayName={inv.user?.username || "Invité"}
+														className="w-8 h-8"
+													/>
+													<div>
+														<div className="font-semibold text-xs text-foreground">
+															{inv.user?.username || "Joueur"}
+														</div>
+														<div className="text-[10px] text-muted-foreground font-mono">
+															ID: {inv.user?.id}
+														</div>
+													</div>
+												</div>
+
+												<div className="flex items-center gap-2 self-end sm:self-auto">
+													<button
+														type="button"
+														onClick={() => handleNotifyInvite(inv)}
+														className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-border bg-background hover:bg-muted text-xs text-muted-foreground transition"
+														title="Relancer le joueur avec une mention sur Discord"
+													>
+														<Bell className="w-3 h-3 text-amber-400" />
+														Relancer
+													</button>
+													<button
+														type="button"
+														onClick={() => handleRevokeInvite(inv)}
+														className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-rose-500/30 hover:bg-rose-500/10 text-xs text-rose-400 transition"
+													>
+														<X className="w-3 h-3" />
+														Révoquer
+													</button>
+												</div>
 											</div>
-
-											<span className="px-2 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20">
-												En attente de réponse
-											</span>
-										</div>
-									))}
-								</div>
-							)}
+										))}
+									</div>
+								)}
+							</div>
 						</div>
 					)}
 

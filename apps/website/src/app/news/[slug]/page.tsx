@@ -38,7 +38,7 @@ import { SeriesNavigation } from "@/components/news/SeriesNavigation";
 import { TableOfContents } from "@/components/news/TableOfContents";
 import { Badge } from "@rosegriffon/ui";
 import { isRemoteAvatar } from "@/lib/avatar";
-import { getPgPool } from "@/lib/db/pg";
+import { getPgPoolOrNull } from "@/lib/db/pg";
 import { extractTableOfContents } from "@/lib/lexical-utils";
 
 interface ArticlePageProps {
@@ -100,8 +100,6 @@ function estimateReadTime(content: string): number {
 }
 
 async function getNews(slug: string, isPreview = false) {
-	const pool = getPgPool();
-
 	// `slug` est UNIQUE sur toute la table, tous corpus confondus : la page sert
 	// donc aussi bien une actualité Azalée qu'une chronique de l'association,
 	// depuis que `/chroniques` a fusionné ici.
@@ -112,6 +110,11 @@ async function getNews(slug: string, isPreview = false) {
 		sql += ` AND status = $${params.length}`;
 	}
 	sql += " LIMIT 1";
+
+	const pool = getPgPoolOrNull();
+	if (!pool) {
+		return null;
+	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let news: any;
@@ -157,7 +160,7 @@ async function getNews(slug: string, isPreview = false) {
 					[profileIds]
 				);
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const byId = new Map<string, any>(linked.map((p) => [p.id, p]));
+				const byId = new Map<string, any>(linked.map((p: any) => [p.id, p]));
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				news.co_authors = co.map((c: any) => {
 					const p = c?.profile_id ? byId.get(c.profile_id) : null;
@@ -189,7 +192,10 @@ async function getNews(slug: string, isPreview = false) {
  * pour produire les balises meta/OpenGraph).
  */
 async function getNewsMeta(slug: string, isPreview = false) {
-	const pool = getPgPool();
+	const pool = getPgPoolOrNull();
+	if (!pool) {
+		return null;
+	}
 
 	const params: unknown[] = [slug, ["azalee", "website"]];
 	let sql =
@@ -246,7 +252,10 @@ async function isCurrentUserAdmin(): Promise<boolean> {
 			return false;
 		}
 
-		const pool = getPgPool();
+		const pool = getPgPoolOrNull();
+		if (!pool) {
+			return false;
+		}
 		const { rows: profileRows } = await pool.query<{ role: string | null; discord_id: string | null }>(
 			"SELECT role, discord_id FROM profiles WHERE id = $1 LIMIT 1",
 			[session.user.id]

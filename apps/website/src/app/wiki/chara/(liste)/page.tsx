@@ -46,7 +46,7 @@ export async function generateMetadata({
 		},
 		description: `Base de données des joueurs Inazuma Eleven: Victory Road. ${filters.length > 0 ? `Filtres : ${filters.join(", ")}. ` : ""}Retrouvez les stats, techniques et méthodes de recrutement de tous les personnages.`,
 		openGraph: {
-			description: "Encyclopédie complète Inazuma Eleven Victory Road",
+			description: "Wiki complet Inazuma Eleven Victory Road",
 			locale: "fr_FR",
 			siteName: "Azalée - Inazuma Eleven Victory Road Wiki",
 			title: `${title} | Azalée`,

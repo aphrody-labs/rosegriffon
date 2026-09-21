@@ -29,7 +29,33 @@ const transporter = nodemailer.createTransport({
 	host: process.env.SMTP_HOST || "smtp.gmail.com",
 	port: parseInt(process.env.SMTP_PORT || "587", 10),
 	secure: process.env.SMTP_SECURE === "true", // true pour 465, false pour 587,
+	connectionTimeout: 5000,
+	greetingTimeout: 5000,
+	socketTimeout: 5000,
 });
+
+export interface SendEmailOptions {
+	to: string | string[];
+	subject: string;
+	html: string;
+	text?: string;
+	from?: string;
+	replyTo?: string;
+	cc?: string | string[];
+	bcc?: string | string[];
+	attachments?: {
+		filename: string;
+		content?: Buffer | string;
+		path?: string;
+		contentType?: string;
+	}[];
+}
+
+export interface SendEmailResult {
+	messageId: string;
+	success: boolean;
+	mocked?: boolean;
+}
 
 /**
  * Envoi générique, réutilisé par Better Auth (vérification d'adresse,
@@ -41,25 +67,41 @@ export async function sendEmail({
 	subject,
 	html,
 	text,
-}: {
-	to: string;
-	subject: string;
-	html: string;
-	text?: string;
-}) {
-	if (!process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
-		console.warn("[email] identifiants SMTP absents — message non envoyé à", to);
-		return;
+	from,
+	replyTo,
+	cc,
+	bcc,
+	attachments,
+}: SendEmailOptions): Promise<SendEmailResult> {
+	if (
+		process.env.NODE_ENV === "test" ||
+		process.env.MOCK_EMAIL === "true" ||
+		!process.env.SMTP_USER ||
+		!process.env.SMTP_PASSWORD
+	) {
+		return {
+			messageId: `mock-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+			mocked: true,
+			success: true,
+		};
 	}
 	try {
-		return await transporter.sendMail({
-			from: process.env.SMTP_FROM || '"Rose Griffon" <contact@rosegriffon.fr>',
+		const info = await transporter.sendMail({
+			from: from || process.env.SMTP_FROM || '"Rose Griffon" <contact@rosegriffon.fr>',
 			html,
 			subject,
 			// Repli texte brut : certains clients refusent un message sans partie texte.
 			text: text ?? html.replaceAll(/<[^>]*>/g, " ").replaceAll(/\s+/g, " ").trim(),
 			to,
+			replyTo,
+			cc,
+			bcc,
+			attachments,
 		});
+		return {
+			messageId: info.messageId,
+			success: true,
+		};
 	} catch (error) {
 		console.error("[email] envoi impossible", error);
 		throw error;
@@ -357,4 +399,147 @@ export async function sendOrderCancellationEmail(
 		console.error("Erreur lors de l'envoi de l'email d'annulation:", error);
 		throw error;
 	}
+}
+
+/**
+ * Envoyer un message depuis le formulaire de contact officiel
+ */
+export async function sendContactFormEmail(data: {
+	title: string;
+	subject: string;
+	description: string;
+	senderEmail?: string;
+	senderName?: string;
+	attachments?: {
+		filename: string;
+		content: Buffer;
+		contentType: string;
+	}[];
+}): Promise<SendEmailResult> {
+	const recipient = process.env.SMTP_TO_CONTACT || process.env.SMTP_USER || "contact@rosegriffon.fr";
+
+	const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1a1a1a">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden">
+      <tr><td style="padding:28px;background:#a14b3f;color:#ffffff">
+        <h1 style="margin:0;font-size:20px;font-weight:700">Nouveau message de contact</h1>
+        <p style="margin:6px 0 0;font-size:14px;opacity:0.9">Sujet : ${data.subject}</p>
+      </td></tr>
+      <tr><td style="padding:28px">
+        <h2 style="margin:0 0 16px;font-size:18px;color:#1a1a1a">${data.title}</h2>
+        ${data.senderEmail ? `<p style="margin:0 0 12px;font-size:14px;color:#666">De : <strong>${data.senderName ? `${data.senderName} (${data.senderEmail})` : data.senderEmail}</strong></p>` : ""}
+        <div style="padding:16px;background:#f9f9f9;border-left:4px solid #a14b3f;border-radius:4px;font-size:15px;line-height:1.6;white-space:pre-wrap">
+${data.description}
+        </div>
+      </td></tr>
+      <tr><td style="padding:16px 28px;background:#f0f0f0;font-size:12px;color:#888" align="center">
+        Association Rose Griffon · Formulaire web officiel
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`;
+
+	return await sendEmail({
+		to: recipient,
+		replyTo: data.senderEmail,
+		subject: `[Contact RG] ${data.subject} — ${data.title}`,
+		html,
+		text: `Titre: ${data.title}\nSujet: ${data.subject}\nDe: ${data.senderEmail || "anonyme"}\n\n${data.description}`,
+		attachments: data.attachments,
+	});
+}
+
+/**
+ * Envoyer un message confidentiel à la cellule de médiation
+ */
+export async function sendMediationRequestEmail(data: {
+	subject: string;
+	message: string;
+	senderEmail?: string;
+	senderName?: string;
+}): Promise<SendEmailResult> {
+	const recipient = "rosegriffon.mediation@gmail.com";
+
+	const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1a1a1a">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;border-top:4px solid #d97706">
+      <tr><td style="padding:28px">
+        <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#92400e">Cellule de médiation — Saisine confidentielle</h1>
+        <p style="margin:0 0 16px;font-size:14px;color:#666">Objet : ${data.subject}</p>
+        ${data.senderEmail ? `<p style="margin:0 0 16px;font-size:14px;color:#444">Contact : <strong>${data.senderName ? `${data.senderName} (${data.senderEmail})` : data.senderEmail}</strong></p>` : `<p style="margin:0 0 16px;font-size:14px;color:#888"><em>Saisine anonyme</em></p>`}
+        <div style="padding:18px;background:#fffbeb;border:1px solid #fef3c7;border-radius:8px;font-size:15px;line-height:1.6;white-space:pre-wrap;color:#1f2937">
+${data.message}
+        </div>
+        <p style="margin:20px 0 0;font-size:12px;color:#9ca3af">
+          Ce message est strictement confidentiel et destiné uniquement aux membres de la cellule de médiation Rose Griffon.
+        </p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`;
+
+	return await sendEmail({
+		to: recipient,
+		replyTo: data.senderEmail,
+		subject: `[Médiation Confidentielle] ${data.subject}`,
+		html,
+		text: `Médiation Confidentielle\nObjet: ${data.subject}\nDe: ${data.senderEmail || "anonyme"}\n\n${data.message}`,
+	});
+}
+
+/**
+ * Envoyer un email de notification tournoi / e-sport Achilléa
+ */
+export async function sendTournamentNotificationEmail(data: {
+	recipientEmail: string;
+	playerName: string;
+	tournamentName: string;
+	type: "registration_confirmed" | "match_ready" | "dispute_alert" | "podium";
+	details?: string;
+	tournamentUrl?: string;
+}): Promise<SendEmailResult> {
+	const titles: Record<string, string> = {
+		registration_confirmed: "Inscription confirmée !",
+		match_ready: "Votre prochain match est prêt",
+		dispute_alert: "Signalement ouvert sur votre match",
+		podium: "Félicitations pour votre podium !",
+	};
+
+	const title = titles[data.type] || "Information tournoi";
+	const url = data.tournamentUrl || "https://rosegriffon.fr/achillea/tournaments";
+
+	const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1a1a1a">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" width="100%" style="max-width:500px;background:#ffffff;border-radius:16px;overflow:hidden">
+      <tr><td style="padding:28px;background:#1e1b4b;color:#ffffff" align="center">
+        <h1 style="margin:0;font-size:22px;font-weight:700">⚔️ Achilléa E-sport</h1>
+        <p style="margin:6px 0 0;font-size:15px;color:#a5b4fc">${data.tournamentName}</p>
+      </td></tr>
+      <tr><td style="padding:28px">
+        <h2 style="margin:0 0 12px;font-size:18px">${title}</h2>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.5;color:#4a4a4a">
+          Bonjour <strong>${data.playerName}</strong>,<br/><br/>
+          ${data.details || `Des informations sont disponibles pour votre participation au tournoi ${data.tournamentName}.`}
+        </p>
+        <div style="text-align:center;margin:24px 0">
+          <a href="${url}" style="display:inline-block;padding:12px 28px;background:#4338ca;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;border-radius:8px">
+            Accéder au tournoi
+          </a>
+        </div>
+      </td></tr>
+      <tr><td style="padding:16px 28px;border-top:1px solid #eee;font-size:12px;color:#888" align="center">
+        Achilléa · Ligue compétitive Inazuma Eleven
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`;
+
+	return await sendEmail({
+		to: data.recipientEmail,
+		subject: `⚔️ [Achilléa] ${title} — ${data.tournamentName}`,
+		html,
+	});
 }

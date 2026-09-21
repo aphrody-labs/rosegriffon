@@ -21,8 +21,16 @@ export async function GET() {
 			{ status: 200 }
 		);
 	}
-	const discount = await getPatronDiscount(user.id);
-	return NextResponse.json(discount, {
-		headers: { "cache-control": "private, max-age=60" },
-	});
+	try {
+		const discount = await getPatronDiscount(user.id);
+		return NextResponse.json(discount, {
+			headers: { "cache-control": "private, max-age=60" },
+		});
+	} catch (error) {
+		console.error("[patreon/discount] Erreur calcul remise:", error);
+		return NextResponse.json(
+			{ active: false, percent: 0, reason: "error" },
+			{ status: 200 }
+		);
+	}
 }

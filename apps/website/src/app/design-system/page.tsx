@@ -101,7 +101,7 @@ export default function DesignSystemShowcase() {
 	return (
 		<div
 			data-design-system-root
-			className="theme-azalee-light relative isolate overflow-hidden"
+			className="theme-roy relative isolate overflow-hidden"
 			style={{
 				backgroundColor: RG_MARINE,
 				fontFamily: "var(--font-body-ds), 'Poppins', system-ui, sans-serif",

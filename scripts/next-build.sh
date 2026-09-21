@@ -37,7 +37,9 @@ BUILD_TMP="${BUILD_TMP:-$HOME/.azalee-build-tmp}"
 mkdir -p "$BUILD_TMP"
 
 build_start=$(date +%s)
-env TMPDIR="$BUILD_TMP" \
+# Node undici ne supporte pas socks5h:// (UnsupportedProxyProtocol sur next/font)
+env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u all_proxy \
+	TMPDIR="$BUILD_TMP" \
 	NODE_ENV=production NODE_NO_WARNINGS=1 \
 	NODE_OPTIONS="--max-old-space-size=8192 ${NODE_OPTIONS:-}" \
 	"$NODE_BIN" node_modules/next/dist/bin/next build --turbopack "$@"

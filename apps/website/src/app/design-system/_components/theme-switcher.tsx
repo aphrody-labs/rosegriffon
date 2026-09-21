@@ -3,26 +3,26 @@
 import { useEffect, useState } from "react";
 
 const THEMES = [
-	{
-		id: "theme-azalee-light",
-		label: "Azalée Light",
-		mode: "light",
-		swatch: "#F89C5A",
-	},
+	{ id: "theme-roy", label: "Roy", mode: "light", swatch: "#344E8C" },
+	{ id: "theme-gaelle", label: "Gaëlle", mode: "light", swatch: "#B03519" },
 	{
 		id: "theme-azalee-dark",
-		label: "Azalée Dark",
+		label: "Azalée",
 		mode: "dark",
 		swatch: "#1C1B1F",
 	},
-	{ id: "theme-roy", label: "Roy", mode: "light", swatch: "#344E8C" },
-	{ id: "theme-gaelle", label: "Gaëlle", mode: "light", swatch: "#B03519" },
+	{
+		id: "theme-achillea",
+		label: "Achilléa",
+		mode: "dark",
+		swatch: "#6D00CE",
+	},
 ] as const;
 
 type ThemeId = (typeof THEMES)[number]["id"];
 
 export function ThemeSwitcher() {
-	const [active, setActive] = useState<ThemeId>("theme-azalee-light");
+	const [active, setActive] = useState<ThemeId>("theme-roy");
 
 	useEffect(() => {
 		const root = document.documentElement.parentElement;

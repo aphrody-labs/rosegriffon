@@ -163,9 +163,8 @@ describe("tokens exposés", () => {
 	});
 
 	test("le pont shadcn est résolu, pas laissé en référence", () => {
-		// azalee-light écrit `--card: var(--md-sys-color-surface-container-low)`.
-		expect(THEMES["theme-azalee-light"].shadcn.card).toBe(
-			THEMES["theme-azalee-light"].md3.surfaceContainerLow
+		expect(THEMES["theme-azalee-dark"].shadcn.card).toBe(
+			THEMES["theme-azalee-dark"].md3.surfaceContainerLow
 		);
 	});
 

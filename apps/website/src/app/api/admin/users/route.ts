@@ -28,18 +28,23 @@ export async function GET(req: Request) {
 			count,
 		} = await supabase
 			.from("profiles")
-			.select("id,email,full_name,role,discord_id,created_at,updated_at", {
+			.select("id,email,full_name,role,discord_id,claimed_at,updated_at", {
 				count: "exact",
 			})
-			.order("created_at", { ascending: false })
+			.order("updated_at", { ascending: false, nullsFirst: false })
 			.range(from, to);
 
 		if (error) {
 			throw error;
 		}
 
+		const formattedUsers = (users ?? []).map((u: Record<string, unknown>) => ({
+			...u,
+			created_at: u.claimed_at ?? u.updated_at,
+		}));
+
 		return NextResponse.json({
-			data: users ?? [],
+			data: formattedUsers,
 			pagination: {
 				limit,
 				page,

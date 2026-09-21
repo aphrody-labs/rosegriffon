@@ -4,16 +4,11 @@ import { Suspense } from "react";
 
 import { Input, Skeleton } from "@rosegriffon/ui";
 
-import DiscordSection from "@/components/shared/DiscordSection";
 import { SERVEURS_DISCORD, serveurDiscord } from "@/lib/discord";
 import type { CleServeur } from "@/lib/discord/hierarchie";
 import { cn } from "@/lib/utils";
 
-import AssoMembersSection from "./_components/asso";
-import BoardMembersSection from "./_components/board";
 import { HierarchieServeur, ResumeServeur } from "./_components/hierarchie-serveur";
-import PartenairesSection from "./_components/PartenairesSection";
-import TeamsSection from "./_components/teams";
 
 /**
  * Qui fait Rose Griffon — page UNIQUE, deux lectures.
@@ -157,15 +152,6 @@ export default async function CommunityPage({
 
 			{vue === "communaute" ? (
 				<div className="flex flex-col gap-10">
-					{/* Les DEUX serveurs, côte à côte : Rose Griffon rassemble, Achilléa
-					    fait jouer. Le bloc Discord était écrit pour un seul serveur — son
-					    identifiant, son texte et son emote dans le corps du composant. */}
-					<div className="grid gap-4 lg:grid-cols-2">
-						{SERVEURS_DISCORD.map((entree) => (
-							<DiscordSection key={entree.cle} serveur={entree} compact />
-						))}
-					</div>
-
 					<section className="flex flex-col gap-4">
 						<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 							<div className="space-y-1">
@@ -210,21 +196,24 @@ export default async function CommunityPage({
 						</Suspense>
 					</section>
 
-					{/* L'association, elle, n'est pas un serveur Discord : son bureau et ses
-					    équipes vivent dans `team_members`. Chaque section garde son
-					    `Suspense` — une source lente ne retient pas les autres. */}
-					<Suspense fallback={<SquelettedeSection />}>
-						<BoardMembersSection />
-					</Suspense>
-					<Suspense fallback={<SquelettedeSection />}>
-						<AssoMembersSection />
-					</Suspense>
-					<Suspense fallback={<SquelettedeSection />}>
-						<TeamsSection />
-					</Suspense>
-					<Suspense fallback={<SquelettedeSection />}>
-						<PartenairesSection />
-					</Suspense>
+					{/* Les équipes de l'association vivent sur la page dédiée /notre-equipe */}
+					<div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-3xl border border-primary/20 bg-primary/5">
+						<div className="space-y-1 text-center sm:text-left">
+							<h3 className="text-base font-bold text-foreground">
+								Équipes & Pôles de l&apos;Association Rose Griffon
+							</h3>
+							<p className="text-xs sm:text-sm text-muted-foreground">
+								Découvrez le bureau de l&apos;association, les créateurs d&apos;Azalée et Achilléa, les dessinateurs,
+								le lore, la production et leurs médailles officielles sur la page dédiée.
+							</p>
+						</div>
+						<Link
+							href="/notre-equipe"
+							className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary text-xs sm:text-sm font-semibold hover:bg-primary/90 transition-colors whitespace-nowrap shadow-sm"
+						>
+							Consulter Notre Équipe →
+						</Link>
+					</div>
 				</div>
 			)}
 		</div>

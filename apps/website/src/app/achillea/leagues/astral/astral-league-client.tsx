@@ -23,7 +23,7 @@ import { signalerException } from "@/lib/achillea/signaler";
 export default function AstralLeaguePage() {
 	const [season, setSeason] = useState<LeagueSeasonPayload | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [activeTab, setActiveTab] = useState<"standings" | "matches" | "rules">("standings");
+	const [activeTab, setActiveTab] = useState<"standings" | "matches" | "playoffs" | "rules">("standings");
 	const [selectedMatchday, setSelectedMatchday] = useState<number>(1);
 
 	useEffect(() => {
@@ -138,7 +138,7 @@ export default function AstralLeaguePage() {
 			</div>
 
 			{/* Tabs */}
-			<div className="flex items-center gap-2 border-b border-border pb-px">
+			<div className="flex items-center gap-2 border-b border-border pb-px overflow-x-auto">
 				<button
 					type="button"
 					onClick={() => setActiveTab("standings")}
@@ -162,6 +162,18 @@ export default function AstralLeaguePage() {
 				>
 					<Calendar className="w-3.5 h-3.5" />
 					Calendrier & Journées
+				</button>
+				<button
+					type="button"
+					onClick={() => setActiveTab("playoffs")}
+					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+						activeTab === "playoffs"
+							? "border-primary text-foreground"
+							: "border-transparent text-muted-foreground hover:text-foreground"
+					}`}
+				>
+					<Sparkles className="w-3.5 h-3.5 text-amber-400" />
+					Play-offs (Final Four)
 				</button>
 				<button
 					type="button"
@@ -190,7 +202,7 @@ export default function AstralLeaguePage() {
 							<div className="overflow-x-auto">
 								<table className="w-full text-left text-xs">
 									<thead>
-										<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-[10px] tracking-wider">
+										<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-xs tracking-wider">
 											<th className="py-3 px-4 w-12 text-center">Rang</th>
 											<th className="py-3 px-4">Équipe</th>
 											<th className="py-3 px-3 text-center">J</th>
@@ -279,7 +291,7 @@ export default function AstralLeaguePage() {
 								</table>
 							</div>
 
-							<div className="p-3 bg-muted/20 border-t border-border flex items-center gap-2 text-[11px] text-muted-foreground">
+							<div className="p-3 bg-muted/20 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
 								<span className="w-2.5 h-2.5 rounded-full bg-primary/40 inline-block" />
 								<span>Les 4 premières équipes sont qualifiées pour les Play-offs.</span>
 							</div>
@@ -330,7 +342,7 @@ export default function AstralLeaguePage() {
 											>
 												<div className="text-right flex-1 min-w-0">
 													<div className="font-bold text-xs truncate">{homeName}</div>
-													<div className="text-[10px] font-mono text-muted-foreground">
+													<div className="text-xs font-mono text-muted-foreground">
 														[{match.homeId}]
 													</div>
 												</div>
@@ -343,7 +355,7 @@ export default function AstralLeaguePage() {
 
 												<div className="text-left flex-1 min-w-0">
 													<div className="font-bold text-xs truncate">{awayName}</div>
-													<div className="text-[10px] font-mono text-muted-foreground">
+													<div className="text-xs font-mono text-muted-foreground">
 														[{match.awayId}]
 													</div>
 												</div>
@@ -352,6 +364,139 @@ export default function AstralLeaguePage() {
 									})}
 								</div>
 							)}
+						</div>
+					)}
+
+					{/* Playoffs Final Four Tab */}
+					{activeTab === "playoffs" && (
+						<div className="space-y-6">
+							<div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border">
+								<div className="flex items-center gap-3">
+									<span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+										<Trophy className="w-5 h-5" />
+									</span>
+									<div>
+										<h3 className="font-bold text-sm text-foreground uppercase tracking-wider">
+											Final Four — Play-offs Officiels
+										</h3>
+										<p className="text-xs text-muted-foreground mt-0.5">
+											Arbre à élimination directe réunissant les 4 meilleures équipes de la saison régulière.
+										</p>
+									</div>
+								</div>
+								<span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-bold border border-amber-500/20">
+									Saison 1
+								</span>
+							</div>
+
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+								{/* Demi-finale 1 */}
+								<div className="border border-border bg-card rounded-2xl p-5 space-y-3 shadow-xs">
+									<div className="flex items-center justify-between border-b border-border/60 pb-2">
+										<span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+											Demi-finale 1
+										</span>
+										<span className="text-xs font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
+											BO3
+										</span>
+									</div>
+
+									<div className="space-y-2">
+										<div className="flex items-center justify-between p-2.5 rounded-xl bg-background border border-border/80 text-xs">
+											<div className="flex items-center gap-2">
+												<span className="w-5 h-5 rounded-full bg-amber-400/20 text-amber-400 font-bold flex items-center justify-center text-xs">
+													1
+												</span>
+												<span className="font-semibold text-foreground">
+													{standings[0] ? teamsMap.get(standings[0].teamId) || standings[0].teamId : "Seed 1 (1er)"}
+												</span>
+											</div>
+											<span className="font-mono font-bold">-</span>
+										</div>
+
+										<div className="flex items-center justify-between p-2.5 rounded-xl bg-background border border-border/80 text-xs">
+											<div className="flex items-center gap-2">
+												<span className="w-5 h-5 rounded-full bg-muted text-muted-foreground font-bold flex items-center justify-center text-xs">
+													4
+												</span>
+												<span className="font-semibold text-foreground">
+													{standings[3] ? teamsMap.get(standings[3].teamId) || standings[3].teamId : "Seed 4 (4ème)"}
+												</span>
+											</div>
+											<span className="font-mono font-bold">-</span>
+										</div>
+									</div>
+								</div>
+
+								{/* Demi-finale 2 */}
+								<div className="border border-border bg-card rounded-2xl p-5 space-y-3 shadow-xs">
+									<div className="flex items-center justify-between border-b border-border/60 pb-2">
+										<span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+											Demi-finale 2
+										</span>
+										<span className="text-xs font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
+											BO3
+										</span>
+									</div>
+
+									<div className="space-y-2">
+										<div className="flex items-center justify-between p-2.5 rounded-xl bg-background border border-border/80 text-xs">
+											<div className="flex items-center gap-2">
+												<span className="w-5 h-5 rounded-full bg-slate-400/20 text-slate-300 font-bold flex items-center justify-center text-xs">
+													2
+												</span>
+												<span className="font-semibold text-foreground">
+													{standings[1] ? teamsMap.get(standings[1].teamId) || standings[1].teamId : "Seed 2 (2ème)"}
+												</span>
+											</div>
+											<span className="font-mono font-bold">-</span>
+										</div>
+
+										<div className="flex items-center justify-between p-2.5 rounded-xl bg-background border border-border/80 text-xs">
+											<div className="flex items-center gap-2">
+												<span className="w-5 h-5 rounded-full bg-amber-700/20 text-amber-600 font-bold flex items-center justify-center text-xs">
+													3
+												</span>
+												<span className="font-semibold text-foreground">
+													{standings[2] ? teamsMap.get(standings[2].teamId) || standings[2].teamId : "Seed 3 (3ème)"}
+												</span>
+											</div>
+											<span className="font-mono font-bold">-</span>
+										</div>
+									</div>
+								</div>
+
+								{/* Grande Finale */}
+								<div className="md:col-span-2 border-2 border-amber-500/30 bg-card rounded-2xl p-6 space-y-4 shadow-sm">
+									<div className="flex items-center justify-between border-b border-border/60 pb-2">
+										<div className="flex items-center gap-2">
+											<Trophy className="w-4 h-4 text-amber-400" />
+											<span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+												Grande Finale Astral League
+											</span>
+										</div>
+										<span className="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold">
+											BO5
+										</span>
+									</div>
+
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+										<div className="p-3 rounded-xl bg-background/80 border border-border text-center space-y-1">
+											<div className="text-xs text-muted-foreground">Finaliste 1</div>
+											<div className="font-bold text-sm text-foreground">
+												Vainqueur Demi-finale 1
+											</div>
+										</div>
+
+										<div className="p-3 rounded-xl bg-background/80 border border-border text-center space-y-1">
+											<div className="text-xs text-muted-foreground">Finaliste 2</div>
+											<div className="font-bold text-sm text-foreground">
+												Vainqueur Demi-finale 2
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					)}
 

@@ -3,7 +3,7 @@ import type { ComponentType, SVGProps } from "react";
 import { PfpIcon } from "@/components/icons/PfpIcon";
 
 import type { EMOTES } from "@/lib/emotes";
-import { Hash, Palette, Smile, Users } from "@/lib/icons-config";
+import { Hash, Palette, Smile, Tv, Users } from "@/lib/icons-config";
 
 /**
  * Source unique des projets Rose Griffon.
@@ -97,6 +97,18 @@ export const PROJETS: Projet[] = [
 		icone: Smile,
 		slug: "emotes",
 		titre: "Galerie d'emotes",
+	},
+	{
+		badge: "WebTV & Replays",
+		description:
+			"La chaîne WebTV historique de Rose Griffon : sessions de jeu, tournois commentés et archives vidéo de la communauté.",
+		emote: "roy-cool",
+		href: "/rose-griffon-tv",
+		icone: Tv,
+		image: "/rgtv/affiche.webp",
+		slug: "rgtv",
+		surAccueil: false,
+		titre: "RG TV",
 	},
 ];
 

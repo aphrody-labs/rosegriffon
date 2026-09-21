@@ -10,7 +10,8 @@ import { ArticleEditor } from "@/components/articles/ArticleEditor";
 import { getServerUser } from "@/lib/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function EditArticlePage({ params }: { params: { id: string } }) {
+export default async function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
+	const { id } = await params;
 	const user = await getServerUser();
 	if (!user) {
 		redirect("/login");
@@ -22,7 +23,7 @@ export default async function EditArticlePage({ params }: { params: { id: string
 	const { data: article } = await supabase
 		.from("articles")
 		.select("*")
-		.eq("id", params.id)
+		.eq("id", id)
 		.eq("app", "website")
 		.single();
 

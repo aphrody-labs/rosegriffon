@@ -192,7 +192,6 @@ export function resoudreVar(
 export const NOMS_THEMES = [
 	"theme-roy",
 	"theme-gaelle",
-	"theme-azalee-light",
 	"theme-azalee-dark",
 	"theme-achillea",
 ] as const;

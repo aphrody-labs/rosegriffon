@@ -164,7 +164,10 @@ const resolvers = {
 			}));
 		},
 		character: async (_: any, { id }: any) => {
-			const c = await wikiService.getCharacter(id);
+			const c =
+				(await wikiService.getCharacterByBaseSlug(id)) ||
+				(await wikiService.getCharacterBySlug(id)) ||
+				(await wikiService.getCharacter(id));
 			if (!c) return null;
 			return {
 				id: c.charaId,

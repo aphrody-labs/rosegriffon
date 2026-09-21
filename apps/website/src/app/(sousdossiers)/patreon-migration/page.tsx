@@ -1,4 +1,4 @@
-import { EyeOff, Heart, Sparkles, Users } from "lucide-react";
+import { Coins, EyeOff, Heart, Users } from "lucide-react";
 import type { Metadata } from "next";
 
 import { MigrationFAQ } from "@/components/patreon/MigrationFAQ";
@@ -75,7 +75,7 @@ function PatreonMigrationPreview() {
 					{[
 						{
 							desc: "Patreon prend 8-12% + frais de paiement. Stripe direct = 1.4% + 0.25€. Plus de soutien réel pour la création.",
-							icon: Sparkles,
+							icon: Coins,
 							title: "Frais réduits",
 						},
 						{

@@ -1578,12 +1578,23 @@ export const wikiService = {
 	async getItem(id: string): Promise<Item | undefined> {
 		// ... existing getItem ...
 		const supabase = await createClient();
-		// Try exact match on ID first (hex), then name if needed
-		const { data: row } = await supabase
+		// Try exact match on ID first (hex), then internal_code/name if needed
+		let { data: row } = await supabase
 			.from("inagle_items")
 			.select("*")
 			.eq("id", id)
 			.maybeSingle();
+
+		if (!row) {
+			const safeId = sanitizeFilter(id);
+			const { data: fallbackRow } = await supabase
+				.from("inagle_items")
+				.select("*")
+				.or(`internal_code.eq.${safeId},name_en.eq.${safeId},name_fr.eq.${safeId}`)
+				.limit(1)
+				.maybeSingle();
+			row = fallbackRow;
+		}
 
 		if (row) {
 			const item = row as unknown as DbItem;
@@ -1827,7 +1838,7 @@ export const wikiService = {
 			const { data } = await supabase
 				.from("inagle_skills")
 				.select("*")
-				.or(`internal_code.eq.${safeId},name_en.eq.${safeId},name_fr.eq.${safeId}`)
+				.or(`id.eq.${safeId},internal_code.eq.${safeId},name_en.eq.${safeId},name_fr.eq.${safeId}`)
 				.limit(1)
 				.maybeSingle();
 			row = data;

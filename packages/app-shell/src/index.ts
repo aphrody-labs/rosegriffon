@@ -58,7 +58,7 @@ export {
 	MobileBottomNavigation,
 	type MobileBottomNavProps,
 } from "./components/MobileBottomNav";
-export { AppSidebar, WikiSidebar, type AppSidebarProps } from "./components/AppSidebar";
+export { AppSidebar, WikiSidebar, SidebarUniverseHeader, type AppSidebarProps } from "./components/AppSidebar";
 export {
 	TopAppBar,
 	DesktopTopBar,

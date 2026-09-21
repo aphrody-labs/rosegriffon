@@ -30,18 +30,23 @@ export async function GET(requete: Request) {
 		return NextResponse.json({ groupes: [], resultats: [] });
 	}
 
-	const pool = getPgPool();
-	const resultats = await rechercherPartout(
-		async (sql, params) => {
-			const { rows } = await pool.query(sql, params);
-			return rows as never;
-		},
-		terme,
-		{ limiteParSource: 4, limiteTotale: 12 }
-	);
+	try {
+		const pool = getPgPool();
+		const resultats = await rechercherPartout(
+			async (sql, params) => {
+				const { rows } = await pool.query(sql, params);
+				return rows as never;
+			},
+			terme,
+			{ limiteParSource: 4, limiteTotale: 12 }
+		);
 
-	return NextResponse.json({
-		groupes: grouperParDomaine(resultats),
-		resultats,
-	});
+		return NextResponse.json({
+			groupes: grouperParDomaine(resultats),
+			resultats,
+		});
+	} catch (erreur) {
+		console.error("Erreur API recherche unifiée:", erreur);
+		return NextResponse.json({ groupes: [], resultats: [] }, { status: 200 });
+	}
 }

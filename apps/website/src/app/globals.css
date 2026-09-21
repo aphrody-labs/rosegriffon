@@ -12,6 +12,86 @@
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
+@utility content-deferred {
+	content-visibility: auto;
+	contain-intrinsic-size: auto 500px;
+}
+
+@utility glass-surface {
+	background-color: color-mix(in srgb, var(--background) 80%, transparent);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+}
+
+@utility scrollbar-thin {
+	scrollbar-width: thin;
+	scrollbar-color: var(--border) transparent;
+}
+
+@utility achillea-glow-card {
+	box-shadow: 0 0 50px -15px rgba(109, 0, 206, 0.3);
+}
+
+@utility achillea-glow-logo {
+	filter: drop-shadow(0 0 8px rgba(223, 255, 87, 0.6));
+}
+
+@utility achillea-card-gradient {
+	background-image: linear-gradient(to bottom, #180928, #0f051a, #0a0312);
+}
+
+@utility achillea-text-gradient {
+	background-image: linear-gradient(to right, #dfff57, #b875ff, #6d00ce);
+}
+
+@utility achillea-rank-1 {
+	background-color: rgba(245, 158, 11, 0.2);
+	color: #fcd34d;
+	border-color: rgba(245, 158, 11, 0.5);
+}
+
+@utility achillea-rank-2 {
+	background-color: rgba(203, 213, 225, 0.2);
+	color: #e2e8f0;
+	border-color: rgba(203, 213, 225, 0.5);
+}
+
+@utility achillea-rank-3 {
+	background-color: rgba(180, 83, 9, 0.2);
+	color: #fbbf24;
+	border-color: rgba(180, 83, 9, 0.5);
+}
+
+@utility achillea-rank-default {
+	background-color: rgba(109, 0, 206, 0.25);
+	color: #d1d5db;
+	border-color: rgba(109, 0, 206, 0.4);
+}
+
+@utility achillea-status-recruiting {
+	background-color: rgba(16, 185, 129, 0.2);
+	color: #34d399;
+	border-color: rgba(16, 185, 129, 0.3);
+}
+
+@utility achillea-status-full {
+	background-color: rgba(75, 85, 99, 0.3);
+	color: #9ca3af;
+	border-color: rgba(75, 85, 99, 0.4);
+}
+
+@utility azalee-glow-card {
+	box-shadow: 0 0 50px -15px rgba(200, 60, 81, 0.25);
+}
+
+@utility azalee-card-gradient {
+	background-image: linear-gradient(to bottom, #240112, #1a010d, #120009);
+}
+
+@utility azalee-text-gradient {
+	background-image: linear-gradient(to right, #fecd50, #ff8c42, #c83c51);
+}
+
 /* La détection automatique de Tailwind s'arrête à la racine du projet et ignore
  * `node_modules`, où `@rosegriffon/ui` est un lien symbolique : sans ce
  * `@source`, les utilitaires employés uniquement par les composants partagés
@@ -114,6 +194,17 @@
 	--color-azalee-pink: #c83c51;
 	--color-azalee-dark: #240112;
 	--color-azalee-burgundy: #681229;
+	--color-azalee-gold: #b78250;
+
+	/* Achilléa Theme Colors */
+	--color-achillea-purple: #6d00ce;
+	--color-achillea-purple-dark: #150d20;
+	--color-achillea-purple-deep: #0a0312;
+	--color-achillea-purple-card: #180928;
+	--color-achillea-purple-hover: #1f1330;
+	--color-achillea-purple-pill: #1a0c2e;
+	--color-achillea-purple-light: #b875ff;
+	--color-achillea-lime: #dfff57;
 
 	/* Custom breakpoints for better responsiveness */
 	--breakpoint-xxs: 320px; /* iPhone SE, très petits */
@@ -128,6 +219,13 @@
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
+
+	/* Unified Typography tokens */
+	--font-cartoon: var(--font-super-cartoon);
+	--font-bradbun: var(--font-brad-bun-r);
+	--font-aklatan: var(--font-aklatan);
+	--font-poppins: var(--font-poppins);
+	--font-roboto: var(--font-roboto);
 }
 
 /* Valeurs par défaut (aucune classe de thème sur <html>).
@@ -395,23 +493,37 @@
 		backface-visibility: hidden;
 	}
 
-	/* Rose Griffon Custom Fonts - Charte Graphique */
-	h1 {
-		font-family: var(--font-super-cartoon, system-ui);
-		letter-spacing: -0.02em;
-		text-rendering: optimizeLegibility;
-	}
-
-	h2 {
-		font-family: var(--font-brad-bun-r, system-ui);
+	/* Typographie unifiée et cohérente — Charte Graphique Rose Griffon / Azalée / Achilléa */
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-family: var(--font-poppins, system-ui, sans-serif);
 		letter-spacing: -0.01em;
 		text-rendering: optimizeLegibility;
 	}
 
-	h3 {
-		font-family: var(--font-aklatan, system-ui);
-		letter-spacing: 0.01em;
-		text-rendering: optimizeLegibility;
+	/* Classes utilitaires pour polices expressives */
+	.font-cartoon {
+		font-family: var(--font-super-cartoon, system-ui, sans-serif);
+	}
+
+	.font-bradbun {
+		font-family: var(--font-brad-bun-r, system-ui, sans-serif);
+	}
+
+	.font-aklatan {
+		font-family: var(--font-aklatan, system-ui, sans-serif);
+	}
+
+	.font-poppins {
+		font-family: var(--font-poppins, system-ui, sans-serif);
+	}
+
+	.font-roboto {
+		font-family: var(--font-roboto, system-ui, sans-serif);
 	}
 }
 

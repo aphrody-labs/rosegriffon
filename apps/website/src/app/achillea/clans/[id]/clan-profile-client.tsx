@@ -6,7 +6,9 @@ import Image from "next/image";
 import { createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
 import type { ClanDTO, ClanMemberDTO } from "@rosegriffon/achillea-types";
 import { ClanMemberDistinction } from "@rosegriffon/achillea-types/enums/clanMemberRole";
+import { ClanState } from "@rosegriffon/achillea-types/enums/clanState";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
+import { ClanOrgchart } from "@/components/achillea/ClanOrgchart";
 import {
 	Badge,
 	Button,
@@ -31,6 +33,7 @@ import {
 	Sparkles,
 	ShieldAlert,
 	MessageSquare,
+	Network,
 } from "lucide-react";
 import { FaXTwitter, FaTiktok, FaInstagram, FaTwitch } from "react-icons/fa6";
 
@@ -42,9 +45,13 @@ export default function ClanProfilePage({ id }: { id: string }) {
 	const [members, setMembers] = useState<ClanMemberDTO[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [activeTab, setActiveTab] = useState<"members" | "orgchart">("members");
 
 	const [applicationOpen, setApplicationOpen] = useState(false);
 	const [applicationMsg, setApplicationMsg] = useState("");
+	const [selectedDistinction, setSelectedDistinction] = useState<ClanMemberDistinction>(
+		ClanMemberDistinction.Player
+	);
 	const [applying, setApplying] = useState(false);
 	const [applicationSuccess, setApplicationSuccess] = useState(false);
 
@@ -95,7 +102,7 @@ export default function ClanProfilePage({ id }: { id: string }) {
 		setApplying(true);
 		try {
 			const client = createAchilleaClient({ credentials: "include" });
-			const res = await client.clans.createApplication(clanId, [ClanMemberDistinction.Player]);
+			const res = await client.clans.createApplication(clanId, [selectedDistinction]);
 			if (res.ok) {
 				setApplicationSuccess(true);
 				setTimeout(() => setApplicationOpen(false), 2000);
@@ -296,6 +303,24 @@ export default function ClanProfilePage({ id }: { id: string }) {
 				</div>
 			</div>
 
+			{/* Statut particulier du clan */}
+			{clan.state === ClanState.PendingReview && (
+				<div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex items-center gap-3 text-amber-400">
+					<ShieldAlert className="size-5 shrink-0" />
+					<p className="text-sm font-medium">
+						Ce clan est actuellement en attente d&apos;approbation par les administrateurs Achilléa.
+					</p>
+				</div>
+			)}
+			{clan.state === ClanState.Creating && (
+				<div className="p-4 rounded-2xl border border-sky-500/30 bg-sky-500/10 flex items-center gap-3 text-sky-400">
+					<Sparkles className="size-5 shrink-0" />
+					<p className="text-sm font-medium">
+						Ce clan est en cours de constitution et de validation par ses membres fondateurs.
+					</p>
+				</div>
+			)}
+
 			{/* Description & Biographie */}
 			{clan.clanBiography && (
 				<Card className="rounded-2xl border-outline/20">
@@ -308,47 +333,72 @@ export default function ClanProfilePage({ id }: { id: string }) {
 				</Card>
 			)}
 
-			{/* Roster & Membres */}
-			<div className="space-y-4">
-				<div className="flex items-center justify-between">
+			{/* Roster & Organigramme avec Onglets */}
+			<div className="space-y-6">
+				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline/20 pb-3">
 					<div className="flex items-center gap-2">
 						<Users className="size-5 text-primary" />
-						<h2 className="text-xl font-black text-on-surface">Effectif du clan ({members.length})</h2>
+						<h2 className="text-xl font-black text-on-surface">Structure du clan</h2>
+					</div>
+
+					<div className="flex items-center gap-2">
+						<Button
+							variant={activeTab === "members" ? "default" : "outline"}
+							size="sm"
+							onClick={() => setActiveTab("members")}
+							className="text-xs font-semibold gap-1.5"
+						>
+							<Users className="size-3.5" />
+							Membres ({members.length})
+						</Button>
+						<Button
+							variant={activeTab === "orgchart" ? "default" : "outline"}
+							size="sm"
+							onClick={() => setActiveTab("orgchart")}
+							className="text-xs font-semibold gap-1.5"
+						>
+							<Network className="size-3.5" />
+							Organigramme
+						</Button>
 					</div>
 				</div>
 
-				<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-					{sortedMembers.map((m) => (
-						<div
-							key={m.user?.id}
-							className="flex items-center justify-between p-3.5 rounded-2xl border border-outline/20 bg-surface hover:border-primary/40 transition-colors"
-						>
-							<div className="flex items-center gap-3 min-w-0">
-								<UserAvatar
-									userId={m.user?.id}
-									avatar={m.user?.avatar}
-									name={m.user?.username}
-									size="md"
-								/>
-								<div className="min-w-0">
-									<Link
-										href={`/achillea/users/${m.user?.id}`}
-										className="font-bold text-sm text-on-surface hover:text-primary transition-colors truncate block"
-									>
-										{m.user?.username}
-									</Link>
-									<span className="text-[11px] text-on-surface-variant">
-										Rejoint le {new Date(m.createdAt).toLocaleDateString("fr-FR")}
-									</span>
+				{activeTab === "members" ? (
+					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+						{sortedMembers.map((m) => (
+							<div
+								key={m.user?.id}
+								className="flex items-center justify-between p-3.5 rounded-2xl border border-outline/20 bg-surface hover:border-primary/40 transition-colors"
+							>
+								<div className="flex items-center gap-3 min-w-0">
+									<UserAvatar
+										userId={m.user?.id}
+										avatar={m.user?.avatar}
+										name={m.user?.username}
+										size="md"
+									/>
+									<div className="min-w-0">
+										<Link
+											href={`/achillea/users/${m.user?.id}`}
+											className="font-bold text-sm text-on-surface hover:text-primary transition-colors truncate block"
+										>
+											{m.user?.username}
+										</Link>
+										<span className="text-xs text-on-surface-variant">
+											Rejoint le {new Date(m.createdAt).toLocaleDateString("fr-FR")}
+										</span>
+									</div>
 								</div>
-							</div>
 
-							<Badge variant={roleBadgeVariant(m.clanRole as unknown as number)} className="text-[10px] shrink-0 font-bold">
-								{roleLabel(m.clanRole as unknown as number)}
-							</Badge>
-						</div>
-					))}
-				</div>
+								<Badge variant={roleBadgeVariant(m.clanRole as unknown as number)} className="text-xs shrink-0 font-bold">
+									{roleLabel(m.clanRole as unknown as number)}
+								</Badge>
+							</div>
+						))}
+					</div>
+				) : (
+					<ClanOrgchart members={members} />
+				)}
 			</div>
 
 			{/* Modal Candidature */}
@@ -357,7 +407,7 @@ export default function ClanProfilePage({ id }: { id: string }) {
 					<DialogHeader>
 						<DialogTitle>Rejoindre {clan.name}</DialogTitle>
 						<DialogDescription>
-							Envoie ton message de motivation au staff de ce clan.
+							Postule en indiquant ton rôle souhaité et tes motivations.
 						</DialogDescription>
 					</DialogHeader>
 
@@ -368,13 +418,45 @@ export default function ClanProfilePage({ id }: { id: string }) {
 						</div>
 					) : (
 						<div className="space-y-4 py-2">
-							<textarea
-								value={applicationMsg}
-								onChange={(e) => setApplicationMsg(e.target.value)}
-								placeholder="Présente-toi brièvement (expérience de jeu, disponibilités, motivations)..."
-								rows={4}
-								className="w-full p-3 rounded-xl border border-outline/30 bg-surface-variant/20 text-sm text-on-surface focus:outline-none focus:border-primary"
-							/>
+							<div className="space-y-1.5">
+								<label className="text-xs font-semibold text-on-surface">
+									Poste souhaité au sein du clan
+								</label>
+								<div className="grid grid-cols-2 gap-2">
+									{[
+										{ label: "Joueur compétitif", value: ClanMemberDistinction.Player },
+										{ label: "Staff / Encadrement", value: ClanMemberDistinction.Staff },
+										{ label: "Artiste / Graphiste", value: ClanMemberDistinction.Artist },
+										{ label: "Créateur de contenu", value: ClanMemberDistinction.ContentCreator },
+									].map((role) => (
+										<button
+											key={role.value}
+											type="button"
+											onClick={() => setSelectedDistinction(role.value)}
+											className={`p-2.5 rounded-xl border text-xs font-semibold text-left transition-all ${
+												selectedDistinction === role.value
+													? "border-primary bg-primary/10 text-primary shadow-sm"
+													: "border-outline/20 bg-surface-variant/30 text-on-surface hover:border-outline/40"
+											}`}
+										>
+											{role.label}
+										</button>
+									))}
+								</div>
+							</div>
+
+							<div className="space-y-1.5">
+								<label className="text-xs font-semibold text-on-surface">
+									Message de présentation & motivations
+								</label>
+								<textarea
+									value={applicationMsg}
+									onChange={(e) => setApplicationMsg(e.target.value)}
+									placeholder="Présente-toi brièvement (expérience de jeu, disponibilités, motivations)..."
+									rows={4}
+									className="w-full p-3 rounded-xl border border-outline/30 bg-surface-variant/20 text-sm text-on-surface focus:outline-none focus:border-primary"
+								/>
+							</div>
 						</div>
 					)}
 

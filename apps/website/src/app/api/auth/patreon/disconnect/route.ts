@@ -20,11 +20,14 @@
  */
 import { NextResponse } from "next/server";
 
-import { requireAuth } from "@/lib/auth-helpers";
+import { getServerUser } from "@/lib/auth-helpers";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export async function POST() {
-	const user = await requireAuth();
+	const user = await getServerUser();
+	if (!user) {
+		return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+	}
 	const supabase = createAdminClient();
 	if (!supabase) {
 		return NextResponse.json({ error: "Client d'administration indisponible." }, { status: 500 });

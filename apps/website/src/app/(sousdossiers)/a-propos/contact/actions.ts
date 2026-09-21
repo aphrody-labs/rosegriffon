@@ -1,71 +1,28 @@
 "use server";
 
-import nodemailer from "nodemailer";
-
-import { getEnv } from "@/lib/env";
+import { sendContactFormEmail } from "@/lib/email";
 import { createLogger } from "@/lib/logger";
 
 import type { ContactFormValues } from "./schema";
 
 const logger = createLogger("contact-email");
 
-// Interface pour les options d'email avec propriété attachments
-interface NodemailerMailOptions {
-	from: string;
-	to: string;
-	subject: string;
-	html: string;
-	attachments?: {
-		filename: string;
-		content: Buffer;
-		contentType: string;
-	}[];
-}
-
-// Configurer le transporteur SMTP
-function createTransporter() {
-	const smtpUser = getEnv("SMTP_USER");
-	const smtpPassword = getEnv("SMTP_PASSWORD");
-
-	return nodemailer.createTransport({
-		auth: {
-			pass: smtpPassword,
-			user: smtpUser,
-		},
-		host: "smtp.gmail.com",
-		port: 587,
-		secure: false,
-		service: "gmail",
-	});
-}
-
 export async function sendContactEmail(formData: ContactFormValues) {
 	try {
-		const transporter = createTransporter();
-		const smtpUser = getEnv("SMTP_USER");
-
 		logger.info("Envoi d'un email de contact", {
 			hasFile: !!formData.file,
 			subject: formData.subject,
 		});
 
-		// Construire le contenu de l'email
-		const emailContent = `
-      <h2>Titre : ${formData.title}</h2>
-      <p><strong>Sujet :</strong> ${formData.subject}</p>
-      <p><strong>Description :</strong></p>
-      <p>${formData.description.replaceAll(/\n/g, "<br>")}</p>
-    `;
+		let attachments:
+			| {
+					filename: string;
+					content: Buffer;
+					contentType: string;
+			  }[]
+			| undefined;
 
-		// Préparer les options de l'email
-		const mailOptions: NodemailerMailOptions = {
-			from: smtpUser,
-			html: emailContent,
-			subject: `[RG WEB] ${formData.subject} - ${formData.title}`,
-			to: smtpUser,
-		};
-
-		// Ajouter la pièce jointe si elle existe
+		// Traiter la pièce jointe si présente
 		if (
 			formData.file &&
 			formData.file instanceof File &&
@@ -76,7 +33,7 @@ export async function sendContactEmail(formData: ContactFormValues) {
 		) {
 			try {
 				const fileBuffer = await formData.file.arrayBuffer();
-				mailOptions.attachments = [
+				attachments = [
 					{
 						content: Buffer.from(fileBuffer),
 						contentType: formData.file.type,
@@ -89,26 +46,20 @@ export async function sendContactEmail(formData: ContactFormValues) {
 				});
 			} catch (error) {
 				logger.error("Erreur lors du traitement de la pièce jointe", error);
-				// Continuer sans pièce jointe si une erreur survient
 			}
 		}
 
-		// Vérifier la connexion SMTP
-		try {
-			await transporter.verify();
-			logger.debug("Connexion SMTP vérifiée");
-		} catch (error) {
-			logger.error("La vérification SMTP a échoué", error);
-			return { error: "Erreur de configuration SMTP", success: false };
-		}
+		const result = await sendContactFormEmail({
+			title: formData.title,
+			subject: formData.subject,
+			description: formData.description,
+			attachments,
+		});
 
-		// Envoyer l'email
-		const info = await transporter.sendMail(mailOptions);
-		logger.info("Email envoyé avec succès", { messageId: info.messageId });
-
-		return { messageId: info.messageId, success: true };
+		logger.info("Email de contact traité avec succès", { messageId: result.messageId });
+		return { messageId: result.messageId, success: true };
 	} catch (error) {
-		logger.error("Erreur lors de l'envoi de l'email", error);
+		logger.error("Erreur lors de l'envoi de l'email de contact", error);
 		return {
 			error: error instanceof Error ? error.message : "Erreur inconnue",
 			success: false,

@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { ProjectCard } from "@/components/shared/ProjectCard";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 
-import { Sparkles } from "@/lib/icons-config";
+import { Palette } from "@/lib/icons-config";
 import { PROJETS } from "@/lib/projets";
 
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ export default function ProjetsPage() {
 
 				<div className="relative z-10 mx-auto max-w-3xl space-y-6">
 					<div className="inline-flex items-center rounded-full border border-outline bg-surface/50 px-3 py-1 text-sm font-medium text-primary backdrop-blur-sm">
-						<Sparkles className="mr-2 size-4" />
+						<Palette className="mr-2 size-4" />
 						<span>Espace créatif</span>
 					</div>
 

@@ -233,10 +233,7 @@ export async function getComments(
 
 	const { data: rawComments, error } = await client
 		.from("article_comments")
-		.select(
-			`id, content, is_edited, is_pinned, created_at, updated_at, parent_id,
-       profiles:author_id ( id, username, full_name, avatar_url )`
-		)
+		.select("id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id")
 		.eq("article_id", articleId)
 		.is("parent_id", null)
 		.order("is_pinned", { ascending: false })
@@ -252,6 +249,30 @@ export async function getComments(
 	}
 
 	const commentIds: string[] = rawComments.map((c: { id: string }) => c.id);
+	const userIds: string[] = [
+		...new Set<string>(rawComments.map((c: { user_id: string }) => c.user_id).filter(Boolean)),
+	];
+
+	const profilesMap = new Map<
+		string,
+		{ id: string; username: string | null; full_name: string | null; avatar_url: string | null }
+	>();
+	if (userIds.length > 0) {
+		const { data: profilesData } = await client
+			.from("profiles")
+			.select("id, username, full_name, avatar_url")
+			.in("id", userIds);
+		if (profilesData) {
+			for (const p of profilesData as Array<{
+				id: string;
+				username: string | null;
+				full_name: string | null;
+				avatar_url: string | null;
+			}>) {
+				profilesMap.set(p.id, p);
+			}
+		}
+	}
 
 	const { data: repliesData } = await client
 		.from("article_comments")
@@ -294,20 +315,16 @@ export async function getComments(
 			created_at: string;
 			updated_at: string;
 			parent_id: string | null;
-			profiles: {
-				id: string;
-				username: string | null;
-				full_name: string | null;
-				avatar_url: string | null;
-			} | null;
+			user_id: string;
 		}) => {
 			const ref = `comment:${c.id}`;
+			const prof = profilesMap.get(c.user_id);
 			return {
 				author: {
-					avatar_url: c.profiles?.avatar_url ?? null,
-					full_name: c.profiles?.full_name ?? null,
-					id: c.profiles?.id ?? "",
-					username: c.profiles?.username ?? null,
+					avatar_url: prof?.avatar_url ?? null,
+					full_name: prof?.full_name ?? null,
+					id: prof?.id ?? c.user_id,
+					username: prof?.username ?? null,
 				},
 				content: c.content,
 				created_at: c.created_at,
@@ -342,10 +359,7 @@ export async function getReplies(parentId: string): Promise<Reply[]> {
 
 	const { data, error } = await client
 		.from("article_comments")
-		.select(
-			`id, content, is_edited, is_pinned, created_at, updated_at, parent_id,
-       profiles:author_id ( id, username, full_name, avatar_url )`
-		)
+		.select("id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id")
 		.eq("parent_id", parentId)
 		.order("created_at", { ascending: true });
 
@@ -354,8 +368,33 @@ export async function getReplies(parentId: string): Promise<Reply[]> {
 		return [];
 	}
 
-	if (!data) {
+	if (!data || data.length === 0) {
 		return [];
+	}
+
+	const userIds: string[] = [
+		...new Set<string>((data as Array<{ user_id: string }>).map((c) => c.user_id).filter(Boolean)),
+	];
+
+	const profilesMap = new Map<
+		string,
+		{ id: string; username: string | null; full_name: string | null; avatar_url: string | null }
+	>();
+	if (userIds.length > 0) {
+		const { data: profilesData } = await client
+			.from("profiles")
+			.select("id, username, full_name, avatar_url")
+			.in("id", userIds);
+		if (profilesData) {
+			for (const p of profilesData as Array<{
+				id: string;
+				username: string | null;
+				full_name: string | null;
+				avatar_url: string | null;
+			}>) {
+				profilesMap.set(p.id, p);
+			}
+		}
 	}
 
 	return (
@@ -367,28 +406,26 @@ export async function getReplies(parentId: string): Promise<Reply[]> {
 			created_at: string;
 			updated_at: string;
 			parent_id: string | null;
-			profiles: {
-				id: string;
-				username: string | null;
-				full_name: string | null;
-				avatar_url: string | null;
-			} | null;
+			user_id: string;
 		}>
-	).map((c) => ({
-		author: {
-			avatar_url: c.profiles?.avatar_url ?? null,
-			full_name: c.profiles?.full_name ?? null,
-			id: c.profiles?.id ?? "",
-			username: c.profiles?.username ?? null,
-		},
-		content: c.content,
-		created_at: c.created_at,
-		id: c.id,
-		is_edited: c.is_edited,
-		is_pinned: c.is_pinned,
-		parent_id: c.parent_id,
-		updated_at: c.updated_at,
-	}));
+	).map((c) => {
+		const prof = profilesMap.get(c.user_id);
+		return {
+			author: {
+				avatar_url: prof?.avatar_url ?? null,
+				full_name: prof?.full_name ?? null,
+				id: prof?.id ?? c.user_id,
+				username: prof?.username ?? null,
+			},
+			content: c.content,
+			created_at: c.created_at,
+			id: c.id,
+			is_edited: c.is_edited,
+			is_pinned: c.is_pinned,
+			parent_id: c.parent_id,
+			updated_at: c.updated_at,
+		};
+	});
 }
 
 export async function createComment(
@@ -432,24 +469,27 @@ export async function createComment(
 		.from("article_comments")
 		.insert({
 			article_id: articleId,
-			author_id: userId,
 			content: trimmed,
 			created_at: now,
 			is_edited: false,
 			is_pinned: false,
 			parent_id: parentId ?? null,
 			updated_at: now,
+			user_id: userId,
 		})
-		.select(
-			`id, content, is_edited, is_pinned, created_at, updated_at, parent_id,
-       profiles:author_id ( id, username, full_name, avatar_url )`
-		)
+		.select("id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id")
 		.single();
 
 	if (insertError || !inserted) {
 		console.error("createComment error:", insertError);
 		throw new Error("Impossible de créer le commentaire");
 	}
+
+	const { data: authorProfile } = await client
+		.from("profiles")
+		.select("id, username, full_name, avatar_url")
+		.eq("id", userId)
+		.maybeSingle();
 
 	const c = inserted as {
 		id: string;
@@ -459,20 +499,15 @@ export async function createComment(
 		created_at: string;
 		updated_at: string;
 		parent_id: string | null;
-		profiles: {
-			id: string;
-			username: string | null;
-			full_name: string | null;
-			avatar_url: string | null;
-		} | null;
+		user_id: string;
 	};
 
 	return {
 		author: {
-			avatar_url: c.profiles?.avatar_url ?? null,
-			full_name: c.profiles?.full_name ?? null,
-			id: c.profiles?.id ?? "",
-			username: c.profiles?.username ?? null,
+			avatar_url: authorProfile?.avatar_url ?? null,
+			full_name: authorProfile?.full_name ?? null,
+			id: authorProfile?.id ?? userId,
+			username: authorProfile?.username ?? null,
 		},
 		content: c.content,
 		created_at: c.created_at,
@@ -505,14 +540,14 @@ export async function updateComment(commentId: string, content: string): Promise
 
 	const { data: existing, error: fetchError } = await client
 		.from("article_comments")
-		.select("id, author_id")
+		.select("id, user_id")
 		.eq("id", commentId)
 		.maybeSingle();
 
 	if (fetchError || !existing) {
 		throw new Error("Commentaire introuvable");
 	}
-	if (existing.author_id !== userId) {
+	if (existing.user_id !== userId) {
 		throw new Error("Non autorisé");
 	}
 
@@ -524,10 +559,7 @@ export async function updateComment(commentId: string, content: string): Promise
 			updated_at: new Date().toISOString(),
 		})
 		.eq("id", commentId)
-		.select(
-			`id, content, is_edited, is_pinned, created_at, updated_at, parent_id,
-       profiles:author_id ( id, username, full_name, avatar_url )`
-		)
+		.select("id, content, is_edited, is_pinned, created_at, updated_at, parent_id, user_id")
 		.single();
 
 	if (updateError || !updated) {
@@ -535,10 +567,17 @@ export async function updateComment(commentId: string, content: string): Promise
 		throw new Error("Impossible de modifier le commentaire");
 	}
 
-	const { count: replyCount } = await client
-		.from("article_comments")
-		.select("id", { count: "exact", head: true })
-		.eq("parent_id", commentId);
+	const [{ count: replyCount }, { data: authorProfile }] = await Promise.all([
+		client
+			.from("article_comments")
+			.select("id", { count: "exact", head: true })
+			.eq("parent_id", commentId),
+		client
+			.from("profiles")
+			.select("id, username, full_name, avatar_url")
+			.eq("id", userId)
+			.maybeSingle(),
+	]);
 
 	const c = updated as {
 		id: string;
@@ -548,20 +587,15 @@ export async function updateComment(commentId: string, content: string): Promise
 		created_at: string;
 		updated_at: string;
 		parent_id: string | null;
-		profiles: {
-			id: string;
-			username: string | null;
-			full_name: string | null;
-			avatar_url: string | null;
-		} | null;
+		user_id: string;
 	};
 
 	return {
 		author: {
-			avatar_url: c.profiles?.avatar_url ?? null,
-			full_name: c.profiles?.full_name ?? null,
-			id: c.profiles?.id ?? "",
-			username: c.profiles?.username ?? null,
+			avatar_url: authorProfile?.avatar_url ?? null,
+			full_name: authorProfile?.full_name ?? null,
+			id: authorProfile?.id ?? userId,
+			username: authorProfile?.username ?? null,
 		},
 		content: c.content,
 		created_at: c.created_at,
@@ -589,7 +623,7 @@ export async function deleteComment(commentId: string): Promise<void> {
 
 	const { data: comment, error: fetchError } = await client
 		.from("article_comments")
-		.select("id, author_id")
+		.select("id, user_id")
 		.eq("id", commentId)
 		.maybeSingle();
 
@@ -597,12 +631,12 @@ export async function deleteComment(commentId: string): Promise<void> {
 		throw new Error("Commentaire introuvable");
 	}
 
-	if (comment.author_id !== userId) {
+	if (comment.user_id !== userId) {
 		const { data: profile } = await client
 			.from("profiles")
 			.select("role")
 			.eq("id", userId)
-			.single();
+			.maybeSingle();
 
 		if (!profile || !isAdminRole(profile.role)) {
 			throw new Error("Non autorisé");
@@ -628,7 +662,11 @@ export async function pinComment(commentId: string): Promise<{ is_pinned: boolea
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
-	const { data: profile } = await client.from("profiles").select("role").eq("id", userId).single();
+	const { data: profile } = await client
+		.from("profiles")
+		.select("role")
+		.eq("id", userId)
+		.maybeSingle();
 
 	if (!profile || !isAdminRole(profile.role)) {
 		throw new Error("Non autorisé");

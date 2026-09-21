@@ -63,7 +63,7 @@ const WIKI_SECTIONS: Array<{
 		title: "Passifs",
 	},
 	{
-		description: "Créateur 3D et morphing officiel",
+		description: "Créateur 3D et morphing",
 		gradientColors: "bg-linear-to-r from-amber-500 to-yellow-400",
 		href: "/wiki/avatar",
 		icon: "face",
@@ -95,7 +95,8 @@ export function WikiCarousel({ stats }: WikiCarouselProps) {
 			<div className="mb-5 md:mb-6 px-0 md:px-8 lg:px-12">
 				<h2 className="text-xl md:text-3xl font-black text-on-surface font-expressive-title flex items-center gap-3">
 					<span className="w-2 h-8 rounded-full bg-secondary" />
-					Encyclopédie
+					<span className="hidden sm:inline">Wiki — Base de données Inazuma Eleven: Victory Road</span>
+					<span className="sm:hidden">Wiki Victory Road</span>
 				</h2>
 			</div>
 
