@@ -87,7 +87,7 @@ describe("navigation de la source unique Website", () => {
 		// `/settings` vit dans la topbar, pas dans la sidebar
 		expect(chemins).not.toContain("/settings");
 
-		// `/news` est servi à la racine et vit dans la catégorie « Actualité ».
+		// `/news` est servi à la racine et vit dans la catégorie « Wiki ».
 		expect(cheminsCliquables(itemsDeNavigation())).toContain("/news");
 	});
 

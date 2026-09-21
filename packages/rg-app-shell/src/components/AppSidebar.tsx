@@ -29,7 +29,6 @@ import {
 } from "../config/navigation";
 import { iconMap } from "../lib/icons";
 import { traduireNav } from "../lib/translations";
-import { UniverseSwitch } from "./UniverseSwitch";
 
 export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 	items?: NavItem[];
@@ -138,11 +137,6 @@ export function SidebarUniverseHeader({
 						</div>
 					</div>
 				</Link>
-			</div>
-
-			{/* Universe Switcher intégré directement dans la sidebar */}
-			<div className="flex items-center justify-center pt-0.5">
-				<UniverseSwitch className="w-full justify-between px-2 py-1 bg-surface-container-low/80 border border-outline-variant/20" />
 			</div>
 		</SidebarHeader>
 	);
