@@ -163,7 +163,7 @@ export interface Marque {
  * à surveiller pour une image de seize pixels.
  */
 const ICONES_MARQUE: Readonly<Record<string, string>> = Object.freeze({
-	rg: "https://rosegriffon.fr/RG_Logo_V2.5_NB.webp",
+	rg: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
 	azalee: "https://azalee.rosegriffon.fr/RG_Azalee-logo.webp",
 });
 

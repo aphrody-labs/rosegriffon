@@ -212,7 +212,7 @@ export default async function Home() {
 					<section className="flex flex-col justify-center gap-4 lg:col-span-7">
 						<div className="flex items-center gap-3">
 							<Image
-								src="/RG_Logo_V2.5_NB.webp"
+								src="/RG_Logo_V2.5.webp"
 								alt=""
 								width={56}
 								height={56}

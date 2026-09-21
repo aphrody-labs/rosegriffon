@@ -113,7 +113,7 @@ export default function DesignSystemShowcase() {
 				className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.04]"
 			>
 				<Image
-					src="/RG_Logo_V2.5_NB.webp"
+					src="/RG_Logo_V2.5.webp"
 					alt=""
 					width={900}
 					height={900}
@@ -901,7 +901,7 @@ export default function DesignSystemShowcase() {
 							className="relative block size-24 transition-transform motion-safe:duration-500 hover:rotate-[360deg] md:size-32"
 						>
 							<Image
-								src="/RG_Logo_V2.5_NB.webp"
+								src="/RG_Logo_V2.5.webp"
 								alt="Logo Rose Griffon"
 								fill
 								sizes="(max-width: 768px) 96px, 128px"
