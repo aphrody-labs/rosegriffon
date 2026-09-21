@@ -1,10 +1,9 @@
 # Documentation — monorepo Rose Griffon
 
-> 🌟 **SOURCE UNIQUE DE VÉRITÉ** : Le document de référence canonique pour toute la navigation, l'architecture unifiée des trois univers (**Association**, **Wiki Azalée**, **E-Sport Achilléa**), le design system unifié et le plan d'exécution est [`/PLAN.md`](../PLAN.md) à la racine du monorepo.
-> La répartition autonome no-human-in-the-loop entre agents est définie dans [`/PARTITION.md`](../PARTITION.md).
+> 🌟 **SOURCE UNIQUE DE VÉRITÉ** : Le document de référence canonique pour la navigation, l'architecture unifiée des trois univers et le design system est [`/PLAN.md`](../PLAN.md).
 
 Index de la documentation partagée. Convention du dépôt : `*.md` est gitignoré
-**sauf** `docs/**`, `PLAN.md`, `PARTITION.md`, les `README.md` de paquet et quelques exceptions listées
+**sauf** `docs/**`, `PLAN.md`, les `README.md` de paquet et quelques exceptions listées
 dans `.gitignore`.
 
 ## Architecture et données
@@ -12,8 +11,6 @@ dans `.gitignore`.
 | Doc | Portée |
 | --- | --- |
 | [PLAN.md](../PLAN.md) | **Source Unique de Vérité** : Navigation unifiée, 3 univers (Asso/Wiki/E-Sport), tokens `theme-achillea`, layouts & tests. |
-| [PARTITION.md](../PARTITION.md) | Partitionnement des responsabilités no-human-in-the-loop entre Claude Code et Antigravity (AGY). |
-| [REPO_MAP.md](REPO_MAP.md) | Cartographie du monorepo : applications, paquets, dépendances croisées. Généré par `bun run docs:map`. |
 | [database.md](database.md) | Base de données et cache hybride : Postgres self-host ↔ miroir SQLite embarqué. |
 | [decision-archi-donnees-azalee.md](decision-archi-donnees-azalee.md) | Décision d'architecture : passage de la couche données d'Azalée sur Drizzle. |
 | [architecture-unifiee-ievr.md](architecture-unifiee-ievr.md) | Vue d'ensemble de la chaîne IEVR : extraction, stockage, rendu. |
@@ -40,7 +37,7 @@ dans `.gitignore`.
 
 | Doc | Portée |
 | --- | --- |
-| [PROD-STATUS.md](PROD-STATUS.md) | État vérifié de la production, surfaces retirées et règles pour les agents. |
+| [PROD-STATUS.md](PROD-STATUS.md) | État vérifié de la production et surfaces retirées. |
 | [deploy.md](deploy.md) | Déploiement et exploitation : services, procédures, diagnostic, interdits. |
 | [deploiement-sans-coupure.md](deploiement-sans-coupure.md) | Publication bleu/vert : slots, versions, prévisualisation, et les trois pièges qui cassent une prod pendant un déploiement. |
 | [self-host-supabase.md](self-host-supabase.md) | Sortie de Supabase : PostgreSQL local, PostgREST, Storage et Realtime auto-hébergés. |
@@ -52,8 +49,6 @@ dans `.gitignore`.
 | [bot-administration.md](bot-administration.md) | Surface web du bot : contrat de types partagé, serveur d'administration en boucle locale, API et pages `/admin/bot` + `/admin/cron`. |
 | [campagnes-hashtag.md](campagnes-hashtag.md) | Campagnes à hashtag : récolte X + Discord, tolérance aux fautes de frappe, relais vers le salon de suivi. |
 | [insta.md](insta.md) | Instagram : pourquoi aucune récolte automatique n'est possible, la vérification oEmbed, le dépôt manuel et la table dédiée. |
-| [mcp.md](mcp.md) | Serveur MCP du monorepo : mise en service, connexion distante, portées. |
-| [rag-unified.md](rag-unified.md) | Recherche sémantique unifiée : embeddings auto-hébergés, graphe de liens, ingestion. |
 | [stockage-secondaire.md](stockage-secondaire.md) | Archive froide sur le second VPS : pourquoi elle a existé, ce qui en est revenu le 21/8/2026, et ce qui ne doit jamais être déporté. |
 | [achillea-services.md](achillea-services.md) | Topologie, secrets hors Git, ports, sondes et contrat d'upload Supabase d'Achillea. |
 | [achillea-storage-migration.md](achillea-storage-migration.md) | Runbook sûr et reprenable pour migrer les octets Storage Cloud d'Achillea vers sa pile locale isolée. |
@@ -68,27 +63,9 @@ dans `.gitignore`.
 | [assets-cdn.md](assets-cdn.md) | Contrat unique des assets partagés, des URL CDN et de leur publication. |
 | [cloud-deployment.md](cloud-deployment.md) | Déploiement portable de Website sur Vercel, Fly.io ou Cloud Run, avec Supabase Cloud ou Neon. |
 
-## Référence externe (archivée — ne pas éditer)
-
-Les collecteurs externes sont désactivés et retirés de l'exploitation. Les
-snapshots historiques dans `reference/` ne sont plus régénérés ; ils restent
-consultables mais ne constituent pas une documentation de référence du projet.
-
-| Doc | Source |
-| --- | --- |
-| [reference/awesome-markdown.md](reference/awesome-markdown.md) | `github.com/mundimark/awesome-markdown` |
-| [reference/bun-markdown.md](reference/bun-markdown.md) | `github.com/oven-sh/bun` |
-| [reference/better-auth-readme.md](reference/better-auth-readme.md) | `better-auth.com` |
-| [reference/better-auth-session.md](reference/better-auth-session.md) | `better-auth.com` (sessions) |
-| [reference/discordjs-readme.md](reference/discordjs-readme.md) | `discord.js.org` |
-| [reference/turborepo-readme.md](reference/turborepo-readme.md) | `turborepo.dev` |
-| [reference/inazuma-index-readme.md](reference/inazuma-index-readme.md) | index communautaire IEVR |
-| [reference/secteur-v-readme.md](reference/secteur-v-readme.md) | communauté Secteur V |
-
 ## Vérifier la documentation
 
 ```bash
-bun run docs:map           # régénère REPO_MAP.md depuis les package.json
 bun run docs:check-links   # liens internes cassés
 bun run docs:lint          # markdownlint
 bun run docs:build         # les trois d'affilée

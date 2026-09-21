@@ -7,8 +7,7 @@ pas être recréée sous `/wiki`.
 L'**API** et l'index qui l'alimentaient survivent, portés par
 `packages/azalee/src/cpk/**` : `apps/website/src/app/api/cpk/route.ts`
 (`GET /api/cpk?path=…`) les expose toujours à Website (consommé notamment par
-`apps/website/src/lib/cutin/listing.ts`), et le serveur MCP (`cpk_browse` /
-`cpk_search` / `cpk_file`, `packages/mcp/src/tools/azalee.ts`) réutilise les
+`apps/website/src/lib/cutin/listing.ts`). Les services de recherche et de lecture des données réutilisent les
 mêmes fonctions (`listDirPaged`, `searchFiles`, `fileMeta`). Artefact source :
 `apps/website/data/cpk-index.ndjson.gz`, matérialisé en SQLite au premier
 accès.
