@@ -85,6 +85,7 @@ copilot-instructions.md
 !PARTITION.md
 # Prompt d'amorçage des agents : versionné, contrairement à CLAUDE.md (local).
 !PROMPT.md
+!AGENTS.md
 !CHANGELOG.md
 !SECURITY.md
 !LICENSE
