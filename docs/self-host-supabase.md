@@ -152,10 +152,9 @@ Cloud) publie la forme complète du schéma, introspection GraphQL comprise. Les
 **données** restent protégées par les 170 policies RLS ; seule la structure est
 publique, exactement comme avant la migration.
 
-## Serveur MCP
+## Outils internes
 
-`packages/mcp` expose la pile à un agent via quatre outils de lecture
-(`packages/mcp/src/tools/supabase.ts`) :
+Les outils internes d'exploitation accèdent à la pile via quatre opérations de lecture :
 
 | Outil | Ce qu'il ouvre |
 | --- | --- |
@@ -170,8 +169,8 @@ date du dernier dump nocturne. Les outils `live_*` atteignent les 120 tables du
 schéma `public` — articles, équipes, quêtes, boutiques, tweets, membres — à la
 seconde près.
 
-**Ils utilisent la clé `anon`, jamais celle de service.** L'agent hérite donc
-exactement des droits d'un visiteur anonyme : les policies RLS s'appliquent et
+**Ils utilisent la clé `anon`, jamais celle de service.** Les droits restent
+ceux d'un visiteur anonyme : les policies RLS s'appliquent et
 les colonnes personnelles de `profiles` restent hors de portée. Vérifié :
 `live_select` sur `profiles` avec `select=email` ou `select=*` renvoie
 `42501 permission denied`, tandis que `username, role` passe.

@@ -61,12 +61,10 @@ même build Next. Voir [docs/deploy.md](docs/deploy.md),
 [docs/deploiement-sans-coupure.md](docs/deploiement-sans-coupure.md) et
 [docs/cloud-deployment.md](docs/cloud-deployment.md).
 
-## Documentation et agents
+## Documentation
 
-[docs/README.md](docs/README.md) est l’index documentaire. Les règles de
-travail partagées sont dans [AGENTS.md](AGENTS.md) ; le prompt de démarrage
-interopérable est [PROMPT.md](PROMPT.md). Les notes machine-locales et secrets
-restent ignorés par Git.
+[docs/README.md](docs/README.md) est l’index de la documentation produit et
+d’exploitation. Les secrets, journaux et notes locales restent hors Git.
 
 ## Licence
 

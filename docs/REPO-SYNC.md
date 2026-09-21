@@ -104,7 +104,7 @@ Les sorties générées (SEO `public/llm*.md`, rapports de crawl, snapshots de
 `data/`), dépendances (`node_modules`, `.venv`), builds et caches restent
 ignorées : les versionner ne fournirait pas une source révisable et ferait
 entrer des données locales dans l'autocommit. Les instructions privées
-`AGENTS.md`, `CLAUDE.md` et `GEMINI.md` restent également hors publication ;
+Les notes locales d'outillage restent également hors publication ;
 leur présence et leur rôle sont documentés dans les règles de chaque dépôt.
 Toute exception doit être ajoutée explicitement au `.gitignore`, relue par un
 agent, puis validée par `git diff --check` avant le checkpoint.

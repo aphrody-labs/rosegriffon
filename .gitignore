@@ -67,7 +67,6 @@ GEMINI.md
 **/GEMINI.md
 AGENTS.md
 **/AGENTS.md
-!AGENTS.md
 ai.json
 **/ai.json
 skills-lock.json
@@ -83,9 +82,7 @@ copilot-instructions.md
 # Source ultime de vérité et partition de travail partagée entre agents (AGY & Claude)
 !PLAN.md
 !PARTITION.md
-# Prompt d'amorçage des agents : versionné, contrairement à CLAUDE.md (local).
-!PROMPT.md
-!AGENTS.md
+# Les instructions d'outils et notes locales restent hors Git.
 !CHANGELOG.md
 !SECURITY.md
 !LICENSE

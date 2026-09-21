@@ -516,7 +516,7 @@ locale ou IP de VPS dans l'artefact prod, et aucun secret dans le bundle.
 
 ## Références
 
-- docs/la stratégie SEO du dépôt · [docs/REPO_MAP.md](REPO_MAP.md) · [docs/deploy.md](deploy.md)
+- docs/la stratégie SEO du dépôt · [docs/deploy.md](deploy.md)
 - CDN : endpoint `cdn.rosegriffon.fr` (`cdn.service`, content-addressé `/images/<hash>` + `/upload`) ·
   nginx `conf.d/cdn.rosegriffon.conf`, `api.rosegriffon.conf`
 - Repo Achillea : `rose-griffon/achillea` (front `apps/web`, bot `apps/bot`, `docs/supabase-prod.md`)
