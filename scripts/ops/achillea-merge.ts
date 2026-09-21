@@ -74,11 +74,11 @@ async function nombre(base: string, sql: string): Promise<number> {
 
 /** Inventaire comparé des deux côtés — c'est lui qui dit si la copie a réussi. */
 async function inventaire(): Promise<void> {
-	const tablesSource = await nombre(
+	const nombreTablesSource = await nombre(
 		SOURCE,
 		"select count(*) from information_schema.tables where table_schema='public' and table_type='BASE TABLE'"
 	);
-	const tablesCible = await nombre(
+	const nombreTablesCible = await nombre(
 		CIBLE,
 		`select count(*) from information_schema.tables where table_schema='${SCHEMA}' and table_type='BASE TABLE'`
 	);
@@ -87,23 +87,61 @@ async function inventaire(): Promise<void> {
 		`select count(*) from information_schema.foreign_tables where foreign_table_schema='${SCHEMA}'`
 	);
 
-	console.info(`base ${SOURCE} : ${tablesSource} tables`);
+	console.info(`base ${SOURCE} : ${nombreTablesSource} tables`);
 	console.info(
-		`base ${CIBLE}, schéma ${SCHEMA} : ${tablesCible} tables réelles, ${etrangeres} étrangères`
+		`base ${CIBLE}, schéma ${SCHEMA} : ${nombreTablesCible} tables réelles, ${etrangeres} étrangères`
 	);
 
-	if (tablesCible === 0) {
+	if (nombreTablesCible === 0) {
 		return;
 	}
 
-	// Les trois tables qui portent l'essentiel : si leurs comptes divergent, la
-	// copie est partielle et la bascule ne doit pas avoir lieu.
-	for (const table of ['"user"', "clan", "user_elo"]) {
+	// Une comparaison limitée aux tables centrales peut masquer une copie
+	// partielle des guildes, du ranked ou des portefeuilles. Cette vérification
+	// est exhaustive et en lecture seule : elle est sûre avant chaque bascule.
+	const tablesSource = (
+		await psql(
+			SOURCE,
+			"select table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE' order by table_name"
+		)
+	)
+		.split("\n")
+		.filter(Boolean);
+	const tablesCible = new Set(
+		(
+			await psql(
+				CIBLE,
+				`select table_name from information_schema.tables where table_schema='${SCHEMA}' and table_type='BASE TABLE'`
+			)
+		)
+			.split("\n")
+			.filter(Boolean)
+	);
+	const manquantes: string[] = [];
+	const enrichies: string[] = [];
+	for (const table of tablesSource) {
+		if (!tablesCible.has(table)) {
+			manquantes.push(`${table} absente de la cible`);
+			continue;
+		}
 		const [a, b] = await Promise.all([
-			nombre(SOURCE, `select count(*) from public.${table}`),
-			nombre(CIBLE, `select count(*) from ${SCHEMA}.${table}`),
+			nombre(SOURCE, `select count(*) from public."${table}"`),
+			nombre(CIBLE, `select count(*) from ${SCHEMA}."${table}"`),
 		]);
-		console.info(`  ${table.padEnd(10)} source ${a} — cible ${b} ${a === b ? "✓" : "✗"}`);
+		if (a > b) manquantes.push(`${table}: source ${a}, cible ${b}`);
+		if (b > a) enrichies.push(`${table}: source ${a}, cible ${b}`);
+	}
+	for (const table of tablesCible) {
+		if (!tablesSource.includes(table)) enrichies.push(`${table} présente seulement dans la cible`);
+	}
+	if (manquantes.length > 0) {
+		throw new Error(
+			`copie Achilléa incomplète :\n${manquantes.map((ecart) => `  - ${ecart}`).join("\n")}`
+		);
+	}
+	console.info(`  ${tablesSource.length} tables comparées : aucune donnée legacy manquante ✓`);
+	if (enrichies.length > 0) {
+		console.info(`  cible enrichie depuis la copie : ${enrichies.join(" ; ")}`);
 	}
 
 	const communs = await nombre(
@@ -251,6 +289,63 @@ async function copierStockage(): Promise<void> {
 	}
 }
 
+/**
+ * Réconcilie les deux divergences qui peuvent évoluer entre une copie et une
+ * bascule, sans jamais recréer le schéma cible ni écraser un relevé plus récent.
+ *
+ * `guild_member_meta` reçoit les membres absents et n'écrase une ligne que si
+ * son `scanned_at` est plus récent. `stat` est un journal append-only : les ids
+ * déjà présents sont conservés, les lignes absentes sont importées.
+ */
+async function reconcilierDonneesVivantes(): Promise<void> {
+	const stamp = Date.now();
+	const copierCsv = async (table: string, colonnes: string[], requete: string) => {
+		const csv = `/tmp/achillea-reconcile-${table}-${stamp}.csv`;
+		const script = `/tmp/achillea-reconcile-${table}-${stamp}.sql`;
+		const liste = colonnes.map((colonne) => `"${colonne}"`).join(", ");
+		await $`sudo -u postgres psql -d ${SOURCE} -v ON_ERROR_STOP=1 -q -c ${`\\copy (${requete}) to '${csv}' csv`}`;
+		await Bun.write(
+			script,
+			[
+				"begin;",
+				`create temporary table entrant (like ${SCHEMA}."${table}" including defaults) on commit drop;`,
+				`\\copy entrant (${liste}) from '${csv}' csv`,
+				`insert into ${SCHEMA}."${table}" (${liste}) select ${liste} from entrant ${
+					table === "guild_member_meta"
+						? `on conflict (guild_id, user_id) do update set
+							nick = excluded.nick,
+							joined_at = excluded.joined_at,
+							premium_since = excluded.premium_since,
+							roles = excluded.roles,
+							pending = excluded.pending,
+							scanned_at = excluded.scanned_at
+						  where excluded.scanned_at > ${SCHEMA}."${table}".scanned_at`
+						: "on conflict (id) do nothing"
+				};`,
+				"commit;",
+			].join("\n")
+		);
+		await $`sudo chmod 644 ${csv} ${script}`;
+		const resultat = await $`sudo -u postgres psql -d ${CIBLE} -v ON_ERROR_STOP=1 -q -f ${script}`.nothrow();
+		await $`sudo rm -f ${csv} ${script}`.nothrow();
+		if (resultat.exitCode !== 0) {
+			throw new Error(`réconciliation ${table} échouée : ${resultat.stderr.toString().trim()}`);
+		}
+	};
+
+	await copierCsv(
+		"guild_member_meta",
+		["guild_id", "user_id", "nick", "joined_at", "premium_since", "roles", "pending", "scanned_at"],
+		"select guild_id, user_id, nick, joined_at, premium_since, roles, pending, scanned_at from public.guild_member_meta"
+	);
+	await copierCsv(
+		"stat",
+		["id", "type", "value", "additional_data", "created_at"],
+		"select id, type, value, additional_data, created_at from public.stat"
+	);
+	console.info("✓ métadonnées de guildes et statistiques legacy réconciliées sans écrasement");
+}
+
 /** Repointe les fichiers d'environnement et redémarre les services. */
 async function basculer(): Promise<void> {
 	for (const { chemin, cle } of ENV_A_BASCULER) {
@@ -286,6 +381,9 @@ if (arguments_.includes("--copy")) {
 }
 if (arguments_.includes("--copy-storage")) {
 	await copierStockage();
+}
+if (arguments_.includes("--reconcile")) {
+	await reconcilierDonneesVivantes();
 }
 if (arguments_.includes("--cutover")) {
 	await basculer();

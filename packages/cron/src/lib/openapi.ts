@@ -211,7 +211,7 @@ export function getSwaggerHtml(): string {
   <meta name="description" content="Rose Griffon Cron Swagger UI" />
   <title>Rose Griffon Cron API - Swagger UI</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
-  <link rel="icon" type="image/png" href="https://cdn.rosegriffon.fr/static/website/public/favicon.ico" />
+  <link rel="icon" type="image/webp" href="https://cdn.rosegriffon.fr/static/rg/public/icon.webp" />
   <style>
     html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; }
     *, *:before, *:after { box-sizing: inherit; }

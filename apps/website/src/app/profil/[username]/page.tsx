@@ -151,6 +151,41 @@ export default async function UserProfilePage({
 			console.error("[profil] rôle Discord indisponible", error);
 		}
 	}
+	// Achilléa vit dans le même Postgres : ces données publiques enrichissent la
+	// fiche RG sans requête HTTP au bot, et le profil reste lisible pendant son
+	// redémarrage. On n'affiche que les agrégats de compétition, jamais les
+	// informations de session ou de modération e-sport.
+	if (profile.discord_id) {
+		try {
+			const { rows } = await pool.query<{
+				clan: string | null;
+				elo_max: string | number | null;
+				parties: string | number | null;
+			}>(
+				`SELECT max(c.name) AS clan,
+				        max(e.elo) AS elo_max,
+				        coalesce(sum(e.games_played), 0) AS parties
+				   FROM achillea."user" u
+				   LEFT JOIN achillea.user_elo e ON e.user_id = u.id
+				   LEFT JOIN achillea.clan_member cm ON cm.user_id = u.id
+				   LEFT JOIN achillea.clan c ON c.id = cm.clan_id
+				  WHERE u.id = $1
+				  GROUP BY u.id`,
+				[profile.discord_id]
+			);
+			const achillea = rows[0];
+			if (achillea) {
+				fiche = {
+					...fiche,
+					clanAchillea: achillea.clan,
+					eloMax: Number(achillea.elo_max ?? 0) || null,
+					partiesClassees: Number(achillea.parties ?? 0) || null,
+				};
+			}
+		} catch (error) {
+			console.error("[profil] données Achilléa indisponibles", error);
+		}
+	}
 	if (profile.discord_id) {
 		try {
 			const { rows } = await pool.query<{ joined_at: string | null; premium_since: string | null }>(

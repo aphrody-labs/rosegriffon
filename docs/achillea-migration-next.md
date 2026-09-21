@@ -5,7 +5,12 @@ Plan d'exécution pour absorber **`apps/achillea-web` (Angular 21 + PrimeNG)** d
 `rosegriffon.fr` devienne l'unique site du réseau : portail, wiki Azalée et
 Achilléa compétitif.
 
-> Statut : **plan, décisions tranchées le 20/9/2026** (§0). Il prolonge
+> Statut : **migration applicative terminée le 21/9/2026**. Le rendu public est
+> assuré par `apps/website` sous `/achillea`, les routes Angular sont couvertes
+> par des tests de parité et `achillea.rosegriffon.fr` redirige vers Next. Le
+> dossier Angular a été retiré, avec ses dépendances exclusives, après la
+> validation de parité. Ce document conserve seulement le journal de migration.
+> Il prolonge
 > `docs/achillea-modulaire.md` (§ « Prochaine étape si l'on migre le front ») et
 > ne redit pas ce qui y est déjà décrit. Contexte d'intégration :
 > `docs/achillea.md`. Services et ports : `docs/achillea-services.md`.

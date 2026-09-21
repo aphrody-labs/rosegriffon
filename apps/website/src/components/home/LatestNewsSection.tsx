@@ -392,22 +392,12 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
 						</div>
 					</div>
 				)}
-
-				<div className="mt-5 px-0">
-					<Link
-						href="/news"
-						className="flex items-center justify-center w-full gap-2 text-sm font-bold text-primary px-5 py-4 rounded-xl bg-surface-container-high hover:bg-primary hover:text-on-primary transition-all"
-					>
-						Toutes les news
-						<ArrowRight size={18} aria-hidden="true" />
-					</Link>
-				</div>
 			</div>
 
 			{/* ── Desktop Layout ── */}
 			<div className="hidden md:block">
-				<div className="bg-surface-container-low/50 border border-outline-variant/20 rounded-[40px] p-10 shadow-sm backdrop-blur-sm">
-					<div className="flex items-center justify-between mb-8">
+				<div className="rounded-3xl border border-outline-variant/20 bg-surface-container-low/50 p-6 shadow-sm backdrop-blur-sm">
+					<div className="mb-5 flex items-center justify-between">
 						<SectionHeader size="lg" />
 						<Link
 							href="/news"
@@ -419,44 +409,31 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
 					</div>
 
 					{hasArticles && (
-						<div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-							{articles.map((item, i) => (
+						<div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+							{articles.map((item) => (
 								<Link
 									key={item.id}
 									href={`/news/${item.slug}`}
-									className={`group relative flex flex-col h-full bg-surface-container rounded-3xl overflow-hidden border border-outline-variant/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-										i === 0 ? "lg:col-span-2 lg:row-span-2" : ""
-									}`}
+									className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-outline-variant/10 bg-surface-container transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
 								>
-									<div
-										className={`relative overflow-hidden ${i === 0 ? "aspect-[16/9] lg:aspect-[16/10] lg:flex-1" : "aspect-[16/9]"}`}
-									>
+									<div className="relative aspect-[16/8] overflow-hidden min-[1200px]:aspect-[16/7]">
 										<Image
 											src={item.featured_image_url || "/images/placeholder-news.svg"}
 											alt={item.title}
 											fill
 											className="object-cover transition-transform duration-700 group-hover:scale-105"
-											sizes={i === 0 ? "(max-width: 1024px) 50vw, 66vw" : "33vw"}
+											sizes="(max-width: 1024px) 50vw, 33vw"
 										/>
 										<div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
 										<div className="absolute top-3 left-3">
 											<CategoryBadge category={item.category} variant="card" />
 										</div>
 									</div>
-									<div className={`p-5 flex flex-col flex-1 ${i === 0 ? "lg:p-6" : ""}`}>
-										<h3
-											className={`font-bold text-on-surface leading-snug mb-3 group-hover:text-primary transition-colors line-clamp-2 ${i === 0 ? "text-xl lg:text-2xl" : "text-lg"}`}
-										>
+									<div className="flex flex-1 flex-col p-4">
+										<h3 className="mb-2 line-clamp-2 text-base font-bold leading-snug text-on-surface transition-colors group-hover:text-primary">
 											{item.title}
 										</h3>
-										{item.excerpt && (
-											<p
-												className={`text-sm text-on-surface-variant mb-4 ${i === 0 ? "line-clamp-3" : "line-clamp-2"}`}
-											>
-												{item.excerpt}
-											</p>
-										)}
-										<div className="mt-auto pt-4 border-t border-outline-variant/10">
+										<div className="mt-auto border-t border-outline-variant/10 pt-3">
 											<AuthorInfo
 												author={item.author}
 												publishedAt={item.published_at}
@@ -470,18 +447,18 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
 					)}
 
 					{hasTweets && (
-						<div className={hasArticles ? "mt-8 pt-8 border-t border-outline-variant/20" : ""}>
+						<div className={hasArticles ? "mt-5 border-t border-outline-variant/20 pt-5" : ""}>
 							{hasArticles && (
-								<div className="flex items-center gap-2 mb-5">
+								<div className="mb-3 flex items-center gap-2">
 									<AtSign size={18} aria-hidden="true" className="text-[#1DA1F2]" />
 									<h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">
 										Derniers tweets @Azalee_IE
 									</h3>
 								</div>
 							)}
-							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+							<div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
 								{tweets.slice(0, hasArticles ? 3 : 6).map((tweet) => (
-									<TweetCard key={tweet.id} tweet={tweet} variant="full" />
+									<TweetCard key={tweet.id} tweet={tweet} variant="chip" />
 								))}
 							</div>
 						</div>

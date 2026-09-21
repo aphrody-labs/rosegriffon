@@ -1,4 +1,4 @@
-import { Injectable, Schedule } from "@/decorators";
+import { Injectable } from "@/decorators";
 import { User } from "@/entities";
 import { UserRole } from "@/utils/enums";
 import { resolveDependency } from "@/utils/functions";
@@ -16,7 +16,11 @@ export class WeeklyPayout {
 	 * Runs every Monday at midnight UTC.
 	 * Credits 100 ACH to each staff member who interacted in the last 7 days.
 	 */
-	@Schedule("0 0 * * MON", "weekly-payout")
+	/**
+	 * Point de compatibilité pour les appels manuels historiques. Le déclenchement
+	 * autonome vit dans `@rosegriffon/cron` (`achillea:weekly-payout`) : le
+	 * versement ne dépend donc plus de la disponibilité du bot Discord.
+	 */
 	async runWeeklyPayout() {
 		const db = await resolveDependency(Database);
 		const walletService = await resolveDependency(WalletService);

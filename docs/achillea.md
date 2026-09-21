@@ -10,7 +10,7 @@ SEO aligné sur le monorepo RG, et intégration cross-site entre les **3 sites**
 > la section ci-dessous. Le code du commit source audité est désormais importé dans les workspaces
 > dédiés de ce dépôt ; la production historique n'a pas été basculée.
 > **Décision de cadrage (7/9/2026)** : préparer l'intégration dans l'arbre RG par des chemins
-> dédiés (`apps/achillea-web`, `apps/achillea-bot`, `packages/achillea-core` et
+> dédiés (`apps/website`, `apps/achillea-bot`, `packages/achillea-core` et
 > `packages/achillea-types`), avec un client partagé éventuel séparé, sans copier Achillea
 > dans `apps/bot`. Le VPS, la base Supabase, les secrets, les migrations et les services de
 > production Achillea restent séparables tant que les phases de portage et leurs gates ne sont
@@ -248,7 +248,7 @@ composant de bannière.
 | --- | --- | --- |
 | Backend | `apps/bot/src` : 383 fichiers, 55 services, 60 fichiers d'entités, 25 contrôleurs et 181 handlers REST déclarés | `apps/achillea-bot` ; conserver le nom de package `achillea-bot` au premier portage |
 | Ranked / temps réel | Sous-processus Colyseus dans `apps/bot/src/ranked`, plus Socket.IO séparé | inclus dans `apps/achillea-bot`, sans le mélanger au bot RG |
-| Frontend | `apps/web/src` : 295 fichiers, 37 entrées de routes Angular, SPA Angular 21 + PrimeNG 21 | `apps/achillea-web` ; conserver le nom de package `achillea-web` |
+| Frontend | `apps/web/src` : 295 fichiers, 37 entrées de routes Angular, SPA Angular 21 + PrimeNG 21 | migration terminée vers `apps/website` ; le frontend Angular est retiré |
 | Cœur métier | `packages/core/src` : 21 fichiers, logique ELO, ranking, sanctions, licences, votes, ligues et tournois | `packages/achillea-core` ; première surface réutilisable |
 | Contrats | `packages/types/src` : 5 fichiers, enums et DTO métier | `packages/achillea-types` ; contrat versionné |
 | Base | 56 fichiers `Migration*.ts` MikroORM ; la documentation source indique 47 migrations appliquées en production | migration séparée sous `apps/achillea-bot/database/migrations` |
@@ -282,7 +282,7 @@ ci-dessous sont des points de contact dans cet arbre, pas un workspace déjà in
 
 | Surface | Chemin cible | Responsabilité |
 | --- | --- | --- |
-| Frontend | `apps/achillea-web` | Angular, routes, assets et configuration publique Achillea |
+| Frontend | `apps/website` | routes, assets et configuration publique Achillea sous `/achillea` |
 | Backend | `apps/achillea-bot` | Discord, API Ts.ED, jobs, migrations et orchestration ranked |
 | Cœur métier | `packages/achillea-core` | logique pure sans ORM, Discord, DI ou secrets |
 | Contrats | `packages/achillea-types` | DTO/enums partagés entre front, backend et clients |
@@ -387,7 +387,7 @@ ce qui existe déjà de ce qui manque :
   au build/deploy. La configuration prod actuelle pointe directement `ranked.rosegriffon.fr`
   et un projet Supabase Achillea distinct ; la clé publique Supabase n'est pas un secret,
   les autres variables ne doivent pas être embarquées ;
-- garder les assets spécifiques sous `apps/achillea-web/public` et placer seulement les
+- garder les assets spécifiques désormais consommés par `apps/website/public/achillea` et placer seulement les
   assets de marque réellement partagés dans `packages/assets`. Inventorier les doublons
   `apps/website/public/achillea`, `apps/azalee/public/achillea` et le package avant toute
   suppression ; réécrire séparément les anciennes URLs `api.alessf.fr` ;
@@ -448,7 +448,7 @@ interne ranked→REST, tests unitaires/db ciblés et preuve qu'aucune migration 
 
 #### Phase 3 — Front Angular
 
-- porter `apps/web` vers `apps/achillea-web`, assets, environnements et chemins API ;
+- migration terminée de `apps/web` vers `apps/website`, assets, environnements et chemins API ;
 - vérifier les 37 routes, auth, upload, ranked/Colyseus, Socket.IO et les builds dev/prod ;
 - ajouter les liens RG manquants côté Achillea, puis les tests de navigation et de contenu.
 

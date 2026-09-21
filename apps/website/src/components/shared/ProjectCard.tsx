@@ -38,7 +38,6 @@ export function ProjectCard({ projet, sizes = SIZES_PAR_DEFAUT }: ProjectCardPro
 		>
 			<Card className="h-full overflow-hidden rounded-3xl border-border bg-card p-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg">
 				<CardContent className="flex h-full flex-col p-0">
-					{/* Visuel — ratio explicite + recadrage centré */}
 					<div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
 						{projet.image ? (
 							<Image
@@ -64,7 +63,6 @@ export function ProjectCard({ projet, sizes = SIZES_PAR_DEFAUT }: ProjectCardPro
 						</div>
 					</div>
 
-					{/* Contenu */}
 					<div className="flex grow flex-col gap-3 p-5 sm:p-6">
 						<div className="flex items-center gap-3">
 							<span className="rounded-xl bg-muted p-2 text-muted-foreground transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">

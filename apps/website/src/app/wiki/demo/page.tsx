@@ -9,6 +9,7 @@
  * Aucune lecture SQLite / `server-only` : le dossier JSON suffit (frontière server/client nette).
  */
 import type { Metadata } from "next";
+import { cdnOrigin } from "@rosegriffon/assets";
 import dossier from "@/data/aphrody-dossier.json";
 import { cpkAssetUrl, cpkAudioUrl, cpkThumbUrl } from "@rosegriffon/azalee/cpk/shared";
 import { cutinHasAssets, getSkillCutin } from "@rosegriffon/azalee/game/skills-cutin";
@@ -21,7 +22,7 @@ import type {
 	DemoTexture,
 } from "@/components/wiki/demo/types";
 
-const CDN = "https://cdn.rosegriffon.fr";
+const CDN = cdnOrigin(process.env.NEXT_PUBLIC_CDN_ORIGIN);
 
 export const metadata: Metadata = {
 	alternates: { canonical: "/demo" },

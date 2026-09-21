@@ -56,7 +56,6 @@
     "type-check": "bun --bun tsc -p tsconfig.build.json --noEmit"
   },
   "dependencies": {
-    "@aphrody-code/bxc": "catalog:",
     "@aphrody-code/zukan": "catalog:",
     "@leeoniya/ufuzzy": "catalog:",
     "@streamparser/json": "catalog:",

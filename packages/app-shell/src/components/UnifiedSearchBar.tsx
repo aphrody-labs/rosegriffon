@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
@@ -10,6 +11,19 @@ export interface UnifiedSearchBarProps extends React.ComponentProps<"div"> {
 	searchPath?: string;
 	onSearch?: (query: string) => void;
 }
+
+type SearchResult = {
+	id: string | number;
+	titre: string;
+	href: string;
+	domaine: "association" | "wiki" | "esport" | string;
+};
+
+const DOMAIN_LABEL: Record<string, string> = {
+	association: "Association",
+	esport: "E-sport",
+	wiki: "Wiki",
+};
 
 export function UnifiedSearchBar({
 	placeholder = "Rechercher (articles, wiki, tournois)...",
@@ -21,7 +35,10 @@ export function UnifiedSearchBar({
 }: UnifiedSearchBarProps) {
 	const router = useRouter();
 	const [query, setQuery] = React.useState(defaultValue);
+	const [results, setResults] = React.useState<SearchResult[]>([]);
+	const [isSearching, setIsSearching] = React.useState(false);
 	const inputRef = React.useRef<HTMLInputElement>(null);
+	const abortRef = React.useRef<AbortController | null>(null);
 
 	// Raccourci global Ctrl+K / Cmd+K pour focaliser
 	React.useEffect(() => {
@@ -35,6 +52,39 @@ export function UnifiedSearchBar({
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, []);
+
+	React.useEffect(() => {
+		const value = query.trim();
+		abortRef.current?.abort();
+		if (value.length < 2) {
+			setResults([]);
+			setIsSearching(false);
+			return;
+		}
+
+		const controller = new AbortController();
+		abortRef.current = controller;
+		const timer = window.setTimeout(async () => {
+			setIsSearching(true);
+			try {
+				const response = await fetch(`/api/recherche?q=${encodeURIComponent(value)}`, {
+					signal: controller.signal,
+				});
+				if (!response.ok) return;
+				const data = (await response.json()) as { resultats?: SearchResult[] };
+				setResults((data.resultats ?? []).slice(0, 8));
+			} catch {
+				// Une nouvelle frappe annule naturellement la requête précédente.
+			} finally {
+				if (!controller.signal.aborted) setIsSearching(false);
+			}
+		}, 220);
+
+		return () => {
+			controller.abort();
+			window.clearTimeout(timer);
+		};
+	}, [query]);
 
 	const handleSubmit = (value: string) => {
 		const trimmed = value.trim();
@@ -96,6 +146,27 @@ export function UnifiedSearchBar({
 				<kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-semibold text-on-surface-variant/60 bg-surface-container-low border border-outline-variant/20 rounded shadow-xs ml-1 select-none pointer-events-none">
 					<span className="text-[11px]">⌘</span>K
 				</kbd>
+			)}
+
+			{query.trim().length >= 2 && (
+				<div className="absolute left-0 top-[calc(100%+0.5rem)] z-[70] max-h-80 w-full overflow-y-auto rounded-2xl border border-outline-variant/30 bg-surface-container p-1.5 shadow-xl">
+					{results.length === 0 ? (
+						<p className="px-3 py-3 text-center text-xs text-on-surface-variant">
+							{isSearching ? "Recherche dans Azalée, Achilléa et Rose Griffon…" : "Aucun résultat."}
+						</p>
+					) : (
+						<ul>
+							{results.map((result) => (
+								<li key={`${result.domaine}-${result.id}`}>
+									<Link href={result.href} className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm hover:bg-surface-container-high">
+										<span className="truncate text-on-surface">{result.titre}</span>
+										<span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">{DOMAIN_LABEL[result.domaine] ?? result.domaine}</span>
+									</Link>
+								</li>
+							))}
+						</ul>
+					)}
+				</div>
 			)}
 		</div>
 	);

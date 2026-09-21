@@ -15,16 +15,16 @@ import { PROJETS, PROJETS_ACCUEIL } from "@/lib/projets";
  */
 export function ProjectsSection() {
 	return (
-		<section aria-labelledby="projects-heading" className="mx-auto w-full max-w-7xl flex flex-col gap-8 px-4 sm:px-6 lg:px-8">
+		<section aria-labelledby="other-projects-heading" className="mx-auto w-full max-w-7xl flex flex-col gap-8 px-4 sm:px-6 lg:px-8">
 			<div className="flex flex-col gap-3 text-center">
 				<h2
-					id="projects-heading"
+					id="other-projects-heading"
 					className="text-3xl font-black tracking-tight text-foreground sm:text-4xl md:text-5xl text-balance"
 				>
-					Nos projets
+					Autres projets Rose Griffon
 				</h2>
 				<p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-muted-foreground sm:text-lg text-pretty">
-					Découvrez l&apos;écosystème Rose Griffon : médias, outils et contenus communautaires.
+					Créations et outils communautaires.
 				</p>
 			</div>
 

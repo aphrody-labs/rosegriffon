@@ -44,26 +44,6 @@ Environment=WEBSITE_URL=https://rosegriffon.fr
 Environment=API_URL=https://api.rosegriffon.fr
 Environment=CDN_URL=https://cdn.rosegriffon.fr
 
-# Racine BXC. OBLIGATOIRE, et solidaire de l'entrée `/home/ubuntu/aphrody/var/bxc`
-# de `ReadWritePaths=` plus bas : sans ces variables, `@aphrody/bxc` retombe sur son
-# défaut POSIX `~/.bxc`, que `ProtectHome=read-only` interdit de créer. Le démon
-# mourait alors au DÉMARRAGE en `EROFS` sur `mkdir` (`resolveCookiePath`), donc en
-# boucle de redémarrage, toutes ses tâches avec lui. Les mêmes valeurs sont posées
-# pour les unités bxc par `/etc/systemd/system/bxc*.service.d/aphrody-root.conf`.
-# Déplacer la racine BXC impose de changer les deux endroits ensemble.
-Environment=BXC_DIR=/home/ubuntu/aphrody/var/bxc
-Environment=BXC_DATA_DIR=/home/ubuntu/aphrody/var/bxc/data
-Environment=BXC_COOKIES_DIR=/home/ubuntu/aphrody/var/bxc/cookies
-
-# `@aphrody-code/bxc` (npm:@aphrody/bxc, tâche `crawl`/zukan) tente en dernier
-# recours `cargo run --manifest-path rust-bridge/Cargo.toml` pour localiser
-# Chrome — ce dossier n'est jamais publié dans le tarball npm, donc l'appel
-# échoue toujours en prod (« rust-bridge/Cargo.toml does not exist »).
-# CHROME_PATH court-circuite entièrement cette résolution. Repéré le 1/9/2026 :
-# 3 échecs consécutifs de la tâche `crawl` (alerte cron), aucun cargo installé
-# côté rg de toute façon.
-Environment=CHROME_PATH=/usr/local/bin/google-chrome
-
 ExecStart=/home/ubuntu/.bun/bin/bun run src/index.ts
 # `always` : le démon planifie en continu, il n'a aucune raison de sortir. Une sortie
 # en code 0 — fin de boucle inattendue, exception avalée — n'était pas relancée, et
@@ -89,7 +69,7 @@ OOMScoreAdjust=-300
 # ── Durcissement (MemoryDenyWriteExecute INTERDIT — casse le JIT de Bun) ──
 ProtectSystem=strict
 ProtectHome=read-only
-# Les deux répertoires du CDN sont la cible de la tâche `cdn` : sans eux,
+# Le répertoire partagé du CDN est la cible de la tâche `cdn` : sans lui,
 # `ProtectSystem=strict` rend la copie impossible et un nouvel asset partagé
 # n'atteint jamais le CDN.
 # `/var/lib/rg` : cache de la collecte d'audience du second serveur, lu par la
@@ -99,11 +79,7 @@ ProtectHome=read-only
 #   y lance le push d'inagle et la republication du miroir SQLite (`scripts/donnees/
 #   miroir-inagle.sh`), qui écrit dans `var/miroir/`. Sans cette entrée, `ProtectSystem=strict`
 #   la fait échouer en EROFS.
-# `/home/ubuntu/aphrody/var/bxc` (et non plus `/home/ubuntu/.bxc`) : BXC range son
-#   état sous la racine Aphrody, comme le déclarent les drop-ins `bxc*.service.d/
-#   aphrody-root.conf` (`BXC_DIR`). L'ancien chemin n'existe plus ; le laisser ici
-#   faisait échouer la tâche `crawl` en EROFS sous `ProtectSystem=strict`.
-ReadWritePaths=/home/ubuntu/rg /home/ubuntu/niers/var /tmp /home/ubuntu/aphrody/var/bxc /var/www/cdn/static/azalee/public /var/www/cdn/static/website/public /var/lib/rg
+ReadWritePaths=/home/ubuntu/rg /home/ubuntu/niers/var /tmp /var/www/cdn/static/rg/public /var/lib/rg
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelTunables=true

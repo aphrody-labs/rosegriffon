@@ -4,7 +4,7 @@
 	"ownership": {
 		"workspace": "/home/ubuntu/rg",
 		"backend": "apps/achillea-bot",
-		"frontend": "apps/achillea-web",
+		"frontend": "apps/website (/achillea)",
 		"productionSecretsFile": "/etc/rose-griffon/achillea.env",
 		"localSecretsConvention": "$HOME/.bash_secrets"
 	},
@@ -46,21 +46,11 @@
 			"publicIngress": "https://ranked.rosegriffon.fr/socket.io/"
 		},
 		{
-			"id": "frontend-dev",
-			"kind": "http-dev",
-			"workingDirectory": "apps/achillea-web",
-			"developmentCommand": ["bun", "run", "dev"],
-			"bind": "127.0.0.1",
-			"port": 4200,
-			"health": "http://127.0.0.1:4200/"
-		},
-		{
-			"id": "frontend-production",
-			"kind": "static",
-			"workingDirectory": "apps/achillea-web",
+			"id": "frontend",
+			"kind": "next-route",
+			"workingDirectory": "apps/website",
 			"buildCommand": ["bun", "run", "build"],
-			"artifact": "apps/achillea-web/dist/achillea-web/browser",
-			"publicIngress": "https://achillea.rosegriffon.fr"
+			"publicIngress": "https://rosegriffon.fr/achillea"
 		}
 	],
 	"dependencies": [
@@ -150,16 +140,8 @@
 			"TWITCH_SECRET"
 		],
 		"publicBrowserConfiguration": [
-			"ACHILLEA_API_BASE_URL",
-			"ACHILLEA_SOCKET_URL",
-			"ACHILLEA_SOCKET_PATH",
-			"ACHILLEA_COLYSEUS_URL",
-			"ACHILLEA_CDN_BASE_URL",
-			"SUPABASE_URL",
-			"SUPABASE_PUBLISHABLE_KEY",
-			"SUPABASE_JWKS_URL",
-			"ACHILLEA_YOUTUBE_API_KEY",
-			"ACHILLEA_YOUTUBE_CHANNEL_ID"
+			"NEXT_PUBLIC_ACHILLEA_API_URL",
+			"NEXT_PUBLIC_ACHILLEA_COLYSEUS_URL"
 		]
 	},
 	"uploads": {

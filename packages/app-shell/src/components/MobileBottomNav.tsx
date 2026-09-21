@@ -71,7 +71,7 @@ function NavItemButton({
 					<LucideIcon
 						size={24}
 						className={`relative z-10 transition-colors duration-200 ${
-							isActive ? "text-on-secondary-container" : "text-on-surface-variant"
+					isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/80"
 						}`}
 						fill={isActive ? "currentColor" : "none"}
 						aria-hidden="true"
@@ -81,7 +81,7 @@ function NavItemButton({
 			{/* Label */}
 			<span
 				className={`relative z-10 type-label-medium text-center w-full truncate transition-colors duration-200 ${
-					isActive ? "text-on-surface" : "text-on-surface-variant"
+					isActive ? "text-sidebar-foreground" : "text-sidebar-foreground/80"
 				}`}
 			>
 				{traduireNav(item.label, t)}
@@ -132,7 +132,7 @@ export function MobileBottomNav({
 	return (
 		<nav
 			aria-label="Navigation mobile"
-			className={`fixed bottom-0 left-0 right-0 z-50 h-[calc(5rem+env(safe-area-inset-bottom))] pb-safe bg-surface-container/85 backdrop-blur-xl border-t border-outline-variant/5 md:hidden ${
+			className={`fixed bottom-0 left-0 right-0 z-50 h-[calc(5rem+env(safe-area-inset-bottom))] pb-safe bg-sidebar/95 text-sidebar-foreground backdrop-blur-xl border-t border-sidebar-border md:hidden ${
 				className ?? ""
 			}`}
 		>

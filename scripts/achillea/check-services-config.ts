@@ -88,7 +88,6 @@ const expectedPorts = new Map([
 	["api", 4000],
 	["ranked", 4002],
 	["socket-io", 4005],
-	["frontend-dev", 4200],
 ]);
 
 const forbiddenBrowserNames = /(SECRET|SERVICE_KEY|PASSWORD|BOT_TOKEN|ADMIN_TOKEN|DATABASE_)/;
@@ -180,7 +179,7 @@ export function validateManifest(manifest: AchilleaServiceManifest): string[] {
 		if (!secretNames.includes(required))
 			errors.push(`missing server secret declaration ${required}`);
 	}
-	for (const required of ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_JWKS_URL"]) {
+	for (const required of ["NEXT_PUBLIC_ACHILLEA_API_URL", "NEXT_PUBLIC_ACHILLEA_COLYSEUS_URL"]) {
 		if (!publicNames.includes(required))
 			errors.push(`missing public browser declaration ${required}`);
 	}
@@ -277,7 +276,7 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		socketServer,
 		ranked,
 		proxyUpload,
-		webInjection,
+		websiteAchilleaClient,
 		systemd,
 		webNginx,
 		rankedNginx,
@@ -298,7 +297,11 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		read("apps/achillea-bot/src/websockets/socket-server.ts"),
 		read("apps/achillea-bot/src/ranked/main.ts"),
 		read("apps/achillea-bot/src/api/controllers/proxy.ts"),
-		read("apps/achillea-web/scripts/inject-env.ts"),
+		Promise.all([
+			read("apps/website/src/lib/achillea/client.ts"),
+			read("apps/website/src/lib/achillea/use-ranked-match.ts"),
+			read("apps/website/src/lib/achillea/use-ranked-queue.ts"),
+		]).then((sources) => sources.join("\n")),
 		read("infra/systemd/achillea-bot.service"),
 		read("infra/nginx/achillea.rosegriffon.conf"),
 		read("infra/nginx/ranked.rosegriffon.conf"),
@@ -355,17 +358,8 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		errors.push("ranked proofs are not stored as private signed references");
 
 	for (const variable of manifest.environment.publicBrowserConfiguration) {
-		if (!has(webInjection, `"${variable}"`))
-			errors.push(`web runtime injector does not read ${variable}`);
-	}
-	for (const forbidden of [
-		"SUPABASE_SECRET_KEY",
-		"SUPABASE_SERVICE_KEY",
-		"DATABASE_URL",
-		"DATABASE_PASSWORD",
-		"DISCORD_CLIENT_SECRET",
-	]) {
-		if (has(webInjection, forbidden)) errors.push(`web runtime injector exposes ${forbidden}`);
+		if (!has(websiteAchilleaClient, variable))
+			errors.push(`Next Achillea client does not read ${variable}`);
 	}
 
 	for (const line of [
@@ -457,6 +451,8 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		"server 127.0.0.1:4002",
 		"location ^~ /api/proxy/",
 		"client_max_body_size 6M",
+		"location ^~ /achillea",
+		"return 301 https://rosegriffon.fr/achillea$request_uri",
 	]) {
 		if (!has(webNginx, fragment)) errors.push(`Achillea web nginx config is missing ${fragment}`);
 	}

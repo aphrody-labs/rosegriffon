@@ -4,7 +4,6 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarInset, SidebarProvider, Toaster, useBreakpoint } from "@rosegriffon/ui";
 import { ThemeToggle, domaineDeLaRoute } from "@rosegriffon/app-shell";
-import { resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
 
 /** Largeur de la sidebar desktop — source unique (CSS var + décalage du bouton). */
@@ -24,10 +23,14 @@ import { DynamicUniverseHead } from "@/components/layout/DynamicUniverseHead";
 import { AuthProvider as AuthProviderProfil } from "@/components/providers/AuthProvider";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
-import { LanguageProvider, type Language } from "@/components/providers/language-provider";
+import {
+	LanguageProvider,
+	type Language,
+	useLanguage,
+} from "@/components/providers/language-provider";
 import { ProfileProvider, useProfile } from "@/contexts/profile-context";
 import { ThemeProvider } from "@/contexts/theme-context";
-import { AchilleaAuthProvider, useAchilleaAuth } from "@/lib/achillea";
+import { AchilleaAuthProvider } from "@/lib/achillea";
 import { Providers } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar-store";
@@ -94,25 +97,22 @@ function RoutedHeader({
 	const activeDomaine = domaineDeLaRoute(pathname);
 	const { user: rgUser } = useAuth();
 	const { profile: rgProfile } = useProfile();
-	const { user: achilleaUser } = useAchilleaAuth();
-
 	const isEsport = activeDomaine === "esport";
 	const isWiki = activeDomaine === "wiki";
 
-	const user = isEsport ? achilleaUser : rgUser;
-	const profile = isEsport
-		? achilleaUser
-			? {
-					username: achilleaUser.username,
-					avatar_url: achilleaUser.avatar
-						? resolveDiscordAvatarUrl(achilleaUser.id, achilleaUser.avatar)
-						: null,
-				}
-			: null
-		: rgProfile;
+	// L'identité affichée dans le chrome est toujours celle de la session RG.
+	// Le jeton Achilléa est une capacité dérivée pour l'API e-sport, pas une
+	// seconde connexion : le laisser piloter la topbar faisait « disparaître »
+	// un membre connecté dès que le bot/API Achilléa redémarrait.
+	const user = rgUser;
+	const profile = rgProfile;
 
 	const appName = isEsport ? "Achilléa" : isWiki ? "Azalée" : "Rose Griffon";
-	const logoSrc = isEsport ? "/achillea/logo1.svg" : isWiki ? "/RG_Azalee-logo.webp" : "/logo.webp";
+	const logoSrc = isEsport
+		? "/achillea/logo1.svg"
+		: isWiki
+			? "/RG_Azalee-logo.webp"
+			: "/RG_Logo_V2.5.webp";
 	const homeHref = isEsport ? "/achillea" : isWiki ? "/wiki" : "/";
 	const accountHref = profile?.username
 		? `/profil/${encodeURIComponent(profile.username)}`
@@ -124,7 +124,8 @@ function RoutedHeader({
 			showSearch={!isMobile}
 			showCart={false}
 			showSidebarToggle={showSidebarToggle}
-			showUniverseSwitch
+			showUniverseSwitch={false}
+			showSettings={!isMobile}
 			appName={appName}
 			logoSrc={logoSrc}
 			homeHref={homeHref}
@@ -141,6 +142,21 @@ function RoutedHeader({
 	);
 }
 
+function RoutedSidebar() {
+	const { t } = useLanguage();
+	return <AppSidebar renderIcon={NavIcone} headerSlot={null} t={t} />;
+}
+
+function RoutedNavigationRail() {
+	const { t } = useLanguage();
+	return <WebsiteNavigationRail renderIcon={NavIcone} t={t} />;
+}
+
+function RoutedMobileNavigation() {
+	const { t } = useLanguage();
+	return <MobileBottomNavigation renderIcon={NavIcone} t={t} />;
+}
+
 export default function ClientLayout({
 	children,
 	initialLanguage,
@@ -155,10 +171,6 @@ export default function ClientLayout({
 	const pathname = usePathname();
 	const isAdminPage = pathname?.startsWith("/admin");
 	const isShopPage = pathname?.startsWith("/shop");
-	// L'accueil est un tableau de bord tenant dans la hauteur de la fenêtre : un
-	// pied de page sous la grille rendrait la page défilante pour rien. Ses liens
-	// légaux sont repris en bas de la grille.
-	const isHomePage = pathname === "/";
 	const isAuthPage =
 		pathname?.startsWith("/login") ||
 		pathname?.startsWith("/register") ||
@@ -210,13 +222,15 @@ export default function ClientLayout({
 											<SkipToContent />
 
 											{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
-											{showRail && <WebsiteNavigationRail renderIcon={NavIcone} />}
+											{showRail && <RoutedNavigationRail />}
 
 											{/* SIDEBAR — tiroir en compact, tiroir à la demande en medium
 								    (le bouton « Menu » du rail l'ouvre), panneau fixe en expanded.
 								    Elle doit être montée aussi en medium : sans elle, ce bouton
 								    basculait un état sans panneau et ne faisait rien. */}
-											{!shouldHideSidebar && <AppSidebar renderIcon={NavIcone} />}
+											{/* L'identité de l'univers est déjà portée par la topbar. Le header
+											    interne de la sidebar était un doublon masqué sous cette barre fixe. */}
+											{!shouldHideSidebar && <RoutedSidebar />}
 
 											<SidebarNavigationHandler />
 											<EdgeSwipeDetector />
@@ -269,12 +283,12 @@ export default function ClientLayout({
 										    son layout : sans cette garde, les six routes du tunnel
 										    d'achat empilaient deux `contentinfo` — rupture visuelle et
 										    liens légaux annoncés deux fois par les lecteurs d'écran. */}
-													{!isShopPage && <Footer />}
+													{/* En compact, la barre basse porte déjà la navigation : le grand footer
+											    du site ferait doublon et ajouterait plusieurs écrans de défilement. */}
+													{!isShopPage && !isCompact && <Footer />}
 													<MobileWatermark />
 													{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
-													{isCompact && !shouldHideSidebar && (
-														<MobileBottomNavigation renderIcon={NavIcone} />
-													)}
+													{isCompact && !shouldHideSidebar && <RoutedMobileNavigation />}
 												</div>
 											</SidebarInset>
 										</SidebarWrapper>

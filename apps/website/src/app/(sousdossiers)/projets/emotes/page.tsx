@@ -115,29 +115,16 @@ export default function EmotesPage() {
 				/>
 			))}
 			<Toaster richColors position="top-center" />
-			{/* Hero Section */}
-			<section className="relative overflow-hidden rounded-b-3xl bg-linear-to-br from-primary/10 via-background to-background p-8 md:p-12 lg:p-16 text-center border-b border-border/50">
-				<div className="absolute top-0 right-0 -mt-12 -mr-12 size-64 rounded-full bg-primary/5 blur-3xl" />
-				<div className="absolute bottom-0 left-0 -mb-12 -ml-12 size-64 rounded-full bg-blue-500/5 blur-3xl" />
-
-				<div className="relative z-10 mx-auto max-w-3xl space-y-6">
-					<div className="inline-flex items-center rounded-full border border-border bg-background/50 px-3 py-1 text-sm font-medium text-primary backdrop-blur-sm">
-						<Smile className="mr-2 size-4" />
-						<span>Galerie Officielle</span>
-					</div>
-
-					<h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
-						Emotes Rose Griffon
-					</h1>
-
-					<p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-						Découvrez et utilisez la collection complète des expressions de nos mascottes Gaëlle et
-						Roy.
-					</p>
+			<header className="container mx-auto flex min-h-16 max-w-7xl items-center gap-3 border-b border-border px-4 py-4 min-[600px]:px-6">
+				<div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+					<Smile className="size-5" aria-hidden />
 				</div>
-			</section>
+				<h1 className="text-2xl font-extrabold tracking-tight min-[840px]:text-3xl">
+					Emotes Rose Griffon
+				</h1>
+			</header>
 
-			<div className="container mx-auto px-4 mt-8 max-w-7xl">
+			<div className="container mx-auto mt-4 max-w-7xl px-4 min-[600px]:mt-6 min-[600px]:px-6">
 				<Tabs
 					defaultValue="all"
 					value={activeTab}

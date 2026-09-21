@@ -65,13 +65,14 @@ dans `.gitignore`.
 | Doc | Portée |
 | --- | --- |
 | [achillea.md](achillea.md) | Intégration d'Achillea (troisième site) : API, CDN, SEO, liens croisés. |
+| [assets-cdn.md](assets-cdn.md) | Contrat unique des assets partagés, des URL CDN et de leur publication. |
+| [cloud-deployment.md](cloud-deployment.md) | Déploiement portable de Website sur Vercel, Fly.io ou Cloud Run, avec Supabase Cloud ou Neon. |
 
-## Référence externe (générée — ne pas éditer)
+## Référence externe (archivée — ne pas éditer)
 
-La tâche cron `external-docs`
-(`packages/cron/src/tasks/ie-crawl/external-docs.ts`) récupère ces
-documentations pour le RAG et les régénère dans `reference/`. Toute édition
-manuelle y sera écrasée.
+Les collecteurs externes sont désactivés et retirés de l'exploitation. Les
+snapshots historiques dans `reference/` ne sont plus régénérés ; ils restent
+consultables mais ne constituent pas une documentation de référence du projet.
 
 | Doc | Source |
 | --- | --- |

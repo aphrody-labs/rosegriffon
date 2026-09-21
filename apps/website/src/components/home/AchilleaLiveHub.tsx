@@ -5,10 +5,7 @@ import {
 	ArrowRight,
 	Award,
 	Calendar,
-	Crown,
 	Gamepad2,
-	Layers,
-	Shield,
 	Sparkles,
 	Swords,
 	Trophy,
@@ -27,13 +24,13 @@ import type {
 import type { ChiffresEsport, LigneClassement } from "@/lib/achillea/classement";
 
 export interface AchilleaLiveHubProps {
-	description?: string;
-	image?: string;
-	link?: string;
-	discordLink?: string;
 	classement?: LigneClassement[];
 	chiffresEsport?: ChiffresEsport;
 	previewData?: AchilleaPreviewData;
+	showHeader?: boolean;
+	description?: string;
+	link?: string;
+	discordLink?: string;
 }
 
 type PreviewTab = "leaderboard" | "clans" | "tournaments" | "modes";
@@ -82,9 +79,7 @@ function RankedPlayerMiniCard({ player }: { player: LigneClassement }) {
 				</div>
 			</div>
 			<div className="pt-2 mt-2 border-t border-achillea-purple/20 flex items-center justify-between text-xs">
-				<span className="font-bold text-achillea-lime tabular-nums text-xs">
-					{player.elo} ELO
-				</span>
+				<span className="font-bold text-achillea-lime tabular-nums text-xs">{player.elo} ELO</span>
 				<span className="text-xs text-muted-foreground group-hover/player:text-foreground flex items-center gap-0.5 transition-colors">
 					Profil →
 				</span>
@@ -220,13 +215,15 @@ function TournamentMiniCard({ tournament }: { tournament: PreviewTournament }) {
 }
 
 export function AchilleaLiveHub({
-	description = "Le carrefour de l'esport Inazuma Eleven ! Gestion de clans, tournois, matchs classés, ranking communautaire et bot Achilléa.",
-	discordLink = "https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055",
 	classement = [],
 	chiffresEsport,
 	previewData,
+	showHeader = true,
+	description = "Matchs classés, clans et tournois de la scène compétitive Inazuma Eleven.",
+	link = "/achillea",
+	discordLink = "https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055",
 }: AchilleaLiveHubProps) {
-	const [activePreview, setActivePreview] = useState<PreviewTab>("leaderboard");
+	const [activePreview, setActivePreview] = useState<PreviewTab>("clans");
 	const [liveData, setLiveData] = useState<AchilleaPreviewData | undefined>(previewData);
 
 	// Synchroniser les données initiales ou charger depuis l'API directe en arrière-plan
@@ -257,121 +254,70 @@ export function AchilleaLiveHub({
 
 	return (
 		<section
-			aria-labelledby="achillea-hub-title"
-			className="w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8"
+			aria-label={showHeader ? undefined : "Achilléa"}
+			aria-labelledby={showHeader ? "achillea-hub-title" : undefined}
+			className="w-full px-4 min-[600px]:px-0"
 		>
-			<Card className="overflow-hidden border border-achillea-purple/40 achillea-glow-card achillea-card-gradient relative rounded-3xl p-3.5 sm:p-6 lg:p-8 flex flex-col gap-6">
+			<Card className="overflow-hidden border border-achillea-purple/40 achillea-glow-card achillea-card-gradient relative rounded-3xl p-3.5 min-[600px]:p-5 min-[840px]:p-6 flex flex-col gap-4">
 				{/* Background lighting effects */}
+				<Image src="/achillea/achillea-banner.png" alt="" fill sizes="100vw" className="pointer-events-none object-cover object-right opacity-[0.08]" aria-hidden />
 				<div className="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none achillea-bg-noise" />
 				<div className="absolute -right-24 -top-24 size-96 bg-achillea-purple rounded-full blur-[140px] opacity-25 pointer-events-none" />
 				<div className="absolute -left-24 -bottom-24 size-96 bg-achillea-lime rounded-full blur-[140px] opacity-15 pointer-events-none" />
 
-				{/* ── 1. HEADER DU HUB : Titre, Stats rapides & Actions directes ── */}
-				<div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-achillea-purple/30 pb-5">
-					{/* Logo & Identité */}
-					<div className="flex items-center gap-3 sm:gap-3.5">
-						<div className="relative size-11 sm:size-14 shrink-0 rounded-2xl bg-background/50 border border-achillea-lime/40 p-1.5 flex items-center justify-center shadow-lg">
-							<Image
-								src="/achillea/logo1.svg"
-								alt="Logo Achilléa"
-								width={44}
-								height={44}
-								className="object-contain achillea-glow-logo"
-							/>
-						</div>
-						<div className="flex flex-col gap-0.5 min-w-0">
-							<div className="flex items-center gap-2">
-								<span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-achillea-purple/25 border border-achillea-lime/40 text-achillea-lime text-xs font-bold uppercase tracking-wider">
-									<span className="size-1.5 rounded-full bg-achillea-lime animate-pulse" />
-									E-Sport &amp; Compétition
-								</span>
+				{/* ── 1. IDENTITÉ DU HUB ── */}
+				{showHeader && (
+					<div className="relative z-10 flex flex-col gap-3 border-b border-achillea-purple/30 pb-4 min-[600px]:flex-row min-[600px]:items-center min-[600px]:justify-between">
+						{/* Logo & Identité */}
+						<div className="flex items-center gap-3 sm:gap-3.5">
+							<div className="relative size-11 sm:size-14 shrink-0 rounded-2xl bg-background/50 border border-achillea-lime/40 p-1.5 flex items-center justify-center shadow-lg">
+								<Image
+									src="/achillea/logo1.svg"
+									alt="Logo Achilléa"
+									width={44}
+									height={44}
+									className="object-contain achillea-glow-logo"
+								/>
 							</div>
-							<h2
-								id="achillea-hub-title"
-								className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-foreground leading-tight tracking-tight sm:tracking-wide font-expressive-title"
-							>
-								<span className="bg-clip-text text-transparent achillea-text-gradient">
-									ACHILLÉA — ARÈNE COMPÉTITIVE
-								</span>
-							</h2>
+							<div className="min-w-0">
+								<h2
+									id="achillea-hub-title"
+									className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-foreground leading-tight tracking-tight sm:tracking-wide font-expressive-title"
+								>
+									<span className="bg-clip-text text-transparent achillea-text-gradient">
+										Achilléa
+									</span>
+								</h2>
+								<p className="mt-0.5 max-w-xl text-xs text-muted-foreground sm:text-sm">{description}</p>
+							</div>
+						</div>
+						<div className="flex flex-wrap gap-2">
+							<Button asChild size="sm" className="min-h-10 rounded-xl border border-achillea-lime/50 bg-achillea-purple px-3 text-xs font-black text-achillea-lime hover:bg-achillea-purple/80">
+								<Link href={link}><Swords className="mr-1.5 size-3.5" />Accéder à l'Arène</Link>
+							</Button>
+							<Button asChild size="sm" variant="outline" className="min-h-10 rounded-xl border-achillea-purple/50 bg-achillea-purple-dark/80 px-3 text-xs font-bold text-foreground hover:border-achillea-lime/50 hover:bg-achillea-purple/25 hover:text-achillea-lime">
+								<a href={discordLink} target="_blank" rel="noopener noreferrer"><DiscordIcon className="mr-1.5 size-3.5" />Discord</a>
+							</Button>
 						</div>
 					</div>
-
-					{/* Compteurs en direct & Boutons d'accès */}
-					<div className="flex flex-wrap items-center gap-2 sm:gap-3">
-						<div className="hidden xl:flex items-center gap-2 bg-background/40 border border-achillea-purple/30 rounded-2xl px-3 py-1.5 text-xs text-muted-foreground">
-							{stats?.joueurs != null && (
-								<>
-									<span className="font-bold text-achillea-lime tabular-nums">
-										{stats.joueurs.toLocaleString("fr-FR")}
-									</span>
-									<span>Joueurs classés</span>
-									<span className="opacity-30">·</span>
-								</>
-							)}
-							{stats?.clans != null && (
-								<>
-									<span className="font-bold text-achillea-lime tabular-nums">
-										{stats.clans.toLocaleString("fr-FR")}
-									</span>
-									<span>Clans</span>
-								</>
-							)}
-						</div>
-
-						<Button
-							asChild
-							size="sm"
-							className="bg-achillea-purple hover:bg-achillea-purple/80 text-achillea-lime font-black rounded-xl shadow-md hover:shadow-lg transition-all border border-achillea-lime/50 px-3.5 sm:px-4 py-2 min-h-[40px] text-xs sm:text-sm"
-						>
-							<Link href="/achillea">
-								<Swords className="mr-1.5 size-3.5" />
-								Accéder à l'Arène
-							</Link>
-						</Button>
-
-						<Button
-							asChild
-							variant="outline"
-							size="sm"
-							className="bg-achillea-purple-dark/80 text-foreground border-achillea-purple/50 font-bold rounded-xl hover:bg-achillea-purple/25 hover:border-achillea-lime/50 hover:text-achillea-lime transition-all px-3 sm:px-3.5 py-2 min-h-[40px] text-xs sm:text-sm"
-						>
-							<a href={discordLink} target="_blank" rel="noopener noreferrer">
-								<DiscordIcon className="mr-1.5 size-3.5" />
-								Discord Compétitif
-							</a>
-						</Button>
-					</div>
-				</div>
+				)}
 
 				{/* ── 2. BENTO GRID UNIFIÉ : 2 COLONNES MAJEURES ── */}
 				<div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
 					{/* ── COLONNE GAUCHE (7 cols) : SCÈNE COMPÉTITIVE & LIVE PREVIEWS ── */}
-					<div className="lg:col-span-7 flex flex-col justify-between gap-4">
+					<div className="lg:col-span-12 flex flex-col justify-between gap-4">
 						<div className="flex flex-col gap-3">
 							{/* En-tête de section & Sélecteur d'onglets immersif */}
 							<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
 								<div className="flex items-center gap-1.5">
 									<Sparkles className="size-3.5 text-achillea-lime" />
 									<span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-										Aperçus de la scène compétitive en direct
+										Compétition
 									</span>
 								</div>
 
 								{/* Onglets sélecteurs de preview avec scroll horizontal fluide sur petit mobile */}
 								<div className="flex items-center gap-1 overflow-x-auto max-w-full p-0.5 rounded-xl border border-achillea-purple/40 bg-background/50 text-xs">
-									<button
-										type="button"
-										onClick={() => setActivePreview("leaderboard")}
-										className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] shrink-0 rounded-lg font-bold text-xs transition-all ${
-											activePreview === "leaderboard"
-												? "bg-achillea-lime text-achillea-purple-deep shadow-sm"
-												: "text-muted-foreground hover:text-foreground"
-										}`}
-									>
-										<Trophy className="size-3" />
-										Classement
-									</button>
 									<button
 										type="button"
 										onClick={() => setActivePreview("clans")}
@@ -382,7 +328,19 @@ export function AchilleaLiveHub({
 										}`}
 									>
 										<Users className="size-3" />
-										Clans
+										Classement des clans
+									</button>
+									<button
+										type="button"
+										onClick={() => setActivePreview("leaderboard")}
+										className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] shrink-0 rounded-lg font-bold text-xs transition-all ${
+											activePreview === "leaderboard"
+												? "bg-achillea-lime text-achillea-purple-deep shadow-sm"
+												: "text-muted-foreground hover:text-foreground"
+										}`}
+									>
+										<Trophy className="size-3" />
+										Classement 1v1
 									</button>
 									<button
 										type="button"
@@ -412,38 +370,7 @@ export function AchilleaLiveHub({
 							</div>
 
 							{/* ── Contenu dynamique selon l'onglet ── */}
-							{/* Onglet 1 : Classement ELO */}
-							{activePreview === "leaderboard" && (
-								<div className="flex flex-col gap-2.5">
-									<div className="flex items-center justify-between text-xs px-0.5">
-										<span className="text-muted-foreground">
-											{stats?.joueurs
-												? `${stats.joueurs.toLocaleString("fr-FR")} joueurs classés sur l'Arène 1v1`
-												: "Ladder 1 contre 1"}
-										</span>
-										<Link
-											href="/achillea/ranked/leaderboard"
-											className="font-bold text-achillea-lime hover:underline flex items-center gap-1"
-										>
-											Voir tout le classement
-											<ArrowRight className="size-3" />
-										</Link>
-									</div>
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-										{topPlayers && topPlayers.length > 0 ? (
-											topPlayers.slice(0, 4).map((p) => (
-												<RankedPlayerMiniCard key={p.userId} player={p} />
-											))
-										) : (
-											<div className="col-span-2 p-6 text-center text-xs text-muted-foreground rounded-2xl bg-background/40 border border-achillea-purple/30">
-												Chargement des joueurs classés...
-											</div>
-										)}
-									</div>
-								</div>
-							)}
-
-							{/* Onglet 2 : Clans */}
+							{/* Onglet 1 : classement des clans */}
 							{activePreview === "clans" && (
 								<div className="flex flex-col gap-2.5">
 									<div className="flex items-center justify-between text-xs px-0.5">
@@ -460,12 +387,43 @@ export function AchilleaLiveHub({
 											<ArrowRight className="size-3" />
 										</Link>
 									</div>
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+									<div className="grid grid-cols-1 gap-2.5 max-[599px]:[&>*:nth-child(n+3)]:hidden min-[600px]:grid-cols-2 min-[1200px]:grid-cols-4">
 										{clans && clans.length > 0 ? (
 											clans.map((c) => <ClanMiniCard key={c.id} clan={c} />)
 										) : (
 											<div className="col-span-2 p-6 text-center text-xs text-muted-foreground rounded-2xl bg-background/40 border border-achillea-purple/30">
 												Chargement des clans actifs...
+											</div>
+										)}
+									</div>
+								</div>
+							)}
+
+							{/* Onglet 2 : classement ELO 1v1 */}
+							{activePreview === "leaderboard" && (
+								<div className="flex flex-col gap-2.5">
+									<div className="flex items-center justify-between text-xs px-0.5">
+										<span className="text-muted-foreground">
+											{stats?.joueurs
+												? `${stats.joueurs.toLocaleString("fr-FR")} joueurs classés sur l'Arène 1v1`
+												: "Ladder 1 contre 1"}
+										</span>
+										<Link
+											href="/achillea/ranked/leaderboard"
+											className="font-bold text-achillea-lime hover:underline flex items-center gap-1"
+										>
+											Voir tout le classement
+											<ArrowRight className="size-3" />
+										</Link>
+									</div>
+									<div className="grid grid-cols-1 gap-2.5 max-[599px]:[&>*:nth-child(n+3)]:hidden min-[600px]:grid-cols-2 min-[1200px]:grid-cols-4">
+										{topPlayers && topPlayers.length > 0 ? (
+											topPlayers
+												.slice(0, 4)
+												.map((p) => <RankedPlayerMiniCard key={p.userId} player={p} />)
+										) : (
+											<div className="col-span-2 p-6 text-center text-xs text-muted-foreground rounded-2xl bg-background/40 border border-achillea-purple/30">
+												Chargement des joueurs classés...
 											</div>
 										)}
 									</div>
@@ -487,11 +445,9 @@ export function AchilleaLiveHub({
 											<ArrowRight className="size-3" />
 										</Link>
 									</div>
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+									<div className="grid grid-cols-1 gap-2.5 max-[599px]:[&>*:nth-child(n+3)]:hidden min-[600px]:grid-cols-2 min-[1200px]:grid-cols-4">
 										{tournaments && tournaments.length > 0 ? (
-											tournaments.map((t) => (
-												<TournamentMiniCard key={t.id} tournament={t} />
-											))
+											tournaments.map((t) => <TournamentMiniCard key={t.id} tournament={t} />)
 										) : (
 											<div className="col-span-2 p-6 text-center text-xs text-muted-foreground rounded-2xl bg-background/40 border border-achillea-purple/30">
 												Chargement des tournois...
@@ -569,139 +525,6 @@ export function AchilleaLiveHub({
 									</div>
 								</div>
 							)}
-						</div>
-
-						{/* 2.2 Pilules de navigation rapide dans l'écosystème Achilléa */}
-						<div className="flex flex-col gap-2 pt-1 border-t border-achillea-purple/30">
-							<span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-								<Layers className="size-3 text-achillea-purple-light" />
-								Sections Compétitives
-							</span>
-							<div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-								<Link
-									href="/achillea/ranked/leaderboard"
-									className="p-2.5 rounded-xl bg-background/40 border border-achillea-purple/30 hover:border-achillea-lime/50 transition-all flex items-center justify-center text-center gap-2 group/pill hover:bg-achillea-purple-pill"
-								>
-									<Trophy className="size-3.5 text-achillea-lime group-hover/pill:scale-110 transition-transform" />
-									<span className="text-xs font-bold text-foreground">Classement</span>
-								</Link>
-								<Link
-									href="/achillea/clans"
-									className="p-2.5 rounded-xl bg-background/40 border border-achillea-purple/30 hover:border-achillea-lime/50 transition-all flex items-center justify-center text-center gap-2 group/pill hover:bg-achillea-purple-pill"
-								>
-									<Users className="size-3.5 text-achillea-lime group-hover/pill:scale-110 transition-transform" />
-									<span className="text-xs font-bold text-foreground">Clans</span>
-								</Link>
-								<Link
-									href="/achillea/tournaments"
-									className="p-2.5 rounded-xl bg-background/40 border border-achillea-purple/30 hover:border-achillea-lime/50 transition-all flex items-center justify-center text-center gap-2 group/pill hover:bg-achillea-purple-pill"
-								>
-									<Award className="size-3.5 text-achillea-lime group-hover/pill:scale-110 transition-transform" />
-									<span className="text-xs font-bold text-foreground">Tournois</span>
-								</Link>
-								<Link
-									href="/achillea/ranked/tiers"
-									className="p-2.5 rounded-xl bg-background/40 border border-achillea-purple/30 hover:border-achillea-lime/50 transition-all flex items-center justify-center text-center gap-2 group/pill hover:bg-achillea-purple-pill"
-								>
-									<Crown className="size-3.5 text-achillea-lime group-hover/pill:scale-110 transition-transform" />
-									<span className="text-xs font-bold text-foreground">Paliers ELO</span>
-								</Link>
-							</div>
-						</div>
-					</div>
-
-					{/* ── COLONNE DROITE (5 cols) : PODIUM DIRECT & REJOINDRE LA SCÈNE ── */}
-					<div className="lg:col-span-5 flex flex-col justify-between gap-4 bg-background/40 border border-achillea-purple/30 rounded-2xl p-4 sm:p-5">
-						<div className="flex flex-col gap-3">
-							<div className="flex items-center justify-between border-b border-achillea-purple/20 pb-3">
-								<div className="flex items-center gap-2">
-									<Crown className="size-4 text-achillea-lime" />
-									<h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-foreground">
-										Podium 1v1 — Top Joueurs
-									</h3>
-								</div>
-								<Link
-									href="/achillea/ranked/leaderboard"
-									className="text-xs font-semibold text-muted-foreground hover:text-achillea-lime transition-colors"
-								>
-									Classement →
-								</Link>
-							</div>
-
-							{/* Podium Top 3 */}
-							<div className="flex flex-col gap-2">
-								{topPlayers && topPlayers.length > 0 ? (
-									topPlayers.slice(0, 3).map((p) => {
-										const medal =
-											p.rang === 1
-												? "🥇"
-												: p.rang === 2
-													? "🥈"
-													: "🥉";
-										return (
-											<Link
-												key={p.userId}
-												href="/achillea/ranked/leaderboard"
-												className="p-3 rounded-xl bg-achillea-purple-dark/80 hover:bg-achillea-purple-hover border border-achillea-purple/20 hover:border-achillea-lime/40 transition-colors flex items-center justify-between group/row"
-											>
-												<div className="flex items-center gap-2.5 min-w-0">
-													<span className="text-base">{medal}</span>
-													<UserAvatar
-														userId={p.userId}
-														avatar={p.avatar}
-														name={p.nom}
-														size="sm"
-														className="rounded-lg border border-achillea-purple/40"
-													/>
-													<div className="min-w-0">
-														<div className="text-xs font-bold text-foreground truncate group-hover/row:text-achillea-lime transition-colors">
-															{p.nom}
-														</div>
-														<div className="text-xs text-muted-foreground">
-															{p.palier ? `Palier ${p.palier}` : `${p.victoires}V - ${p.defaites}D`}
-														</div>
-													</div>
-												</div>
-												<span className="text-xs font-black tabular-nums text-achillea-lime shrink-0">
-													{p.elo} ELO
-												</span>
-											</Link>
-										);
-									})
-								) : (
-									<div className="p-4 text-center text-xs text-muted-foreground">
-										Aucun joueur classé pour le moment
-									</div>
-								)}
-							</div>
-						</div>
-
-						{/* Cartouche d'action rapide */}
-						<div className="p-3.5 rounded-xl bg-achillea-purple-dark/90 border border-achillea-purple/40 flex flex-col gap-2">
-							<div className="flex items-center gap-2">
-								<Shield className="size-4 text-achillea-lime" />
-								<span className="text-xs font-bold uppercase tracking-wider text-foreground">
-									Participer à la compétition
-								</span>
-							</div>
-							<p className="text-xs text-muted-foreground leading-relaxed font-light">
-								{description}
-							</p>
-							<div className="flex items-center gap-2 pt-1">
-								<Link
-									href="/achillea/clans/create"
-									className="text-xs font-bold text-achillea-lime hover:underline"
-								>
-									Créer un clan →
-								</Link>
-								<span className="text-muted-foreground/50">·</span>
-								<Link
-									href="/achillea/tournaments"
-									className="text-xs font-bold text-achillea-lime hover:underline"
-								>
-									S'inscrire à un tournoi →
-								</Link>
-							</div>
 						</div>
 					</div>
 				</div>

@@ -59,11 +59,8 @@ jobs:
           bun run build:compile
           bun run build:ranked
 
-      - name: Vérifier le frontend et son artefact
-        working-directory: apps/achillea-web
+      - name: Vérifier le frontend Next et les routes Achilléa migrées
+        working-directory: apps/website
         run: |
           bun run type-check
-          bun run lint
-          bun run test
-          node ./node_modules/@angular/cli/bin/ng.js test --watch=false
-          bun run build
+          bun test src/app/achillea src/lib/achillea

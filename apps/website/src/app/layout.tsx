@@ -20,12 +20,12 @@ const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
  * Script anti-scintillement pour le chrome applicatif (barre latérale, en-tête).
  *
  * Il garantit que `<html>` porte immédiatement la classe du thème chrome
- * (`theme-roy` ou `theme-gaelle`) dès la première peinture sans aucun FOUC.
+ * (`roy` ou `gaelle`) dès la première peinture sans aucun FOUC.
  * Les thèmes de contenu (Azalée sombre pour le wiki, Achilléa pour l'e-sport)
  * sont appliqués isolément sur `#main-content`, préservant la lisibilité
  * et la stabilité de la barre latérale et de la barre supérieure.
  */
-const SCRIPT_THEME = `(function(){try{var t=localStorage.getItem('rg-theme');var valid=['roy','gaelle'];var theme=(t&&valid.indexOf(t)!==-1)?t:'roy';var cl=document.documentElement.classList;cl.remove('roy','gaelle','theme-roy','theme-gaelle','theme-azalee-dark','theme-achillea','theme-azalee-light');cl.add('theme-'+theme,theme);}catch(e){document.documentElement.classList.add('theme-roy','roy');}})();`;
+const SCRIPT_THEME = `(function(){try{var t=localStorage.getItem('rg-theme');var valid=['roy','gaelle'];var theme=(t&&valid.indexOf(t)!==-1)?t:'roy';var cl=document.documentElement.classList;cl.remove('roy','gaelle','theme-roy','theme-gaelle');cl.add(theme);}catch(e){document.documentElement.classList.add('roy');}})();`;
 
 const geistSans = Geist({
 	display: "swap",

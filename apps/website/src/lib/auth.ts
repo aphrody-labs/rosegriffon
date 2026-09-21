@@ -209,6 +209,13 @@ export const auth = betterAuth({
 
 	account: {
 		...commonAuthOptions.account,
+		// Le callback OAuth ne doit pas dépendre d'un état transitoire dans le
+		// navigateur : en production, le conserver dans `verification` résiste aux
+		// changements d'origine, aux onglets et aux cookies stricts. Les jetons
+		// fournis par Discord/Google/Patreon restent chiffrés au repos avec le
+		// secret Better Auth ; aucun lecteur SQL ne reçoit un bearer token brut.
+		storeStateStrategy: "database",
+		encryptOAuthTokens: true,
 		accountLinking: {
 			enabled: true,
 			trustedProviders: ["discord", "google", "twitch", "patreon"],

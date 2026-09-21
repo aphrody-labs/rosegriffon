@@ -128,7 +128,9 @@ export const userDtoSchema = z.object({
 	username: z.string(),
 	sim: z.number().optional(),
 	avatar: z.string().optional(),
-	clanId: z.number().optional(),
+	// Le backend retourne explicitement `null` pour un joueur sans clan.
+	// `optional()` seul rejetait la réponse entière des tournois concernés.
+	clanId: z.number().nullable().optional(),
 	soloRank: rankDtoSchema.optional(),
 	duoRank: rankDtoSchema.optional(),
 	lastInteract: apiDateSchema.optional(),

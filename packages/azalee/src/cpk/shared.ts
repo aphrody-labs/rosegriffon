@@ -50,7 +50,7 @@ export interface CpkListing {
 /** Type de contenu CDN dérivé de l'extension. */
 export type CpkAssetKind = "image" | "model" | "raw";
 
-const CDN_BASE = "https://cdn.rosegriffon.fr";
+const CDN_BASE = DEFAULT_CDN_ORIGIN;
 
 /** Extensions décodées en image (g4tx → png live par le CDN). */
 const IMAGE_EXTS = new Set(["g4tx"]);
@@ -251,3 +251,4 @@ export function previewKindLabel(kind: CpkPreviewKind): string {
 	};
 	return labels[kind];
 }
+import { DEFAULT_CDN_ORIGIN } from "@rosegriffon/assets";

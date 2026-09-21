@@ -32,12 +32,15 @@ export function LanguageSwitcher() {
 			<DropdownMenuTrigger asChild>
 				<Button
 					variant="ghost"
-					size="icon"
-					className="size-12 md:size-10"
+					size="sm"
+					className="h-12 min-w-11 gap-1 px-2 md:h-10"
 					title={`${t("ui.language.current")}: ${currentName}`}
 					aria-label={`${t("ui.language.current")}: ${currentName}. ${t("ui.language.change")}`}
 				>
-					<Languages className="size-5" aria-hidden />
+					<Languages data-icon="inline-start" aria-hidden />
+					<span className="text-xs font-black uppercase" aria-hidden="true">
+						{language}
+					</span>
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="min-w-48">
@@ -48,13 +51,13 @@ export function LanguageSwitcher() {
 					return (
 						<DropdownMenuItem
 							key={locale}
-							onClick={() => setLanguage(locale)}
+							onSelect={() => setLanguage(locale)}
 							aria-current={isActive ? "true" : undefined}
 						>
 							<span lang={locale} className="flex-1">
 								{new Intl.DisplayNames([locale], { type: "language" }).of(locale) ?? locale}
 							</span>
-							{isActive && <Check className="size-4" aria-hidden />}
+							{isActive && <Check data-icon="inline-end" aria-hidden />}
 						</DropdownMenuItem>
 					);
 				})}

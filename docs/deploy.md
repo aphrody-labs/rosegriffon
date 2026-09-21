@@ -16,7 +16,7 @@ explicite sur le VPS ; un `git push` seul ne déploie rien.
 | Surface | Source | Runtime |
 | --- | --- | --- |
 | Rose Griffon et wiki Azalée `/wiki` | `apps/website` | `website-web.service` :3004 / `website-web-b.service` :3014 |
-| Achilléa | `apps/achillea-web` | application Angular et API Achilléa dédiées |
+| Achilléa `/achillea` | `apps/website` | rendu Next unifié ; API et temps réel restent dans `apps/achillea-bot` |
 | `azalee.rosegriffon.fr` | redirection vers `rosegriffon.fr/wiki` | aucun service, aucun build |
 
 Azalée n'est pas un frontend autonome. Le nom reste utilisé par la
@@ -47,6 +47,11 @@ Les API, bots, le CDN et le cron se rechargent indépendamment. Leur nom Azalée
 sudo systemctl restart azalee-api.service
 sudo systemctl restart rg-cron.service
 ```
+
+Le contrat des assets partagés et la procédure CDN sont dans
+[assets-cdn.md](assets-cdn.md). Publier une modification de cette surface exige
+de déployer ensemble le cron, nginx et leur configuration systemd ; ne pas
+copier les mêmes assets dans plusieurs répertoires `public/`.
 
 Avant de modifier une unité ou nginx, valider la configuration :
 

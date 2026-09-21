@@ -199,6 +199,16 @@ export function AccountClient({
 									showCosmetics
 									onSubmit={async (values) => updateProfile(values)}
 								/>
+								<section className="mt-6 rounded-xl border border-border bg-muted/20 p-4">
+									<h2 className="text-sm font-semibold">Espace Achilléa</h2>
+									<p className="mt-1 text-sm text-muted-foreground">
+										Le portefeuille et la compétition utilisent ce même compte Rose Griffon.
+									</p>
+									<div className="mt-3 flex flex-wrap gap-3 text-sm font-medium">
+										<a className="text-primary hover:underline" href="/achillea/wallet">Portefeuille ACH</a>
+										<a className="text-primary hover:underline" href="/achillea/ranked/leaderboard">Classement</a>
+									</div>
+								</section>
 							</div>
 						</div>
 					),

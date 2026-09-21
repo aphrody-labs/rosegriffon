@@ -1,8 +1,8 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Go to repository root
-cd "$(dirname "$0")/../../.."
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+cd "$REPO_ROOT"
 
 echo "======================================================"
 echo "🌊 [$(date)] Running Data Processing Wave Cycle..."
@@ -15,7 +15,7 @@ bun scripts/inagle/pipeline/wave-processing.ts
 bun scripts/inagle/pipeline/sync-db-to-json.ts
 
 # 3. Check if characters.json has changed
-if git diff --name-only | grep -q "characters.json"; then
+if ! git diff --quiet -- packages/inagle/src/entries/characters.json; then
     echo "✨ Detected changes in characters.json! Rebuilding Next.js application..."
     
     # Commit changes
@@ -27,7 +27,7 @@ if git diff --name-only | grep -q "characters.json"; then
     
     # Republication sans coupure (bascule bleu/vert) au lieu d'un restart brutal.
     echo "🔄 Publication de la nouvelle version..."
-    bun /home/ubuntu/rg/scripts/ops/deploy.ts deploy website --no-build --no-gate
+    bun "$REPO_ROOT/scripts/ops/deploy.ts" deploy website --no-build --no-gate
     echo "✅ Nouvelle version en ligne."
 else
     echo "✨ No changes detected in characters.json. Skipping build and restart."

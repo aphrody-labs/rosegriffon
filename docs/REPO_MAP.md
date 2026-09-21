@@ -3,7 +3,7 @@ title: "Cartographie du Monorepo"
 description: "Structure et dépendances des packages et applications du monorepo Rose Griffon"
 scope: ["monorepo"]
 status: "stable"
-last_updated: "2026-09-20"
+last_updated: "2026-09-21"
 ---
 
 # 🗺️ Cartographie du Monorepo
@@ -13,36 +13,6 @@ Ce document cartographie la structure complète du monorepo **Rose Griffon**. Il
 ## 🚀 Applications (`apps/`)
 
 Applications autonomes prêtes à être déployées :
-
-### 📁 [@rosegriffon/achillea-web](file:///apps/achillea-web)
-* **Chemin :** `apps/achillea-web`
-* **Description :** Aucune description fournie.
-* **Version :** `0.0.2`
-* **Points d'entrée clés :**
-  - [`src/main.ts`](file:///apps/achillea-web/src/main.ts)
-
-* **Scripts disponibles :**
-  - `bun run ng` : `ng`
-  - `bun run config:generate` : `bun scripts/inject-env.ts`
-  - `bun run start` : `bun run config:generate && ng serve`
-  - `bun run dev` : `bun run start`
-  - `bun run build` : `bun run config:generate && ng build && bun scripts/sanitize-production-artifact.ts`
-  - `bun run watch` : `bun run config:generate && ng build --watch --configuration development`
-  - `bun run test` : `bun test tests/`
-  - `bun run test:angular` : `ng test --watch=false`
-  - `bun run test:e2e` : `bun test ./tests/e2e/smoke.e2e.ts`
-  - `bun run lint` : `bun --cwd ../.. ./node_modules/.bin/oxlint --config .oxlintrc.json apps/achillea-web`
-  - `bun run lint:fix` : `bun --cwd ../.. ./node_modules/.bin/oxlint --config .oxlintrc.json --fix apps/achillea-web`
-  - `bun run type-check` : `tsc -p tsconfig.typecheck.json`
-  - `bun run format` : `oxfmt .`
-  - `bun run format:check` : `oxfmt --check .`
-  - `bun run clean` : `bun scripts/clean.ts`
-
-* **Dépendances internes & externes :**
-  - **Dependencies :** `@angular/common`, `@angular/compiler`, `@angular/core`, `@angular/forms`, `@angular/platform-browser`, `@angular/router`, `@casl/ability`, `@colyseus/sdk`, `@ngx-translate/core`, `@ngx-translate/http-loader`, `@primeuix/themes`, `@rosegriffon/achillea-client`, `@rosegriffon/achillea-core`, `@rosegriffon/achillea-types`, `@sindresorhus/transliterate`, `@supabase/supabase-js`, `@tailwindcss/postcss`, `brackets-model`, `brackets-viewer`, `iso-639-1`, `lottie-web`, `ngx-lottie`, `primeicons`, `primelocale`, `primeng`, `rxjs`, `socket.io-client`, `tailwindcss`, `tslib`, `valibot`, `vite`, `zone.js`
-  - **DevDependencies :** `@angular/build`, `@angular/cli`, `@angular/compiler-cli`, `@happy-dom/global-registrator`, `@types/jasmine`, `jasmine-core`, `karma`, `karma-chrome-launcher`, `karma-coverage`, `karma-jasmine`, `karma-jasmine-html-reporter`, `postcss`, `puppeteer`, `tailwindcss-primeui`, `typescript`
-
----
 
 ### 📁 [cdn](file:///apps/cdn)
 * **Chemin :** `apps/cdn`
@@ -275,23 +245,6 @@ Packages partagés consommés par les applications :
 
 * **Scripts disponibles :**
   - `bun run lint` : `bunx oxlint -c ../../.oxlintrc.json .`
-
-* **Dépendances internes & externes :**
-  - **Dependencies :** Aucune
-  - **DevDependencies :** Aucune
-
----
-
-### 📁 [@rosegriffon/hub](file:///packages/hub)
-* **Chemin :** `packages/hub`
-* **Description :** Registre des applications du réseau Rose Griffon : identité, montage, API, thème et santé de chaque app
-* **Version :** `0.1.0`
-* **Points d'entrée clés :**
-  - [`src/index.ts`](file:///packages/hub/src/index.ts)
-
-* **Scripts disponibles :**
-  - `bun run lint` : `bunx oxlint -c ../../.oxlintrc.json src`
-  - `bun run type-check` : `bun --bun tsc --noEmit`
 
 * **Dépendances internes & externes :**
   - **Dependencies :** Aucune

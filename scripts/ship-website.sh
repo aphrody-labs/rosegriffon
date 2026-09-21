@@ -7,4 +7,6 @@
 # Options utiles : --no-build (publier les artefacts déjà bâtis), --no-gate (sauter le
 # type-check), --allow-low-memory. `bun scripts/ops/deploy.ts --help` liste tout.
 set -euo pipefail
-exec /home/ubuntu/.bun/bin/bun /home/ubuntu/rg/scripts/ops/deploy.ts deploy website "$@"
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec bun "$REPO_ROOT/scripts/ops/deploy.ts" deploy website "$@"

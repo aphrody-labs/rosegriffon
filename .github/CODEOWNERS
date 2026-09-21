@@ -10,7 +10,6 @@
 # Apps spécifiques
 /apps/website/    @aphrody-code
 /apps/bot/        @aphrody-code
-/apps/achillea-web/ @aphrody-code
 /apps/achillea-bot/ @aphrody-code
 
 # Packages partagés

@@ -34,7 +34,7 @@
  * salon déplacé dans l'archive est pris automatiquement à la passe suivante.
  *
  * ── ET ON NE REMONTE PAS 29 HISTORIQUES D'UN COUP ───────────────────────────
- * La veille tourne toutes les 5 minutes. Remonter l'historique complet de 26
+ * La veille de rattrapage tourne toutes les 15 minutes. Remonter l'historique complet de 26
  * nouveaux salons dans la même passe, c'est dépasser le délai maximal de la
  * tâche et se faire tuer en plein travail — pour recommencer de zéro cinq
  * minutes plus tard. `BACKFILLS_PAR_PASSE` borne le nombre d'historiques
@@ -245,7 +245,7 @@ function urlAvatarDiscord(auteur: AuteurBrut): string {
  *
  * La clause `WHERE` du `DO UPDATE` évite de réécrire une ligne identique : sans
  * elle, la passe de rafraîchissement de tête déclencherait 100 notifications
- * temps réel inutiles toutes les 5 minutes.
+ * temps réel inutiles toutes les 15 minutes.
  */
 async function enregistrerMessage(
 	brut: MessageBrut,
@@ -841,7 +841,7 @@ async function marquerSupprimes(identifiants: string[]): Promise<void> {
  *
  * L'ensemble des salons suivis est celui rempli par la dernière synchro ; tant
  * qu'aucune synchro n'a tourné, aucun événement n'est retenu (le filet de
- * sécurité toutes les 5 minutes rattrape ce court intervalle de démarrage).
+ * sécurité toutes les 15 minutes rattrape ce court intervalle de démarrage).
  */
 export function brancherVeilleMessagesTempsReel(client: Client): void {
 	client.on("messageCreate", async (message) => {

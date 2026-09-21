@@ -18,6 +18,7 @@
 import { Box, Download, Film, Loader2, Pause, Play, RotateCcw, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { cdnOrigin } from "@rosegriffon/assets";
 import CharacterModelViewer from "@/components/wiki/CharacterModelViewer";
 import { cpkAssetUrl } from "@rosegriffon/azalee/cpk/shared";
 import { downloadName } from "@rosegriffon/azalee/text/download-filename";
@@ -92,7 +93,7 @@ export function CutinViewer({ cutin, skillName }: CutinViewerProps): React.JSX.E
 	const handleRef = useRef<CutinSceneHandle | null>(null);
 	const blobUrlsRef = useRef<string[]>([]);
 
-	const modelUrl = `https://cdn.rosegriffon.fr/model-chr/waza/${cutin.event_id_name}.glb`;
+	const modelUrl = `${cdnOrigin(process.env.NEXT_PUBLIC_CDN_ORIGIN)}/model-chr/waza/${cutin.event_id_name}.glb`;
 	const textureUrl = cpkAssetUrl(cutin.texture_g4tx);
 
 	// Chargement des données une fois la scène montée (AbortController au démontage).

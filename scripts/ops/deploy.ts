@@ -113,8 +113,12 @@ const RELEASES_ROOT = "/home/ubuntu/rg-releases";
 const NGINX_UPSTREAM_DIR = "/etc/nginx/rg-upstreams";
 const NGINX_MAIN_CONF = "/etc/nginx/nginx.conf";
 const BUN_BIN = "/home/ubuntu/.bun/bin/bun";
-/** Versions conservées sur disque (retour arrière + réservoir de fragments). */
-const DEFAULT_KEEP = 5;
+/**
+ * Versions conservées sur disque (production, rollback immédiat et une marge de
+ * sécurité). Trois versions suffisent au bleu/vert tout en empêchant les builds
+ * Next de remplir le disque entre deux publications.
+ */
+const DEFAULT_KEEP = 3;
 /** Secondes pendant lesquelles l'ancien slot reste debout après la bascule. */
 const DEFAULT_DRAIN_SECONDS = 10;
 /** Marge de mémoire libre exigée en plus de l'empreinte estimée de la doublure. */
@@ -1290,14 +1294,15 @@ async function commandReleases(apps: AppConfig[]): Promise<boolean> {
 }
 
 /**
- * Retire les versions générées qui ne servent plus aucun slot.
+ * Retire les versions générées qui ne servent plus aucun slot et excèdent la
+ * rétention demandée.
  *
  * Cette commande est volontairement distincte de la rétention automatique : elle ne conserve
- * que les versions réellement attachées à un service actif, répare les liens de slot inactifs,
- * remet `previousRelease` à null et reconstruit le réservoir statique sur ce petit ensemble.
+ * les versions attachées à un service actif ainsi que les dernières versions demandées,
+ * répare les liens de slot inactifs et reconstruit le réservoir statique sur cet ensemble.
  * Un aperçu en cours est refusé plutôt que supprimé sous les pieds d'un testeur.
  */
-async function commandCleanup(app: AppConfig): Promise<boolean> {
+async function commandCleanup(app: AppConfig, keep: number): Promise<boolean> {
 	const unlock = await acquireLock(app);
 	try {
 		const state = await readState(app);
@@ -1318,6 +1323,8 @@ async function commandCleanup(app: AppConfig): Promise<boolean> {
 		slotsActifs.add(releaseVivant);
 
 		const releases = await listReleases(app);
+		for (const release of releases.slice(0, Math.max(1, keep))) slotsActifs.add(release);
+		if (state.previousRelease) slotsActifs.add(state.previousRelease);
 		const obsoletes = releases.filter((release) => !slotsActifs.has(release));
 		for (const release of obsoletes) {
 			await rm(releasePath(app, release), { recursive: true, force: true });
@@ -1335,7 +1342,10 @@ async function commandCleanup(app: AppConfig): Promise<boolean> {
 			} else state.slots[slot] = { release };
 		}
 		state.release = releaseVivant;
-		state.previousRelease = null;
+		state.previousRelease =
+			state.previousRelease && slotsActifs.has(state.previousRelease)
+				? state.previousRelease
+				: null;
 		state.preview = null;
 		state.history.push({
 			at: new Date().toISOString(),
@@ -1345,7 +1355,7 @@ async function commandCleanup(app: AppConfig): Promise<boolean> {
 			note: `${obsoletes.length} version(s) retirée(s)`,
 		});
 		await writeState(app, state);
-		await refreshStaticPool(app, Math.max(1, slotsActifs.size));
+		await refreshStaticPool(app, Math.max(1, keep));
 
 		// `.next` est un cache de build régénérable. Les releases utilisent des liens physiques,
 		// donc ce nettoyage ne retire aucun fichier encore servi par un slot.
@@ -1647,7 +1657,7 @@ async function main(): Promise<number> {
 		logFile = `${appRoot(app)}/logs/${command}-${stamp()}.log`;
 		try {
 			if (command === "install") ok = (await installApp(app, flags)) && ok;
-			else if (command === "cleanup") ok = (await commandCleanup(app)) && ok;
+			else if (command === "cleanup") ok = (await commandCleanup(app, flags.keep)) && ok;
 			else if (command === "reload") ok = (await commandReload(app, flags)) && ok;
 			else if (command === "rollback") ok = (await commandRollback(app, flags)) && ok;
 			else if (command === "preview") ok = (await commandPreview(app, flags)) && ok;

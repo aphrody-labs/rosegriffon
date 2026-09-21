@@ -2,9 +2,11 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { createAchilleaClient } from "@/lib/achillea";
-import type { LeagueSeasonPayload, LeagueMatchRow, LeagueStandingRow } from "@rosegriffon/achillea-types/domain/league";
+import type {
+	LeagueSeasonPayload,
+	LeagueMatchRow,
+} from "@rosegriffon/achillea-types/domain/league";
 import {
 	Trophy,
 	ArrowLeft,
@@ -14,16 +16,16 @@ import {
 	Layers,
 	ChevronLeft,
 	ChevronRight,
-	Shield,
 	Loader2,
-	CheckCircle2,
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function AstralLeaguePage() {
 	const [season, setSeason] = useState<LeagueSeasonPayload | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [activeTab, setActiveTab] = useState<"standings" | "matches" | "playoffs" | "rules">("standings");
+	const [activeTab, setActiveTab] = useState<"standings" | "matches" | "playoffs" | "rules">(
+		"standings"
+	);
 	const [selectedMatchday, setSelectedMatchday] = useState<number>(1);
 
 	useEffect(() => {
@@ -73,9 +75,9 @@ export default function AstralLeaguePage() {
 	}, [season, selectedMatchday]);
 
 	return (
-		<div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+		<div className="mx-auto max-w-5xl space-y-6 px-4 py-4 min-[600px]:px-6 min-[600px]:py-6">
 			{/* Breadcrumb */}
-			<div className="space-y-1 border-b border-border pb-6">
+			<div className="space-y-2 border-b border-border pb-4">
 				<Link
 					href="/achillea"
 					className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition mb-2"
@@ -87,53 +89,21 @@ export default function AstralLeaguePage() {
 					<span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
 						<Trophy className="w-5 h-5" />
 					</span>
-					<h1 className="text-3xl font-bold tracking-tight">Astral League — Championnat Officiel</h1>
+					<h1 className="text-2xl font-bold tracking-tight min-[840px]:text-3xl">Astral League</h1>
 				</div>
-				<p className="text-sm text-muted-foreground">
-					La ligue d'élite Inazuma Eleven: Victory Road. Saison régulière en format championnat et phases finales en play-offs.
-				</p>
-			</div>
-
-			{/* Hero Banner */}
-			<div className="border border-border bg-card rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-sm flex flex-col md:flex-row items-center gap-6">
-				<div className="relative w-32 h-32 shrink-0 flex items-center justify-center p-2 rounded-2xl bg-muted/40 border border-border">
-					<Image
-						src="/leagues/astral-logo-mark.png"
-						alt="Astral League Logo"
-						width={96}
-						height={96}
-						className="object-contain drop-shadow"
-						priority
-					/>
-				</div>
-
-				<div className="space-y-2 text-center md:text-left flex-1">
-					<div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-						<h2 className="text-2xl font-black">Astral League · Saison 1</h2>
-						<span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-							En cours
-						</span>
-					</div>
-					<p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
-						8 équipes sélectionnées s'affrontent sur 7 journées de championnat aller simple. Les 4 premières places au classement se qualifient pour le bracket final des Play-offs.
-					</p>
-
-					<div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2 text-xs font-medium text-muted-foreground">
-						<span className="flex items-center gap-1.5">
-							<Users className="w-4 h-4 text-primary" />
-							{season?.teams?.length ?? 8} équipes
-						</span>
-						<span>·</span>
-						<span className="flex items-center gap-1.5">
-							<Calendar className="w-4 h-4 text-primary" />
-							{totalMatchdays} journées
-						</span>
-						<span>·</span>
-						<span className="flex items-center gap-1.5">
-							<Sparkles className="w-4 h-4 text-amber-400" />
-							Top 4 Play-offs
-						</span>
-					</div>
+				<div className="flex flex-wrap items-center gap-3 text-xs font-medium text-muted-foreground">
+					<span className="flex items-center gap-1.5">
+						<Users className="w-4 h-4 text-primary" />
+						{season?.teams?.length ?? 8} équipes
+					</span>
+					<span className="flex items-center gap-1.5">
+						<Calendar className="w-4 h-4 text-primary" />
+						{totalMatchdays} journées
+					</span>
+					<span className="flex items-center gap-1.5">
+						<Sparkles className="w-4 h-4 text-amber-400" />
+						Top 4 Play-offs
+					</span>
 				</div>
 			</div>
 
@@ -192,7 +162,9 @@ export default function AstralLeaguePage() {
 			{loading ? (
 				<div className="py-20 text-center space-y-3">
 					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-					<p className="text-sm text-muted-foreground">Chargement des données de l'Astral League...</p>
+					<p className="text-sm text-muted-foreground">
+						Chargement des données de l'Astral League...
+					</p>
 				</div>
 			) : (
 				<>
@@ -233,12 +205,12 @@ export default function AstralLeaguePage() {
 																row.rank === 1
 																	? "bg-amber-400 text-black"
 																	: row.rank === 2
-																	? "bg-slate-300 text-black"
-																	: row.rank === 3
-																	? "bg-amber-700 text-white"
-																	: isPlayoffSpot
-																	? "bg-primary/20 text-primary"
-																	: "text-muted-foreground"
+																		? "bg-slate-300 text-black"
+																		: row.rank === 3
+																			? "bg-amber-700 text-white"
+																			: isPlayoffSpot
+																				? "bg-primary/20 text-primary"
+																				: "text-muted-foreground"
 															}`}
 														>
 															{row.rank}
@@ -275,8 +247,8 @@ export default function AstralLeaguePage() {
 															row.mapDiff > 0
 																? "text-emerald-400"
 																: row.mapDiff < 0
-																? "text-rose-400"
-																: "text-muted-foreground"
+																	? "text-rose-400"
+																	: "text-muted-foreground"
 														}`}
 													>
 														{row.mapDiff > 0 ? `+${row.mapDiff}` : row.mapDiff}
@@ -380,7 +352,8 @@ export default function AstralLeaguePage() {
 											Final Four — Play-offs Officiels
 										</h3>
 										<p className="text-xs text-muted-foreground mt-0.5">
-											Arbre à élimination directe réunissant les 4 meilleures équipes de la saison régulière.
+											Arbre à élimination directe réunissant les 4 meilleures équipes de la saison
+											régulière.
 										</p>
 									</div>
 								</div>
@@ -408,7 +381,9 @@ export default function AstralLeaguePage() {
 													1
 												</span>
 												<span className="font-semibold text-foreground">
-													{standings[0] ? teamsMap.get(standings[0].teamId) || standings[0].teamId : "Seed 1 (1er)"}
+													{standings[0]
+														? teamsMap.get(standings[0].teamId) || standings[0].teamId
+														: "Seed 1 (1er)"}
 												</span>
 											</div>
 											<span className="font-mono font-bold">-</span>
@@ -420,7 +395,9 @@ export default function AstralLeaguePage() {
 													4
 												</span>
 												<span className="font-semibold text-foreground">
-													{standings[3] ? teamsMap.get(standings[3].teamId) || standings[3].teamId : "Seed 4 (4ème)"}
+													{standings[3]
+														? teamsMap.get(standings[3].teamId) || standings[3].teamId
+														: "Seed 4 (4ème)"}
 												</span>
 											</div>
 											<span className="font-mono font-bold">-</span>
@@ -446,7 +423,9 @@ export default function AstralLeaguePage() {
 													2
 												</span>
 												<span className="font-semibold text-foreground">
-													{standings[1] ? teamsMap.get(standings[1].teamId) || standings[1].teamId : "Seed 2 (2ème)"}
+													{standings[1]
+														? teamsMap.get(standings[1].teamId) || standings[1].teamId
+														: "Seed 2 (2ème)"}
 												</span>
 											</div>
 											<span className="font-mono font-bold">-</span>
@@ -458,7 +437,9 @@ export default function AstralLeaguePage() {
 													3
 												</span>
 												<span className="font-semibold text-foreground">
-													{standings[2] ? teamsMap.get(standings[2].teamId) || standings[2].teamId : "Seed 3 (3ème)"}
+													{standings[2]
+														? teamsMap.get(standings[2].teamId) || standings[2].teamId
+														: "Seed 3 (3ème)"}
 												</span>
 											</div>
 											<span className="font-mono font-bold">-</span>
@@ -527,7 +508,8 @@ export default function AstralLeaguePage() {
 								Phase Finale (Play-offs)
 							</h3>
 							<p>
-								Les 4 premières équipes accèdent à l'arbre des play-offs en match à élimination directe pour désigner le grand champion de la saison.
+								Les 4 premières équipes accèdent à l'arbre des play-offs en match à élimination
+								directe pour désigner le grand champion de la saison.
 							</p>
 						</div>
 					)}

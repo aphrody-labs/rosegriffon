@@ -97,12 +97,15 @@ export function construireNavigationItems(): NavItem[] {
 	const w = wiki;
 
 	return [
-		{ imageUrl: "/RG_Azalee-logo.webp", icon: "home", label: "nav.home", path: w("/") },
+		// Accueil : pictogramme Material, le logo Azalée reste réservé à l'entête du groupe.
+		{ icon: "home", label: "nav.home", path: w("/") },
+		// Sprite « lien » : connexion/collaboration, utilisé pour Inazuma Eleven Cross.
 		{ commonSprite: "lien", icon: "sports_soccer", label: "nav.cross", path: w("/cross") },
 		// Les articles et notes de version décrivent l'actualité du jeu et du wiki.
-		{ emote: "gaelle-fiere", icon: "feed", label: "nav.association.news", path: "/news" },
-		{ commonSprite: "breche", icon: "update", label: "nav.news.patch_notes", path: w("/patch-notes") },
+		{ icon: "feed", label: "nav.association.news", path: "/news" },
+		{ icon: "update", label: "nav.news.patch_notes", path: w("/patch-notes") },
 		// — Base de données (wiki curé) —
+		// Sprite « chara » : portrait/personnage, donc index des joueurs.
 		{ commonSprite: "chara", icon: "groups", label: "nav.wiki.players", path: w("/chara") },
 		{
 			// Techniques, tactiques, passifs (capacités hors hyper).
@@ -113,7 +116,12 @@ export function construireNavigationItems(): NavItem[] {
 					icon: "sports_martial_arts",
 					commonSprite: "skill",
 				},
-				{ commonSprite: "justice", label: "nav.wiki.tactics", path: w("/tactic"), icon: "strategy" },
+				{
+					commonSprite: "justice",
+					label: "nav.wiki.tactics",
+					path: w("/tactic"),
+					icon: "strategy",
+				},
 				{
 					label: "nav.wiki.passives",
 					path: w("/passive"),
@@ -194,10 +202,9 @@ export function construireNavigationItems(): NavItem[] {
 			label: "nav.section.items",
 			path: w("/item"),
 		},
-		{ gameIcon: "road", icon: "task_alt", label: "nav.wiki.quests", path: w("/quete") },
+		{ icon: "task_alt", label: "nav.wiki.quests", path: w("/quete") },
 		{
 			// Table d'expérience du jeu (`inagle_exp_table`) : courbe + calculateurs.
-			commonSprite: "tension",
 			icon: "trending_up",
 			label: "nav.wiki.levels",
 			path: w("/niveau"),
@@ -298,15 +305,14 @@ export function construireEsportItems(): NavItem[] {
 
 	return [
 		{
-			// Logo Achilléa officiel (`public/achillea/logo1.svg`).
+			// L'accueil garde un pictogramme Material ; le logo est déjà sur le groupe.
 			icon: "sports_esports",
-			imageUrl: "/achillea/logo1.svg",
 			label: "nav.esport.home",
 			path: e("/"),
 		},
 		{
 			children: [
-				{ gameIcon: "emblem", icon: "groups", label: "nav.esport.clans.list", path: e("/clans") },
+				{ icon: "groups", label: "nav.esport.clans.list", path: e("/clans") },
 				{ icon: "add_circle", label: "nav.esport.clans.create", path: e("/clans/create") },
 				{ icon: "shield", label: "nav.esport.clans.dashboard", path: e("/clans/dashboard") },
 			],
@@ -316,7 +322,7 @@ export function construireEsportItems(): NavItem[] {
 		},
 		{
 			children: [
-				{ commonSprite: "contre", icon: "swords", label: "nav.esport.ranked.play", path: e("/ranked") },
+				{ icon: "swords", label: "nav.esport.ranked.play", path: e("/ranked") },
 				{
 					icon: "leaderboard",
 					label: "nav.esport.ranked.leaderboard",
@@ -332,7 +338,30 @@ export function construireEsportItems(): NavItem[] {
 		{
 			children: [
 				{
-					gameIcon: "medal",
+					emote: "gaelle-fiere",
+					icon: "account_circle",
+					label: "nav.association.avatar_rg",
+					path: "/projets/outils/pfp",
+				},
+				{
+					emote: "gaelle-coeur",
+					icon: "palette",
+					label: "nav.association.nostalgie",
+					path: "/projets/nostalgie",
+				},
+				{
+					emote: "rg-funny",
+					icon: "groups",
+					label: "nav.association.murals",
+					path: "/projets/muraux",
+				},
+				{
+					emote: "gaelle-surprise",
+					icon: "sentiment_satisfied",
+					label: "nav.association.emotes",
+					path: "/projets/emotes",
+				},
+				{
 					icon: "emoji_events",
 					label: "nav.esport.tournaments.list",
 					path: e("/tournaments"),
@@ -363,7 +392,7 @@ export function construireEsportItems(): NavItem[] {
 		// écrans de service, atteints depuis le contexte qui les motive (une
 		// rencontre à caster, une inscription, un achat), jamais depuis une barre
 		// latérale. Les pages existent toujours.
-		{ gameIcon: "emote", icon: "menu_book", label: "nav.esport.guide", path: e("/guide") },
+		{ icon: "menu_book", label: "nav.esport.guide", path: e("/guide") },
 	];
 }
 
@@ -379,9 +408,7 @@ export function construireEsportItems(): NavItem[] {
  * chroniques sont un filtre et non un second site.
  */
 export function construireActualiteItems(): NavItem[] {
-	return [
-		{ emote: "gaelle-fiere", icon: "feed", label: "nav.association.news", path: "/news" },
-	];
+	return [{ emote: "gaelle-fiere", icon: "feed", label: "nav.association.news", path: "/news" }];
 }
 
 /**
@@ -393,11 +420,12 @@ export function construireActualiteItems(): NavItem[] {
  */
 export function construireAssociationItems(): NavItem[] {
 	return [
-		{ imageUrl: "/RG_Logo_V2.5.webp", icon: "home", label: "nav.association.home", path: "/" },
+		// Le groupe porte déjà le logo RG : l'accueil utilise le symbole Maison.
+		{ icon: "home", label: "nav.association.home", path: "/" },
 		{ emote: "rg-funny", icon: "forum", label: "nav.association.community", path: "/community" },
 		{ emote: "gaelle-salut", icon: "groups", label: "nav.association.team", path: "/notre-equipe" },
-		{ gameIcon: "nameplate", icon: "event", label: "nav.association.events", path: "/evenements" },
-		{ gameIcon: "ticket", icon: "how_to_vote", label: "nav.association.polls", path: "/sondages" },
+		{ icon: "event", label: "nav.association.events", path: "/evenements" },
+		{ icon: "how_to_vote", label: "nav.association.polls", path: "/sondages" },
 		{
 			children: [
 				{
@@ -413,13 +441,11 @@ export function construireAssociationItems(): NavItem[] {
 					path: "/iergday",
 				},
 			],
-			gameIcon: "house",
 			icon: "rocket_launch",
 			label: "nav.association.projects",
 			path: "/projets",
 		},
 		{
-			gameIcon: "moneybag",
 			icon: "volunteer_activism",
 			label: "nav.association.support",
 			path: "/nous-soutenir",
@@ -428,8 +454,7 @@ export function construireAssociationItems(): NavItem[] {
 }
 
 /**
- * Menu complet, groupé en QUATRE catégories : actualité, association, wiki,
- * e-sport.
+ * Menu complet, groupé en trois catégories : association, wiki et e-sport.
  *
  * `groupOnly` sur l'entête : le groupe n'est pas une destination, seulement un
  * déclencheur de repli — sans ce drapeau la barre latérale en ferait un lien
@@ -446,12 +471,9 @@ export function construireNavigationUnifiee(): SousCategorieNav[] {
 		/**
 		 * Déplié au chargement.
 		 *
-		 * Les quatre groupes l'étaient, soit 66 liens dans la colonne dès
-		 * l'ouverture — le wiki en apporte 38 à lui seul. Actualité et
-		 * Association restent ouverts : ce sont les destinations du portail. Wiki
-		 * et E-sport sont des UNIVERS, avec leur propre page d'accueil et leur
-		 * propre navigation interne ; leur entrée de menu suffit, et elle porte
-		 * leur logo plutôt qu'un pictogramme.
+		 * La barre n'affiche qu'un univers à la fois. L'association est le repli
+		 * initial ; le composant de navigation ouvre ensuite automatiquement le
+		 * groupe correspondant à la route courante.
 		 */
 		ouvertParDefaut: boolean;
 	}[] = [

@@ -8,6 +8,7 @@ import {
 	type DescriptionTache,
 	type SanteCron,
 } from "@rosegriffon/types/cron";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 
 /**
  * Client de `rg-cron.service` — l'ordonnanceur, vu depuis le site.
@@ -174,6 +175,39 @@ export async function declencherTache(
 
 export interface TelemetrieDiscord {
 	[clef: string]: unknown;
+}
+
+/** Une exécution persistée par `rg-cron` dans PostgreSQL. */
+export interface ExecutionCron {
+	tache: string;
+	demarre_le: string;
+	duree_ms: number;
+	succes: boolean;
+	erreur: string | null;
+	origine: string;
+}
+
+/**
+ * Historique administratif depuis la même table que le démon alimente.
+ *
+ * L'observabilité ne doit jamais rendre l'administration inutilisable : une
+ * migration en attente ou une base momentanément indisponible donne une liste
+ * vide, tandis que l'état live du démon reste affiché.
+ */
+export async function historiqueDuCron(limite = 20): Promise<ExecutionCron[]> {
+	const plafond = Math.min(Math.max(Math.trunc(limite), 1), 100);
+	try {
+		const supabase = createSupabaseServiceClient() as any;
+		const { data, error } = await supabase
+			.from("cron_executions")
+			.select("tache, demarre_le, duree_ms, succes, erreur, origine")
+			.order("demarre_le", { ascending: false })
+			.limit(plafond);
+		if (error) throw error;
+		return (data ?? []) as ExecutionCron[];
+	} catch {
+		return [];
+	}
 }
 
 /** Télémétrie Discord du démon (présences, salons vocaux), ou `null`. */

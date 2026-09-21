@@ -267,7 +267,11 @@ export function VisualSettingsEditor({ settings: initialSettings }: VisualSettin
 								def="Le pilier médiatique de Rose Griffon."
 								type="textarea"
 							/>
-							<Field label="Image URL" sKey="home_azalee_image" def="https://azalee.rosegriffon.fr/opengraph-image.png" />
+							<Field
+								label="Image URL"
+								sKey="home_azalee_image"
+								def="https://azalee.rosegriffon.fr/opengraph-image.png"
+							/>
 							<Field label="Logo URL" sKey="home_azalee_logo" def="/RG_Azalee-logo.webp" />
 							<Separator />
 							<Field
@@ -296,7 +300,11 @@ export function VisualSettingsEditor({ settings: initialSettings }: VisualSettin
 									"home_azalee_description",
 									"Le pilier médiatique de Rose Griffon."
 								)}
-								image={getVal(settings, "home_azalee_image", "https://azalee.rosegriffon.fr/opengraph-image.png")}
+								image={getVal(
+									settings,
+									"home_azalee_image",
+									"https://azalee.rosegriffon.fr/opengraph-image.png"
+								)}
 								logo={getVal(settings, "home_azalee_logo", "/RG_Azalee-logo.webp")}
 								twitterLink={getVal(settings, "home_azalee_twitter", "https://x.com/Azalee_IE")}
 								instagramLink={getVal(
@@ -312,53 +320,12 @@ export function VisualSettingsEditor({ settings: initialSettings }: VisualSettin
 
 			{/* --- ACHILLEA TAB --- */}
 			<TabsContent value="achillea" className="space-y-6 animate-in fade-in-50">
-				<div className="grid lg:grid-cols-2 gap-8">
-					<Card>
-						<CardHeader>
-							<CardTitle>Achillea</CardTitle>
-							<CardDescription>Configuration de la bannière E-Sport.</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							<Field
-								label="Description"
-								sKey="home_achillea_description"
-								def="Le carrefour de l'esport Inazuma Eleven !"
-								type="textarea"
-							/>
-							<Field label="Image URL" sKey="home_achillea_image" def="https://achillea.rosegriffon.fr/opengraph-image" />
-							<Field
-								label="Lien Site"
-								sKey="home_achillea_link"
-								def="https://achillea.rosegriffon.fr/"
-							/>
-							<Field
-								label="Lien Discord"
-								sKey="home_achillea_discord"
-								def="https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055"
-							/>
-						</CardContent>
-					</Card>
-
-					<div className="space-y-4">
-						<Label className="text-muted-foreground uppercase text-xs tracking-wider">
-							Aperçu en direct
-						</Label>
-						<div className="border rounded-3xl p-4 bg-muted/30 dark:bg-black/20">
-							<AchilleaBanner
-								description={getVal(
-									settings,
-									"home_achillea_description",
-									"Le carrefour de l'esport Inazuma Eleven !"
-								)}
-								image={getVal(settings, "home_achillea_image", "https://achillea.rosegriffon.fr/opengraph-image")}
-								link={getVal(settings, "home_achillea_link", "https://achillea.rosegriffon.fr/")}
-								discordLink={getVal(
-									settings,
-									"home_achillea_discord",
-									"https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055"
-								)}
-							/>
-						</div>
+				<div className="space-y-4">
+					<Label className="text-muted-foreground uppercase text-xs tracking-wider">
+						Aperçu en direct
+					</Label>
+					<div className="border rounded-3xl p-4 bg-muted/30 dark:bg-black/20">
+						<AchilleaBanner />
 					</div>
 				</div>
 			</TabsContent>

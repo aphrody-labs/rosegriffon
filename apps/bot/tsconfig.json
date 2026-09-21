@@ -8,6 +8,7 @@
 		"useDefineForClassFields": false,
 		"paths": {
 			"@/*": ["./src/*"],
+			"@rosegriffon/assets": ["../../packages/assets/src/index.ts"],
 			"@rosegriffon/db": ["../../packages/db/src/index.ts"],
 			"@rosegriffon/db/*": ["../../packages/db/src/*"],
 			"@rosegriffon/types": ["../../packages/types/src/index.ts"],

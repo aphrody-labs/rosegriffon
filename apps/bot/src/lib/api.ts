@@ -60,11 +60,27 @@ export interface ApiProfile {
 	discord_id: string | null;
 }
 
+/**
+ * A Discord identity that either completed OAuth (`linked`) or was imported
+ * from Achillea/RG member data (`linked: false`). Imported identities are
+ * display-only: use `apiAuth` for actions requiring an RG account link.
+ */
+export interface ApiBotIdentity extends Omit<ApiProfile, "email"> {
+	linked: boolean;
+}
+
 export async function apiAuth(discordId: string): Promise<ApiProfile | null> {
 	const data = await request<{ linked: boolean; profile: ApiProfile | null }>(
 		`/api/bot/v1/auth?discord_id=${encodeURIComponent(discordId)}`
 	);
 	return data.profile;
+}
+
+export async function apiIdentity(discordId: string): Promise<ApiBotIdentity | null> {
+	const data = await request<{ found: boolean; identity: ApiBotIdentity | null }>(
+		`/api/bot/v1/identity?discord_id=${encodeURIComponent(discordId)}`
+	);
+	return data.identity;
 }
 
 export interface ApiStats {

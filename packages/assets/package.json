@@ -2,8 +2,9 @@
   "name": "@rosegriffon/assets",
   "version": "1.0.0",
   "description": "Shared static assets for Rose Griffon apps",
+  "type": "module",
   "exports": {
-    ".": "./package.json",
+    ".": "./src/index.ts",
     "./public/*": "./public/*"
   },
   "publishConfig": {

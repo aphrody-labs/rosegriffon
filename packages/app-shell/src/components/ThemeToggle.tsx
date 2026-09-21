@@ -5,11 +5,11 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import {
+	Button,
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-	THEMES,
 } from "@rosegriffon/ui";
 
 export interface ThemeOption {
@@ -67,14 +67,15 @@ export function ThemeToggle({
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<button
-					type="button"
+				<Button
+					variant="ghost"
+					size="icon"
 					className={`relative size-12 md:size-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-all duration-300 ${className ?? ""}`}
 					aria-label="Changer de thème"
 					title={active.label}
 				>
 					{ActiveIcon ? (
-						<ActiveIcon className="size-6 md:size-5" aria-hidden="true" />
+						<ActiveIcon aria-hidden="true" />
 					) : active.image ? (
 						<Image
 							src={active.image}
@@ -82,12 +83,12 @@ export function ThemeToggle({
 							width={24}
 							height={24}
 							unoptimized
-							className="size-6 md:size-5 object-contain"
+							className="object-contain"
 						/>
 					) : (
-						<Moon className="size-6 md:size-5" aria-hidden="true" />
+						<Moon aria-hidden="true" />
 					)}
-				</button>
+				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-48">
 				{themes.map((entry) => {
@@ -95,12 +96,12 @@ export function ThemeToggle({
 					return (
 						<DropdownMenuItem
 							key={entry.id}
-							onClick={() => setTheme(entry.id)}
+							onSelect={() => setTheme(entry.id)}
 							className="gap-2.5"
 							aria-current={entry.id === active.id ? "true" : undefined}
 						>
 							{Icon ? (
-								<Icon className="size-4 shrink-0" aria-hidden="true" />
+								<Icon data-icon="inline-start" aria-hidden="true" />
 							) : entry.image ? (
 								<Image
 									src={entry.image}
@@ -108,14 +109,14 @@ export function ThemeToggle({
 									width={20}
 									height={20}
 									unoptimized
-									className="size-5 shrink-0 object-contain"
+									className="shrink-0 object-contain"
 								/>
 							) : (
-								<Moon className="size-4 shrink-0" aria-hidden="true" />
+								<Moon data-icon="inline-start" aria-hidden="true" />
 							)}
 							<span className="flex-1 truncate">{entry.label}</span>
 							{entry.id === active.id && (
-								<Check className="size-4 shrink-0 opacity-70" aria-hidden="true" />
+								<Check data-icon="inline-end" className="opacity-70" aria-hidden="true" />
 							)}
 						</DropdownMenuItem>
 					);

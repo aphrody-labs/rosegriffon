@@ -31,6 +31,7 @@
 
 import { $ } from "bun";
 import { readdir } from "node:fs/promises";
+import { join } from "node:path";
 
 const RACINE = "/home/ubuntu/rg";
 const INFRA_SYSTEMD = `${RACINE}/infra/systemd`;
@@ -45,6 +46,21 @@ const NIERS_NGINX = "/home/ubuntu/niers/deploy/nginx";
 const NGINX_CONF_D = "/etc/nginx/conf.d";
 const SYSCTL_D = "/etc/sysctl.d";
 const LOGROTATE_D = "/etc/logrotate.d";
+
+/** Fichiers d'un arbre, avec chemins relatifs POSIX (inclut les drop-ins systemd). */
+async function fichiersRecursifs(racine: string, préfixe = ""): Promise<string[]> {
+	const entrées = await readdir(racine, { withFileTypes: true }).catch(() => []);
+	const fichiers: string[] = [];
+	for (const entrée of entrées) {
+		const relatif = préfixe === "" ? entrée.name : `${préfixe}/${entrée.name}`;
+		if (entrée.isDirectory()) {
+			fichiers.push(...(await fichiersRecursifs(join(racine, entrée.name), relatif)));
+		} else if (entrée.isFile()) {
+			fichiers.push(relatif);
+		}
+	}
+	return fichiers;
+}
 
 /**
  * Préfixes d'unités systemd du périmètre. Une unité qui commence par l'un d'eux est
@@ -113,6 +129,23 @@ async function unités(): Promise<Objet[]> {
 			(o) => o.machine !== null || dansDépôt.includes(o.nom) || dansNiers.includes(o.nom)
 		)
 	);
+}
+
+/**
+ * Les drop-ins sont des unités effectives : les omettre laisse une partie des
+ * limites, variables et politiques de reprise hors du contrôle de dérive.
+ */
+async function dropinsSystemd(): Promise<Objet[]> {
+	const fichiers = await fichiersRecursifs(INFRA_SYSTEMD);
+	return fichiers
+		.filter((relatif) => /\.(?:service|timer)\.d\/[^/]+\.conf$/u.test(relatif))
+		.toSorted()
+		.map((relatif) => ({
+			dépôt: `${INFRA_SYSTEMD}/${relatif}`,
+			famille: "systemd" as const,
+			machine: `/etc/systemd/system/${relatif}`,
+			nom: relatif,
+		}));
 }
 
 /** Vhosts et fragments nginx effectivement chargés (`conf.d/*.conf` et les `.inc` inclus). */
@@ -220,6 +253,7 @@ const LÉGENDE: Record<État, string> = {
 async function commandeCheck(options: { secrets: boolean }): Promise<number> {
 	const objets = [
 		...(await unités()),
+		...(await dropinsSystemd()),
 		...(await vhosts()),
 		...(await réglagesNoyau()),
 		...(await rotationJournaux()),
@@ -268,6 +302,7 @@ async function commandeCheck(options: { secrets: boolean }): Promise<number> {
 async function commandePull(): Promise<number> {
 	const objets = [
 		...(await unités()),
+		...(await dropinsSystemd()),
 		...(await vhosts()),
 		...(await réglagesNoyau()),
 		...(await rotationJournaux()),
@@ -295,6 +330,7 @@ async function commandePull(): Promise<number> {
 async function commandeDiff(nom: string): Promise<number> {
 	const objets = [
 		...(await unités()),
+		...(await dropinsSystemd()),
 		...(await vhosts()),
 		...(await réglagesNoyau()),
 		...(await rotationJournaux()),

@@ -4,7 +4,7 @@
 # └──────────────────────────────────────────────────────────────────────────┘
 # Achilléa n'a plus de session propre : elle dérive du compte Rose Griffon
 # (cf. « feat(achillea): une seule session, derivee du compte rose griffon »).
-# GoTrue n'a donc plus aucun appelant — ni dans `apps/achillea-web`, ni dans
+# GoTrue n'a donc plus aucun appelant — ni dans `apps/website`, ni dans
 # `apps/achillea-bot`, ni dans `packages/achillea-*` — et les DEUX passerelles
 # répondent déjà `410` sur `/auth/v1/` : la façade publique
 # (`infra/nginx/achillea.rosegriffon.conf`) et sa copie loopback

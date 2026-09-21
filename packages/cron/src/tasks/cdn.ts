@@ -1,11 +1,15 @@
 import { Glob } from "bun";
 import { mkdir, stat, writeFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { join, dirname } from "node:path";
 import { brotliCompressSync, gzipSync, constants } from "node:zlib";
 import { execSync } from "node:child_process";
+import { SHARED_ASSETS_PATH } from "@rosegriffon/assets";
 
-const SOURCE_DIR = "/home/ubuntu/rg/packages/assets/public";
-const DEST_DIRS = ["/var/www/cdn/static/azalee/public", "/var/www/cdn/static/website/public"];
+const SOURCE_DIR =
+	process.env.RG_ASSETS_SOURCE_DIR ?? fileURLToPath(new URL("../../../assets/public/", import.meta.url));
+const CDN_STATIC_ROOT = process.env.CDN_STATIC_ROOT ?? "/var/www/cdn/static";
+const DEST_DIR = join(CDN_STATIC_ROOT, SHARED_ASSETS_PATH);
 
 /**
  * Synchronise les assets statiques partagés du monorepo vers le CDN.
@@ -17,7 +21,7 @@ export async function syncCdnAssets(): Promise<{ success: boolean; error?: strin
 		// Utilise l'implémentation native ultra-rapide de Glob de Bun
 		const glob = new Glob("**/*");
 		const files = Array.from(glob.scanSync({ cwd: SOURCE_DIR, onlyFiles: true }));
-		console.log(`[Cron CDN] ${files.length} assets trouvés pour la synchronisation.`);
+		console.log(`[Cron CDN] ${files.length} assets trouvés pour la synchronisation vers ${DEST_DIR}.`);
 
 		let copyCount = 0;
 		let skipCount = 0;
@@ -27,33 +31,32 @@ export async function syncCdnAssets(): Promise<{ success: boolean; error?: strin
 			const fileContent = await Bun.file(srcPath).arrayBuffer();
 			const buffer = Buffer.from(fileContent);
 
-			for (const destDir of DEST_DIRS) {
-				const destPath = join(destDir, relPath);
-				const destParentDir = dirname(destPath);
+			const destPath = join(DEST_DIR, relPath);
+			const destParentDir = dirname(destPath);
 
-				// Crée le dossier parent si nécessaire
-				await mkdir(destParentDir, { recursive: true });
+			// Crée le dossier parent si nécessaire
+			await mkdir(destParentDir, { recursive: true });
 
 				// Vérifie si le fichier existe déjà et est identique
-				let shouldCopy = true;
-				try {
-					const destStat = await stat(destPath);
-					const srcStat = await stat(srcPath);
-					if (destStat.size === srcStat.size) {
-						shouldCopy = false;
-					}
-				} catch {
-					// Le fichier n'existe pas encore
+			let shouldCopy = true;
+			try {
+				const destStat = await stat(destPath);
+				const srcStat = await stat(srcPath);
+				if (destStat.size === srcStat.size) {
+					shouldCopy = false;
 				}
+			} catch {
+				// Le fichier n'existe pas encore
+			}
 
-				if (shouldCopy) {
-					// Copie du fichier
-					await writeFile(destPath, buffer);
-					copyCount++;
+			if (shouldCopy) {
+				// Copie du fichier
+				await writeFile(destPath, buffer);
+				copyCount++;
 
 					// Pré-compression pour les fichiers texte, SVG, polices, etc.
-					const ext = destPath.split(".").pop()?.toLowerCase();
-					const compressibleExtensions = [
+				const ext = destPath.split(".").pop()?.toLowerCase();
+				const compressibleExtensions = [
 						"js",
 						"css",
 						"html",
@@ -64,11 +67,11 @@ export async function syncCdnAssets(): Promise<{ success: boolean; error?: strin
 						"xml",
 						"webmanifest",
 					];
-					if (ext && compressibleExtensions.includes(ext)) {
-						try {
+				if (ext && compressibleExtensions.includes(ext)) {
+					try {
 							// Gzip (niveau 9)
 							const gzContent = gzipSync(buffer, { level: 9 });
-							await writeFile(`${destPath}.gz`, gzContent);
+						await writeFile(`${destPath}.gz`, gzContent);
 
 							// Brotli (qualité 11)
 							const brContent = brotliCompressSync(buffer, {
@@ -76,17 +79,16 @@ export async function syncCdnAssets(): Promise<{ success: boolean; error?: strin
 									[constants.BROTLI_PARAM_QUALITY]: 11,
 								},
 							});
-							await writeFile(`${destPath}.br`, brContent);
-						} catch (compressErr) {
+						await writeFile(`${destPath}.br`, brContent);
+					} catch (compressErr) {
 							console.warn(
 								`[Cron CDN] Warning: Impossible de pré-compresser ${relPath}:`,
 								compressErr
 							);
-						}
 					}
-				} else {
-					skipCount++;
 				}
+			} else {
+				skipCount++;
 			}
 		}
 		console.log(

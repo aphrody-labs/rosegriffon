@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join as pathJoin, resolve as pathResolve } from "node:path";
+import { DEFAULT_CDN_ORIGIN } from "@rosegriffon/assets";
 
 // Serverless (Cloud Run) : binder 0.0.0.0 + lire $PORT (injecté par la plateforme).
 // `CDN_PORT` reste honoré pour le legacy/tests (CDN_PORT=0 → port éphémère) ;
@@ -11,7 +12,7 @@ const HOST = process.env.CDN_HOST ?? "0.0.0.0";
 // / Cloud Run). Aucune persistance garantie — c'est best-effort par instance.
 const TMP_BASE = pathJoin(tmpdir(), "rpbey-cdn");
 const STORAGE = process.env.CDN_STORAGE ?? pathJoin(TMP_BASE, "images");
-const FALLBACK_PUBLIC_BASE = process.env.CDN_PUBLIC_BASE ?? "https://cdn.rosegriffon.fr";
+const FALLBACK_PUBLIC_BASE = process.env.CDN_PUBLIC_BASE ?? DEFAULT_CDN_ORIGIN;
 const ASSETS_MANIFEST =
   process.env.CDN_ASSETS_MANIFEST ?? pathJoin(TMP_BASE, "assets-manifest.json");
 const REPO_ROOT = process.env.CDN_REPO_ROOT ?? pathResolve(import.meta.dir, "../..");
