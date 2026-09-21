@@ -7,16 +7,30 @@ export default function manifest(): MetadataRoute.Manifest {
 		description:
 			"Site officiel de l'association Rose Griffon, rassemblant la communauté Inazuma Eleven en France.",
 		display: "standalone",
+		// Trois fichiers RÉELS, générés aux dimensions annoncées. La version
+		// précédente déclarait deux fois le même WebP de 1920 px en le disant
+		// 192 puis 512 : le navigateur téléchargeait 100 Ko pour une icône de
+		// lanceur, et Android refuse une icône dont la taille ne correspond pas.
 		icons: [
 			{
-				src: "/RG_Logo_V2.5.webp",
+				src: "/icon-192.png",
 				sizes: "192x192",
-				type: "image/webp",
+				type: "image/png",
+				purpose: "any",
 			},
 			{
-				src: "/RG_Logo_V2.5.webp",
+				src: "/icon-512.png",
 				sizes: "512x512",
-				type: "image/webp",
+				type: "image/png",
+				purpose: "any",
+			},
+			// `maskable` est rogné en cercle ou en écusson selon le lanceur : le
+			// logo y est réduit à 80 % sur fond blanc pour rester entier dans la
+			// zone sûre. Le même fichier que `any` perdrait l'éclair et la rose.
+			{
+				src: "/icon-maskable-512.png",
+				sizes: "512x512",
+				type: "image/png",
 				purpose: "maskable",
 			},
 		],
