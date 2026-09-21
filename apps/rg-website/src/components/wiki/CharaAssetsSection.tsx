@@ -8,13 +8,14 @@
  */
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import { cdnOrigin } from "@rosegriffon/assets";
 import { Icon } from "@/components/ui/Icon";
 
 const CharacterModelViewer = dynamic(() => import("@/components/wiki/CharacterModelViewer"), {
 	ssr: false,
 });
 
-const CDN = "https://cdn.rosegriffon.fr";
+const CDN = cdnOrigin(process.env.NEXT_PUBLIC_CDN_ORIGIN);
 
 export function CharaAssetsSection({
 	internalCode,

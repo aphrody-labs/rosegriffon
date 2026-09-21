@@ -1,8 +1,0 @@
-# Achillea — tableau de bord communautaire Inazuma Eleven
-# Servi en statique par nginx (prioritaire sur le fallback SPA).
-
-User-agent: *
-Allow: /
-
-# Les /api/* sont des rewrites/proxy vers le backend, pas du contenu indexable.
-Disallow: /api/

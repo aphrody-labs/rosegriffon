@@ -87,6 +87,8 @@ export default function PresencesPage() {
 	);
 
 	const pastFilteredEvents = filteredEvents.filter((event) => event.type === "past");
+	const hasUpcomingEvents = upcomingFilteredEvents.length > 0;
+	const primaryEvents = hasUpcomingEvents ? upcomingFilteredEvents : pastFilteredEvents;
 
 	const conventionsCount = events.filter((e) => e.category === "Conventions").length;
 
@@ -158,11 +160,13 @@ export default function PresencesPage() {
 				<SectionHeading
 					icon={<Calendar className="size-6" aria-hidden />}
 					iconClassName="bg-secondary text-secondary-foreground shadow-secondary/20"
-					title="Prochains événements"
+					title={hasUpcomingEvents ? "Prochains événements" : "Derniers événements passés"}
 					subtitle={
 						searchFilter
 							? `Filtre actif : « ${searchFilter} » — ${upcomingFilteredEvents.length} à venir, ${pastFilteredEvents.length} passé(s)`
-							: undefined
+							: hasUpcomingEvents
+								? undefined
+								: "Aucun événement à venir : les derniers événements archivés sont affichés."
 					}
 					action={
 						<EventSearch
@@ -174,13 +178,14 @@ export default function PresencesPage() {
 					}
 				/>
 				<EventsList
-					events={upcomingFilteredEvents}
+					events={primaryEvents}
 					isLoading={isLoading}
 					isFiltered={!!searchFilter}
 				/>
 			</SectionCard>
 
 			{/* Liste des événements passés */}
+			{hasUpcomingEvents && (
 			<SectionCard>
 				<SectionHeading
 					icon={<Calendar className="size-6" aria-hidden />}
@@ -189,6 +194,7 @@ export default function PresencesPage() {
 				/>
 				<EventsList events={pastFilteredEvents} isLoading={isLoading} isFiltered={!!searchFilter} />
 			</SectionCard>
+			)}
 		</PageContainer>
 	);
 }

@@ -20,12 +20,11 @@ bun test scripts/achillea/check-services-config.test.ts
 | API REST Ts.ED           | `127.0.0.1:4000`   | via le proxy ranked ; upload `/api/proxy/*` en direct par Nginx | processus backend              |
 | Ranked REST + Colyseus   | `127.0.0.1:4002`   | `https://ranked.rosegriffon.fr`                                 | enfant du backend              |
 | Socket.IO                | `127.0.0.1:4005`   | `https://ranked.rosegriffon.fr/socket.io/`                      | processus backend              |
-| Angular en développement | `127.0.0.1:4200`   | locale seulement                                                | Angular CLI                    |
-| Angular en production    | fichiers statiques | `https://achillea.rosegriffon.fr`                               | Nginx, aucun processus Angular |
+| Front Achilléa            | route Next         | `https://rosegriffon.fr/achillea`                               | `apps/website`                |
 
 Une seule unité systemd supervise le backend, l'API, Socket.IO et le sous-processus ranked.
 `KillMode=control-group` garantit que ranked s'arrête avec son parent. Le front de production
-est le contenu immuable de `apps/achillea-web/dist/achillea-web/browser`, servi par Nginx.
+est rendu par `apps/website`; `achillea.rosegriffon.fr` redirige vers cette route.
 
 L'unité candidate est [`infra/systemd/achillea-bot.service`](../infra/systemd/achillea-bot.service).
 Elle n'est ni copiée ni démarrée par les tests de configuration.

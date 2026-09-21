@@ -13,13 +13,9 @@ import { EMOTES } from "@/lib/emotes";
 /**
  * Icône d'une entrée de navigation — les images de CETTE communauté.
  *
- * CE QU'ELLE REMPLACE
- * La barre latérale rendait des pictogrammes `lucide-react` : une « maison »
- * générique pour l'accueil, un « livre » pour le wiki, une « manette » pour
- * l'e-sport. Le même dessin que n'importe quel tableau de bord, sur un site
- * dont tout le contenu est Inazuma Eleven — alors que le dépôt porte déjà les
- * atlas d'icônes natives du jeu, les emotes de Roy et Gaëlle et les logos des
- * trois marques.
+ * Les destinations génériques (accueil, calendrier, vote, réglages…) gardent
+ * un pictogramme sémantique. Les contenus propres à Rose Griffon ou au jeu
+ * utilisent en priorité les assets du dépôt : logos, emotes et sprites Azalée.
  *
  * L'ORDRE DE PRIORITÉ
  * 1. `imageUrl` — un logo de marque (Rose Griffon, Azalée, Achilléa, RGTV) ;
@@ -28,8 +24,8 @@ import { EMOTES } from "@/lib/emotes";
  * 4. `commonSprite` — un sprite de l'atlas commun du jeu ;
  * 5. `null` — et là seulement, `AppSidebar` retombe sur son pictogramme.
  *
- * Les quatre premières sont des IMAGES DE MARQUE OU DU JEU. Le repli lucide ne
- * sert plus que d'ultime filet, le temps qu'une entrée reçoive son asset.
+ * Les quatre premières sont des images de marque ou du jeu. Le repli fourni
+ * par `AppSidebar` rend l'identifiant Material correspondant pour le reste.
  */
 export function NavIcone(item: NavItem): React.ReactNode {
 	if (item.imageUrl) {

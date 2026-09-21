@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useReducer, useState } from "react";
+import { cdnOrigin } from "@rosegriffon/assets";
 import { Button } from "@rosegriffon/ui/button";
 import { Input } from "@rosegriffon/ui/input";
 import {
@@ -94,7 +95,7 @@ export function Atelier({
 		cdn ??
 		(url?.includes("/model-avatar/")
 			? url.slice(0, url.indexOf("/model-avatar/"))
-			: "https://cdn.rosegriffon.fr");
+			: cdnOrigin());
 	const selection = cat?.parts.find((part) => part.id === p.avatar.choix[active]);
 	const pieces =
 		cat?.parts

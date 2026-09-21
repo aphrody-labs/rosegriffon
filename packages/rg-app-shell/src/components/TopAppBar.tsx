@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleUser, LayoutDashboard, Menu, Settings, User } from "lucide-react";
+import { ArrowLeft, CircleUser, LayoutDashboard, Menu, Settings, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -38,6 +38,7 @@ export interface TopAppBarProps {
 	showCart?: boolean;
 	showSidebarToggle?: boolean;
 	showActions?: boolean;
+	showSettings?: boolean;
 	className?: string;
 }
 
@@ -86,7 +87,7 @@ export function resolvePageTitle(pathname: string, titleMap = DEFAULT_TITLE_MAP)
 
 export function MobileHeader({
 	appName = "Rose Griffon",
-	logoSrc = "/logo.webp",
+	logoSrc = "/RG_Logo_V2.5.webp",
 	homeHref = "/",
 	adminHref = BASE_ADMIN,
 	settingsHref = "/settings",
@@ -98,6 +99,7 @@ export function MobileHeader({
 	themeToggleSlot,
 	loginSlot,
 	accountHref,
+	showSettings = true,
 	titleMap = DEFAULT_TITLE_MAP,
 	className,
 }: TopAppBarProps) {
@@ -114,6 +116,7 @@ export function MobileHeader({
 
 	const isHome = pathname === "/" || pathname === homeHref;
 	const title = resolvePageTitle(pathname, titleMap);
+	const goBack = () => (window.history.length > 1 ? router.back() : router.push(homeHref));
 
 	const publicProfileHref =
 		accountHref && accountHref !== "/settings"
@@ -125,12 +128,23 @@ export function MobileHeader({
 	return (
 		<header
 			className={`fixed top-0 left-0 right-0 z-40 flex h-[calc(4rem+env(safe-area-inset-top))] items-center gap-2 px-4 pt-safe md:hidden transition-[background-color,box-shadow] duration-300 motion-standard ${
-				isScrolled ? "bg-surface-container/90 backdrop-blur-xl elevation-1" : "bg-surface"
+				isScrolled ? "bg-sidebar/95 backdrop-blur-xl elevation-1" : "bg-sidebar"
 			} ${className ?? ""}`}
 		>
+			{!isHome && (
+				<button
+					type="button"
+					onClick={goBack}
+					className="size-12 shrink-0 rounded-full text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+					aria-label="Revenir à la page précédente"
+					title="Retour"
+				>
+					<ArrowLeft size={24} aria-hidden="true" />
+				</button>
+			)}
 			<button
 				onClick={toggleSidebar}
-				className="size-12 flex items-center justify-center text-on-surface hover:bg-on-surface/[0.08] rounded-full transition-colors -ml-1"
+				className="size-12 flex items-center justify-center text-sidebar-foreground hover:bg-sidebar-accent rounded-full transition-colors -ml-1"
 				aria-label="Ouvrir le menu"
 				aria-expanded={openMobile}
 			>
@@ -142,10 +156,10 @@ export function MobileHeader({
 					<div className="relative size-7">
 						<Image src={logoSrc} fill sizes="28px" alt={appName} className="object-contain" />
 					</div>
-					<span className="type-title-large text-on-surface">{appName}</span>
+					<span className="type-title-large text-sidebar-foreground">{appName}</span>
 				</Link>
 			) : (
-				<span className="type-title-large text-on-surface truncate ml-1">{title}</span>
+				<span className="type-title-large text-sidebar-foreground truncate ml-1">{title}</span>
 			)}
 
 			<div className="flex-1" />
@@ -158,7 +172,7 @@ export function MobileHeader({
 				{isAdmin && (
 					<Link
 						href={adminHref}
-						className="size-12 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
+						className="size-12 rounded-full flex items-center justify-center text-sidebar-foreground/85 hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors"
 						aria-label="Administration"
 					>
 						<LayoutDashboard size={24} aria-hidden="true" />
@@ -167,23 +181,27 @@ export function MobileHeader({
 
 				{notificationsSlot}
 
-				{themeToggleSlot ?? <ThemeToggle className="size-12" />}
+				{themeToggleSlot ?? <ThemeToggle className="size-12 !text-sidebar-foreground hover:!bg-sidebar-accent" />}
 
-				<Link
-					href={settingsHref}
-					className="size-12 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
-					aria-label="Paramètres"
-					title="Paramètres"
-				>
-					<Settings size={24} aria-hidden="true" />
-				</Link>
+				{showSettings && (
+					<Link
+						href={settingsHref}
+						className="size-12 rounded-full flex items-center justify-center text-sidebar-foreground/85 hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors"
+						aria-label="Paramètres"
+						title="Paramètres"
+					>
+						<Settings size={24} aria-hidden="true" />
+					</Link>
+				)}
 
 				<div className="ml-1">
 					{user ? (
 						<button
 							className="size-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 active:scale-95 transition-transform"
 							onClick={() => router.push(publicProfileHref)}
-							aria-label={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
+							aria-label={
+								profile?.username ? `Profil public de ${profile.username}` : "Profil public"
+							}
 							title={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
 						>
 							{profile?.avatar_url ? (
@@ -200,15 +218,15 @@ export function MobileHeader({
 							)}
 						</button>
 					) : (
-						loginSlot ?? (
+						(loginSlot ?? (
 							<Link
 								href="/login"
-								className="size-12 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
+							className="size-12 rounded-full flex items-center justify-center text-sidebar-foreground/85 hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors"
 								aria-label="Se connecter"
 							>
 								<CircleUser size={24} aria-hidden="true" />
 							</Link>
-						)
+						))
 					)}
 				</div>
 			</div>
@@ -218,7 +236,7 @@ export function MobileHeader({
 
 export function DesktopTopBar({
 	appName = "Rose Griffon",
-	logoSrc = "/logo.webp",
+	logoSrc = "/RG_Logo_V2.5.webp",
 	homeHref = "/",
 	adminHref = BASE_ADMIN,
 	settingsHref = "/settings",
@@ -232,6 +250,7 @@ export function DesktopTopBar({
 	themeToggleSlot,
 	loginSlot,
 	accountHref,
+	showSettings = true,
 	titleMap = DEFAULT_TITLE_MAP,
 	className,
 }: TopAppBarProps) {
@@ -239,6 +258,8 @@ export function DesktopTopBar({
 	const router = useRouter();
 	const { toggleSidebar, open } = useSidebar();
 	const title = resolvePageTitle(pathname, titleMap);
+	const isHome = pathname === "/" || pathname === homeHref;
+	const goBack = () => (window.history.length > 1 ? router.back() : router.push(homeHref));
 
 	const publicProfileHref =
 		accountHref && accountHref !== "/settings"
@@ -249,15 +270,26 @@ export function DesktopTopBar({
 
 	return (
 		<header
-			className={`fixed top-0 left-0 right-0 z-[60] flex h-14 items-center justify-between px-4 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/5 max-md:hidden ${
+			className={`fixed top-0 left-0 right-0 z-[60] flex h-14 items-center justify-between px-4 bg-sidebar/95 text-sidebar-foreground backdrop-blur-xl border-b border-sidebar-border max-md:hidden ${
 				className ?? ""
 			}`}
 		>
 			{/* Left: Burger + Logo + UniverseSwitch + (Optional) Title */}
 			<div className="flex items-center gap-1.5 min-w-[220px]">
+				{!isHome && (
+					<button
+						type="button"
+						onClick={goBack}
+						className="size-10 rounded-full flex items-center justify-center text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+						aria-label="Revenir à la page précédente"
+						title="Retour"
+					>
+						<ArrowLeft size={20} aria-hidden="true" />
+					</button>
+				)}
 				<button
 					onClick={toggleSidebar}
-					className="size-10 rounded-full flex items-center justify-center text-on-surface hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
+					className="size-10 rounded-full flex items-center justify-center text-sidebar-foreground hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors"
 					aria-label="Ouvrir le menu"
 					aria-expanded={open}
 				>
@@ -267,7 +299,7 @@ export function DesktopTopBar({
 					<div className="relative size-7 shrink-0 transition-transform group-hover:scale-105">
 						<Image src={logoSrc} fill sizes="28px" alt={appName} className="object-contain" />
 					</div>
-					<span className="font-expressive-title text-xl text-on-surface transition-all duration-500 group-hover:text-primary group-hover:font-width-expanded">
+					<span className="font-expressive-title text-xl text-sidebar-foreground transition-all duration-500 group-hover:font-width-expanded">
 						{appName}
 					</span>
 				</Link>
@@ -280,8 +312,8 @@ export function DesktopTopBar({
 
 				{title && (
 					<div className="flex items-center gap-2 ml-2 animate-in fade-in slide-in-from-left-2 duration-300">
-						<span className="size-1 rounded-full bg-outline-variant/60" />
-						<span className="font-semibold text-sm text-on-surface tracking-wide mt-0.5 truncate max-w-[180px]">
+						<span className="size-1 rounded-full bg-sidebar-foreground/60" />
+						<span className="font-semibold text-sm text-sidebar-foreground tracking-wide mt-0.5 truncate max-w-[180px]">
 							{title}
 						</span>
 					</div>
@@ -298,7 +330,7 @@ export function DesktopTopBar({
 				{isAdmin && (
 					<Link
 						href={adminHref}
-						className="size-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
+						className="size-10 rounded-full flex items-center justify-center text-sidebar-foreground/85 hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors"
 						aria-label="Administration"
 						title="Administration"
 					>
@@ -308,16 +340,18 @@ export function DesktopTopBar({
 
 				{notificationsSlot}
 
-				{themeToggleSlot ?? <ThemeToggle />}
+				{themeToggleSlot ?? <ThemeToggle className="!text-sidebar-foreground hover:!bg-sidebar-accent" />}
 
-				<Link
-					href={settingsHref}
-					className="size-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
-					aria-label="Paramètres"
-					title="Paramètres"
-				>
-					<Settings size={20} aria-hidden="true" />
-				</Link>
+				{showSettings && (
+					<Link
+						href={settingsHref}
+						className="size-10 rounded-full flex items-center justify-center text-sidebar-foreground/85 hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors"
+						aria-label="Paramètres"
+						title="Paramètres"
+					>
+						<Settings size={20} aria-hidden="true" />
+					</Link>
+				)}
 
 				<div className="ml-2">
 					{user ? (
@@ -326,7 +360,9 @@ export function DesktopTopBar({
 							onClick={() => router.push(publicProfileHref)}
 							role="button"
 							tabIndex={0}
-							aria-label={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
+							aria-label={
+								profile?.username ? `Profil public de ${profile.username}` : "Profil public"
+							}
 							title={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
 							onKeyDown={(e) => {
 								if (e.key === "Enter" || e.key === " ") {
@@ -348,15 +384,15 @@ export function DesktopTopBar({
 							)}
 						</div>
 					) : (
-						loginSlot ?? (
+						(loginSlot ?? (
 							<Link
 								href="/login"
-								className="h-9 px-4 rounded-full flex items-center gap-2 text-primary type-label-large hover:bg-primary/[0.08] active:bg-primary/[0.12] transition-colors duration-200"
+								className="h-9 px-4 rounded-full flex items-center gap-2 text-sidebar-foreground type-label-large hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors duration-200"
 							>
 								<CircleUser size={20} aria-hidden="true" />
 								Connexion
 							</Link>
-						)
+						))
 					)}
 				</div>
 			</div>

@@ -27,6 +27,8 @@ import { collecterAudienceAchillea } from "./tasks/stats/achillea";
 import { rafraichirVideosTechniques } from "./tasks/zukan-videos";
 import { initDiscord, getDiscordTelemetry, onTelemetryUpdate, getDiscordClient, GUILD_ID } from "./lib/discord";
 import { runAchilleaSync } from "./tasks/achillea-sync";
+import { runAchilleaSeasonRollover } from "./tasks/achillea-seasons";
+import { runAchilleaWeeklyPayout } from "./tasks/achillea-weekly-payout";
 import { runDiscordSync, runDiscordChannelScan } from "./tasks/discord";
 import {
 	armerSalonsDeCategories,
@@ -231,7 +233,7 @@ class ErreurDelaiDepasse extends Error {
  *
  * `lib/ipc-unix.ts` documentait déjà le trou : son verrou ne couvrait que les
  * lancements venus du pont, si bien que deux `POST /tasks/db/run` — ou un cron
- * qui repasse avant la fin du précédent (`discord:messages` toutes les 5 min) —
+ * qui repasse avant la fin du précédent (`discord:messages` toutes les 15 min) —
  * lançaient deux exécutions concurrentes sur les mêmes tables. Le verrou est
  * désormais posé ici, sur le seul point de passage commun.
  */
@@ -484,6 +486,10 @@ if (indexRun >= 0) {
 		await executeTask("sync:achillea", runAchilleaSync);
 	} else if (task === "stats:achillea" || task === "stats") {
 		await executeTask("stats:achillea", collecterAudienceAchillea);
+	} else if (task === "achillea:seasons" || task === "achillea-seasons") {
+		await executeTask("achillea:seasons", runAchilleaSeasonRollover);
+	} else if (task === "achillea:weekly-payout" || task === "achillea-weekly-payout") {
+		await executeTask("achillea:weekly-payout", runAchilleaWeeklyPayout);
 	} else if (task === "seo") {
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
 		await executeTask("seo:indexnow", runSeoIndexNow);
@@ -509,6 +515,8 @@ if (indexRun >= 0) {
 		await executeTask("seo:llms-txt", runSeoLlmsTxt);
 		await executeTask("seo:indexnow", runSeoIndexNow);
 		await executeTask("stats:achillea", collecterAudienceAchillea);
+		await executeTask("achillea:seasons", runAchilleaSeasonRollover);
+		await executeTask("achillea:weekly-payout", runAchilleaWeeklyPayout);
 	} else {
 		console.error(
 			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, sync:achillea, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
@@ -519,13 +527,14 @@ if (indexRun >= 0) {
 
 // ─── ENREGISTREMENT DES SGHEDULES CRON DE PRODUCTION (BUN.CRON) ───────────────
 
-// 1. Publication programmée Azalée : toutes les 15 minutes
-Bun.cron("*/15 * * * *", async () => {
+// 1. Publication programmée Azalée : quatre fois par heure, décalée des autres
+// tâches réseau afin d'éviter le pic CPU/I/O de la minute 00.
+Bun.cron("2,17,32,47 * * * *", async () => {
 	await executeTask("publish", triggerPublishScheduled);
 });
 
-// 2. Pré-chauffage des caches ISR : toutes les 30 minutes
-Bun.cron("*/30 * * * *", async () => {
+// 2. Pré-chauffage des caches ISR : deux fois par heure, après la publication.
+Bun.cron("7,37 * * * *", async () => {
 	await executeTask("warm", warmCaches);
 });
 
@@ -533,17 +542,19 @@ Bun.cron("*/30 * * * *", async () => {
 // puis projection vers les tables d'Achilléa : toutes les 30 minutes.
 // L'ordre compte — la projection recopie ce que la collecte vient d'écrire, et
 // ne parle jamais à Discord elle-même.
-Bun.cron("*/30 * * * *", async () => {
+Bun.cron("12,42 * * * *", async () => {
 	await executeTask("discord:sync", runDiscordSync);
 	await executeTask("sync:achillea", runAchilleaSync);
 });
 
-// 2c. Veille des salons Discord suivis : toutes les 5 minutes.
+// 2c. Veille des salons Discord suivis : toutes les 15 minutes.
 // Filet de sécurité du temps réel : les événements de la passerelle sont perdus
 // pendant un redémarrage du démon ou une coupure de la connexion Discord, et le
 // repli sans intents privilégiés n'en reçoit aucun. Ce rattrapage REST rejoue
-// tout ce qui a été manqué (messages, éditions, réactions).
-Bun.cron("*/5 * * * *", async () => {
+// tout ce qui a été manqué (messages, éditions, réactions). La passerelle traite
+// les messages courants immédiatement ; cette cadence limite donc le scan REST
+// lourd à quatre passages par heure au lieu de douze.
+Bun.cron("5,20,35,50 * * * *", async () => {
 	await executeTask("discord:messages", runDiscordMessagesSync);
 });
 
@@ -599,7 +610,7 @@ Bun.cron("35 * * * *", async () => {
 // Une passe à vide coûte deux requêtes SQL. Le caler sur l'heure comme les
 // récoltes ferait attendre jusqu'à soixante minutes une création déjà en base —
 // pendant une campagne, c'est la différence entre un fil vivant et un digest.
-Bun.cron("*/15 * * * *", async () => {
+Bun.cron("10,25,40,55 * * * *", async () => {
 	await executeTask("campagnes:relais", () => relayerCampagnesDiscord());
 });
 
@@ -677,8 +688,20 @@ Bun.cron("0 6 * * *", async () => {
 // leur journal nginx n'est pas lisible d'ici. L'onglet Statistiques affiche une
 // fenêtre de 24 h — un décalage plus long rendrait « les dernières heures » faux
 // de façon visible pour ces deux domaines.
-Bun.cron("*/15 * * * *", async () => {
+Bun.cron("8,23,38,53 * * * *", async () => {
 	await executeTask("stats:achillea", collecterAudienceAchillea);
+});
+
+// 10. Achilléa — ouverture / clôture des saisons : chaque nuit à minuit UTC.
+// Cette maintenance était auparavant cachée dans le processus du bot ; elle
+// appartient au démon de tâches, qui est le service supervisé en continu.
+Bun.cron("0 0 * * *", async () => {
+	await executeTask("achillea:seasons", runAchilleaSeasonRollover);
+});
+
+// 11. Achilléa — indemnité hebdomadaire du staff : lundi 00:00 UTC.
+Bun.cron("0 0 * * MON", async () => {
+	await executeTask("achillea:weekly-payout", runAchilleaWeeklyPayout);
 });
 
 console.log("✅ Toutes les tâches cron ont été planifiées avec succès.");
@@ -867,6 +890,10 @@ const server = Bun.serve({
 				// trois listes.
 				"stats:achillea": collecterAudienceAchillea,
 				"stats-achillea": collecterAudienceAchillea,
+				"achillea:seasons": runAchilleaSeasonRollover,
+				"achillea-seasons": runAchilleaSeasonRollover,
+				"achillea:weekly-payout": runAchilleaWeeklyPayout,
+				"achillea-weekly-payout": runAchilleaWeeklyPayout,
 				"zukan:videos": rafraichirVideosTechniques,
 				"zukan-videos": rafraichirVideosTechniques,
 			};

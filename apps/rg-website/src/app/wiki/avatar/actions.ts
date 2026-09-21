@@ -13,6 +13,7 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { cdnOrigin } from "@rosegriffon/assets";
 
 import { getServerSession } from "@/lib/auth-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -32,7 +33,7 @@ import type {
 export type { AvatarEnregistre, Sauvegarde } from "./sauvegardes";
 
 /** Origine qui sert les vignettes décodées du jeu. */
-const CDN = process.env.NEXT_PUBLIC_CDN_ORIGIN ?? "https://cdn.rosegriffon.fr";
+const CDN = cdnOrigin(process.env.NEXT_PUBLIC_CDN_ORIGIN);
 
 /** Seau de stockage des photos de profil, celui des réglages du compte. */
 const SEAU = "avatars";

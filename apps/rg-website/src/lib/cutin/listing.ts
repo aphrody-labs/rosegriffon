@@ -11,12 +11,13 @@
  * helpers d'URL purs de `lib/cpk/shared`.
  */
 import { cpkAssetUrl, cpkRawUrl } from "@rosegriffon/azalee/cpk/shared";
+import { cdnOrigin } from "@rosegriffon/assets";
 import type { CpkFile } from "@rosegriffon/azalee/cpk/shared";
 import type { SkillCutin } from "@rosegriffon/azalee/game/skills-cutin";
 import type { CutinLayerDescriptor, CutinManifest } from "./types";
 
 /** Origine du CDN qui sert les GLB waza assemblés (nie-model-serve). */
-const CDN = "https://cdn.rosegriffon.fr";
+const CDN = cdnOrigin(process.env.NEXT_PUBLIC_CDN_ORIGIN);
 
 /**
  * Découpe `ev60_00340_c000101_s00_p00_c0010.g4pk` → `{subject, phase, plan}`.

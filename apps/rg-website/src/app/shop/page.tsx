@@ -18,26 +18,15 @@ export default async function ShopIndexPage({ searchParams }: ShopPageProps) {
 			: PRODUCTS;
 
 	return (
-		<div className="mx-auto max-w-7xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
-			{/* Hero */}
-			<section className="mb-12 grid gap-6 md:mb-16 md:grid-cols-12 md:items-end">
-				<header className="md:col-span-8">
-					<p className="mb-3 inline-flex items-center gap-2 rounded-full border-2 border-[#d4af37] bg-[#0c1730] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[#d4af37] shadow-[0_2px_0_0_rgba(0,0,0,0.5)]">
-						<span>★</span>
-						<span>Édition Communauté 2026</span>
-						<span>★</span>
-					</p>
-					<h1 className="text-balance text-fluid-display-xl font-extrabold leading-[0.95] tracking-tight text-white">
-						La boutique <span className="text-[#d4af37]">Rose Griffon</span>.
+		<div className="mx-auto max-w-7xl px-4 pb-16 pt-4 min-[600px]:px-6 min-[600px]:pt-6">
+			<section className="mb-6 grid gap-4 border-b border-[#d4af37]/30 pb-4 min-[840px]:grid-cols-12 min-[840px]:items-center">
+				<header className="min-[840px]:col-span-8">
+					<h1 className="text-2xl font-extrabold tracking-tight text-white min-[840px]:text-3xl">
+						Boutique <span className="text-[#d4af37]">Rose Griffon</span>
 					</h1>
-					<p className="mt-5 max-w-2xl text-base text-white/80 md:text-lg">
-						Stickers, prints A5, badges brodés, marque-pages, textile et packs collector édités avec
-						les artistes de l'association — tirages limités, imprimés en France, expédiés sous 3 à
-						10 jours.
-					</p>
 				</header>
 
-				<aside className="md:col-span-4">
+				<aside className="min-[840px]:col-span-4">
 					<Suspense
 						fallback={
 							<div className="h-24 animate-pulse rounded-2xl border-2 border-[#d4af37]/30 bg-[#0c1730]/60" />
@@ -49,7 +38,7 @@ export default async function ShopIndexPage({ searchParams }: ShopPageProps) {
 			</section>
 
 			{/* Filters */}
-			<section className="mb-8 flex flex-wrap items-center justify-between gap-4">
+			<section className="mb-6 flex flex-wrap items-center justify-between gap-3">
 				<CategoryFilter active={cat} />
 				<p className="text-xs font-semibold uppercase tracking-widest text-white/60">
 					{filtered.length} produit{filtered.length > 1 ? "s" : ""}

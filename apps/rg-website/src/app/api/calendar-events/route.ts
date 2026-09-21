@@ -63,6 +63,45 @@ async function calendarEventsHandler() {
 		// 2. Fallback to Google Calendar if DB is empty
 		logger.info("Postgres events empty or error, falling back to Google Calendar");
 		const events = await getCalendarEvents();
+
+		// Amorçage unique : la table locale devient la source de vérité dès la
+		// première récupération réussie. Les événements passés restent donc
+		// consultables même si le calendrier Google est ensuite indisponible.
+		if (events.length > 0) {
+			try {
+				const pool = getPgPool();
+				const rows = events
+					.map((event) => ({
+						description: event.description ?? null,
+						endTime: event.end?.dateTime ?? event.end?.date,
+						location: event.location ?? null,
+						startTime: event.start?.dateTime ?? event.start?.date,
+						title: event.summary ?? "Événement sans titre",
+					}))
+					.filter((event) => event.startTime && event.endTime);
+
+				if (rows.length > 0) {
+					await pool.query(
+						`INSERT INTO events (title, description, start_time, end_time, location)
+						 SELECT item.title, item.description, item.start_time, item.end_time, item.location
+						 FROM jsonb_to_recordset($1::jsonb) AS item(
+							title text, description text, start_time timestamptz, end_time timestamptz, location text
+						 )
+						 WHERE NOT EXISTS (SELECT 1 FROM events)`,
+						[JSON.stringify(rows.map(({ endTime, startTime, ...event }) => ({
+							...event,
+							end_time: endTime,
+							start_time: startTime,
+						})))]
+					);
+					logger.info(`${rows.length} event(s) Google préchargé(s) dans Postgres`);
+				}
+			} catch (error) {
+				// La réponse Google reste disponible : l'amorçage ne doit jamais
+				// empêcher l'affichage public du calendrier.
+				logger.error("Impossible de précharger les événements dans Postgres", error);
+			}
+		}
 		logger.info(`${events.length} event(s) retrieved from Google`);
 		return apiSuccess({ events });
 	} catch (error) {

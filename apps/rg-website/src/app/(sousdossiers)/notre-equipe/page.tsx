@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
 	Award,
 	BookOpen,
@@ -171,7 +170,8 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
 		nom: "Cellule de Médiation",
 	},
 	{
-		badgeColor: "bg-gaelle-blue/10 text-gaelle-blue dark:text-gaelle-blue-light border-gaelle-blue/30",
+		badgeColor:
+			"bg-gaelle-blue/10 text-gaelle-blue dark:text-gaelle-blue-light border-gaelle-blue/30",
 		borderTheme: "border-gaelle-blue/40",
 		description:
 			"Les membres adhérents qui participent à la vie associative, soutiennent nos initiatives et font vivre la passion d'Inazuma Eleven au quotidien.",
@@ -194,7 +194,9 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
 	},
 ];
 
-async function chargerEquipes(): Promise<{ definition: DefinitionEquipe; membres: MembreStaff[] }[]> {
+async function chargerEquipes(): Promise<
+	{ definition: DefinitionEquipe; membres: MembreStaff[] }[]
+> {
 	try {
 		const pool = getPgPool();
 		const { rows } = await pool.query<MembreRaw>(
@@ -272,7 +274,10 @@ async function chargerEquipes(): Promise<{ definition: DefinitionEquipe; membres
 }
 
 /** Médaille d'honneur pour le bureau : or, argent ou bronze selon le rôle. */
-function obtenirMedailleBureau(role: string, index: number): {
+function obtenirMedailleBureau(
+	role: string,
+	index: number
+): {
 	badgeBg: string;
 	borderClass: string;
 	glowStyle: string;
@@ -294,7 +299,8 @@ function obtenirMedailleBureau(role: string, index: number): {
 	if (roleLower.includes("vice-président")) {
 		return {
 			badgeBg: "bg-slate-300/20 text-slate-700 dark:text-slate-200 border-slate-300/50",
-			borderClass: "border-4 border-slate-300 dark:border-slate-200 shadow-[0_0_20px_rgba(203,213,225,0.4)]",
+			borderClass:
+				"border-4 border-slate-300 dark:border-slate-200 shadow-[0_0_20px_rgba(203,213,225,0.4)]",
 			glowStyle: "bg-slate-300/20",
 			icon: Award,
 			libelle: "Médaille d'Argent",
@@ -304,7 +310,8 @@ function obtenirMedailleBureau(role: string, index: number): {
 	if (roleLower.includes("trésorier") || roleLower.includes("secrétaire")) {
 		return {
 			badgeBg: "bg-amber-700/15 text-amber-800 dark:text-amber-300 border-amber-700/40",
-			borderClass: "border-4 border-amber-700 dark:border-amber-600 shadow-[0_0_20px_rgba(180,83,9,0.4)]",
+			borderClass:
+				"border-4 border-amber-700 dark:border-amber-600 shadow-[0_0_20px_rgba(180,83,9,0.4)]",
 			glowStyle: "bg-amber-700/20",
 			icon: Medal,
 			libelle: "Médaille de Bronze",
@@ -351,52 +358,46 @@ export default async function NotreEquipePage() {
 				members={tousLesMembresPourSchema}
 			/>
 
-			{/* Hero Header */}
-			<header className="relative overflow-hidden border-b border-outline-variant/15 bg-surface-container-lowest/60 py-16 lg:py-24">
-				<div className="absolute inset-0 bg-radial-at-t from-primary/10 via-transparent to-transparent pointer-events-none" />
-				<div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-5xl text-center space-y-6">
-					<div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs sm:text-sm font-semibold tracking-wide">
-						<Users className="size-4" />
-						<span>Organigramme Officiel — {totalMembres} Contributeurs Actifs</span>
+			<header className="container mx-auto flex flex-col gap-3 border-b border-outline-variant/30 px-4 py-4 min-[600px]:px-6 min-[600px]:py-6 min-[840px]:flex-row min-[840px]:items-center">
+				<div className="flex shrink-0 items-center gap-3">
+					<div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+						<Users className="size-5" aria-hidden />
 					</div>
-
-					<h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground">
-						Notre <span className="text-primary">Équipe</span>
-					</h1>
-
-					<p className="max-w-3xl mx-auto text-base sm:text-lg text-muted-foreground leading-relaxed">
-						Chaque pôle, chaque équipe et chaque membre apportent leur pierre à l&apos;édifice Rose Griffon.
-						Retrouvez ci-dessous la répartition officielle de notre association et les médailles
-						qui récompensent leur investissement au service de la communauté Inazuma Eleven.
-					</p>
-
-					{/* Navigation rapide d'ancrage par équipe */}
-					<nav
-						aria-label="Navigation rapide par équipe"
-						className="flex flex-wrap items-center justify-center gap-2 pt-4 max-w-4xl mx-auto"
-					>
-						{equipes.map(({ definition, membres }) => {
-							const Icone = definition.icon;
-							return (
-								<a
-									key={definition.id}
-									href={`#${definition.id}`}
-									className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-outline-variant/20 bg-surface-container/60 hover:bg-surface-container-high hover:border-primary/40 text-xs font-semibold text-foreground transition-colors"
-								>
-									<Icone className="size-3.5 text-primary" />
-									<span>{definition.nom}</span>
-									<span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-surface-container-highest text-[10px] text-muted-foreground tabular-nums">
-										{membres.length}
-									</span>
-								</a>
-							);
-						})}
-					</nav>
+					<div>
+						<h1 className="text-2xl font-black tracking-tight text-foreground min-[840px]:text-3xl">
+							Notre équipe
+						</h1>
+						<p className="text-xs font-medium text-muted-foreground">
+							{totalMembres} contributeurs
+						</p>
+					</div>
 				</div>
+
+				<nav
+					aria-label="Navigation rapide par équipe"
+					className="flex gap-2 overflow-x-auto pb-1 min-[840px]:ml-auto"
+				>
+					{equipes.map(({ definition, membres }) => {
+						const Icone = definition.icon;
+						return (
+							<a
+								key={definition.id}
+								href={`#${definition.id}`}
+								className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-outline-variant/20 bg-surface-container/60 hover:bg-surface-container-high hover:border-primary/40 text-xs font-semibold text-foreground transition-colors"
+							>
+								<Icone className="size-3.5 text-primary" />
+								<span>{definition.nom}</span>
+								<span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-surface-container-highest text-[10px] text-muted-foreground tabular-nums">
+									{membres.length}
+								</span>
+							</a>
+						);
+					})}
+				</nav>
 			</header>
 
 			{/* Grilles d'Équipes & Médailles */}
-			<main className="container mx-auto px-4 md:px-6 lg:px-8 py-12 lg:py-20 space-y-20 lg:space-y-28 max-w-7xl">
+			<main className="container mx-auto max-w-7xl space-y-10 px-4 py-6 min-[600px]:px-6 min-[840px]:space-y-14 min-[840px]:py-8">
 				{equipes.map(({ definition, membres }, eqIdx) => {
 					const IconeEquipe = definition.icon;
 					const estBureau = definition.id === "bureauteam";
@@ -406,7 +407,7 @@ export default async function NotreEquipePage() {
 							key={definition.id}
 							id={definition.id}
 							aria-labelledby={`titre-${definition.id}`}
-							className="scroll-mt-24 space-y-8"
+							className="scroll-mt-24 space-y-5"
 						>
 							{/* En-tête de section d'équipe */}
 							<div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-outline-variant/15">
@@ -433,7 +434,9 @@ export default async function NotreEquipePage() {
 								</div>
 								<div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container text-xs font-bold text-foreground border border-outline-variant/15 self-start md:self-auto shrink-0">
 									<span className="size-2 rounded-full bg-primary animate-pulse" />
-									<span>{membres.length} membre{membres.length > 1 ? "s" : ""}</span>
+									<span>
+										{membres.length} membre{membres.length > 1 ? "s" : ""}
+									</span>
 								</div>
 							</div>
 
@@ -471,11 +474,11 @@ export default async function NotreEquipePage() {
 												<div
 													className={cn(
 														"relative size-24 sm:size-28 lg:size-32 rounded-full overflow-hidden transition-all duration-300 group-hover:scale-105",
-														medailleBureau ? medailleBureau.borderClass : (
-															estLead
+														medailleBureau
+															? medailleBureau.borderClass
+															: estLead
 																? "border-3 border-primary ring-4 ring-primary/20 shadow-md"
 																: "border-3 border-outline-variant/30 group-hover:border-primary/60"
-														)
 													)}
 												>
 													<ImageWithSkeleton
@@ -524,11 +527,11 @@ export default async function NotreEquipePage() {
 												<span
 													className={cn(
 														"text-[11px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full border truncate max-w-full inline-block",
-														medailleBureau ? medailleBureau.badgeBg : (
-															estLead
+														medailleBureau
+															? medailleBureau.badgeBg
+															: estLead
 																? "bg-primary/15 text-primary border-primary/30"
 																: definition.badgeColor
-														)
 													)}
 													title={membre.role}
 												>

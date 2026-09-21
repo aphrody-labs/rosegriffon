@@ -10,7 +10,9 @@
     "start": "bun server.ts",
     "dev": "bun --watch server.ts"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@rosegriffon/assets": "workspace:*"
+  },
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:"

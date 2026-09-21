@@ -14,6 +14,8 @@
 		"baseUrl": ".",
 		"rootDir": "..",
 		"paths": {
+			"@rosegriffon/assets": ["../assets/src/index.ts"],
+			"@rosegriffon/assets/*": ["../assets/src/*"],
 			"@rosegriffon/db": ["../db/src/index.ts"],
 			"@rosegriffon/db/*": ["../db/src/*"],
 			"@rosegriffon/types": ["../types/src/index.ts"],

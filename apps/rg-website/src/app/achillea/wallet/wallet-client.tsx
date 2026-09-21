@@ -2,12 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-	useAchilleaAuth,
-	createAchilleaClient,
-	formatAchCurrency,
-} from "@/lib/achillea";
-import type { WalletBalance, WalletTransaction } from "@rosegriffon/achillea-types/domain/wallet";
+import { formatAchCurrency } from "@/lib/achillea";
+import type { WalletBalance } from "@rosegriffon/achillea-types/domain/wallet";
 import { WalletTransactionDirection } from "@rosegriffon/achillea-types/enums/wallet";
 import {
 	Wallet,
@@ -24,36 +20,48 @@ import {
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
+type TransactionWebsite = {
+	id: string;
+	type: string;
+	amount: number;
+	reason: string | null;
+	direction: WalletTransactionDirection;
+	createdAt: string;
+};
+
+type EtatAcces = "verification" | "connecte" | "non_connecte" | "discord_absent" | "indisponible";
+
 export default function WalletPage() {
-	const { user, isAuthenticated, login, isLoading: authLoading } = useAchilleaAuth();
 	const [balance, setBalance] = useState<WalletBalance | null>(null);
-	const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+	const [transactions, setTransactions] = useState<TransactionWebsite[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [etatAcces, setEtatAcces] = useState<EtatAcces>("verification");
 
 	useEffect(() => {
-		if (!isAuthenticated) {
-			setLoading(false);
-			return;
-		}
-
 		let cancelled = false;
 		setLoading(true);
-		const client = createAchilleaClient({ credentials: "include" });
-
-		Promise.all([
-			client.wallet.balance(),
-			client.wallet.history({ limit: 50 }),
-		])
-			.then(([balRes, histRes]) => {
+		fetch("/api/achillea/wallet", { credentials: "same-origin" })
+			.then(async (reponse) => {
 				if (cancelled) return;
-				if (balRes.ok && balRes.value) {
-					setBalance(balRes.value);
+				if (reponse.status === 401) {
+					setEtatAcces("non_connecte");
+					return;
 				}
-				if (histRes.ok && histRes.value?.transactions) {
-					setTransactions(histRes.value.transactions);
+				if (reponse.status === 409) {
+					setEtatAcces("discord_absent");
+					return;
 				}
+				if (!reponse.ok) throw new Error(`wallet HTTP ${reponse.status}`);
+				const donnees = (await reponse.json()) as {
+					balance: WalletBalance;
+					transactions: TransactionWebsite[];
+				};
+				setBalance(donnees.balance);
+				setTransactions(donnees.transactions);
+				setEtatAcces("connecte");
 			})
 			.catch((cause) => {
+				if (!cancelled) setEtatAcces("indisponible");
 				signalerException("wallet", cause);
 			})
 			.finally(() => {
@@ -63,7 +71,7 @@ export default function WalletPage() {
 		return () => {
 			cancelled = true;
 		};
-	}, [isAuthenticated]);
+	}, []);
 
 	/*
 	 * La session arrive par un aller-retour réseau (`GET /auth/me`) : tant qu'il
@@ -72,7 +80,7 @@ export default function WalletPage() {
 	 * chargement — c'est ce qui donne l'impression qu'Achilléa refuse l'accès.
 	 * Les pages d'administration attendaient déjà, celles-ci non.
 	 */
-	if (authLoading) {
+	if (etatAcces === "verification") {
 		return (
 			<div className="max-w-md mx-auto px-4 py-20 text-center text-sm text-muted-foreground">
 				Vérification de la session…
@@ -80,21 +88,34 @@ export default function WalletPage() {
 		);
 	}
 
-	if (!isAuthenticated) {
+	if (etatAcces === "non_connecte" || etatAcces === "discord_absent") {
 		return (
 			<div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
 				<ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
 				<h2 className="text-xl font-bold">Connexion requise</h2>
 				<p className="text-sm text-muted-foreground">
-					Connectez-vous pour consulter votre solde d'Achilléa Points et votre portefeuille.
+					{etatAcces === "discord_absent"
+						? "Liez votre compte Discord à votre profil Rose Griffon pour accéder à Achilléa."
+						: "Connectez-vous pour consulter votre solde d'Achilléa Points et votre portefeuille."}
 				</p>
-				<button
-					type="button"
-					onClick={() => login()}
-					className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition shadow-sm text-xs"
-				>
-					Se connecter
-				</button>
+				{etatAcces === "non_connecte" && (
+					<Link
+						href="/login?redirect=/achillea/wallet"
+						className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition shadow-sm text-xs"
+					>
+						Se connecter
+					</Link>
+				)}
+			</div>
+		);
+	}
+
+	if (etatAcces === "indisponible") {
+		return (
+			<div className="max-w-md mx-auto px-4 py-20 text-center space-y-3">
+				<ShieldAlert className="w-12 h-12 text-rose-400 mx-auto" />
+				<h2 className="text-xl font-bold">Portefeuille temporairement indisponible</h2>
+				<p className="text-sm text-muted-foreground">La base Achilléa ne répond pas encore. Réessayez dans un instant.</p>
 			</div>
 		);
 	}

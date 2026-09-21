@@ -26,7 +26,11 @@ export interface UserDTO {
 	 */
 	sim?: number;
 	avatar?: string;
-	clanId?: number;
+	/**
+	 * L'API historique sérialise l'absence de clan en `null` (et non en champ
+	 * absent). Les deux formes sont donc recevables dans le contrat partagé.
+	 */
+	clanId?: number | null;
 	soloRank?: RankDTO;
 	duoRank?: RankDTO;
 	lastInteract?: Date;

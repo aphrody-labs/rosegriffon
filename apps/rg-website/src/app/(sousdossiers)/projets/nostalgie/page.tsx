@@ -24,7 +24,6 @@ import {
 	CloudUpload,
 	Download,
 	ImageIcon,
-	Info,
 	Link2,
 	Loader2,
 	MessageCircle,
@@ -328,61 +327,21 @@ export default function NostalgieVR() {
 			/>
 			<Toaster richColors position="top-center" />
 
-			{/* Hero Section */}
-			<section className="relative py-8 sm:py-12 overflow-hidden">
-				<div className="absolute inset-0 bg-linear-to-b from-background via-background to-muted/20">
-					<div
-						className="absolute inset-0 opacity-[0.02]"
-						style={{ backgroundImage: "url(/images/grid.svg)" }}
-					/>
+			<header className="container mx-auto flex max-w-7xl items-center gap-3 border-b border-border px-4 py-4 min-[600px]:px-6">
+				<div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+					<Scissors className="size-5" aria-hidden />
 				</div>
-
-				<div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-					<div className="text-center space-y-4 mb-8 sm:mb-12">
-						<div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-							<Scissors className="size-4" />
-							Outil de montage photo
-						</div>
-
-						<h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-							Projet{" "}
-							<span className="bg-clip-text text-transparent bg-linear-to-r from-orange-500 via-blue-500 to-cyan-400 dark:from-orange-400 dark:via-blue-400 dark:to-cyan-300">
-								Nostalgie
-							</span>
-						</h1>
-
-						<p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-							Créez votre montage comparatif entre les anciennes générations Inazuma Eleven et
-							Victory Road
-						</p>
-					</div>
-
-					{/* Info Card */}
-					<Card className="max-w-3xl mx-auto mb-8 border-primary/20 bg-primary/2">
-						<CardContent className="pt-6">
-							<div className="flex gap-4 items-start">
-								<div className="p-2 bg-primary/10 rounded-full">
-									<Info className="size-5 text-primary mt-0.5 shrink-0" />
-								</div>
-								<div className="space-y-1">
-									<CardTitle className="text-base sm:text-lg">Comment ça marche ?</CardTitle>
-									<CardDescription className="text-sm">
-										1. Uploadez une image de 2011 et une image de Victory Road
-										<br className="hidden sm:block" />
-										2. Recadrez-les si besoin
-										<br className="hidden sm:block" />
-										3. Créez et téléchargez votre montage final avec filigrane
-									</CardDescription>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
+				<div>
+					<h1 className="text-2xl font-bold tracking-tight min-[840px]:text-3xl">
+						Projet Nostalgie
+					</h1>
+					<p className="text-xs text-muted-foreground">Importer · Recadrer · Télécharger</p>
 				</div>
-			</section>
+			</header>
 
 			{/* Main Content */}
-			<section className="relative flex-1 py-8 sm:py-12">
-				<div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<section className="relative flex-1 py-4 min-[600px]:py-6">
+				<div className="container mx-auto max-w-7xl px-4 min-[600px]:px-6">
 					{/* Upload Areas */}
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 						<UploadArea

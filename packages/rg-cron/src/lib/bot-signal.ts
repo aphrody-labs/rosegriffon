@@ -77,20 +77,20 @@ function catalogueTaches(): Record<string, () => Promise<unknown>> {
 
 /** Planifications, telles qu'annoncées par `GET :3005/tasks`. */
 const PLANIFICATIONS: Record<string, string> = {
-	publish: "*/15 * * * *",
-	warm: "*/30 * * * *",
+	publish: "2,17,32,47 * * * *",
+	warm: "7,37 * * * *",
 	db: "0 2 * * *",
 	patreon: "0 3 * * *",
 	cdn: "0 4 * * *",
 	"github-publish": "30 4 * * *",
 	crawl: "0 5 * * *",
 	"seo:llms-txt": "45 5 * * *",
-	"stats:achillea": "*/15 * * * *",
+	"stats:achillea": "8,23,38,53 * * * *",
 	"seo:indexnow": "0 6 * * *",
 	reminders: "0 8 * * *",
-	discord: "*/30 * * * *",
+	discord: "12,42 * * * *",
 	"discord:scan": "manuel",
-	"discord:messages": "*/5 * * * *",
+	"discord:messages": "5,20,35,50 * * * *",
 	"discord:backfill": "manuel",
 	"discord:polls": "10 * * * *",
 	"x:campagnes": "20 * * * *",
@@ -154,7 +154,7 @@ function monterPontBot(options: OptionsPontBot): PontIpc {
  *
  * L'état est purement en mémoire — c'est un INDICE, pas un curseur. Un
  * redémarrage du cron le perd, et cela n'a aucune conséquence : le bot draine de
- * toute façon toutes les 5 minutes, et son curseur à lui est en base.
+ * toute façon toutes les 15 minutes, et son curseur à lui est en base.
  */
 export function demarrerVeilleTweets(pont: PontIpc): () => void {
 	let dernierVu: string | null = null;

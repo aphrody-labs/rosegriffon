@@ -79,6 +79,7 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
+    "@rosegriffon/assets": "workspace:*",
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/inagle": "workspace:*",
     "@supabase/supabase-js": "catalog:",

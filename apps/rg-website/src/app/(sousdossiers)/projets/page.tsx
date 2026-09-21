@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function ProjetsPage() {
 	return (
-		<div className="space-y-12 pb-12">
+		<div className="space-y-6 px-4 py-4 pb-12 min-[600px]:px-6 min-[600px]:py-6 min-[840px]:space-y-8">
 			<BreadcrumbSchema
 				items={[
 					{ item: "/", name: "Accueil" },
@@ -24,30 +24,17 @@ export default function ProjetsPage() {
 				]}
 			/>
 
-			{/* En-tête */}
-			<section className="relative overflow-hidden rounded-3xl border border-outline-variant bg-linear-to-br from-primary-container to-surface-variant p-8 text-center shadow-sm md:p-12 lg:p-16">
-				<div className="absolute right-0 top-0 -mr-12 -mt-12 size-64 rounded-full bg-primary opacity-10 blur-3xl" />
-				<div className="absolute bottom-0 left-0 -mb-12 -ml-12 size-64 rounded-full bg-tertiary opacity-10 blur-3xl" />
-
-				<div className="relative z-10 mx-auto max-w-3xl space-y-6">
-					<div className="inline-flex items-center rounded-full border border-outline bg-surface/50 px-3 py-1 text-sm font-medium text-primary backdrop-blur-sm">
-						<Palette className="mr-2 size-4" />
-						<span>Espace créatif</span>
-					</div>
-
-					<h1 className="text-4xl font-extrabold tracking-tight text-on-surface sm:text-5xl md:text-6xl">
-						Nos projets
-					</h1>
-
-					<p className="text-lg leading-relaxed text-on-surface-variant md:text-xl">
-						Découvrez les outils et les espaces collaboratifs développés pour et par la communauté
-						Rose Griffon.
-					</p>
+			<header className="flex min-h-16 items-center gap-3 border-b border-outline-variant/60 pb-4">
+				<div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+					<Palette className="size-5" aria-hidden />
 				</div>
-			</section>
+				<h1 className="text-2xl font-extrabold tracking-tight text-on-surface min-[840px]:text-3xl">
+					Projets
+				</h1>
+			</header>
 
 			{/* Grille — même carte et mêmes données que l'extrait de la page d'accueil */}
-			<section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+			<section className="grid grid-cols-1 gap-4 min-[600px]:grid-cols-2 min-[1200px]:grid-cols-3">
 				{PROJETS.map((projet) => (
 					<ProjectCard key={projet.slug} projet={projet} />
 				))}

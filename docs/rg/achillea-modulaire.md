@@ -17,9 +17,8 @@ packages/achillea-core       règles métier pures, multi-runtime
 packages/achillea-client     accès API isomorphe (fetch + zod), zéro framework
         ▲                    → 197 routes, 16 ressources
         │
-        ├── apps/achillea-web     Angular  — adaptateur mince
         ├── apps/achillea-bot     Bun      — API + Discord
-        └── apps/website          Next 16  — consommation directe
+        └── apps/website          Next 16  — interface publique et consommation directe
 
 packages/achillea-contract   JSON Schema + Rust + Swift + Kotlin générés
                              → les cibles hors TypeScript
@@ -109,8 +108,8 @@ champs propres — les trente hérités disparaissaient sans avertissement.
 ## Ce que la modularisation a supprimé
 
 Avant, les DTO vivaient en double : une copie dans `achillea-types` (consommée
-par le bot) et une copie dans `apps/achillea-web/src/app/core/models/`
-(consommée par Angular), qui divergeaient silencieusement — un `UserDTO` sans
+par le bot) et une copie dans le front Angular retiré, qui divergeaient
+silencieusement — un `UserDTO` sans
 `type`, des enums `LobbyState`/`TeamSide`/`PlayerNoteCategory` redéclarés,
 `MatchMode` en `const` d'un côté et en `enum` de l'autre.
 
@@ -203,7 +202,6 @@ Les paquets et apps Achilléa suivent désormais la convention du monorepo :
 | `@achillea/client` | `@rosegriffon/achillea-client`   |
 | —                  | `@rosegriffon/achillea-contract` |
 | `achillea-bot`     | `@rosegriffon/achillea-bot`      |
-| `achillea-web`     | `@rosegriffon/achillea-web`      |
 
 Les chemins sur disque (`apps/achillea-*`, `packages/achillea-*`) et le nom de
 projet Angular sont inchangés : aucun service systemd ni chemin de déploiement
@@ -218,7 +216,6 @@ bun --filter @rosegriffon/achillea-client   type-check && bun --filter @rosegrif
 bun --filter @rosegriffon/achillea-contract type-check && bun --filter @rosegriffon/achillea-contract test
 bun --filter @rosegriffon/achillea-contract check
 bun --filter @rosegriffon/achillea-bot      type-check
-bun --filter @rosegriffon/achillea-web      type-check
 bun --filter @rosegriffon/website           type-check
 ```
 

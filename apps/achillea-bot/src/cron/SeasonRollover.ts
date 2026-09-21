@@ -1,4 +1,4 @@
-import { Injectable, Schedule } from "@/decorators";
+import { Injectable } from "@/decorators";
 import { Season } from "@/entities";
 import { SeasonState } from "@/utils/enums";
 import { resolveDependency } from "@/utils/functions";
@@ -12,7 +12,11 @@ export class SeasonRollover {
 	 * - Opens Upcoming seasons whose startsAt <= now
 	 * - Closes Active seasons whose endsAt <= now
 	 */
-	@Schedule("0 0 * * *", "season-rollover")
+	/**
+	 * Compatibilité interne uniquement. Le tick autonome a migré dans
+	 * `@rosegriffon/cron` (`achillea:seasons`) afin que le cycle de vie des
+	 * saisons ne dépende plus de la présence du bot Discord.
+	 */
 	async rolloverSeasons() {
 		const db = await resolveDependency(Database);
 		const em = db.em.fork();

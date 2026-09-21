@@ -91,10 +91,10 @@ export function SidebarUniverseHeader({
 
 	if (isCollapsed) {
 		return (
-			<SidebarHeader className="p-2 flex items-center justify-center border-b border-outline-variant/15">
+			<SidebarHeader className="p-2 flex items-center justify-center border-b border-sidebar-border">
 				<Link
 					href={current.href}
-					className="relative size-10 rounded-xl p-1.5 flex items-center justify-center hover:bg-surface-container-high transition-colors"
+					className="relative size-10 rounded-xl p-1.5 flex items-center justify-center text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
 					title={`${current.name} — ${current.badge}`}
 				>
 					<Image
@@ -110,14 +110,11 @@ export function SidebarUniverseHeader({
 	}
 
 	return (
-		<SidebarHeader className="p-3 border-b border-outline-variant/15 space-y-2.5">
+		<SidebarHeader className="p-3 border-b border-sidebar-border space-y-2.5 text-sidebar-foreground">
 			{/* Univers Identity */}
 			<div className="flex items-center justify-between gap-2">
-				<Link
-					href={current.href}
-					className="flex items-center gap-2.5 min-w-0 group/brand flex-1"
-				>
-					<div className="relative size-8 shrink-0 rounded-lg overflow-hidden p-0.5 bg-surface-container-high border border-outline-variant/20 group-hover/brand:scale-105 transition-transform">
+				<Link href={current.href} className="flex items-center gap-2.5 min-w-0 group/brand flex-1">
+					<div className="relative size-8 shrink-0 rounded-lg overflow-hidden p-0.5 bg-sidebar-accent border border-sidebar-border group-hover/brand:scale-105 transition-transform">
 						<Image
 							src={current.logo}
 							alt={current.name}
@@ -128,10 +125,12 @@ export function SidebarUniverseHeader({
 					</div>
 					<div className="min-w-0 flex-1">
 						<div className="flex items-center gap-1.5">
-							<span className="font-black text-sm text-on-surface truncate group-hover/brand:text-primary transition-colors">
+							<span className="font-black text-sm text-sidebar-foreground truncate transition-colors">
 								{current.name}
 							</span>
-							<span className={`text-xs font-bold px-1.5 py-0.5 rounded border ${current.badgeColor}`}>
+							<span
+								className={`text-xs font-bold px-1.5 py-0.5 rounded border ${current.badgeColor}`}
+							>
 								{current.badge}
 							</span>
 						</div>
@@ -218,13 +217,21 @@ function RecursiveNavItem({
 			(item.path === "#wiki" && activeDomaine === "wiki") ||
 			(item.path === "#esport" && activeDomaine === "esport"));
 
-	const [isOpen, setIsOpen] = React.useState(isActive || isUniversePillar || Boolean(item.defaultOpen));
+	const [isOpen, setIsOpen] = React.useState(
+		isActive || isUniversePillar || Boolean(item.defaultOpen)
+	);
 
 	React.useEffect(() => {
-		if (isActive || isUniversePillar) {
+		// Un changement d'univers ouvre sa catégorie et replie celle que l'on
+		// quitte. Les sous-sections internes conservent, elles, le choix manuel.
+		if (depth === 0 && item.groupOnly) {
+			setIsOpen(isUniversePillar);
+			return;
+		}
+		if (isActive) {
 			setIsOpen(true);
 		}
-	}, [isActive, isUniversePillar]);
+	}, [depth, isActive, isUniversePillar, item.groupOnly]);
 
 	const { state, isMobile } = useSidebar();
 	const isCollapsed = state === "collapsed" && !isMobile;
@@ -235,8 +242,8 @@ function RecursiveNavItem({
 			: "h-11 px-4 gap-3 justify-start"
 	} ${
 		isActive
-			? "bg-secondary-container text-on-secondary-container font-bold"
-			: "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high active:bg-surface-container-highest"
+			? "bg-sidebar-primary text-sidebar-primary-foreground font-bold"
+			: "text-sidebar-foreground/85 hover:text-sidebar-foreground hover:bg-sidebar-accent active:bg-sidebar-accent"
 	}`;
 
 	const iconClass = `flex items-center justify-center transition-transform duration-200 ${
@@ -269,7 +276,7 @@ function RecursiveNavItem({
 			{item.children && (!isCollapsed || depth > 0) && (
 				<ChevronRight
 					size={18}
-					className={`ml-auto text-on-surface-variant/75 transition-transform duration-200 ${
+					className={`ml-auto text-sidebar-foreground/75 transition-transform duration-200 ${
 						isOpen ? "rotate-90" : ""
 					}`}
 					aria-hidden="true"
@@ -282,17 +289,17 @@ function RecursiveNavItem({
 		const isPillar = depth === 0 && item.groupOnly;
 		const pillarColor =
 			item.path === "#association"
-				? "text-rose-griffon"
+				? "text-sidebar-foreground"
 				: item.path === "#esport"
-					? "text-achillea-violet dark:text-achillea-lime"
-					: "text-secondary";
+					? "text-sidebar-foreground"
+					: "text-sidebar-foreground";
 
 		const pillarBg =
 			item.path === "#association"
-				? "bg-rose-griffon/10 text-rose-griffon border-rose-griffon/25"
+				? "bg-sidebar-primary text-sidebar-primary-foreground border-sidebar-border"
 				: item.path === "#esport"
-					? "bg-achillea-violet/10 dark:bg-achillea-lime/10 text-achillea-violet dark:text-achillea-lime border-achillea-violet/25 dark:border-achillea-lime/30"
-					: "bg-secondary/10 text-secondary border-secondary/25";
+					? "bg-sidebar-primary text-sidebar-primary-foreground border-sidebar-border"
+					: "bg-sidebar-primary text-sidebar-primary-foreground border-sidebar-border";
 
 		return (
 			<Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
@@ -307,13 +314,17 @@ function RecursiveNavItem({
 										? `relative overflow-hidden w-full transition-all duration-200 group rounded-xl px-3 py-2.5 h-auto flex items-center justify-between mt-3 mb-1 first:mt-0 font-extrabold text-xs tracking-wider uppercase border outline-hidden focus-visible:ring-2 focus-visible:ring-primary ${
 												isActive || isUniversePillar
 													? `${pillarBg} font-black shadow-xs`
-													: "border-outline-variant/20 text-on-surface-variant font-bold bg-surface-container-low/60 hover:bg-surface-container hover:text-on-surface"
-										  }`
+											: "border-sidebar-border text-sidebar-foreground/85 font-bold bg-sidebar-accent/40 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+											}`
 										: `${buttonClass} w-full`
 								}
 								aria-expanded={isOpen}
 							>
-								<div className={isPillar ? `flex items-center justify-center size-5 ${pillarColor}` : iconClass}>
+								<div
+									className={
+										isPillar ? `flex items-center justify-center size-5 ${pillarColor}` : iconClass
+									}
+								>
 									<NavIcon
 										item={item}
 										isActive={Boolean(isActive)}
@@ -330,14 +341,9 @@ function RecursiveNavItem({
 								>
 									{traduireNav(item.label, t)}
 								</span>
-								{isUniversePillar && (
-									<span className="text-xs font-bold px-1.5 py-0.5 rounded bg-surface/80 text-on-surface-variant mr-1.5 border border-outline-variant/20 uppercase tracking-tighter shrink-0">
-										Actif
-									</span>
-								)}
 								<ChevronRight
 									size={16}
-									className={`shrink-0 text-on-surface-variant/75 transition-transform duration-200 ${
+									className={`shrink-0 text-sidebar-foreground/75 transition-transform duration-200 ${
 										isOpen ? "rotate-90" : ""
 									}`}
 									aria-hidden="true"
@@ -373,7 +379,7 @@ function RecursiveNavItem({
 								</Link>
 							</SidebarMenuButton>
 							<CollapsibleTrigger asChild>
-								<button className="size-9 flex items-center justify-center rounded-lg text-on-surface-variant/75 hover:text-on-surface-variant hover:bg-on-surface/[0.08] transition-colors shrink-0">
+								<button className="size-9 flex items-center justify-center rounded-lg text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors shrink-0">
 									<ChevronRight
 										size={18}
 										className={`transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
@@ -384,7 +390,7 @@ function RecursiveNavItem({
 						</div>
 					)}
 					<CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-						<SidebarMenu className="mt-1 ml-4 border-l-2 border-outline-variant/20 pl-2 space-y-1">
+						<SidebarMenu className="mt-1 ml-4 border-l-2 border-sidebar-border pl-2 space-y-1">
 							{item.children.map((child) => (
 								<RecursiveNavItem
 									key={child.path}
@@ -444,33 +450,26 @@ export function AppSidebar({
 		(item) => !item.adminOnly || (mounted && isAdmin)
 	);
 
-	const defaultHeader = (
-		<SidebarUniverseHeader pathname={pathname} isCollapsed={isCollapsed} />
-	);
+	const defaultHeader = <SidebarUniverseHeader pathname={pathname} isCollapsed={isCollapsed} />;
 
 	return (
 		<Sidebar
 			collapsible="icon"
 			variant="sidebar"
-			className={`border-none bg-surface ${className ?? ""}`}
+			className={`border-none bg-sidebar text-sidebar-foreground ${className ?? ""}`}
 			{...props}
 		>
-			<div className="absolute inset-0 bg-surface -z-10" />
+			<div className="absolute inset-0 bg-sidebar -z-10" />
 
 			{headerSlot === undefined ? defaultHeader : headerSlot}
 
-			<SidebarContent className="py-2 bg-surface">
+			<SidebarContent className="py-2 bg-sidebar text-sidebar-foreground">
 				<SidebarGroup>
 					<SidebarGroupContent>
 						<SidebarMenu className="gap-1">
 							{filteredNavItems.map((item) => (
 								<div key={item.path} className="w-full">
-									<RecursiveNavItem
-										item={item}
-										pathname={pathname}
-										t={t}
-										renderIcon={renderIcon}
-									/>
+									<RecursiveNavItem item={item} pathname={pathname} t={t} renderIcon={renderIcon} />
 								</div>
 							))}
 						</SidebarMenu>

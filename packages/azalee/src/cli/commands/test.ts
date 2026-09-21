@@ -102,21 +102,8 @@ interface PageResult {
 export function registerTestCommand(program: Command): void {
 	program
 		.command("test")
-		.description(
-			"Exécute l'intégralité des tests (filtres, API, bxc, pages et boutons) de façon native ou avec Playwright",
-		)
-		.option("-p, --playwright", "Exécute tous les tests via Playwright (E2E)")
+		.description("Exécute l'intégralité des tests natifs (filtres, API, pages et boutons)")
 		.action(async (options: TestOptions) => {
-			if (options.playwright) {
-				console.log(`${colors.cyan}Lancement des tests Playwright E2E...${colors.reset}`);
-				const child = Bun.spawn(["bunx", "playwright", "test"], {
-					stdout: "inherit",
-					stderr: "inherit",
-					cwd: path.resolve(process.cwd(), "apps/website"),
-				});
-				process.exit(await child.exited);
-			}
-
 			console.log(`${colors.bold}${colors.magenta}=== RUNNING NATIVE VERIFICATION SUITE ===${colors.reset}\n`);
 
 			// ─── SUITE 1 : filtres de base de données ───

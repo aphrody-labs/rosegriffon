@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 import { cn } from "@/lib/utils";
 
 /*
@@ -28,7 +26,7 @@ import { cn } from "@/lib/utils";
  * `whitespace-nowrap`, ce qui fait déborder un libellé long dès 320 px.
  */
 const heroButtonBase =
-	"h-auto min-h-12 rounded-full px-5 py-3 text-center text-base font-bold whitespace-normal sm:px-6";
+	"h-auto min-h-11 rounded-xl px-4 py-2 text-center text-sm font-semibold whitespace-normal";
 export const heroPrimaryButtonClass = `${heroButtonBase} bg-rg-or text-rg-marine hover:bg-rg-or/90`;
 export const heroSecondaryButtonClass = `${heroButtonBase} border border-rg-or/60 bg-rg-sur-marine/10 text-rg-sur-marine backdrop-blur-sm hover:border-rg-or hover:bg-rg-sur-marine/20 hover:text-rg-sur-marine`;
 
@@ -42,7 +40,10 @@ export function PageContainer({
 }) {
 	return (
 		<div
-			className={cn("mx-auto w-full max-w-7xl flex flex-col gap-12 px-4 py-8 md:px-6 lg:px-8", className)}
+			className={cn(
+				"mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-4 min-[600px]:px-6 min-[600px]:py-6 min-[840px]:gap-8",
+				className
+			)}
 		>
 			{children}
 		</div>
@@ -50,9 +51,10 @@ export function PageContainer({
 }
 
 /**
- * Bannière de marque en tête de page — dégradé marine → brique, texte blanc
- * cassé, accents or. Volontairement identique dans les quatre thèmes : c'est
- * une surface de marque, pas une surface d'interface.
+ * En-tête d'application compact. Le nom historique `PageHero` est conservé
+ * pour ne pas casser ses consommateurs, mais le composant n'est plus une
+ * bannière éditoriale : identité, titre et éventuelles actions tiennent dans
+ * une seule barre responsive.
  */
 export function PageHero({
 	eyebrow,
@@ -79,60 +81,31 @@ export function PageHero({
 	image?: { src: string };
 	children?: React.ReactNode;
 }) {
+	void description;
+	void image;
+
 	return (
-		<section
-			className={cn(
-				"relative overflow-hidden rounded-3xl p-6 shadow-2xl xs:p-8 md:p-12 lg:p-16",
-				!image && "bg-linear-to-br from-rg-marine via-rg-marine-clair to-rg-brique"
-			)}
-		>
-			{image && (
-				<>
-					{/* `alt` vide : l'image est purement décorative, le titre porte le sens. */}
-					<Image
-						src={image.src}
-						alt=""
-						fill
-						sizes="100vw"
-						priority
-						className="object-cover"
-						aria-hidden
-					/>
-					<div
-						className="absolute inset-0 bg-linear-to-br from-rg-marine/95 via-rg-marine-clair/90 to-rg-brique/90"
-						aria-hidden
-					/>
-				</>
-			)}
-			{/* Texture partagée par toutes les bannières (asset, pas une couleur). */}
-			<div
-				className="pointer-events-none absolute inset-0 opacity-20 mix-blend-overlay"
-				style={{ backgroundImage: "url(/images/noise.svg)" }}
-				aria-hidden
-			/>
-			<div className="relative z-10">
-				{(eyebrow || icon) && (
-					<div className="mb-4 flex items-center gap-3">
+		<header className="flex min-h-16 flex-col gap-3 border-b border-border pb-4 min-[600px]:flex-row min-[600px]:items-center min-[600px]:justify-between">
+			<div className="flex min-w-0 items-center gap-3">
+				{icon && (
+					<div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
 						{icon}
-						{eyebrow && (
-							<span className="text-xs font-semibold tracking-wide text-rg-or uppercase sm:text-sm md:text-base">
-								{eyebrow}
-							</span>
-						)}
 					</div>
 				)}
-				<h1 className="mb-4 text-fluid-display-lg font-bold tracking-tight text-rg-sur-marine md:mb-6">
-					{title}
-				</h1>
-				{description && (
-					<p className="max-w-3xl text-fluid-body-lg leading-relaxed text-rg-sur-marine/85">
-						{description}
-					</p>
-				)}
-				{actions && <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">{actions}</div>}
-				{children}
+				<div className="min-w-0">
+					{eyebrow && (
+						<div className="truncate text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+							{eyebrow}
+						</div>
+					)}
+					<h1 className="truncate text-2xl font-bold tracking-tight text-foreground min-[840px]:text-3xl">
+						{title}
+					</h1>
+				</div>
 			</div>
-		</section>
+			{actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+			{children && <div className="min-[600px]:basis-full">{children}</div>}
+		</header>
 	);
 }
 
@@ -154,14 +127,16 @@ export function SectionHeading({
 	id?: string;
 }) {
 	return (
-		<div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+		<div className="mb-4 flex flex-col items-start justify-between gap-3 min-[600px]:flex-row min-[600px]:items-center">
 			<div className="flex items-center gap-3">
 				{icon && <div className={cn("rounded-lg p-2 shadow-lg", iconClassName)}>{icon}</div>}
 				<div>
 					<h2 id={id} className="text-fluid-headline-lg font-bold text-foreground">
 						{title}
 					</h2>
-					{subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
+					{subtitle && (
+						<p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{subtitle}</p>
+					)}
 				</div>
 			</div>
 			{action}
@@ -183,7 +158,7 @@ export function SectionCard({
 		<section
 			id={id}
 			className={cn(
-				"scroll-mt-24 rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-xl transition-shadow duration-300 hover:shadow-2xl",
+				"scroll-mt-24 rounded-2xl border border-border bg-card p-4 text-card-foreground shadow-sm min-[600px]:p-6",
 				className
 			)}
 		>

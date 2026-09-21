@@ -15,7 +15,8 @@ import "server-only";
  * Depuis la fusion des bases (`scripts/ops/achillea-merge.ts`), le schéma
  * `achillea` EST dans la base `rg`, avec de vraies tables : la jointure se fait
  * dans Postgres, en une requête, sans passer par une connexion distante.
- * `achillea-bot` reste l'unique écrivain de ces tables.
+ * Les écritures passent par les services dédiés (API Achilléa et `rg-cron`) ;
+ * cette couche website reste explicitement en lecture seule.
  *
  * ACCÈS
  * Ces fonctions lisent des données personnelles : elles ne doivent être

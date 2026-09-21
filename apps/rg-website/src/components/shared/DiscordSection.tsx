@@ -6,23 +6,6 @@ import { useEffect, useState } from "react";
 
 import { serveurDiscord, type ServeurDiscord } from "@/lib/discord";
 
-/**
- * Section « communauté Discord » — implémentation UNIQUE du bloc Discord.
- *
- * Elle remplace l'ancien couple `DiscordBlock` (coquille + widget) et le corps
- * éditorial recopié dans `app/page.tsx` : les deux se partageaient un même bloc
- * en double, avec deux boutons « Rejoindre » et deux logos concurrents.
- *
- * Thème : toutes les surfaces et tous les textes passent par les tokens
- * (`bg-card`, `bg-muted`, `text-foreground`, `border-border`…), donc la section
- * suit les thèmes Roy, Gaëlle et Azalée. Seule l'identité de marque Discord —
- * le logo et l'aplat d'accent du bouton — conserve `bg-discord` / `text-discord`,
- * constantes de marque exposées en tokens par `@rosegriffon/ui`.
- */
-
-
-
-
 /** Pastilles de présence — tokens sémantiques, jamais `bg-green-500` & co. */
 const COULEUR_STATUT: Record<string, string> = {
 	dnd: "bg-destructive",
@@ -47,20 +30,8 @@ interface DonneesWidget {
 }
 
 interface DiscordSectionProps {
-	/**
-	 * Serveur à afficher. Le composant ne connaissait que Rose Griffon — son
-	 * identifiant, son invitation, son texte et son emote étaient écrits dans le
-	 * corps. Achilléa a son propre serveur, sa propre communauté et sa propre
-	 * hiérarchie : le même bloc devait pouvoir le montrer sans être recopié.
-	 */
 	serveur?: ServeurDiscord;
-	/** Titre de la section ; omis, le bloc n'a pas d'en-tête. */
-	titre?: string;
-	/** Phrase d'accroche sous le titre. */
-	sousTitre?: string;
-	/** Lien d'invitation, surchargeable depuis les réglages. */
 	lienInvitation?: string;
-	/** Rendu resserré : deux serveurs côte à côte plutôt qu'un pleine largeur. */
 	compact?: boolean;
 }
 
@@ -78,23 +49,18 @@ function WidgetDiscord({
 }) {
 	if (chargement) {
 		return (
-			<div className="flex size-full flex-col items-center justify-center gap-3 p-6 text-muted-foreground">
+			<div className="flex size-full items-center justify-center p-6 text-muted-foreground" aria-label="Chargement du Discord">
 				<div className="size-10 animate-spin rounded-full border-2 border-border border-b-primary" />
-				<p className="text-sm">Chargement du widget Discord…</p>
 			</div>
 		);
 	}
 
 	if (erreur || !donnees) {
 		return (
-			<div className="flex size-full flex-col items-center justify-center gap-4 p-6 text-center">
-				<p className="text-base font-semibold text-foreground">Widget Discord indisponible</p>
-				<p className="max-w-xs text-sm text-muted-foreground">
-					Le widget ne peut pas être chargé pour le moment, mais l&apos;invitation reste ouverte.
-				</p>
+			<div className="flex size-full items-center justify-center gap-3 p-6">
+				<DiscordIcon className="size-6 text-discord" aria-hidden />
 				<Button asChild className="bg-discord font-bold text-rg-sur-marine hover:bg-discord/90">
 					<a href={lienInvitation} target="_blank" rel="noopener noreferrer">
-						<DiscordIcon className="mr-2 size-4" />
 						Rejoindre le Discord
 					</a>
 				</Button>
@@ -104,8 +70,11 @@ function WidgetDiscord({
 
 	return (
 		<div className="flex size-full flex-col p-4 sm:p-5">
-			<div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-				<h3 className="text-base font-bold text-foreground sm:text-lg">{donnees.name}</h3>
+			<div className="mb-3 flex items-center justify-between gap-3">
+				<div className="flex min-w-0 items-center gap-2">
+					<DiscordIcon className="size-5 shrink-0 text-discord" aria-hidden />
+					<h3 className="truncate text-base font-bold text-foreground sm:text-lg">{donnees.name}</h3>
+				</div>
 				<Button
 					asChild
 					size="sm"
@@ -125,7 +94,6 @@ function WidgetDiscord({
 				<span className="font-semibold text-foreground">{donnees.presence_count}</span> en ligne
 				{" • "}
 				<span className="font-semibold text-foreground">{donnees.member_count}</span> membres
-				visibles
 			</p>
 
 			<ul className="min-h-0 grow flex flex-col gap-2 overflow-y-auto pr-1 scrollbar-thin">
@@ -156,8 +124,6 @@ function WidgetDiscord({
 
 export default function DiscordSection({
 	serveur = serveurDiscord("rose-griffon"),
-	titre,
-	sousTitre,
 	lienInvitation,
 	compact = false,
 }: DiscordSectionProps) {
@@ -213,81 +179,19 @@ export default function DiscordSection({
 	}, [serveur.guildId]);
 
 	return (
-		<div className="w-full flex flex-col gap-4">
-			{(titre || sousTitre) && (
-				<div className="mx-auto max-w-7xl flex flex-col gap-2 px-4 text-center">
-					{titre && (
-						<h2 id="community-heading" className="text-2xl font-bold text-foreground md:text-3xl text-balance">
-							{titre}
-						</h2>
-					)}
-					{sousTitre && (
-						<p className="mx-auto max-w-2xl text-base text-muted-foreground text-pretty">{sousTitre}</p>
-					)}
-				</div>
-			)}
-
-			<div className={compact ? "w-full" : "mx-auto w-full max-w-7xl px-4"}>
-				<div
-					className={`grid w-full overflow-hidden rounded-2xl border border-border bg-card ${
-						compact ? "" : "lg:grid-cols-2"
-					}`}
-				>
-					{/* Contenu éditorial */}
-					<div className="order-2 flex flex-col justify-center gap-3 p-5 lg:order-1 lg:p-8">
-						<div className="flex items-center gap-3">
-							<div className="rounded-xl bg-discord/10 p-2.5">
-								<DiscordIcon className="size-5 text-discord" />
-							</div>
-							<div className="min-w-0">
-								<h3 className="truncate text-lg font-bold text-foreground">{serveur.nom}</h3>
-								<p className="truncate text-xs font-medium text-discord">Discord</p>
-							</div>
-						</div>
-
-						<p className="text-sm leading-relaxed text-muted-foreground">
-							{serveur.description}
-						</p>
-
-						<ul className="flex flex-wrap gap-2">
-							{serveur.atouts.map((atout) => (
-								<li
-									key={atout}
-									className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
-								>
-									{atout}
-								</li>
-							))}
-						</ul>
-
-						<div className="pt-1">
-							<Button
-								asChild
-								className="h-10 w-full bg-discord font-bold text-rg-sur-marine hover:bg-discord/90 sm:w-auto"
-							>
-								<a href={invitation} target="_blank" rel="noopener noreferrer">
-									<DiscordIcon className="mr-2 size-4" />
-									Rejoindre {serveur.nom}
-								</a>
-							</Button>
-						</div>
-					</div>
-
-					{/* Widget des membres en ligne */}
-					<div
-						className={`order-1 border-b border-border bg-muted lg:order-2 lg:border-b-0 ${
-							compact ? "h-[18rem]" : "h-[22rem] sm:h-[26rem] lg:h-[31.25rem] lg:border-l"
-						}`}
-					>
-						<WidgetDiscord
-							donnees={donnees}
-							chargement={chargement}
-							erreur={erreur}
-							lienInvitation={invitation}
-						/>
-					</div>
-				</div>
-			</div>
+		<div
+			className={
+				compact
+					? "h-[18rem] overflow-hidden rounded-2xl border border-border bg-card"
+					: "mx-auto h-[22rem] w-full max-w-7xl overflow-hidden rounded-2xl border border-border bg-card sm:h-[26rem]"
+			}
+		>
+			<WidgetDiscord
+				donnees={donnees}
+				chargement={chargement}
+				erreur={erreur}
+				lienInvitation={invitation}
+			/>
 		</div>
 	);
 }

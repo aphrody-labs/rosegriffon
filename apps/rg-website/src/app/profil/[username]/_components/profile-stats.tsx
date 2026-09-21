@@ -9,6 +9,7 @@ import {
 	MessageSquare,
 	Star,
 	TrendingUp,
+	Trophy,
 	UserCheck,
 } from "lucide-react";
 
@@ -45,6 +46,10 @@ export interface StatistiquesProfil {
 	boostDepuis?: string | null;
 	/** Rôles Discord portés, du plus haut au plus bas. */
 	roles?: ReadonlyArray<{ nom: string; couleur: number | null }>;
+	/** Données publiques Achilléa, lues dans le schéma partagé. */
+	clanAchillea?: string | null;
+	eloMax?: number | null;
+	partiesClassees?: number | null;
 }
 
 export function ProfileStats({ stats }: { stats: StatistiquesProfil }) {
@@ -58,6 +63,9 @@ export function ProfileStats({ stats }: { stats: StatistiquesProfil }) {
 		{ icone: MessageSquare, libelle: "Messages", valeur: nombre(stats.messages) },
 		{ icone: TrendingUp, libelle: "Expérience", valeur: nombre(stats.xp, " XP") },
 		{ icone: Coins, libelle: "Jetons Kizuna", valeur: nombre(stats.jetons) },
+		{ icone: Trophy, libelle: "Clan Achilléa", valeur: stats.clanAchillea ?? null },
+		{ icone: Trophy, libelle: "Meilleur ELO", valeur: nombre(stats.eloMax) },
+		{ icone: Trophy, libelle: "Parties classées", valeur: nombre(stats.partiesClassees) },
 		{
 			icone: Flame,
 			libelle: "Série quotidienne",

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 
 export const metadata: Metadata = {
 	title: {
@@ -40,9 +39,5 @@ export const metadata: Metadata = {
 };
 
 export default function WikiLayout({ children }: { children: React.ReactNode }) {
-	return (
-		<SupabaseProvider>
-			<div className="wiki-scope min-h-full">{children}</div>
-		</SupabaseProvider>
-	);
+	return <div className="wiki-scope min-h-full">{children}</div>;
 }

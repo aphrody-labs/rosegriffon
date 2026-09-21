@@ -9,6 +9,8 @@
 		"paths": {
 			"@/*": ["./src/*", "./*"],
 			"@public/*": ["./public/*"],
+			"@rosegriffon/assets": ["../../packages/assets/src/index.ts"],
+			"@rosegriffon/assets/*": ["../../packages/assets/src/*"],
 			"@rosegriffon/azalee": ["../../packages/azalee/src/index.ts"],
 			"@rosegriffon/azalee/*": ["../../packages/azalee/src/*"],
 			"@rosegriffon/db": ["../../packages/db/src/index.ts"],

@@ -125,8 +125,8 @@ export async function warmCaches(): Promise<{ success: boolean }> {
 		`${websiteUrl}/chroniques`,
 		`${websiteUrl}/community`,
 		`${apiUrl}/health`, // Vérifier l'état de la gateway API
-		`${cdnUrl}/static/azalee/public/logo-og.png`, // Vérifier que le CDN répond correctement
-		`${cdnUrl}/static/website/public/icon.webp`,
+		`${cdnUrl}/static/rg/public/logo-og.png`, // Vérifier le miroir partagé canonique
+		`${cdnUrl}/static/rg/public/icon.webp`,
 	];
 
 	console.log("[Cron Cache] Pré-chauffage des caches ISR...");

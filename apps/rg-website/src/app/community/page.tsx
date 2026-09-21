@@ -138,20 +138,16 @@ export default async function CommunityPage({
 	);
 
 	return (
-		<div className="container mx-auto flex flex-col gap-8 px-4 py-10 lg:px-8">
-			<header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-				<div className="space-y-1">
+		<div className="container mx-auto flex flex-col gap-6 px-4 py-4 min-[600px]:px-6 min-[600px]:py-6 min-[840px]:gap-8">
+			<header className="flex min-h-16 flex-col gap-3 border-b border-border pb-4 min-[600px]:flex-row min-[600px]:items-center min-[600px]:justify-between">
+				<div>
 					<h1 className="text-fluid-2xl font-bold text-foreground">Communauté</h1>
-					<p className="max-w-2xl text-sm text-muted-foreground">
-						Les membres des deux serveurs, leur hiérarchie telle qu&apos;elle existe sur Discord,
-						et les équipes de l&apos;association.
-					</p>
 				</div>
 				<Onglets entrees={VUES} actif={vue} lien={lienVue} />
 			</header>
 
 			{vue === "communaute" ? (
-				<div className="flex flex-col gap-10">
+				<div className="flex flex-col gap-6">
 					<section className="flex flex-col gap-4">
 						<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 							<div className="space-y-1">
@@ -179,7 +175,7 @@ export default async function CommunityPage({
 					</section>
 				</div>
 			) : (
-				<div className="flex flex-col gap-12">
+				<div className="flex flex-col gap-6">
 					<section className="flex flex-col gap-4">
 						<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 							<div className="space-y-1">
@@ -197,15 +193,11 @@ export default async function CommunityPage({
 					</section>
 
 					{/* Les équipes de l'association vivent sur la page dédiée /notre-equipe */}
-					<div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-3xl border border-primary/20 bg-primary/5">
-						<div className="space-y-1 text-center sm:text-left">
+					<div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4 min-[600px]:flex-row">
+						<div className="text-center min-[600px]:text-left">
 							<h3 className="text-base font-bold text-foreground">
 								Équipes & Pôles de l&apos;Association Rose Griffon
 							</h3>
-							<p className="text-xs sm:text-sm text-muted-foreground">
-								Découvrez le bureau de l&apos;association, les créateurs d&apos;Azalée et Achilléa, les dessinateurs,
-								le lore, la production et leurs médailles officielles sur la page dédiée.
-							</p>
 						</div>
 						<Link
 							href="/notre-equipe"

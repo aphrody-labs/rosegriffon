@@ -31,61 +31,37 @@ export function NextEventBanner({ event }: NextEventBannerProps) {
 	const isToday = new Date().toDateString() === startDate.toDateString();
 
 	return (
-		<section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
-			<div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-violet-600 to-indigo-600 shadow-xl shadow-indigo-500/20 text-white">
-				{/* Motif de fond */}
-				<div
-					className="absolute inset-0 opacity-10"
-					style={{ backgroundImage: "url(/grid-pattern.svg)" }}
-				/>
-
-				<div className="relative z-10 flex flex-col md:flex-row items-center justify-between p-6 md:p-8 gap-6">
-					{/* Bloc Date & Info */}
-					<div className="flex flex-col md:flex-row items-center md:items-start gap-6 w-full md:w-auto text-center md:text-left">
-						{/* Date Badge */}
-						<div className="shrink-0 flex flex-col items-center justify-center size-20 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-inner">
-							<span className="text-2xl font-bold font-brad-bun-r">{day}</span>
-							<span className="text-sm font-medium uppercase tracking-wider">{month}</span>
-						</div>
-
-						{/* Détails */}
-						<div className="flex flex-col gap-2 max-w-xl">
-							<div className="flex items-center justify-center md:justify-start gap-2">
-								<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/20 text-white border border-white/30 uppercase tracking-wide">
-									{isToday ? "En ce moment" : "Prochain événement"}
-								</span>
-								{time && (
-									<span className="flex items-center gap-1 text-xs font-medium text-indigo-100">
-										<Clock className="size-3" />
-										{time}
-									</span>
-								)}
-							</div>
-
-							<h2 className="text-2xl md:text-3xl font-bold leading-tight font-brad-bun-r tracking-wide text-balance">
-								{event.summary}
-							</h2>
-
-							{event.location && (
-								<div className="flex items-center justify-center md:justify-start gap-2 text-indigo-100 text-sm">
-									<MapPin className="size-4 shrink-0" />
-									<span className="line-clamp-1">{event.location}</span>
-								</div>
-							)}
-						</div>
-					</div>
-
-					{/* Action */}
-					<div className="shrink-0">
-						<Link
-							href="/evenements"
-							className="group flex items-center gap-2 px-6 py-3 bg-white text-indigo-600 rounded-full font-bold hover:bg-indigo-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
-						>
-							Voir les détails
-							<ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-						</Link>
-					</div>
+		<section className="w-full px-4 min-[600px]:px-0">
+			<div className="flex min-h-16 items-center gap-3 bg-linear-to-r from-violet-600 to-indigo-600 px-4 py-2 text-white">
+				<div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-white/15">
+					<span className="text-lg font-bold leading-none">{day}</span>
+					<span className="text-[10px] font-medium uppercase">{month}</span>
 				</div>
+				<div className="min-w-0 flex-1">
+					<div className="flex items-center gap-2 text-xs text-indigo-100">
+						<span>{isToday ? "En ce moment" : "Prochain événement"}</span>
+						{time && (
+							<span className="flex items-center gap-1">
+								<Clock className="size-3" aria-hidden />
+								{time}
+							</span>
+						)}
+					</div>
+					<h2 className="truncate text-sm font-bold min-[600px]:text-base">{event.summary}</h2>
+					{event.location && (
+						<span className="hidden items-center gap-1 truncate text-xs text-indigo-100 min-[600px]:flex">
+							<MapPin className="size-3" aria-hidden />
+							{event.location}
+						</span>
+					)}
+				</div>
+				<Link
+					href="/evenements"
+					aria-label={`Voir l'événement ${event.summary}`}
+					className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white text-indigo-600 hover:bg-indigo-50"
+				>
+					<ArrowRight className="size-5" aria-hidden />
+				</Link>
 			</div>
 		</section>
 	);

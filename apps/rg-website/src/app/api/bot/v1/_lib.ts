@@ -51,6 +51,52 @@ export async function resolveDiscordToProfile(discordId: string) {
 	return profile;
 }
 
+export interface BotDiscordIdentity {
+	id: string;
+	username: string | null;
+	full_name: string | null;
+	role: string | null;
+	avatar_url: string | null;
+	discord_id: string | null;
+	/** True only after the user completed the real Discord OAuth flow. */
+	linked: boolean;
+}
+
+/**
+ * Resolve the identity a bot may display for a Discord member.
+ *
+ * This deliberately accepts the private, unclaimed profiles created from the
+ * Achillea/RG member imports, but never treats them as OAuth credentials. Keep
+ * `resolveDiscordToProfile` for RBAC and all write endpoints.
+ */
+export async function resolveBotDiscordIdentity(
+	discordId: string
+): Promise<BotDiscordIdentity | null> {
+	const oauthProfile = await resolveDiscordToProfile(discordId);
+	if (oauthProfile) {
+		const profile = oauthProfile as Omit<BotDiscordIdentity, "linked">;
+		return { ...profile, linked: true };
+	}
+
+	const supabase = createAdminClient();
+	if (!supabase) {
+		return null;
+	}
+
+	const { data: profile } = await supabase
+		.from("profiles")
+		.select("id, username, full_name, role, avatar_url, discord_id")
+		.eq("discord_id", discordId)
+		.is("claimed_at", null)
+		.maybeSingle();
+
+	if (!profile) {
+		return null;
+	}
+
+	return { ...(profile as Omit<BotDiscordIdentity, "linked">), linked: false };
+}
+
 export interface BotPrincipal {
 	profile_id: string;
 	discord_id: string;

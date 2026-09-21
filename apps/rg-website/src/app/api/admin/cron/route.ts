@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireApiAdmin } from "@/lib/api-auth";
-import { etatDuCron, telemetrieDiscord } from "@/lib/bot/cron";
+import { etatDuCron, historiqueDuCron, telemetrieDiscord } from "@/lib/bot/cron";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +19,14 @@ export async function GET() {
 		return garde.response;
 	}
 
-	const [cron, telemetrie] = await Promise.all([etatDuCron(), telemetrieDiscord()]);
+	const [cron, telemetrie, historique] = await Promise.all([
+		etatDuCron(),
+		telemetrieDiscord(),
+		historiqueDuCron(),
+	]);
 
 	return NextResponse.json(
-		{ cron, telemetrie, role: garde.data.role },
+		{ cron, historique, telemetrie, role: garde.data.role },
 		{ headers: { "cache-control": "private, no-store" } }
 	);
 }

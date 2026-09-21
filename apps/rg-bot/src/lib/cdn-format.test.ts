@@ -136,8 +136,8 @@ describe("normalisation d'un chemin d'asset", () => {
 	});
 
 	test("miroir static : servi mais sans variante", () => {
-		// Mesuré : /static/azalee/public/ChronoStones_EN.webp → 200, image/webp, 14 774 octets.
-		const r = reussi("/static/azalee/public/ChronoStones_EN.webp");
+		// Les assets communs sont servis depuis le miroir unique `rg/public`.
+		const r = reussi("/static/rg/public/ChronoStones_EN.webp");
 		expect(r.surface).toBe("static");
 		expect(r.variante).toBe(false);
 	});
@@ -186,7 +186,7 @@ describe("normalisation d'un chemin d'asset", () => {
 
 	test("le .g4tx n'est PAS réécrit hors des surfaces de décodage", () => {
 		// Sur `static/`, nginx sert le fichier tel quel : le renommer produirait un 404.
-		expect(refuse("/static/azalee/public/texture.g4tx")).toContain(".g4tx");
+		expect(refuse("/static/rg/public/texture.g4tx")).toContain(".g4tx");
 	});
 });
 

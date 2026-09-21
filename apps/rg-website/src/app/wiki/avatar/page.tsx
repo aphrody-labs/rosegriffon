@@ -26,6 +26,7 @@
  * `menu_text`, pas d'une liste écrite à la main.
  */
 import type { Metadata } from "next";
+import { cdnOrigin } from "@rosegriffon/assets";
 import { Editeur } from "./Editeur";
 import type { Catalogue } from "./types";
 
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
 };
 
 /** Origine qui sert le catalogue et les vignettes (nie-model-serve derrière le CDN). */
-const CDN = process.env.NEXT_PUBLIC_CDN_ORIGIN ?? "https://cdn.rosegriffon.fr";
+const CDN = cdnOrigin(process.env.NEXT_PUBLIC_CDN_ORIGIN);
 
 /**
  * Charge le catalogue résolu. `null` si la source est injoignable — la page rend alors son
