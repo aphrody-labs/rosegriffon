@@ -226,8 +226,6 @@
     "infra:pull": "bun scripts/ops/infra.ts pull",
     "infra:diff": "bun scripts/ops/infra.ts diff",
     "website:dev": "bun --filter @rosegriffon/website dev",
-    "rag:poc": "bun packages/cron/src/tasks/ie-crawl/rag-poc.ts",
-    "rag:ingest": "bun scripts/rag-ingest.ts",
     "images:compress": "bun scripts/ops/compress-images.ts",
     "cdn:invalidate": "bun scripts/ops/invalidate-cdn.ts",
     "docs:map": "bun scripts/generate-repo-map.ts",

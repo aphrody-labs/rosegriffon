@@ -21,7 +21,6 @@ import { registerDbCommand } from "./commands/db";
 import { registerDialogueCommand } from "./commands/dialogue";
 import { registerGlossaryRebuildCommand } from "./commands/glossary";
 import { registerItemCommand } from "./commands/item";
-import { registerRagCommand } from "./commands/rag";
 import { registerRandomTeamCommand } from "./commands/random-team";
 import { registerRedisCommand } from "./commands/redis";
 import { registerRepairCommand } from "./commands/repair";
@@ -65,7 +64,6 @@ export function createAzaleeProgram(): Command {
 	// Diagnostics
 	registerAuditCommand(program);
 	registerTestVariantsCommand(program);
-	registerRagCommand(program);
 	registerStatusCommand(program);
 
 	// Opérations

@@ -86,7 +86,6 @@ export {
 	preloadCharacterEnrichment,
 } from "./entities/character.js";
 export * from "./menu/index.js";
-export * from "./rag/index.js";
 // APIs
 export * from "./service.js";
 

@@ -73,10 +73,8 @@ case "$CIBLE" in
 	nie-site)        PORT=8085; SEUIL_GIB=8.5; SANTE="/healthz"; RELEASES="" ;;
 	rg-postgrest)    PORT=8809; SEUIL_GIB=1.6; SANTE="/";       RELEASES="" ;;
 	rg-storage)      PORT=8810; SEUIL_GIB=0.8; SANTE="/";       RELEASES="" ;;
-	rag-api)         PORT=8806; SEUIL_GIB=1.6; SANTE="/";       RELEASES="" ;;
 	cdn-variants)    PORT=8805; SEUIL_GIB=2.6; SANTE="/health"; RELEASES="" ;;
 	rg-cdn)          PORT=8804; SEUIL_GIB=0.8; SANTE="/health"; RELEASES="" ;;
-	rg-mcp)          PORT=8808; SEUIL_GIB=1.6; SANTE="/health"; RELEASES="" ;;
 	rg-realtime)     PORT=8812; SEUIL_GIB=0.8; SANTE="/health"; RELEASES="" ;;
 	achillea-bot)      PORT=4000; SEUIL_GIB=3.4; SANTE="/health/check"; RELEASES="" ;;
 	achillea-postgrest) PORT=8820; SEUIL_GIB=0.8; SANTE="/"; RELEASES="" ;;

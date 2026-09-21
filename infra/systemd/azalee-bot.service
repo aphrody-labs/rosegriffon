@@ -35,10 +35,10 @@ Description=Azalée Discord Bot (Bun + discordx — profil azalee du bot rg)
 # Ordonnancement seulement (pas de `Wants=` : aucun de ces services n'est tiré
 # au démarrage par celui-ci). Le bot lit Postgres directement (Bun.SQL),
 # interroge l'API Azalée en boucle locale (:8807) pour ses fiches de jeu et ses
-# fichiers CPK, et rag-api (:8806) pour `/rag`. Aucun n'est requis pour
+# fichiers CPK. Aucun n'est requis pour
 # démarrer : une commande dont le service est éteint échoue seule, avec son
 # message.
-After=network-online.target rg-postgrest.service azalee-api.service rag-api.service
+After=network-online.target rg-postgrest.service azalee-api.service
 Wants=network-online.target
 
 [Service]
