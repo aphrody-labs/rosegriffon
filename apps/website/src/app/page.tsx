@@ -166,17 +166,17 @@ async function chargerDonneesAccueil() {
 		{ rows: previewClans },
 		{ rows: previewTournaments },
 	] = await Promise.all([
-		getPublicSetting("home_intro_title", "Qu'est-ce que Rose Griffon ?"),
+		getPublicSetting("home_intro_title", "Le portail Inazuma Eleven"),
 		getPublicSetting(
 			"home_intro_text",
-			"Rose Griffon est une association française régie par la loi de 1901, ayant pour vocation de rassembler les principaux acteurs de la communauté Inazuma Eleven ainsi que l'ensemble des passionnés sous une même bannière. Elle s'engage à valoriser à la fois la scène artistique liée à cette licence et son univers compétitif."
+			"La référence française d'Inazuma Eleven : base de données complète Victory Road, compétition e-sport, tournois, guides et communauté passionnée."
 		),
 		getPublicSetting("home_intro_image", "/RG_screens_twitch_ethan.webp"),
 		getPublicSetting("home_azalee_title", "AZALÉE"),
 		getPublicSetting("home_azalee_tag", "Wiki & Actualités"),
 		getPublicSetting(
 			"home_azalee_description",
-			"Le pilier médiatique et le wiki de Rose Griffon. Le wiki Azalée couvre tout Inazuma Eleven: Victory Road — personnages, techniques, esprits guerriers — avec traductions exclusives, interviews et analyses."
+			"Base de données Victory Road complète : personnages, techniques, esprits guerriers, guides stratégiques et actualités."
 		),
 		getPublicSetting("home_azalee_image", "https://azalee.rosegriffon.fr/opengraph-image.png"),
 		getPublicSetting("home_azalee_logo", "/RG_Azalee-logo.webp"),
@@ -184,7 +184,7 @@ async function chargerDonneesAccueil() {
 		getPublicSetting("home_azalee_instagram", "https://www.instagram.com/azaleefr/"),
 		getPublicSetting(
 			"home_achillea_description",
-			"Le carrefour de l'esport Inazuma Eleven ! Gestion de clans, tournois, matchs classés, ranking communautaire et bot Rose Griffon."
+			"L'arène e-sport officielle : matchs classés 1v1 & 2v2, ladder ELO, tournois réguliers et gestion de clans."
 		),
 		getPublicSetting("home_achillea_image", "https://achillea.rosegriffon.fr/opengraph-image"),
 		getPublicSetting("home_achillea_link", "/achillea"),

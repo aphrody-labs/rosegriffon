@@ -26,9 +26,20 @@ export function UserAvatar({
 
 	const resolvedName = (name ?? displayName ?? "Joueur").trim();
 	const initial = resolvedName.charAt(0).toUpperCase() || "?";
+	const effectiveUserId =
+		userId?.trim() ||
+		(typeof avatar === "string" ? avatar.match(/\/avatars\/(\d+)\//)?.[1] : undefined) ||
+		"0";
+	const defaultAvatarIndex = (() => {
+		try {
+			return Number((BigInt(effectiveUserId) >> 22n) % 6n);
+		} catch {
+			return 0;
+		}
+	})();
 	const resolvedUrl = broken
-		? `https://cdn.discordapp.com/embed/avatars/${(BigInt(userId || "0") >> 22n) % 6n}.png`
-		: resolveDiscordAvatarUrl(userId, avatar);
+		? `https://cdn.discordapp.com/embed/avatars/${Math.abs(defaultAvatarIndex)}.png`
+		: resolveDiscordAvatarUrl(effectiveUserId, avatar);
 
 	const sizeClasses = {
 		sm: "size-7 text-xs",

@@ -60,11 +60,10 @@ describe("inventaire des routes", () => {
  *
  * Un lien ajouté sans page fait échouer les tests, pas la production.
  */
-describe("navigation unifiée : quatre catégories", () => {
-	test("les quatre catégories sont présentes, dans l'ordre", () => {
+describe("navigation unifiée : trois catégories", () => {
+	test("les trois catégories sont présentes, dans l'ordre", () => {
 		const groupes = construireNavigationUnifiee();
 		expect(groupes.map((g) => g.domaine)).toEqual([
-			"actualite",
 			"association",
 			"wiki",
 			"esport",

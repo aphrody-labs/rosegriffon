@@ -99,9 +99,8 @@ export function construireNavigationItems(): NavItem[] {
 	return [
 		{ imageUrl: "/RG_Azalee-logo.webp", icon: "home", label: "nav.home", path: w("/") },
 		{ commonSprite: "lien", icon: "sports_soccer", label: "nav.cross", path: w("/cross") },
-		// Les articles vivent dans la catégorie « Actualité » : les répéter ici
-		// donnait deux accordéons pour une même destination. Seules les notes de
-		// version restent, elles décrivent le jeu et non la vie du site.
+		// Les articles et notes de version décrivent l'actualité du jeu et du wiki.
+		{ emote: "gaelle-fiere", icon: "feed", label: "nav.association.news", path: "/news" },
 		{ commonSprite: "breche", icon: "update", label: "nav.news.patch_notes", path: w("/patch-notes") },
 		// — Base de données (wiki curé) —
 		{ commonSprite: "chara", icon: "groups", label: "nav.wiki.players", path: w("/chara") },
@@ -274,18 +273,15 @@ export function construireMobileNavUnifiee(): NavItem[] {
 // casse entre-temps.
 
 /**
- * Les trois domaines du réseau — unité de THÈME, pas de menu.
- *
- * Le menu compte quatre catégories (cf. `GROUPES_NAV`) : « Actualité » est un
- * regroupement éditorial, pas un univers visuel, et les articles gardent le
- * thème de l'association.
+ * Les trois domaines et catégories de premier niveau du réseau.
+ * L'actualité (/news) est intégrée dans la catégorie Wiki.
  */
 export const DOMAINES = ["association", "wiki", "esport"] as const;
 
 export type Domaine = (typeof DOMAINES)[number];
 
-/** Les quatre catégories de premier niveau du menu, dans l'ordre d'affichage. */
-export const GROUPES_NAV = ["actualite", "association", "wiki", "esport"] as const;
+/** Les catégories de premier niveau du menu, dans l'ordre d'affichage. */
+export const GROUPES_NAV = ["association", "wiki", "esport"] as const;
 
 export type GroupeNav = (typeof GROUPES_NAV)[number];
 
@@ -459,14 +455,6 @@ export function construireNavigationUnifiee(): SousCategorieNav[] {
 		 */
 		ouvertParDefaut: boolean;
 	}[] = [
-		{
-			domaine: "actualite",
-			emote: "gaelle-fiere",
-			enfants: construireActualiteItems(),
-			icon: "newspaper",
-			label: "nav.domaine.actualite",
-			ouvertParDefaut: true,
-		},
 		{
 			domaine: "association",
 			enfants: construireAssociationItems(),

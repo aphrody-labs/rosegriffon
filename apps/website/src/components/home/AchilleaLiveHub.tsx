@@ -17,6 +17,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { UserAvatar } from "@/components/achillea/UserAvatar";
 
 import type {
 	AchilleaPreviewData,
@@ -54,21 +55,13 @@ function RankedPlayerMiniCard({ player }: { player: LigneClassement }) {
 			className="group/player p-3.5 rounded-2xl bg-achillea-purple-dark/70 hover:bg-achillea-purple-hover border border-achillea-purple/30 hover:border-achillea-lime/60 transition-all duration-200 flex flex-col justify-between relative overflow-hidden h-full"
 		>
 			<div className="flex items-center gap-3">
-				<div className="relative size-12 shrink-0 rounded-xl overflow-hidden bg-background/60 border border-achillea-purple/40 group-hover/player:scale-105 transition-transform">
-					{player.avatar ? (
-						<Image
-							src={player.avatar}
-							alt={player.nom}
-							fill
-							unoptimized
-							className="object-cover"
-						/>
-					) : (
-						<div className="size-full flex items-center justify-center font-black text-sm text-achillea-lime bg-achillea-purple/30">
-							{player.nom.slice(0, 2).toUpperCase()}
-						</div>
-					)}
-				</div>
+				<UserAvatar
+					userId={player.userId}
+					avatar={player.avatar}
+					name={player.nom}
+					size="lg"
+					className="group-hover/player:scale-105 transition-transform rounded-xl border border-achillea-purple/40"
+				/>
 				<div className="flex-1 min-w-0">
 					<div className="flex items-center gap-1.5 mb-1">
 						<span className={`text-xs font-black px-1.5 py-0.5 rounded border ${rankClass}`}>
@@ -653,21 +646,13 @@ export function AchilleaLiveHub({
 											>
 												<div className="flex items-center gap-2.5 min-w-0">
 													<span className="text-base">{medal}</span>
-													<div className="relative size-8 shrink-0 rounded-lg overflow-hidden bg-background/50 border border-achillea-purple/40">
-														{p.avatar ? (
-															<Image
-																src={p.avatar}
-																alt={p.nom}
-																fill
-																unoptimized
-																className="object-cover"
-															/>
-														) : (
-															<div className="size-full flex items-center justify-center font-bold text-xs text-achillea-lime">
-																{p.nom.slice(0, 1)}
-															</div>
-														)}
-													</div>
+													<UserAvatar
+														userId={p.userId}
+														avatar={p.avatar}
+														name={p.nom}
+														size="sm"
+														className="rounded-lg border border-achillea-purple/40"
+													/>
 													<div className="min-w-0">
 														<div className="text-xs font-bold text-foreground truncate group-hover/row:text-achillea-lime transition-colors">
 															{p.nom}

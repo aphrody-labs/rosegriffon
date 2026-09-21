@@ -37,8 +37,9 @@ export function resolveDiscordAvatarUrl(
 	size = 256
 ): string {
 	const width = toPositiveInt(size, 256, 16);
-	const id = userId?.trim() || "0";
 	const raw = (avatar ?? "").trim();
+	const extractedId = raw.match(/\/avatars\/(\d+)\//iu)?.[1];
+	const id = userId?.trim() || extractedId || "0";
 	if (!raw) return discordDefaultAvatarUrl(id);
 
 	if (!/^https?:\/\//iu.test(raw)) {
