@@ -6,7 +6,7 @@
  * this package only validates and resolves them deterministically.
  */
 
-export const THEME_IDS = ["roy", "gaelle", "azalee-light", "azalee-dark", "achillea"] as const;
+export const THEME_IDS = ["roy", "gaelle", "azalee-dark", "achillea"] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 
 export const LOCALE_IDS = ["fr", "en", "ja"] as const;

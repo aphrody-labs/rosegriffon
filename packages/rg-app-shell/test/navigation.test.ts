@@ -80,11 +80,12 @@ describe("estItemActif", () => {
 });
 
 describe("navigation de la source unique Website", () => {
-	test("aucune route de service n'est préfixée par le wiki", () => {
+	test("aucune route de service n'est préfixée par le wiki et settings vit dans la topbar", () => {
 		const chemins = cheminsCliquables(construireNavigationItems());
 		expect(chemins).not.toContain("/wiki/news");
 		expect(chemins).not.toContain("/wiki/settings");
-		expect(chemins).toContain("/settings");
+		// `/settings` vit dans la topbar, pas dans la sidebar
+		expect(chemins).not.toContain("/settings");
 
 		// `/news` est servi à la racine et vit dans la catégorie « Actualité ».
 		expect(cheminsCliquables(itemsDeNavigation())).toContain("/news");
@@ -148,8 +149,8 @@ describe("dictionnaire de navigation", () => {
  * dans `styles.css`. Ce test empêche la liste de redivergir.
  */
 describe("sélecteur de thème", () => {
-	test("propose exactement les thèmes du catalogue", () => {
-		expect(DEFAULT_THEMES.map((t) => t.id).sort()).toEqual(Object.keys(THEMES).sort());
+	test("propose exclusivement les thèmes d'association (Roy et Gaëlle)", () => {
+		expect(DEFAULT_THEMES.map((t) => t.id).sort()).toEqual(["gaelle", "roy"]);
 	});
 
 	test("aucun identifiant fantôme", () => {

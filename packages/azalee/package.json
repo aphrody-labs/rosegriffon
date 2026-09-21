@@ -1,7 +1,7 @@
 {
   "name": "@rosegriffon/azalee",
-  "version": "1.0.1",
-  "description": "Biblioth\u00e8que Bun du wiki Azal\u00e9e (Inazuma Eleven: Victory Road) \u2014 acc\u00e8s donn\u00e9es via miroir SQLite, index CPK, index de texte de jeu, r\u00e9solution d'URLs CDN, recherche floue et CLI.",
+  "version": "1.0.0",
+  "description": "Bibliothèque Bun du wiki Azalée (Inazuma Eleven: Victory Road) — accès données via miroir SQLite, index CPK, index de texte de jeu, résolution d'URLs CDN, recherche floue et CLI.",
   "keywords": [
     "azalee",
     "bun",

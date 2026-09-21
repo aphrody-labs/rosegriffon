@@ -20,23 +20,22 @@ export interface ThemeOption {
 }
 
 /**
- * Thèmes proposés par le sélecteur, DÉRIVÉS du catalogue de `@rosegriffon/ui`.
- *
- * Cette liste était recopiée à la main, et elle avait dérivé : trois entrées
- * quand le catalogue en déclarait cinq, et surtout un identifiant `"dark"` qui
- * ne correspond à AUCUN thème — `next-themes` posait donc la classe `.dark`,
- * qui n'existe qu'en repli générique, au lieu de `.theme-azalee-dark`. Azalée
- * clair et Achilléa, eux, étaient tout simplement absents du sélecteur : les
- * déclarer dans `styles.css` ne suffisait pas à les rendre choisissables.
- *
- * Ajouter un thème au catalogue l'ajoute désormais au sélecteur, sans toucher
- * ce fichier. C'est le seul moyen de garantir qu'ils ne redivergent pas.
+ * Thèmes proposés par le sélecteur d'association : Roy et Gaëlle exclusivement.
+ * Les univers Azalée et Achilléa ont chacun leur thème de domaine dédié (Azalée sombre et Achilléa e-sport)
+ * appliqué sur leur contenu, tandis que le chrome et l'association restent pilotés par Roy et Gaëlle.
  */
-export const DEFAULT_THEMES: ThemeOption[] = Object.entries(THEMES).map(([id, theme]) => ({
-	id,
-	image: theme.icon,
-	label: theme.name,
-}));
+export const DEFAULT_THEMES: ThemeOption[] = [
+	{
+		id: "roy",
+		image: "/emote/RG_Roy_salut.webp",
+		label: "Roy",
+	},
+	{
+		id: "gaelle",
+		image: "/emote/RG_Gaelle_salut.webp",
+		label: "Gaëlle",
+	},
+];
 
 export function ThemeToggle({
 	themes = DEFAULT_THEMES,

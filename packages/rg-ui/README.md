@@ -44,21 +44,21 @@ import { useIsMobile, useMediaQuery, useSwipe } from "@rosegriffon/ui";
 
 | Classe               | Mode  | Seed               | Usage                     |
 | -------------------- | ----- | ------------------ | ------------------------- |
-| `theme-roy`          | light | bleu/doré          | personnage Inazuma Roy    |
-| `theme-gaelle`       | light | vermillon/orange   | personnage Inazuma Gaelle |
-| `theme-azalee-light` | light | `#F89C5A` (orange) | wiki Azalée par défaut    |
-| `theme-azalee-dark`  | dark  | `#F89C5A` inversé  | wiki Azalée mode sombre   |
+| `theme-roy`          | light | bleu/doré          | Rose Griffon Roy (défaut)  |
+| `theme-gaelle`       | light | vermillon/orange   | Rose Griffon Gaëlle        |
+| `theme-azalee-dark`  | dark  | `#F89C5A` sombre   | wiki Azalée mode sombre   |
+| `theme-achillea`     | dark  | cyber violet       | e-sport Achilléa          |
 
 Application :
 
 ```tsx
 // Static (layout React)
-<html className="theme-azalee-light">
+<html className="theme-roy">
 
 // Dynamique (next-themes)
 import { ThemeProvider } from "next-themes";
 
-<ThemeProvider attribute="class" themes={["theme-azalee-light", "theme-azalee-dark", "theme-roy", "theme-gaelle"]}>
+<ThemeProvider attribute="class" themes={["theme-roy", "theme-gaelle"]}>
   {children}
 </ThemeProvider>
 ```

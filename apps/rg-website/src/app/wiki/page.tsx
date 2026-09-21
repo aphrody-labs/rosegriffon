@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 	description:
 		"Base de données complète Inazuma Eleven: Victory Road. Joueurs, techniques, objets, esprits guerriers et actualités décryptées.",
 	openGraph: {
-		title: "Azalée - Encyclopédie Inazuma Eleven: Victory Road | Rose Griffon",
+		title: "Azalée - Wiki Inazuma Eleven: Victory Road | Rose Griffon",
 		description:
 			"L'information la plus précise autour d'Inazuma Eleven: Victory Road. Stats, fiches, techniques et actualités en français.",
 		url: "https://rosegriffon.fr/wiki",
@@ -31,13 +31,13 @@ export const metadata: Metadata = {
 			},
 		],
 	},
-	title: "Azalée — Encyclopédie Inazuma Eleven: Victory Road",
+	title: "Azalée — Wiki Inazuma Eleven: Victory Road",
 	twitter: {
 		card: "summary_large_image",
 		creator: "@Azalee_IE",
 		description: "L'information la plus précise autour d'Inazuma Eleven: Victory Road.",
 		site: "@Azalee_IE",
-		title: "Azalée — Encyclopédie Inazuma Eleven",
+		title: "Azalée — Wiki Inazuma Eleven",
 	},
 };
 
@@ -105,7 +105,7 @@ export default async function WikiHomePage() {
 	return (
 		<div className="animate-in fade-in duration-700">
 			{/*
-			 * Hero interactif de l'encyclopédie Azalée.
+			 * Hero interactif du wiki Azalée.
 			 *
 			 * LA GOUTTIÈRE QUI MANQUAIT
 			 * `LandingHero` est le composant d'accueil du wiki unifié, où le
@@ -153,7 +153,7 @@ export default async function WikiHomePage() {
 					<div className="flex-1 h-px bg-outline-variant/20" />
 				</div>
 
-				{/* Carousel des catégories de l'encyclopédie */}
+				{/* Carousel des catégories du wiki */}
 				<AnimatedSection direction="scale" delay={0.1}>
 					<WikiCarousel stats={wikiStats} />
 				</AnimatedSection>

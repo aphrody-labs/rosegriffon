@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 import { PageContainer, PageHero, SectionCard, SectionHeading } from "@/components/shared/PageShell";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
-import { Award, Eye, Handshake, Scale, Sparkles, Users } from "@/lib/icons-config";
+import { Award, Eye, Handshake, Palette, Scale, Users } from "@/lib/icons-config";
 
 // Page statique avec ISR - Revalidate toutes les semaines (charte rarement modifiée)
 export const revalidate = 604_800; // 1 semaine
@@ -43,7 +43,7 @@ const ENGAGEMENTS = [
 		text: "Chaque projet, chaque action menée est justifiée, expliquée et rendue publique. Nous nous engageons à toujours expliciter nos intentions et décisions de manière claire et accessible.",
 	},
 	{
-		icon: Sparkles,
+		icon: Palette,
 		title: "Refus de l'IA générative comme substitut à la création humaine",
 		text: "Rose Griffon privilégie la création humaine. Nous nous engageons à limiter drastiquement l'utilisation d'IA générative (visuelle, sonore, textuelle) dans nos productions pour garantir l'authenticité, la qualité et l'éthique du travail fourni.",
 	},

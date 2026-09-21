@@ -10,10 +10,9 @@
  *   - typescale (15 rôles officiels)
  *   - state-layer utility
  *
- * Thèmes unifiés (5) — appliqués via classe sur <html> ou ancêtre :
+ * Thèmes unifiés (4) — appliqués via classe sur <html> ou ancêtre :
  *   - .theme-roy           — Inazuma character, light, accent bleu/doré
  *   - .theme-gaelle        — Inazuma character, light, vermillon/orange
- *   - .theme-azalee-light  — Wiki Azalée, light, seed MD3 #F89C5A
  *   - .theme-azalee-dark   — Wiki Azalée, dark, seed MD3 #F89C5A
  *   - .theme-achillea      — Compétitif Achilléa, dark cyber violet/néon lime
  *
@@ -503,85 +502,6 @@
 		--sidebar-border: rgba(255, 196, 110, 0.3);
 		--sidebar-ring: rgba(255, 196, 110, 0.4);
 	}
-
-	:root.theme-azalee-light,
-	.theme-azalee-light,
-	:root.azalee-light,
-	.azalee-light {
-		--md-sys-color-primary: #f2a93b;
-		--md-sys-color-on-primary: #2a1519;
-		--md-sys-color-primary-container: #ffe08b;
-		--md-sys-color-on-primary-container: #2a1519;
-		--md-sys-color-secondary: #a92335;
-		--md-sys-color-on-secondary: #ffffff;
-		--md-sys-color-secondary-container: #ffdad6;
-		--md-sys-color-on-secondary-container: #410006;
-		--md-sys-color-tertiary: #2f4f4f;
-		--md-sys-color-on-tertiary: #ffffff;
-		--md-sys-color-tertiary-container: #b1ecec;
-		--md-sys-color-on-tertiary-container: #002020;
-		--md-sys-color-error: #ba1a1a;
-		--md-sys-color-on-error: #ffffff;
-		--md-sys-color-error-container: #ffdad6;
-		--md-sys-color-on-error-container: #93000a;
-		--md-sys-color-background: #fff8f5;
-		--md-sys-color-on-background: #221a15;
-		--md-sys-color-surface: #fff8f5;
-		--md-sys-color-on-surface: #221a15;
-		--md-sys-color-surface-variant: #f4ded3;
-		--md-sys-color-on-surface-variant: #52443c;
-		--md-sys-color-outline: #84746a;
-		--md-sys-color-outline-variant: #d7c3b7;
-		--md-sys-color-scrim: #000000;
-		--md-sys-color-shadow: #000000;
-		--md-sys-color-inverse-surface: #382e29;
-		--md-sys-color-inverse-on-surface: #feede5;
-		--md-sys-color-inverse-primary: #ffb786;
-		--md-sys-color-surface-dim: #e7d7ce;
-		--md-sys-color-surface-bright: #fff8f5;
-		--md-sys-color-surface-container-lowest: #ffffff;
-		--md-sys-color-surface-container-low: #fff1ea;
-		--md-sys-color-surface-container: #fcebe2;
-		--md-sys-color-surface-container-high: #f6e5dc;
-		--md-sys-color-surface-container-highest: #f0dfd7;
-		--background: var(--md-sys-color-surface);
-		--foreground: var(--md-sys-color-on-surface);
-		--card: var(--md-sys-color-surface-container-low);
-		--card-foreground: var(--md-sys-color-on-surface);
-		--popover: var(--md-sys-color-surface-container-high);
-		--popover-foreground: var(--md-sys-color-on-surface);
-		--primary: var(--md-sys-color-primary);
-		--primary-foreground: var(--md-sys-color-on-primary);
-		--secondary: var(--md-sys-color-secondary-container);
-		--secondary-foreground: var(--md-sys-color-on-secondary-container);
-		--muted: var(--md-sys-color-surface-container);
-		--muted-foreground: var(--md-sys-color-on-surface-variant);
-		--accent: var(--md-sys-color-tertiary-container);
-		--accent-foreground: var(--md-sys-color-on-tertiary-container);
-		--destructive: var(--md-sys-color-error);
-		--destructive-foreground: var(--md-sys-color-on-error);
-		--border: var(--md-sys-color-outline-variant);
-		--input: var(--md-sys-color-outline);
-		--ring: var(--md-sys-color-primary);
-		/* Les thèmes Roy et Gaëlle définissent `--chart-*` mais pas les thèmes
-		 * Azalée : les graphiques retombaient alors sur le `:root` gris de
-		 * shadcn côté website, et sur RIEN côté azalee. Rampe catégorielle de 5
-		 * teintes distinctes, ancrée sur l'ambre de la marque Azalée. */
-		--chart-1: var(--md-sys-color-primary);
-		--chart-2: oklch(0.6 0.13 200);
-		--chart-3: oklch(0.58 0.15 145);
-		--chart-4: oklch(0.55 0.18 300);
-		--chart-5: oklch(0.6 0.16 25);
-		--sidebar: var(--md-sys-color-surface);
-		--sidebar-foreground: var(--md-sys-color-on-surface);
-		--sidebar-primary: var(--md-sys-color-primary);
-		--sidebar-primary-foreground: var(--md-sys-color-on-primary);
-		--sidebar-accent: var(--md-sys-color-tertiary-container);
-		--sidebar-accent-foreground: var(--md-sys-color-on-tertiary-container);
-		--sidebar-border: var(--md-sys-color-outline-variant);
-		--sidebar-ring: var(--md-sys-color-primary);
-	}
-
 	:root.theme-azalee-dark,
 	.theme-azalee-dark,
 	:root.azalee-dark,
@@ -772,10 +692,6 @@
 		background-color: var(--background);
 		color: var(--foreground);
 	}
-	:where(.theme-azalee-light:not(:root)) {
-		background-color: var(--background);
-		color: var(--foreground);
-	}
 	:where(.theme-azalee-dark:not(:root)) {
 		background-color: var(--background);
 		color: var(--foreground);
@@ -796,6 +712,21 @@
 		font-feature-settings:
 			"rlig" 1,
 			"calt" 1;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		text-wrap: balance;
+	}
+
+	p,
+	blockquote,
+	li {
+		text-wrap: pretty;
 	}
 
 	:focus-visible {
@@ -940,6 +871,36 @@
 	}
 	.scrollbar-hide::-webkit-scrollbar {
 		display: none;
+	}
+
+	/* ─── Modern Web Custom Scrollbars (CSS standard + WebKit fallback) ── */
+	.scrollbar-thin {
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-outline-variant, #888888) transparent;
+	}
+	.scrollbar-thin::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+	.scrollbar-thin::-webkit-scrollbar-thumb {
+		background: var(--color-outline-variant, #888888);
+		border-radius: 9999px;
+	}
+	.scrollbar-thin::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	/* ─── Modern Web Performance: Defer heavy off-screen rendering ──── */
+	.content-deferred {
+		content-visibility: auto;
+		contain-intrinsic-size: auto 500px;
+	}
+
+	/* ─── Modern Web Glassmorphism surface ───────────────────────────── */
+	.glass-surface {
+		background-color: color-mix(in srgb, var(--background) 80%, transparent);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
 	}
 
 	/* ─── Achilléa Ranking Gradients ──────────────────────────────────── */

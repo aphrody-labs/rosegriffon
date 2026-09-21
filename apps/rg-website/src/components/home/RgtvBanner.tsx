@@ -12,7 +12,7 @@ export interface RgtvBannerProps {
 
 export function RgtvBanner({
 	title = "RG TV",
-	subtitle = "WebTV Officielle",
+	subtitle = "WebTV Rose Griffon",
 	description = "Votre rendez-vous quotidien Inazuma Eleven ! Retrouvez nos streamers sur Twitch et YouTube pour des sessions de jeu, des tournois commentés et de la bonne humeur.",
 	image = "/rgtv/affiche.webp",
 	buttonText = "ACCÉDER À LA WEBTV",
@@ -49,8 +49,8 @@ export function RgtvBanner({
 					</div>
 
 					{/* Right: Text Content */}
-					<CardContent className="px-6 pb-6 pt-0 sm:px-10 sm:pb-10 sm:pt-0 md:p-12 md:pt-0 flex flex-col justify-center space-y-6 bg-transparent relative">
-						<div className="space-y-3">
+					<CardContent className="px-6 pb-6 pt-0 sm:px-10 sm:pb-10 sm:pt-0 md:p-12 md:pt-0 flex flex-col justify-center gap-6 bg-transparent relative">
+						<div className="flex flex-col gap-3">
 							<div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#d63901] border-2 border-border text-white text-xs font-black uppercase tracking-wide shadow-lg transform -rotate-2">
 								<Image
 									src="/rgtv/rgtv.webp"
@@ -72,7 +72,7 @@ export function RgtvBanner({
 							</h2>
 						</div>
 
-						<p className="text-black/80 text-lg leading-relaxed max-w-md font-bold">
+						<p className="text-black/80 text-lg leading-relaxed max-w-md font-bold text-pretty">
 							{description}
 						</p>
 

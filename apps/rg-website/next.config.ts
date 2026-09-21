@@ -163,9 +163,9 @@ const nextConfig: NextConfig = {
 			// pour le même compte Discord : depuis que la session e-sport dérive
 			// de la session Rose Griffon (`/api/achillea/session`), il n'y a plus
 			// qu'une porte d'entrée.
-			{ destination: "/login?redirect=/achillea", permanent: true, source: "/achillea/auth" },
-			{ destination: "/community", permanent: true, source: "/notre-equipe" },
-			{ destination: "/community", permanent: true, source: "/notre-equipe/:path*" },
+			// La page `/notre-equipe` rassemble l'ensemble des pôles de l'association.
+			// Les anciens sous-chemins fragmentés redirigent vers `/notre-equipe`.
+			{ destination: "/notre-equipe", permanent: true, source: "/notre-equipe/:path+" },
 			{
 				destination: "/nous-soutenir",
 				permanent: true,
@@ -261,6 +261,25 @@ const nextConfig: NextConfig = {
 			// Forme d'URL de réinitialisation utilisée par azalee : les deux apps
 			// partagent le chrome et les courriels, les deux formes doivent aboutir.
 			{ destination: "/reset-password", permanent: false, source: "/auth/reset-password" },
+			// Redirections legacy Achilléa (Angular → Next.js)
+			{ destination: "/login", permanent: true, source: "/achillea/auth" },
+			{ destination: "/achillea/tournaments", permanent: true, source: "/achillea/events/list/tournament" },
+			{ destination: "/achillea/tournaments/circuit/ranking", permanent: true, source: "/achillea/events/tournaments/circuit/ranking" },
+			{ destination: "/achillea/tournaments/create", permanent: true, source: "/achillea/events/create/tournament" },
+			{ destination: "/achillea/tournaments/:id", permanent: true, source: "/achillea/events/tournaments/:id" },
+			{ destination: "/achillea/leagues/astral", permanent: true, source: "/achillea/leagues/astral-s1" },
+			{ destination: "/achillea/leagues/astral", permanent: true, source: "/achillea/leagues/asytral" },
+			{ destination: "/achillea/leagues/astral", permanent: true, source: "/achillea/leagues/asytral-s1" },
+			{ destination: "/achillea/tournaments/circuit/ranking", permanent: true, source: "/achillea/tournament-ranking" },
+			{ destination: "/achillea/tournaments/:id", permanent: true, source: "/achillea/tournament-page/:id" },
+			{ destination: "/achillea/clans/:id", permanent: true, source: "/achillea/clan-profile/:id" },
+			{ destination: "/achillea/clans/dashboard", permanent: true, source: "/achillea/clan-dashboard" },
+			{ destination: "/achillea/clans", permanent: true, source: "/achillea/clans-list" },
+			{ destination: "/achillea/ranked/leaderboard", permanent: true, source: "/achillea/ranked-leaderboard" },
+			{ destination: "/achillea/ranked/tiers", permanent: true, source: "/achillea/ranked-tiers" },
+			{ destination: "/achillea/ranked/match", permanent: true, source: "/achillea/ranked-match" },
+			{ destination: "/achillea/ranked/history", permanent: true, source: "/achillea/ranked-history" },
+			{ destination: "/achillea/users/:id", permanent: true, source: "/achillea/user-profile/:id" },
 		];
 	},
 

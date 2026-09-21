@@ -101,7 +101,7 @@ describe("resolveExperience", () => {
 				fontScale: 1.1,
 				locale: "en",
 				reducedMotion: true,
-				theme: "azalee-light",
+				theme: "azalee-dark",
 			},
 			domain: {
 				density: "compact",

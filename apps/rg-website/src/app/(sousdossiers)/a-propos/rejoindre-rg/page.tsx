@@ -23,7 +23,6 @@ import {
 	MapPin,
 	MessageCircle,
 	Shield,
-	Sparkles,
 	UserPlus,
 	Users,
 } from "@/lib/icons-config";
@@ -175,7 +174,7 @@ export default async function RejoindreRGPage() {
 			/>
 
 			<PageHero
-				icon={<Sparkles className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />}
+				icon={<UserPlus className="size-7 shrink-0 text-rg-or md:size-8" aria-hidden />}
 				eyebrow="Recrutement ouvert"
 				title="Rejoignez l'aventure Rose Griffon"
 				description="Une association dynamique et passionnée qui recherche constamment de nouveaux talents. Contribuez à l'essor de la communauté Inazuma Eleven en France, selon vos disponibilités."

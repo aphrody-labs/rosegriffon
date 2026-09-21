@@ -1,7 +1,7 @@
 {
   "name": "@rosegriffon/config",
-  "version": "0.1.2",
-  "description": "Configs partag\u00e9es : tsconfig, eslint, oxlint, tailwind preset",
+  "version": "1.0.0",
+  "description": "Configs partagées : tsconfig, eslint, oxlint, tailwind preset",
   "files": [
     "tsconfig-*.json",
     "oxlintrc.json",

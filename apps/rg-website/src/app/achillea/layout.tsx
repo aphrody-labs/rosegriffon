@@ -9,6 +9,11 @@ export const metadata: Metadata = {
 	},
 	description:
 		"La scène compétitive officielle Inazuma Eleven: Victory Road. Clans, classements classés ELO (1v1, 2v2), Astral League, tournois communautaires et bot Discord officiel.",
+	icons: {
+		icon: "/achillea/achillea_ico.png",
+		shortcut: "/achillea/achillea_ico.png",
+		apple: "/achillea/achillea_ico.png",
+	},
 	/*
 	 * PAS de `alternates.canonical` ici.
 	 *

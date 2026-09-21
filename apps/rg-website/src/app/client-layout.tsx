@@ -20,6 +20,7 @@ import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 import SidebarNavigationHandler from "@/components/layout/SidebarNavigationHandler";
 import EdgeSwipeDetector from "@/components/shared/EdgeSwipeDetector";
 import MobileWatermark from "@/components/shared/MobileWatermark";
+import { DynamicUniverseHead } from "@/components/layout/DynamicUniverseHead";
 import { AuthProvider as AuthProviderProfil } from "@/components/providers/AuthProvider";
 import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
@@ -113,7 +114,9 @@ function RoutedHeader({
 	const appName = isEsport ? "Achilléa" : isWiki ? "Azalée" : "Rose Griffon";
 	const logoSrc = isEsport ? "/achillea/logo1.svg" : isWiki ? "/RG_Azalee-logo.webp" : "/logo.webp";
 	const homeHref = isEsport ? "/achillea" : isWiki ? "/wiki" : "/";
-	const accountHref = isEsport ? "/achillea/wallet" : "/settings";
+	const accountHref = profile?.username
+		? `/profil/${encodeURIComponent(profile.username)}`
+		: "/profil";
 
 	return (
 		<Header
@@ -129,7 +132,7 @@ function RoutedHeader({
 			themeToggleSlot={
 				<div className="flex items-center gap-1">
 					<LanguageSwitcher />
-					<ThemeToggle />
+					{!isEsport && !isWiki && <ThemeToggle />}
 				</div>
 			}
 			user={user}
@@ -200,6 +203,9 @@ export default function ClientLayout({
 								<LanguageProvider initialLanguage={initialLanguage}>
 									<AchilleaAuthProvider>
 										<SidebarWrapper isMedium={isMedium}>
+											{/* Gestionnaire dynamique de Favicon, Titre et SEO selon l'univers */}
+											<DynamicUniverseHead />
+
 											{/* Accessibilité: lien pour sauter au contenu principal */}
 											<SkipToContent />
 
@@ -263,7 +269,7 @@ export default function ClientLayout({
 										    son layout : sans cette garde, les six routes du tunnel
 										    d'achat empilaient deux `contentinfo` — rupture visuelle et
 										    liens légaux annoncés deux fois par les lecteurs d'écran. */}
-													{!isShopPage && !isHomePage && <Footer />}
+													{!isShopPage && <Footer />}
 													<MobileWatermark />
 													{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
 													{isCompact && !shouldHideSidebar && (

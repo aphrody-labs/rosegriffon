@@ -128,7 +128,7 @@ function WidgetDiscord({
 				visibles
 			</p>
 
-			<ul className="min-h-0 grow space-y-2 overflow-y-auto pr-1">
+			<ul className="min-h-0 grow flex flex-col gap-2 overflow-y-auto pr-1 scrollbar-thin">
 				{donnees.members.map((membre) => (
 					<li key={membre.id} className="flex items-center gap-3">
 						<div className="relative shrink-0">
@@ -213,16 +213,16 @@ export default function DiscordSection({
 	}, [serveur.guildId]);
 
 	return (
-		<div className="w-full space-y-4">
+		<div className="w-full flex flex-col gap-4">
 			{(titre || sousTitre) && (
-				<div className="mx-auto max-w-7xl space-y-2 px-4 text-center">
+				<div className="mx-auto max-w-7xl flex flex-col gap-2 px-4 text-center">
 					{titre && (
-						<h2 id="community-heading" className="text-2xl font-bold text-foreground md:text-3xl">
+						<h2 id="community-heading" className="text-2xl font-bold text-foreground md:text-3xl text-balance">
 							{titre}
 						</h2>
 					)}
 					{sousTitre && (
-						<p className="mx-auto max-w-2xl text-base text-muted-foreground">{sousTitre}</p>
+						<p className="mx-auto max-w-2xl text-base text-muted-foreground text-pretty">{sousTitre}</p>
 					)}
 				</div>
 			)}

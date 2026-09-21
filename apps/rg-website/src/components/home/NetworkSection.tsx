@@ -21,14 +21,14 @@ export function NetworkSection() {
 					<span className="w-2 h-8 rounded-full bg-primary" />
 					Le réseau Rose Griffon
 				</h2>
-				<p className="mt-2 text-sm md:text-base text-on-surface-variant max-w-2xl">
+				<p className="mt-2 text-sm md:text-base text-on-surface-variant max-w-2xl text-pretty">
 					Azalée fait partie de Rose Griffon, l'association de la communauté Inazuma Eleven en
 					France. Découvrez le site de l'association et Achilléa, son pôle compétitif (clans,
 					tournois et matchs classés).
 				</p>
 			</div>
 
-			<div className="space-y-6 md:space-y-8">
+			<div className="flex flex-col gap-6 md:gap-8">
 				<RgtvBanner />
 				<AchilleaBanner />
 			</div>

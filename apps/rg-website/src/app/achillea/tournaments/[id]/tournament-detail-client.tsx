@@ -11,10 +11,19 @@ import {
 	tournamentStateTone,
 	badgeVariant,
 	placementPrizeAp,
+	isTournamentOrganizer,
 } from "@/lib/achillea";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
+import { TournamentBracket } from "@/components/achillea/TournamentBracket";
+import { TournamentScoresDialog } from "@/components/achillea/TournamentScoresDialog";
+import { TournamentLifecycleActions } from "@/components/achillea/TournamentLifecycleActions";
+import { TournamentEventsJournal } from "@/components/achillea/TournamentEventsJournal";
+import { TournamentTopSummary } from "@/components/achillea/TournamentTopSummary";
+import { EventParticipantsTable } from "@/components/achillea/EventParticipantsTable";
+import { PlayerNotesPanel } from "@/components/achillea/PlayerNotesPanel";
 import { Badge, Button, Card, Skeleton } from "@rosegriffon/ui";
 import type { WireTournament, WireParticipant } from "@rosegriffon/achillea-types/domain/tournament-ops";
+import type { ParticipantDTO } from "@rosegriffon/achillea-types";
 import { TournamentState } from "@rosegriffon/achillea-types/enums/eventEnums";
 import {
 	Trophy,
@@ -22,6 +31,7 @@ import {
 	Calendar,
 	Users,
 	ShieldCheck,
+	ShieldAlert,
 	Clock,
 	Layers,
 	ExternalLink,
@@ -33,6 +43,7 @@ import {
 	UserPlus,
 	UserMinus,
 	Loader2,
+	Activity,
 } from "lucide-react";
 
 export default function TournamentDetailPage({ id }: { id: string }) {
@@ -45,9 +56,29 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 	const [bracketData, setBracketData] = useState<unknown>(null);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
-	const [activeTab, setActiveTab] = useState<"overview" | "bracket" | "participants" | "organizers">("overview");
+	const [activeTab, setActiveTab] = useState<"overview" | "bracket" | "participants" | "summary" | "events" | "organizers" | "notes">("overview");
 
+	const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
 	const [isRegistering, setIsRegistering] = useState<boolean>(false);
+
+	const loadTournament = async () => {
+		if (isNaN(tournamentId)) return;
+		const client = createAchilleaClient();
+		try {
+			const res = await client.tournaments.get(tournamentId);
+			if (res.ok && res.value) {
+				setTournament(res.value[0]);
+				setParticipants(res.value[1] ?? []);
+				setBracketData(res.value[2] ?? null);
+			} else {
+				setError("Tournoi introuvable ou indisponible.");
+			}
+		} catch {
+			setError("Erreur de communication avec le serveur.");
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	useEffect(() => {
 		if (isNaN(tournamentId)) {
@@ -55,38 +86,15 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 			setLoading(false);
 			return;
 		}
-
-		let cancelled = false;
 		setLoading(true);
-		const client = createAchilleaClient();
-
-		client.tournaments
-			.get(tournamentId)
-			.then((res) => {
-				if (cancelled) return;
-				if (res.ok && res.value) {
-					setTournament(res.value[0]);
-					setParticipants(res.value[1] ?? []);
-					setBracketData(res.value[2] ?? null);
-				} else {
-					setError("Tournoi introuvable ou indisponible.");
-				}
-			})
-			.catch(() => {
-				if (!cancelled) setError("Erreur de communication avec le serveur.");
-			})
-			.finally(() => {
-				if (!cancelled) setLoading(false);
-			});
-
-		return () => {
-			cancelled = true;
-		};
+		void loadTournament();
 	}, [tournamentId]);
 
 	const isUserRegistered = Boolean(
 		user && participants.some((p) => p.user?.id === user.id)
 	);
+
+	const isOrganizer = Boolean(tournament && isTournamentOrganizer(user, tournament as any));
 
 	const handleToggleRegister = async () => {
 		if (!isAuthenticated) {
@@ -104,11 +112,7 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 				setParticipants((prev) => prev.filter((p) => p.user?.id !== user?.id));
 			} else {
 				await client.tournaments.participate(tournament.id);
-				// Refresh participants list
-				const ref = await client.tournaments.get(tournament.id);
-				if (ref.ok) {
-					setParticipants(ref.value[1] ?? []);
-				}
+				void loadTournament();
 			}
 		} finally {
 			setIsRegistering(false);
@@ -300,6 +304,14 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 				</div>
 			</div>
 
+			{/* Panneau Organisateur / Arbitre */}
+			{isOrganizer && (
+				<TournamentLifecycleActions
+					tournament={tournament}
+					onUpdated={() => void loadTournament()}
+				/>
+			)}
+
 			{/* Tabs Navigation */}
 			<div className="flex items-center gap-2 border-b border-border pb-px overflow-x-auto">
 				<button
@@ -340,6 +352,30 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 				</button>
 				<button
 					type="button"
+					onClick={() => setActiveTab("summary")}
+					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+						activeTab === "summary"
+							? "border-primary text-foreground"
+							: "border-transparent text-muted-foreground hover:text-foreground"
+					}`}
+				>
+					<Trophy className="w-3.5 h-3.5" />
+					Podium & Résultats
+				</button>
+				<button
+					type="button"
+					onClick={() => setActiveTab("events")}
+					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+						activeTab === "events"
+							? "border-primary text-foreground"
+							: "border-transparent text-muted-foreground hover:text-foreground"
+					}`}
+				>
+					<Activity className="w-3.5 h-3.5" />
+					Journal d&apos;arbitrage
+				</button>
+				<button
+					type="button"
 					onClick={() => setActiveTab("organizers")}
 					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
 						activeTab === "organizers"
@@ -350,6 +386,20 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 					<ShieldCheck className="w-3.5 h-3.5" />
 					Organisateurs
 				</button>
+				{isOrganizer && (
+					<button
+						type="button"
+						onClick={() => setActiveTab("notes")}
+						className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+							activeTab === "notes"
+								? "border-primary text-foreground"
+								: "border-transparent text-muted-foreground hover:text-foreground"
+						}`}
+					>
+						<ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
+						Notes Staff
+					</button>
+				)}
 			</div>
 
 			{/* Tab 1: Overview */}
@@ -397,77 +447,40 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 
 			{/* Tab 2: Bracket */}
 			{activeTab === "bracket" && (
-				<div className="border border-border bg-card rounded-2xl p-6 text-center space-y-4">
-					<div className="space-y-1">
-						<h3 className="font-bold text-base">Arbre de compétition</h3>
-						<p className="text-xs text-muted-foreground">
-							{tournament.internalState === TournamentState.PENDING ||
-							tournament.internalState === TournamentState.PREREGISTERING
-								? "Le bracket sera généré et verrouillé dès la clôture des inscriptions."
-								: "Suivi en temps réel de l'avancement des rencontres du bracket."}
-						</p>
-					</div>
-
-					{/* Bracket Tree placeholder / visualizer */}
-					<div className="py-12 border border-dashed border-border rounded-xl bg-background/50 flex flex-col items-center justify-center space-y-2">
-						<Layers className="w-8 h-8 text-muted-foreground/60" />
-						<span className="text-xs font-semibold text-muted-foreground">
-							Arbre officiel ({tournament.participantsNumber} slots)
-						</span>
-						<span className="text-[11px] text-muted-foreground">
-							Géré via brackets-manager et synchronisé avec les lobbies Achilléa.
-						</span>
-					</div>
-				</div>
+				<TournamentBracket
+					bracketData={bracketData}
+					participants={participants}
+					maxSlots={tournament.participantsNumber ?? 16}
+					isOngoing={tournament.internalState === TournamentState.ONGOING}
+					canReportScore={isOrganizer || Boolean(isUserRegistered)}
+					onSelectMatch={(mId) => setSelectedMatchId(mId)}
+				/>
 			)}
 
 			{/* Tab 3: Participants */}
 			{activeTab === "participants" && (
-				<div className="border border-border bg-card rounded-2xl overflow-hidden">
-					<div className="p-4 border-b border-border bg-muted/30 flex items-center justify-between">
-						<h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
-							Liste des compétiteurs ({participants.length} / {tournament.participantsNumber})
-						</h3>
-					</div>
-
-					{participants.length === 0 ? (
-						<div className="py-12 text-center text-muted-foreground text-xs">
-							Aucun participant inscrit pour l'instant.
-						</div>
-					) : (
-						<div className="divide-y divide-border/60">
-							{participants.map((p, idx) => (
-								<div
-									key={p.id ?? idx}
-									className="p-3 px-4 flex items-center justify-between gap-4 hover:bg-muted/20 transition"
-								>
-									<div className="flex items-center gap-3">
-										<span className="text-xs font-mono font-bold text-muted-foreground w-6 text-center">
-											#{idx + 1}
-										</span>
-										<UserAvatar
-											avatar={p.user?.avatar}
-											displayName={p.user?.username || "Joueur"}
-											className="w-7 h-7"
-										/>
-										<div>
-											<span className="font-semibold text-xs text-foreground">
-												{p.user?.username || "Joueur"}
-											</span>
-										</div>
-									</div>
-
-									<span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-										Inscrit
-									</span>
-								</div>
-							))}
-						</div>
-					)}
-				</div>
+				<EventParticipantsTable
+					eventId={tournament.id}
+					eventName={tournament.name}
+					participantsCount={tournament.participantsNumber ?? 16}
+					internalState={tournament.internalState}
+					participants={participants as unknown as ParticipantDTO[]}
+					canManage={isOrganizer}
+					onReload={loadTournament}
+				/>
 			)}
 
-			{/* Tab 4: Organizers */}
+			{/* Tab 4: Podium & Summary */}
+			{activeTab === "summary" && (
+				<TournamentTopSummary tournamentId={tournament.id} />
+			)}
+
+			{/* Tab 5: Events Journal */}
+			{activeTab === "events" && (
+				<TournamentEventsJournal tournamentId={tournament.id} />
+			)}
+
+			{/* Tab 6: Organizers */}
 			{activeTab === "organizers" && (
 				<div className="border border-border bg-card rounded-2xl p-6 space-y-4">
 					<h3 className="font-bold text-sm">Staff & Arbitres du tournoi</h3>
@@ -481,10 +494,34 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 									? tournament.organization.name
 									: "Achilléa Esport"}
 							</div>
-							<div className="text-[11px] text-muted-foreground">Organisateur principal</div>
+							<div className="text-xs text-muted-foreground">Organisateur principal</div>
 						</div>
 					</div>
 				</div>
+			)}
+
+			{/* Tab 7: Notes Staff & Litiges (Organizers only) */}
+			{activeTab === "notes" && isOrganizer && (
+				<PlayerNotesPanel
+					tournamentId={tournament.id}
+					candidates={participants.map((p) => ({
+						id: String(p.user?.id ?? p.id),
+						label: p.user?.username ?? `Joueur #${p.id}`,
+						avatar: p.user?.avatar,
+					}))}
+					title={`Registre des signalements — Tournoi #${tournament.id}`}
+				/>
+			)}
+
+			{/* Modal Dialog de Saisie & Validation des Scores */}
+			{selectedMatchId !== null && (
+				<TournamentScoresDialog
+					matchId={selectedMatchId}
+					tournamentId={tournament.id}
+					isOrganizer={isOrganizer}
+					onClose={() => setSelectedMatchId(null)}
+					onScoreUpdated={() => void loadTournament()}
+				/>
 			)}
 		</div>
 	);

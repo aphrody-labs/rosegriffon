@@ -38,7 +38,7 @@ export const metadata = {
 export default function DesignSystemLayout({ children }: { children: ReactNode }) {
 	return (
 		<div
-			className={`${fraunces.variable} ${jetbrains.variable} ${poppins.variable} ${superCartoon.variable} theme-azalee-light min-h-screen bg-surface text-on-surface antialiased`}
+			className={`${fraunces.variable} ${jetbrains.variable} ${poppins.variable} ${superCartoon.variable} theme-roy min-h-screen bg-surface text-on-surface antialiased`}
 		>
 			{children}
 		</div>

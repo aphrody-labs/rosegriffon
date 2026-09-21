@@ -35,7 +35,7 @@ import {
 	ArrowRight,
 	ExternalLink,
 	PlayCircle,
-	Zap,
+	Swords,
 } from "lucide-react";
 import { FaDiscord, FaTwitch } from "react-icons/fa6";
 
@@ -263,7 +263,7 @@ export function HeroSection({
 				{/* Header & Logo */}
 				<div className="space-y-4">
 					<div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#6d00ce]/10 border border-[#6d00ce]/30 text-[#6d00ce] text-xs font-black uppercase tracking-wider shadow-sm">
-						<Zap className="size-3.5 fill-[#6d00ce]" />
+						<Swords className="size-3.5" />
 						E-Sport Inazuma Eleven
 					</div>
 
@@ -278,7 +278,7 @@ export function HeroSection({
 					</div>
 
 					<p className="text-sm sm:text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto font-medium">
-						Le carrefour officiel de la scène compétitive Inazuma Eleven: Victory Road.
+						Le carrefour communautaire de la scène compétitive Inazuma Eleven: Victory Road.
 						Clans, tournois homologués, classement classé et ligues majeures.
 					</p>
 				</div>
@@ -526,7 +526,7 @@ export function HeroSection({
 						className="p-5 rounded-2xl border border-outline/20 bg-surface hover:border-primary/50 hover:shadow-lg transition-all group space-y-2"
 					>
 						<div className="size-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold">
-							<Zap className="size-5" />
+							<Swords className="size-5" />
 						</div>
 						<h4 className="font-black text-base text-on-surface group-hover:text-primary transition-colors">
 							Ranked ELO
@@ -574,7 +574,7 @@ export function HeroSection({
 							<ExternalLink className="size-3.5 text-on-surface-variant" />
 						</div>
 						<p className="text-xs text-on-surface-variant line-clamp-2">
-							Serveur officiel avec bot, matchmaking et salons d'équipe.
+							Serveur communautaire avec bot, matchmaking et salons d'équipe.
 						</p>
 					</a>
 				</div>

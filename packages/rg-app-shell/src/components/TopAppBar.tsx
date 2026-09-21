@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleUser, LayoutDashboard, Menu, User } from "lucide-react";
+import { CircleUser, LayoutDashboard, Menu, Settings, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -22,6 +22,7 @@ export interface TopAppBarProps {
 	logoSrc?: string;
 	homeHref?: string;
 	adminHref?: string;
+	settingsHref?: string;
 	isAdmin?: boolean;
 	showUniverseSwitch?: boolean;
 	user?: unknown | null;
@@ -41,7 +42,7 @@ export interface TopAppBarProps {
 }
 
 const DEFAULT_TITLE_MAP: Record<string, string> = {
-	"/wiki": "Encyclopédie",
+	"/wiki": "Wiki",
 	"/search": "Recherche",
 	"/news": "Actualités",
 	"/patch-notes": "Patch Notes",
@@ -88,6 +89,7 @@ export function MobileHeader({
 	logoSrc = "/logo.webp",
 	homeHref = "/",
 	adminHref = BASE_ADMIN,
+	settingsHref = "/settings",
 	isAdmin = false,
 	showUniverseSwitch = false,
 	user = null,
@@ -95,7 +97,7 @@ export function MobileHeader({
 	notificationsSlot,
 	themeToggleSlot,
 	loginSlot,
-	accountHref = "/settings",
+	accountHref,
 	titleMap = DEFAULT_TITLE_MAP,
 	className,
 }: TopAppBarProps) {
@@ -112,6 +114,13 @@ export function MobileHeader({
 
 	const isHome = pathname === "/" || pathname === homeHref;
 	const title = resolvePageTitle(pathname, titleMap);
+
+	const publicProfileHref =
+		accountHref && accountHref !== "/settings"
+			? accountHref
+			: profile?.username
+				? `/profil/${encodeURIComponent(profile.username)}`
+				: "/profil";
 
 	return (
 		<header
@@ -140,6 +149,11 @@ export function MobileHeader({
 			)}
 
 			<div className="flex-1" />
+			{showUniverseSwitch && (
+				<div className="flex items-center mr-1">
+					<UniverseSwitch className="scale-90" />
+				</div>
+			)}
 			<div className="flex items-center gap-0.5">
 				{isAdmin && (
 					<Link
@@ -155,12 +169,22 @@ export function MobileHeader({
 
 				{themeToggleSlot ?? <ThemeToggle className="size-12" />}
 
+				<Link
+					href={settingsHref}
+					className="size-12 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
+					aria-label="Paramètres"
+					title="Paramètres"
+				>
+					<Settings size={24} aria-hidden="true" />
+				</Link>
+
 				<div className="ml-1">
 					{user ? (
 						<button
 							className="size-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 active:scale-95 transition-transform"
-							onClick={() => router.push(accountHref)}
-							aria-label="Mon compte"
+							onClick={() => router.push(publicProfileHref)}
+							aria-label={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
+							title={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
 						>
 							{profile?.avatar_url ? (
 								<Image
@@ -197,6 +221,7 @@ export function DesktopTopBar({
 	logoSrc = "/logo.webp",
 	homeHref = "/",
 	adminHref = BASE_ADMIN,
+	settingsHref = "/settings",
 	isAdmin = false,
 	showUniverseSwitch = true,
 	user = null,
@@ -206,7 +231,7 @@ export function DesktopTopBar({
 	notificationsSlot,
 	themeToggleSlot,
 	loginSlot,
-	accountHref = "/settings",
+	accountHref,
 	titleMap = DEFAULT_TITLE_MAP,
 	className,
 }: TopAppBarProps) {
@@ -214,6 +239,13 @@ export function DesktopTopBar({
 	const router = useRouter();
 	const { toggleSidebar, open } = useSidebar();
 	const title = resolvePageTitle(pathname, titleMap);
+
+	const publicProfileHref =
+		accountHref && accountHref !== "/settings"
+			? accountHref
+			: profile?.username
+				? `/profil/${encodeURIComponent(profile.username)}`
+				: "/profil";
 
 	return (
 		<header
@@ -241,15 +273,15 @@ export function DesktopTopBar({
 				</Link>
 
 				{showUniverseSwitch && (
-					<div className="ml-2 hidden xl:flex items-center">
+					<div className="ml-3 hidden sm:flex items-center">
 						<UniverseSwitch />
 					</div>
 				)}
 
 				{title && (
 					<div className="flex items-center gap-2 ml-2 animate-in fade-in slide-in-from-left-2 duration-300">
-						<span className="size-1 rounded-full bg-outline-variant/40" />
-						<span className="font-bold text-sm text-on-surface-variant tracking-wide opacity-80 mt-0.5 truncate max-w-[160px]">
+						<span className="size-1 rounded-full bg-outline-variant/60" />
+						<span className="font-semibold text-sm text-on-surface tracking-wide mt-0.5 truncate max-w-[180px]">
 							{title}
 						</span>
 					</div>
@@ -278,17 +310,27 @@ export function DesktopTopBar({
 
 				{themeToggleSlot ?? <ThemeToggle />}
 
+				<Link
+					href={settingsHref}
+					className="size-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/[0.08] active:bg-on-surface/[0.12] transition-colors"
+					aria-label="Paramètres"
+					title="Paramètres"
+				>
+					<Settings size={20} aria-hidden="true" />
+				</Link>
+
 				<div className="ml-2">
 					{user ? (
 						<div
 							className="size-9 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden transition-all duration-200 cursor-pointer hover:ring-2 hover:ring-primary/20 active:scale-95"
-							onClick={() => router.push(accountHref)}
+							onClick={() => router.push(publicProfileHref)}
 							role="button"
 							tabIndex={0}
-							aria-label={profile?.username || "Mon compte"}
+							aria-label={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
+							title={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
 							onKeyDown={(e) => {
 								if (e.key === "Enter" || e.key === " ") {
-									router.push(accountHref);
+									router.push(publicProfileHref);
 								}
 							}}
 						>

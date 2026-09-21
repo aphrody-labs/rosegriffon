@@ -18,9 +18,11 @@ import {
 	Heart,
 	Mail,
 	Megaphone,
-	Sparkles,
+	Server,
+	Swords,
 	Trophy,
 	Users,
+	Video,
 } from "@/lib/icons-config";
 
 export const metadata: Metadata = {
@@ -75,17 +77,17 @@ const TRANSPARENCY = [
 	},
 	{
 		desc: "Azalée (chroniques + chaîne), Rose Griffon TV. Outils de production, hébergement.",
-		icon: Sparkles,
+		icon: Video,
 		title: "Projets médiatiques",
 	},
 	{
 		desc: "Achilléa : scène compétitive structurée, tournois nationaux, coaching.",
-		icon: Trophy,
+		icon: Swords,
 		title: "Développement e-sport",
 	},
 	{
 		desc: "Serveurs, CDN, sites, bots Discord. Tout est auto-hébergé pour rester maîtres de nos données.",
-		icon: Eye,
+		icon: Server,
 		title: "Infrastructure technique",
 	},
 ];
@@ -184,7 +186,7 @@ export default function NousSoutenirPage() {
 			<section aria-labelledby="autres">
 				<SectionHeading
 					id="autres"
-					icon={<Sparkles className="size-6" aria-hidden />}
+					icon={<Heart className="size-6" aria-hidden />}
 					iconClassName="bg-primary text-primary-foreground shadow-primary/20"
 					title="Autres façons de nous soutenir"
 					subtitle="Un coup de main ponctuel, ou simplement une question à nous poser."

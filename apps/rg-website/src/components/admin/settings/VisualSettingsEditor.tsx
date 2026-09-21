@@ -215,7 +215,7 @@ export function VisualSettingsEditor({ settings: initialSettings }: VisualSettin
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<Field label="Titre" sKey="home_rgtv_title" def="RG TV" />
-							<Field label="Sous-titre" sKey="home_rgtv_subtitle" def="WebTV Officielle" />
+							<Field label="Sous-titre" sKey="home_rgtv_subtitle" def="WebTV Rose Griffon" />
 							<Field
 								label="Description"
 								sKey="home_rgtv_description"
@@ -235,7 +235,7 @@ export function VisualSettingsEditor({ settings: initialSettings }: VisualSettin
 						<div className="border rounded-3xl p-4 bg-muted/30 dark:bg-black/20">
 							<RgtvBanner
 								title={getVal(settings, "home_rgtv_title", "RG TV")}
-								subtitle={getVal(settings, "home_rgtv_subtitle", "WebTV Officielle")}
+								subtitle={getVal(settings, "home_rgtv_subtitle", "WebTV Rose Griffon")}
 								description={getVal(
 									settings,
 									"home_rgtv_description",

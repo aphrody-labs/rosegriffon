@@ -28,7 +28,7 @@ export type TeamMember = Database["public"]["Tables"]["team_members"]["Row"];
 export type TeamMemberInput = EntreeMembre;
 
 /** Pages publiques qui affichent des membres du staff. */
-const CHEMINS_A_REVALIDER = ["/community", "/admin/staff"];
+const CHEMINS_A_REVALIDER = ["/notre-equipe", "/community", "/admin/staff"];
 
 function revaliderPagesStaff(): void {
 	for (const chemin of CHEMINS_A_REVALIDER) {

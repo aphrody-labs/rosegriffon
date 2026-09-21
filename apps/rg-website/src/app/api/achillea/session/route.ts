@@ -74,60 +74,65 @@ export async function POST() {
 		return NextResponse.json({ error: "non_authentifie" }, { status: 401 });
 	}
 
-	const pool = getPgPool();
+	try {
+		const pool = getPgPool();
 
-	// Le compte Discord lié à CETTE session, et le profil qui porte le pseudo et
-	// l'avatar affichés côté Rose Griffon.
-	const { rows } = await pool.query<LigneCompteDiscord>(
-		`SELECT a.account_id AS discord_id,
-		        COALESCE(p.username, u.name) AS username,
-		        COALESCE(p.avatar_url, u.image) AS avatar_url
-		 FROM public.account a
-		 JOIN public."user" u ON u.id = a.user_id
-		 LEFT JOIN public.profiles p ON p.id = a.user_id
-		 WHERE a.user_id = $1 AND a.provider_id = 'discord'
-		 LIMIT 1`,
-		[session.user.id]
-	);
+		// Le compte Discord lié à CETTE session, et le profil qui porte le pseudo et
+		// l'avatar affichés côté Rose Griffon.
+		const { rows } = await pool.query<LigneCompteDiscord>(
+			`SELECT a.account_id AS discord_id,
+			        COALESCE(p.username, u.name) AS username,
+			        COALESCE(p.avatar_url, u.image) AS avatar_url
+			 FROM public.account a
+			 JOIN public."user" u ON u.id = a.user_id
+			 LEFT JOIN public.profiles p ON p.id = a.user_id
+			 WHERE a.user_id = $1 AND a.provider_id = 'discord'
+			 LIMIT 1`,
+			[session.user.id]
+		);
 
-	const compte = rows[0];
-	if (!compte?.discord_id) {
-		return NextResponse.json({ error: "discord_non_lie" }, { status: 409 });
+		const compte = rows[0];
+		if (!compte?.discord_id) {
+			return NextResponse.json({ error: "discord_non_lie" }, { status: 409 });
+		}
+
+		// Le joueur doit exister côté Achilléa : `/api/users/me` lit cette table, et
+		// un jeton valide pour un identifiant absent produirait une session qui
+		// s'authentifie mais ne trouve personne. `on conflict` ne touche pas aux
+		// données du jeu (elo, clan, licence) — seulement à l'identité affichée.
+		//
+		// `display_name` et `normalized_display_name` sont laissés à leur défaut :
+		// le bot les calcule avec `normalizeNames()` (NFKC, alphabets stylisés
+		// repliés, 90 lignes), et les recopier ici en `UPPER()` fabriquerait une
+		// seconde normalisation, divergente, qui casserait la recherche de joueurs.
+		// Le bot les remplit à la première synchronisation Discord.
+		await pool.query(
+			`INSERT INTO achillea."user" (id, created_at, updated_at, last_interact, role, username, avatar)
+			 VALUES ($1, now(), now(), now(), 0, $2, $3)
+			 ON CONFLICT (id) DO UPDATE
+			 SET last_interact = now(),
+			     updated_at = now(),
+			     username = COALESCE(EXCLUDED.username, achillea."user".username),
+			     avatar = COALESCE(EXCLUDED.avatar, achillea."user".avatar)`,
+			[compte.discord_id, compte.username, compte.avatar_url]
+		);
+
+		const jeton = signerJetonAchillea(
+			{ avatar: compte.avatar_url, id: compte.discord_id, username: compte.username },
+			secret
+		);
+
+		const magasin = await cookies();
+		magasin.set(COOKIE_SESSION_ACHILLEA, jeton, {
+			...COOKIE,
+			maxAge: DUREE_SESSION_ACHILLEA_SECONDES,
+		});
+
+		return NextResponse.json({ id: compte.discord_id, username: compte.username });
+	} catch (error) {
+		console.error("[achillea/session] Erreur session Achilléa:", error);
+		return NextResponse.json({ error: "base_de_donnees_indisponible" }, { status: 503 });
 	}
-
-	// Le joueur doit exister côté Achilléa : `/api/users/me` lit cette table, et
-	// un jeton valide pour un identifiant absent produirait une session qui
-	// s'authentifie mais ne trouve personne. `on conflict` ne touche pas aux
-	// données du jeu (elo, clan, licence) — seulement à l'identité affichée.
-	//
-	// `display_name` et `normalized_display_name` sont laissés à leur défaut :
-	// le bot les calcule avec `normalizeNames()` (NFKC, alphabets stylisés
-	// repliés, 90 lignes), et les recopier ici en `UPPER()` fabriquerait une
-	// seconde normalisation, divergente, qui casserait la recherche de joueurs.
-	// Le bot les remplit à la première synchronisation Discord.
-	await pool.query(
-		`INSERT INTO achillea."user" (id, created_at, updated_at, last_interact, role, username, avatar)
-		 VALUES ($1, now(), now(), now(), 0, $2, $3)
-		 ON CONFLICT (id) DO UPDATE
-		 SET last_interact = now(),
-		     updated_at = now(),
-		     username = COALESCE(EXCLUDED.username, achillea."user".username),
-		     avatar = COALESCE(EXCLUDED.avatar, achillea."user".avatar)`,
-		[compte.discord_id, compte.username, compte.avatar_url]
-	);
-
-	const jeton = signerJetonAchillea(
-		{ avatar: compte.avatar_url, id: compte.discord_id, username: compte.username },
-		secret
-	);
-
-	const magasin = await cookies();
-	magasin.set(COOKIE_SESSION_ACHILLEA, jeton, {
-		...COOKIE,
-		maxAge: DUREE_SESSION_ACHILLEA_SECONDES,
-	});
-
-	return NextResponse.json({ id: compte.discord_id, username: compte.username });
 }
 
 /** Ferme la session Achilléa en même temps que celle de Rose Griffon. */

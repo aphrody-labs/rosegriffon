@@ -83,7 +83,7 @@ export function police(
 	return `${graisse === "bold" ? "bold " : ""}${taille}px ${famille}`;
 }
 
-const AZALEE_CLAIR = THEMES["theme-azalee-light"];
+const ROY = THEMES["theme-roy"];
 const AZALEE_SOMBRE = THEMES["theme-azalee-dark"];
 
 /**
@@ -91,7 +91,7 @@ const AZALEE_SOMBRE = THEMES["theme-azalee-dark"];
  *
  * Marine + or + brique viennent des tokens de marque (`--rg-*`), qui ne suivent
  * pas le thème ; les surfaces et les couleurs de texte viennent du thème
- * `azalee-light`, dont les valeurs sont pensées pour du contenu posé sur une
+ * `theme-roy`, dont les valeurs sont pensées pour du contenu posé sur une
  * surface claire.
  */
 export const PALETTE = {
@@ -104,23 +104,23 @@ export const PALETTE = {
 	brique: MARQUE.brique,
 	briqueClair: MARQUE.briqueClair,
 	/** Orange Azalée — accent secondaire. */
-	azalee: AZALEE_CLAIR.md3.primary,
+	azalee: "#F89C5A",
 	azaleeVif: AZALEE_SOMBRE.md3.primary,
 	/** Texte posé sur le marine. */
 	surFond: MARQUE.surMarine,
 	/** Surface des cartes et texte associé. */
-	carte: AZALEE_CLAIR.md3.surfaceContainerLowest,
-	carteAlt: AZALEE_CLAIR.md3.surfaceContainerLow,
-	carteCreuse: AZALEE_CLAIR.md3.surfaceContainerHigh,
-	texte: AZALEE_CLAIR.md3.onSurface,
-	texteAttenue: AZALEE_CLAIR.md3.onSurfaceVariant,
+	carte: ROY.md3.surfaceContainerLowest,
+	carteAlt: ROY.md3.surfaceContainerLow,
+	carteCreuse: ROY.md3.surfaceContainerHigh,
+	texte: ROY.md3.onSurface,
+	texteAttenue: ROY.md3.onSurfaceVariant,
 	/** Textes posés sur les pastilles. */
-	surOr: AZALEE_CLAIR.md3.onPrimary,
-	surBrique: AZALEE_CLAIR.md3.onSecondary,
+	surOr: ROY.md3.onPrimary,
+	surBrique: ROY.md3.onSecondary,
 	/** Filets discrets à l'intérieur des cartes. */
-	filet: AZALEE_CLAIR.md3.outlineVariant,
+	filet: ROY.md3.outlineVariant,
 	/** Noir des ombres dures et des contours de titre. */
-	ombre: AZALEE_CLAIR.md3.shadow,
+	ombre: ROY.md3.shadow,
 } as const;
 
 /** Rayons d'arrondi — échelle de formes M3 partagée. */

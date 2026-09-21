@@ -1,4 +1,4 @@
-import { getPgPool } from "@/lib/db/pg";
+import { getPgPoolOrNull } from "@/lib/db/pg";
 
 export const dynamic = "force-dynamic";
 
@@ -8,16 +8,17 @@ interface SettingRow {
 }
 
 export async function GET() {
-	const pool = getPgPool();
-
 	// Récupérer tous les settings Achilléa en une fois
 	let settings: SettingRow[] | undefined;
 	try {
-		const { rows } = await pool.query<SettingRow>(
-			"SELECT key, value FROM settings WHERE key ILIKE $1",
-			["home_achillea_%"]
-		);
-		settings = rows;
+		const pool = getPgPoolOrNull();
+		if (pool) {
+			const { rows } = await pool.query<SettingRow>(
+				"SELECT key, value FROM settings WHERE key ILIKE $1",
+				["home_achillea_%"]
+			);
+			settings = rows;
+		}
 	} catch {
 		settings = undefined;
 	}

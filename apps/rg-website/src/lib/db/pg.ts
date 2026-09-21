@@ -19,6 +19,11 @@ export const getDatabaseURL = (): string => {
 	return url;
 };
 
+export function isDatabaseConfigured(): boolean {
+	const url = process.env.DATABASE_URL;
+	return !!(url && !url.startsWith("eyJ2Ijo") && url !== "undefined" && url !== "null");
+}
+
 let _pgPool: Pool | null = null;
 
 const configuredPoolMax = Number.parseInt(process.env.DATABASE_POOL_MAX ?? "", 10);
@@ -34,6 +39,22 @@ export function getPgPool(): Pool {
 			idleTimeoutMillis: 30_000,
 			max: poolMax,
 		});
+
+		_pgPool.on("error", (err) => {
+			console.error("[pg] Erreur inattendue sur client Postgres inactif :", err);
+		});
 	}
 	return _pgPool;
+}
+
+/** Retourne le pool Postgres direct ou null si non configuré ou indisponible (repli gracieux). */
+export function getPgPoolOrNull(): Pool | null {
+	if (!isDatabaseConfigured()) {
+		return null;
+	}
+	try {
+		return getPgPool();
+	} catch {
+		return null;
+	}
 }

@@ -123,7 +123,7 @@ export async function exportAuthorStatsCSV(): Promise<string> {
 	const [{ data: reactions }, { data: comments }, { data: profiles }] = await Promise.all([
 		client.from("article_reactions").select("article_id").in("article_id", articleIds),
 		client.from("article_comments").select("article_id").in("article_id", articleIds),
-		client.from("profiles").select("id, username, display_name").in("id", authorIds),
+		client.from("profiles").select("id, username, full_name").in("id", authorIds),
 	]);
 
 	// Index article_id → author_id
@@ -139,7 +139,7 @@ export async function exportAuthorStatsCSV(): Promise<string> {
 	const profileName = new Map<string, string>();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	for (const p of (profiles ?? []) as any[]) {
-		profileName.set(p.id, p.display_name || p.username || p.id);
+		profileName.set(p.id, p.full_name || p.username || p.id);
 	}
 
 	// Agréger par auteur

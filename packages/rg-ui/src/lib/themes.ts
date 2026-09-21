@@ -32,17 +32,6 @@ export const THEMES = {
 			text: "#373434", // Noir
 		},
 	},
-	"azalee-light": {
-		name: "Azalée clair",
-		icon: "/emote/RG_Reika_zukan.webp",
-		colors: {
-			primary: "#F2A93B",
-			secondary: "#A92335",
-			accent: "#FFE08B",
-			background: "#FFF8F5",
-			text: "#221A15",
-		},
-	},
 	"azalee-dark": {
 		name: "Azalée",
 		icon: "/emote/RG_Reika_zukan.webp",

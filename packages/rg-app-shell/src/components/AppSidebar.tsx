@@ -13,6 +13,7 @@ import {
 	SidebarContent,
 	SidebarGroup,
 	SidebarGroupContent,
+	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
@@ -20,12 +21,15 @@ import {
 	useSidebar,
 } from "@rosegriffon/ui";
 import {
+	domaineDeLaRoute,
 	itemsDeNavigation,
 	estItemActif,
+	type Domaine,
 	type NavItem,
 } from "../config/navigation";
 import { iconMap } from "../lib/icons";
 import { traduireNav } from "../lib/translations";
+import { UniverseSwitch } from "./UniverseSwitch";
 
 export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 	items?: NavItem[];
@@ -34,6 +38,114 @@ export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 	renderIcon?: (item: NavItem) => React.ReactNode;
 	headerSlot?: React.ReactNode;
 	footerSlot?: React.ReactNode;
+}
+
+/**
+ * En-tête dynamique de la barre latérale :
+ * Affiche l'identité du domaine actif (Rose Griffon, Azalée, Achilléa)
+ * et propose un switch d'univers instantané sans casser le layout.
+ */
+export function SidebarUniverseHeader({
+	pathname,
+	isCollapsed,
+}: {
+	pathname: string;
+	isCollapsed: boolean;
+}) {
+	const activeDomaine = domaineDeLaRoute(pathname);
+
+	const info: Record<
+		Domaine,
+		{
+			name: string;
+			badge: string;
+			logo: string;
+			href: string;
+			badgeColor: string;
+		}
+	> = {
+		association: {
+			name: "Rose Griffon",
+			badge: "Association",
+			logo: "/RG_Logo_V2.5.webp",
+			href: "/",
+			badgeColor: "bg-primary/10 text-primary border-primary/20",
+		},
+		wiki: {
+			name: "Azalée",
+			badge: "Wiki VR",
+			logo: "/RG_Azalee-logo.webp",
+			href: "/wiki",
+			badgeColor: "bg-secondary/15 text-secondary border-secondary/30",
+		},
+		esport: {
+			name: "Achilléa",
+			badge: "E-Sport",
+			logo: "/achillea/logo1.svg",
+			href: "/achillea",
+			badgeColor:
+				"bg-achillea-violet/15 dark:bg-achillea-lime/20 text-achillea-violet dark:text-achillea-lime border-achillea-violet/30 dark:border-achillea-lime/40",
+		},
+	};
+
+	const current = info[activeDomaine];
+
+	if (isCollapsed) {
+		return (
+			<SidebarHeader className="p-2 flex items-center justify-center border-b border-outline-variant/15">
+				<Link
+					href={current.href}
+					className="relative size-10 rounded-xl p-1.5 flex items-center justify-center hover:bg-surface-container-high transition-colors"
+					title={`${current.name} — ${current.badge}`}
+				>
+					<Image
+						src={current.logo}
+						alt={current.name}
+						fill
+						sizes="32px"
+						className="object-contain"
+					/>
+				</Link>
+			</SidebarHeader>
+		);
+	}
+
+	return (
+		<SidebarHeader className="p-3 border-b border-outline-variant/15 space-y-2.5">
+			{/* Univers Identity */}
+			<div className="flex items-center justify-between gap-2">
+				<Link
+					href={current.href}
+					className="flex items-center gap-2.5 min-w-0 group/brand flex-1"
+				>
+					<div className="relative size-8 shrink-0 rounded-lg overflow-hidden p-0.5 bg-surface-container-high border border-outline-variant/20 group-hover/brand:scale-105 transition-transform">
+						<Image
+							src={current.logo}
+							alt={current.name}
+							fill
+							sizes="32px"
+							className="object-contain"
+						/>
+					</div>
+					<div className="min-w-0 flex-1">
+						<div className="flex items-center gap-1.5">
+							<span className="font-black text-sm text-on-surface truncate group-hover/brand:text-primary transition-colors">
+								{current.name}
+							</span>
+							<span className={`text-xs font-bold px-1.5 py-0.5 rounded border ${current.badgeColor}`}>
+								{current.badge}
+							</span>
+						</div>
+					</div>
+				</Link>
+			</div>
+
+			{/* Universe Switcher intégré directement dans la sidebar */}
+			<div className="flex items-center justify-center pt-0.5">
+				<UniverseSwitch className="w-full justify-between px-2 py-1 bg-surface-container-low/80 border border-outline-variant/20" />
+			</div>
+		</SidebarHeader>
+	);
 }
 
 function NavIcon({
@@ -102,13 +214,23 @@ function RecursiveNavItem({
 	renderIcon?: (item: NavItem) => React.ReactNode;
 }) {
 	const isActive = estItemActif(pathname, item);
-	const [isOpen, setIsOpen] = React.useState(isActive || Boolean(item.defaultOpen));
+	const activeDomaine = domaineDeLaRoute(pathname);
+
+	// Détection si l'élément correspond à l'univers actif courant
+	const isUniversePillar =
+		depth === 0 &&
+		((item.path === "#actualite" && activeDomaine === "association") ||
+			(item.path === "#association" && activeDomaine === "association") ||
+			(item.path === "#wiki" && activeDomaine === "wiki") ||
+			(item.path === "#esport" && activeDomaine === "esport"));
+
+	const [isOpen, setIsOpen] = React.useState(isActive || isUniversePillar || Boolean(item.defaultOpen));
 
 	React.useEffect(() => {
-		if (isActive) {
+		if (isActive || isUniversePillar) {
 			setIsOpen(true);
 		}
-	}, [isActive]);
+	}, [isActive, isUniversePillar]);
 
 	const { state, isMobile } = useSidebar();
 	const isCollapsed = state === "collapsed" && !isMobile;
@@ -153,7 +275,7 @@ function RecursiveNavItem({
 			{item.children && (!isCollapsed || depth > 0) && (
 				<ChevronRight
 					size={18}
-					className={`ml-auto text-on-surface-variant/50 transition-transform duration-200 ${
+					className={`ml-auto text-on-surface-variant/75 transition-transform duration-200 ${
 						isOpen ? "rotate-90" : ""
 					}`}
 					aria-hidden="true"
@@ -164,17 +286,19 @@ function RecursiveNavItem({
 
 	if (item.children && !isCollapsed) {
 		const isPillar = depth === 0 && item.groupOnly;
-		const pillarColor = item.path === "#association"
-			? "text-rose-griffon"
-			: item.path === "#esport"
-				? "text-achillea-violet dark:text-achillea-lime"
-				: "text-secondary";
+		const pillarColor =
+			item.path === "#association"
+				? "text-rose-griffon"
+				: item.path === "#esport"
+					? "text-achillea-violet dark:text-achillea-lime"
+					: "text-secondary";
 
-		const pillarBg = item.path === "#association"
-			? "bg-rose-griffon/10 text-rose-griffon border-rose-griffon/20"
-			: item.path === "#esport"
-				? "bg-achillea-violet/10 dark:bg-achillea-lime/10 text-achillea-violet dark:text-achillea-lime border-achillea-violet/25 dark:border-achillea-lime/25"
-				: "bg-secondary/10 text-secondary border-secondary/20";
+		const pillarBg =
+			item.path === "#association"
+				? "bg-rose-griffon/10 text-rose-griffon border-rose-griffon/25"
+				: item.path === "#esport"
+					? "bg-achillea-violet/10 dark:bg-achillea-lime/10 text-achillea-violet dark:text-achillea-lime border-achillea-violet/25 dark:border-achillea-lime/30"
+					: "bg-secondary/10 text-secondary border-secondary/25";
 
 		return (
 			<Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
@@ -187,9 +311,9 @@ function RecursiveNavItem({
 								className={
 									isPillar
 										? `relative overflow-hidden w-full transition-all duration-200 group rounded-xl px-3 py-2.5 h-auto flex items-center justify-between mt-3 mb-1 first:mt-0 font-extrabold text-xs tracking-wider uppercase border outline-hidden focus-visible:ring-2 focus-visible:ring-primary ${
-												isActive
-													? `${pillarBg} font-black`
-													: "border-outline-variant/15 text-on-surface-variant bg-surface-container-low/50 hover:bg-surface-container hover:text-on-surface"
+												isActive || isUniversePillar
+													? `${pillarBg} font-black shadow-xs`
+													: "border-outline-variant/20 text-on-surface-variant font-bold bg-surface-container-low/60 hover:bg-surface-container hover:text-on-surface"
 										  }`
 										: `${buttonClass} w-full`
 								}
@@ -208,13 +332,18 @@ function RecursiveNavItem({
 								<span
 									className={`whitespace-nowrap transition-all duration-300 truncate flex-1 text-left ${
 										isPillar ? "font-extrabold text-xs tracking-wider" : "text-sm font-medium"
-									} ${isActive ? "font-bold" : ""}`}
+									} ${isActive || isUniversePillar ? "font-black" : ""}`}
 								>
 									{traduireNav(item.label, t)}
 								</span>
+								{isUniversePillar && (
+									<span className="text-xs font-bold px-1.5 py-0.5 rounded bg-surface/80 text-on-surface-variant mr-1.5 border border-outline-variant/20 uppercase tracking-tighter shrink-0">
+										Actif
+									</span>
+								)}
 								<ChevronRight
 									size={16}
-									className={`shrink-0 text-on-surface-variant/50 transition-transform duration-200 ${
+									className={`shrink-0 text-on-surface-variant/75 transition-transform duration-200 ${
 										isOpen ? "rotate-90" : ""
 									}`}
 									aria-hidden="true"
@@ -250,7 +379,7 @@ function RecursiveNavItem({
 								</Link>
 							</SidebarMenuButton>
 							<CollapsibleTrigger asChild>
-								<button className="size-9 flex items-center justify-center rounded-lg text-on-surface-variant/50 hover:text-on-surface-variant hover:bg-on-surface/[0.08] transition-colors shrink-0">
+								<button className="size-9 flex items-center justify-center rounded-lg text-on-surface-variant/75 hover:text-on-surface-variant hover:bg-on-surface/[0.08] transition-colors shrink-0">
 									<ChevronRight
 										size={18}
 										className={`transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
@@ -309,6 +438,8 @@ export function AppSidebar({
 }: AppSidebarProps) {
 	const pathname = usePathname() || "/";
 	const resolvedNavItems = items ?? itemsDeNavigation();
+	const { state, isMobile } = useSidebar();
+	const isCollapsed = state === "collapsed" && !isMobile;
 
 	const [mounted, setMounted] = React.useState(false);
 	React.useEffect(() => {
@@ -317,6 +448,10 @@ export function AppSidebar({
 
 	const filteredNavItems = resolvedNavItems.filter(
 		(item) => !item.adminOnly || (mounted && isAdmin)
+	);
+
+	const defaultHeader = (
+		<SidebarUniverseHeader pathname={pathname} isCollapsed={isCollapsed} />
 	);
 
 	return (
@@ -328,9 +463,9 @@ export function AppSidebar({
 		>
 			<div className="absolute inset-0 bg-surface -z-10" />
 
-			{headerSlot}
+			{headerSlot === undefined ? defaultHeader : headerSlot}
 
-			<SidebarContent className="py-4 bg-surface">
+			<SidebarContent className="py-2 bg-surface">
 				<SidebarGroup>
 					<SidebarGroupContent>
 						<SidebarMenu className="gap-1">

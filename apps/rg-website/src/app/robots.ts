@@ -89,9 +89,15 @@ export default function robots(): MetadataRoute.Robots {
 				],
 			},
 		],
-		// Deux plans de site : Next en génère un par fichier `sitemap.ts`, et celui
+		// Trois plans de site : Next en génère un par fichier `sitemap.ts`. Celui
 		// de la boutique (`app/shop/sitemap.ts`) n'était déclaré nulle part — ses
 		// douze fiches produit n'avaient donc aucun point d'entrée de découverte.
-		sitemap: [`${baseUrl}/sitemap.xml`, `${baseUrl}/shop/sitemap.xml`],
+		sitemap: [
+			`${baseUrl}/sitemap.xml`,
+			`${baseUrl}/shop/sitemap.xml`,
+			// Restaure le plan de site du wiki, supprimé sans être porté par la fusion
+			// d'`apps/azalee` (commit `d74cee35`) — voir `app/wiki/sitemap.ts`.
+			`${baseUrl}/wiki/sitemap.xml`,
+		],
 	};
 }
