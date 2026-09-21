@@ -12,7 +12,7 @@ export const metadata = {
 	openGraph: {
 		description:
 			"Produits collector Inazuma Eleven France — packs personnage, prints A5, stickers, badges, textile.",
-		images: ["/RG_Logo_V2.5_B.webp"],
+		images: ["/RG_Logo_V2.5.webp"],
 		title: "Boutique Rose Griffon",
 	},
 	title: "Boutique · Rose Griffon",
@@ -27,7 +27,7 @@ const organizationSchema = {
 		contactType: "Customer Service",
 		email: "contact@rose-griffon.fr",
 	},
-	logo: "https://rosegriffon.fr/RG_Logo_V2.5_B.webp",
+	logo: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
 	name: "Association Rose Griffon",
 	sameAs: [
 		"https://twitter.com/rosegriffon_fr",
@@ -65,13 +65,13 @@ export default async function ShopLayout({ children }: { children: ReactNode }) 
 						href="/shop"
 						className="group inline-flex items-center gap-3 outline-hidden focus-visible:ring-[3px] focus-visible:ring-[#d4af37]/50 rounded-full"
 					>
-						<span className="relative grid size-10 place-items-center rounded-full bg-[#d4af37] shadow-[0_2px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 group-hover:rotate-12">
+						<span className="relative grid size-10 place-items-center rounded-full bg-white shadow-[0_2px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 group-hover:rotate-12">
 							<Image
-								src="/RG_Logo_V2.5_NB.webp"
+								src="/RG_Logo_V2.5.webp"
 								alt=""
 								width={26}
 								height={26}
-								className="size-6 brightness-0"
+								className="size-6"
 								aria-hidden
 							/>
 						</span>

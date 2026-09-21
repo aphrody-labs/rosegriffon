@@ -410,7 +410,7 @@ export function construireActualiteItems(): NavItem[] {
  */
 export function construireAssociationItems(): NavItem[] {
 	return [
-		{ imageUrl: "/RG_Logo_V2.5_NB.webp", icon: "home", label: "nav.association.home", path: "/" },
+		{ imageUrl: "/RG_Logo_V2.5.webp", icon: "home", label: "nav.association.home", path: "/" },
 		{ emote: "gaelle-salut", icon: "diversity_3", label: "nav.association.about_us", path: "/a-propos" },
 		{ emote: "rg-funny", icon: "forum", label: "nav.association.community", path: "/community" },
 		{ gameIcon: "nameplate", icon: "event", label: "nav.association.events", path: "/evenements" },
@@ -475,7 +475,7 @@ export function construireNavigationUnifiee(): SousCategorieNav[] {
 			domaine: "association",
 			enfants: construireAssociationItems(),
 			icon: "diversity_3",
-			imageUrl: "/RG_Logo_V2.5_NB.webp",
+			imageUrl: "/RG_Logo_V2.5.webp",
 			label: "nav.domaine.association",
 			ouvertParDefaut: true,
 		},

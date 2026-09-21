@@ -88,7 +88,7 @@ export const APPLICATIONS: Readonly<Record<IdApplication, ApplicationReseau>> = 
 		description: "L'association Rose Griffon : actualités, événements, communauté et boutique.",
 		icone: "diversity_3",
 		id: "association",
-		logo: "/RG_Logo_V2.5_NB.webp",
+		logo: "/RG_Logo_V2.5.webp",
 		nom: "Rose Griffon",
 		nomCourt: "Accueil",
 		sante: "/api/health",

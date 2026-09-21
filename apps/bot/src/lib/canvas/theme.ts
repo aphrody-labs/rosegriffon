@@ -36,7 +36,7 @@ export const MARQUE_CANVAS = {
 
 /** Mascottes et logos servis par le site, réutilisés tels quels sur les cartes. */
 export const VISUELS = {
-	griffon: `${PUBLIC_WEBSITE}/RG_Logo_V2.5_NB.webp`,
+	griffon: `${PUBLIC_WEBSITE}/RG_Logo_V2.5.webp`,
 	emote: `${PUBLIC_WEBSITE}/emote.webp`,
 	royCarte: `${PUBLIC_WEBSITE}/RG_roy_LC.webp`,
 	azalee: `${PUBLIC_WEBSITE}/RG_Azalee-logo.webp`,

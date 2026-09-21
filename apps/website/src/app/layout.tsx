@@ -137,11 +137,10 @@ export const metadata: Metadata = {
 	formatDetection: {
 		telephone: false,
 	},
-	icons: {
-		apple: "/RG_Logo_V2.5.webp",
-		icon: "/RG_Logo_V2.5.webp",
-		shortcut: "/RG_Logo_V2.5.webp",
-	},
+	// Pas de champ `icons` ici : les fichiers `favicon.ico`, `icon.png` et
+	// `apple-icon.png` de `app/` ont la priorité sur l'objet `metadata` et
+	// suffisent. Le déclarer en plus émettait un second `rel="icon"` et un
+	// `apple-touch-icon` en WebP, format qu'iOS n'accepte pas pour cette balise.
 	keywords:
 		"Rose Griffon, Inazuma Eleven, association, communauté, gaming, France, Azalée, Achilléa, Roy, Gaëlle, Inazuma Eleven France, Inazuma Eleven France Association, Inazuma Eleven France Association Rose Griffon",
 	metadataBase: new URL("https://rosegriffon.fr"),
