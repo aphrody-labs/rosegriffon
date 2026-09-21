@@ -32,16 +32,15 @@ interface SiteTarget {
 	sitemapUrl: string;
 }
 
+// Une seule cible depuis la fusion du wiki dans `rosegriffon.fr` :
+// `azalee.rosegriffon.fr/sitemap.xml` redirige (301) vers celui-ci, le garder
+// revenait à soumettre deux fois les mêmes URLs sous un hôte dont on ne publie
+// plus la clé IndexNow.
 const SITES: SiteTarget[] = [
 	{
 		name: "website",
 		host: "rosegriffon.fr",
 		sitemapUrl: "https://rosegriffon.fr/sitemap.xml",
-	},
-	{
-		name: "azalee",
-		host: "azalee.rosegriffon.fr",
-		sitemapUrl: "https://azalee.rosegriffon.fr/sitemap.xml",
 	},
 ];
 
