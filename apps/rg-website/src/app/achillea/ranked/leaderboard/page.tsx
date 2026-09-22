@@ -1,5 +1,6 @@
 import { metadonneesAchillea } from "@/app/achillea/metadonnees";
 import RankedLeaderboardClient from "./ranked-leaderboard-client";
+import { createAchilleaClient } from "@/lib/achillea";
 
 /*
  * Page serveur : elle n'existe que pour porter `metadata`, que `"use client"`
@@ -13,6 +14,7 @@ export const metadata = metadonneesAchillea({
 	indexable: true,
 });
 
-export default function RankedLeaderboardPage() {
-	return <RankedLeaderboardClient />;
+export default async function RankedLeaderboardPage() {
+	const result = await createAchilleaClient().ranked.leaderboard({ mode: 2, page: 0, pageSize: 25 });
+	return <RankedLeaderboardClient initialData={result.ok ? result.value : null} />;
 }
