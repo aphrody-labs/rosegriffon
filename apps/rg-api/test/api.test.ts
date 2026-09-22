@@ -254,8 +254,15 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		if (id === undefined) return;
 		const response = await app.handle(new Request(`http://localhost/v1/achillea/clans/${id}/members`));
 		expect(response.status).toBe(200);
-		const members = await response.json() as unknown[];
+		const members = await response.json() as Array<Record<string, unknown>>;
 		expect(Array.isArray(members)).toBe(true);
+		const first = members[0];
+		if (first) {
+			expect(typeof first.clanRole).toBe("number");
+			expect(Array.isArray(first.distinctions)).toBe(true);
+			expect(typeof first.clanFameContributed).toBe("number");
+			expect(typeof first.user).toBe("object");
+		}
 	});
 
 	it("ranked public reads use the canonical unified contract", async () => {
