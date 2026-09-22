@@ -263,6 +263,22 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		}
 	});
 
+	it("clan name validation is internal-only and API-owned", async () => {
+		const requests = [
+			new Request("http://localhost/v1/achillea/clans/validate/name", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ name: "Achillea" }),
+			}),
+			new Request("http://localhost/v1/achillea/clans/validate/short-name", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ shortName: "AC" }),
+			}),
+		];
+		for (const request of requests) expect((await app.handle(request)).status).toBe(401);
+	});
+
 	it("GET /v1/achillea/clans/:id/members is SQL-backed", async () => {
 		const list = await api.v1.achillea.clans.get();
 		const id = list.data?.data[0]?.id;
