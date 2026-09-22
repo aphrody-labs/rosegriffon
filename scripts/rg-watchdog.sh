@@ -79,7 +79,6 @@ case "$CIBLE" in
 	achillea-postgrest) PORT=8820; SEUIL_GIB=0.8; SANTE="/"; RELEASES="" ;;
 	achillea-storage)  PORT=8821; SEUIL_GIB=1.6; SANTE="/bucket/images"; RELEASES="" ;;
 	achillea-realtime) PORT=8822; SEUIL_GIB=0.8; SANTE="/health"; RELEASES="" ;;
-	achillea-auth)     PORT=8824; SEUIL_GIB=0.8; SANTE="/health"; RELEASES="" ;;
 	*) echo "rg-watchdog: service inconnu « $CIBLE » — l'ajouter à la table" >&2; exit 2 ;;
 esac
 

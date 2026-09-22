@@ -289,7 +289,6 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		postgrestSystemd,
 		storageSystemd,
 		realtimeSystemd,
-		authSystemd,
 		internalNginx,
 	] = await Promise.all([
 		read("apps/achillea-bot/src/main.ts"),
@@ -314,7 +313,6 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 		read("infra/systemd/achillea-postgrest.service"),
 		read("infra/systemd/achillea-storage.service"),
 		read("infra/systemd/achillea-realtime.service"),
-		read("infra/systemd/achillea-auth.service"),
 		read("infra/nginx/achillea-supabase-internal.conf"),
 	]);
 
@@ -417,7 +415,6 @@ export async function validateRepository(manifest: AchilleaServiceManifest): Pro
 			["RG_REALTIME_HOST=127.0.0.1", "RG_REALTIME_PORT=8822", "achillea-realtime.env"],
 			"Realtime",
 		],
-		[authSystemd, ["achillea-auth.env", "supabase/gotrue:v2.189.0", "--network host"], "Auth"],
 	] as Array<[string, string[], string]>) {
 		for (const fragment of fragments) {
 			if (!has(contents, fragment)) errors.push(`${label} unit is missing ${fragment}`);

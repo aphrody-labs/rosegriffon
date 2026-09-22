@@ -202,8 +202,7 @@
 		"secretsFiles": [
 			"/etc/rose-griffon/achillea-postgrest.env",
 			"/etc/rose-griffon/achillea-storage.env",
-			"/etc/rose-griffon/achillea-realtime.env",
-			"/etc/rose-griffon/achillea-auth.env"
+			"/etc/rose-griffon/achillea-realtime.env"
 		],
 		"services": [
 			{
@@ -225,16 +224,11 @@
 				"id": "achillea-supabase-internal",
 				"port": 8823,
 				"config": "infra/nginx/achillea-supabase-internal.conf"
-			},
-			{
-				"id": "achillea-auth",
-				"port": 8824,
-				"unit": "infra/systemd/achillea-auth.service"
 			}
 		],
 		"authApi": {
 			"status": "retired",
-			"reason": "Achillea has no session of its own: it derives from the Rose Griffon account. GoTrue (achillea-auth.service, :8824) was stopped and disabled on 2026-09-20, along with its watchdog timer, and both gateways return 410 on /auth/v1/. The auth schema is kept in the database until its historical accounts are migrated."
+			"reason": "Achillea has no session of its own: it derives from the Rose Griffon account. The former GoTrue unit was removed, and both gateways return 410 on /auth/v1/. The auth schema is kept in the database until its historical accounts are migrated."
 		}
 	},
 	"productionChecks": [
