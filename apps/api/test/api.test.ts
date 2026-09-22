@@ -224,6 +224,15 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		for (const request of requests) expect((await app.handle(request)).status).toBe(401);
 	});
 
+	it("notification reads and mutations require the unified session", async () => {
+		const requests = [
+			new Request("http://localhost/v1/achillea/notifications/me"),
+			new Request("http://localhost/v1/achillea/notifications/read/1", { method: "PATCH" }),
+			new Request("http://localhost/v1/achillea/notifications/read-all", { method: "PATCH" }),
+		];
+		for (const request of requests) expect((await app.handle(request)).status).toBe(401);
+	});
+
 	it("GET /v1/achillea/clans returns 200 with clans list", async () => {
 		const res = await api.v1.achillea.clans.get();
 		expect(res.status).toBe(200);

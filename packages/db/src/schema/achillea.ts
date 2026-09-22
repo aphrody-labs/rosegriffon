@@ -34,6 +34,8 @@ export interface AchilleaTables {
 	user: UserTable;
 	user_connection: UserConnectionTable;
 	oauth_csrf: OAuthCsrfTable;
+	notification: NotificationTable;
+	user_notification: UserNotificationTable;
 	blacklist: BlacklistTable;
 	sanction: SanctionTable;
 	player_note: PlayerNoteTable;
@@ -348,6 +350,27 @@ export interface OAuthCsrfTable {
 	created_at: Generated<Date>;
 	updated_at: Generated<Date>;
 	discord_id: string;
+}
+
+export interface NotificationTable {
+	id: Generated<number>;
+	created_at: Generated<Date>;
+	updated_at: Generated<Date>;
+	title: string;
+	message: string;
+	type: number;
+	category: number;
+	payload: Record<string, unknown> | null;
+}
+
+export interface UserNotificationTable {
+	id: Generated<number>;
+	created_at: Generated<Date>;
+	updated_at: Generated<Date>;
+	notification_id: number;
+	user_id: string;
+	is_read: Generated<boolean>;
+	read_at: Date | null;
 }
 
 export interface UserTable {
