@@ -356,6 +356,22 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		expect(res.data?.mode).toBe(0);
 	});
 
+	it("GET /v1/achillea/users/:id serves the unified public profile projection", async () => {
+		const leaderboard = await api.v1.achillea.users.leaderboard.get({
+			query: { mode: 0, season: "", limit: 1 },
+		});
+		const userId = leaderboard.data?.entries[0]?.userId;
+		if (!userId) return;
+		const res = await app.handle(new Request(`http://localhost/v1/achillea/users/${encodeURIComponent(userId)}`));
+		expect(res.status).toBe(200);
+		const profile = await res.json() as { id?: string; ranked?: { solo?: { mode?: number }; duo?: { mode?: number } }; interclans?: unknown; tournaments?: unknown };
+		expect(profile.id).toBe(userId);
+		expect(profile.ranked?.solo?.mode).toBe(2);
+		expect(profile.ranked?.duo?.mode).toBe(4);
+		expect(profile.interclans).toBeDefined();
+		expect(profile.tournaments).toBeDefined();
+	});
+
 	it("PUT /v1/achillea/users/me/profile requires the unified session", async () => {
 		const res = await api.v1.achillea.users.me.profile.put({ bio: "x" });
 		expect(res.status).toBe(401);
