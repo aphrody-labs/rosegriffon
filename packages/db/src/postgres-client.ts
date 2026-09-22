@@ -124,15 +124,23 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
 		return this;
 	}
 	not(column: string, operator: "is" | "like" | "ilike", value: unknown) {
-		if (operator === "is") return this.is(column, "null", value);
+		if (operator === "is") {
+			this.where.push(`${identifier(column)} IS ${value === null ? "NOT NULL" : "NOT " + String(value).toUpperCase()}`);
+			return this;
+		}
 		this.where.push(`${identifier(column)} NOT ${operator.toUpperCase()} ${this.value(value)}`);
 		return this;
 	}
 	or(expression: string) {
 		const parts = expression.split(",").map((part) => {
-			const [column, operator, value] = part.split(".");
+			const tokens = part.split(".");
+			const [column, operator, value] = tokens;
 			if (!column || !operator) throw new Error(`Invalid OR filter: ${part}`);
+			if (operator === "is" && value === "null") return `${identifier(column)} IS NULL`;
 			if (operator === "not" && value === "null") return `${identifier(column)} IS NOT NULL`;
+			if (operator === "not" && value === "is" && tokens[3] === "null") {
+				return `${identifier(column)} IS NOT NULL`;
+			}
 			if (operator === "eq") return `${identifier(column)} = ${this.value(value ?? "")}`;
 			if (operator === "like" || operator === "ilike")
 				return `${identifier(column)} ${operator.toUpperCase()} ${this.value(value ?? "")}`;
