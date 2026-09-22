@@ -221,6 +221,7 @@
     "release:promote": "bun scripts/ops/release-stack.ts --promote",
     "infra:check": "bun scripts/ops/infra.ts check",
     "infra:status": "bun scripts/ops/stack.ts status",
+    "infra:inventory": "bun scripts/ops/stack.ts status --json --deep",
     "infra:plan": "bun scripts/ops/stack.ts plan",
     "infra:pull": "bun scripts/ops/infra.ts pull",
     "infra:diff": "bun scripts/ops/infra.ts diff",

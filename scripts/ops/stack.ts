@@ -3,7 +3,7 @@
  * Contrat et observabilité de la stack RG/Niers.
  *
  * Commands:
- *   status [--json] [--strict]  live units, probes, disk and duplicates
+ *   status [--json] [--strict] [--deep]  live units, host resources and probes
  *   check                       manifest/source consistency
  *   plan                        check + live status, no mutations
  *
@@ -17,6 +17,7 @@ const MANIFEST_PATH = `${ROOT}/infra/stack.json`;
 const manifest = JSON.parse(await readFile(MANIFEST_PATH, "utf8")) as Manifest;
 const json = process.argv.includes("--json");
 const strict = process.argv.includes("--strict");
+const deep = process.argv.includes("--deep");
 const command = process.argv[2] ?? "status";
 
 type Component = {
@@ -51,6 +52,20 @@ async function run(args: string[]): Promise<CommandResult> {
 	return { code: await child.exited, stdout, stderr };
 }
 
+async function text(path: string): Promise<string> {
+	try {
+		return await readFile(path, "utf8");
+	} catch {
+		return "";
+	}
+}
+
+function number(value: string | undefined): number | null {
+	if (value === undefined || value === "" || value === "N/A") return null;
+	const parsed = Number(value);
+	return Number.isFinite(parsed) ? parsed : null;
+}
+
 function unique<T>(values: T[]): T[] {
 	return [...new Set(values)];
 }
@@ -75,7 +90,7 @@ function manifestProblems(): string[] {
 }
 
 async function unitStatus(unit: string) {
-	const result = await run(["systemctl", "show", unit, "--no-page", "--property=LoadState,ActiveState,SubState,UnitFileState"]);
+	const result = await run(["systemctl", "show", unit, "--no-page", "--property=LoadState,ActiveState,SubState,UnitFileState,MemoryCurrent,CPUUsageNSec,TasksCurrent,NRestarts"]);
 	const values = Object.fromEntries(
 		result.stdout
 			.trim()
@@ -89,6 +104,10 @@ async function unitStatus(unit: string) {
 		active: values.ActiveState === "active",
 		state: values.SubState ?? "unknown",
 		enabled: values.UnitFileState ?? "unknown",
+		memoryBytes: number(values.MemoryCurrent),
+		cpuTimeNs: number(values.CPUUsageNSec),
+		tasks: number(values.TasksCurrent),
+		restarts: number(values.NRestarts),
 	};
 }
 
@@ -115,13 +134,109 @@ async function probe(url: string) {
 	}
 }
 
-async function disk() {
-	const result = await run(["df", "-Pk", "/", "/tmp"]);
+async function filesystems() {
+	const paths = ["/", "/home/ubuntu", "/home/ubuntu/rg", "/home/ubuntu/niers", "/var", "/var/www", "/tmp", "/run", "/boot"];
+	const result = await run(["df", "-Pk", ...paths]);
 	const rows = result.stdout.trim().split("\n").slice(1);
-	return rows.map((row) => {
+	const seen = new Set<string>();
+	return rows.flatMap((row) => {
 		const columns = row.trim().split(/\s+/u);
-		return { mount: columns.at(-1), usedPercent: Number.parseInt(columns.at(-2)?.replace("%", "") ?? "0", 10), availableKb: Number(columns.at(-3) ?? 0) };
+		const mount = columns.slice(5).join(" ") || columns.at(-1) || "unknown";
+		if (seen.has(mount)) return [];
+		seen.add(mount);
+		return [{ filesystem: columns[0], mount, sizeKb: number(columns[1]), usedKb: number(columns[2]), availableKb: number(columns[3]), usedPercent: Number.parseInt(columns[4]?.replace("%", "") ?? "0", 10) }];
 	});
+}
+
+function parseMeminfo(source: string) {
+	const values: Record<string, number> = {};
+	for (const line of source.trim().split("\n")) {
+		const match = line.match(/^([^:]+):\s+(\d+)/u);
+		if (match) values[match[1]] = Number(match[2]) * (line.endsWith(" kB") ? 1024 : 1);
+	}
+	const total = values.MemTotal ?? 0;
+	const available = values.MemAvailable ?? values.MemFree ?? 0;
+	const swapTotal = values.SwapTotal ?? 0;
+	const swapFree = values.SwapFree ?? 0;
+	return { totalBytes: total, availableBytes: available, usedBytes: Math.max(0, total - available), usedPercent: total ? Math.round((1 - available / total) * 100) : null, swapTotalBytes: swapTotal, swapUsedBytes: Math.max(0, swapTotal - swapFree), swapUsedPercent: swapTotal ? Math.round((1 - swapFree / swapTotal) * 100) : null };
+}
+
+function parseNetDev(source: string) {
+	return source.trim().split("\n").slice(2).flatMap((line) => {
+		const [rawName, rawValues] = line.split(":", 2);
+		if (!rawName || !rawValues) return [];
+		const values = rawValues.trim().split(/\s+/u);
+		return [{ interface: rawName.trim(), rxBytes: number(values[0]) ?? 0, txBytes: number(values[8]) ?? 0 }];
+	});
+}
+
+async function network() {
+	const before = parseNetDev(await text("/proc/net/dev"));
+	await Bun.sleep(1000);
+	const after = parseNetDev(await text("/proc/net/dev"));
+	const beforeByName = new Map(before.map((row) => [row.interface, row]));
+	return after.map((row) => {
+		const previous = beforeByName.get(row.interface) ?? row;
+		return { ...row, rxBytesPerSecond: Math.max(0, row.rxBytes - previous.rxBytes), txBytesPerSecond: Math.max(0, row.txBytes - previous.txBytes) };
+	});
+}
+
+function parsePressure(source: string) {
+	return Object.fromEntries(source.trim().split("\n").filter(Boolean).map((line) => {
+		const [kind, ...fields] = line.split(" ");
+		return [kind, Object.fromEntries(fields.map((field) => field.split("=", 2)).filter((pair) => pair.length === 2))];
+	}));
+}
+
+async function processSummary() {
+	const result = await run(["ps", "-eo", "pid=,ppid=,user=,comm=,%cpu=,%mem=,rss=,stat=", "--sort=-%cpu"]);
+	const processes = result.stdout.trim().split("\n").filter(Boolean).map((line) => {
+		const fields = line.trim().split(/\s+/u);
+		return { pid: number(fields[0]), ppid: number(fields[1]), user: fields[2], command: fields[3], cpuPercent: number(fields[4]), memoryPercent: number(fields[5]), rssKb: number(fields[6]), state: fields[7] };
+	});
+	return { count: processes.length, topCpu: processes.slice(0, 10), topMemory: [...processes].sort((a, b) => (b.memoryPercent ?? 0) - (a.memoryPercent ?? 0)).slice(0, 10) };
+}
+
+async function serviceSummary() {
+	const listed = await run(["systemctl", "list-units", "--type=service", "--state=running", "--no-legend", "--plain"]);
+	const names = listed.stdout.trim().split("\n").filter(Boolean).map((line) => line.trim().split(/\s+/u)[0]);
+	const resources = await Promise.all(names.map(async (unit) => ({ unit, ...(await unitStatus(unit)) })));
+	return { runningCount: names.length, running: names, topMemory: [...resources].sort((a, b) => (b.memoryBytes ?? 0) - (a.memoryBytes ?? 0)).slice(0, 10), topCpuTime: [...resources].sort((a, b) => (b.cpuTimeNs ?? 0) - (a.cpuTimeNs ?? 0)).slice(0, 10) };
+}
+
+async function socketSummary() {
+	const summary = await run(["ss", "-s"]);
+	const established = await run(["ss", "-Htan", "state", "established"]);
+	const listening = await run(["ss", "-Hln"]);
+	return {
+		summary: summary.stdout.trim().split("\n").filter(Boolean),
+		established: established.stdout.trim() ? established.stdout.trim().split("\n").length : 0,
+		listening: listening.stdout.trim() ? listening.stdout.trim().split("\n").length : 0,
+	};
+}
+
+async function kernelSummary() {
+	const pressure = Object.fromEntries(await Promise.all(["cpu", "io", "memory"].map(async (name) => [name, parsePressure(await text(`/proc/pressure/${name}`))])));
+	const fileNr = (await text("/proc/sys/fs/file-nr")).trim().split(/\s+/u).map(Number);
+	const oom = (await run(["journalctl", "-k", "-n", "300", "--no-pager"])).stdout.match(/out of memory|oom-kill|killed process/giu)?.length ?? 0;
+	return { pressure, fileHandles: { allocated: fileNr[0] ?? null, unused: fileNr[1] ?? null, max: fileNr[2] ?? null }, oomEventsRecent: oom, loadAverage: await osLoadAverage() };
+}
+
+async function osLoadAverage() {
+	const source = (await text("/proc/loadavg")).trim().split(/\s+/u).map(Number);
+	return { one: source[0] ?? null, five: source[1] ?? null, fifteen: source[2] ?? null, cpuCount: navigator.hardwareConcurrency };
+}
+
+async function inventory() {
+	const paths = ["/", "/home/ubuntu", "/home/ubuntu/rg", "/home/ubuntu/niers", "/var", "/tmp"];
+	const result = await Promise.all(paths.map(async (path) => {
+		const du = await run(["timeout", "20s", "du", "-x", "-d", "1", "-B1", "--apparent-size", path]);
+		return { path, timedOut: du.code === 124, entries: du.stdout.trim().split("\n").filter(Boolean).map((line) => {
+			const match = line.match(/^(\d+)\s+(.*)$/u);
+			return match ? { bytes: Number(match[1]), path: match[2] } : { raw: line };
+		}).sort((a, b) => ((b as { bytes?: number }).bytes ?? 0) - ((a as { bytes?: number }).bytes ?? 0)).slice(0, 20) };
+	}));
+	return result;
 }
 
 async function status() {
@@ -133,7 +248,8 @@ async function status() {
 			probe: component.health ? await probe(component.health) : undefined,
 		})),
 	);
-	const diskState = await disk();
+	const diskState = await filesystems();
+	const [networkState, processes, services, sockets, kernel] = await Promise.all([network(), processSummary(), serviceSummary(), socketSummary(), kernelSummary()]);
 	const diskWarnings = diskState.filter(
 		(row) => row.usedPercent >= Number(manifest.policy.diskWarningPercent ?? 85),
 	);
@@ -152,7 +268,15 @@ async function status() {
 		schemaVersion: manifest.schemaVersion,
 		timestamp: new Date().toISOString(),
 		components,
+		host: { hostname: (await run(["hostname"])).stdout.trim(), kernel: (await run(["uname", "-sr"])).stdout.trim(), uptimeSeconds: number((await text("/proc/uptime")).split(" ")[0]) },
+		memory: parseMeminfo(await text("/proc/meminfo")),
 		disk: diskState,
+		network: networkState,
+		processes,
+		services,
+		sockets,
+		kernel,
+		inventory: deep ? await inventory() : undefined,
 		diskWarnings,
 		manifestProblems: manifestProblems(),
 		health: requiredFailures.length === 0 && manifestProblems().length === 0 && !diskCritical ? "ok" : "degraded",
@@ -164,7 +288,10 @@ async function status() {
 			const health = component.probe ? ` probe=${component.probe.status}` : "";
 			console.log(`- ${component.id.padEnd(24)} ${component.unit.active ? "UP" : "DOWN"} ${component.unit.state}${health}`);
 		}
+		console.log(`- host ${result.host.hostname} ${result.host.kernel}`);
+		console.log(`- memory ${result.memory.usedPercent}% used, swap ${result.memory.swapUsedPercent ?? 0}% used`);
 		for (const row of result.disk) console.log(`- disk ${row.mount}: ${row.usedPercent}% used`);
+		for (const row of result.network) console.log(`- net ${row.interface}: rx ${row.rxBytesPerSecond} B/s, tx ${row.txBytesPerSecond} B/s`);
 		for (const row of result.diskWarnings) console.log(`! disk warning ${row.mount}: ${row.usedPercent}% used`);
 		for (const problem of result.manifestProblems) console.log(`! ${problem}`);
 	}
@@ -192,7 +319,7 @@ else if (command === "plan") {
 		const statusCode = await status();
 		exitCode = checkCode || statusCode;
 } else {
-		console.error("usage: bun scripts/ops/stack.ts [status|check|plan] [--json] [--strict]");
+	console.error("usage: bun scripts/ops/stack.ts [status|check|plan] [--json] [--strict] [--deep]");
 	exitCode = 2;
 }
 process.exit(exitCode);
