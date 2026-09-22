@@ -19,8 +19,8 @@
  * Le dump, lui, nommait ses fichiers `<basename_g4tx>_<nom_texture>.png` — un
  * nommage qui n'existe dans AUCUN chemin CPK. Toute URL de cette forme est un 404
  * garanti : elles ont toutes été retirées d'ici. Les manifestes servant de
- * garde-fous sont régénérés depuis `apps/azalee/data/cpk-index.ndjson.gz`
- * (250 800 chemins réels) et non plus depuis `inagle_game_assets`, dont les
+ * garde-fous proviennent des projections SQL `inagle_asset_manifests` et
+ * `inagle_cpk_index`, et non plus de `inagle_game_assets`, dont les
  * 40 471 lignes `exists = 1` décrivent le dump disparu.
  */
 import { ASSET_MANIFEST } from "@rosegriffon/inagle/asset-manifest";
