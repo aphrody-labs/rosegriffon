@@ -67,6 +67,7 @@ export interface ClanTable {
 	auto_accept_members: Generated<boolean>;
 	state: number;
 	channel_id: string;
+	normalized_name: Generated<string>;
 	normalized_short_name: Generated<string>;
 	clan_emoji_id: Generated<string>;
 	languages: Generated<string[]>;

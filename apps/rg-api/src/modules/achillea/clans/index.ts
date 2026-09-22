@@ -3,9 +3,38 @@ import { dbPlugin } from "../../../plugins/db";
 import { ClanModel } from "./model";
 import { ClanService } from "./service";
 import { resolveAchilleaSession } from "../../auth/session";
+import { verifyAdminBearerToken } from "@rosegriffon/achillea-core/auth";
 
 export const clanController = new Elysia({ prefix: "/clans" })
 	.use(dbPlugin)
+	.post("/validate/name", async ({ db, headers, body, set }) => {
+		const bearer = headers.authorization?.replace(/^Bearer\s+/i, "");
+		if (!verifyAdminBearerToken(bearer, process.env.API_ADMIN_TOKEN)) {
+			set.status = 401;
+			return { message: "Internal authentication required" as const };
+		}
+		return ClanService.validateName(db, body.name);
+	}, {
+		body: t.Object({ name: t.String() }),
+		response: {
+			200: ClanModel.validation,
+			401: t.Object({ message: t.Literal("Internal authentication required") }),
+		},
+	})
+	.post("/validate/short-name", async ({ db, headers, body, set }) => {
+		const bearer = headers.authorization?.replace(/^Bearer\s+/i, "");
+		if (!verifyAdminBearerToken(bearer, process.env.API_ADMIN_TOKEN)) {
+			set.status = 401;
+			return { message: "Internal authentication required" as const };
+		}
+		return ClanService.validateShortName(db, body.shortName);
+	}, {
+		body: t.Object({ shortName: t.String() }),
+		response: {
+			200: ClanModel.validation,
+			401: t.Object({ message: t.Literal("Internal authentication required") }),
+		},
+	})
 	.get("/me", async ({ db, headers }) => {
 		const session = await resolveAchilleaSession(headers);
 		if (!session) return status(401, { message: "Authentication required" as const });

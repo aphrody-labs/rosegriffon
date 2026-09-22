@@ -8,7 +8,8 @@ import { Client } from "@aphrody/discordx";
 import GraphemeSplitter from "grapheme-splitter";
 
 import type { ClanApplicationDTO, ClanInviteDTO } from "@/api/models/dtos";
-import { coreManagerConfig } from "@/configs";
+import { coreManagerConfig, urlsConfig } from "@/configs";
+import { env } from "@/env";
 import { Service } from "@/decorators";
 import {
 	Clan,
@@ -225,34 +226,33 @@ export class ClanService {
 		return dto;
 	}
 
-	async validateName(name: string) {
-		const splitter = new GraphemeSplitter();
-		const count = splitter.countGraphemes(name);
-		const normalizedName = normalizeNames(name);
-		if (count < 3 || count > 30 || !normalizedName) {
-			return ClanCreationErrors.INVALID_NAME;
+	private async validateWithUnifiedApi(path: string, value: string) {
+		const response = await fetch(`${urlsConfig.unifiedApi}/v1/achillea/clans/validate/${path}`, {
+			method: "POST",
+			headers: {
+				accept: "application/json",
+				"content-type": "application/json",
+				...(env.API_ADMIN_TOKEN ? { authorization: `Bearer ${env.API_ADMIN_TOKEN}` } : {}),
+			},
+			body: JSON.stringify(path === "name" ? { name: value } : { shortName: value }),
+		});
+		if (!response.ok) throw new Error(`Unified clan validation failed (${response.status})`);
+		const result = await response.json() as { valid: boolean; code?: string };
+		if (result.valid) return true;
+		switch (result.code) {
+			case "NAME_TAKEN": return ClanCreationErrors.NAME_TAKEN;
+			case "INVALID_SHORTNAME": return ClanCreationErrors.INVALID_SHORTNAME;
+			case "SHORTNAME_TAKEN": return ClanCreationErrors.SHORTNAME_TAKEN;
+			default: return ClanCreationErrors.INVALID_NAME;
 		}
-		const clanExists = await this.db.get(Clan).findOne({ normalizedName });
-		if (clanExists) {
-			return ClanCreationErrors.NAME_TAKEN;
-		}
+	}
 
-		return true;
+	async validateName(name: string) {
+		return this.validateWithUnifiedApi("name", name);
 	}
 
 	async validateShortName(shortName: string) {
-		const splitter = new GraphemeSplitter();
-		const count = splitter.countGraphemes(shortName);
-		const normalizedShortName = normalizeNames(shortName);
-		if (count < 2 || count > 3 || !normalizedShortName || !normalizedShortName.match("^[^\\s]+$")) {
-			return ClanCreationErrors.INVALID_SHORTNAME;
-		}
-		const clanExists = await this.db.get(Clan).findOne({ normalizedShortName });
-		if (clanExists) {
-			return ClanCreationErrors.SHORTNAME_TAKEN;
-		}
-
-		return true;
+		return this.validateWithUnifiedApi("short-name", shortName);
 	}
 
 	/**

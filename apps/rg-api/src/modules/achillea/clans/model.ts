@@ -1,6 +1,13 @@
 import { t } from "elysia";
 
 export const ClanModel = {
+	validation: t.Object({
+		valid: t.Boolean(),
+		code: t.Optional(t.Union([
+			t.Literal("INVALID_NAME"), t.Literal("NAME_TAKEN"),
+			t.Literal("INVALID_SHORTNAME"), t.Literal("SHORTNAME_TAKEN"),
+		])),
+	}),
 	member: t.Object({
 		clanRole: t.Number(), distinctions: t.Array(t.String()), clanFameContributed: t.Number(),
 		createdAt: t.Date(), updatedAt: t.Date(),
