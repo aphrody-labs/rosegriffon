@@ -15,15 +15,13 @@ import path from "node:path";
 import {
 	configureAzalee,
 	getAzaleeConfig,
-	getCacheDir,
 	resetAzaleeConfig,
 	resolveDataDir,
-	resolveDataFile,
 	resolveMirrorPath,
 } from "../src/config";
 
 /** Sauvegarde/restauration des variables d'environnement lues par le module. */
-const ENV_KEYS = ["AZALEE_DATA_DIR", "AZALEE_CACHE_DIR", "SQLITE_DB_PATH"] as const;
+const ENV_KEYS = ["AZALEE_DATA_DIR", "SQLITE_DB_PATH"] as const;
 let savedEnv: Record<string, string | undefined> = {};
 
 beforeEach(() => {
@@ -50,7 +48,7 @@ describe("resolveDataDir — découverte du dossier d'artefacts", () => {
 		expect(existsSync(dataDir as string)).toBe(true);
 		// Au moins un des marqueurs Azalée doit exister — sinon c'est un `data/`
 		// homonyme (dumps Postgres à la racine du monorepo) qu'on doit rejeter.
-		const markers = ["cpk-index.ndjson.gz", "backups/mirror.sqlite", "schema-snapshot"];
+		const markers = ["backups/mirror.sqlite", "schema-snapshot"];
 		expect(markers.some((m) => existsSync(path.join(dataDir as string, m)))).toBe(true);
 	});
 
@@ -68,19 +66,16 @@ describe("configureAzalee / getAzaleeConfig / resetAzaleeConfig", () => {
 		expect(getAzaleeConfig().dataDir).toBe(path.resolve("."));
 		expect(getAzaleeConfig().mirrorPath).toBeUndefined();
 
-		configureAzalee({ cacheDir: "./cache-x" });
-		// La 2e passe ne doit PAS effacer la 1re (fusion, pas remplacement).
+		// Une seconde passe ne doit PAS effacer la première (fusion, pas remplacement).
 		expect(getAzaleeConfig().dataDir).toBe(path.resolve("."));
-		expect(getAzaleeConfig().cacheDir).toBe(path.resolve("./cache-x"));
 	});
 
 	test("resetAzaleeConfig remet les trois clés à zéro", () => {
-		configureAzalee({ cacheDir: "/x", dataDir: "/a", mirrorPath: "/b" });
-		expect(Object.keys(getAzaleeConfig())).toHaveLength(3);
+		configureAzalee({ dataDir: "/a", mirrorPath: "/b" });
+		expect(Object.keys(getAzaleeConfig())).toHaveLength(2);
 		resetAzaleeConfig();
 		expect(getAzaleeConfig().dataDir).toBeUndefined();
 		expect(getAzaleeConfig().mirrorPath).toBeUndefined();
-		expect(getAzaleeConfig().cacheDir).toBeUndefined();
 	});
 
 	test.skipIf(!hasData)("AZALEE_DATA_DIR est prioritaire sur les chemins conventionnels", () => {
@@ -92,19 +87,6 @@ describe("configureAzalee / getAzaleeConfig / resetAzaleeConfig", () => {
 		// silencieuse) — on retombe sur la découverte conventionnelle.
 		process.env.AZALEE_DATA_DIR = tmpdir();
 		expect(resolveDataDir()).toBe(dataDir as string);
-	});
-});
-
-describe("resolveDataFile — localisation d'un artefact nommé", () => {
-	test.skipIf(!hasData)("trouve l'index CPK", () => {
-		const cpk = resolveDataFile("cpk-index.ndjson.gz");
-		expect(cpk).toBeString();
-		expect(existsSync(cpk as string)).toBe(true);
-		expect(path.dirname(cpk as string)).toBe(dataDir as string);
-	});
-
-	test("renvoie null pour un artefact inexistant", () => {
-		expect(resolveDataFile("ce-fichier-nexiste-pas.ndjson.gz")).toBeNull();
 	});
 });
 
@@ -126,20 +108,5 @@ describe("resolveMirrorPath — miroir SQLite des tables inagle_*", () => {
 		process.env.SQLITE_DB_PATH = "relatif/mirror.sqlite";
 		// Absolutisé par rapport au cwd (jamais renvoyé relatif).
 		expect(resolveMirrorPath()).toBe(path.resolve("relatif/mirror.sqlite"));
-	});
-});
-
-describe("getCacheDir — dossier de matérialisation", () => {
-	test("défaut = os.tmpdir(), sous-dossier joint", () => {
-		delete process.env.AZALEE_CACHE_DIR;
-		expect(getCacheDir()).toBe(tmpdir());
-		expect(getCacheDir("azalee-cpk")).toBe(path.join(tmpdir(), "azalee-cpk"));
-	});
-
-	test("AZALEE_CACHE_DIR puis cacheDir explicite prennent la main", () => {
-		process.env.AZALEE_CACHE_DIR = "/tmp/depuis-env-cache";
-		expect(getCacheDir("x")).toBe("/tmp/depuis-env-cache/x");
-		configureAzalee({ cacheDir: "/tmp/explicite-cache" });
-		expect(getCacheDir("x")).toBe("/tmp/explicite-cache/x");
 	});
 });

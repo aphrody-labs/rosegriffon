@@ -5,8 +5,8 @@
  *                                              { dir, dirs[], files[], fileTotal, fileOffset }
  *   GET /api/cpk?path=<file>&meta=1          → métadonnées du fichier + URL CDN du contenu
  *
- * Source : `lib/cpk/index.ts` (SQLite matérialisé depuis l'index Redis db3,
- * `import "server-only"`). Le CONTENU décodé d'un fichier est servi par le CDN
+ * Source : `lib/cpk/index.ts` (projection PostgreSQL `inagle_cpk_index`,
+ * `import "server-only"`). Le CONTENU décodé d’un fichier est servi par le CDN
  * (`assetUrl`/`thumbUrl`) ; cette API ne renvoie que la structure + les URLs.
  *
  * Le listing est **paginé côté serveur** (`listDirPaged`) : les sous-dossiers sont
@@ -34,7 +34,7 @@ function clampInt(raw: string | null, fallback: number, min: number, max: number
 	return Math.min(max, Math.max(min, n));
 }
 
-export function GET(request: Request): NextResponse {
+export async function GET(request: Request): Promise<NextResponse> {
 	const { searchParams } = new URL(request.url);
 	const rawPath = searchParams.get("path") ?? "";
 	const wantMeta = searchParams.get("meta") === "1";
@@ -49,14 +49,14 @@ export function GET(request: Request): NextResponse {
 
 	try {
 		if (query != null) {
-			const files = searchFiles(query, 200);
+			const files = await searchFiles(query, 200);
 			return NextResponse.json(
 				{ query, files, count: files.length },
 				{ headers: { "Cache-Control": "public, max-age=60" } },
 			);
 		}
 		if (wantMeta) {
-			const meta = fileMeta(rawPath);
+			const meta = await fileMeta(rawPath);
 			if (!meta) {
 				return NextResponse.json({ error: "not found", path: rawPath }, { status: 404 });
 			}
@@ -65,7 +65,7 @@ export function GET(request: Request): NextResponse {
 			});
 		}
 
-		const listing = listDirPaged(rawPath, limit, offset);
+		const listing = await listDirPaged(rawPath, limit, offset);
 		return NextResponse.json(listing, {
 			headers: { "Cache-Control": "public, max-age=300, s-maxage=300" },
 		});

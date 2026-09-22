@@ -1,7 +1,7 @@
 /**
  * Types + helpers PURS de l'index CPK, client-safe.
  *
- * Ce module ne touche NI sqlite, NI Node, NI le réseau → importable depuis un
+ * Ce module ne touche NI PostgreSQL, NI Node, NI le réseau → importable depuis un
  * composant `"use client"` comme depuis une page serveur (cf. frontière stricte
  * azalee : un `"use client"` ne doit jamais importer une valeur d'une lib qui
  * touche sqlite/supabase-server/Node). Le data-fetch SQLite vit dans

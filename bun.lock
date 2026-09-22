@@ -487,6 +487,7 @@
         "@rosegriffon/inagle": "workspace:*",
         "@rosegriffon/inagle-cross": "workspace:*",
         "commander": "catalog:",
+        "kysely": "catalog:",
         "wanakana": "catalog:",
       },
       "devDependencies": {
