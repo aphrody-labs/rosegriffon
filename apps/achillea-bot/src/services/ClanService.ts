@@ -32,7 +32,6 @@ import {
 	createClanFoundationEmbed,
 	createInviteThread,
 	disbandClan,
-	freshDiscordAvatarUrl,
 	hasActiveClanMembership,
 	isSocialMediaUrl,
 	logDemote,
@@ -42,7 +41,6 @@ import {
 	onMembershipChange,
 	removeClanRoleFromUser,
 	resolveDependency,
-	resolveDiscordAvatarUrl,
 	SocialMedia,
 	syncUser,
 	turnClanMemberIntoHistory,
@@ -507,83 +505,6 @@ export class ClanService {
 
 		const logger = await resolveDependency(Logger);
 		await logOnAchilleaSpecificClanChannel(logger, voteMsg, newClan.channelId);
-	}
-
-	async getClanMembers(clanId: number, refresh: boolean = false): Promise<ClanMemberDTO[]> {
-		const em = this.db.em.fork();
-
-		const clanMembers = await em.find(
-			ClanMember,
-			{ clan: clanId },
-			{
-				populate: ["user"], // ensure we have user relation
-				orderBy: { role: "asc" },
-				refresh,
-			}
-		);
-
-		if (clanMembers.length === 0) return [];
-
-		// OPTIM : avant cette method faisait N round-trips getUserDTO (~150 queries
-		// pour 30 membres). On batch maintenant en 2 queries totales :
-		//   1) tous les UserView en 1 SELECT IN
-		//   2) tous les Rank cache en 1 SELECT (~8 lignes, partage entre membres)
-		const userIds = clanMembers.map((m) => m.user.id);
-		const [userViews, ranks] = await Promise.all([
-			em.find("UserView" as any, { id: { $in: userIds } }) as Promise<any[]>,
-			em.find("Rank" as any, {}) as Promise<any[]>,
-		]);
-		const userViewMap = new Map<string, any>();
-		for (const uv of userViews) userViewMap.set(uv.id, uv);
-		const rankMap = new Map<string, any>();
-		for (const r of ranks) rankMap.set(r.key, r);
-
-		return clanMembers.map((member) => {
-			const uv = userViewMap.get(member.user.id);
-			// Avatar stocké en base (URL CDN complète, déjà peuplé via `user`) en priorité ;
-			// sinon cache discord.js ; sinon défaut Discord calculé sur l'ID (pas le /0.png figé).
-			const cached = this.client.users.cache.get(member.user.id);
-			const avatar = cached
-				? freshDiscordAvatarUrl(cached)
-				: resolveDiscordAvatarUrl(member.user.id, member.user.avatar);
-
-			const soloKey = uv?.solo_key || "Non classé";
-			const duoKey = uv?.duo_key || "Non classé";
-			const userDTO = {
-				id: member.user.id,
-				type: "user" as const,
-				username: uv?.displayName ?? "Utilisateur inconnu",
-				clanId: uv?.clanId,
-				sim: 0,
-				avatar,
-				soloRank: {
-					elo: uv?.solo_elo ?? 0,
-					key: soloKey,
-					gradient: rankMap.get(soloKey)?.gradient ?? [],
-				},
-				duoRank: {
-					elo: uv?.duo_elo ?? 0,
-					key: duoKey,
-					gradient: rankMap.get(duoKey)?.gradient ?? [],
-				},
-				lastInteract: uv?.lastInteract,
-				role: uv?.role,
-				currentLevel: uv?.currentLevel,
-				totalXp: uv?.totalXp,
-				hasTwitch: uv?.hasTwitch,
-				hasChallonge: uv?.hasChallonge,
-				hasYoutube: uv?.hasYoutube,
-			};
-
-			return {
-				clanRole: member.role,
-				distinctions: member.distinctions,
-				clanFameContributed: member.clanFameContributed,
-				createdAt: member.createdAt,
-				updatedAt: member.updatedAt,
-				user: userDTO,
-			};
-		});
 	}
 
 	async getClanMemberDTO(

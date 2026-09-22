@@ -9,12 +9,13 @@ import {
 	PathParams,
 	Post,
 	QueryParams,
+	Req,
 	Res,
 	UseBefore,
 } from "@tsed/common";
 import { BadRequest, Forbidden, Unauthorized } from "@tsed/exceptions";
 import { Default, Default as DefaultValue, Maximum, Minimum } from "@tsed/schema";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
 import { CookieAuthorize, NotInClan } from "@/api/middlewares";
 import type {
@@ -83,6 +84,25 @@ export class ClansController extends BaseController {
 		if (!row || row.role < UserRole.Administrator) {
 			throw new Forbidden("Réservé aux administrateurs");
 		}
+	}
+
+	/**
+	 * Membres: projection canonique détenue par l'API unifiée.
+	 *
+	 * Les mutations Discord ci-dessous restent dans ce contrôleur, mais leur
+	 * réponse ne relit plus MikroORM (et ses vues/rangs historiques). Cela
+	 * garantit que l'état renvoyé après une action est le même que celui servi
+	 * au site et aux autres clients.
+	 */
+	private async fetchUnifiedMembers(clanId: number, req: Request): Promise<ClanMemberDTO[]> {
+		const headers: Record<string, string> = { accept: "application/json" };
+		if (req.headers.cookie) headers.cookie = req.headers.cookie;
+		if (req.headers.authorization) headers.authorization = req.headers.authorization;
+		const upstream = await fetch(new URL(`/v1/achillea/clans/${clanId}/members`, urlsConfig.unifiedApi), { headers });
+		if (!upstream.ok) {
+			throw new BadRequest("Impossible de relire les membres depuis l'API unifiée.");
+		}
+		return await upstream.json() as ClanMemberDTO[];
 	}
 
 	@Get("/")
@@ -299,6 +319,7 @@ export class ClansController extends BaseController {
 		@PathParams("id") id: string,
 		@BodyParams("reason") reason: string,
 		@Context() ctx: Context,
+		@Req() req: Request,
 		@Res() res: Response
 	) {
 		const executor = ctx.get("user");
@@ -330,7 +351,7 @@ export class ClansController extends BaseController {
 
 			await this.clanService.kickMember(targetAsMember!, reason.trim(), executor);
 
-			const updatedMembers = await this.clanService.getClanMembers(executorAsMember!.clan.id, true);
+			const updatedMembers = await this.fetchUnifiedMembers(executorAsMember!.clan.id, req);
 
 			return res.status(200).json({
 				success: true,
@@ -366,6 +387,7 @@ export class ClansController extends BaseController {
 	async updateMember(
 		@BodyParams() member: ClanMemberDTO,
 		@Context() ctx: Context,
+		@Req() req: Request,
 		@Res() res: Response
 	) {
 		const executor = ctx.get("user");
@@ -410,7 +432,7 @@ export class ClansController extends BaseController {
 			);
 
 			// // ✅ 4. Fetch updated members list
-			const updatedMembers = await this.clanService.getClanMembers(executorAsMember!.clan.id, true);
+			const updatedMembers = await this.fetchUnifiedMembers(executorAsMember!.clan.id, req);
 
 			return res.status(200).json({
 				success: true,
