@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { isAdmin, resolveProfile } from "@rosegriffon/auth";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import type { Database } from "@rosegriffon/db";
 
 import { logAdminAction } from "@/lib/admin-logger";
 import { getServerUser } from "@/lib/auth-helpers";
-import { createAdminClient } from "@/lib/supabase/server";
 
 import {
 	avecNomEquipe,
@@ -52,7 +52,7 @@ async function exigerAdmin(): Promise<{ ok: true } | { ok: false; message: strin
 		return { message: "Non authentifié", ok: false };
 	}
 
-	const admin = createAdminClient();
+	const admin = createPostgresClient();
 	const profil = await resolveProfile(admin, user);
 
 	if (!profil || !isAdmin(profil.role)) {
@@ -83,7 +83,7 @@ export async function getAllTeamMembers(): Promise<{
 			return { data: null, error: garde.message };
 		}
 
-		const admin = createAdminClient();
+		const admin = createPostgresClient();
 		const { data, error } = await admin.from("team_members").select("*");
 
 		if (error) {
@@ -122,7 +122,7 @@ export async function createTeamMember(input: TeamMemberInput): Promise<{
 
 		const valeurs = { ...avecNomEquipe(analyse.data), source: SOURCE_ADMIN };
 
-		const admin = createAdminClient();
+		const admin = createPostgresClient();
 		const { data, error } = await admin.from("team_members").insert(valeurs).select().single();
 
 		if (error) {
@@ -172,7 +172,7 @@ export async function updateTeamMember(
 
 		const valeurs = avecNomEquipe(analyse.data);
 
-		const admin = createAdminClient();
+		const admin = createPostgresClient();
 		const { data, error } = await admin
 			.from("team_members")
 			.update(valeurs)
@@ -226,7 +226,7 @@ export async function deleteTeamMember(id: string): Promise<{
 			return { error: premierMessage(identifiant.error), success: false };
 		}
 
-		const admin = createAdminClient();
+		const admin = createPostgresClient();
 		const { error } = await admin.from("team_members").delete().eq("id", identifiant.data);
 
 		if (error) {
@@ -275,7 +275,7 @@ export async function uploadTeamMemberImage(file: File): Promise<{
 		const graine = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 		const chemin = construireCheminImage(file.type, graine);
 
-		const admin = createAdminClient();
+		const admin = createPostgresClient();
 		const { error: erreurEnvoi } = await admin.storage.from(BUCKET_IMAGES).upload(chemin, file, {
 			cacheControl: "3600",
 			contentType: file.type,

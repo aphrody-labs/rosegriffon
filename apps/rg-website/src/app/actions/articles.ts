@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { requireEditorOrFail } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
 import { createClient } from "@/lib/supabase/server";
@@ -32,8 +33,7 @@ export async function saveArticle(
 		return { id: articleId ?? "", error: (error as Error).message };
 	}
 
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 
 	if (articleId) {
 		// UPDATE — scope `app="azalee"` pour empêcher l'écriture cross-app
@@ -105,8 +105,7 @@ export async function updateArticleStatus(
 		return { error: (error as Error).message };
 	}
 
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 
 	const updateData: Record<string, unknown> = {
 		status: newStatus,
@@ -157,8 +156,7 @@ export async function deleteArticle(articleId: string): Promise<{ error?: string
 		return { error: (error as Error).message };
 	}
 
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { error } = await (supabase as any)
@@ -187,8 +185,7 @@ export async function toggleArticlePin(
 		return { error: (error as Error).message };
 	}
 
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { error } = await (supabase as any)
@@ -300,8 +297,7 @@ export async function duplicateArticle(
 		return { error: (error as Error).message };
 	}
 
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data: original, error: fetchError } = await (supabase as any)
@@ -577,8 +573,7 @@ export async function bulkUpdateArticles(
 		return { success: false, count: 0, error: (error as Error).message };
 	}
 
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { error } = await (supabase as any)
@@ -609,8 +604,7 @@ export async function bulkDeleteArticles(
 		return { success: false, count: 0, error: (error as Error).message };
 	}
 
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { error } = await (supabase as any)
@@ -737,8 +731,7 @@ export async function createArticleVersion(
 		return { success: false, error: (error as Error).message };
 	}
 
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -855,8 +848,7 @@ export async function restoreArticleVersion(
 		return { success: false, error: (error as Error).message };
 	}
 
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
