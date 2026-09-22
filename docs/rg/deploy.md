@@ -44,9 +44,12 @@ Les API, bots, le CDN et le cron se rechargent indépendamment. Leur nom Azalée
 éventuel décrit leur domaine fonctionnel, pas un frontend :
 
 ```bash
-sudo systemctl restart azalee-api.service
 sudo systemctl restart rg-cron.service
 ```
+
+Le wiki Azalée, son index CPK et ses textes sont servis par le montage
+`/v1/azalee` de `rg-api.service`; les anciens services `azalee-api` et
+`azalee-bot` sont retirés.
 
 Le contrat des assets partagés et la procédure CDN sont dans
 [assets-cdn.md](assets-cdn.md). Publier une modification de cette surface exige

@@ -20,16 +20,10 @@
  *     pas les noms de fichier URI, même avec `SQLITE_OPEN_URI` en `flags`.
  *
  * On passe donc par `@rosegriffon/azalee/remote`, un client HTTP typé (41 routes)
- * pointé sur `azalee-api.service` en loopback. Zéro descripteur SQLite, zéro
- * `-shm`, zéro modification du durcissement systemd — et la rotation nocturne
- * redémarre elle-même `azalee-api.service`, donc il n'y a aucun descripteur à
- * faire survivre.
+ * pointé sur le montage Azalée de l'API unifiée en loopback. Zéro descripteur
+ * SQLite, zéro `-shm`, zéro second daemon à maintenir.
  *
- * ⚠ Ce que ce choix ne résout PAS, et qu'il faut savoir : `azalee-api.service`
- * porte le même durcissement. Si SA base est illisible, ses routes de LISTE
- * répondent 200 avec `{"data":[],"total":0}` (les routes de fiche, elles,
- * répondent 500). Une autocomplétion vide n'est donc pas la preuve que la
- * donnée n'existe pas : `ops_status azalee-api` reste le juge.
+ * L'API unifiée est supervisée par `rg-api.service` et sa sonde `/health`.
  *
  * ⚠ Ne JAMAIS importer `@rosegriffon/azalee/server` ici : c'est le sous-chemin
  * qui ouvre `bun:sqlite`, précisément ce qu'on évite.
@@ -43,9 +37,9 @@ import {
 
 /**
  * API Azalée en loopback. 3010 est déjà pris par un autre service du VPS : le
- * défaut de la bibliothèque est 8807, servi aussi sur `api.rosegriffon.fr/azalee`.
+ * défaut local est 8800 sous `/v1/azalee`.
  */
-export const URL_API_AZALEE = Bun.env.AZALEE_API_URL ?? "http://127.0.0.1:8807";
+export const URL_API_AZALEE = Bun.env.AZALEE_API_URL ?? "http://127.0.0.1:8800/v1/azalee";
 
 /** Base publique du wiki, pour les liens des embeds. */
 export const URL_WIKI_AZALEE = Bun.env.AZALEE_URL ?? "https://azalee.rosegriffon.fr";
@@ -57,11 +51,8 @@ let client: AzaleeClient | null = null;
  * démarrage du bot ne doit pas dépendre de la disponibilité d'un autre service.
  */
 export function azalee(): AzaleeClient {
-	// Réessais calibrés sur le TROU DE LA ROTATION NOCTURNE : `mirror-sync.sh`
-	// redémarre `azalee-api.service`, qui met ~2,4 s à répondre 200 (mesuré).
-	// Les défauts de la bibliothèque (3 tentatives, 300 ms de base) couvraient
-	// ~0,9 s : une commande `/ievr` échouait une fois par nuit pour rien.
-	// 800 ms → 1,6 s → 3,2 s couvre le redémarrage avec de la marge, et
+	// Les retries couvrent un reload court de l'API unifiée : 800 ms → 1,6 s
+	// → 3,2 s évite un échec transitoire de commande, et
 	// `ECONNREFUSED` est bien classé réessayable par le transport.
 	client ??= createAzaleeClient({
 		baseUrl: URL_API_AZALEE,

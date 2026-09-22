@@ -19,8 +19,8 @@
  * tous 200. Ils sont surchargeables par variable d'environnement, parce qu'un
  * poste de développement n'a pas la même topologie que le VPS.
  *
- * ⚠ 3010 est déjà pris par un autre service : le défaut de `@rosegriffon/azalee`
- * est 8807, jamais 3010.
+ * L'API de données Azalée est un montage de `rg-api` : il n'y a plus de daemon
+ * headless ni de port dédié à superviser.
  *
  * ⚠ Le serveur MCP (:8808) figure dans le registre pour la SUPERVISION
  * uniquement. Le bot ne l'appelle pas : sa portée d'écriture s'ouvre avec
@@ -31,7 +31,7 @@
 
 /** Identifiants stables des services. Sert de clé partout ailleurs. */
 export type NomService =
-	| "azalee-api"
+	| "rg-api"
 	| "rag"
 	| "mcp"
 	| "cdn"
@@ -70,14 +70,14 @@ function publique(variable: string, defaut: string): string {
 }
 
 export const SERVICES: Readonly<Record<NomService, DescriptionService>> = {
-	"azalee-api": {
-		nom: "azalee-api",
-		titre: "API Azalée",
-		base: local(8807, "AZALEE_API_URL"),
+	"rg-api": {
+		nom: "rg-api",
+		titre: "API unifiée (Azalée inclus)",
+		base: local(8800, "UNIFIED_API_URL"),
 		sante: "/health",
-		publique: publique("AZALEE_URL", "https://azalee.rosegriffon.fr"),
-		unite: "azalee-api.service",
-		role: "41 routes JSON en lecture seule sur les données de jeu IEVR",
+		publique: publique("API_PUBLIC_URL", "https://api.rosegriffon.fr"),
+		unite: "rg-api.service",
+		role: "API Elysia + Kysely et montage /v1/azalee",
 	},
 	rag: {
 		nom: "rag",
