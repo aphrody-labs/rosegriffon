@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@rosegriffon/achillea-client": "workspace:*",
-    "@aphrody-code/canvas": "catalog:",
+    "@aphrody/canvas": "catalog:",
     "@rosegriffon/azalee": "workspace:*",
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/types": "workspace:*",

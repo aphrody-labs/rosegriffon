@@ -14,7 +14,7 @@
  *     test — c'est la garantie qu'il n'existe pas de seconde saisie manuelle.
  *
  * Deux conversions sont indispensables pour les consommateurs hors navigateur :
- *   - `oklch()` → hexadécimal sRGB. Le backend Skia de `@aphrody-code/canvas`
+ *   - `oklch()` → hexadécimal sRGB. Le backend Skia de `@aphrody/canvas`
  *     ne connaît pas `oklch` : il renvoie silencieusement `#000000`, ce qui
  *     donnerait des cartes Discord entièrement noires.
  *   - `var(--x)` → valeur résolue, en cascadant le bloc du thème puis `:root`.

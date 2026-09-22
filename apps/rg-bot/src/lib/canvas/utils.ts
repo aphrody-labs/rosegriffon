@@ -6,7 +6,7 @@
  * les fonds portent des arcs diagonaux et le logo griffon en filigrane.
  */
 
-import { type Image, loadImage, type SKRSContext2D } from "@aphrody-code/canvas";
+import { type Image, loadImage, type SKRSContext2D } from "@aphrody/canvas";
 
 import { BORDURE_OR, OMBRE_DURE, PALETTE, RAYONS, VISUELS } from "./theme";
 import { tronquer } from "./texte";

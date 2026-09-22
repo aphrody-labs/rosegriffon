@@ -23,7 +23,7 @@
  * `/profil`.
  */
 
-import { createCanvas, type SKRSContext2D } from "@aphrody-code/canvas";
+import { createCanvas, type SKRSContext2D } from "@aphrody/canvas";
 
 import { entierLisible, formaterNombre } from "../ui/nombres";
 import { rangDe, type Progression } from "../experience";

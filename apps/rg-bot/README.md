@@ -95,7 +95,7 @@ src/
 │   ├── audit.ts          logAdminAction → admin_audit_log
 │   ├── embeds.ts         rgEmbed + utils format (truncate, fmtDate, DAYS_FR, …)
 │   ├── *-format.ts       logique pure de rendu, couverte par `bun test`
-│   └── canvas/           génération PNG via @aphrody-code/canvas
+│   └── canvas/           génération PNG via @aphrody/canvas
 │       ├── theme.ts      palette + fonts (ensureFonts)
 │       ├── cards.ts      renderProfileCard, renderTeamGrid, renderEventList, …
 │       └── utils.ts      helpers Canvas2D (rounded rect, wrapped text, circular img, …)
