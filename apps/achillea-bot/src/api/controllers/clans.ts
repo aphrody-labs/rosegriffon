@@ -723,43 +723,22 @@ export class ClansController extends BaseController {
 	async updateClanInfo(
 		@PathParams("id") id: number,
 		@BodyParams() patch: UpdateClanDTO,
-		@Context() ctx: Context,
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		const executor = ctx.get("user") as UserDTO | undefined;
-		if (!executor) throw new Unauthorized("Non authentifié");
-
-		const isSiteAdmin = (executor.role ?? 0) >= UserRole.Administrator;
-
-		if (!isSiteAdmin) {
-			const member = await this.clanService.getMember(executor.id);
-			if (!member || member.clan.id !== id || member.role < ClanMemberRole.Captain) {
-				return res.status(403).json({
-					success: false,
-					error: "Réservé au président du clan ou à un administrateur.",
-				});
-			}
-			// isInactive : action de modération (page "gestion des clans" du dashboard
-			// admin), pas un réglage de président de clan.
-			if (patch.isInactive !== undefined) {
-				return res.status(403).json({
-					success: false,
-					error: "Réservé aux administrateurs.",
-				});
-			}
+		const headers: Record<string, string> = { accept: "application/json", "content-type": "application/json" };
+		if (req.headers.cookie) headers.cookie = req.headers.cookie;
+		if (req.headers.authorization) headers.authorization = req.headers.authorization;
+		const upstream = await fetch(new URL(`/v1/achillea/clans/${id}`, urlsConfig.unifiedApi), {
+			method: "PATCH", headers, body: JSON.stringify(patch),
+		});
+		const payload = await upstream.json().catch(() => ({ message: "Unified API unavailable" })) as {
+			success?: boolean; previousName?: string; roleId?: string; clan?: { name: string }; message?: string; error?: string;
+		};
+		if (upstream.ok && payload.previousName && payload.roleId && payload.clan?.name && payload.previousName !== payload.clan.name) {
+			await this.clanService.renameClanRole(payload.roleId, id, payload.clan.name);
 		}
-
-		try {
-			const updated = await this.clanService.updateClanInfo(id, patch);
-			return res.status(200).json({ success: true, clan: JSON.parse(JSON.stringify(updated)) });
-		} catch (err: any) {
-			return res
-				.status(err.status && err.status >= 400 && err.status < 600 ? err.status : 400)
-				.json({
-					success: false,
-					error: err.message ?? "Impossible de mettre à jour le clan.",
-				});
-		}
+		return res.status(upstream.status || 503).json(payload);
 	}
 
 	@Get("/:id")

@@ -5,7 +5,6 @@ import { plainToInstance } from "class-transformer";
 import type { BaseMessageOptions, GuildMember, TextChannel, User } from "discord.js";
 import { Colors, escapeMarkdown, roleMention, userMention } from "discord.js";
 import { Client } from "@aphrody/discordx";
-import GraphemeSplitter from "grapheme-splitter";
 
 import type { ClanApplicationDTO, ClanInviteDTO } from "@/api/models/dtos";
 import { coreManagerConfig, urlsConfig } from "@/configs";
@@ -255,122 +254,22 @@ export class ClanService {
 		return this.validateWithUnifiedApi("short-name", shortName);
 	}
 
+	/** Discord-only side effect kept at the bot boundary after API persistence. */
+	async renameClanRole(roleId: string, clanId: number, name: string) {
+		try {
+			const achillea = await this.client.guilds.fetch(coreManagerConfig.coreGuildId);
+			const role = await achillea.roles.fetch(roleId);
+			await role?.setName(name, "Renommage du Clan (dashboard)");
+		} catch (error) {
+			console.error(`[ClanService] Échec du renommage du rôle Discord pour le clan ${clanId}:`, error);
+		}
+	}
+
 	/**
 	 * MàJ des infos éditables depuis l'onglet "Infos" du dashboard de clan (logo, nom, tag,
 	 * bio, réseaux, recrutement). Permissions vérifiées côté controller (Président du clan
 	 * ou admin site) — ce service ne fait que valider/persister les champs fournis.
 	 */
-	async updateClanInfo(
-		clanId: number,
-		patch: {
-			name?: string;
-			shortenedName?: string;
-			clanBiography?: string;
-			clanAvatarUrl?: string;
-			xUrl?: string | null;
-			instagramUrl?: string | null;
-			tiktokUrl?: string | null;
-			isRecruiting?: boolean;
-			autoAcceptMembers?: boolean;
-			isInactive?: boolean;
-		}
-	): Promise<ClanDTO> {
-		const clan = await this.db.em.getRepository(Clan).findOne({ id: clanId });
-		if (!clan) throw new NotFound("Clan not found");
-
-		const splitter = new GraphemeSplitter();
-		const previousName = clan.name;
-
-		if (patch.name !== undefined && patch.name !== clan.name) {
-			const count = splitter.countGraphemes(patch.name);
-			const normalizedName = normalizeNames(patch.name);
-			if (count < 3 || count > 30 || !normalizedName) {
-				throw new BadRequest("Nom invalide (3 à 30 caractères).");
-			}
-			const taken = await this.db.get(Clan).findOne({ normalizedName, id: { $ne: clanId } });
-			if (taken) throw new BadRequest("Ce nom de clan est déjà pris.");
-			clan.name = patch.name;
-			clan.normalizedName = normalizedName;
-		}
-
-		if (patch.shortenedName !== undefined && patch.shortenedName !== clan.shortenedName) {
-			const count = splitter.countGraphemes(patch.shortenedName);
-			const normalizedShortName = normalizeNames(patch.shortenedName);
-			if (
-				count < 2 ||
-				count > 3 ||
-				!normalizedShortName ||
-				!normalizedShortName.match("^[^\\s]+$")
-			) {
-				throw new BadRequest("Tag invalide (2 à 3 caractères, sans espace).");
-			}
-			const taken = await this.db.get(Clan).findOne({ normalizedShortName, id: { $ne: clanId } });
-			if (taken) throw new BadRequest("Ce tag de clan est déjà pris.");
-			clan.shortenedName = patch.shortenedName;
-			clan.normalizedShortName = normalizedShortName;
-		}
-
-		if (patch.clanBiography !== undefined) {
-			if (patch.clanBiography.length > 1500) {
-				throw new BadRequest("Biographie trop longue (1500 caractères max).");
-			}
-			clan.clanBiography = patch.clanBiography;
-		}
-
-		if (patch.clanAvatarUrl !== undefined && patch.clanAvatarUrl !== clan.clanAvatarUrl) {
-			if (!patch.clanAvatarUrl) throw new BadRequest("Logo invalide.");
-			const taken = await this.db
-				.get(Clan)
-				.findOne({ clanAvatarUrl: patch.clanAvatarUrl, id: { $ne: clanId } });
-			if (taken) throw new BadRequest("Cette image est déjà utilisée par un autre clan.");
-			clan.clanAvatarUrl = patch.clanAvatarUrl;
-		}
-
-		const assignSocial = async (
-			value: string | null | undefined,
-			platform: SocialMedia,
-			field: "xUrl" | "instagramUrl" | "tiktokUrl",
-			label: string
-		) => {
-			if (value === undefined) return;
-			if (!value || value.trim() === "") {
-				clan[field] = null;
-				return;
-			}
-			const social = await isSocialMediaUrl(value);
-			if (!social || social.platform !== platform) {
-				throw new BadRequest(`Lien ${label} invalide.`);
-			}
-			clan[field] = social.canonicalUrl;
-		};
-		await assignSocial(patch.xUrl, SocialMedia.X, "xUrl", "X/Twitter");
-		await assignSocial(patch.instagramUrl, SocialMedia.Instagram, "instagramUrl", "Instagram");
-		await assignSocial(patch.tiktokUrl, SocialMedia.TikTok, "tiktokUrl", "TikTok");
-
-		if (patch.isRecruiting !== undefined) clan.isRecruiting = patch.isRecruiting;
-		if (patch.autoAcceptMembers !== undefined) clan.autoAcceptMembers = patch.autoAcceptMembers;
-		if (patch.isInactive !== undefined) clan.isInactive = patch.isInactive;
-
-		await this.db.em.flush();
-
-		// Best-effort : renomme le rôle Discord du clan en même temps que son nom. Ne bloque
-		// jamais la MàJ DB (le rôle peut avoir été supprimé/renommé manuellement entre-temps).
-		if (clan.name !== previousName) {
-			try {
-				const achillea = await this.client.guilds.fetch(coreManagerConfig.coreGuildId);
-				const role = await achillea.roles.fetch(clan.roleId);
-				await role?.setName(clan.name, "Renommage du Clan (dashboard)");
-			} catch (err) {
-				console.error(
-					`[ClanService] Échec du renommage du rôle Discord pour le clan ${clan.id}:`,
-					err
-				);
-			}
-		}
-
-		return this.toDTO(clan);
-	}
-
 	async validateFounders(founders: User[]) {
 		const foundersIds = founders.map((founder) => founder.id);
 		if (foundersIds.length !== 5) {

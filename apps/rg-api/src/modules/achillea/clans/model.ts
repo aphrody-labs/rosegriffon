@@ -8,6 +8,21 @@ export const ClanModel = {
 			t.Literal("INVALID_SHORTNAME"), t.Literal("SHORTNAME_TAKEN"),
 		])),
 	}),
+	updateBody: t.Object({
+		name: t.Optional(t.String()), shortenedName: t.Optional(t.String()),
+		clanBiography: t.Optional(t.String()), clanAvatarUrl: t.Optional(t.String()),
+		xUrl: t.Optional(t.Nullable(t.String())), instagramUrl: t.Optional(t.Nullable(t.String())),
+		tiktokUrl: t.Optional(t.Nullable(t.String())), isRecruiting: t.Optional(t.Boolean()),
+		autoAcceptMembers: t.Optional(t.Boolean()), isInactive: t.Optional(t.Boolean()),
+	}),
+	updateResponse: t.Object({
+		success: t.Literal(true),
+		previousName: t.String(), roleId: t.String(),
+		clan: t.Object({
+			id: t.Number(), name: t.String(), shortName: t.String(), avatarUrl: t.String(),
+			biography: t.String(), fame: t.Number(), isRecruiting: t.Boolean(), membersLimit: t.Boolean(),
+		}),
+	}),
 	member: t.Object({
 		clanRole: t.Number(), distinctions: t.Array(t.String()), clanFameContributed: t.Number(),
 		createdAt: t.Date(), updatedAt: t.Date(),

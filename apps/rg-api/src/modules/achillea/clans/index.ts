@@ -57,6 +57,23 @@ export const clanController = new Elysia({ prefix: "/clans" })
 			200: ClanModel.listResponse
 		}
 	})
+	.patch("/:id", async ({ db, headers, params, body, set }) => {
+		const session = await resolveAchilleaSession(headers);
+		if (!session) return status(401, { message: "Authentication required" as const });
+		const result = await ClanService.update(db, params.id, session.id, body);
+		if (!result.ok) return status(result.status as 400 | 401 | 403 | 404, { message: result.message });
+		return { success: true as const, previousName: result.previousName, roleId: result.roleId, clan: result.clan };
+	}, {
+		params: t.Object({ id: t.Numeric() }),
+		body: ClanModel.updateBody,
+		response: {
+			200: ClanModel.updateResponse,
+			400: t.Object({ message: t.String() }),
+			401: t.Object({ message: t.String() }),
+			403: t.Object({ message: t.String() }),
+			404: t.Object({ message: t.String() }),
+		},
+	})
 	.get("/:id", async ({ db, params: { id } }) => {
 		const item = await ClanService.findById(db, id);
 		if (!item) {
