@@ -31,7 +31,7 @@ import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedHubPage() {
 	const { user, isAuthenticated, isLoading, login } = useAchilleaAuth();
-	const [mode, setMode] = useState<1 | 2>(1); // 1 = 1v1, 2 = 2v2
+	const [mode, setMode] = useState<2 | 4>(2); // 2 = 1v1, 4 = 2v2
 	const [isRanked, setIsRanked] = useState<boolean>(true);
 	const [profile, setProfile] = useState<RankedProfile | null>(null);
 	const [trend, setTrend] = useState<RankedTrend | null>(null);
@@ -176,9 +176,9 @@ export default function RankedHubPage() {
 				<div className="flex items-center p-1 bg-muted rounded-lg">
 					<button
 						type="button"
-						onClick={() => startTransition(() => setMode(1))}
+						onClick={() => startTransition(() => setMode(2))}
 						className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
-							mode === 1
+							mode === 2
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
 						}`}
@@ -187,9 +187,9 @@ export default function RankedHubPage() {
 					</button>
 					<button
 						type="button"
-						onClick={() => startTransition(() => setMode(2))}
+						onClick={() => startTransition(() => setMode(4))}
 						className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
-							mode === 2
+							mode === 4
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
 						}`}
@@ -296,7 +296,7 @@ export default function RankedHubPage() {
 										{profile?.elo ?? 0} AP
 									</span>
 									<span className="px-2 py-0.5 rounded-md text-xs font-medium bg-muted text-muted-foreground">
-										{mode === 1 ? "1v1" : "2v2"}
+										{mode === 2 ? "1v1" : "2v2"}
 									</span>
 									{profile?.percentile && (
 										<span className="px-2 py-0.5 rounded-md text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -396,14 +396,14 @@ export default function RankedHubPage() {
 							<div className="space-y-1">
 								<h3 className="text-xl font-bold">Lancer une recherche</h3>
 								<p className="text-sm text-muted-foreground">
-									Recherchez un joueur de votre niveau en {mode === 1 ? "1v1" : "2v2"} (
+									Recherchez un joueur de votre niveau en {mode === 2 ? "1v1" : "2v2"} (
 									<span className="font-semibold text-foreground">{isRanked ? "Classé" : "Amical"}</span>).
 								</p>
 							</div>
 
 							<button
 								type="button"
-								onClick={() => void rejoindreFile(mode === 2 ? "2v2" : "1v1")}
+								onClick={() => void rejoindreFile(mode === 4 ? "2v2" : "1v1")}
 								className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--achillea-primary)] hover:bg-[var(--achillea-primary-400)] text-white font-bold text-sm rounded-xl transition shadow-lg active:scale-95"
 							>
 								<Search className="w-4 h-4" />

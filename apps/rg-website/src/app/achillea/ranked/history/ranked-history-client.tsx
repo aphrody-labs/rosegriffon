@@ -26,7 +26,7 @@ import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedHistoryPage() {
 	const { user, isAuthenticated, isLoading: authLoading, login } = useAchilleaAuth();
-	const [mode, setMode] = useState<number>(-1); // -1 = all, 1 = 1v1, 2 = 2v2
+	const [mode, setMode] = useState<-1 | 2 | 4>(-1); // -1 = all, 2 = 1v1, 4 = 2v2
 	const [period, setPeriod] = useState<number>(0); // 0 = all, 7 = 7d, 30 = 30d
 	const [history, setHistory] = useState<RankedHistoryEntry[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -140,18 +140,18 @@ export default function RankedHistoryPage() {
 						</button>
 						<button
 							type="button"
-							onClick={() => setMode(1)}
+							onClick={() => setMode(2)}
 							className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-								mode === 1 ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+								mode === 2 ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
 							}`}
 						>
 							1v1
 						</button>
 						<button
 							type="button"
-							onClick={() => setMode(2)}
+							onClick={() => setMode(4)}
 							className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-								mode === 2 ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+								mode === 4 ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
 							}`}
 						>
 							2v2

@@ -33,7 +33,7 @@ const DEFAULT_TIERS: RankedTierInfo[] = [
 ];
 
 export default function RankedTiersPage() {
-	const [mode, setMode] = useState<1 | 2>(1);
+	const [mode, setMode] = useState<2 | 4>(2);
 	const [tiers, setTiers] = useState<RankedTierInfo[]>(DEFAULT_TIERS);
 	const [loading, setLoading] = useState<boolean>(true);
 
@@ -91,9 +91,9 @@ export default function RankedTiersPage() {
 				<div className="flex items-center p-1 bg-muted rounded-lg self-start sm:self-auto">
 					<button
 						type="button"
-						onClick={() => setMode(1)}
+						onClick={() => setMode(2)}
 						className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
-							mode === 1
+							mode === 2
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
 						}`}
@@ -102,9 +102,9 @@ export default function RankedTiersPage() {
 					</button>
 					<button
 						type="button"
-						onClick={() => setMode(2)}
+						onClick={() => setMode(4)}
 						className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
-							mode === 2
+							mode === 4
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
 						}`}
