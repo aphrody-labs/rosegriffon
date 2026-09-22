@@ -149,16 +149,10 @@ export class ClansController extends BaseController {
 	async getClanMembers(
 		@PathParams("id") id: number,
 		@Res() res: Response
-	): Promise<ClanMemberDTO[]> {
-		const members = await this.clanService.getClanMembers(id);
-		if (!members || members.length < 1) {
-			throw new BadRequest(`Clan with id ${id} has no members`);
-		}
-
-		// Members : changent rarement (membership stable). 30s + SWR 2min.
+	): Promise<any> {
+		const upstream = await fetch(new URL(`/v1/achillea/clans/${id}/members`, urlsConfig.unifiedApi));
 		res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=120");
-
-		return members;
+		return res.status(upstream.status || 503).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
 	}
 
 	@Post("/create")

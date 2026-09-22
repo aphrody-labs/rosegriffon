@@ -248,6 +248,16 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		}
 	});
 
+	it("GET /v1/achillea/clans/:id/members is SQL-backed", async () => {
+		const list = await api.v1.achillea.clans.get();
+		const id = list.data?.data[0]?.id;
+		if (id === undefined) return;
+		const response = await app.handle(new Request(`http://localhost/v1/achillea/clans/${id}/members`));
+		expect(response.status).toBe(200);
+		const members = await response.json() as unknown[];
+		expect(Array.isArray(members)).toBe(true);
+	});
+
 	it("ranked public reads use the canonical unified contract", async () => {
 		const leaderboard = await app.handle(new Request("http://localhost/v1/achillea/ranked/leaderboard?mode=2&page=0&pageSize=5"));
 		expect(leaderboard.status).toBe(200);

@@ -1,6 +1,16 @@
 import { t } from "elysia";
 
 export const ClanModel = {
+	member: t.Object({
+		clanRole: t.Number(), distinctions: t.Array(t.String()), clanFameContributed: t.Number(),
+		createdAt: t.Date(), updatedAt: t.Date(),
+		user: t.Object({ id: t.String(), type: t.Literal("user"), username: t.String(), avatar: t.String(), clanId: t.Number(), role: t.Number() }),
+	}),
+	members: t.Array(t.Object({
+		clanRole: t.Number(), distinctions: t.Array(t.String()), clanFameContributed: t.Number(),
+		createdAt: t.Date(), updatedAt: t.Date(),
+		user: t.Object({ id: t.String(), type: t.Literal("user"), username: t.String(), avatar: t.String(), clanId: t.Number(), role: t.Number() }),
+	})),
 	clan: t.Object({
 		id: t.Number(),
 		name: t.String(),
