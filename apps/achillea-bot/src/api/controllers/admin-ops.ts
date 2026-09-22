@@ -178,40 +178,15 @@ export class AdminOpsController extends BaseController {
 	async listUsers(
 		@Context() ctx: Context,
 		@Res() res: Response,
+		@Req() req: Request,
 		@QueryParams("page") page = 1,
 		@QueryParams("pagination") pagination = 25,
 		@QueryParams("q") q?: string
 	) {
 		this.requireStaff(ctx);
-		const em = this.db.em.fork();
-		const limit = Math.min(100, Math.max(1, Number(pagination) || 25));
-		const p = Math.max(1, Number(page) || 1);
-		const where: Record<string, unknown> = {};
-		if (q?.trim()) {
-			const term = `%${q.trim()}%`;
-			where["$or"] = [
-				{ username: { $ilike: term } },
-				{ displayName: { $ilike: term } },
-				{ id: { $like: term.replace(/%/g, "") } },
-			];
-		}
-		const [items, total] = await em.findAndCount(User, where as any, {
-			orderBy: { lastInteract: "DESC" },
-			limit,
-			offset: (p - 1) * limit,
-			fields: ["id", "username", "displayName", "avatar", "role", "lastInteract"] as any,
-		});
-		return res.json({
-			data: items.map((u) => ({
-				id: u.id,
-				username: u.username,
-				displayName: u.displayName,
-				avatar: u.avatar,
-				role: u.role,
-				lastInteract: u.lastInteract,
-			})),
-			meta: { page: p, limit, total, pageCount: Math.ceil(total / limit) },
-		});
+		const query = new URLSearchParams({ page: String(page), pagination: String(pagination) });
+		if (q?.trim()) query.set("q", q.trim());
+		return this.forwardAdmin(`/ops/users?${query}`, req, res);
 	}
 
 	/** Patch rôle utilisateur (Admin+). */
@@ -229,45 +204,9 @@ export class AdminOpsController extends BaseController {
 
 	/** Top wallets + derniers mouvements. */
 	@Get("/wallets")
-	async wallets(@Context() ctx: Context, @Res() res: Response, @QueryParams("limit") limit = 30) {
+	async wallets(@Context() ctx: Context, @Res() res: Response, @Req() req: Request, @QueryParams("limit") limit = 30) {
 		this.requireStaff(ctx, UserRole.Moderator);
-		const em = this.db.em.fork();
-		const lim = Math.min(100, Math.max(1, Number(limit) || 30));
-		const top = await em.find(
-			Wallet,
-			{},
-			{
-				populate: ["user"],
-				orderBy: { balance: "DESC" } as any,
-				limit: lim,
-			}
-		);
-		const recent = await em.find(
-			Transaction,
-			{},
-			{
-				orderBy: { createdAt: "DESC" },
-				limit: lim,
-				populate: ["fromUser", "toUser"],
-			}
-		);
-		return res.json({
-			top: top.map((w) => ({
-				userId: w.user.id,
-				displayName: (w.user as any).displayName || (w.user as any).username || w.user.id,
-				balance: parseFloat(w.balance),
-				currency: w.currency,
-			})),
-			recent: recent.map((t) => ({
-				id: t.id,
-				type: t.type,
-				amount: parseFloat(t.amount),
-				reason: t.reason,
-				fromUserId: t.fromUser?.id ?? null,
-				toUserId: t.toUser?.id ?? null,
-				createdAt: t.createdAt,
-			})),
-		});
+		return this.forwardAdmin(`/ops/wallets?limit=${encodeURIComponent(String(limit))}`, req, res);
 	}
 
 	/** Crédit / débit admin (amount > 0 crédit, < 0 débit). */
@@ -283,11 +222,15 @@ export class AdminOpsController extends BaseController {
 		return this.forwardAdmin(`/wallets/${encodeURIComponent(userId)}/adjust`, req, res, body);
 	}
 
-	private async forwardAdmin(path: string, req: Request, res: Response, body: unknown) {
+	private async forwardAdmin(path: string, req: Request, res: Response, body?: unknown) {
 		const headers: Record<string, string> = { accept: "application/json", "content-type": "application/json" };
 		if (req.headers.cookie) headers.cookie = req.headers.cookie;
 		if (req.headers.authorization) headers.authorization = req.headers.authorization;
-		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea/admin${path}`, { method: "POST", headers, body: JSON.stringify(body) });
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea/admin${path}`, {
+			method: body === undefined ? "GET" : "POST",
+			headers,
+			...(body === undefined ? {} : { body: JSON.stringify(body) }),
+		});
 		const text = await upstream.text();
 		res.status(upstream.status).type("json");
 		return res.send(text);

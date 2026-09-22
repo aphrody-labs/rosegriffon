@@ -15,6 +15,80 @@ async function staff(db: Kysely<Database>, headers: { authorization?: string; co
 
 export const adminController = new Elysia({ prefix: "/admin" })
 	.use(dbPlugin)
+	.get("/ops/users", async ({ db, headers, query }) => {
+		const auth = await staff(db, headers, 2);
+		if (auth.error) return auth.error;
+		const limit = Math.min(100, Math.max(1, Math.floor(query.pagination ?? 25)));
+		const page = Math.max(1, Math.floor(query.page ?? 1));
+		const term = query.q?.trim();
+		let base = db.selectFrom("user");
+		if (term) {
+			const pattern = `%${term}%`;
+			base = base.where((eb) => eb.or([
+				eb("username", "ilike", pattern),
+				eb("display_name", "ilike", pattern),
+				eb("id", "ilike", pattern),
+			]));
+		}
+		const [rows, count] = await Promise.all([
+			base.select(["id", "username", "display_name", "avatar", "role", "last_interact"])
+				.orderBy("last_interact", "desc").limit(limit).offset((page - 1) * limit).execute(),
+			base.select(({ fn }) => fn.countAll<number>().as("count")).executeTakeFirst(),
+		]);
+		const total = Number(count?.count ?? 0);
+		return {
+			data: rows.map((user) => ({
+				id: user.id,
+				username: user.username,
+				displayName: user.display_name,
+				avatar: user.avatar,
+				role: user.role,
+				lastInteract: user.last_interact,
+			})),
+			meta: { page, limit, total, pageCount: Math.ceil(total / limit) },
+		};
+	}, {
+		query: t.Object({ page: t.Optional(t.Numeric()), pagination: t.Optional(t.Numeric()), q: t.Optional(t.String()) }),
+	})
+	.get("/ops/wallets", async ({ db, headers, query }) => {
+		const auth = await staff(db, headers, 2);
+		if (auth.error) return auth.error;
+		const limit = Math.min(100, Math.max(1, Math.floor(query.limit ?? 30)));
+		const [top, recent] = await Promise.all([
+			db.selectFrom("wallet as wallet")
+				.innerJoin("user", "user.id", "wallet.user_id")
+				.select([
+					"wallet.user_id",
+					"wallet.balance",
+					"wallet.currency",
+					"user.display_name",
+					"user.username",
+				])
+				.orderBy("wallet.balance", "desc").limit(limit).execute(),
+			db.selectFrom("transaction")
+				.select(["id", "type", "amount", "reason", "from_user_id", "to_user_id", "created_at"])
+				.orderBy("created_at", "desc").limit(limit).execute(),
+		]);
+		return {
+			top: top.map((wallet) => ({
+				userId: wallet.user_id,
+				displayName: wallet.display_name || wallet.username || wallet.user_id,
+				balance: Number(wallet.balance),
+				currency: wallet.currency,
+			})),
+			recent: recent.map((transaction) => ({
+				id: transaction.id,
+				type: transaction.type,
+				amount: Number(transaction.amount),
+				reason: transaction.reason,
+				fromUserId: transaction.from_user_id,
+				toUserId: transaction.to_user_id,
+				createdAt: transaction.created_at,
+			})),
+		};
+	}, {
+		query: t.Object({ limit: t.Optional(t.Numeric()) }),
+	})
 	.post("/users/:id/role", async ({ db, headers, params: { id }, body }) => {
 		const auth = await staff(db, headers, 2);
 		if (auth.error) return auth.error;
