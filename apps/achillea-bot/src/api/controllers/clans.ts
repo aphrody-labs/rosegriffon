@@ -33,7 +33,6 @@ import {
 	ClanPosterService,
 	ClanService,
 	CustomImagesUpload,
-	Database,
 	UserService,
 } from "@/services";
 import { BaseController } from "@/utils/classes";
@@ -50,7 +49,7 @@ import {
 	normalizeClanMemberLimits,
 	setClanMemberLimits,
 } from "@/utils/functions/clanLimits";
-import { hasActiveClanMembership, resolveDependenciesSync } from "@/utils/functions";
+import { resolveDependenciesSync } from "@/utils/functions";
 
 import { createClanSpecificChannel } from "../../utils/functions/channel";
 
@@ -60,18 +59,16 @@ export class ClansController extends BaseController {
 	private userService: UserService;
 	private imageService: CustomImagesUpload;
 	private posterService: ClanPosterService;
-	private db: Database;
 
 	constructor() {
 		super();
 
-		[this.clanService, this.userService, this.imageService, this.posterService, this.db] =
+		[this.clanService, this.userService, this.imageService, this.posterService] =
 			resolveDependenciesSync([
 				ClanService,
 				UserService,
 				CustomImagesUpload,
 				ClanPosterService,
-				Database,
 			]);
 	}
 
@@ -593,6 +590,7 @@ export class ClansController extends BaseController {
 	async createApplication(
 		@BodyParams("clanId") targetClanId: number,
 		@BodyParams("distinctions") distinctions: ClanMemberDistinction[],
+		@Req() req: Request,
 		@Context() ctx: Context,
 		@Res() res: Response
 	) {
@@ -607,10 +605,15 @@ export class ClansController extends BaseController {
 		try {
 			// 1. Executor must not already be in an ACTIVE clan (une adhésion à un
 			// Clan inactif ne bloque pas — transfert/prêt implicite).
-			const executorInActiveClan = await hasActiveClanMembership(executor.id, this.db.em);
-			if (executorInActiveClan) {
-				throw new BadRequest("Vous faites déjà partie d'un Clan.");
-			}
+				const headers: Record<string, string> = { accept: "application/json" };
+				if (req.headers.cookie) headers.cookie = req.headers.cookie;
+				if (req.headers.authorization) headers.authorization = req.headers.authorization;
+				const membership = await fetch(new URL("/v1/achillea/clans/me", urlsConfig.unifiedApi), { headers });
+				if (!membership.ok) throw new BadRequest("Impossible de vérifier votre adhésion au Clan.");
+				const membershipBody = await membership.json() as { clanId?: number | null };
+				if (membershipBody.clanId != null) {
+					throw new BadRequest("Vous faites déjà partie d'un Clan.");
+				}
 
 			// 3. Validate distinctions array
 			if (!Array.isArray(distinctions)) {
