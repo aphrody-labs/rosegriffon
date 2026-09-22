@@ -2,7 +2,6 @@ import {
 	applyEloUpdate,
 	DEFAULT_BASE_RATING,
 	DEFAULT_K_FACTOR,
-	placementPrizeAp,
 	progressiveEloDelta,
 	computeMatchElo,
 	resolveTournamentSideOutcome,
@@ -12,7 +11,7 @@ import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import type { Generated, Kysely } from "kysely";
 import { singleton } from "tsyringe";
 
-import { Lobby, Rank, Season, Tournament, User, UserElo } from "@/entities";
+import { Lobby, Rank, Season, User, UserElo } from "@/entities";
 import {
 	EventTypeEnum,
 	LobbyState,
@@ -45,19 +44,6 @@ export interface TournamentEloApplyResult {
 }
 
 /** Placement final d'un participant (rank 1-based brackets-manager). */
-export interface TournamentPlacement {
-	userId: string;
-	rank: number;
-}
-
-export interface TournamentPlacementPrizeResult {
-	applied: boolean;
-	reason?: string;
-	/** userId → AP plats versés (0 omis). */
-	deltas?: Record<string, number>;
-	tournamentSize?: number;
-}
-
 interface EloDatabase {
 	user_elo: {
 		user_id: string;
@@ -282,93 +268,6 @@ export class EloService {
 		});
 	}
 
-	/**
-	 * Verse le bonus AP podium (1er / 2e / demis) à la fin d'un tournoi.
-	 * Idempotent via `tournament.placementEloApplied`.
-	 *
-	 * - AP **plats** (hors barème match) : ne compte ni W/L ni games_played.
-	 * - Mode par défaut : solo (`ONE_VS_ONE`) — ladder principale.
-	 * - `tournamentSize` = `participantsNumber` (capacité annoncée, ex. 32).
-	 */
-	async applyTournamentPlacementPrizes(
-		tournamentId: number,
-		placements: readonly TournamentPlacement[],
-		opts?: { mode?: MatchMode; em?: DatabaseEntityManager }
-	): Promise<TournamentPlacementPrizeResult> {
-		const entityManager = opts?.em ?? this.db.em.fork();
-		const mode = opts?.mode ?? MatchMode.ONE_VS_ONE;
-
-		return await entityManager.transactional(async (tem) => {
-			const tournament = await tem.findOne(
-				Tournament,
-				{ id: tournamentId },
-				{ lockMode: LockMode.PESSIMISTIC_WRITE }
-			);
-
-			if (!tournament) return { applied: false, reason: "tournoi_introuvable" };
-			if (tournament.placementEloApplied) return { applied: false, reason: "deja_applique" };
-
-			const size = tournament.participantsNumber ?? 0;
-			if (size <= 0) return { applied: false, reason: "taille_invalide" };
-			if (!placements.length) return { applied: false, reason: "aucun_placement" };
-
-			const activeSeason = await this.getCurrentSeason(tem);
-			const baseRating = activeSeason?.config?.baseRating ?? DEFAULT_BASE_RATING;
-
-			const findOrCreate = async (userId: string): Promise<UserElo> => {
-				const existing = await tem.findOne(UserElo, {
-					user: { id: userId } as User,
-					mode,
-				});
-				if (existing) return existing;
-				const row = tem.create(UserElo, {
-					user: tem.getReference(User, userId),
-					mode,
-					season: activeSeason,
-					elo: baseRating,
-					peakRating: baseRating,
-					gamesPlayed: 0,
-					wins: 0,
-					losses: 0,
-					createdAt: new Date(),
-					updatedAt: new Date(),
-				});
-				tem.persist(row);
-				return row;
-			};
-
-			const deltas: Record<string, number> = {};
-			// Un même user ne reçoit qu'une fois le bonus (rank le plus favorable).
-			const bestRankByUser = new Map<string, number>();
-			for (const p of placements) {
-				if (!p.userId || !Number.isFinite(p.rank) || p.rank < 1) continue;
-				const prev = bestRankByUser.get(p.userId);
-				if (prev === undefined || p.rank < prev) bestRankByUser.set(p.userId, p.rank);
-			}
-
-			for (const [userId, rank] of bestRankByUser) {
-				const prize = placementPrizeAp(size, rank);
-				if (prize <= 0) continue;
-				const row = await findOrCreate(userId);
-				const { newElo, clampedDelta } = applyEloUpdate(row.elo, prize);
-				row.elo = newElo;
-				if (newElo > row.peakRating) row.peakRating = newElo;
-				deltas[userId] = clampedDelta;
-			}
-
-			tournament.placementEloApplied = true;
-			await tem.flush();
-
-			if (Object.keys(deltas).length > 0) {
-				this.metrics.increment("achillea_elo_placement_prizes_total", {
-					size: String(size),
-				});
-			}
-
-			return { applied: true, deltas, tournamentSize: size };
-		});
-	}
-
 	async getCurrentSeason(em?: DatabaseEntityManager): Promise<Season | null> {
 		const entityManager = em ?? this.db.em.fork();
 		return entityManager.findOne(
@@ -378,8 +277,4 @@ export class EloService {
 		);
 	}
 
-	async getActiveSeasons(): Promise<Season[]> {
-		const em = this.db.em.fork();
-		return em.find(Season, { state: SeasonState.Active }, { orderBy: { startsAt: "ASC" } });
-	}
 }
