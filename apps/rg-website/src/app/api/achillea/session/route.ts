@@ -2,10 +2,9 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import {
-	COOKIE_SESSION_ACHILLEA,
-	DUREE_SESSION_ACHILLEA_SECONDES,
-	signerJetonAchillea,
-} from "@/lib/achillea/jeton";
+	ACHILLEA_SESSION_COOKIE_NAME,
+	ACHILLEA_SESSION_TTL_SECONDS,
+} from "@rosegriffon/auth/achillea-session";
 import { getServerSession } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
 
@@ -34,11 +33,10 @@ import { getPgPool } from "@/lib/db/pg";
  * contrepartie côté e-sport — la route le dit (`409`) au lieu de fabriquer un
  * compte fantôme.
  *
- * POURQUOI SIGNER ICI PLUTÔT QUE DEMANDER À L'API
- * L'API Achilléa ne sait signer un jeton qu'au retour de SON OAuth. Lui ajouter
- * un point d'entrée « fais-moi confiance, ce membre est authentifié » revient à
- * déplacer le secret sans rien gagner : c'est le même secret, partagé par les
- * deux moitiés de la même application.
+ * L'émission du jeton appartient à l'API unifiée : cette route ne fait que
+ * vérifier la session Better Auth, résoudre le compte Discord lié, puis appeler
+ * le pont interne authentifié. Le secret JWT et l'écriture de `achillea.user`
+ * restent ainsi hors du runtime Next.js.
  */
 
 /**
@@ -62,10 +60,8 @@ interface LigneCompteDiscord {
 }
 
 export async function POST() {
-	const secret = process.env.ACHILLEA_JWT_SECRET;
-	if (!secret) {
-		// Sans le secret partagé, la passerelle ne peut rien signer. On le dit
-		// franchement : un 500 muet enverrait chercher la panne côté Achilléa.
+	const internalToken = process.env.API_ADMIN_TOKEN;
+	if (!internalToken) {
 		return NextResponse.json({ error: "passerelle_non_configuree" }, { status: 503 });
 	}
 
@@ -96,36 +92,24 @@ export async function POST() {
 			return NextResponse.json({ error: "discord_non_lie" }, { status: 409 });
 		}
 
-		// Le joueur doit exister côté Achilléa : `/api/users/me` lit cette table, et
-		// un jeton valide pour un identifiant absent produirait une session qui
-		// s'authentifie mais ne trouve personne. `on conflict` ne touche pas aux
-		// données du jeu (elo, clan, licence) — seulement à l'identité affichée.
-		//
-		// `display_name` et `normalized_display_name` sont laissés à leur défaut :
-		// le bot les calcule avec `normalizeNames()` (NFKC, alphabets stylisés
-		// repliés, 90 lignes), et les recopier ici en `UPPER()` fabriquerait une
-		// seconde normalisation, divergente, qui casserait la recherche de joueurs.
-		// Le bot les remplit à la première synchronisation Discord.
-		await pool.query(
-			`INSERT INTO achillea."user" (id, created_at, updated_at, last_interact, role, username, avatar)
-			 VALUES ($1, now(), now(), now(), 0, $2, $3)
-			 ON CONFLICT (id) DO UPDATE
-			 SET last_interact = now(),
-			     updated_at = now(),
-			     username = COALESCE(EXCLUDED.username, achillea."user".username),
-			     avatar = COALESCE(EXCLUDED.avatar, achillea."user".avatar)`,
-			[compte.discord_id, compte.username, compte.avatar_url]
-		);
-
-		const jeton = signerJetonAchillea(
-			{ avatar: compte.avatar_url, id: compte.discord_id, username: compte.username },
-			secret
-		);
+		const apiUrl = (process.env.ACHILLEA_API_URL ?? process.env.NEXT_PUBLIC_ACHILLEA_API_URL ?? "https://api.rosegriffon.fr").replace(/\/$/, "");
+		const exchange = await fetch(`${apiUrl}/v1/auth/session/exchange`, {
+			method: "POST",
+			headers: { authorization: `Bearer ${internalToken}`, "content-type": "application/json" },
+			body: JSON.stringify({ id: compte.discord_id, username: compte.username, avatar: compte.avatar_url }),
+			cache: "no-store",
+		});
+		if (!exchange.ok) {
+			console.error("[achillea/session] API exchange failed", exchange.status);
+			return NextResponse.json({ error: "api_unifiee_indisponible" }, { status: 503 });
+		}
+		const payload = (await exchange.json()) as { token?: string };
+		if (!payload.token) return NextResponse.json({ error: "session_invalide" }, { status: 503 });
 
 		const magasin = await cookies();
-		magasin.set(COOKIE_SESSION_ACHILLEA, jeton, {
+		magasin.set(ACHILLEA_SESSION_COOKIE_NAME, payload.token, {
 			...COOKIE,
-			maxAge: DUREE_SESSION_ACHILLEA_SECONDES,
+			maxAge: ACHILLEA_SESSION_TTL_SECONDS,
 		});
 
 		return NextResponse.json({ id: compte.discord_id, username: compte.username });
@@ -138,6 +122,6 @@ export async function POST() {
 /** Ferme la session Achilléa en même temps que celle de Rose Griffon. */
 export async function DELETE() {
 	const magasin = await cookies();
-	magasin.set(COOKIE_SESSION_ACHILLEA, "", { ...COOKIE, maxAge: 0 });
+	magasin.set(ACHILLEA_SESSION_COOKIE_NAME, "", { ...COOKIE, maxAge: 0 });
 	return NextResponse.json({ ok: true });
 }

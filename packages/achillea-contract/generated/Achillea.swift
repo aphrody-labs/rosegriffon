@@ -684,6 +684,8 @@ public struct EnrichedUserDTO: Codable, Sendable {
 	/// ENTIÈRE, donc de tous les clans.
 	public let sim: Double?
 	public let avatar: String?
+	/// L'API historique sérialise l'absence de clan en `null` (et non en champ
+	/// absent). Les deux formes sont donc recevables dans le contrat partagé.
 	public let clanId: Double?
 	public let soloRank: RankDTO?
 	public let duoRank: RankDTO?
@@ -2067,6 +2069,8 @@ public struct UserDTO: Codable, Sendable {
 	/// ENTIÈRE, donc de tous les clans.
 	public let sim: Double?
 	public let avatar: String?
+	/// L'API historique sérialise l'absence de clan en `null` (et non en champ
+	/// absent). Les deux formes sont donc recevables dans le contrat partagé.
 	public let clanId: Double?
 	public let soloRank: RankDTO?
 	public let duoRank: RankDTO?
@@ -2114,7 +2118,8 @@ public struct WalletHistoryPage: Codable, Sendable {
 
 /// Une ligne du journal des transactions (`GET /wallet/me/history`).
 public struct WalletTransaction: Codable, Sendable {
-	public let id: Double
+	/// PostgreSQL UUID of the immutable transaction row.
+	public let id: String
 	public let type: WalletTransactionType
 	public let amount: Double
 	public let reason: String?

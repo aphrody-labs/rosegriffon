@@ -19,7 +19,6 @@ import { registerCompareCommand } from "./commands/compare";
 import { registerDataCommand } from "./commands/data";
 import { registerDbCommand } from "./commands/db";
 import { registerDialogueCommand } from "./commands/dialogue";
-import { registerGlossaryRebuildCommand } from "./commands/glossary";
 import { registerItemCommand } from "./commands/item";
 import { registerRandomTeamCommand } from "./commands/random-team";
 import { registerRedisCommand } from "./commands/redis";
@@ -59,7 +58,6 @@ export function createAzaleeProgram(): Command {
 	registerSearchCommand(program);
 	registerDbCommand(program);
 	registerRedisCommand(program);
-	registerGlossaryRebuildCommand(program);
 
 	// Diagnostics
 	registerAuditCommand(program);

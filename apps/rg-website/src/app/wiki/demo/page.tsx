@@ -3,7 +3,7 @@
  *
  * Server Component PUR : sérialise tout le dossier (`data/aphrody-dossier.json`) en un
  * {@link DemoData} via les helpers CLIENT-SAFE (`cpkAssetUrl`/`cpkAudioUrl`/`cpkThumbUrl`,
- * `getSkillCutin`/`cutinHasAssets`), puis délègue toute l'interactivité 3D à l'îlot
+ * `wikiService` SQL), puis délègue toute l'interactivité 3D à l'îlot
  * `<DemoExperience>` (`"use client"` + `next/dynamic { ssr:false }` pour la scène R3F).
  *
  * Aucune lecture SQLite / `server-only` : le dossier JSON suffit (frontière server/client nette).
@@ -12,7 +12,7 @@ import type { Metadata } from "next";
 import { cdnOrigin } from "@rosegriffon/assets";
 import dossier from "@/data/aphrody-dossier.json";
 import { cpkAssetUrl, cpkAudioUrl, cpkThumbUrl } from "@rosegriffon/azalee/cpk/shared";
-import { cutinHasAssets, getSkillCutin } from "@rosegriffon/azalee/game/skills-cutin";
+import { wikiService } from "@/lib/wiki-service";
 import { DemoExperience } from "@/components/wiki/demo/DemoExperience";
 import type {
 	DemoData,
@@ -96,7 +96,7 @@ function telopFrUrl(pairs: string[][] | undefined): string | null {
 }
 
 /** Construit le {@link DemoData} sérialisable depuis le dossier (exécuté côté serveur). */
-function buildDemoData(): DemoData {
+async function buildDemoData(): Promise<DemoData> {
 	// --- Formes : 1 entrée par ère (series), enrichie par asset + variante de même code. ---
 	const forms: DemoFormData[] = d.series.map((s) => {
 		const asset = d.assets.find((a) => a.code === s.code);
@@ -123,6 +123,16 @@ function buildDemoData(): DemoData {
 	});
 
 	// --- Techniques : flatten des variants[].techniques, dédupliquées par skill_id_str. ---
+	const featuredCodes = ["whs00340", "whs00900", "whs02900"];
+	const skillCodes = new Set([
+		...d.variants.flatMap((v) => (v.techniques ?? []).map((t) => t.info.skill_id_str)),
+		...featuredCodes,
+	]);
+	const sqlEntries = await wikiService.getSkillCutins([...skillCodes]);
+	const entriesByCode = new Map(sqlEntries.map((entry) => [entry.skill_id_str, entry]));
+	const servedEvents = await wikiService.getSkillCutinAssets(
+		sqlEntries.map((entry) => entry.cutin?.event_id_name).filter((event): event is string => Boolean(event)),
+	);
 	const seen = new Set<string>();
 	const skills: DemoSkill[] = [];
 	const pushSkill = (
@@ -132,8 +142,8 @@ function buildDemoData(): DemoData {
 	): void => {
 		if (!info?.skill_id_str || seen.has(info.skill_id_str)) return;
 		seen.add(info.skill_id_str);
-		// Noms localisés via le manifeste skills-cutin (info brut n'a que des codes numériques).
-		const entry = getSkillCutin(info.skill_id_str);
+		// Noms localisés via la projection SQL des cut-ins (le dossier brut n'a que des codes numériques).
+		const entry = entriesByCode.get(info.skill_id_str);
 		const fallbackName = { fr: "?", en: "?", ja: "?" };
 		const event = info.event_id_name;
 		skills.push({
@@ -149,15 +159,16 @@ function buildDemoData(): DemoData {
 			telopUrl: telopFrUrl(cutin?.telop_by_lang),
 			textureUrl: cutin?.texture_g4tx ? cpkAssetUrl(cutin.texture_g4tx) : null,
 			wazaGlbUrl: `${CDN}/model-chr/waza/${event}.glb`,
-			has3d: cutinHasAssets(event),
+			has3d: servedEvents.has(event),
+			cutin: entry?.cutin ?? null,
 		});
 	};
 	for (const v of d.variants) {
 		for (const t of v.techniques ?? []) pushSkill(t.info, t.cutin, t.learn_level);
 	}
 	// Lignée vedette explicite (au cas où une ère manquerait dans le dossier).
-	for (const code of ["whs00340", "whs00900", "whs02900"]) {
-		const entry = getSkillCutin(code);
+	for (const code of featuredCodes) {
+		const entry = entriesByCode.get(code);
 		if (!entry?.cutin || seen.has(code)) continue;
 		pushSkill(
 			{
@@ -265,8 +276,8 @@ function buildDemoData(): DemoData {
 	};
 }
 
-export default function DemoPage() {
-	const data = buildDemoData();
+export default async function DemoPage() {
+	const data = await buildDemoData();
 	return (
 		<div className="w-full space-y-10">
 			<header className="space-y-2">

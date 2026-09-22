@@ -21,8 +21,8 @@ import {
 } from "./cron-taches";
 
 describe("catalogue", () => {
-	test("les 24 tâches servies par GET :3005/tasks", () => {
-		expect(TACHES_CRON).toHaveLength(24);
+	test("les 26 tâches servies par GET :3005/tasks", () => {
+		expect(TACHES_CRON).toHaveLength(26);
 		expect(TACHES_CRON).toContain("db");
 		expect(TACHES_CRON).toContain("stats:achillea");
 		expect(TACHES_CRON).toContain("github-publish");

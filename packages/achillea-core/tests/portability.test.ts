@@ -45,7 +45,7 @@ async function sourceFiles(dir: string): Promise<string[]> {
 	for (const entry of entries) {
 		const full = join(dir, entry.name);
 		if (entry.isDirectory()) files.push(...(await sourceFiles(full)));
-		else if (entry.name.endsWith(".ts")) files.push(full);
+		else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".test.ts")) files.push(full);
 	}
 	return files;
 }

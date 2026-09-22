@@ -1,13 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import { createHmac } from "node:crypto";
 import {
-	AUDIENCE_SESSION_ACHILLEA,
-	COOKIE_SESSION_ACHILLEA,
-	DUREE_SESSION_ACHILLEA_SECONDES,
-	EMETTEUR_ACHILLEA,
-	signerJetonAchillea,
-	type IdentiteAchillea,
-} from "./achillea/jeton";
+	ACHILLEA_SESSION_AUDIENCE,
+	ACHILLEA_SESSION_COOKIE_NAME,
+	ACHILLEA_SESSION_TTL_SECONDS,
+	ACHILLEA_AUTH_ISSUER,
+	signAchilleaSessionToken,
+	type AchilleaSessionIdentity,
+} from "@rosegriffon/auth/achillea-session";
 import { safeReturnUrl } from "./achillea/auth-session";
 import { isAdmin, isStaff } from "@rosegriffon/auth";
 
@@ -41,10 +41,10 @@ function verifierJetonManuel(
 		if (charge.exp && charge.exp < maintenant) {
 			return { valide: false, erreur: "jeton_expire" };
 		}
-		if (charge.iss !== EMETTEUR_ACHILLEA) {
+		if (charge.iss !== ACHILLEA_AUTH_ISSUER) {
 			return { valide: false, erreur: "emetteur_invalide" };
 		}
-		if (charge.aud !== AUDIENCE_SESSION_ACHILLEA) {
+		if (charge.aud !== ACHILLEA_SESSION_AUDIENCE) {
 			return { valide: false, erreur: "audience_invalide" };
 		}
 		if (charge.id !== charge.sub) {
@@ -59,13 +59,13 @@ function verifierJetonManuel(
 describe("Unified Auth Ecosystem - Contrat & Sécurité", () => {
 	describe("Passerelle Jeton Achilléa (Rose Griffon -> Achilléa)", () => {
 		it("signe un jeton conforme aux exigences strictes du bot Achilléa", () => {
-			const identite: IdentiteAchillea = {
+			const identite: AchilleaSessionIdentity = {
 				id: "123456789012345678",
 				username: "CaptainInazuma",
 				avatar: "https://cdn.discordapp.com/avatars/123/avatar.png",
 			};
 
-			const jeton = signerJetonAchillea(identite, TEST_SECRET);
+			const jeton = signAchilleaSessionToken(identite, TEST_SECRET);
 			const verification = verifierJetonManuel(jeton, TEST_SECRET);
 
 			expect(verification.valide).toBe(true);
@@ -73,17 +73,17 @@ describe("Unified Auth Ecosystem - Contrat & Sécurité", () => {
 			expect(verification.charge?.sub).toBe("123456789012345678");
 			expect(verification.charge?.username).toBe("CaptainInazuma");
 			expect(verification.charge?.avatar).toBe("https://cdn.discordapp.com/avatars/123/avatar.png");
-			expect(verification.charge?.iss).toBe(EMETTEUR_ACHILLEA);
-			expect(verification.charge?.aud).toBe(AUDIENCE_SESSION_ACHILLEA);
+			expect(verification.charge?.iss).toBe(ACHILLEA_AUTH_ISSUER);
+			expect(verification.charge?.aud).toBe(ACHILLEA_SESSION_AUDIENCE);
 			expect(verification.charge?.tokenUse).toBe("session");
 			expect(verification.charge?.exp - verification.charge?.iat).toBe(
-				DUREE_SESSION_ACHILLEA_SECONDES
+				ACHILLEA_SESSION_TTL_SECONDS
 			);
 		});
 
 		it("rejette immédiatement un jeton signé avec un mauvais secret", () => {
-			const identite: IdentiteAchillea = { id: "987654321" };
-			const jeton = signerJetonAchillea(identite, "mauvais-secret-non-partage");
+			const identite: AchilleaSessionIdentity = { id: "987654321" };
+			const jeton = signAchilleaSessionToken(identite, "mauvais-secret-non-partage");
 
 			const verification = verifierJetonManuel(jeton, TEST_SECRET);
 			expect(verification.valide).toBe(false);
@@ -91,11 +91,11 @@ describe("Unified Auth Ecosystem - Contrat & Sécurité", () => {
 		});
 
 		it("rejette un jeton altéré ou expiré", () => {
-			const identite: IdentiteAchillea = { id: "987654321" };
+			const identite: AchilleaSessionIdentity = { id: "987654321" };
 			// Jeton expiré depuis 1 heure
 			const ilYaUneHeure = Math.floor(Date.now() / 1000) - 3600;
-			const ilYaUnMoisEtUneHeure = ilYaUneHeure - DUREE_SESSION_ACHILLEA_SECONDES;
-			const jetonExpire = signerJetonAchillea(identite, TEST_SECRET, ilYaUnMoisEtUneHeure);
+			const ilYaUnMoisEtUneHeure = ilYaUneHeure - ACHILLEA_SESSION_TTL_SECONDS;
+			const jetonExpire = signAchilleaSessionToken(identite, TEST_SECRET, ilYaUnMoisEtUneHeure);
 
 			const verification = verifierJetonManuel(jetonExpire, TEST_SECRET);
 			expect(verification.valide).toBe(false);
@@ -103,8 +103,8 @@ describe("Unified Auth Ecosystem - Contrat & Sécurité", () => {
 		});
 
 		it("garantit le nom et la portée des cookies de session Achilléa", () => {
-			expect(COOKIE_SESSION_ACHILLEA).toBe("token");
-			expect(DUREE_SESSION_ACHILLEA_SECONDES).toBe(30 * 24 * 60 * 60);
+			expect(ACHILLEA_SESSION_COOKIE_NAME).toBe("token");
+			expect(ACHILLEA_SESSION_TTL_SECONDS).toBe(30 * 24 * 60 * 60);
 		});
 	});
 

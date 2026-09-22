@@ -29,9 +29,13 @@ const ARGUMENT_VARIANTS: unknown[][] = [
 	[{ nom: "valeur" }, "1", 1],
 ];
 
-/** Une méthode dont le nom finit par `Url` construit un lien, sans requête. */
+/**
+ * Les builders locaux finissent par `Url` et ne font aucun appel réseau.
+ * `providerOAuthUrl` est l'exception contractuelle : l'API doit créer un
+ * state CSRF et renvoie donc son URL après une requête authentifiée.
+ */
 function isUrlBuilder(method: string): boolean {
-	return method.endsWith("Url");
+	return method.endsWith("Url") && method !== "providerOAuthUrl";
 }
 
 /** Appelle `method` avec la première variante d'arguments acceptée. */

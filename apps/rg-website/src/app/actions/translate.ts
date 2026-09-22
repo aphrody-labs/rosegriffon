@@ -1,10 +1,8 @@
 "use server";
 
-import fs from "node:fs/promises";
-import path from "node:path";
 import { isKana, toKatakana, toHiragana } from "wanakana";
 import { japaneseToRomaji } from "@rosegriffon/azalee/text/japanese-romaji";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/postgres-client";
 import { TACTIC_FR } from "@rosegriffon/azalee/text/translations";
 
 export interface TranslationResult {
@@ -180,28 +178,48 @@ function scoreResult(r: TranslationResult, queryNorm: string, queryTokens: strin
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// Glossaire local
+// Projection SQL des noms traduisibles
 // ──────────────────────────────────────────────────────────────────────────
 
 let glossaryCache: any = null;
 
 async function loadGlossary() {
 	if (glossaryCache) return glossaryCache;
-	const possiblePaths = [
-		path.join(process.cwd(), "data", "glossary.json"),
-		path.join(process.cwd(), "..", "..", "data", "glossary.json"),
-		"/home/ubuntu/niers/data/glossary.json",
-	];
-	for (const p of possiblePaths) {
-		try {
-			const content = await fs.readFile(p, "utf-8");
-			glossaryCache = JSON.parse(content);
-			return glossaryCache;
-		} catch {
-			// Ignore error and try next path
-		}
+	try {
+		const db = createPostgresClient();
+		const [characters, skills, keshins, souls, passives, teams, items] = await Promise.all([
+			db.from("inagle_characters").select("slug, name_fr, name_en, name_ja").not("internal_code", "like", "%_5000"),
+			db.from("inagle_skills").select("id, name_fr, name_en, name_ja"),
+			db.from("inagle_keshins_clean").select("id, name_fr, name_en, name_ja"),
+			db.from("inagle_souls_clean").select("id, name_fr, name_en, name_ja"),
+			db.from("inagle_passives").select("id, name_fr, name_en, name_ja"),
+			db.from("inagle_teams").select("id, name_fr, name_en, name_ja"),
+			db.from("inagle_items").select("id, name_fr, name_en, name_ja, category").neq("category", "special_tactics"),
+		]);
+		const names = (rows: any[] | null | undefined, category: string, subType?: string) =>
+			(rows ?? []).map((row) => ({
+				code: row.slug ?? row.id,
+				en: row.name_en ?? undefined,
+				fr: row.name_fr ?? undefined,
+				ja: row.name_ja ?? undefined,
+				subType,
+				category,
+			}));
+		glossaryCache = {
+			characters: names(characters.data, "characters"),
+			techniques: names(skills.data, "techniques"),
+			auras: [
+				...names(keshins.data, "auras", "keshin"),
+				...names(souls.data, "auras", "soul"),
+			],
+			passives: names(passives.data, "passives"),
+			teams: names(teams.data, "teams"),
+			items: names(items.data, "items"),
+		};
+		return glossaryCache;
+	} catch {
+		return null;
 	}
-	return null;
 }
 
 interface GlossaryItem {
@@ -316,7 +334,7 @@ async function searchGlossary(query: string, entityType?: string): Promise<Trans
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// Supabase
+// Recherche SQL PostgreSQL
 // ──────────────────────────────────────────────────────────────────────────
 
 /** Échappe une valeur pour un pattern ilike PostgREST (retire la ponctuation dangereuse). */
@@ -346,12 +364,12 @@ function buildOrFilters(columns: string[], variants: string[]): string {
 }
 
 /**
- * Recherche dans les tables Supabase / miroir SQLite. Récupère un set un peu
+ * Recherche dans les tables PostgreSQL via la façade SQL partagée. Récupère un set un peu
  * plus large (variantes ilike + premier token / préfixe) que la stricte chaîne,
  * le ranking/post-filtrage fuzzy est fait en JS dans searchTranslations.
  */
-async function searchSupabase(query: string, entityType?: string): Promise<TranslationResult[]> {
-	const supabase = await createClient();
+async function searchPostgres(query: string, entityType?: string): Promise<TranslationResult[]> {
+	const supabase = createPostgresClient();
 	const queryNorm = normalizeForSearch(query);
 	if (!queryNorm) return [];
 	const tokens = tokenize(query);
@@ -390,7 +408,7 @@ async function searchSupabase(query: string, entityType?: string): Promise<Trans
 		.join(",");
 
 	// NB : inagle_characters n'a PAS de colonne name_roma → ne jamais filtrer
-	// dessus (no such column dans le miroir SQLite). Romaji dérivé via name_ja.
+	// dessus. Romaji dérivé via name_ja.
 	const charOrFilterString = orFilterString;
 
 	const results: TranslationResult[] = [];
@@ -608,7 +626,7 @@ async function searchSupabase(query: string, entityType?: string): Promise<Trans
 // ──────────────────────────────────────────────────────────────────────────
 
 /**
- * Recherche de traductions unifiée : tables Supabase + glossaire local, avec
+ * Recherche de traductions unifiée : projections PostgreSQL, avec
  * normalisation accent-insensible, conversion romaji↔kana, matching multi-mots
  * (AND désordonné) et passe fuzzy de secours (Levenshtein) si peu de résultats
  * exacts. Dédup + tri par pertinence (exact > prefix > token > fuzzy).
@@ -626,7 +644,7 @@ export async function searchTranslations(
 	const queryTokens = tokenize(query);
 
 	const [dbResults, glossaryResults] = await Promise.all([
-		searchSupabase(query, entityType),
+		searchPostgres(query, entityType),
 		searchGlossary(query, entityType),
 	]);
 

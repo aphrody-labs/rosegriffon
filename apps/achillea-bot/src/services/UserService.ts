@@ -1,6 +1,5 @@
 import type { Guild } from "discord.js";
 import { Client } from "@aphrody/discordx";
-import { BadRequest, NotFound } from "@tsed/exceptions";
 
 import { Service } from "@/decorators";
 import { Clan, ClanMember, Rank, User, UserView } from "@/entities";
@@ -36,9 +35,14 @@ function emptyCompetitionStats() {
 @Service()
 export class UserService {
 	constructor(
-		private db: Database,
-		private client: Client
+		private db: Database
 	) {}
+
+	private get client(): Client {
+		const client = (globalThis as typeof globalThis & { __roseGriffonDiscordClient?: Client }).__roseGriffonDiscordClient;
+		if (!client) throw new Error("Discord client is not initialized");
+		return client;
+	}
 
 	async getUserDTO(userId: string): Promise<UserDTO> {
 		const userView = await this.db.em.findOne(UserView, { id: userId });
@@ -811,46 +815,6 @@ export class UserService {
 		};
 	}
 
-	/**
-	 * Met à jour bio / lien Twitch du profil — réservé au titulaire (`userId` vient
-	 * du contexte auth, jamais d'un path param). Seuls ces deux champs sont éditables
-	 * par l'utilisateur ; tout le reste du profil (avatar, pseudo, rangs...) reste
-	 * dérivé de Discord / des stats de jeu.
-	 */
-	async updateOwnProfile(
-		userId: string,
-		fields: { bio?: string | null; twitchUrl?: string | null }
-	): Promise<{ bio: string | null; twitchUrl: string | null }> {
-		const user = await this.db.em.findOne(User, { id: userId });
-		if (!user) throw new NotFound("Utilisateur introuvable");
-
-		if (fields.bio !== undefined) {
-			const trimmed = fields.bio?.trim() ?? null;
-			if (trimmed && trimmed.length > 500) {
-				throw new BadRequest("La bio ne peut pas dépasser 500 caractères.");
-			}
-			user.bio = trimmed || null;
-		}
-
-		if (fields.twitchUrl !== undefined) {
-			const trimmed = fields.twitchUrl?.trim() ?? null;
-			if (trimmed) {
-				let hostname: string;
-				try {
-					hostname = new URL(trimmed).hostname.replace(/^www\./, "");
-				} catch {
-					throw new BadRequest("Lien Twitch invalide.");
-				}
-				if (hostname !== "twitch.tv") {
-					throw new BadRequest("Le lien doit pointer vers twitch.tv.");
-				}
-			}
-			user.twitchUrl = trimmed || null;
-		}
-
-		await this.db.em.flush();
-		return { bio: user.bio, twitchUrl: user.twitchUrl };
-	}
 }
 
 // Source unique : @rosegriffon/achillea-types (contrat partagé bot ↔ web).

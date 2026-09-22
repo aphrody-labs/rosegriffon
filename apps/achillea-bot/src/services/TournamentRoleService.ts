@@ -19,9 +19,14 @@ import { Database } from "./Database";
 @Service()
 export class TournamentRoleService {
 	constructor(
-		private db: Database,
-		private client: Client
+		private db: Database
 	) {}
+
+	private get client(): Client {
+		const client = (globalThis as typeof globalThis & { __roseGriffonDiscordClient?: Client }).__roseGriffonDiscordClient;
+		if (!client) throw new Error("Discord client is not initialized");
+		return client;
+	}
 
 	/**
 	 * Crée le rôle du tournoi s'il n'en a pas déjà un, et le mémorise sur l'entité.

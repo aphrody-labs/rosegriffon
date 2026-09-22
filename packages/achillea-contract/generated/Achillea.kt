@@ -704,6 +704,8 @@ data class EnrichedUserDTO(
 	/// ENTIÈRE, donc de tous les clans.
 	val sim: Double? = null,
 	val avatar: String? = null,
+	/// L'API historique sérialise l'absence de clan en `null` (et non en champ
+	/// absent). Les deux formes sont donc recevables dans le contrat partagé.
 	val clanId: Double? = null,
 	val soloRank: RankDTO? = null,
 	val duoRank: RankDTO? = null,
@@ -2343,6 +2345,8 @@ data class UserDTO(
 	/// ENTIÈRE, donc de tous les clans.
 	val sim: Double? = null,
 	val avatar: String? = null,
+	/// L'API historique sérialise l'absence de clan en `null` (et non en champ
+	/// absent). Les deux formes sont donc recevables dans le contrat partagé.
 	val clanId: Double? = null,
 	val soloRank: RankDTO? = null,
 	val duoRank: RankDTO? = null,
@@ -2400,7 +2404,8 @@ data class WalletHistoryPage(
 /// Une ligne du journal des transactions (`GET /wallet/me/history`).
 @Serializable
 data class WalletTransaction(
-	val id: Double,
+	/// PostgreSQL UUID of the immutable transaction row.
+	val id: String,
 	val type: WalletTransactionType,
 	val amount: Double,
 	val reason: String?,

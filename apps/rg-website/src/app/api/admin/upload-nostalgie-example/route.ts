@@ -1,9 +1,8 @@
-import { createClient } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { requireApiAdmin } from "@/lib/api-auth";
-import type { Database } from "@rosegriffon/db";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -15,10 +14,7 @@ export async function POST(req: NextRequest) {
 	}
 
 	try {
-		const supabase = createClient<Database>(
-			process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-			process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-		);
+		const db = createPostgresClient();
 
 		const formData = await req.formData();
 		const file = formData.get("file") as File | null;
@@ -35,7 +31,7 @@ export async function POST(req: NextRequest) {
 
 		const buffer = await file.arrayBuffer();
 
-		const { data, error } = await supabase.storage
+		const { data, error } = await db.storage
 			.from("nostalgie-examples")
 			.upload("ogVR.jpg", new Uint8Array(buffer), {
 				contentType: file.type,
@@ -47,9 +43,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "Upload failed" }, { status: 500 });
 		}
 
-		const { data: publicUrlData } = supabase.storage
-			.from("nostalgie-examples")
-			.getPublicUrl("ogVR.jpg");
+		const { data: publicUrlData } = db.storage.from("nostalgie-examples").getPublicUrl("ogVR.jpg");
 
 		return NextResponse.json({
 			path: data?.path,

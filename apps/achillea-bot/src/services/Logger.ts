@@ -20,7 +20,6 @@ import { env } from "@/env";
 import { locales } from "@/i18n";
 import { PluginsManager } from "./PluginsManager";
 import { Scheduler } from "./Scheduler";
-import { Store } from "./Store";
 import { redactSensitive, safeLogValue } from "../api/security/log-redaction";
 import { fileOrDirectoryExists } from "../utils/functions/files";
 import { formatDate } from "../utils/functions/date";
@@ -97,13 +96,14 @@ export class Logger {
 	constructor(
 		@inject(delay(() => Client)) private client: Client,
 		@inject(delay(() => Scheduler)) private scheduler: Scheduler,
-		@inject(delay(() => Store)) private store: Store,
 		@inject(delay(() => PluginsManager)) private pluginsManager: PluginsManager
 	) {
-		if (!this.store.get("botHasBeenReloaded")) {
+		const loggerState = globalThis as typeof globalThis & { __roseGriffonLoggerConfigured?: boolean };
+		if (!loggerState.__roseGriffonLoggerConfigured) {
 			console.info = (...args) => this.baseLog("info", ...args);
 			console.warn = (...args) => this.baseLog("warn", ...args);
 			console.error = (...args) => this.baseLog("error", ...args);
+			loggerState.__roseGriffonLoggerConfigured = true;
 		}
 	}
 

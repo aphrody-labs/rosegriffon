@@ -1,9 +1,8 @@
 import { Controller, Get, Res } from "@tsed/common";
 import type { Response } from "express";
 
-import { LeagueService } from "@/services/LeagueService";
+import { urlsConfig } from "@/configs";
 import { BaseController } from "@/utils/classes";
-import { resolveDependenciesSync } from "@/utils/functions";
 
 /**
  * Championnats / ligues (format Premier League, distinct des coupes).
@@ -11,33 +10,12 @@ import { resolveDependenciesSync } from "@/utils/functions";
  */
 @Controller("/leagues")
 export class LeaguesController extends BaseController {
-	private leagueService: LeagueService;
-
-	constructor() {
-		super();
-		[this.leagueService] = resolveDependenciesSync([LeagueService]);
-	}
+	constructor() { super(); }
 
 	/** Liste des championnats connus (MVP : Astral S1). */
 	@Get("/")
 	async list(@Res() res: Response) {
-		const astral = this.leagueService.getAstralSeason();
-		res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
-		return res.json({
-			items: [
-				{
-					id: astral.meta.id,
-					name: astral.meta.name,
-					season: astral.meta.season,
-					format: astral.meta.format,
-					description: astral.meta.description,
-					champion: astral.meta.champion,
-					teamCount: astral.meta.teamCount,
-					matchdays: astral.meta.matchdays,
-					aliases: astral.meta.aliases,
-				},
-			],
-		});
+		return this.proxy("/leagues", res);
 	}
 
 	/** Détail Astral League S1 : règlement, classement, résultats, play-offs. */
@@ -46,8 +24,12 @@ export class LeaguesController extends BaseController {
 	@Get("/asytral")
 	@Get("/asytral-s1")
 	async astral(@Res() res: Response) {
-		const payload = this.leagueService.getAstralSeason();
-		res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
-		return res.json(payload);
+		return this.proxy("/leagues/astral", res);
+	}
+
+	private async proxy(path: string, res: Response) {
+		const response = await fetch(`${urlsConfig.unifiedApi}/v1/achillea${path}`);
+		res.status(response.status).setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
+		return res.json(await response.json());
 	}
 }

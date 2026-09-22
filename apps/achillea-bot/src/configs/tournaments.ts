@@ -1,7 +1,7 @@
 import {
 	DEFAULT_MAX_OPEN_TOURNAMENTS_PER_ORG,
 	DEFAULT_PUBLICATION_WINDOW,
-} from "@/services/tournamentRules";
+} from "@rosegriffon/achillea-core";
 
 /**
  * Règles de création des tournois — les `X` laissés ouverts par le cadrage.

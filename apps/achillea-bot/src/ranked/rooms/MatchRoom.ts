@@ -11,11 +11,6 @@
 // admin. Tout le flow est journalisé (télémétrie).
 
 import { Room, Client } from "colyseus";
-
-import type { SessionUser } from "../auth";
-import { authFromColyseus } from "../auth";
-import { ChatMessage, MatchState, PlayerState } from "../schema/MatchState";
-import { getActiveSeason } from "../db";
 import {
 	clampScore,
 	parseMode,
@@ -23,7 +18,12 @@ import {
 	resultLabel,
 	teamForIndex,
 	type ScoreInput,
-} from "../match-logic";
+} from "@rosegriffon/achillea-core";
+
+import type { SessionUser } from "../auth";
+import { authFromColyseus } from "../auth";
+import { ChatMessage, MatchState, PlayerState } from "../schema/MatchState";
+import { getActiveSeason } from "../db";
 import {
 	contestOngoingLobby,
 	createOngoingLobby,

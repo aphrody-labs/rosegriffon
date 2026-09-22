@@ -16,16 +16,12 @@
  * Usage : bun scripts/patreon-memberships-sync.ts [--dry-run] [--user-id=UUID]
  */
 
-import { createClient } from "@supabase/supabase-js";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const TOKEN = process.env.PATREON_CREATOR_ACCESS_TOKEN ?? process.env.PATREON_ACCESS_TOKEN;
 const CAMPAIGN_ID = process.env.PATREON_CAMPAIGN_ID;
 
-if (!SUPABASE_URL || !SERVICE_ROLE) {
-	throw new Error("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY manquants");
-}
+if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL manquante");
 if (!TOKEN) throw new Error("PATREON_CREATOR_ACCESS_TOKEN manquant");
 if (!CAMPAIGN_ID) throw new Error("PATREON_CAMPAIGN_ID manquant");
 
@@ -33,9 +29,7 @@ const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
 const userIdFilter = process.argv.find((a) => a.startsWith("--user-id="))?.split("=")[1] ?? null;
 
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
-	auth: { persistSession: false },
-});
+const db = createPostgresClient();
 
 interface JsonApiResource<A = Record<string, unknown>> {
 	id: string;
@@ -148,7 +142,7 @@ async function resolveRgUserId(
 	email: string | null,
 	discordId: string | null
 ): Promise<{ userId: string; via: string } | null> {
-	const { data: tok } = await supabase
+	const { data: tok } = await db
 		.from("patreon_oauth_tokens")
 		.select("user_id")
 		.eq("patreon_user_id", patreonUserId)
@@ -156,7 +150,7 @@ async function resolveRgUserId(
 		.maybeSingle();
 	if (tok?.user_id) return { userId: tok.user_id, via: "oauth_token" };
 
-	const { data: tokCreator } = await supabase
+	const { data: tokCreator } = await db
 		.from("patreon_oauth_tokens")
 		.select("user_id")
 		.eq("patreon_user_id", patreonUserId)
@@ -164,7 +158,7 @@ async function resolveRgUserId(
 	if (tokCreator?.user_id) return { userId: tokCreator.user_id, via: "oauth_token_creator" };
 
 	if (discordId) {
-		const { data: p } = await supabase
+		const { data: p } = await db
 			.from("profiles")
 			.select("id")
 			.eq("discord_id", discordId)
@@ -173,11 +167,7 @@ async function resolveRgUserId(
 	}
 
 	if (email) {
-		const { data: p } = await supabase
-			.from("profiles")
-			.select("id")
-			.ilike("email", email)
-			.maybeSingle();
+		const { data: p } = await db.from("profiles").select("id").ilike("email", email).maybeSingle();
 		if (p?.id) return { userId: p.id, via: "email" };
 	}
 
@@ -265,7 +255,7 @@ async function main() {
 			continue;
 		}
 
-		const { error } = await supabase
+		const { error } = await db
 			.from("patreon_memberships")
 			.upsert(row, { onConflict: "user_id,patreon_user_id" });
 		if (error) console.error("  ✗ upsert failed:", error.message);

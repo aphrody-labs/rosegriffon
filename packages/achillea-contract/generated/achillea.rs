@@ -2867,6 +2867,8 @@ pub struct UserDto {
 	pub sim: Option<f64>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub avatar: Option<String>,
+	/// L'API historique sérialise l'absence de clan en `null` (et non en champ
+	/// absent). Les deux formes sont donc recevables dans le contrat partagé.
 	#[serde(rename = "clanId", default, skip_serializing_if = "Option::is_none")]
 	pub clan_id: Option<f64>,
 	#[serde(rename = "soloRank", default, skip_serializing_if = "Option::is_none")]
@@ -2935,7 +2937,8 @@ pub struct WalletHistoryPage {
 /// Une ligne du journal des transactions (`GET /wallet/me/history`).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WalletTransaction {
-	pub id: f64,
+	/// PostgreSQL UUID of the immutable transaction row.
+	pub id: String,
 	pub r#type: WalletTransactionType,
 	pub amount: f64,
 	#[serde(default, skip_serializing_if = "Option::is_none")]

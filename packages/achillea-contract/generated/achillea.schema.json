@@ -7280,7 +7280,15 @@
 					"type": "string"
 				},
 				"clanId": {
-					"type": "number"
+					"anyOf": [
+						{
+							"type": "number"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"description": "L'API historique sérialise l'absence de clan en `null` (et non en champ\nabsent). Les deux formes sont donc recevables dans le contrat partagé."
 				},
 				"soloRank": {
 					"$ref": "#/$defs/RankDTO"
@@ -7426,7 +7434,8 @@
 			"type": "object",
 			"properties": {
 				"id": {
-					"type": "number"
+					"type": "string",
+					"description": "PostgreSQL UUID of the immutable transaction row."
 				},
 				"type": {
 					"$ref": "#/$defs/WalletTransactionType"

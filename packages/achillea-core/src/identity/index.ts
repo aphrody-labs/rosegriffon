@@ -99,3 +99,12 @@ export function rankImagePath(key: string | null | undefined, basePath = "ranks"
 	const base = basePath.replace(/\/$/u, "");
 	return `${base}/${rankImageSlug(key)}.webp`;
 }
+
+/** Extracts the first non-empty path segment from a social profile URL. */
+export function socialProfileUsername(urlString: string): string {
+	try {
+		return new URL(urlString).pathname.split("/").find(Boolean) ?? "";
+	} catch {
+		return "";
+	}
+}

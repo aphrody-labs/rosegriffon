@@ -3,11 +3,11 @@
  *
  * Deux familles de données coexistent :
  *
- * 1. Les **données figées** (manifestes d'assets, enrichissements, catalogue
- *    Cross…) vivent dans `src/data/*.json` et sont importées statiquement par
- *    les modules — elles suivent le package, y compris dans un bundle
- *    navigateur.
- * 2. Les **artefacts volumineux** (miroir SQLite du wiki, index CPK et index de
+ * 1. Les **projections SQL** (manifestes d'assets, formations, cutins et
+ *    catalogue métier) viennent de PostgreSQL ; les modules embarqués ne
+ *    contiennent que les types et projections explicitement nécessaires au
+ *    client.
+ * 2. Les **artefacts volumineux** (miroir SQLite de compatibilité, index CPK et index de
  *    texte en NDJSON gz) restent hors du package et sont localisés au runtime
  *    par ce module.
  *

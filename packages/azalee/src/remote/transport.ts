@@ -10,10 +10,10 @@
 import { AzaleeRemoteError, isAzaleeRetriable } from "./errors";
 
 /**
- * Base d'URL publique de l'API Azalée (passerelle nginx `api.rosegriffon.fr`,
- * qui route `/azalee/*` vers le service headless de cette bibliothèque).
+ * Base d'URL publique de l'API unifiée. L'ancien préfixe `/azalee` reste
+ * utilisable via `AZALEE_API_URL` pendant la bascule Nginx.
  */
-export const AZALEE_DEFAULT_API_URL = "https://api.rosegriffon.fr/azalee";
+export const AZALEE_DEFAULT_API_URL = "https://api.rosegriffon.fr/v1/azalee";
 
 /**
  * Base d'URL du sidecar local (`azalee serve`), l'adresse qu'une application

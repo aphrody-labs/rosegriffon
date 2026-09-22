@@ -3,12 +3,12 @@
 // envoie une seat reservation aux 2 clients.
 
 import { Room, Client } from "colyseus";
+import { parseMode, selectQueuePair } from "@rosegriffon/achillea-core";
 
 import type { SessionUser } from "../auth";
 import { authFromColyseus } from "../auth";
 import { getActiveSeason, getOrCreateElo, getUserRow } from "../db";
 import { createRankedMatch } from "../match-factory";
-import { parseMode, selectQueuePair } from "../match-logic";
 import { logMatchEvent } from "../telemetry";
 
 const ELO_WINDOW = 200;

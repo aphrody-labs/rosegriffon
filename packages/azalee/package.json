@@ -1,7 +1,7 @@
 {
   "name": "@rosegriffon/azalee",
   "version": "1.0.0",
-  "description": "Bibliothèque Bun du wiki Azalée (Inazuma Eleven: Victory Road) — accès données via miroir SQLite, index CPK, index de texte de jeu, résolution d'URLs CDN, recherche floue et CLI.",
+  "description": "Bibliothèque Bun du wiki Azalée (Inazuma Eleven: Victory Road) — accès PostgreSQL, extraction SQLite offline, index CPK, recherche et CLI.",
   "keywords": [
     "azalee",
     "bun",
@@ -53,12 +53,10 @@
     "./text/*": "./src/text/*.ts",
     "./game": "./src/game/index.ts",
     "./game/*": "./src/game/*.ts",
-    "./rag": "./src/rag.ts",
     "./remote": "./src/remote/index.ts",
     "./remote/*": "./src/remote/*.ts",
     "./server": "./src/server/index.ts",
     "./server/*": "./src/server/*.ts",
-    "./data/*": "./src/data/*",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -66,11 +64,10 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "build": "bun --bun tsc -p tsconfig.build.json && bun scripts/copy-data.ts",
+    "build": "bun --bun tsc -p tsconfig.build.json",
     "cli": "bun src/cli.ts",
     "compile": "bun scripts/build-standalone.ts",
     "serve": "bun src/cli.ts serve",
-    "sync:entries": "bun scripts/sync-inagle-entries.ts",
     "test": "bun test",
     "lint": "bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction src",
     "lint:fix": "bunx oxlint -c ../../.oxlintrc.json -A style -A pedantic -A restriction --fix src",
@@ -82,14 +79,12 @@
     "@rosegriffon/assets": "workspace:*",
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/inagle": "workspace:*",
-    "@supabase/supabase-js": "catalog:",
+    "@rosegriffon/inagle-cross": "workspace:*",
     "commander": "catalog:",
-    "drizzle-orm": "^0.45.2",
     "wanakana": "catalog:"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.10.1",
-    "@rosegriffon/config": "workspace:*",
     "@types/bun": "catalog:",
     "@types/node": "catalog:",
     "oxlint": "catalog:",

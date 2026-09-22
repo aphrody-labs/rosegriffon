@@ -1,83 +1,59 @@
 import type { BaseCharacter, CharacterVariant, MultiLevelStats, Skill } from "@rosegriffon/inagle";
-import type {
-	InagleCharacter,
-	InagleDrop,
-	InagleItem,
-	InagleKizunaItem,
-	InagleTactic,
-} from "@rosegriffon/inagle/types/database";
-import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 import { getPgPool } from "@/lib/db/pg";
 import { getMiximaxImageUrl, resolveAssetUrl, resolveAuraTelopUrl } from "@rosegriffon/azalee/images";
 
-import { createSqliteClient } from "@rosegriffon/azalee/db";
-
-// Lazy getter for Supabase to prevent top-level execution during build
-let _supabase: ReturnType<typeof createClient> | null = null;
-let _hasWarnedMissingBun = false;
-
-function getSupabase(): ReturnType<typeof createClient> {
-	if (_supabase) {
-		return _supabase;
-	}
-
-	const url =
-		typeof window === "undefined" &&
-		process.env.SUPABASE_INTERNAL_URL &&
-		process.env.SUPABASE_INTERNAL_URL.startsWith("http")
-			? process.env.SUPABASE_INTERNAL_URL
-			: process.env.NEXT_PUBLIC_SUPABASE_URL &&
-				  process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
-				? process.env.NEXT_PUBLIC_SUPABASE_URL
-				: (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
-
-	const key =
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
-		!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.startsWith("{")
-			? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-			: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjk0MzAsImV4cCI6MjA2MTY0NTQzMH0.N4l07k3V_X5I8iW0n_D6K9-O4v5l7l6s6MYGpJIXRW_rB8zc45k7chqi8Ljl_CLiLc=";
-
-	const baseClient = createClient(url, key);
-	const sqliteClient = createSqliteClient();
-
-	_supabase = new Proxy(baseClient, {
-		get(target, prop, receiver) {
-			if (prop === "from") {
-				return (table: string) => {
-					if (table.startsWith("inagle_")) {
-						try {
-							return sqliteClient.from(table);
-						} catch (e: unknown) {
-							const msg = e instanceof Error ? e.message : String(e);
-							if (
-								msg.includes("Cannot find module 'bun:sqlite'") ||
-								msg.includes("Failed to load external module bun:sqlite") ||
-								msg.includes("No SQLite database backup found")
-							) {
-								if (!_hasWarnedMissingBun) {
-									console.log(
-										"[api-client] SQLite database cache is unavailable (falling back to Postgres)."
-									);
-									_hasWarnedMissingBun = true;
-								}
-							} else {
-								console.warn(`[api-client] Fallback to Postgres for table ${table}:`, e);
-							}
-							return target.from(table);
-						}
-					}
-					return target.from(table);
-				};
-			}
-			return Reflect.get(target, prop, receiver);
-		},
-	}) as unknown as ReturnType<typeof createClient>;
-
-	return _supabase;
-}
 
 const CACHE_TTL = 3600 * 24;
+
+type InagleCharacter = {
+	id: string;
+	name_localised: string | null;
+	name_kanji: string | null;
+	position: string | null;
+	element: string | null;
+	gender: string | null;
+	type: string | null;
+	game: string | null;
+	moveset: string | null;
+	kick: number | null;
+	control: number | null;
+	technique: number | null;
+	pressure: number | null;
+	physical: number | null;
+	agility: number | null;
+	intelligence: number | null;
+	image_url: string | null;
+	slug: string | null;
+};
+
+type InagleItem = {
+	name: string;
+	name_jp?: string | null;
+	type?: string | null;
+	description?: string | null;
+	image_url?: string | null;
+};
+
+type InagleTactic = {
+	name: string;
+	cooldown: number | null;
+	duration: number | null;
+	effect1: string | null;
+	effect2: string | null;
+	effect3: string | null;
+	shop: string | null;
+};
+
+type InagleDrop = Record<string, unknown>;
+
+type InagleKizunaItem = {
+	name: string;
+	notes: string | null;
+	power: number | null;
+	shop: string | null;
+	size: string | null;
+};
 
 // --- Mappers for Compatibility ---
 
@@ -158,11 +134,19 @@ function mapToBaseCharacter(row: any): BaseCharacter {
 
 // --- Generic Fetcher ---
 async function fetchTable<T>(table: string): Promise<T[]> {
-	const { data, error } = await getSupabase().from(table).select("*");
-	if (error) {
+	const allowed = new Set([
+		"inagle_characters", "inagle_items", "inagle_teams", "inagle_formations", "inagle_passives",
+		"inagle_tactics", "inagle_drops", "inagle_kizuna_items", "inagle_skills", "inagle_auras",
+		"inagle_keshins_clean", "inagle_souls_clean", "inagle_miximax_clean", "inagle_awakenings_clean",
+		"inagle_mode_changes_clean",
+	]);
+	if (!allowed.has(table)) return [];
+	try {
+		const { rows } = await getPgPool().query(`select * from public."${table}"`);
+		return rows as T[];
+	} catch {
 		return [];
 	}
-	return (data || []) as T[];
 }
 
 // --- API Methods ---
@@ -175,11 +159,8 @@ const getRawCharacters = unstable_cache(
 		let finished = false;
 
 		while (!finished) {
-			const { data, error } = await getSupabase()
-				.from("inagle_characters")
-				.select("*")
-				.range(from, from + batchSize - 1);
-			if (error || !data || data.length === 0) {
+			const { rows: data } = await getPgPool().query(`select * from public.inagle_characters order by id asc limit $1 offset $2`, [batchSize, from]);
+			if (!data || data.length === 0) {
 				finished = true;
 			} else {
 				allData = allData.concat(data as InagleCharacter[]);
@@ -232,7 +213,7 @@ function mapAuraRow(row: any): any {
 			row.image_url;
 	return {
 		_file: "inagle_auras",
-		_source: "supabase",
+		_source: "postgres",
 		assetCode,
 		auraId: row.id,
 		auraIdStr: row.id,
@@ -297,16 +278,9 @@ const getAuras = unstable_cache(
 			{ video_url: string | null; internal_code: string | null }
 		>();
 		if (skillIds.length > 0) {
-			const { data: skills } = (await getSupabase()
-				.from("inagle_skills")
-				.select("id, video_url, internal_code")
-				.in("id", skillIds)) as {
-				data: Array<{
-					id: string;
-					video_url: string | null;
-					internal_code: string | null;
-				}> | null;
-			};
+			const { rows: skills } = await getPgPool().query<{ id: string; video_url: string | null; internal_code: string | null }>(
+				"select id, video_url, internal_code from public.inagle_skills where id = any($1::text[])", [skillIds],
+			);
 			if (skills) {
 				for (const s of skills) {
 					skillVideoMap.set(s.id, {
@@ -333,7 +307,7 @@ const getAuras = unstable_cache(
 );
 
 // Les "hissatsu" (techniques) vivent dans `inagle_skills` ; la table/vue
-// `inagle_hissatsu` n'existe NI dans le miroir SQLite NI dans Supabase. L'ancien
+// `inagle_hissatsu` n'existe pas dans PostgreSQL. L'ancien
 // `fetchTable("inagle_hissatsu")` levait "no such table" → catch → [] → le
 // compteur "Techniques" du dashboard affichait 0 (au lieu de ~1002).
 const getRawSkills = unstable_cache(
@@ -422,7 +396,7 @@ function mapPassiveRow(row: any): any {
 	const boostType = boostTypeMap[row.boost_type] || "unknown";
 	return {
 		_file: "inagle_passives",
-		_source: "supabase",
+	_source: "postgres",
 		boostType,
 		boostTypeName: {
 			en: boostType.charAt(0).toUpperCase() + boostType.slice(1),
@@ -455,13 +429,11 @@ interface MerchProductRow {
 }
 
 /**
- * Lecture Postgres DIRECTE (bypass le Data API PostgREST de Supabase) — cf.
+ * Lecture Postgres DIRECTE via le pool partagé — cf.
  * lib/db/pg.ts. Catalogue boutique public consommé par `app/soutenir/page.tsx`.
  * `price` (numeric Postgres) revient en string via le driver `pg` (contrairement
- * à PostgREST/supabase-js qui le sérialise en nombre JSON) et `created_at`
- * (timestamptz) revient en `Date` (contrairement à la string ISO PostgREST) —
- * les deux sont normalisés ici pour préserver exactement la forme renvoyée
- * jusqu'ici par supabase-js.
+ * à l'ancien client HTTP) et `created_at` (timestamptz) revient en `Date` ;
+ * les deux sont normalisés ici pour préserver la forme publique.
  */
 async function getMerchProducts(): Promise<MerchProductRow[]> {
 	try {

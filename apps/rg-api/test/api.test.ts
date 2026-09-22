@@ -1,0 +1,534 @@
+import { describe, expect, it } from "bun:test";
+import { treaty } from "@elysia/eden";
+import { app } from "../src";
+
+const api = treaty(app);
+
+describe("Rose Griffon Unified API (apps/api)", () => {
+	it("GET /health returns 200 with status ok", async () => {
+		const res = await api.health.get();
+		expect(res.status).toBe(200);
+		expect(res.data?.status).toBe("ok");
+		expect(res.data?.service).toBe("rg-api");
+	});
+
+	it("GET /v1/achillea/tournaments returns 200 with valid shape", async () => {
+		const res = await api.v1.achillea.tournaments.get();
+		expect(res.status).toBe(200);
+		expect(res.data).toBeDefined();
+		if (res.data) {
+			expect(Array.isArray(res.data.data)).toBe(true);
+			expect(typeof res.data.count).toBe("number");
+		}
+	});
+
+	it("GET /v1/achillea/tournaments/circuit/ranking returns the unified circuit projection", async () => {
+		const res = await app.handle(new Request("http://localhost/v1/achillea/tournaments/circuit/ranking"));
+		expect(res.status).toBe(200);
+		const data = await res.json() as { leaderboard?: unknown[]; tournaments?: unknown[]; clanRanking?: unknown[] };
+		expect(Array.isArray(data.leaderboard)).toBe(true);
+		expect(Array.isArray(data.tournaments)).toBe(true);
+		expect(Array.isArray(data.clanRanking)).toBe(true);
+	});
+
+	it("GET /v1/achillea/tournaments/99999999 returns 404 with typed not found", async () => {
+		const res = await api.v1.achillea.tournaments({ id: 99999999 }).get();
+		expect(res.status).toBe(404);
+		expect(res.error).toBeDefined();
+	});
+
+	it("GET /v1/achillea/tournaments/:id keeps the triplet detail contract", async () => {
+		const list = await api.v1.achillea.tournaments.get();
+		const id = list.data?.data[0]?.id;
+		if (id === undefined) return;
+		const res = await api.v1.achillea.tournaments({ id }).get();
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.data)).toBe(true);
+		expect(res.data).toHaveLength(3);
+		expect(Array.isArray(res.data?.[1])).toBe(true);
+		expect(res.data?.[2]).toBeDefined();
+	});
+
+	it("GET /v1/achillea/tournaments/99999999/events returns typed not found", async () => {
+		const res = await api.v1.achillea.tournaments({ id: 99999999 }).events.get();
+		expect(res.status).toBe(404);
+	});
+
+	it("tournament registration mutations require the unified session", async () => {
+		const participate = await api.v1.achillea.tournaments.participate({ id: 99999999 }).post();
+		const unregister = await api.v1.achillea.tournaments.unregister({ id: 99999999 }).post();
+		expect(participate.status).toBe(401);
+		expect(unregister.status).toBe(401);
+	});
+
+	it("tournament create/edit mutations require the unified session", async () => {
+		const create = await app.handle(
+			new Request("http://localhost/v1/achillea/tournaments/create/achillea", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ organization: 1 }),
+			})
+		);
+		const edit = await app.handle(
+			new Request("http://localhost/v1/achillea/tournaments/99999999/edit", {
+				method: "PUT",
+				headers: { "content-type": "application/json" },
+				body: "{}",
+			})
+		);
+		expect(create.status).toBe(401);
+		expect(edit.status).toBe(401);
+	});
+
+	it("tournament score policy mutation requires the unified session", async () => {
+		const res = await api.v1.achillea
+			.tournaments({ id: 99999999 })
+			["score-policy"].post({ policy: "players" });
+		expect(res.status).toBe(401);
+	});
+
+	it("tournament lobby score mutations require the unified session", async () => {
+		const requests = [
+			new Request("http://localhost/v1/achillea/tournaments/report-score", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ lobbyId: 1, gameNumber: 1, score1: 1, score2: 0 }),
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/validate-score", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ lobbyId: 1, lobbyMatchId: 1 }),
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/unvalidate-score", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ lobbyId: 1, lobbyMatchId: 1 }),
+			}),
+		];
+		for (const request of requests) expect((await app.handle(request)).status).toBe(401);
+	});
+
+	it("tournament lifecycle mutations require the unified session", async () => {
+		const requests = [
+			new Request("http://localhost/v1/achillea/tournaments/open-registrations/99999999", {
+				method: "POST",
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/99999999/close", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: "{}",
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/99999999/cancel", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ reason: "test" }),
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/99999999/restore", { method: "POST" }),
+			new Request("http://localhost/v1/achillea/tournaments/start/99999999", { method: "PUT" }),
+			new Request("http://localhost/v1/achillea/tournaments/next-phase/99999999", { method: "PUT" }),
+		];
+		for (const request of requests) expect((await app.handle(request)).status).toBe(401);
+	});
+
+	it("tournament participant administration requires the unified session", async () => {
+		const requests = [
+			new Request("http://localhost/v1/achillea/tournaments/remove-participant/99999999", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ userId: "u" }),
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/99999999/disqualify", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ userId: "u", reason: "test" }),
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/99999999/reinstate", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ userId: "u" }),
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/99999999/promote-participant", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ userId: "u" }),
+			}),
+		];
+		for (const request of requests) expect((await app.handle(request)).status).toBe(401);
+	});
+
+	it("tournament seeding mutations require the unified session", async () => {
+		const requests = [
+			new Request("http://localhost/v1/achillea/tournaments/set-participant-seeding/99999999", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ participant: { id: 1, seed: 1 } }),
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/seed-by-ranked/99999999", {
+				method: "POST",
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/seed-random/99999999", {
+				method: "POST",
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/clear-seeds/99999999", {
+				method: "POST",
+			}),
+			new Request("http://localhost/v1/achillea/tournaments/generate-bracket/99999999", {
+				method: "POST",
+			}),
+		];
+		for (const request of requests) expect((await app.handle(request)).status).toBe(401);
+	});
+
+	it("tournament placement prizes require the unified session", async () => {
+		const res = await app.handle(new Request("http://localhost/v1/achillea/tournaments/99999999/apply-placement-prizes", { method: "POST" }));
+		expect(res.status).toBe(401);
+	});
+
+	it("internal tournament placement trigger requires API_ADMIN_TOKEN", async () => {
+		const res = await app.handle(new Request("http://localhost/v1/achillea/tournaments/internal/99999999/apply-placement-prizes", { method: "POST" }));
+		expect(res.status).toBe(401);
+	});
+
+	it("admin role and wallet mutations require the unified session", async () => {
+		const role = await app.handle(
+			new Request("http://localhost/v1/achillea/admin/users/u/role", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ role: 1 }),
+			})
+		);
+		const wallet = await app.handle(
+			new Request("http://localhost/v1/achillea/admin/wallets/u/adjust", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ amount: 1 }),
+			})
+		);
+		expect(role.status).toBe(401);
+		expect(wallet.status).toBe(401);
+	});
+
+	it("GET /v1/achillea/clans returns 200 with clans list", async () => {
+		const res = await api.v1.achillea.clans.get();
+		expect(res.status).toBe(200);
+		expect(res.data).toBeDefined();
+		if (res.data) {
+			expect(Array.isArray(res.data.data)).toBe(true);
+			expect(typeof res.data.count).toBe("number");
+		}
+	});
+
+	it("GET /v1/achillea/organizations returns a typed list", async () => {
+		const res = await api.v1.achillea.organizations.get({ query: { page: 1, pageSize: 5 } });
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.data?.data)).toBe(true);
+		expect(typeof res.data?.count).toBe("number");
+	});
+
+	it("organization mutations require the unified session", async () => {
+		const mine = await api.v1.achillea.organizations.me.get();
+		expect(mine.status).toBe(401);
+		const create = await api.v1.achillea.organizations.create.post({
+			name: "Test Organization",
+			normalizedName: "TEST ORGANIZATION",
+			logo: "",
+			description: "",
+			origin: "fr",
+			orgManagers: [],
+			socialMedias: [],
+			broadcastMedias: [],
+		});
+		expect(create.status).toBe(401);
+	});
+
+	it("sanction persistence routes require a session", async () => {
+		const list = await api.v1.achillea.sanctions.get();
+		expect(list.status).toBe(401);
+		const create = await api.v1.achillea.sanctions.post({
+			userId: "u",
+			guildId: "g",
+			type: "warn",
+		});
+		expect(create.status).toBe(401);
+	});
+
+	it("GET /v1/achillea/leaderboard returns ranked entries", async () => {
+		const res = await api.v1.achillea.leaderboard.get({ query: { mode: 0, limit: 5 } });
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.data?.data)).toBe(true);
+		expect(typeof res.data?.count).toBe("number");
+	});
+
+	it("GET /v1/achillea/leagues/astral returns the canonical season", async () => {
+		const res = await api.v1.achillea.leagues.astral.get();
+		expect(res.status).toBe(200);
+		expect(res.data?.meta.id).toBeDefined();
+		expect(Array.isArray(res.data?.standings)).toBe(true);
+		expect(Array.isArray(res.data?.results)).toBe(true);
+	});
+
+	it("GET /v1/achillea/users/leaderboard keeps the versioned client contract", async () => {
+		const res = await api.v1.achillea.users.leaderboard.get({
+			query: { mode: 0, season: "", limit: 5 },
+		});
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.data?.entries)).toBe(true);
+		expect(typeof res.data?.total).toBe("number");
+		expect(res.data?.mode).toBe(0);
+	});
+
+	it("PUT /v1/achillea/users/me/profile requires the unified session", async () => {
+		const res = await api.v1.achillea.users.me.profile.put({ bio: "x" });
+		expect(res.status).toBe(401);
+	});
+
+	it("GET /v1/achillea/licenses/verify rejects malformed QR values uniformly", async () => {
+		const res = await api.v1.achillea.licenses.verify({ qrSecret: "short" }).get();
+		expect(res.status).toBe(200);
+		expect(res.data).toEqual({ valid: false, reason: "not_found" });
+	});
+
+	it("GET /v1/achillea/licenses/me requires the unified session", async () => {
+		const res = await api.v1.achillea.licenses.me.get();
+		expect(res.status).toBe(401);
+		expect(res.data).toBeNull();
+	});
+
+	it("GET /v1/achillea/wallet/me requires the unified session", async () => {
+		const res = await api.v1.achillea.wallet.me.get();
+		expect(res.status).toBe(401);
+		expect(res.error).toBeDefined();
+	});
+
+	it("GET /v1/achillea/wallet/me/history requires the unified session", async () => {
+		const res = await api.v1.achillea.wallet.me.history.get({ query: { limit: 20, offset: 0 } });
+		expect(res.status).toBe(401);
+		expect(res.error).toBeDefined();
+	});
+
+	it("GET /v1/auth/oauth/callback rejects incomplete provider callbacks", async () => {
+		const res = await api.v1.auth.oauth.callback.get({ query: { provider: "twitch" } });
+		expect(res.status).toBe(400);
+	});
+
+	it("GET /v1/auth/me rejects requests without a purpose-bound session", async () => {
+		const res = await api.v1.auth.me.get();
+		expect(res.status).toBe(401);
+		expect(res.error).toBeDefined();
+	});
+
+	it("POST /v1/auth/session/exchange is restricted to the internal bridge", async () => {
+		const res = await app.handle(new Request("http://localhost/v1/auth/session/exchange", {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({ id: "discord-user" }),
+		}));
+		expect(res.status).toBe(401);
+	});
+
+	it("GET /v1/auth/realtime-token rejects requests without a unified session", async () => {
+		const res = await api.v1.auth["realtime-token"].get();
+		expect(res.status).toBe(401);
+		expect(res.error).toBeDefined();
+	});
+
+	it("GET /v1/auth/oauth/:provider/start rejects unauthenticated starts", async () => {
+		const res = await api.v1.auth
+			.oauth({ provider: "twitch" })
+			.start.get({ query: { userId: "user-1" } });
+		expect(res.status).toBe(401);
+		expect(res.error).toBeDefined();
+	});
+
+	it("GET /v1/community/info returns 200 with brand data", async () => {
+		const res = await api.v1.community.info.get();
+		expect(res.status).toBe(200);
+		expect(res.data?.name).toBe("Rose Griffon");
+		expect(res.data?.colors.primary).toBe("#a14b3f");
+	});
+
+	it("GET /v1/community/emotes returns 200 with emotes list", async () => {
+		const res = await api.v1.community.emotes.get();
+		expect(res.status).toBe(200);
+		expect(res.data?.success).toBe(true);
+		expect(Array.isArray(res.data?.data)).toBe(true);
+	});
+
+	it("GET /v1/community/tags/popular returns 200 with top tags", async () => {
+		const res = await api.v1.community.tags.popular.get();
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.data)).toBe(true);
+	});
+
+	it("GET /v1/wiki/characters returns 200 with wiki characters data", async () => {
+		const res = await api.v1.wiki.characters.get({ query: { limit: 2 } });
+		expect(res.status).toBe(200);
+		expect(res.data).toBeDefined();
+	});
+
+	it("GET /v1/content/news/feed returns 200 with articles feed", async () => {
+		const res = await api.v1.content.news.feed.get({ query: { page: 1 } });
+		expect(res.status).toBe(200);
+		expect(res.data).toBeDefined();
+		if (res.data) {
+			expect(Array.isArray(res.data.items)).toBe(true);
+			expect(typeof res.data.hasMore).toBe("boolean");
+		}
+	});
+
+	it("GET /v1/content/calendar-events returns 200 with calendar events", async () => {
+		const res = await api.v1.content["calendar-events"].get();
+		expect(res.status).toBe(200);
+		expect(res.data).toBeDefined();
+		if (res.data) {
+			expect(Array.isArray(res.data.events)).toBe(true);
+		}
+	});
+
+	it("POST /v1/billing/webhooks/stripe returns 400 when missing signature", async () => {
+		const res = await api.v1.billing.webhooks.stripe.post();
+		expect(res.status).toBe(400);
+	});
+
+	it("POST /v1/billing/webhooks/stripe returns 200 with valid header", async () => {
+		const res = await api.v1.billing.webhooks.stripe.post(null, {
+			headers: { "stripe-signature": "test_sig" },
+		});
+		expect(res.status).toBe(200);
+		expect(res.data?.received).toBe(true);
+	});
+
+	it("GET /v1/storage/health returns 200 with storage status", async () => {
+		const res = await api.v1.storage.health.get();
+		expect(res.status).toBe(200);
+		expect(res.data?.ok).toBe(true);
+	});
+
+	it("GET /v1/realtime/health returns 200 with realtime status", async () => {
+		const res = await api.v1.realtime.health.get();
+		expect(res.status).toBe(200);
+		expect(res.data?.ok).toBe(true);
+	});
+
+	it("GET /v1/inagle/health returns the game-data service status", async () => {
+		const res = await api.v1.inagle.health.get();
+		expect(res.status).toBe(200);
+		expect(res.data).toEqual({ ok: true, service: "inagle" });
+	});
+
+	it("GET /v1/inagle/teams returns a stable paginated shape", async () => {
+		const res = await api.v1.inagle.teams.get({ query: { limit: 2 } });
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.data?.data)).toBe(true);
+		expect(typeof res.data?.count).toBe("number");
+	});
+
+	it("GET /v1/inagle/quests returns a stable paginated shape", async () => {
+		const res = await api.v1.inagle.quests.get({ query: { limit: 2 } });
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.data?.data)).toBe(true);
+		expect(typeof res.data?.count).toBe("number");
+	});
+
+	it("GET /v1/inagle/formations returns the SQL-backed projection", async () => {
+		const res = await api.v1.inagle.formations.get({ query: { limit: 2 } });
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.data?.data)).toBe(true);
+		expect(typeof res.data?.count).toBe("number");
+	});
+
+	it("GET /v1/inagle/items returns a stable paginated shape", async () => {
+		const res = await api.v1.inagle.items.get({ query: { limit: 2 } });
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.data?.data)).toBe(true);
+		expect(typeof res.data?.count).toBe("number");
+	});
+
+	it("GET /v1/inagle/drops/table/:id keeps the SQL/API contract", async () => {
+		const res = await api.v1.inagle.drops.table({ id: "missing" }).get();
+		expect(res.status).toBe(200);
+		expect(res.data).toBeDefined();
+	});
+
+	it("GET /v1/inagle/drops/item/:id reads SQL drop sources", async () => {
+		const res = await api.v1.inagle.drops.item({ id: "0" }).get();
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.data?.data)).toBe(true);
+	});
+
+	it("GET /v1/inagle/souls reads the canonical PostgreSQL projection", async () => {
+		const res = await api.v1.inagle.souls.get({ query: { limit: 2 } });
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.data?.data)).toBe(true);
+	});
+
+	it("GET /v1/inagle/skill-cutins reads the canonical SQL projection", async () => {
+		const res = await app.handle(new Request("http://localhost/v1/inagle/skill-cutins/whs01230"));
+		expect(res.status).toBe(200);
+		const body = (await res.json()) as { data?: { skill_id_str?: string } };
+		expect(body.data?.skill_id_str).toBe("whs01230");
+	});
+
+	it("GET /v1/inagle/skill-cutins/assets exposes the SQL CDN gate", async () => {
+		const res = await app.handle(
+			new Request("http://localhost/v1/inagle/skill-cutins/assets/ev60_00340")
+		);
+		expect(res.status).toBe(200);
+		expect((await res.json()).available).toBe(true);
+	});
+
+	it("GET /v1/azalee/health is served by the unified bridge", async () => {
+		const res = await api.v1.azalee.health.get();
+		expect(res.status).toBe(200);
+		expect(res.data).toBeDefined();
+	});
+
+	it("GET /v1/azalee/api/teams uses the SQL wiki service", async () => {
+		const res = await app.handle(new Request("http://localhost/v1/azalee/api/teams"));
+		expect(res.status).toBe(200);
+		const body = await res.json();
+		expect(Array.isArray(body)).toBe(true);
+		expect(body.length).toBeGreaterThan(0);
+	});
+
+	it("GET /v1/azalee/api/items uses the SQL wiki service", async () => {
+		const res = await app.handle(new Request("http://localhost/v1/azalee/api/items?limit=2"));
+		expect(res.status).toBe(200);
+		const body = await res.json();
+		expect(Array.isArray(body.data)).toBe(true);
+		expect(body.source).toBe("postgres");
+	});
+
+	it("GET /v1/azalee/api/cpk and /text use unified package handlers", async () => {
+		const cpk = await app.handle(new Request("http://localhost/v1/azalee/api/cpk?limit=1"));
+		expect(cpk.status).toBe(200);
+		const cpkBody = (await cpk.json()) as { dir: string; source: string; dirs: unknown[] };
+		expect(cpkBody.dir).toBeDefined();
+		expect(cpkBody.source).toBe("postgres");
+		expect(cpkBody.dirs.length).toBeGreaterThan(0);
+		const text = await app.handle(new Request("http://localhost/v1/azalee/api/text/stats"));
+		expect(text.status).toBe(200);
+		const textStats = (await text.json()) as Array<{ category: string; count: number }>;
+		expect(Array.isArray(textStats)).toBe(true);
+		expect(textStats.length).toBeGreaterThan(0);
+		const search = await app.handle(
+			new Request("http://localhost/v1/azalee/api/text?q=Mark&locale=fr&limit=2")
+		);
+		expect(search.status).toBe(200);
+		const searchBody = (await search.json()) as { source: string; data: unknown[] };
+		expect(searchBody.source).toBe("postgres");
+		expect(searchBody.data.length).toBeGreaterThan(0);
+	});
+
+	it("GET /v1/azalee/api/cross/catalog is SQL-backed", async () => {
+		const response = await app.handle(
+			new Request("http://localhost/v1/azalee/api/cross/catalog?limit=2")
+		);
+		expect(response.status).toBe(200);
+		const body = (await response.json()) as { source: string; data: unknown[]; count: number };
+		expect(body.source).toBe("postgres");
+		expect(Array.isArray(body.data)).toBe(true);
+		expect(body.data.length).toBeGreaterThan(0);
+		expect(body.count).toBeGreaterThan(0);
+	});
+});

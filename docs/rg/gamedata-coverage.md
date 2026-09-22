@@ -69,7 +69,7 @@ route ci-dessous est préfixée par `/wiki`).
 | `inagle_items` | `/wiki/item` (+ détail) | **SURFACÉ** |
 | `inagle_keshins/souls/miximax/awakenings` | `/wiki/keshin` | **SURFACÉ** |
 | `inagle_special_tactics`/`super_tactics`/`team_build` | `/wiki/tactic` | **SURFACÉ** |
-| `inagle_passives` (1716) | **`/wiki/passive`** (+ `/wiki/passive/[id]`) — via export `nie-data` `data/passives-full.json` | **SURFACÉ (récent)** |
+| `inagle_passives` (1716) | **`/wiki/passive`** (+ `/wiki/passive/[id]`) — projection SQL canonique | **SURFACÉ (récent)** |
 | `inagle_teams` (208) | **`/wiki/equipe`** (+ `/wiki/equipe/[id]`) | **SURFACÉ (récent)** |
 | `inagle_shops` (2331) | **`/wiki/boutique`** (+ détail) | **SURFACÉ (récent)** |
 | `inagle_quests` (182) | **`/wiki/quete`** (+ détail) | **SURFACÉ (récent)** |

@@ -330,13 +330,12 @@ async function famillesSimples(baseUrl: string): Promise<MetadataRoute.Sitemap> 
 }
 
 /**
- * Passifs — 1 716 instances, données figées dans `data/passives-full.json`
- * (nie-data) et non poussées en base (cf. `wikiService.getPassivesList`) :
- * seule source possible, pas de table Postgres équivalente.
+ * Passifs — projection SQL `inagle_passives`
+ * projection SQL canonique.
  */
 async function passifs(baseUrl: string): Promise<MetadataRoute.Sitemap> {
 	try {
-		const { data } = wikiService.getPassivesList({ limit: 5000, page: 1 });
+		const { data } = await wikiService.getPassivesList({ limit: 5000, page: 1 });
 		return data
 			.filter((p) => p.passive_id)
 			.map((p) => ({

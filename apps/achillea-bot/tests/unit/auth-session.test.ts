@@ -42,13 +42,13 @@ describe("central auth session contract", () => {
 		expect((decoded.exp ?? 0) - (decoded.iat ?? 0)).toBe(300);
 	});
 
-	test("temporarily accepts legacy signed cookies but can reject them explicitly", () => {
+	test("rejects legacy signed cookies by default but supports explicit compatibility", () => {
 		const legacy = jwt.sign({ id: "99" }, process.env.JWT_SECRET_KEY!, {
 			algorithm: "HS256",
 			expiresIn: "30d",
 		});
-		expect(verifySessionToken(legacy).id).toBe("99");
-		expect(() => verifySessionToken(legacy, false)).toThrow("Legacy token rejected");
+		expect(() => verifySessionToken(legacy)).toThrow("Legacy token rejected");
+		expect(verifySessionToken(legacy, true).id).toBe("99");
 	});
 
 	test("uses identical cookie scope when setting and clearing", () => {

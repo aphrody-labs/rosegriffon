@@ -1,5 +1,5 @@
 /**
- * Tests unitaires PURS des règles métier tournoi (src/services/tournamentRules.ts) +
+ * Tests unitaires PURS des règles métier tournoi (`@rosegriffon/achillea-core`) +
  * du helper de pagination (src/api/models/interfaces/Paginated.ts). Aucune DB.
  *
  * Verrouille deux régressions corrigées :
@@ -15,8 +15,8 @@ import {
 	computeSeriesOutcome,
 	type SeriesMatch,
 	userIsTournamentOrganizer,
-} from "../../src/services/tournamentRules";
-import { MatchFormat, TeamSide } from "../../src/utils/enums";
+} from "@rosegriffon/achillea-core";
+import { MatchFormat, TeamSide } from "@rosegriffon/achillea-core";
 
 const m = (scoreTeam1: number, scoreTeam2: number, isValidated = true): SeriesMatch => ({
 	isValidated,

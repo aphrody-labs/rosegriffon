@@ -19,6 +19,7 @@
 // ── Compétition ─────────────────────────────────────────────────────────────
 export * from "./elo";
 export * from "./ranking";
+export * from "./ranked";
 export * from "./league";
 export * from "./participants";
 export * from "./tournaments";
@@ -35,6 +36,7 @@ export * from "./wallet";
 
 // ── Transverse ──────────────────────────────────────────────────────────────
 export * from "./access";
+export * from "./auth";
 export * from "./enums";
 export * from "./format";
 export * from "./http";
@@ -42,7 +44,9 @@ export * from "./identity";
 export * from "./labels";
 export * from "./names";
 export * from "./numbers";
+export * from "./oauth";
 export * from "./pagination";
 export * from "./presentation";
 export * from "./reference";
+export * from "./rulesets";
 export * from "./validation";

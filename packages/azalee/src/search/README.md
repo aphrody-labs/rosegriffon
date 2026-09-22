@@ -12,7 +12,7 @@ Les noms existent en français, anglais et japonais : une requête doit trouver
 | `smart-search.ts` | `smartSearch()` : recherche contextuelle sur toutes les collections, cache de résultats, suggestions « vouliez-vous dire » |
 | `utils.ts` | normalisation de texte partagée |
 | `search-ui-config.ts` | libellés de type et styles de badge de langue (client-safe) |
-| `manifest.json` | index figé embarqué dans le paquet |
+| projection SQL | index durable des données recherchables |
 
 ## Utilisation
 

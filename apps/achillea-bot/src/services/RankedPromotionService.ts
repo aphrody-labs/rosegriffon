@@ -1,10 +1,12 @@
 import { Client } from "@aphrody/discordx";
 import type { TextChannel } from "discord.js";
 import { EmbedBuilder } from "discord.js";
+import type { Kysely } from "kysely";
 
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { coreManagerConfig } from "@/configs";
 import { Service } from "@/decorators";
-import { Data, Rank, User } from "@/entities";
+import { Data } from "@/entities";
 import { MatchMode } from "@/utils/enums";
 
 import { Database } from "./Database";
@@ -12,6 +14,40 @@ import { Database } from "./Database";
 /** Au-delà de ce nombre de promotions détectées en une passe, on suspecte une anomalie
  *  (ex. reset/snapshot corrompu) et on ré-initialise sans rien annoncer (anti-spam). */
 const MAX_PROMOTIONS_PER_PASS = 10;
+
+interface RankedPromotionDatabase {
+	rank: {
+		id: number;
+		key: string;
+		min_elo: number;
+		max_elo: number;
+		emoji_id: string;
+		emoji_key: string;
+		gradient: string[];
+	};
+	user_elo: {
+		user_id: string;
+		mode: number;
+		elo: number;
+		games_played: number;
+	};
+	user: {
+		id: string;
+		display_name: string;
+		username: string | null;
+	};
+}
+
+type PromotionRank = {
+	id: number;
+	key: string;
+	minElo: number;
+	maxElo: number;
+	emojiId: string;
+	emojiKey: string;
+	gradient: string[];
+};
+const sql = createAchilleaSql<RankedPromotionDatabase>() as Kysely<RankedPromotionDatabase>;
 
 /**
  * Détecte les montées de palier (1v1) entre deux passes et :
@@ -37,8 +73,19 @@ export class RankedPromotionService {
 
 	async detect(): Promise<void> {
 		try {
-			const em = this.db.em.fork();
-			const ranks = (await em.find(Rank, {})).sort((a, b) => a.minElo - b.minElo);
+			const ranks = await sql
+				.selectFrom("rank")
+				.select([
+					"id",
+					"key",
+					"min_elo as minElo",
+					"max_elo as maxElo",
+					"emoji_id as emojiId",
+					"emoji_key as emojiKey",
+					"gradient",
+				])
+				.orderBy("min_elo", "asc")
+				.execute();
 			if (!ranks.length) return;
 			const tierIndexOf = (elo: number): number => {
 				const i = ranks.findIndex((r) => elo >= r.minElo && elo <= r.maxElo);
@@ -46,11 +93,12 @@ export class RankedPromotionService {
 			};
 
 			// joueurs 1v1 ayant disputé au moins une partie
-			const rows = await em.execute<{ user_id: string; elo: number }[]>(
-				`SELECT user_id, elo FROM user_elo WHERE mode = ? AND games_played > 0`,
-				[MatchMode.ONE_VS_ONE],
-				"all"
-			);
+			const rows = await sql
+				.selectFrom("user_elo")
+				.select(["user_id", "elo"])
+				.where("mode", "=", MatchMode.ONE_VS_ONE)
+				.where("games_played", ">", 0)
+				.execute();
 
 			const store = this.db.get(Data);
 			let snapshot: Record<string, number> = {};
@@ -89,8 +137,12 @@ export class RankedPromotionService {
 
 			// noms des promus
 			const ids = promotions.map((p) => p.userId);
-			const users = await em.find(User, { id: { $in: ids } });
-			const nameOf = new Map(users.map((u) => [u.id, u.displayName || u.username || "Joueur"]));
+			const users = await sql
+				.selectFrom("user")
+				.select(["id", "display_name", "username"])
+				.where("id", "in", ids)
+				.execute();
+			const nameOf = new Map(users.map((u) => [u.id, u.display_name || u.username || "Joueur"]));
 
 			await this.announce(promotions, ranks, nameOf);
 		} catch (e) {
@@ -100,10 +152,10 @@ export class RankedPromotionService {
 
 	private async announce(
 		promotions: { userId: string; toIndex: number }[],
-		ranks: Rank[],
+		ranks: PromotionRank[],
 		nameOf: Map<string, string>
 	): Promise<void> {
-		const tierEmoji = (r: Rank): string =>
+		const tierEmoji = (r: PromotionRank): string =>
 			r.emojiId ? `<:${r.emojiKey || r.key}:${r.emojiId}> ` : "";
 
 		// #2 — annonce groupée dans 🚨・annonces-ranked

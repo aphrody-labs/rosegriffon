@@ -45,10 +45,8 @@ const EXPECTED_COMMANDS = [
 	"search",
 	"db",
 	"redis",
-	"glossary-rebuild",
 	"audit",
 	"test-variants",
-	"rag",
 	"status",
 	"wave",
 	"repair",
@@ -138,7 +136,7 @@ describe("createAzaleeProgram", () => {
 		expect(program.version()).toBe(CLI_VERSION);
 	});
 
-	test("enregistre exactement les 24 commandes attendues, dans l'ordre", () => {
+	test("enregistre exactement les 22 commandes attendues, dans l'ordre", () => {
 		const program = createAzaleeProgram();
 		expect(program.commands.map((c) => c.name())).toEqual([...EXPECTED_COMMANDS]);
 	});
@@ -185,14 +183,12 @@ describe("options déclarées", () => {
 		search: ["-j, --json"],
 		db: ["-s, --sqlite", "-j, --json"],
 		redis: ["-j, --json"],
-		"glossary-rebuild": ["-j, --json"],
 		audit: ["-j, --json"],
 		"test-variants": [],
-		rag: ["-j, --json", "-l, --limit <limit>"],
 		status: ["-j, --json"],
 		wave: ["-c, --cycle", "-l, --loop"],
 		repair: [],
-		sync: ["-p, --push", "-j, --json"],
+		sync: ["-p, --push"],
 		compare: ["-l, --level <level>", "-j, --json"],
 		chara: ["-j, --json"],
 		dialogue: ["-s, --speaker <speaker>", "-j, --json", "-l, --limit <limit>"],
@@ -221,7 +217,6 @@ describe("options déclarées", () => {
 		const optionOf = (cmdName: string, long: string) =>
 			program.commands.find((c) => c.name() === cmdName)?.options.find((o) => o.long === long);
 
-		expect(optionOf("rag", "--limit")?.defaultValue).toBe("4");
 		expect(optionOf("compare", "--level")?.defaultValue).toBe("99");
 		expect(optionOf("dialogue", "--limit")?.defaultValue).toBe("10");
 		expect(optionOf("random-team", "--formation")?.defaultValue).toBe("4-4-2");
@@ -250,7 +245,7 @@ describe("options déclarées", () => {
 });
 
 describe("--help", () => {
-	test("l'aide racine liste les 24 commandes", () => {
+	test("l'aide racine liste les 22 commandes", () => {
 		const help = captureHelp(["--help"]);
 		expect(help).toContain("Usage: azalee [options] [command]");
 		for (const name of EXPECTED_COMMANDS) {

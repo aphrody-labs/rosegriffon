@@ -23,17 +23,11 @@
  * (250 800 chemins réels) et non plus depuis `inagle_game_assets`, dont les
  * 40 471 lignes `exists = 1` décrivent le dump disparu.
  */
-import characterFaceManifest from "../data/character-face-manifest.json";
-import characterModelManifest from "../data/character-model-manifest.json";
-import chrModelManifest from "../data/chr-model-manifest.json";
-import itemImageManifest from "../data/item-image-manifest.json";
-import keshinModelManifest from "../data/keshin-model-manifest.json";
-import menuAssetManifest from "../data/menu-asset-manifest.json";
-import miximaxIconManifest from "../data/miximax-icon-manifest.json";
+import { ASSET_MANIFEST } from "@rosegriffon/inagle/asset-manifest";
 
 /**
  * Manifeste objets : `internal_code` → conteneur `.g4tx` + nom de texture réels
- * (cf. `scripts/build-item-image-manifest.ts`). Une valeur numérique désigne le
+ * (projection SQL `inagle_asset_manifests`). Une valeur numérique désigne le
  * conteneur, la texture portant alors le nom de l'objet ; un couple
  * `[index, nom]` couvre les textures au nom différent du code (plaques `nm*`).
  *
@@ -42,18 +36,18 @@ import miximaxIconManifest from "../data/miximax-icon-manifest.json";
  * dans `01_icon_emblem`, les `coa_animal_*` dans `22_icon_town`, les `ds*` dans
  * `20_icon_deco`, les `nm*` dans `25_icon_nameplate`).
  */
-const ITEM_IMAGE_MANIFEST = itemImageManifest as unknown as {
+const ITEM_IMAGE_MANIFEST = ASSET_MANIFEST.itemImage as unknown as {
 	containers: string[];
 	items: Record<string, number | [number, string]>;
 };
 
 /**
  * Garde-fous d'assets menu, générés depuis l'index CPK réel
- * (`scripts/build-menu-asset-manifest.ts`). Chaque famille liste les basenames
+ * (projection SQL `inagle_asset_manifests`). Chaque famille liste les basenames
  * `.g4tx` qui existent VRAIMENT ; un code absent → placeholder, jamais une URL
  * forgée en 404.
  */
-const MENU_ASSETS = menuAssetManifest as {
+const MENU_ASSETS = ASSET_MANIFEST.menuAsset as unknown as {
 	emblems: string[];
 	telop: { en: string[]; fr: string[] };
 	aura: { armed: string[]; fs: string[]; mixi: string[]; soul: string[] };
@@ -70,7 +64,7 @@ const AURA_MIXI_CODES = new Set(MENU_ASSETS.aura.mixi);
 /**
  * Correspondance code Miximax (`icon_code` `c05028XXX` ou `asset_code` base `wmm00XXX`)
  * → code d'icône RÉEL des CPK (`ca/cn/cp/iau`). Généré par
- * `scripts/build-miximax-icon-manifest.ts` (cf. ce fichier pour la dérivation
+ * la projection SQL `inagle_asset_manifests` (cf. ce fichier pour la dérivation
  * `config.skillId2` → `inagle_chara_menu_resource` → fichier disque).
  *
  * `inagle_miximax.icon_code` vaut `c05028XXX` (dérivé du code perso) mais AUCUN fichier
@@ -79,16 +73,16 @@ const AURA_MIXI_CODES = new Set(MENU_ASSETS.aura.mixi);
  * sur disque — un code absent → placeholder (le caller bascule sur telop/image_url), pas
  * un 404 forgé.
  */
-const MIXIMAX_ICON_MANIFEST = miximaxIconManifest as Record<string, string>;
+const MIXIMAX_ICON_MANIFEST = ASSET_MANIFEST.miximaxIcon as Record<string, string>;
 
 /**
  * Set EXHAUSTIF des codes de base `c<NNNNNNNN>` qui possèdent réellement un visage
  * variant-1. Vérifié contre l'index CPK : **5677/5677** ont bien un conteneur
  * `200_icon/10_icon_chr/face/<code>_l.g4tx` (le CPK en compte 5678, le surplus étant
- * `face_ban00`, non nominatif). Régénéré par `scripts/build-character-face-manifest.ts`.
+ * `face_ban00`, non nominatif). Régénéré depuis la projection SQL CPK.
  * Sert de gate à `getCharacterFaceUrl` : placeholder pour les persos sans visage.
  */
-const CHARACTER_FACE_CODES = new Set(characterFaceManifest as string[]);
+const CHARACTER_FACE_CODES = new Set(ASSET_MANIFEST.characterFace as readonly string[]);
 
 /**
  * Set EXHAUSTIF des basenames `c<NNNNNNNN>` (et autres) qui possèdent un modèle 3D GLB
@@ -98,25 +92,25 @@ const CHARACTER_FACE_CODES = new Set(characterFaceManifest as string[]);
  * `getCharacterModelGlbUrl` pour ne monter le viewer 3D que quand le GLB existe (sinon
  * fallback image) — même garde-fou anti-404 que CHARACTER_FACE_CODES.
  */
-const CHARACTER_MODEL_CODES = new Set(characterModelManifest as string[]);
+const CHARACTER_MODEL_CODES = new Set(ASSET_MANIFEST.characterModel as readonly string[]);
 
 /**
  * Gate des modèles 3D COMPLETS keshin (`k<NNNNNN>`) + armures (`ka<NNNNNN>NN`) réellement
  * servis live par `nie-model-serve` sur `cdn.rosegriffon.fr/model-full/<code>.glb`.
- * Vérité terrain = probe HTTP du vrai endpoint (cf. `scripts/build-keshin-model-manifest.ts`).
+ * Vérité terrain = probe HTTP du vrai endpoint, importée dans la projection SQL.
  *
  * Aujourd'hui : 5 keshin (ceux en `.g4md`) + 89 armures. Les ~92 keshin restants ne
  * sont qu'en `.g4mg` — pas encore assemblables côté serving → exclus du gate (pas de
  * bouton 3D mort). Régénérer le manifeste quand la couche serving gagne le support g4mg.
  */
-const KESHIN_MODEL_CODES = new Set((keshinModelManifest as { keshin: string[] }).keshin);
-const ARMURE_MODEL_CODES = new Set((keshinModelManifest as { armures: string[] }).armures);
+const KESHIN_MODEL_CODES = new Set((ASSET_MANIFEST.keshinModel as { keshin: readonly string[] }).keshin);
+const ARMURE_MODEL_CODES = new Set((ASSET_MANIFEST.keshinModel as { armures: readonly string[] }).armures);
 
 /**
  * Set EXHAUSTIF des codes uniforme PERSONNELS `u<NNNNNNNN>` (8 chiffres) qui possèdent
  * un fichier `200_icon/10_icon_chr/uniform/u<8>_l.g4tx` dans les CPK. Généré depuis
- * l'index CPK (`menu-asset-manifest.json`) : **303 codes**, identiques au scan du dump
- * d'origine (`diff` = vide, 303/303) — l'allowlist était juste, seule l'URL était fausse.
+ * l'index CPK projeté dans SQL : **303 codes**, identiques au scan du dump
+ * d'origine (`diff` = vide, 303/303) — projection `inagle_asset_manifests`.
  *
  * Le code uniforme dérive du code perso par swap de préfixe `c<8>` → `u<8>`. Le gate
  * reste POSITIF : ~5380 persos n'ont AUCUN uniforme personnel et renvoient une chaîne
@@ -168,8 +162,8 @@ const LEGACY_STORAGE_PREFIX = "/storage/v1/object/public/menu/";
  * ou `null` si l'objet n'a d'icône nulle part dans les CPK (367 codes sur 1667 —
  * trou de données du jeu, vérifié absent des 250 800 chemins indexés).
  *
- * La résolution vient du manifeste `item-image-manifest.json`, construit en
- * interrogeant l'index texture → conteneur. Elle remplace l'ancienne dérivation par
+ * La résolution vient de la projection SQL de l'index texture → conteneur. Elle
+ * remplace l'ancienne dérivation par
  * famille (`eq_ac` → `icon_item05_…`) qui supposait à la fois un nom de fichier de
  * dump et un dossier — tous deux faux.
  */
@@ -252,9 +246,9 @@ function mapLegacyMenuPath(menuPath: string): string | null {
 	}
 	const emMatch = menuPath.match(/^200_icon\/01_icon_emblem\/(em[0-9a-z_]+)\.webp$/i);
 	if (emMatch) {
-		// Les `emblem_url` en `0x<CRC>.webp` (208/208 des équipes) ne correspondent à AUCUN
+		// Les `emblem_url` en `0x<CRC>.webp` ne correspondent à AUCUN
 		// nom d'emblème : ce CRC est celui de l'identifiant d'équipe, pas d'un fichier
-		// (0/208 présents dans emblem-crc-map). Ils tombent donc en `null` — trou de données
+		// Ils tombent donc en `null` — trou de données
 		// réel, pas un problème d'adressage.
 		return emblemFileUrl(emMatch[1] as string);
 	}
@@ -530,8 +524,8 @@ export const getItemIconUrl = getItemImageUrl;
  * URL d'un emblème d'équipe.
  *
  * Chemin réel : `200_icon/01_icon_emblem/<nom>.g4tx`, conteneur à texture unique →
- * forme 1:1. Le nom vient de `emblem-crc-map.json` (`crc32_std(nom) → nom`, 542
- * emblèmes du CPK). Un identifiant numérique est complété en `em<4 chiffres>` (7
+ * forme 1:1. Le nom vient du code de l'asset résolu. Un identifiant numérique est
+ * complété en `em<4 chiffres>` (7
  * emblèmes seulement portent cette forme courte). Gate sur les noms réels : chaîne
  * vide si l'emblème n'existe pas, jamais une URL 404.
  */
@@ -1043,13 +1037,13 @@ const MODEL_CHR_GLB_BASE = "https://cdn.rosegriffon.fr/model-chr";
 export type ChrModelSub = "waza" | "item" | "animal";
 
 const CHR_MODEL_CODES: Record<ChrModelSub, Set<string>> = {
-	animal: new Set((chrModelManifest as { animal: string[] }).animal),
-	item: new Set((chrModelManifest as { item: string[] }).item),
-	waza: new Set((chrModelManifest as { waza: string[] }).waza),
+	 animal: new Set((ASSET_MANIFEST.chrModel as { animal: readonly string[] }).animal),
+	 item: new Set((ASSET_MANIFEST.chrModel as { item: readonly string[] }).item),
+	 waza: new Set((ASSET_MANIFEST.chrModel as { waza: readonly string[] }).waza),
 };
 
 /** Basename RÉEL du `.g4tx` de texture par code (relevé sur l'index CPK, cf. `getChrModelTextureUrl`). */
-const CHR_MODEL_TEXTURES = (chrModelManifest as { textures?: Record<string, Record<string, string>> })
+const CHR_MODEL_TEXTURES = (ASSET_MANIFEST.chrModel as { textures?: Record<string, Record<string, string>> })
 	.textures ?? {};
 
 /**

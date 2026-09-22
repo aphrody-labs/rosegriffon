@@ -1,8 +1,8 @@
 /**
  * Accès données SECTION ÉQUIPES (`/equipe`).
  *
- * Lit directement le miroir SQLite embarqué via le client Supabase proxifié
- * (`@/lib/supabase/server` → `createSqliteClient` pour les tables `inagle_*`).
+ * Lit les projections PostgreSQL `inagle_*` via le fournisseur Supabase
+ * injecté par l'hôte. Le miroir SQLite n'est utilisé qu'en mode offline.
  *
  * Tables sources (vérité terrain miroir) :
  *   - `inagle_teams`    (208) : nom multi-langue, emblèmes (CRC/série), kits (CRC/série),
@@ -21,10 +21,7 @@
 
 
 import { createClient } from "../db/provider";
-import { getCharacterFaceUrl, getEmblemImageUrl } from "../images";
-// Table CRC → nom d'emblème (`emNNNNNN`), générée depuis l'index CPK
-// (crc32 standard de chaque `emNNNNNN`). Couvre 206/208 emblèmes réels.
-import emblemCrcMap from "../data/emblem-crc-map.json";
+import { getCharacterFaceUrl } from "../images";
 import {
 	SERIES_LABELS,
 	type TeamDetail,
@@ -105,14 +102,6 @@ function teamOrder(dataRaw: string | null): number {
 // dans Victory Road > Inazuma Eleven original > GO > Ares/Orion).
 const EMBLEM_SERIES_ORDER = ["v", "ie", "go", "aresOrion"] as const;
 
-// Normalise un CRC en clé du map : `0x` minuscule + hex MAJUSCULE.
-// Piège : `crc.toUpperCase()` transformerait aussi le `x` → `0X…` (clé absente).
-function normalizeCrcKey(crc: string): string {
-	return `0x${crc.replace(/^0x/i, "").toUpperCase()}`;
-}
-
-const EMBLEM_CRC_MAP = emblemCrcMap as Record<string, string>;
-
 function resolveTeamEmblem(row: RawTeamRow): string | null {
 	// 1) Vrai emblème : `emblems` = { série: CRC }. On choisit la série la plus
 	// représentative dispo, on mappe son CRC → `emNNNNNN` → URL CDN (sert 200).
@@ -127,21 +116,12 @@ function resolveTeamEmblem(row: RawTeamRow): string | null {
 		}
 		if (!crc) crc = Object.values(emblems).find(Boolean) ?? null;
 		if (crc) {
-			const emName = EMBLEM_CRC_MAP[normalizeCrcKey(crc)];
-			if (emName) {
-				const url = getEmblemImageUrl(emName);
-				if (url) return url;
-			}
+			// L'index CPK est maintenant matérialisé dans `emblem_url` par l'import
+			// SQL. Aucun manifeste JSON n'est consulté au runtime.
+			if (crc && row.emblem_url) return row.emblem_url;
 		}
 	}
-	// 2) PAS de repli sur `emblem_url` brut : `resolveAssetUrl` renvoie une URL `http…`
-	// telle quelle SANS la vérifier contre le manifeste (son seul gate porte sur les formes
-	// `/storage/…`/`/menu/…`, pas sur une URL déjà absolue) — `emblem_url` en base est ce
-	// même genre d'URL forgée, jamais confrontée aux 542 emblèmes réels. Mesuré : ~20/208
-	// équipes (le CRC de step 1 n'a pas de correspondance dans `emblem-crc-map.json`, ex.
-	// `0x86D317FE` série `aresOrion`) obtenaient ainsi une URL garantie 404 plutôt que le
-	// placeholder que le composant sait déjà afficher (`TeamCard`/`hasEmblem`).
-	return null;
+	return row.emblem_url || null;
 }
 
 /**

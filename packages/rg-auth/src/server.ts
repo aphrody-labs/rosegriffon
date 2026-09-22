@@ -1,8 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { resolveProfile, isAdmin } from "./index";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@rosegriffon/db";
+type ProfileClient = { from: (table: string) => any };
 
 /**
  * Server-only helpers requiring Next.js runtime.
@@ -26,7 +25,7 @@ interface AuthInstanceLike {
  */
 export async function createAdminGuard(
 	authInstance: AuthInstanceLike,
-	supabase: SupabaseClient<Database>,
+	supabase: ProfileClient,
 	options: { redirectTo?: string; fallbackRole?: string } = {}
 ) {
 	const session = await authInstance.api.getSession({
@@ -55,7 +54,7 @@ export async function createAdminGuard(
  */
 export async function createRoleGuard(
 	authInstance: AuthInstanceLike,
-	supabase: SupabaseClient<Database>,
+	supabase: ProfileClient,
 	allowedRoles: string[],
 	options: { redirectTo?: string } = {}
 ) {

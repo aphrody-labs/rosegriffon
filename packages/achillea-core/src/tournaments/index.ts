@@ -16,6 +16,9 @@
 
 import { ScoreReportPolicy } from "@rosegriffon/achillea-types";
 
+export * from "./rules";
+export * from "./phase-transition";
+
 /**
  * Droit de saisir / valider le score d'un match de tournoi.
  *

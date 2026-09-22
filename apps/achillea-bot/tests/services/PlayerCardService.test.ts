@@ -73,22 +73,22 @@ const FAKE_ELO = {
 // ---------------------------------------------------------------------------
 
 function buildMockDb(opts: { userExists: boolean; withElo?: boolean }) {
-	const em = {
-		fork() {
-			return {
-				async findOne(_entity: any, where: any) {
-					// User lookup : { id: <userId> }
-					if (where?.id === FAKE_USER_ID && opts.userExists) return FAKE_USER;
-					// UserElo lookup : { user: <userId>, mode: ... }
-					if (where?.user === FAKE_USER_ID) {
-						return opts.withElo === false ? null : FAKE_ELO;
-					}
-					return null;
-				},
-			};
-		},
+	const query = {
+		leftJoin: () => query,
+		select: () => query,
+		where: () => query,
+		executeTakeFirst: async () => opts.userExists ? {
+			id: FAKE_USER.id,
+			display_name: FAKE_USER.displayName,
+			normalized_display_name: FAKE_USER.normalizedDisplayName,
+			username: FAKE_USER.username,
+			avatar: FAKE_USER.avatar,
+			elo: opts.withElo === false ? null : FAKE_ELO.elo,
+			wins: opts.withElo === false ? null : FAKE_ELO.wins,
+			losses: opts.withElo === false ? null : FAKE_ELO.losses,
+		} : undefined,
 	};
-	return { em } as any;
+	return { selectFrom: () => query } as any;
 }
 
 // ---------------------------------------------------------------------------
@@ -114,14 +114,14 @@ afterAll(() => {
 
 describe("PlayerCardService — generateCard()", () => {
 	test("retourne un Buffer non vide", async () => {
-		const svc = new PlayerCardService(buildMockDb({ userExists: true }));
+		const svc = new PlayerCardService().withDatabase(buildMockDb({ userExists: true }));
 		const buf = await svc.generateCard(FAKE_USER_ID);
 		expect(Buffer.isBuffer(buf)).toBe(true);
 		expect(buf.length).toBeGreaterThan(1024);
 	});
 
 	test("premier byte = 0x89 (signature PNG)", async () => {
-		const svc = new PlayerCardService(buildMockDb({ userExists: true }));
+		const svc = new PlayerCardService().withDatabase(buildMockDb({ userExists: true }));
 		const buf = await svc.generateCard(FAKE_USER_ID);
 		expect(buf[0]).toBe(0x89);
 		expect(buf[1]).toBe(0x50); // P
@@ -130,14 +130,14 @@ describe("PlayerCardService — generateCard()", () => {
 	});
 
 	test("rend aussi sans UserElo (fallback ELO=0)", async () => {
-		const svc = new PlayerCardService(buildMockDb({ userExists: true, withElo: false }));
+		const svc = new PlayerCardService().withDatabase(buildMockDb({ userExists: true, withElo: false }));
 		const buf = await svc.generateCard(FAKE_USER_ID);
 		expect(buf[0]).toBe(0x89);
 		expect(buf.length).toBeGreaterThan(1024);
 	});
 
 	test("expose les W/L et winrate de UserElo (plus de fallback 0)", async () => {
-		const svc = new PlayerCardService(buildMockDb({ userExists: true }));
+		const svc = new PlayerCardService().withDatabase(buildMockDb({ userExists: true }));
 		const data = await (
 			svc as unknown as {
 				loadCardData: (id: string) => Promise<{ wins: number; losses: number; winrate: number }>;
@@ -149,7 +149,7 @@ describe("PlayerCardService — generateCard()", () => {
 	});
 
 	test("throw NotFound si userId inexistant", async () => {
-		const svc = new PlayerCardService(buildMockDb({ userExists: false }));
+		const svc = new PlayerCardService().withDatabase(buildMockDb({ userExists: false }));
 		let caught: unknown = null;
 		try {
 			await svc.generateCard(FAKE_USER_ID);
@@ -163,7 +163,7 @@ describe("PlayerCardService — generateCard()", () => {
 
 describe("PlayerCardService — generateAndSave()", () => {
 	test("ecrit bien storage/cards/<userId>.png sur disque", async () => {
-		const svc = new PlayerCardService(buildMockDb({ userExists: true }));
+		const svc = new PlayerCardService().withDatabase(buildMockDb({ userExists: true }));
 		const path = await svc.generateAndSave(FAKE_USER_ID);
 		writtenFiles.push(path);
 

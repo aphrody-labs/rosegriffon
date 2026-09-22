@@ -277,6 +277,7 @@ describe("chemins et verbes par ressource", () => {
 		expect(client.auth.discordLoginUrl("/ranked")).toBe(
 			"https://a.test/api/auth/discord?state=%2Franked"
 		);
+		expect(client.auth.callbackUrl()).toBe("https://rosegriffon.fr/api/auth/callback/discord");
 	});
 });
 

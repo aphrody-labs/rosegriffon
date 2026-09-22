@@ -12,12 +12,12 @@
 //       * refus  → l'inviteur reçoit "invite-declined".
 
 import { Room, Client } from "colyseus";
+import { parseMode } from "@rosegriffon/achillea-core";
 
 import type { SessionUser } from "../auth";
 import { authFromColyseus } from "../auth";
 import { getActiveSeason, getOrCreateElo, getUserRow } from "../db";
 import { createRankedMatch } from "../match-factory";
-import { parseMode } from "../match-logic";
 import { LobbyPlayer, LobbyState } from "../schema/LobbyState";
 import { logMatchEvent } from "../telemetry";
 

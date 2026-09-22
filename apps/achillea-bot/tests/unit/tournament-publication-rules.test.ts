@@ -1,6 +1,6 @@
 /**
  * Tests unitaires PURS des règles de création de tournoi
- * (`src/services/tournamentRules.ts`, lot H de `docs/plan-tournois.md`).
+ * (`@rosegriffon/achillea-core`, lot H de `docs/plan-tournois.md`).
  *
  * Règle du cadrage : « un tournoi se doit d'être publié au moins 1 semaine à l'avance
  * et ne peut pas être publié plus de X semaines/mois à l'avance ; une organisation ne
@@ -19,8 +19,8 @@ import {
 	DEFAULT_MAX_OPEN_TOURNAMENTS_PER_ORG,
 	DEFAULT_PUBLICATION_WINDOW,
 	leadTimeInDays,
-} from "../../src/services/tournamentRules";
-import { ParticipantStatus } from "../../src/utils/enums";
+} from "@rosegriffon/achillea-core";
+import { ParticipantStatus } from "@rosegriffon/achillea-core";
 
 const NOW = new Date("2026-08-12T12:00:00.000Z");
 const inDays = (days: number) => new Date(NOW.getTime() + days * 86_400_000);

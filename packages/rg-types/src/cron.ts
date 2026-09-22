@@ -23,7 +23,7 @@
  * aussi bien dans un composant React que dans une commande Discord.
  */
 
-/** Les 24 tâches servies par `GET :3005/tasks`. */
+/** Les 26 tâches servies par `GET :3005/tasks`. */
 export const TACHES_CRON = [
 	"db",
 	"zukan:videos",

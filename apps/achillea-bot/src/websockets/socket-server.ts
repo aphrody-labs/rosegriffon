@@ -1,6 +1,5 @@
 import http from "node:http";
 
-import express from "express";
 import type { DefaultEventsMap, ExtendedError, Socket } from "socket.io";
 import { Server as SocketIOServer } from "socket.io";
 
@@ -12,11 +11,8 @@ import {
 } from "@/auth";
 import { urlsConfig } from "@/configs/urls";
 
-// Create an Express app (optional; you can use plain HTTP too)
-const app = express();
-
-// Create a bare HTTP server
-const server = http.createServer(app);
+// Socket.IO ne nécessite aucun middleware Express : le serveur HTTP natif suffit.
+const server = http.createServer();
 
 // Create a Socket.IO server on top
 export const io = new SocketIOServer(server, {

@@ -18,12 +18,8 @@ export class HealthController extends BaseController {
 	constructor() {
 		super();
 
-		[this.client, this.db, this.stats, this.logger] = resolveDependenciesSync([
-			Client,
-			Database,
-			Stats,
-			Logger,
-		]);
+		this.client = (globalThis as typeof globalThis & { __roseGriffonDiscordClient?: Client }).__roseGriffonDiscordClient ?? resolveDependenciesSync([Client])[0];
+		[this.db, this.stats, this.logger] = resolveDependenciesSync([Database, Stats, Logger]);
 	}
 
 	@Get("/check")

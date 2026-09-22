@@ -12,10 +12,12 @@ export const urlsConfig = {
 	websiteHost: new URL(env.WEBSITE_URL).host,
 	/** API publique (vérification de licences, etc.). */
 	publicApi: env.PUBLIC_API_URL,
+	/** API unifiée Elysia/Kysely — seule destination des nouveaux flux métier. */
+	unifiedApi: env.UNIFIED_API_URL,
 	/** Base de vérification d'une licence (QR) → page web publique /licence/verify/:qr. */
 	licenseVerify: `${env.WEBSITE_URL}/licence/verify`,
-	/** Base des callbacks OAuth (provider ajouté en query : ?provider=twitch). */
-	oauthCallback: `${env.OAUTH_CALLBACK_BASE_URL}/bot/OAuth/callback`,
+	/** Callback OAuth providers unifié (provider ajouté en query : ?provider=twitch). */
+	oauthCallback: `${env.UNIFIED_API_URL}/v1/auth/oauth/callback`,
 	/** Origines CORS autorisées (CSV `WEB_ALLOWED_ORIGINS`, sinon localhost + site). */
 	allowedOrigins: [
 		...new Set(

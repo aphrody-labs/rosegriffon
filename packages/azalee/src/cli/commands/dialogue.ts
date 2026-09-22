@@ -1,9 +1,8 @@
-/** `azalee dialogue` — recherche dans les dialogues narratifs et de chronique. */
-
-import { existsSync, readFileSync } from "node:fs";
-import path from "node:path";
+/** `azalee dialogue` — recherche SQL dans les dialogues narratifs et de chronique. */
 
 import type { Command } from "commander";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import type { Database } from "@rosegriffon/db/schema";
 
 import { colors, errorMessage, getOrReadInput, reportError, restoreLogs, suppressLogs } from "../context";
 import type { DialogueOptions } from "../types";
@@ -12,20 +11,8 @@ import type { DialogueOptions } from "../types";
 interface DialogueMatch {
 	eventId: string;
 	dialogueId: string;
-	speaker: string | undefined;
+	speaker?: string;
 	text: { fr?: string; en?: string; ja?: string } | undefined;
-}
-
-/** Forme du dump `all-gamedata/story_text_database.json`. */
-interface StoryTextDatabase {
-	events?: Array<{
-		eventId: string;
-		dialogues: Array<{
-			dialogueId: string;
-			speaker?: { charaId?: string; names?: { fr?: string; en?: string; ja?: string } };
-			text?: { fr?: string; en?: string; ja?: string };
-		}>;
-	}>;
 }
 
 export function registerDialogueCommand(program: Command): void {
@@ -42,59 +29,40 @@ export function registerDialogueCommand(program: Command): void {
 				const speakerQuery = options.speaker;
 				const limitVal = parseInt(options.limit, 10) || 10;
 
-				const dataRoot = process.env.DATA_ROOT || process.env.DATA_PATH || "/home/ubuntu/niers/data";
-				const dbPath = path.join(dataRoot, "all-gamedata/story_text_database.json");
-				if (!existsSync(dbPath)) {
-					reportError(
-						options.json,
-						"Story text database not found",
-						`${colors.red}Erreur: Base de dialogues introuvable. Exécutez 'azalee sync --push' d'abord.${colors.reset}`,
-					);
-					return;
-				}
-
-				const data = JSON.parse(readFileSync(dbPath, "utf-8")) as StoryTextDatabase;
-				const events = data.events || [];
 				const matches: DialogueMatch[] = [];
 
 				const textQ = inputQuery.toLowerCase().trim();
 				const speakerQ = speakerQuery?.toLowerCase().trim();
+				const db = createAchilleaSql<Database>();
+				const dialogueRows = await db
+					.selectFrom("inagle_game_text")
+					.select(["hash_id", "locale", "category", "value"])
+					.where((eb) => eb.or([
+						eb("category", "ilike", "%dialog%"),
+						eb("category", "ilike", "%event%"),
+						eb("category", "ilike", "%story%"),
+						eb("category", "ilike", "%map%"),
+						eb("category", "ilike", "%phase%"),
+					]))
+					.$if(Boolean(textQ), (qb) => qb.where("value", "ilike", `%${textQ}%`))
+					.$if(Boolean(speakerQ), (qb) => qb.where("value", "ilike", `%${speakerQ}%`))
+					.orderBy("hash_id", "asc")
+					.limit(Math.max(limitVal * 3, 3))
+					.execute();
 
-				outerLoop: for (const ev of events) {
-					const eventId = ev.eventId;
-					for (const d of ev.dialogues) {
-						let matchesText = true;
-						let matchesSpeaker = true;
-
-						if (textQ) {
-							const textFr = d.text?.fr?.toLowerCase() || "";
-							const textEn = d.text?.en?.toLowerCase() || "";
-							const textJa = d.text?.ja?.toLowerCase() || "";
-							matchesText = textFr.includes(textQ) || textEn.includes(textQ) || textJa.includes(textQ);
-						}
-
-						if (speakerQ) {
-							const spNameFr = d.speaker?.names?.fr?.toLowerCase() || "";
-							const spNameEn = d.speaker?.names?.en?.toLowerCase() || "";
-							const spNameJa = d.speaker?.names?.ja?.toLowerCase() || "";
-							matchesSpeaker =
-								spNameFr.includes(speakerQ) ||
-								spNameEn.includes(speakerQ) ||
-								spNameJa.includes(speakerQ) ||
-								d.speaker?.charaId?.toLowerCase() === speakerQ;
-						}
-
-						if (matchesText && matchesSpeaker) {
-							matches.push({
-								eventId,
-								dialogueId: d.dialogueId,
-								speaker: d.speaker?.names?.fr || d.speaker?.names?.en || d.speaker?.names?.ja || d.speaker?.charaId,
-								text: d.text,
-							});
-							if (matches.length >= limitVal) break outerLoop;
-						}
-					}
+				const grouped = new Map<string, DialogueMatch>();
+				for (const row of dialogueRows) {
+					const current: DialogueMatch = grouped.get(row.hash_id) ?? {
+						eventId: row.category,
+						dialogueId: row.hash_id,
+						text: {},
+					};
+					if (row.locale === "fr" || row.locale === "en" || row.locale === "ja") current.text = { ...current.text, [row.locale]: row.value };
+					current.speaker ??= speakerQ;
+					grouped.set(row.hash_id, current);
 				}
+				matches.push(...grouped.values());
+				matches.splice(limitVal);
 
 				restoreLogs(!!options.json);
 				if (options.json) {

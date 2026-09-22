@@ -23,10 +23,9 @@ const envSchema = z.object({
 	SUPABASE_ANON_KEY: z.string().min(1).optional(),
 	SUPABASE_JWT_SECRET: z.string().min(1).optional(),
 
-	// Passerelle d'identité Achilléa : même secret que `JWT_SECRET_KEY` du bot.
-	// Optionnel — sans lui, `/api/achillea/session` répond 503 et la session
-	// e-sport reste anonyme, au lieu de faire échouer le démarrage du site.
-	ACHILLEA_JWT_SECRET: z.string().min(1).optional(),
+	// Pont interne vers l'API unifiée. Il reste serveur uniquement.
+	ACHILLEA_API_URL: z.string().url().optional(),
+	API_ADMIN_TOKEN: z.string().min(1).optional(),
 
 	// Postgres (Supabase)
 	POSTGRES_DATABASE: z.string().min(1).optional(),

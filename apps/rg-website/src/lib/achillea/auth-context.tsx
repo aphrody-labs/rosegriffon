@@ -1,13 +1,6 @@
 "use client";
 
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useEffect,
-	useState,
-	type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { SessionUserDTO } from "@rosegriffon/achillea-types/domain/user";
 import { safeReturnUrl } from "./auth-session";
 import { createAchilleaClient } from "./client";
@@ -90,7 +83,14 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 				// s'il n'y a pas de session Rose Griffon, `409` si aucun compte
 				// Discord n'y est lié — deux informations, pas des pannes. L'état
 				// reste `anonymous`.
-				const reponse = await fetch("/api/achillea/session", { method: "POST" });
+				const reponse = await fetch("/api/achillea/session", {
+					method: "POST",
+					// Explicite pour conserver la session RG quand le site est servi
+					// derrière un domaine parent/proxy ; le jeton HTTP-only est ensuite
+					// lu par ranked.rosegriffon.fr.
+					credentials: "include",
+					cache: "no-store",
+				});
 				if (!reponse.ok || annule) return;
 				await lireSession();
 			} catch {
@@ -116,7 +116,11 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 
 	const logout = useCallback(async () => {
 		try {
-			await fetch("/api/achillea/session", { method: "DELETE" });
+			await fetch("/api/achillea/session", {
+				method: "DELETE",
+				credentials: "include",
+				cache: "no-store",
+			});
 		} finally {
 			setUser(null);
 			setStatus("anonymous");
@@ -141,9 +145,7 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 		refreshUser,
 	};
 
-	return (
-		<AchilleaAuthContext.Provider value={value}>{children}</AchilleaAuthContext.Provider>
-	);
+	return <AchilleaAuthContext.Provider value={value}>{children}</AchilleaAuthContext.Provider>;
 }
 
 export function useAchilleaAuth(): AchilleaAuthContextType {

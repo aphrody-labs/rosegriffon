@@ -292,11 +292,14 @@ lui seul) : à découper en sous-lots par onglet.
    sont pas** des dépendances Angular : elles déménagent vers `apps/website`
    (ou `packages/ui`) au moment où la phase qui les consomme atterrit.
 
-**Ce qui n'est PAS touché** : `apps/achillea-bot`, l'API `:4000`/`:4002`, le
-Socket.IO `:4005`, `ranked.rosegriffon.fr`, `achillea-auth.service`,
-`achillea-postgrest.service`, `achillea-realtime.service`,
-`achillea-storage.service`, la base Achilléa, ses migrations et ses secrets.
-Ce plan ne déplace **que** le rendu.
+**Ce qui reste un adaptateur** : `apps/achillea-bot` conserve le gateway Discord,
+les commandes, les embeds, les notifications et les contrôleurs de compatibilité.
+Les règles métier portables sont progressivement extraites vers
+`@rosegriffon/achillea-core` et les formes vers `@rosegriffon/achillea-types`;
+les routes REST et l'accès DB restent provisoirement dans le bot tant qu'un
+service plateforme équivalent n'est pas branché. L'API `:4000`/`:4002`, le
+Socket.IO `:4005`, `ranked.rosegriffon.fr`, les services Supabase et les
+migrations restent inchangés comme infrastructure d'exécution.
 
 ---
 
@@ -446,8 +449,9 @@ qu'attend l'API Achilléa : il retrouve le compte Discord lié
 (`account.provider_id = 'discord'`), garantit l'existence du joueur dans
 `achillea."user"` — même base, donc une seule requête — et signe le JWT avec le
 secret partagé (`ACHILLEA_JWT_SECRET`, identique à `JWT_SECRET_KEY` du bot).
-Le format est verrouillé par `apps/website/src/lib/achillea/jeton.test.ts`, qui
-fait vérifier notre signature par `jsonwebtoken`, le vérificateur réel du bot.
+Le contrat est centralisé dans `@rosegriffon/achillea-core` et la signature
+serveur dans `@rosegriffon/auth/achillea-session`; ses tests vérifient le format
+attendu par le vérificateur réel du bot.
 
 `AchilleaAuthProvider` ne décide donc plus rien, et `AchilleaNav` n'a plus de
 bouton « Connexion » : il y avait deux connexions et deux déconnexions dans le

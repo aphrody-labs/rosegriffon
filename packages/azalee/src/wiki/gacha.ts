@@ -2,9 +2,9 @@
  * @file lib/wiki/gacha.ts
  * @description Accès data dédié à la section « Capsules / Gacha + Costumes ».
  *
- * Lit directement le miroir SQLite via le client data partagé d'azalee
- * (`@/lib/supabase/server` → `createSqliteClient`, qui route toute table
- * `inagle_*` vers le miroir embarqué). NE touche PAS `lib/wiki-service.ts`.
+ * Lit directement les projections PostgreSQL via le client data partagé
+ * d'azalée. Le miroir local est réservé au CLI/offline. NE touche PAS
+ * `lib/wiki-service.ts`.
  *
  * Tables sources (schéma RÉEL vérifié sur le miroir, rien d'inventé) :
  *

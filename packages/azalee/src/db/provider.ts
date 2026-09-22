@@ -1,44 +1,15 @@
-/**
- * Fournisseur de client base de données — point d'injection unique de la lib.
- *
- * Par défaut la bibliothèque lit **le miroir SQLite** des tables `inagle_*`
- * (100 % Bun, zéro réseau) : elle est donc utilisable telle quelle en CLI, en
- * test ou dans n'importe quel script.
- *
- * Une application hôte peut injecter son propre client — c'est ce que fait
- * Website, qui fournit le client Supabase enveloppé d'un `Proxy` routant
- * les tables `inagle_*` vers le miroir et **tout le reste** (éditorial, social,
- * `tweets`…) vers PostgREST. Sans injection, seules les tables présentes dans le
- * miroir répondent.
- */
-
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { createPostgresClient } from "@rosegriffon/db/postgres-client";
 import { createSqliteClient } from "./sqlite-client";
 
-/** Fabrique de client, synchrone ou asynchrone. */
-export type DatabaseClientFactory = () => SupabaseClient | Promise<SupabaseClient>;
-
+export type DatabaseClient = { from(table: string): any };
+export type DatabaseClientFactory = () => DatabaseClient | Promise<DatabaseClient>;
 let factory: DatabaseClientFactory | null = null;
-
-/**
- * Injecte la fabrique de client utilisée par toute la lib. Passer `null`
- * restaure le comportement par défaut (miroir SQLite seul).
- */
-export function setDatabaseProvider(next: DatabaseClientFactory | null): void {
-	factory = next;
-}
-
-/** Indique si une fabrique a été injectée par l'hôte. */
-export function hasDatabaseProvider(): boolean {
-	return factory !== null;
-}
-
-/**
- * Renvoie le client de lecture des données de jeu. Les modules `wiki/*`
- * n'utilisent que la surface `.from(table).select(...)`, commune au client
- * Supabase et au client miroir.
- */
-export async function createClient(): Promise<SupabaseClient> {
+export function setDatabaseProvider(next: DatabaseClientFactory | null): void { factory = next; }
+export function hasDatabaseProvider(): boolean { return factory !== null; }
+export async function createClient(): Promise<DatabaseClient> {
 	if (factory) return await factory();
-	return createSqliteClient() as unknown as SupabaseClient;
+	const connectionString = process.env.DATABASE_URL ?? process.env.ROSE_GRIFFON_DATABASE_URL ?? process.env.RG_DATABASE_URL;
+	// PostgreSQL is the production/runtime source. SQLite is deliberately
+	// limited to test/offline mode and is never selected silently in services.
+	return process.env.NODE_ENV !== "test" ? createPostgresClient(connectionString) : createSqliteClient();
 }

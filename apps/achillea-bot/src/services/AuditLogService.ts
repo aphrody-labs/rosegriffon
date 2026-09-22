@@ -1,11 +1,35 @@
 import { EmbedBuilder } from "discord.js";
+import type { Generated, Kysely } from "kysely";
 import { delay, inject } from "tsyringe";
 
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { Service } from "@/decorators";
-import { AuditLog, Guild } from "@/entities";
 
-import { Database } from "./Database";
 import { Logger } from "./Logger";
+
+interface AuditDatabase {
+	audit_log: {
+		id: Generated<string>;
+		actor_id: string | null;
+		action: string;
+		target_type: string;
+		target_id: string | null;
+		payload: Record<string, unknown> | null;
+		reason: string | null;
+		ip: string | null;
+		ts: Date;
+		prev_signature: string | null;
+		signature: string;
+	};
+	guild: { id: string; audit_log_channel_id: string | null };
+}
+
+type AuditRecord = Omit<AuditDatabase["audit_log"], "id" | "ts"> & {
+	id: string;
+	ts: Date;
+};
+
+const sql = createAchilleaSql<AuditDatabase>() as Kysely<AuditDatabase>;
 
 export interface AuditLogParams {
 	actor_id?: string | null;
@@ -26,7 +50,6 @@ export interface AuditVerifyResult {
 @Service()
 export class AuditLogService {
 	constructor(
-		@inject(delay(() => Database)) private db: any,
 		@inject(delay(() => Logger)) private logger: any
 	) {}
 
@@ -63,40 +86,47 @@ export class AuditLogService {
 	/**
 	 * Insert a new audit log entry with chained SHA256 signature.
 	 */
-	async log(params: AuditLogParams): Promise<AuditLog> {
-		const em = this.db.em.fork();
-
-		// Fetch last entry to get the chain head
-		const last = await em.findOne(AuditLog, {}, { orderBy: { ts: "DESC" } });
-
+	async log(params: AuditLogParams): Promise<AuditRecord> {
 		const ts = new Date();
 		const actor_id = params.actor_id ?? null;
 		const target_id = params.target_id ?? null;
 		const payload = params.payload ?? null;
 
-		const signature = this.computeSignature(last?.signature ?? null, {
-			actor_id,
-			action: params.action,
-			target_type: params.target_type,
-			target_id,
-			payload,
-			ts,
+		const record = await sql.transaction().execute(async (trx) => {
+			// Read and append in one transaction so concurrent writers cannot
+			// accidentally compute a chain head from a stale connection.
+			const last = await trx
+				.selectFrom("audit_log")
+				.select(["signature"])
+				.orderBy("ts", "desc")
+				.limit(1)
+				.forUpdate()
+				.executeTakeFirst();
+			const signature = this.computeSignature(last?.signature ?? null, {
+				actor_id,
+				action: params.action,
+				target_type: params.target_type,
+				target_id,
+				payload,
+				ts,
+			});
+			return trx
+				.insertInto("audit_log")
+				.values({
+					actor_id,
+					action: params.action,
+					target_type: params.target_type,
+					target_id,
+					payload,
+					reason: params.reason ?? null,
+					ip: params.ip ?? null,
+					ts,
+					prev_signature: last?.signature ?? null,
+					signature,
+				})
+				.returningAll()
+				.executeTakeFirstOrThrow();
 		});
-
-		const record = em.create(AuditLog, {
-			actorId: actor_id,
-			action: params.action,
-			targetType: params.target_type,
-			targetId: target_id,
-			payload,
-			reason: params.reason ?? null,
-			ip: params.ip ?? null,
-			ts,
-			prevSignature: last?.signature ?? null,
-			signature,
-		});
-
-		await em.persist(record).flush();
 
 		// Mirror to Discord channel if configured
 		if (params.guild_id) {
@@ -111,17 +141,16 @@ export class AuditLogService {
 	 * Returns { valid: true } if chain is intact, or { valid: false, broken_at: id } at first break.
 	 */
 	async verify(): Promise<AuditVerifyResult> {
-		const em = this.db.em.fork();
-		const entries = await em.findAll(AuditLog, { orderBy: { ts: "ASC" } });
+		const entries = await sql.selectFrom("audit_log").selectAll().orderBy("ts", "asc").execute();
 
 		let prev: string | null = null;
 
 		for (const entry of entries) {
 			const expected = this.computeSignature(prev, {
-				actor_id: entry.actorId,
+				actor_id: entry.actor_id,
 				action: entry.action,
-				target_type: entry.targetType,
-				target_id: entry.targetId,
+				target_type: entry.target_type,
+				target_id: entry.target_id,
 				payload: entry.payload,
 				ts: entry.ts,
 			});
@@ -139,11 +168,14 @@ export class AuditLogService {
 	/**
 	 * Post a summary embed to a guild's audit log channel.
 	 */
-	private async mirrorToDiscord(record: AuditLog, guildId: string): Promise<void> {
+	private async mirrorToDiscord(record: AuditRecord, guildId: string): Promise<void> {
 		try {
-			const em = this.db.em.fork();
-			const guild = await em.findOne(Guild, { id: guildId });
-			if (!guild?.auditLogChannelId) return;
+			const guild = await sql
+				.selectFrom("guild")
+				.select(["audit_log_channel_id"])
+				.where("id", "=", guildId)
+				.executeTakeFirst();
+			if (!guild?.audit_log_channel_id) return;
 
 			const embed = new EmbedBuilder()
 				.setTitle("Audit Log")
@@ -152,17 +184,17 @@ export class AuditLogService {
 					{ name: "Action", value: record.action, inline: true },
 					{
 						name: "Target",
-						value: `${record.targetType}${record.targetId ? ` (${record.targetId})` : ""}`,
+						value: `${record.target_type}${record.target_id ? ` (${record.target_id})` : ""}`,
 						inline: true,
 					},
-					{ name: "Actor", value: record.actorId ? `<@${record.actorId}>` : "System", inline: true }
+					{ name: "Actor", value: record.actor_id ? `<@${record.actor_id}>` : "System", inline: true }
 				)
 				.setTimestamp(record.ts)
 				.setFooter({ text: `sig: ${record.signature.slice(0, 12)}…` });
 
 			if (record.reason) embed.addFields({ name: "Reason", value: record.reason });
 
-			await this.logger.discordChannel(guild.auditLogChannelId, { embeds: [embed] }, "info");
+			await this.logger.discordChannel(guild.audit_log_channel_id, { embeds: [embed] }, "info");
 		} catch {
 			// Mirror is best-effort — never block the main log
 		}

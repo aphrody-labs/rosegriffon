@@ -230,10 +230,9 @@ française de la communauté Inazuma Eleven.
 Azalée expose une API GraphQL publique en lecture seule pour interroger la base de données du jeu.
 
 - Endpoint GraphQL : POST https://rosegriffon.fr/api/graphql (Content-Type: application/json)
-- Queries disponibles : characters, character, skills, skill, items, item, auras, ragSearch, tweets.
+- Queries disponibles : characters, character, skills, skill, items, item, auras, tweets.
 - Filtres skills(page, limit, q, category, element) ; characters(page, limit, q, element, position, rarity, team, series).
 - Champs Skill : id, name { fr en ja }, description { fr en ja }, category, element, power, tension, image, sheetData. Le champ name est de type LocalizedString (sous-champs fr/en/ja).
-- Recherche sémantique (RAG) : POST https://rosegriffon.fr/api/rag/search ; données formatées LLM : https://rosegriffon.fr/api/llm/<model>.
 
 Exemple de requête (techniques de Tir) :
 POST https://rosegriffon.fr/api/graphql

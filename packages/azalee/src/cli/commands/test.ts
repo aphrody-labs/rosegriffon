@@ -103,6 +103,7 @@ export function registerTestCommand(program: Command): void {
 	program
 		.command("test")
 		.description("Exécute l'intégralité des tests natifs (filtres, API, pages et boutons)")
+		.option("-p, --playwright", "Délègue la suite à Playwright")
 		.action(async (options: TestOptions) => {
 			console.log(`${colors.bold}${colors.magenta}=== RUNNING NATIVE VERIFICATION SUITE ===${colors.reset}\n`);
 
@@ -343,7 +344,8 @@ export function registerTestCommand(program: Command): void {
 				const cheminTeste = (chemin: string): string => {
 					const RACINES = ["/news", "/settings", "/search", "/login", "/legal", "/contact", "/soutenir", "/charte", "/maintenance"];
 					const estRacine = RACINES.some((r) => chemin === r || chemin.startsWith(`${r}/`));
-					return estRacine || chemin === "/" ? chemin : `${prefixeWiki}${chemin}`;
+					const dejaSousPrefixe = prefixeWiki.length > 0 && (chemin === prefixeWiki || chemin.startsWith(`${prefixeWiki}/`));
+					return estRacine || chemin === "/" || dejaSousPrefixe ? chemin : `${prefixeWiki}${chemin}`;
 				};
 
 				// ─── SUITE 2 : endpoints API & GraphQL ───
@@ -509,6 +511,7 @@ export function registerTestCommand(program: Command): void {
 						const html = await res.text();
 						stdout = JSON.stringify({
 							httpStatus: res.status,
+							finalUrl: res.url || url,
 							bytes: html.length,
 							headers: { contentType: res.headers.get("content-type") || "text/html" },
 							assets: ["mock-asset.js"],
@@ -544,6 +547,7 @@ export function registerTestCommand(program: Command): void {
 						const html = await res.text();
 						stdout = JSON.stringify({
 							httpStatus: res.status,
+							finalUrl: res.url || `${url}${cheminTeste("/contact")}`,
 							bytes: html.length,
 							headers: { contentType: res.headers.get("content-type") || "text/html" },
 						});

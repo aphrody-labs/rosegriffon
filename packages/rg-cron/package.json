@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@aphrody-code/x": "catalog:",
-    "@aphrody-code/zukan": "catalog:",
     "@asteasolutions/zod-to-openapi": "catalog:",
     "@rosegriffon/auth": "workspace:*",
     "@rosegriffon/assets": "workspace:*",

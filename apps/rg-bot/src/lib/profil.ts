@@ -232,8 +232,8 @@ export interface Profil {
  * Deux familles, et une seule raison : ce sont les surfaces qui parlent du JEU
  * et de son exploitation, pas de la communauté Rose Griffon.
  *
- *   - les données de jeu et les fichiers extraits (`/azalee`, `/cpk`, `/rag`,
- *     `/cdn`) ainsi que l'archive des posts X (`/x`) ;
+ *   - les données de jeu et les fichiers extraits (`/azalee`, `/cpk`, `/cdn`)
+ *     ainsi que l'archive des posts X (`/x`) ;
  *   - toute la racine `/staff`, c'est-à-dire la CONSULTATION d'exploitation.
  *     Elle est protégée par `requireRgAdmin` (rôle résolu en base via la table
  *     `account` de Better Auth), donc elle protège identiquement quel que soit
@@ -255,7 +255,6 @@ const MODULES_AZALEE = [
 	// staff qui utilise les deux dans la même minute. Cf. `docs/bot-commandes.md`.
 	"commands/azalee-jeu.ts",
 	"commands/cpk.ts",
-	"commands/rag.ts",
 	"commands/cdn.ts",
 	"commands/x.ts",
 	// Les boutons de la carte de validation d'annonce. Ce module ne déclare

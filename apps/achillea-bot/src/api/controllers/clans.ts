@@ -26,7 +26,7 @@ import type {
 	UpdateClanDTO,
 } from "@/api/models/dtos";
 import type { Paginated } from "@/api/models/interfaces";
-import { coreManagerConfig } from "@/configs";
+import { coreManagerConfig, urlsConfig } from "@/configs";
 import type { UserDTO } from "@/services";
 import {
 	ClanPosterService,
@@ -103,6 +103,20 @@ export class ClansController extends BaseController {
 		@Default(ClanState.Approved)
 		state: ClanState
 	): Promise<any> {
+		const upstreamUrl = new URL("/v1/achillea/clans", urlsConfig.unifiedApi);
+		upstreamUrl.searchParams.set("page", String(page ?? 1));
+		upstreamUrl.searchParams.set("pageSize", String(pagination ?? 25));
+		if (state !== undefined) upstreamUrl.searchParams.set("state", String(state));
+		const upstream = await fetch(upstreamUrl);
+		if (upstream.ok) {
+			const payload = await upstream.json() as { data?: unknown[]; count?: number };
+			const total = payload.count ?? payload.data?.length ?? 0;
+			res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
+			return res.json({ data: payload.data ?? [], meta: { page: page ?? 1, limit: pagination ?? 25, total, pageCount: Math.ceil(total / (pagination ?? 25)) } });
+		}
+		if (upstream.status !== 404 && upstream.status !== 501) {
+			return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
+		}
 		const [items, total] = await this.clanService.getClans(page, pagination, state);
 
 		// Liste de clans publique : tres peu changeante (creation/dissolution clan

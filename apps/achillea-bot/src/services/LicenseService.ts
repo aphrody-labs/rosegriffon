@@ -4,12 +4,56 @@ import { join } from "node:path";
 import { formatLicenseNumber, generateQrSecret, LICENSE_VALIDITY_MS } from "@rosegriffon/achillea-core";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import QRCode from "qrcode";
+import type { Generated, Kysely } from "kysely";
 import { singleton } from "tsyringe";
 
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { urlsConfig } from "@/configs";
-import { License, User } from "@/entities";
-import { Database } from "@/services/Database";
 import { LicenseStatus } from "@/utils/enums";
+
+interface LicenseDatabase {
+	license: {
+		id: Generated<string>;
+		user_id: string;
+		license_number: string;
+		issued_at: Generated<Date>;
+		valid_until: Date;
+		status: string;
+		pdf_url: string | null;
+		qr_secret: string;
+		created_at: Generated<Date>;
+		updated_at: Generated<Date>;
+	};
+	user: {
+		id: string;
+		display_name: string | null;
+		username: string | null;
+		avatar: string | null;
+		role: number;
+	};
+}
+
+const sql = createAchilleaSql<LicenseDatabase>() as Kysely<LicenseDatabase>;
+
+type LicenseRow = Omit<LicenseDatabase["license"], "id" | "issued_at" | "created_at" | "updated_at"> & {
+	id: string;
+	issued_at: Date;
+	created_at: Date;
+	updated_at: Date;
+};
+
+export interface LicenseRecord {
+	id: string;
+	user: { id: string; displayName: string | null; username: string | null; avatar: string | null };
+	licenseNumber: string;
+	issuedAt: Date;
+	validUntil: Date;
+	status: LicenseStatus;
+	pdfUrl: string | null;
+	qrSecret: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 /** Storage root for generated PDFs (relative to apps/achillea-bot/). */
 const STORAGE_ROOT = join(process.cwd(), "storage", "licenses");
@@ -30,7 +74,26 @@ export interface VerifyResult {
 
 @singleton()
 export class LicenseService {
-	constructor(private db: Database) {}
+	private readonly db = sql;
+
+	async findLatestForUser(userId: string): Promise<LicenseRecord | null> {
+		const row = await this.db.selectFrom("license").selectAll().where("user_id", "=", userId).orderBy("issued_at", "desc").executeTakeFirst();
+		if (!row) return null;
+		const user = await this.db.selectFrom("user").select(["id", "display_name", "username", "avatar"]).where("id", "=", userId).executeTakeFirstOrThrow();
+		return this.toRecord(row, user);
+	}
+
+	async findById(id: string): Promise<LicenseRecord | null> {
+		const row = await this.db.selectFrom("license").selectAll().where("id", "=", id).executeTakeFirst();
+		if (!row) return null;
+		const user = await this.db.selectFrom("user").select(["id", "display_name", "username", "avatar"]).where("id", "=", row.user_id).executeTakeFirstOrThrow();
+		return this.toRecord(row, user);
+	}
+
+	async isAdministrator(userId: string): Promise<boolean> {
+		const user = await this.db.selectFrom("user").select("role").where("id", "=", userId).executeTakeFirst();
+		return Boolean(user && user.role >= 2);
+	}
 
 	// issue
 
@@ -43,33 +106,38 @@ export class LicenseService {
 	 * - validUntil    : +1 an
 	 * - pdfUrl        : `/api/licenses/<id>.pdf` (endpoint API qui stream le fichier)
 	 */
-	async issue(userId: string): Promise<License> {
-		const em = this.db.em.fork();
-
-		const user = await em.findOneOrFail(User, { id: userId });
+	async issue(userId: string): Promise<LicenseRecord> {
+		const user = await this.db.selectFrom("user").select(["id", "display_name", "username", "avatar"]).where("id", "=", userId).executeTakeFirstOrThrow();
 
 		const year = new Date().getFullYear();
 		const yearStart = new Date(`${year}-01-01T00:00:00Z`);
 		const yearEnd = new Date(`${year + 1}-01-01T00:00:00Z`);
-		const seq = (await em.count(License, { issuedAt: { $gte: yearStart, $lt: yearEnd } })) + 1;
+		const seqRow = await this.db
+			.selectFrom("license")
+			.select(({ fn }) => fn.count<string>("id").as("count"))
+			.where("issued_at", ">=", yearStart)
+			.where("issued_at", "<", yearEnd)
+			.executeTakeFirstOrThrow();
+		const seq = Number(seqRow.count) + 1;
 		const licenseNumber = formatLicenseNumber(year, seq);
 
 		// 64 hex chars via Web Crypto (logique pure @rosegriffon/achillea-core).
 		const qrSecret = generateQrSecret();
 
-		const license = new License();
-		license.user = user;
-		license.licenseNumber = licenseNumber;
-		license.qrSecret = qrSecret;
-		license.validUntil = new Date(Date.now() + VALIDITY_MS);
-		license.status = LicenseStatus.Active;
-
-		em.persist(license);
-		await em.flush();
+		const validUntil = new Date(Date.now() + VALIDITY_MS);
+		const row = await this.db.insertInto("license").values({
+			user_id: user.id,
+			license_number: licenseNumber,
+			valid_until: validUntil,
+			status: LicenseStatus.Active,
+			pdf_url: null,
+			qr_secret: qrSecret,
+		}).returningAll().executeTakeFirstOrThrow();
+		const license: LicenseRecord = this.toRecord(row, user);
 
 		// Generate + write PDF to storage
 		const pdfBytes = await this.generatePdf(license, {
-			displayName: user.displayName || user.username || `User#${user.id}`,
+			displayName: user.display_name || user.username || `User#${user.id}`,
 			avatar: user.avatar || null,
 		});
 		await mkdir(STORAGE_ROOT, { recursive: true });
@@ -77,7 +145,8 @@ export class LicenseService {
 		await Bun.write(pdfPath, pdfBytes);
 
 		license.pdfUrl = `/api/licenses/${license.id}.pdf`;
-		await em.flush();
+		const updated = await this.db.updateTable("license").set({ pdf_url: license.pdfUrl }).where("id", "=", license.id).returningAll().executeTakeFirstOrThrow();
+		license.updatedAt = updated.updated_at;
 
 		return license;
 	}
@@ -85,12 +154,10 @@ export class LicenseService {
 	// revoke
 
 	/** Revokes a license (sets status = Revoked). */
-	async revoke(licenseId: string, _by: string): Promise<License> {
-		const em = this.db.em.fork();
-		const license = await em.findOneOrFail(License, { id: licenseId });
-		license.status = LicenseStatus.Revoked;
-		await em.flush();
-		return license;
+	async revoke(licenseId: string, _by: string): Promise<LicenseRecord> {
+		const row = await this.db.updateTable("license").set({ status: LicenseStatus.Revoked }).where("id", "=", licenseId).returningAll().executeTakeFirstOrThrow();
+		const user = await this.db.selectFrom("user").select(["id", "display_name", "username", "avatar"]).where("id", "=", row.user_id).executeTakeFirstOrThrow();
+		return this.toRecord(row, user);
 	}
 
 	// verify
@@ -100,8 +167,15 @@ export class LicenseService {
 	 * Returns a sanitized result with valid/holder/licenseNumber/validUntil only.
 	 */
 	async verify(qrSecret: string): Promise<VerifyResult> {
-		const em = this.db.em.fork();
-		const license = await em.findOne(License, { qrSecret }, { populate: ["user"] });
+		const license = await this.db
+			.selectFrom("license")
+			.innerJoin("user", "user.id", "license.user_id")
+			.select([
+				"license.id", "license.license_number", "license.valid_until", "license.status",
+				"user.display_name", "user.username", "user.avatar",
+			])
+			.where("license.qr_secret", "=", qrSecret)
+			.executeTakeFirst();
 
 		if (!license) return { valid: false, reason: "not_found" };
 
@@ -109,27 +183,41 @@ export class LicenseService {
 			return {
 				valid: false,
 				reason: "revoked",
-				licenseNumber: license.licenseNumber,
+				licenseNumber: license.license_number,
 			};
 		}
 
-		if (license.validUntil.getTime() <= Date.now() || license.status === LicenseStatus.Expired) {
+		if (license.valid_until.getTime() <= Date.now() || license.status === LicenseStatus.Expired) {
 			return {
 				valid: false,
 				reason: "expired",
-				licenseNumber: license.licenseNumber,
+				licenseNumber: license.license_number,
 			};
 		}
 
-		const user = license.user;
 		return {
 			valid: true,
-			licenseNumber: license.licenseNumber,
-			validUntil: license.validUntil,
+			licenseNumber: license.license_number,
+			validUntil: license.valid_until,
 			holder: {
-				displayName: user.displayName || user.username || "Inconnu",
-				avatar: user.avatar || null,
+				displayName: license.display_name || license.username || "Inconnu",
+				avatar: license.avatar || null,
 			},
+		};
+	}
+
+	private toRecord(row: LicenseRow, user: Pick<LicenseDatabase["user"], "id" | "display_name" | "username" | "avatar">): LicenseRecord {
+		return {
+			id: row.id,
+			user: { id: user.id, displayName: user.display_name, username: user.username, avatar: user.avatar },
+			licenseNumber: row.license_number,
+			issuedAt: row.issued_at,
+			validUntil: row.valid_until,
+			status: row.status as LicenseStatus,
+			pdfUrl: row.pdf_url,
+			qrSecret: row.qr_secret,
+			createdAt: row.created_at,
+			updatedAt: row.updated_at,
 		};
 	}
 
@@ -142,7 +230,7 @@ export class LicenseService {
 	 * - Verso : conditions générales courtes.
 	 */
 	async generatePdf(
-		license: License,
+		license: LicenseRecord,
 		holder: { displayName: string; avatar: string | null }
 	): Promise<Uint8Array> {
 		const pdf = await PDFDocument.create();

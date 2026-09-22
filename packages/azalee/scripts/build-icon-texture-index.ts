@@ -24,8 +24,8 @@
  *   validé octet à octet contre l'exemple Rust `inspect_g4tx` de `nie-formats`.
  *
  * `10_icon_chr/face` (5676) et `10_icon_chr/uniform` (12 481) sont **exclus** :
- * ce sont des conteneurs 1:1 par personnage, déjà couverts par
- * `character-face-manifest.json` et adressables sans index.
+ * ce sont des conteneurs 1:1 par personnage, déjà couverts par la projection
+ * `inagle_asset_manifests` et adressables sans index.
  *
  * Run : `bun packages/azalee/scripts/build-icon-texture-index.ts`
  * Options : `--out <fichier>` `--service <url>` `--concurrency <n>` `--dry-run`

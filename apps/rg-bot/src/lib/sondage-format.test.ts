@@ -865,17 +865,12 @@ describe("vie privée — non-dérive", () => {
 	 * commentaire.
 	 */
 	const RACINE = new URL("../..", import.meta.url).pathname;
-	// Les SEPT fichiers de l'unité « rag-sondage », pas seulement ceux qui
-	// touchent la base : un identifiant de table peut dériver dans un commentaire
-	// d'exemple ou dans une requête RAG collée en dur aussi bien qu'en SQL.
+	// Les quatre fichiers de l'unité sondage, pas seulement ceux qui touchent la base.
 	const FICHIERS = [
 		"src/lib/sondage-format.ts",
 		"src/lib/sondage-format.test.ts",
 		"src/commands/sondage.ts",
 		"src/commands/campagne.ts",
-		"src/lib/rag-format.ts",
-		"src/lib/rag-format.test.ts",
-		"src/commands/rag.ts",
 	];
 	const INTERDIT = ["discord", "poll", "votes"].join("_");
 

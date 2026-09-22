@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { PickerCharacter } from "@/components/tools/my-team/CharacterPicker";
 import { getServerSession } from "@/lib/auth-helpers";
 import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
+import type { Formation } from "@rosegriffon/azalee/game/formations";
 import { wikiService } from "@/lib/wiki-service";
 import { TeamBuilderLoader } from "./TeamBuilderLoader";
 
@@ -28,7 +29,7 @@ export default async function MyTeamPage() {
 	const session = await getServerSession();
 	const isAuthenticated = Boolean(session?.user);
 
-	const [{ data: rawChars }, { data: rawCoords }] = await Promise.all([
+	const [{ data: rawChars }, { data: rawCoords }, formations] = await Promise.all([
 		wikiService.getCharactersList({
 			limit: 6000,
 			page: 1,
@@ -37,7 +38,8 @@ export default async function MyTeamPage() {
 		wikiService.getCoordinatorsList({
 			limit: 200,
 			status: "all",
-		})
+		}),
+		wikiService.getFormations(),
 	]);
 
 	// Group variants and deduplicate
@@ -100,5 +102,5 @@ export default async function MyTeamPage() {
 
 	const characters = [...mappedPlayers, ...mappedCoords];
 
-	return <TeamBuilderLoader characters={characters} isAuthenticated={isAuthenticated} />;
+	return <TeamBuilderLoader characters={characters} formations={formations as Formation[]} isAuthenticated={isAuthenticated} />;
 }

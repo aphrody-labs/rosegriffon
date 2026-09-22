@@ -148,7 +148,7 @@ export function registerDataCommand(program: Command): void {
 	dataCmd
 		.command("verify")
 		.description(
-			"Vérifie les chemins/données : miroir présent+récent, DATA_ROOT, entries, snapshot schéma"
+				"Vérifie les chemins/données : PostgreSQL, DATA_ROOT et snapshot schéma"
 		)
 		.action(() => {
 			let ok = true;
@@ -176,10 +176,7 @@ export function registerDataCommand(program: Command): void {
 				"dump chara_param présent",
 				existsSync(`${DATA_ROOT_DEFAULT}/common/gamedata/character`)
 			);
-			check(
-				"inagle entries/characters.json",
-				existsSync(`${REPO_ROOT}/packages/inagle/src/entries/characters.json`)
-			);
+			check("DATABASE_URL configurée", Boolean(process.env.DATABASE_URL || process.env.ROSE_GRIFFON_DATABASE_URL || process.env.RG_DATABASE_URL));
 			check("snapshot schéma DB", existsSync(`${REPO_ROOT}/apps/website/data/schema-snapshot`));
 			check(
 				"standalone embarque un miroir",

@@ -1,38 +1,22 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "../types.gen";
+import { sql } from "kysely";
 import type { DashboardStats } from "@rosegriffon/types";
+import { createAchilleaSql } from "../achillea-sql";
 
-interface CountResult {
-	count: number | null;
-}
+type CountRow = { count: number };
 
 /**
- * Shared service to fetch aggregated dashboard counts.
- * Optimized for performance using head-only queries for counts.
+ * Service partagé pour les agrégats du tableau de bord.
+ * Chaque métrique est calculée côté PostgreSQL, sans charger les lignes.
  */
-export async function getDashboardStats(
-	supabase: SupabaseClient<Database>
-): Promise<DashboardStats> {
-	const yesterday = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
-	const now = new Date().toISOString();
+export async function getDashboardStats(): Promise<DashboardStats> {
+	const db = createAchilleaSql();
+	const yesterday = new Date(Date.now() - 24 * 3600 * 1000);
+	const now = new Date();
 
-	async function count<T extends keyof Database["public"]["Tables"]>(
-		table: T,
-		filter?: (q: any) => any
-	): Promise<number> {
-		let q = supabase.from(table).select("*", { count: "exact", head: true });
-
-		if (filter) {
-			q = filter(q) as any;
-		}
-
-		const { count: c, error } = await q;
-		if (error) {
-			console.error(`[getDashboardStats] Error counting ${table}:`, error.message);
-			return 0;
-		}
-		return c ?? 0;
-	}
+	const count = async (query: ReturnType<typeof sql<CountRow>>) => {
+		const result = await query.execute(db);
+		return Number(result.rows[0]?.count ?? 0);
+	};
 
 	const [
 		profiles_total,
@@ -46,16 +30,16 @@ export async function getDashboardStats(
 		team_members,
 		discord_members,
 	] = await Promise.all([
-		count("profiles"),
-		count("profiles", (q) => q.gte("updated_at", yesterday)),
-		count("profiles", (q) => q.eq("role", "admin")),
-		count("profiles", (q) => q.eq("role", "banned")),
-		count("articles", (q) => q.eq("status", "published")),
-		count("articles", (q) => q.eq("status", "draft")),
-		count("events", (q) => q.gte("end_time", now)),
-		count("events", (q) => q.lt("end_time", now)),
-		count("team_members", (q) => q.eq("is_active", true)),
-		count("discord_members", (q) => q.eq("is_bot", false)),
+		count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.profiles`),
+		count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.profiles WHERE updated_at >= ${yesterday}`),
+		count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.profiles WHERE role = 'admin'`),
+		count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.profiles WHERE role = 'banned'`),
+		count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.articles WHERE status = 'published'`),
+		count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.articles WHERE status = 'draft'`),
+		count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.events WHERE end_time >= ${now}`),
+		count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.events WHERE end_time < ${now}`),
+		count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.team_members WHERE is_active = TRUE`),
+		count(sql<CountRow>`SELECT COUNT(*)::int AS count FROM public.discord_members WHERE is_bot = FALSE`),
 	]);
 
 	return {

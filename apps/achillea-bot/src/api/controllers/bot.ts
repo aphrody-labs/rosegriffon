@@ -28,8 +28,9 @@ export class BotController extends BaseController {
 
 	constructor() {
 		super();
-
-		[this.client, this.db] = resolveDependenciesSync([Client, Database]);
+		const runtimeClient = (globalThis as typeof globalThis & { __roseGriffonDiscordClient?: Client }).__roseGriffonDiscordClient;
+		this.client = runtimeClient ?? resolveDependenciesSync([Client])[0];
+		[this.db] = resolveDependenciesSync([Database]);
 	}
 
 	@Get("/info")

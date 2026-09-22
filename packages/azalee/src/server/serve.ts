@@ -32,7 +32,7 @@ import { wikiService } from "../wiki/service";
  *
  * Aligné sur le plan d'adressage des outils internes du VPS
  * (`api.rosegriffon.fr` : n2b 8802, shai 8803, cdn 8804, cdn-variants 8805,
- * rag-api 8806, azalee-api **8807**). 3010 est déjà pris par un autre service.
+ * azalee-api **8807**). 3010 est déjà pris par un autre service.
  */
 export const DEFAULT_AZALEE_PORT = 8807;
 

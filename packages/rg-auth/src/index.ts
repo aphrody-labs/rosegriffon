@@ -1,8 +1,23 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { PUBLIC_PROFILE_COLUMNS, type Database, type PublicProfile } from "@rosegriffon/db";
+import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rosegriffon/db";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { ADMIN_ROLES } from "@rosegriffon/types";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export {
+	ACHILLEA_AUTH_ISSUER,
+	ACHILLEA_REALTIME_AUDIENCE,
+	ACHILLEA_REALTIME_TTL_SECONDS,
+	ACHILLEA_SESSION_AUDIENCE,
+	ACHILLEA_SESSION_COOKIE_NAME,
+	ACHILLEA_SESSION_TTL_SECONDS,
+	signAchilleaSessionToken,
+	signAchilleaRealtimeToken,
+	type AchilleaSessionIdentity,
+} from "./achillea-session";
+
+type ProfileQueryClient = { from: (table: string) => any };
+type AuthDataClient = ProfileQueryClient & {
+	rpc: (name: string, args?: Record<string, unknown>) => Promise<any>;
+};
 
 /**
  * Common logic to resolve a profile from a Better Auth user,
@@ -16,7 +31,7 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
  * colonnes réellement lues par les appelants — sont dans la liste blanche.
  */
 export async function resolveProfile(
-	supabase: SupabaseClient<Database>,
+	supabase: ProfileQueryClient,
 	user: { id: string; email?: string | null }
 ): Promise<PublicProfile | null> {
 	const tryFetch = async (column: string, value: string): Promise<PublicProfile | null> => {
@@ -71,8 +86,6 @@ export function isStaff(role: string | null | undefined): boolean {
 	return role === "admin" || role === "staff";
 }
 
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
-
 /**
  * Renvoie un pseudo libre dérivé du candidat.
  *
@@ -81,7 +94,7 @@ import { createSupabaseServiceClient } from "@rosegriffon/db/service";
  * suffixe, et un rejeu retombe sur la même valeur.
  */
 async function trouverPseudoLibre(
-	db: SupabaseClient<Database>,
+	db: AuthDataClient,
 	candidat: string,
 	userId: string
 ): Promise<string> {
@@ -109,7 +122,7 @@ async function trouverPseudoLibre(
 }
 
 /**
- * Ensures a profile exists in Supabase for the given user.
+ * Ensures a profile exists in PostgreSQL for the given user.
  * Standardizes username generation and initial role assignment.
  */
 export async function ensureUserProfile(
@@ -119,10 +132,10 @@ export async function ensureUserProfile(
 		email?: string | null;
 		image?: string | null;
 	},
-	supabase?: SupabaseClient<Database>,
+	supabase?: AuthDataClient,
 	options: { defaultRole?: string; appName?: string } = {}
 ) {
-	const db = supabase || createSupabaseServiceClient();
+	const db: AuthDataClient = supabase ?? createPostgresClient();
 	try {
 		const { data: existing } = await db
 			.from("profiles")
@@ -136,8 +149,12 @@ export async function ensureUserProfile(
 			.select("provider_id, account_id")
 			.eq("user_id", user.id);
 
-		const discordAccount = accounts?.find((a) => a.provider_id === "discord");
-		const patreonAccount = accounts?.find((a) => a.provider_id === "patreon");
+		const discordAccount = accounts?.find(
+			(a: { provider_id?: string }) => a.provider_id === "discord"
+		);
+		const patreonAccount = accounts?.find(
+			(a: { provider_id?: string }) => a.provider_id === "patreon"
+		);
 
 		const discordId = discordAccount?.account_id || null;
 		const patreonId = patreonAccount?.account_id || null;
@@ -188,10 +205,9 @@ export async function ensureUserProfile(
 			// pré-créé d'un profil RÉEL mal initialisé : la fonction exige en plus que
 			// l'identifiant soit l'uuid v5 dérivé du `discord_id` et que le profil ne
 			// porte aucun contenu saisi par un humain.
-			const { data: liberes, error: liberation } = await db.rpc(
-				"rg_liberer_profil_discord",
-				{ p_discord_id: discordId }
-			);
+			const { data: liberes, error: liberation } = await db.rpc("rg_liberer_profil_discord", {
+				p_discord_id: discordId,
+			});
 			if (liberation) {
 				console.error(
 					`[@rosegriffon/auth] libération du profil pré-créé ${discordId} impossible:`,

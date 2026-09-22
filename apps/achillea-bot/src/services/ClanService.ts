@@ -81,9 +81,14 @@ import { UserService } from "./UserService";
 export class ClanService {
 	constructor(
 		private db: Database,
-		private client: Client,
 		private notifications: NotificationService
 	) {}
+
+	private get client(): Client {
+		const client = (globalThis as typeof globalThis & { __roseGriffonDiscordClient?: Client }).__roseGriffonDiscordClient;
+		if (!client) throw new Error("Discord client is not initialized");
+		return client;
+	}
 
 	async getMember(userId: string, em?: DatabaseEntityManager) {
 		const usedEm = em ?? this.db.em;
@@ -596,7 +601,7 @@ export class ClanService {
 	}
 
 	async toClanInviteDTO(invite: ClanInvite) {
-		const userService = new UserService(this.db, this.client);
+		const userService = new UserService(this.db);
 		const inviterAsMember = await this.getMemberOrHistory(invite.inviter.id);
 		if (!inviterAsMember) return null;
 
@@ -614,7 +619,7 @@ export class ClanService {
 	}
 
 	async toClanApplicationDTO(application: ClanApplication) {
-		const userService = new UserService(this.db, this.client);
+		const userService = new UserService(this.db);
 
 		return {
 			id: application.id,

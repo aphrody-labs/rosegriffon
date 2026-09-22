@@ -19,7 +19,6 @@ export * from "./EventAnnouncement";
 export * from "./Lobby";
 export * from "./LobbyUser";
 export * from "./LobbyMatch";
-export * from "./OauthCsrf";
 export * from "./UserConnection";
 export * from "./Rank";
 export * from "./UserElo";

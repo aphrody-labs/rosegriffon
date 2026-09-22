@@ -1,14 +1,38 @@
 import { Client } from "@aphrody/discordx";
 import type { TextChannel } from "discord.js";
 import { EmbedBuilder } from "discord.js";
+import type { Kysely } from "kysely";
 
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { coreManagerConfig } from "@/configs";
 import { Service } from "@/decorators";
-import { Data, Rank, Season, User } from "@/entities";
+import { Data } from "@/entities";
 import { MatchMode, SeasonState } from "@/utils/enums";
 
 import { Database } from "./Database";
 import { LeaderboardService, type LeaderboardPage } from "./LeaderboardService";
+
+interface LeaderboardAnnounceDatabase {
+	season: { id: string; name: string; state: string; starts_at: Date };
+	rank: {
+		key: string;
+		min_elo: number;
+		max_elo: number;
+		emoji_id: string;
+		emoji_key: string;
+	};
+	user: { id: string; display_name: string; username: string | null };
+}
+
+type AnnouncementRank = {
+	key: string;
+	minElo: number;
+	maxElo: number;
+	emojiId: string;
+	emojiKey: string;
+};
+
+const sql = createAchilleaSql<LeaderboardAnnounceDatabase>() as Kysely<LeaderboardAnnounceDatabase>;
 
 /**
  * Publie et maintient à jour le classement Ranked dans le salon 🏅・leaderboard.
@@ -43,20 +67,20 @@ export class LeaderboardAnnounceService {
 		if (!channelId) return; // pas configuré (ex. serveur de test) → on n'affiche rien
 
 		try {
-			const em = this.db.em.fork();
-			const season = await em.findOne(Season, { state: SeasonState.Active });
-			const embed = await this.buildEmbed(
-				em,
-				season?.id ?? null,
-				season?.name ?? "Saison en cours"
-			);
+			const season = await sql
+				.selectFrom("season")
+				.select(["id", "name"])
+				.where("state", "=", SeasonState.Active)
+				.orderBy("starts_at", "desc")
+				.executeTakeFirst();
+			const embed = await this.buildEmbed(season?.id ?? null, season?.name ?? "Saison en cours");
 			await this.postOrEdit(channelId, embed);
 		} catch (e) {
 			console.error("[leaderboard] refresh KO", e);
 		}
 	}
 
-	private tierLabelFactory(ranks: Rank[]): (elo: number) => string {
+	private tierLabelFactory(ranks: AnnouncementRank[]): (elo: number) => string {
 		const sorted = [...ranks].sort((a, b) => a.minElo - b.minElo);
 		return (elo: number) => {
 			const r = sorted.find((x) => elo >= x.minElo && elo <= x.maxElo) ?? sorted[0];
@@ -66,7 +90,6 @@ export class LeaderboardAnnounceService {
 	}
 
 	private async buildEmbed(
-		em: ReturnType<Database["em"]["fork"]>,
 		seasonId: string | null,
 		seasonName: string
 	): Promise<EmbedBuilder> {
@@ -76,9 +99,25 @@ export class LeaderboardAnnounceService {
 		]);
 
 		const ids = [...new Set([...solo.entries, ...duo.entries].map((e) => e.userId))];
-		const users = ids.length ? await em.find(User, { id: { $in: ids } }) : [];
-		const nameOf = new Map(users.map((u) => [u.id, u.displayName || u.username || "Joueur"]));
-		const tierOf = this.tierLabelFactory(await em.find(Rank, {}));
+		const users = ids.length
+			? await sql
+					.selectFrom("user")
+					.select(["id", "display_name", "username"])
+					.where("id", "in", ids)
+					.execute()
+			: [];
+		const nameOf = new Map(users.map((u) => [u.id, u.display_name || u.username || "Joueur"]));
+		const ranks = await sql
+			.selectFrom("rank")
+			.select([
+				"key",
+				"min_elo as minElo",
+				"max_elo as maxElo",
+				"emoji_id as emojiId",
+				"emoji_key as emojiKey",
+			])
+			.execute();
+		const tierOf = this.tierLabelFactory(ranks);
 
 		const fmt = (page: LeaderboardPage): string => {
 			// On n'affiche que les joueurs ayant réellement disputé au moins une partie.

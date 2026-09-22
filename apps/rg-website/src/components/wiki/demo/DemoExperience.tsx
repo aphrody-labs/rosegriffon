@@ -27,7 +27,6 @@ import {
 import { fetchCutinManifest } from "@/lib/cutin/listing";
 import { loadCutinStoryboard } from "@/lib/cutin/decode";
 import { createTheatreSequencer } from "@/lib/cutin/theatre-sequencer";
-import { getSkillCutin } from "@rosegriffon/azalee/game/skills-cutin";
 import type { CutinSceneHandle } from "./ComposedHissatsuScene";
 import { DemoModelSelector } from "./DemoModelSelector";
 import { DemoSkillsSection } from "./DemoSkillsSection";
@@ -140,7 +139,7 @@ export function DemoExperience({ data }: { data: DemoData }): React.JSX.Element 
 		const ac = new AbortController();
 		(async () => {
 			try {
-				const cutin = getSkillCutin(skill.skillIdStr)?.cutin ?? null;
+				const cutin = skill.cutin;
 				let story: CutinStoryboard;
 				if (cutin) {
 					// On ne lit le manifeste QUE pour fournir le storyboard caméra (g4cm) — les g4pk

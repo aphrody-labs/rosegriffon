@@ -1,10 +1,8 @@
 /**
- * `/auth` — session Discord, jeton temps réel, déconnexion.
+ * `/auth` — session unifiée Rose Griffon, jeton temps réel, déconnexion.
  *
- * Les points d'entrée OAuth (`/auth/discord`, `/auth/challonge`, `/auth/twitch`,
- * `/auth/callback`) répondent par une redirection HTTP, pas par du JSON : le
- * client n'en expose que les URL à faire suivre au navigateur. Aucune de ces
- * méthodes ne touche `window` — la navigation reste à la charge de l'appelant.
+ * Achilléa ne possède plus l'OAuth Discord : le site Rose Griffon/Better Auth
+ * est l'unique propriétaire du callback Discord.
  */
 
 import { z } from "zod";
@@ -22,6 +20,8 @@ export const realtimeTokenResponseSchema = z.object({
 	expiresIn: z.number(),
 	userId: z.string(),
 }) satisfies z.ZodType<RealtimeTokenResponse>;
+
+const providerOAuthUrlSchema = z.object({ url: z.string().url() });
 
 /** 9 routes (4 JSON, 5 redirections dont on n'expose que l'URL). */
 export class AuthResource extends AchilleaResource {
@@ -46,16 +46,17 @@ export class AuthResource extends AchilleaResource {
 	}
 
 	/**
-	 * URL de `GET /auth/discord` — démarre la connexion Discord.
+	 * URL de compatibilité : l'API redirige vers le login Rose Griffon unifié.
+	 * Les nouvelles interfaces doivent appeler `/login?redirect=…`.
 	 * `state` porte le chemin interne de retour (`/ranked`, `/compte`…).
 	 */
 	discordLoginUrl(state?: string): string {
 		return this.http.url("/auth/discord", { state });
 	}
 
-	/** URL de `GET /auth/callback` — `redirect_uri` public de l'OAuth Discord. */
+	/** Callback Discord canonique enregistré dans le portail développeur. */
 	callbackUrl(): string {
-		return this.http.url("/auth/callback");
+		return "https://rosegriffon.fr/api/auth/callback/discord";
 	}
 
 	/** URL de `GET /auth/challonge` — liaison du compte Challonge (session requise). */
@@ -66,6 +67,18 @@ export class AuthResource extends AchilleaResource {
 	/** URL de `GET /auth/twitch` — liaison du compte Twitch (session requise). */
 	twitchLinkUrl(): string {
 		return this.http.url("/auth/twitch");
+	}
+
+	/** URL d'association d'un fournisseur, générée par l'API unifiée. */
+	providerOAuthUrl(
+		provider: "twitch" | "challonge",
+		userId: string,
+		options?: { authorization?: string }
+	): Promise<AchilleaClientResult<{ url: string }>> {
+		return this.http.get(`/auth/oauth/${provider}/start`, providerOAuthUrlSchema, {
+			query: { userId },
+			headers: options?.authorization ? { Authorization: options.authorization } : undefined,
+		});
 	}
 
 	/**

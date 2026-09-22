@@ -26,7 +26,6 @@ export * from "./TournamentsService";
 export * from "./TournamentEventService";
 export * from "./TournamentRoleService";
 export * from "./TournamentScheduleService";
-export * from "./LeagueService";
 export * from "./BracketService";
 export * from "./AuditLogService";
 export * from "./AccessControlService";

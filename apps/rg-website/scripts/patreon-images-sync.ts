@@ -11,13 +11,9 @@
  * Usage : bun scripts/patreon-images-sync.ts [--limit N] [--dry-run] [--force]
  */
 
-import { createClient } from "@supabase/supabase-js";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
-const SUPABASE_URL = String(process.env.SUPABASE_URL);
-const SERVICE_ROLE = String(process.env.SUPABASE_SERVICE_ROLE_KEY);
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-	throw new Error("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY manquants");
-}
+if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL manquante");
 
 const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
@@ -25,9 +21,7 @@ const force = args.has("--force");
 const limitArg = process.argv.find((a) => a.startsWith("--limit="));
 const limit = limitArg ? Number.parseInt(limitArg.split("=")[1] || "0", 10) : null;
 
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
-	auth: { persistSession: false },
-});
+const db = createPostgresClient();
 
 const BUCKET = "patreon";
 const ALLOWED_HOSTS = new Set([
@@ -96,7 +90,7 @@ async function archiveOne(img: ImgRef): Promise<{
 	mime?: string;
 }> {
 	if (!force) {
-		const { data: existing } = await supabase
+		const { data: existing } = await db
 			.from("patreon_post_images")
 			.select("id, storage_path, sha256")
 			.eq("patreon_post_id", img.postId)
@@ -127,7 +121,7 @@ async function archiveOne(img: ImgRef): Promise<{
 		};
 	}
 
-	const { error: upErr } = await supabase.storage.from(BUCKET).upload(storage_path, buf, {
+	const { error: upErr } = await db.storage.from(BUCKET).upload(storage_path, buf, {
 		contentType: mime ?? "application/octet-stream",
 		upsert: true,
 	});
@@ -135,7 +129,7 @@ async function archiveOne(img: ImgRef): Promise<{
 		return { skipped: true, reason: `storage: ${upErr.message}` };
 	}
 
-	const { error: dbErr } = await supabase.from("patreon_post_images").upsert(
+	const { error: dbErr } = await db.from("patreon_post_images").upsert(
 		{
 			patreon_post_id: img.postId,
 			position: img.position,
@@ -164,7 +158,7 @@ async function main() {
 	const start = Date.now();
 	console.log(`[patreon-images-sync] dry=${dryRun} force=${force} limit=${limit ?? "∞"}`);
 
-	const { data: posts, error } = await supabase
+	const { data: posts, error } = await db
 		.from("patreon_post_events")
 		.select("patreon_post_id, raw_payload")
 		.order("published_at", { ascending: true });

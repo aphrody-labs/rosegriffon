@@ -1,4 +1,5 @@
 import { singleton } from "tsyringe";
+import { compareCastCandidates } from "@rosegriffon/achillea-core";
 
 import { CastAttribution, CastAvailability, CastEvent, CastSlot } from "@/entities";
 import {
@@ -36,20 +37,8 @@ export interface ChecklistItem {
 	confirmed: boolean;
 }
 
-// Scoring constants (à ajuster post-prod selon retours terrain)
-
-/** Bonus si le caster a mis le rôle dans ses préférences. */
-const SCORE_PREFERRED_ROLE = 10; // scoring weight: 10 (fort signal d'adéquation)
-
-/** Bonus si la disponibilité est "available" vs "maybe". */
-const SCORE_AVAILABILITY_YES = 5; // scoring weight: 5
-
-/** Pénalité par attribution récente (7 derniers jours) pour anti-saturation. */
-const SCORE_RECENT_CAST_PENALTY = 3; // scoring weight: -3 per recent cast
-
-/** Bonus binôme : si le candidat a déjà casté avec un autre caster déjà assigné
- *  sur ce même event (historique commun d'attributions sur des events passés). */
-const SCORE_BINOME_BONUS = 8; // scoring weight: 8 (MVP : à affiner post-prod)
+// Poids de scoring et décision de tri : @rosegriffon/achillea-core/casts.
+const SCORE_BINOME_BONUS = 8;
 
 /** Fenêtre anti-saturation en jours. */
 const RECENT_CAST_WINDOW_DAYS = 7;
@@ -300,28 +289,26 @@ export class CastService {
 			if (candidates.length === 0) continue;
 
 			// Calcul des scores
-			const scored = candidates.map((avail) => {
-				let score = 0;
-
-				// +10 si rôle préféré
-				const prefs = avail.preferredRoles ?? [];
-				if (prefs.includes(slot.role)) score += SCORE_PREFERRED_ROLE;
-
-				// +5 si disponibilité franche
-				if (avail.status === CastAvailabilityStatus.Available) score += SCORE_AVAILABILITY_YES;
-
-				// -3 par cast récent
-				const recent = recentCountMap.get(avail.userId) ?? 0;
-				score -= recent * SCORE_RECENT_CAST_PENALTY;
-
-				// +8 bonus binôme
-				score += binomeScoreMap.get(avail.userId) ?? 0;
-
-				return { avail, score };
-			});
+			const scored = candidates.map((avail) => ({ avail }));
 
 			// Trier par score décroissant, puis alphabétique sur userId pour déterminisme
-			scored.sort((a, b) => b.score - a.score || a.avail.userId.localeCompare(b.avail.userId));
+			scored.sort((a, b) => compareCastCandidates(
+				{
+					userId: a.avail.userId,
+					status: a.avail.status,
+					preferredRoles: a.avail.preferredRoles,
+					recentAssignments: recentCountMap.get(a.avail.userId) ?? 0,
+					binomeBonus: binomeScoreMap.get(a.avail.userId) ?? 0,
+				},
+				{
+					userId: b.avail.userId,
+					status: b.avail.status,
+					preferredRoles: b.avail.preferredRoles,
+					recentAssignments: recentCountMap.get(b.avail.userId) ?? 0,
+					binomeBonus: binomeScoreMap.get(b.avail.userId) ?? 0,
+				},
+				slot.role,
+			));
 
 			const winner = scored[0];
 			if (!winner) continue;

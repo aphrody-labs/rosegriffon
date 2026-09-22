@@ -6,10 +6,11 @@
  */
 
 export { createSqliteClient, SqliteQueryBuilder } from "./sqlite-client";
+export { createPostgresClient, PostgresQueryBuilder } from "@rosegriffon/db/postgres-client";
 export {
 	createClient,
 	hasDatabaseProvider,
 	setDatabaseProvider,
-	type DatabaseClientFactory,
+	type DatabaseClient, type DatabaseClientFactory,
 } from "./provider";
 export { resolveMirrorPath } from "../config";

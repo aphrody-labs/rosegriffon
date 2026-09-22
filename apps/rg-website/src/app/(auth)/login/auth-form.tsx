@@ -7,18 +7,12 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
-
+import { safeReturnUrl } from "@/lib/achillea/auth-session";
 
 type Provider = "discord" | "google" | "patreon";
 
 function safeRedirect(raw: string | null | undefined): string {
-	if (!raw) {
-		return "/dashboard";
-	}
-	if (!raw.startsWith("/") || raw.startsWith("//")) {
-		return "/dashboard";
-	}
-	return raw;
+	return safeReturnUrl(raw, "/dashboard");
 }
 
 export function AuthForm() {
