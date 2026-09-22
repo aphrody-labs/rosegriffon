@@ -1,6 +1,6 @@
 "use server";
 
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -18,9 +18,7 @@ export async function trackArticleView(articleId: string): Promise<{ success: bo
 		return { success: false };
 	}
 
-	const supabase = createAdminClient();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const client = supabase as any;
+	const client = createPostgresClient();
 
 	// On vérifie que l'article appartient bien à l'app "azalee" avant
 	// D'incrémenter quoi que ce soit — un user qui devine un UUID rpb

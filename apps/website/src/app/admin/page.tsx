@@ -275,7 +275,7 @@ export default async function AdminDashboardPage() {
 					href="/admin/users"
 					icon={UserPlus}
 					accent="bg-info/10 text-info"
-					items={recentUsers.map((u) => ({
+					items={recentUsers.map((u: { created_at: string | null; id: string; role: string | null; full_name: string | null; username: string | null }) => ({
 						date: u.created_at || undefined,
 						id: u.id,
 						subtitle: u.role || "Utilisateur",

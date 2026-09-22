@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "@/lib/auth-helpers";
 import { isAdminRole } from "@/lib/auth-roles";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { TweetSchema } from "./schema";
 import type { TweetFormValues } from "./schema";
 
@@ -14,8 +13,7 @@ async function requireTweetAdmin() {
 		return { error: "Non authentifié" as const, session: null };
 	}
 
-	const supabase = await createClient();
-	const { data: profile } = await supabase
+	const { data: profile } = await createPostgresClient()
 		.from("profiles")
 		.select("role")
 		.eq("id", session.user.id)
@@ -34,7 +32,7 @@ export async function deleteTweet(id: string) {
 		throw new Error(authError || "Non authentifié");
 	}
 
-	const adminDb = createAdminClient();
+	const adminDb = createPostgresClient();
 	await adminDb.from("tweets").delete().eq("id", id);
 	revalidatePath("/dashboard/tweets");
 }
@@ -50,7 +48,7 @@ export async function saveTweet(data: TweetFormValues) {
 		return { success: false, error: authError || "Non authentifié" };
 	}
 
-	const adminDb = createAdminClient();
+	const adminDb = createPostgresClient();
 	const payload = {
 		author_name: parsed.data.author_name,
 		author_username: parsed.data.author_username,
