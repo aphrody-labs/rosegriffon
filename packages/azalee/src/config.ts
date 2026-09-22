@@ -92,7 +92,6 @@ function dataDirCandidates(): string[] {
  */
 const DATA_DIR_MARKERS = [
 	"cpk-index.ndjson.gz",
-	"game-text-names.ndjson.gz",
 	"backups/mirror.sqlite",
 	"schema-snapshot",
 ];
