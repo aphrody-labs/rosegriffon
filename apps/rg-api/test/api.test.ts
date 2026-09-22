@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { treaty } from "@elysia/eden";
+import { signAchilleaSessionToken } from "@rosegriffon/auth/achillea-session";
 import { app } from "../src";
 
 const api = treaty(app);
@@ -386,6 +387,20 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 	it("GET /v1/achillea/users/me/ranked-trend is owned by the unified API", async () => {
 		const res = await app.handle(new Request("http://localhost/v1/achillea/users/me/ranked-trend?days=7&last=20"));
 		expect(res.status).toBe(401);
+	});
+
+	it("GET /v1/achillea/users/me/ranked-history returns the shared DTO for a session", async () => {
+		const leaderboard = await api.v1.achillea.users.leaderboard.get({ query: { mode: 2, limit: 1 } });
+		const userId = leaderboard.data?.entries[0]?.userId;
+		const secret = process.env.JWT_SECRET_KEY;
+		if (!userId || !secret) return;
+		const token = signAchilleaSessionToken({ id: userId, username: "contract-test", avatar: null }, secret);
+		const history = await app.handle(new Request("http://localhost/v1/achillea/users/me/ranked-history?limit=20", { headers: { authorization: `Bearer ${token}` } }));
+		const trend = await app.handle(new Request("http://localhost/v1/achillea/users/me/ranked-trend?days=7&last=20", { headers: { authorization: `Bearer ${token}` } }));
+		expect(history.status).toBe(200);
+		expect(Array.isArray(await history.json())).toBe(true);
+		expect(trend.status).toBe(200);
+		expect(typeof (await trend.json()).winRatePeriod).toBe("number");
 	});
 
 	it("GET /v1/achillea/licenses/verify rejects malformed QR values uniformly", async () => {
