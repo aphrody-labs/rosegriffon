@@ -16,8 +16,6 @@ export const urlsConfig = {
 	unifiedApi: env.UNIFIED_API_URL,
 	/** Base de vérification d'une licence (QR) → page web publique /licence/verify/:qr. */
 	licenseVerify: `${env.WEBSITE_URL}/licence/verify`,
-	/** Callback OAuth providers unifié (provider ajouté en query : ?provider=twitch). */
-	oauthCallback: `${env.UNIFIED_API_URL}/v1/auth/oauth/callback`,
 	/** Origines CORS autorisées (CSV `WEB_ALLOWED_ORIGINS`, sinon localhost + site). */
 	allowedOrigins: [
 		...new Set(
