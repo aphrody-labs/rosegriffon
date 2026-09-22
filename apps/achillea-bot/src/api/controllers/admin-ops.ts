@@ -54,7 +54,13 @@ export class AdminOpsController extends BaseController {
 
 	/** Snapshot multi-domaines pour la Vue d'ensemble. */
 	@Get("/overview")
-	async overview(@Context() ctx: Context, @Res() res: Response) {
+	async overview(@Context() ctx: Context, @Req() req: Request, @Res() res: Response) {
+		this.requireStaff(ctx);
+		return this.forwardAdmin("/ops/overview", req, res);
+	}
+
+	/** Legacy implementation retained only as a migration reference; not routed. */
+	async overviewLegacy(@Context() ctx: Context, @Res() res: Response) {
 		this.requireStaff(ctx);
 		const em = this.db.em.fork();
 		const conn = em.getConnection();

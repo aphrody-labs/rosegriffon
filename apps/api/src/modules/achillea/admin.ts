@@ -15,6 +15,42 @@ async function staff(db: Kysely<Database>, headers: { authorization?: string; co
 
 export const adminController = new Elysia({ prefix: "/admin" })
 	.use(dbPlugin)
+	.get("/ops/overview", async ({ db, headers }) => {
+		const auth = await staff(db, headers, 2);
+		if (auth.error) return auth.error;
+		const count = async (table: "user" | "wallet" | "sanction" | "license" | "event" | "clan" | "organization" | "user_elo") => {
+			const row = await db.selectFrom(table).select(({ fn }) => fn.countAll<number>().as("count")).executeTakeFirst();
+			return Number(row?.count ?? 0);
+		};
+		const [usersTotal, walletsTotal, sanctionsTotal, licensesTotal, tournamentsOngoing, clansPending, orgsPending, totalPlayers] = await Promise.all([
+			count("user"), count("wallet"), db.selectFrom("sanction").select(({ fn }) => fn.countAll<number>().as("count")).where("revoked_at", "is", null).executeTakeFirst().then((r) => Number(r?.count ?? 0)),
+			db.selectFrom("license").select(({ fn }) => fn.countAll<number>().as("count")).where("status", "=", "Active").executeTakeFirst().then((r) => Number(r?.count ?? 0)),
+			db.selectFrom("event").select(({ fn }) => fn.countAll<number>().as("count")).where("type", "=", "TOURNAMENT").where("internal_state", "=", "Ongoing").executeTakeFirst().then((r) => Number(r?.count ?? 0)),
+			db.selectFrom("clan").select(({ fn }) => fn.countAll<number>().as("count")).where("state", "=", 1).executeTakeFirst().then((r) => Number(r?.count ?? 0)),
+		db.selectFrom("organization").select(({ fn }) => fn.countAll<number>().as("count")).where("state", "=", 0).executeTakeFirst().then((r) => Number(r?.count ?? 0)),
+		db.selectFrom("user_elo").select(({ fn }) => fn.countAll<number>().as("count")).where("games_played", ">", 0).executeTakeFirst().then((r) => Number(r?.count ?? 0)),
+		]);
+		const [balance, transactionsToday, matches] = await Promise.all([
+			db.selectFrom("wallet").select(({ fn }) => fn.sum<number>("balance").as("sum")).executeTakeFirst().then((r) => Number(r?.sum ?? 0)),
+			db.selectFrom("transaction").select(({ fn }) => fn.countAll<number>().as("count")).where("created_at", ">=", kyselySql<Date>`date_trunc('day', now())`).executeTakeFirst().then((r) => Number(r?.count ?? 0)),
+			db.selectFrom("lobby").select(({ fn }) => [
+				fn.count<number>("id").as("total"),
+				kyselySql<number>`count(*) filter (where state = 'Ongoing')`.as("active"),
+				kyselySql<number>`count(*) filter (where state = 'Contested')`.as("contested"),
+				kyselySql<number>`count(*) filter (where state = 'Finished' and updated_at >= date_trunc('day', now()))`.as("finishedToday"),
+				kyselySql<number>`count(*) filter (where created_at >= date_trunc('day', now()))`.as("today"),
+			]).where("event_type", "=", "RANKED").executeTakeFirst(),
+		]);
+		return {
+			users: { total: usersTotal, staff: 0 }, wallet: { wallets: walletsTotal, totalBalance: balance, txToday: transactionsToday },
+			moderation: { sanctionsActive: sanctionsTotal, licensesActive: licensesTotal },
+			community: { tournamentsOngoing, clansPending, orgsPending, castEventsOpen: 0 },
+			ranked: { activeMatches: Number(matches?.active ?? 0), contestedMatches: Number(matches?.contested ?? 0), finishedToday: Number(matches?.finishedToday ?? 0), matchesToday: Number(matches?.today ?? 0), totalPlayers },
+			audit24h: 0,
+		};
+	}, {
+		response: { 200: t.Any() },
+	})
 	.get("/ops/users", async ({ db, headers, query }) => {
 		const auth = await staff(db, headers, 2);
 		if (auth.error) return auth.error;
