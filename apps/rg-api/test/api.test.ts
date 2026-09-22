@@ -215,6 +215,11 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		expect(wallets.status).toBe(401);
 	});
 
+	it("admin overview is owned by the unified API", async () => {
+		const overview = await app.handle(new Request("http://localhost/v1/achillea/admin/ops/overview"));
+		expect(overview.status).toBe(401);
+	});
+
 	it("player-note reads and mutations require the unified session", async () => {
 		const requests = [
 			new Request("http://localhost/v1/achillea/player-notes"),
