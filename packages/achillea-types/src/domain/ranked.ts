@@ -256,7 +256,7 @@ export interface RankedHistoryEntry {
 	myScore: number;
 	opponentScore: number;
 	eloDelta: number;
-	result: Exclude<MatchResult, "draw">;
+	result: MatchResult;
 	opponent: { userId: string; displayName: string; avatar: string };
 }
 

@@ -111,7 +111,7 @@ export const rankedHistoryEntrySchema = z.object({
 	myScore: z.number(),
 	opponentScore: z.number(),
 	eloDelta: z.number(),
-	result: z.enum(["win", "loss", "forfeit"]),
+	result: z.enum(["win", "loss", "draw", "forfeit"]),
 	opponent: opponentSchema,
 }) satisfies z.ZodType<RankedHistoryEntry>;
 
