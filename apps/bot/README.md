@@ -8,33 +8,25 @@ Bot Discord du projet Rose Griffon : slash commands publiques (communauté,
 Restauré depuis `vps@c4d47a683^:apps/rg-bot/`, modernisé pour le monorepo
 `~/rg/` (Turborepo + Bun + catalog).
 
-> **Aucun de ces bots n'est déployé aujourd'hui.** La source est conservée et
-> compile, mais l'unité `rg-bot.service` n'existe plus sur le VPS et la
-> synchronisation des membres passe par le cron. Ne pas remettre en service
-> sans demande explicite.
+Le seul processus Discord actif est `rg-bot.service`. Les données Azalée sont
+servies par `rg-api.service` (`/v1/azalee`) ; l'ancien profil Discord Azalée et
+son unité `azalee-bot.service` sont retirés.
 
-## Deux bots, un seul code
+## Un bot Discord, une API Azalée
 
-Le même programme sert **deux** bots Discord : celui du serveur Rose Griffon et
-celui du serveur Azalée. Pas deux dossiers, pas une copie — un second
-**profil**, lancé par un second service systemd avec un autre jeton.
+Le bot communautaire Rose Griffon est l'unique processus Discord (`rg-bot`).
+Les commandes et données de jeu passent par l'API Elysia/Kysely unifiée ; elles
+ne nécessitent plus une seconde identité Discord ni un second démon.
 
-Le profil se choisit par `RG_PROFIL_BOT` : `rg` par défaut, `azalee` pour le
-second bot. Il décide du jeton lu, des guildes où les commandes sont
-enregistrées, des commandes chargées, de la marque des embeds, et du salon
-d'annonce des nouveaux posts X ainsi que du nom de son curseur. Base, cache,
-services internes et tout `src/lib/` sont partagés ; le jeton et le curseur ne
-le sont jamais.
+Le profil actif est `rg`, avec un jeton et des guildes centralisés.
 
 **Ne jamais dupliquer un fichier de `src/commands/` pour en faire une variante
 « azalee ».** Toute différence entre les deux bots passe par le registre de
 profils (`src/lib/profil.ts`, module pur couvert par `bun:test`) — sinon chaque
 correctif futur devrait être appliqué deux fois, et ne le serait pas.
 
-Mise en service du second bot (application Discord, intents, URL d'invitation
-et permissions, jeton, démarrage, vérification) :
-[`docs/bot-azalee.md`](../../docs/bot-azalee.md). Unité systemd :
-[`infra/systemd/azalee-bot.service`](../../infra/systemd/azalee-bot.service).
+Le guide historique `docs/bot-azalee.md` est conservé comme archive et ne
+décrit plus un service déployable.
 
 ## Présentation : la trousse `src/lib/ui`
 
@@ -94,9 +86,9 @@ src/
 │   ├── syncMembers.ts    upsert discord_members + sync user.image via account bridge
 │   └── teamPhotos.ts     sync avatars staff (team_members) — 3 tables propagées
 ├── lib/
-│   ├── profil.ts         registre des profils (rg | azalee) — jeton, guildes, modules, marque, annonce
+│   ├── profil.ts         registre de l'identité rg — jeton, guildes, modules, marque
 │   ├── db.ts             expose `supabase` (@rosegriffon/db service) + `sql` (Bun.SQL)
-│   ├── azalee.ts         client HTTP typé de l'API Azalée (:8807) — jamais bun:sqlite ici
+│   ├── azalee.ts         client HTTP typé de l'API Azalée unifiée (:8800/v1/azalee)
 │   ├── api.ts            client HTTP /api/bot/v1/* du site Next (alternative à db direct)
 │   ├── cache.ts          Redis (Bun.RedisClient) + fallback in-memory
 │   ├── rbac.ts           requireRgAdmin/Strict — résout discord_id → profile.role

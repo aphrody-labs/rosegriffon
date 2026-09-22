@@ -20,8 +20,9 @@ explicite sur le VPS ; un `git push` seul ne déploie rien.
 | `azalee.rosegriffon.fr` | redirection vers `rosegriffon.fr/wiki` | aucun service, aucun build |
 
 Azalée n'est pas un frontend autonome. Le nom reste utilisé par la
-bibliothèque de données, l'API headless et le profil du bot ; cela ne justifie
-jamais un second build Next. Voir [azalee.md](azalee.md).
+bibliothèque de données et le montage `/v1/azalee` de l'API unifiée ; cela ne
+justifie jamais un second build Next ni un second bot Discord. Voir
+[azalee.md](azalee.md).
 
 ## Publier Website
 

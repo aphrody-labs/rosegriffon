@@ -1,8 +1,7 @@
-# Catalogue définitif des slash commandes — bots Discord
+# Catalogue définitif des slash commandes — bot Discord
 
-Ce document fixe l'arbre **définitif** des commandes des deux bots
-(`apps/bot`, profils `rg` et `azalee`, cf. `apps/bot/src/lib/profil.ts`) et le
-plan de bascule pour y arriver. C'est un document de **planification** : il ne
+Ce document fixe l'arbre **définitif** des commandes du bot communautaire
+(`apps/bot`, profil `rg`) et le plan de bascule pour y arriver. C'est un document de **planification** : il ne
 modifie aucun fichier `.ts`, il prépare la mise en œuvre à venir.
 
 État relevé le **14/8/2026**, sources vérifiées listées en fin de document
@@ -18,20 +17,15 @@ modifie aucun fichier `.ts`, il prépare la mise en œuvre à venir.
 ### 1.1 Répartition par bot (confirmée par les journaux)
 
 ```
-journalctl -u rg-bot.service -u azalee-bot.service --since "-2 hours" | grep -i "adding\|updating"
+journalctl -u rg-bot.service --since "-2 hours" | grep -i "adding\|updating"
 ```
 
 - **`rg-bot` (profil `rg`)** — 17 racines : `profil`, `classement`,
   `administration`, `gestion`, `moderation`, `ticket`, `agenda`, `staff`,
   `boutique`, `campagne`, `equipe`, `membre`, `patreon`, `sondage`, `kizuna`,
   `collection`, `personnaliser`.
-- **`azalee-bot` (profil `azalee`)** — 6 racines : `article`, `azalee`, `cpk`,
-  `rag`, `cdn`, `x`.
-
-Les deux listes sont **disjointes** (aucun nom en commun) — c'est la
-contrainte du §1.5 de `apps/bot/src/lib/profil.ts` : les deux bots vivent sur
-la même guilde (`1072991720268111892`), un nom partagé rendrait impossible de
-savoir lequel des deux répond.
+Les commandes de données Azalée sont désormais exposées par l'API unifiée et
+ne sont plus chargées par une seconde identité Discord.
 
 ### 1.2 Arbre complet — bot Rose Griffon (`MODULES_RG`)
 
