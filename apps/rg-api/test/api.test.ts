@@ -80,6 +80,19 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		expect(edit.status).toBe(401);
 	});
 
+	it("scheduled tournament transitions are internal-only", async () => {
+		const response = await app.handle(
+			new Request("http://localhost/v1/achillea/tournaments/internal/schedule-transitions", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ now: new Date().toISOString() }),
+			})
+		);
+		expect(response.status).toBe(401);
+		const payload = (await response.json()) as { message?: string };
+		expect(payload.message).toBe("Internal authentication required");
+	});
+
 	it("tournament score policy mutation requires the unified session", async () => {
 		const res = await api.v1.achillea
 			.tournaments({ id: 99999999 })

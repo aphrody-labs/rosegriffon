@@ -279,6 +279,115 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
 		return summary ?? status(404, { message: "Tournament not found" as const });
 	})
 	.post(
+		"/internal/schedule-transitions",
+		async ({ db, headers, body, set }) => {
+			const bearer = headers.authorization?.replace(/^Bearer\s+/i, "");
+			if (!verifyAdminBearerToken(bearer, process.env.API_ADMIN_TOKEN)) {
+				set.status = 401;
+				return { message: "Internal authentication required" as const };
+			}
+
+			const requestedNow = (body as { now?: unknown } | undefined)?.now;
+			const now = requestedNow ? new Date(String(requestedNow)) : new Date();
+			if (Number.isNaN(now.getTime())) {
+				set.status = 400;
+				return { message: "Invalid transition timestamp" as const };
+			}
+
+			const transitions: Array<{
+				tournamentId: number;
+				from: "Pending" | "Preregistering";
+				to: "Preregistering" | "Preparing";
+			}> = [];
+
+			const openDue = await db
+				.selectFrom("event")
+				.select("id")
+				.where("type", "=", "TOURNAMENT")
+				.where("internal_state", "=", "Pending")
+				.where("registration_opens_at", "is not", null)
+				.where("registration_opens_at", "<=", now)
+				.execute();
+			for (const tournament of openDue) {
+				await db.transaction().execute(async (trx) => {
+					const current = await trx
+						.selectFrom("event")
+						.select("internal_state")
+						.where("id", "=", tournament.id)
+						.where("type", "=", "TOURNAMENT")
+						.executeTakeFirst();
+					if (current?.internal_state !== "Pending") return;
+					await trx.updateTable("event").set({ internal_state: "Preregistering", updated_at: now }).where("id", "=", tournament.id).execute();
+					await trx.insertInto("tournament_event").values({
+						tournament_id: tournament.id,
+						type: "REGISTRATIONS_OPENED",
+						actor_id: null,
+						target_id: null,
+						payload: { automatic: true },
+						reason: null,
+					}).execute();
+					transitions.push({ tournamentId: tournament.id, from: "Pending", to: "Preregistering" });
+				});
+			}
+
+			const closeDue = await db
+				.selectFrom("event")
+				.select(["id", "participants_number", "tournament_type"])
+				.where("type", "=", "TOURNAMENT")
+				.where("internal_state", "=", "Preregistering")
+				.where("registration_closes_at", "is not", null)
+				.where("registration_closes_at", "<=", now)
+				.execute();
+			for (const tournament of closeDue) {
+				// Bracket construction is already Kysely-owned by this module. The
+				// state transition and event are committed only after a successful
+				// rebuild, keeping retries idempotent.
+				const rebuilt = await rebuildTournamentBracket(db, tournament.id).catch(() => false);
+				if (!rebuilt && tournament.tournament_type !== "league") continue;
+				await db.transaction().execute(async (trx) => {
+					const current = await trx
+						.selectFrom("event")
+						.select("internal_state")
+						.where("id", "=", tournament.id)
+						.where("type", "=", "TOURNAMENT")
+						.executeTakeFirst();
+					if (current?.internal_state !== "Preregistering") return;
+					await trx.updateTable("event").set({ internal_state: "Preparing", updated_at: now }).where("id", "=", tournament.id).execute();
+					await trx.insertInto("tournament_event").values({
+						tournament_id: tournament.id,
+						type: "REGISTRATIONS_CLOSED",
+						actor_id: null,
+						target_id: null,
+						payload: { automatic: true, bracketRebuilt: rebuilt },
+						reason: null,
+					}).execute();
+					transitions.push({ tournamentId: tournament.id, from: "Preregistering", to: "Preparing" });
+				});
+			}
+			const startCandidates = await db
+				.selectFrom("event")
+				.select("id")
+				.where("type", "=", "TOURNAMENT")
+				.where("internal_state", "=", "Preparing")
+				.where("auto_start", "=", true)
+				.where("starts_at", "is not", null)
+				.where("starts_at", "<=", now)
+				.execute();
+			return { transitions, startCandidates: startCandidates.map(({ id }) => id) };
+		},
+		{
+			body: t.Optional(t.Object({ now: t.Optional(t.String()) })),
+			response: {
+				200: t.Object({
+					transitions: t.Array(t.Object({ tournamentId: t.Number(), from: t.String(), to: t.String() })),
+					startCandidates: t.Array(t.Number()),
+				}),
+				400: t.Object({ message: t.Literal("Invalid transition timestamp") }),
+				401: t.Object({ message: t.Literal("Internal authentication required") }),
+			},
+		}
+	)
+	.post(
 		"/create/achillea",
 		async ({ db, headers, body }) => {
 			const session = await resolveAchilleaSession(headers);
