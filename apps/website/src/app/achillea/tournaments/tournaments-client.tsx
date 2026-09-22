@@ -18,9 +18,13 @@ import {
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
-export default function TournamentsListPage() {
-	const [tournaments, setTournaments] = useState<Tournament[]>([]);
-	const [loading, setLoading] = useState<boolean>(true);
+export default function TournamentsListPage({
+	initialTournaments = [],
+}: {
+	initialTournaments?: Tournament[];
+}) {
+	const [tournaments, setTournaments] = useState<Tournament[]>(initialTournaments);
+	const [loading, setLoading] = useState<boolean>(initialTournaments.length === 0);
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [selectedTab, setSelectedTab] = useState<"all" | "open" | "ongoing" | "finished">("all");
 

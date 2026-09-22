@@ -24,12 +24,16 @@ import {
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
-export default function RankedLeaderboardPage() {
+export default function RankedLeaderboardPage({
+	initialData,
+}: {
+	initialData?: LeaderboardPage | null;
+}) {
 	const [mode, setMode] = useState<2 | 4>(2);
 	const [page, setPage] = useState<number>(0);
 	const pageSize = 25;
-	const [data, setData] = useState<LeaderboardPage | null>(null);
-	const [loading, setLoading] = useState<boolean>(true);
+	const [data, setData] = useState<LeaderboardPage | null>(initialData ?? null);
+	const [loading, setLoading] = useState<boolean>(initialData == null);
 	const [searchQuery, setSearchQuery] = useState<string>("");
 
 	useEffect(() => {

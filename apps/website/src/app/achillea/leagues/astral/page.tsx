@@ -1,5 +1,6 @@
 import { metadonneesAchillea } from "@/app/achillea/metadonnees";
 import AstralLeagueClient from "./astral-league-client";
+import { createAchilleaClient } from "@/lib/achillea";
 
 /*
  * Page serveur : elle n'existe que pour porter `metadata`, que `"use client"`
@@ -13,6 +14,7 @@ export const metadata = metadonneesAchillea({
 	indexable: true,
 });
 
-export default function AstralLeaguePage() {
-	return <AstralLeagueClient />;
+export default async function AstralLeaguePage() {
+	const result = await createAchilleaClient().leagues.astral("astral");
+	return <AstralLeagueClient initialSeason={result.ok ? result.value : null} />;
 }

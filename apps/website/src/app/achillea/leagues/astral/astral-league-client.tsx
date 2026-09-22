@@ -20,9 +20,13 @@ import {
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
-export default function AstralLeaguePage() {
-	const [season, setSeason] = useState<LeagueSeasonPayload | null>(null);
-	const [loading, setLoading] = useState<boolean>(true);
+export default function AstralLeaguePage({
+	initialSeason = null,
+}: {
+	initialSeason?: LeagueSeasonPayload | null;
+}) {
+	const [season, setSeason] = useState<LeagueSeasonPayload | null>(initialSeason);
+	const [loading, setLoading] = useState<boolean>(initialSeason == null);
 	const [activeTab, setActiveTab] = useState<"standings" | "matches" | "playoffs" | "rules">(
 		"standings"
 	);
