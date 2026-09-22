@@ -208,6 +208,13 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		expect(wallet.status).toBe(401);
 	});
 
+	it("admin users and wallets read contracts require the unified session", async () => {
+		const users = await app.handle(new Request("http://localhost/v1/achillea/admin/ops/users?page=1&pagination=25"));
+		const wallets = await app.handle(new Request("http://localhost/v1/achillea/admin/ops/wallets?limit=25"));
+		expect(users.status).toBe(401);
+		expect(wallets.status).toBe(401);
+	});
+
 	it("GET /v1/achillea/clans returns 200 with clans list", async () => {
 		const res = await api.v1.achillea.clans.get();
 		expect(res.status).toBe(200);
