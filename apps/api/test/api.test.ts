@@ -13,6 +13,29 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		expect(res.data?.service).toBe("rg-api");
 	});
 
+	it("Better Auth Elysia mount exposes session, agent, MCP and API-key routes", async () => {
+		const session = await app.handle(new Request("http://localhost/v1/auth/get-session", {
+			headers: { "x-forwarded-for": "127.0.0.1" },
+		}));
+		expect(session.status).toBe(200);
+		expect(await session.json()).toBeNull();
+
+		const agent = await app.handle(new Request("http://localhost/v1/auth/agent-configuration"));
+		expect(agent.status).toBe(200);
+		expect((await agent.json()) as { provider_name: string }).toMatchObject({ provider_name: "Rose Griffon" });
+
+		const capabilities = await app.handle(new Request("http://localhost/v1/auth/capability/list"));
+		expect(capabilities.status).toBe(200);
+		expect((await capabilities.json()) as { capabilities: unknown[] }).toMatchObject({ capabilities: expect.any(Array) });
+
+		const apiKeyCreate = await app.handle(new Request("http://localhost/v1/auth/api-key/create", {
+			method: "POST",
+			headers: { "content-type": "application/json", "x-forwarded-for": "127.0.0.1" },
+			body: "{}",
+		}));
+		expect(apiKeyCreate.status).toBe(401);
+	});
+
 	it("GET /v1/achillea/tournaments returns 200 with valid shape", async () => {
 		const res = await api.v1.achillea.tournaments.get();
 		expect(res.status).toBe(200);
@@ -49,6 +72,21 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		expect(res.data).toHaveLength(3);
 		expect(Array.isArray(res.data?.[1])).toBe(true);
 		expect(res.data?.[2]).toBeDefined();
+	});
+
+	it("GET /v1/achillea/tournaments/:id/summary exposes the BracketService stats contract", async () => {
+		const list = await api.v1.achillea.tournaments.get();
+		const id = list.data?.data[0]?.id;
+		if (id === undefined) return;
+		const res = await api.v1.achillea.tournaments({ id }).summary.get();
+		expect(res.status).toBe(200);
+		if (res.data?.stats) {
+			expect(typeof res.data.stats.matches).toBe("number");
+			expect(typeof res.data.stats.totalGoals).toBe("number");
+			expect(typeof res.data.stats.avgGoals).toBe("number");
+			expect("biggestBlowout" in res.data.stats).toBe(true);
+			expect("closestMatch" in res.data.stats).toBe(true);
+		}
 	});
 
 	it("GET /v1/achillea/tournaments/99999999/events returns typed not found", async () => {
