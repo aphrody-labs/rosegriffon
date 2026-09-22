@@ -5,6 +5,7 @@ import { computeSeriesOutcome } from "@rosegriffon/achillea-core";
 import type { Id, IdSeeding, Match } from "brackets-model";
 
 import { Service } from "@/decorators";
+import { urlsConfig } from "@/configs";
 import {
 	Event,
 	Lobby,
@@ -516,86 +517,21 @@ export class BracketService {
 	 * en cours de tournoi (matchs déjà joués), pas besoin d'attendre la fin.
 	 */
 	async getMatchStats(tournament: Tournament): Promise<TournamentMatchStats | null> {
-		const stages =
-			(await this.manager.storage.select("stage", { tournament_id: tournament.id })) ?? [];
-		if (stages.length === 0) return null;
-
-		const stage = stages[stages.length - 1];
-		const matches: Match[] =
-			(await this.manager.storage.select("match", { stage_id: stage.id })) ?? [];
-
-		const completed = matches.filter(
-			(m) => m.opponent1?.score != null && m.opponent2?.score != null
-		);
-
-		if (completed.length === 0) return null;
-
-		let totalGoals = 0;
-		let topScore = 0;
-		let minMargin = Number.POSITIVE_INFINITY;
-		let maxMargin = 0;
-		type SidedMatch = { winnerId: Id; loserId: Id; scoreWinner: number; scoreLoser: number };
-		let blowout: SidedMatch | null = null;
-		let closest: SidedMatch | null = null;
-
-		for (const m of completed) {
-			const s1 = m.opponent1?.score ?? 0;
-			const s2 = m.opponent2?.score ?? 0;
-			totalGoals += s1 + s2;
-			topScore = Math.max(topScore, s1, s2);
-
-			if (m.opponent1?.id == null || m.opponent2?.id == null) continue;
-			const margin = Math.abs(s1 - s2);
-			const sided: SidedMatch =
-				s1 >= s2
-					? { winnerId: m.opponent1.id, loserId: m.opponent2.id, scoreWinner: s1, scoreLoser: s2 }
-					: { winnerId: m.opponent2.id, loserId: m.opponent1.id, scoreWinner: s2, scoreLoser: s1 };
-
-			if (margin < minMargin) {
-				minMargin = margin;
-				closest = sided;
-			}
-			if (margin > maxMargin) {
-				maxMargin = margin;
-				blowout = sided;
-			}
-		}
-
-		const participants = await this.db.em.find(
-			TournamentParticipant,
-			{ tournament: tournament.id },
-			{ populate: ["user"] }
-		);
-		const userByBracketId = new Map(
-			participants
-				.filter((p) => p.bracketParticipantId != null)
-				.map((p) => [Number(p.bracketParticipantId), p.user])
-		);
-		const toMatchup = (sided: SidedMatch | null): TournamentMatchStats["biggestBlowout"] => {
-			if (!sided) return null;
-			const winner = userByBracketId.get(Number(sided.winnerId));
-			const loser = userByBracketId.get(Number(sided.loserId));
-			if (!winner || !loser) return null;
-			return {
-				winnerDisplayName: winner.displayName,
-				winnerAvatar: winner.avatar,
-				loserDisplayName: loser.displayName,
-				loserAvatar: loser.avatar,
-				scoreWinner: sided.scoreWinner,
-				scoreLoser: sided.scoreLoser,
+		// Match statistics are a public projection owned by the unified API. Keep
+		// bracket-manager reads confined to lifecycle/lobby orchestration above.
+		try {
+			const response = await fetch(
+				`${urlsConfig.unifiedApi.replace(/\/+$/u, "")}/v1/achillea/tournaments/${encodeURIComponent(String(tournament.id))}/summary`,
+				{ headers: { accept: "application/json" } }
+			);
+			if (!response.ok) return null;
+			const payload = (await response.json()) as {
+				stats?: TournamentMatchStats | null;
 			};
-		};
-
-		return {
-			matches: completed.length,
-			totalGoals,
-			avgGoals: Math.round((totalGoals / completed.length) * 100) / 100,
-			topScore,
-			minMargin,
-			maxMargin,
-			biggestBlowout: toMatchup(blowout),
-			closestMatch: toMatchup(closest),
-		};
+			return payload.stats ?? null;
+		} catch {
+			return null;
+		}
 	}
 
 	/**
