@@ -9,6 +9,7 @@ import { usersController } from "./users";
 import { licenseController } from "./licenses";
 import { sanctionController } from "./sanctions";
 import { adminController } from "./admin";
+import { playerNotesController } from "./player-notes";
 
 export const achilleaModule = new Elysia({ prefix: "/achillea" })
 	.use(tournamentController)
@@ -20,4 +21,5 @@ export const achilleaModule = new Elysia({ prefix: "/achillea" })
 	.use(usersController)
 	.use(licenseController)
 	.use(sanctionController)
-	.use(adminController);
+	.use(adminController)
+	.use(playerNotesController);
