@@ -6,8 +6,8 @@ import {
 	AdminPageHeader as DashboardPageHeader,
 	Badge,
 } from "@rosegriffon/ui";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { Icon } from "@/components/ui/Icon";
-import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
 	title: "Statistiques articles - Dashboard Azalée",
@@ -180,7 +180,7 @@ export default async function NewsStatsPage() {
 }
 
 async function getCategoryBreakdown(): Promise<Array<{ category: string; count: number }>> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data } = await supabase
 		.from("articles")

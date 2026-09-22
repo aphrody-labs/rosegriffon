@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { fetchGoogleCalendarEvents } from "@/app/(sousdossiers)/rose-griffon-tv/google-calendar-actions";
 import { logAdminAction } from "@/lib/admin-logger";
 import { getServerUser } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
 
 const scheduleSchema = z.object({
 	category: z.string().optional(),
@@ -24,7 +24,7 @@ const scheduleSchema = z.object({
 export type ScheduleInput = z.infer<typeof scheduleSchema>;
 
 async function checkAdmin() {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const user = await getServerUser();
 
 	if (!user) {
@@ -55,7 +55,7 @@ export async function addSchedule(data: ScheduleInput) {
 		return { error: "Données invalides", success: false };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { data: newSchedule, error } = await supabase
 		.from("stream_schedules")
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,7 +80,7 @@ export async function updateSchedule(id: string, data: Partial<ScheduleInput>) {
 		return { success: false, error: authError };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { error } = await supabase.from("stream_schedules").update(data).eq("id", id);
 
 	if (error) {
@@ -100,7 +100,7 @@ export async function deleteSchedule(id: string) {
 		return { success: false, error: authError };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { error } = await supabase.from("stream_schedules").delete().eq("id", id);
 
 	if (error) {
@@ -121,7 +121,7 @@ export async function syncWithGoogleCalendar() {
 	}
 
 	try {
-		const supabase = await createClient();
+		const supabase = createPostgresClient();
 		const events = await fetchGoogleCalendarEvents(14); // 2 semaines
 
 		// Supprimer l'ancien planning (tout ce qui a un jour valide)

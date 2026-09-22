@@ -1,16 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { logAdminAction } from "@/lib/admin-logger";
 import { getServerUser } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
 
 export async function updateSetting(
 	key: string,
 	value: unknown, // Changed to unknown to avoid any lint error
 	description?: string
 ) {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	// 1. Vérification du rôle Admin
 	const user = await getServerUser();

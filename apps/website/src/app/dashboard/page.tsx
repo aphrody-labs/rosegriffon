@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { getServerUser } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +11,7 @@ export default async function DashboardPage() {
 		redirect("/login");
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { data: profile } = await supabase
 		.from("profiles")
 		.select("username")

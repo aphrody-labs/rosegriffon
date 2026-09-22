@@ -338,30 +338,6 @@ export function construireEsportItems(): NavItem[] {
 		{
 			children: [
 				{
-					emote: "gaelle-fiere",
-					icon: "account_circle",
-					label: "nav.association.avatar_rg",
-					path: "/projets/outils/pfp",
-				},
-				{
-					emote: "gaelle-coeur",
-					icon: "palette",
-					label: "nav.association.nostalgie",
-					path: "/projets/nostalgie",
-				},
-				{
-					emote: "rg-funny",
-					icon: "groups",
-					label: "nav.association.murals",
-					path: "/projets/muraux",
-				},
-				{
-					emote: "gaelle-surprise",
-					icon: "sentiment_satisfied",
-					label: "nav.association.emotes",
-					path: "/projets/emotes",
-				},
-				{
 					icon: "emoji_events",
 					label: "nav.esport.tournaments.list",
 					path: e("/tournaments"),
@@ -439,6 +415,30 @@ export function construireAssociationItems(): NavItem[] {
 					icon: "celebration",
 					label: "nav.association.iergday",
 					path: "/iergday",
+				},
+				{
+					emote: "gaelle-fiere",
+					icon: "account_circle",
+					label: "nav.association.avatar_rg",
+					path: "/projets/outils/pfp",
+				},
+				{
+					emote: "gaelle-coeur",
+					icon: "palette",
+					label: "nav.association.nostalgie",
+					path: "/projets/nostalgie",
+				},
+				{
+					emote: "rg-funny",
+					icon: "groups",
+					label: "nav.association.murals",
+					path: "/projets/muraux",
+				},
+				{
+					emote: "gaelle-surprise",
+					icon: "sentiment_satisfied",
+					label: "nav.association.emotes",
+					path: "/projets/emotes",
 				},
 			],
 			icon: "rocket_launch",

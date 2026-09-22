@@ -2,7 +2,7 @@
 
 import { logAudit } from "@/lib/audit";
 import { getServerSession, requireAdmin } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export async function exportUserData(): Promise<{
 	profiles: unknown;
@@ -22,7 +22,7 @@ export async function exportUserData(): Promise<{
 	}
 
 	const userId = session.user.id;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -111,7 +111,7 @@ export async function deleteUserData(userId: string): Promise<{
 }> {
 	await requireAdmin();
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -154,8 +154,8 @@ export async function deleteUserData(userId: string): Promise<{
 
 	// Supprimer l'utilisateur auth.users en dernier via l'API admin
 	try {
-		const { createSupabaseServiceClient } = await import("@rosegriffon/db/service");
-		const adminClient = createSupabaseServiceClient();
+		const { createPostgresClient } = await import("@rosegriffon/db/service");
+		const adminClient = createPostgresClient();
 		const { error: authError } = await adminClient.auth.admin.deleteUser(userId);
 
 		if (authError) {

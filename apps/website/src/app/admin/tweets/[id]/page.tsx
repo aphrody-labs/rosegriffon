@@ -1,6 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { TweetFormClient } from "./tweet-form-client";
 
 export default async function TweetEditorPage({ params }: { params: Promise<{ id: string }> }) {
@@ -10,7 +10,7 @@ export default async function TweetEditorPage({ params }: { params: Promise<{ id
 	let tweet = null;
 
 	if (!isNew) {
-		const supabase = await createClient();
+		const supabase = createPostgresClient();
 		let { data } = await supabase.from("tweets").select("*").eq("id", id).maybeSingle();
 		if (!data) {
 			const { data: threadTweet } = await supabase

@@ -8,6 +8,7 @@ import type {
 	WebSite,
 	WithContext,
 } from "schema-dts";
+import { NETWORK_SAME_AS } from "@/lib/social-links";
 
 // ... existing imports ...
 
@@ -63,21 +64,7 @@ export function OrganizationSchema() {
 		name: "Rose Griffon",
 		// Réseau Rose Griffon : 3 domaines siblings + tous les réseaux sociaux.
 		// Liste identique sur website / azalee / achillea (entité cohérente).
-		sameAs: [
-			"https://rosegriffon.fr",
-			"https://azalee.rosegriffon.fr",
-			"https://achillea.rosegriffon.fr",
-			"https://x.com/rose_griffon",
-			"https://x.com/Azalee_IE",
-			"https://x.com/Achillea_IE",
-			"https://www.youtube.com/@RoseGriffon",
-			"https://twitch.tv/rose_griffontv",
-			"https://www.instagram.com/rose_griffonfr",
-			"https://www.instagram.com/azaleefr",
-			"https://discord.gg/TYzQvbByv4",
-			"https://disboard.org/server/1072991720268111892",
-			"https://discord.do/fr/inazuma-eleven-fr-%E2%9A%BD-rose-griffon/",
-		],
+		sameAs: NETWORK_SAME_AS,
 		url: "https://rosegriffon.fr",
 	};
 

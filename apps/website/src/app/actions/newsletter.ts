@@ -2,7 +2,7 @@
 
 import { randomBytes } from "node:crypto";
 import { getServerSession, requireAdmin } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 function generateUnsubscribeToken(): string {
 	return randomBytes(32).toString("hex");
@@ -26,7 +26,7 @@ export async function subscribeNewsletter(
 	frequency?: NewsletterFrequency
 ): Promise<{ success: boolean; error?: string }> {
 	const session = await getServerSession();
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -86,7 +86,7 @@ export async function subscribeNewsletter(
 export async function unsubscribeNewsletter(
 	token: string
 ): Promise<{ success: boolean; error?: string }> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -128,7 +128,7 @@ export async function updateNewsletterPreferences(
 		return { error: "Non authentifié.", success: false };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -180,7 +180,7 @@ export async function getNewsletterStatus(): Promise<{
 		return null;
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data } = await (supabase as any)
 		.from("newsletter_subscriptions")
@@ -205,7 +205,7 @@ export async function getNewsletterSubscribers(categories?: string[]): Promise<
 > {
 	await requireAdmin();
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 

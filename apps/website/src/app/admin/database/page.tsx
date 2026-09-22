@@ -9,11 +9,11 @@ import {
 } from "@rosegriffon/ui";
 import { ElementChartLoader } from "./ElementChartLoader";
 import { apiClient } from "@/lib/api-client";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { Icon } from "@/components/ui/Icon";
 
 export default async function DatabasePage() {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	// Fetch real counts concurrently
 	const [characters, skills, teams, items, keshinsCount] = await Promise.all([

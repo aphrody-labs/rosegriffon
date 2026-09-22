@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getArticleVersions, restoreArticleVersion } from "@/app/actions/articles";
 import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { VersionsList } from "./VersionsList";
 import { Icon } from "@/components/ui/Icon";
 
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: VersionsPageProps) {
 
 export default async function VersionsPage({ params }: VersionsPageProps) {
 	const { id } = await params;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const { data: article } = await supabase
 		.from("articles")

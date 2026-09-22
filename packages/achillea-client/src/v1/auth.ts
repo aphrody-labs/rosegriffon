@@ -46,12 +46,16 @@ export class AuthResource extends AchilleaResource {
 	}
 
 	/**
-	 * URL de compatibilité : l'API redirige vers le login Rose Griffon unifié.
-	 * Les nouvelles interfaces doivent appeler `/login?redirect=…`.
-	 * `state` porte le chemin interne de retour (`/ranked`, `/compte`…).
+	 * URL de connexion canonique Rose Griffon.
+	 *
+	 * Achillea ne doit plus envoyer de nouveaux utilisateurs vers son alias
+	 * historique `/api/auth/discord`: Better Auth/Rose Griffon est l'unique
+	 * propriétaire de l'autorisation et du callback Discord.
 	 */
 	discordLoginUrl(state?: string): string {
-		return this.http.url("/auth/discord", { state });
+		const url = new URL("https://rosegriffon.fr/login");
+		if (state) url.searchParams.set("redirect", state);
+		return url.toString();
 	}
 
 	/** Callback Discord canonique enregistré dans le portail développeur. */

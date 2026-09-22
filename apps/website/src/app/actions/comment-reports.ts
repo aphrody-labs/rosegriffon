@@ -1,7 +1,7 @@
 "use server";
 
 import { getServerSession, requireAdmin } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export type ReportReason = "spam" | "harassment" | "inappropriate" | "misinformation" | "other";
 
@@ -54,7 +54,7 @@ export async function reportComment(
 	}
 
 	const userId = session.user.id;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -105,7 +105,7 @@ export async function reportComment(
 export async function getReports(status?: ReportStatus): Promise<CommentReport[]> {
 	await requireAdmin();
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -187,7 +187,7 @@ export async function resolveReport(
 ): Promise<{ success: boolean }> {
 	const { user } = await requireAdmin();
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -218,7 +218,7 @@ export async function hasUserReported(commentId: string): Promise<boolean> {
 		return false;
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 

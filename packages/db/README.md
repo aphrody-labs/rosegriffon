@@ -28,8 +28,6 @@ const db = createPostgresClient();
 const { data } = await db.from("profiles").select("*");
 ```
 
-`createSupabaseServiceClient()` reste uniquement un alias de migration ; il
-exécute le même SQL PostgreSQL et ne constitue pas un second backend.
 
 ## Scripts
 

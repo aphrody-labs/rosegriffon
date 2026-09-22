@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export async function updateZukanHash(
 	characterId: string,
@@ -11,7 +11,7 @@ export async function updateZukanHash(
 	try {
 		await requireAdmin();
 
-		const supabase = await createClient();
+		const supabase = createPostgresClient();
 		const { error } = await supabase
 			.from("inagle_characters")
 			.update({ zukan_hash: newHash })

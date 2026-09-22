@@ -1,10 +1,10 @@
 "use server";
 
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { getServerSession } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
 import { REACTION_TYPES } from "@/lib/reaction-types";
 import type { ReactionType } from "@/lib/reaction-types";
-import { createClient } from "@/lib/supabase/server";
 
 export async function toggleReaction(
 	articleId: string,
@@ -16,7 +16,7 @@ export async function toggleReaction(
 	}
 
 	const userId = session.user.id;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 

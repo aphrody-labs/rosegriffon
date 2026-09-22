@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getServerSession, getServerUser } from "@/lib/auth-helpers";
 import { isAdminRole } from "@/lib/auth-roles";
 import { getPgPool } from "@/lib/db/pg";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 // ==========================================
 // WEBSITE GENERIC COMMENTS
@@ -105,7 +105,7 @@ export async function addCommentAction(
 		return { error: "Le commentaire ne peut pas dépasser 1000 caractères." };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const { data: profile, error: profileError } = await supabase
 		.from("profiles")
@@ -142,7 +142,7 @@ export async function deleteCommentAction(commentId: string) {
 		return { error: "Vous devez être connecté pour supprimer un commentaire." };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const { data: comment, error: fetchError } = await supabase
 		.from("comments")
@@ -222,7 +222,7 @@ export async function getComments(
 	articleId: string,
 	sortBy: "newest" | "oldest" | "popular" = "newest"
 ): Promise<Comment[]> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -353,7 +353,7 @@ export async function getComments(
 }
 
 export async function getReplies(parentId: string): Promise<Reply[]> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -444,7 +444,7 @@ export async function createComment(
 	}
 
 	const userId = session.user.id;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -534,7 +534,7 @@ export async function updateComment(commentId: string, content: string): Promise
 	}
 
 	const userId = session.user.id;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -617,7 +617,7 @@ export async function deleteComment(commentId: string): Promise<void> {
 	}
 
 	const userId = session.user.id;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -658,7 +658,7 @@ export async function pinComment(commentId: string): Promise<{ is_pinned: boolea
 	}
 
 	const userId = session.user.id;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -754,7 +754,7 @@ export async function toggleCommentLike(
 	}
 
 	const userId = session.user.id;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 

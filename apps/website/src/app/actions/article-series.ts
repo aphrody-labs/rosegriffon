@@ -1,8 +1,8 @@
 "use server";
 
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
-import { createClient } from "@/lib/supabase/server";
 
 export interface SeriesInfo {
 	id: string;
@@ -43,7 +43,7 @@ export interface SeriesSummary {
  * Accès public.
  */
 export async function getSeries(slug: string): Promise<SeriesWithArticles | null> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const { data: series, error } = await supabase
 		.from("article_series")
@@ -132,7 +132,7 @@ export async function getArticleSeries(
  * Accès public.
  */
 export async function getAllSeries(): Promise<SeriesSummary[]> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { data } = await supabase
 		.from("article_series")
 		.select("id, title, slug, description, cover_image_url");
@@ -178,7 +178,7 @@ export async function createSeries(data: {
 }): Promise<SeriesInfo> {
 	await requireAdmin();
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { data: created, error } = await supabase
 		.from("article_series")
 		.insert({
@@ -208,7 +208,7 @@ export async function addArticleToSeries(
 ): Promise<{ success: boolean }> {
 	await requireAdmin();
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { error } = await supabase
 		.from("articles")
 		.update({ series_id: seriesId, series_order: order })
@@ -228,7 +228,7 @@ export async function addArticleToSeries(
 export async function removeArticleFromSeries(articleId: string): Promise<{ success: boolean }> {
 	await requireAdmin();
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { error } = await supabase
 		.from("articles")
 		.update({ series_id: null, series_order: 0 })

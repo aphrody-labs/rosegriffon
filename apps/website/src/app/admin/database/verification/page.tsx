@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
 import { VerificationClient } from "./VerificationClient";
 import { Icon } from "@/components/ui/Icon";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function VerificationPage() {
 	await requireAdmin();
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 

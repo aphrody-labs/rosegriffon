@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { DatabaseTableClient } from "./DatabaseTableClient";
 import { Icon } from "@/components/ui/Icon";
 
@@ -18,7 +18,7 @@ export default async function GenericTablePage({
 	const sortCol = sort || "id";
 	const sortDir = dir !== "desc";
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	// Liste blanche (anti-injection). Elle DOIT couvrir toutes les tables
 	// référencées par un lien `/dashboard/database/<t>` du dépôt : trois tuiles

@@ -5,6 +5,8 @@ import { describe, expect, test } from "bun:test";
 
 import {
 	cheminsCliquables,
+	construireAssociationItems,
+	construireEsportItems,
 	construireMobileNavUnifiee,
 	construireNavigationUnifiee,
 	domaineDeLaRoute,
@@ -61,6 +63,22 @@ describe("inventaire des routes", () => {
  * Un lien ajouté sans page fait échouer les tests, pas la production.
  */
 describe("navigation unifiée : trois catégories", () => {
+	test("sépare les projets RG des sous-routes de tournois Achilléa", () => {
+		const projects = construireAssociationItems().find((item) => item.path === "/projets");
+		const tournaments = construireEsportItems().find((item) => item.path === "/achillea/tournaments");
+		const projectPaths = (projects?.children ?? []).map((item) => item.path);
+		const tournamentPaths = (tournaments?.children ?? []).map((item) => item.path);
+
+		expect(projectPaths).toContain("/projets/emotes");
+		expect(projectPaths).toContain("/rose-griffon-tv");
+		expect(projectPaths.some((path) => path.startsWith("/achillea/tournaments"))).toBe(false);
+		expect(tournamentPaths).toEqual([
+			"/achillea/tournaments",
+			"/achillea/tournaments/create",
+			"/achillea/tournaments/circuit/ranking",
+		]);
+	});
+
 	test("les trois catégories sont présentes, dans l'ordre", () => {
 		const groupes = construireNavigationUnifiee();
 		expect(groupes.map((g) => g.domaine)).toEqual([

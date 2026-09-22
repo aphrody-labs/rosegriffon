@@ -13,7 +13,7 @@ import {
 } from "@rosegriffon/azalee/images";
 import { smartSearch } from "@rosegriffon/azalee/search/smart-search";
 import type { GlobalSearchResult, SearchContext } from "@rosegriffon/azalee/search/smart-search";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { TACTIC_FR, translateEffect } from "@rosegriffon/azalee/text/translations";
 
 const TYPE_CONFIG: Record<string, { label: string; icon: string; urlPrefix: string }> = {
@@ -81,7 +81,7 @@ export async function searchGlobal(
 		return [];
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// Sanitize query to prevent PostgREST filter injection
 	const sanitized = query.replaceAll(/[%_,().*\\]/g, "");
 	const q = `%${sanitized}%`;
@@ -496,7 +496,7 @@ export async function searchCompareCharacters(
 		return [];
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	let dbQuery = (supabase as any)
 		.from("inagle_characters")
 		.select(
@@ -666,7 +666,7 @@ const PASSIVE_BOOST_FR: Record<string, string> = {
  * popular items, and key passives.
  */
 export async function getMetaSuggestions(): Promise<MetaSuggestions> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const [playersRes, skillsRes, tacticsRes, itemsRes, passivesRes] = await Promise.all([
 		// Top 10 BASARA by total stats, prefer those with zukan_hash for 3D images
