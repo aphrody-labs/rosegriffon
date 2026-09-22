@@ -1,6 +1,6 @@
 "use server";
 
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { getViewerPatreonAccess } from "./viewer";
 import type { PatreonViewerAccess } from "./viewer";
@@ -44,14 +44,12 @@ export async function getPatreonFeedForViewer(opts?: {
 		return { access, posts: [] };
 	}
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return { access, posts: [] };
-	}
+	const db = createPostgresClient();
+	const storage = db.storage;
 
 	const limit = opts?.limit ?? 12;
 
-	let query = supabase
+	let query = db
 		.from("patreon_post_events")
 		.select("patreon_post_id, title, content_excerpt, url, published_at, is_paid, is_public")
 		.order("published_at", { ascending: false, nullsFirst: false })
@@ -66,17 +64,17 @@ export async function getPatreonFeedForViewer(opts?: {
 		return { access, posts: [] };
 	}
 
-	const postIds = rows.map((r) => r.patreon_post_id);
-	const { data: imageRows } = await supabase
+	const postIds = rows.map((r: { patreon_post_id: string }) => r.patreon_post_id);
+	const { data: imageRows } = await db
 		.from("patreon_post_images")
 		.select("patreon_post_id, position, storage_path, content_type")
 		.in("patreon_post_id", postIds)
 		.order("position", { ascending: true });
 
-	const allPaths = (imageRows ?? []).map((r) => r.storage_path);
+	const allPaths = (imageRows ?? []).map((r: { storage_path: string }) => r.storage_path);
 	const signedUrlMap = new Map<string, string>();
 	if (allPaths.length > 0) {
-		const { data: signed } = await supabase.storage
+		const { data: signed } = await storage
 			.from("patreon")
 			.createSignedUrls(allPaths, SIGNED_URL_TTL_SECONDS);
 		for (const entry of signed ?? []) {
@@ -97,7 +95,15 @@ export async function getPatreonFeedForViewer(opts?: {
 		imagesByPost.set(r.patreon_post_id, list);
 	}
 
-	const posts: PatreonFeedPost[] = rows.map((r) => {
+	const posts: PatreonFeedPost[] = rows.map((r: {
+		patreon_post_id: string;
+		content_excerpt: string | null;
+		is_paid: boolean | null;
+		is_public: boolean | null;
+		published_at: string | null;
+		title: string | null;
+		url: string | null;
+	}) => {
 		const imgs = imagesByPost.get(r.patreon_post_id) ?? [];
 		return {
 			cover: imgs[0] ?? null,

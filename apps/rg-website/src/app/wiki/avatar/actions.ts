@@ -16,7 +16,7 @@ import { revalidatePath } from "next/cache";
 import { cdnOrigin } from "@rosegriffon/assets";
 
 import { getServerSession } from "@/lib/auth-helpers";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import {
 	enregistrerDansDepot,
 	listerDansDepot,
@@ -82,7 +82,7 @@ export async function definirPhotoDepuisAvatar(
 		return { error: "Cette vignette n'a pas pu être récupérée." };
 	}
 
-	const admin = createAdminClient();
+	const admin = createPostgresClient();
 	// Chemin daté, comme le téléversement des réglages : un chemin fixe resservirait l'ancienne
 	// image depuis le cache du CDN et du navigateur.
 	const chemin = `${session.user.id}/avatar-${Date.now()}.png`;
@@ -115,7 +115,7 @@ export async function definirPhotoDepuisAvatar(
 // ─── Sauvegarde et partage ────────────────────────────────────────────────────
 
 function creerDepot(): DepotSauvegardes {
-	const admin = createAdminClient();
+	const admin = createPostgresClient();
 	return {
 		async compter(userId) {
 			const { count } = await admin
@@ -139,7 +139,14 @@ function creerDepot(): DepotSauvegardes {
 				.eq("user_id", userId)
 				.order("modifie_le", { ascending: false })
 				.limit(limite);
-			const lignes = (data ?? []).map((r) => ({
+			const lignes = (data ?? []).map((r: {
+				id: string;
+				user_id: string;
+				nom: string;
+				code: string;
+				donnees: unknown;
+				modifie_le: string;
+			}) => ({
 				id: r.id,
 				userId: r.user_id,
 				nom: r.nom,

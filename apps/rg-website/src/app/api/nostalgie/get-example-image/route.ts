@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 /**
  * API Route pour récupérer l'URL publique ou signée de l'image ogVR.jpg
@@ -12,7 +12,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 export async function GET() {
 	try {
-		const supabase = createAdminClient();
+		const supabase = createPostgresClient();
 
 		if (!supabase) {
 			return NextResponse.json({ error: "Service unavailable" }, { status: 503 });

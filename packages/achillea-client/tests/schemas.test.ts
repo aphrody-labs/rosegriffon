@@ -5,6 +5,7 @@ import {
 	achilleaGuildPageSchema,
 	achilleaGuildStatsSchema,
 } from "../src/v1";
+import { clanDtoSchema } from "../src/v1/clans";
 
 const guild = {
 	id: "123456789012345678",
@@ -73,4 +74,21 @@ describe("v1 guild schemas", () => {
 			by_channel_type: [],
 		});
 	});
+});
+
+test("normalizes the compact unified clans projection", () => {
+	const parsed = clanDtoSchema.parse({
+		id: 61,
+		name: "PROJECT ZOO",
+		shortName: "ZOO",
+		avatarUrl: "https://example.test/zoo.png",
+		biography: "POUIK",
+		fame: 0,
+		isRecruiting: false,
+		membersLimit: false,
+	});
+
+	expect(parsed.shortenedName).toBe("ZOO");
+	expect(parsed.normalizedShortName).toBe("zoo");
+	expect(parsed.founders).toEqual([]);
 });

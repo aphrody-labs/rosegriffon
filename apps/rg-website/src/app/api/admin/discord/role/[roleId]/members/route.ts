@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 /**
  * GET /api/admin/discord/role/[roleId]/members
@@ -112,8 +113,7 @@ export async function GET(
 	}
 
 	// Lookup profiles existants
-	const { createAdminClient } = await import("@/lib/supabase/admin");
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 	const discordIds = withRole.map((m) => m.user.id);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data: profiles } = await (supabase as any)

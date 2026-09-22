@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { requirePatreonCreator } from "@/lib/auth-helpers";
-import { createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -11,10 +11,7 @@ interface Body {
 
 export async function POST(req: Request) {
 	await requirePatreonCreator();
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return NextResponse.json({ error: "no admin client", ok: false }, { status: 500 });
-	}
+	const supabase = createPostgresClient();
 	let body: Body = {};
 	try {
 		body = (await req.json()) as Body;
@@ -46,7 +43,7 @@ export async function POST(req: Request) {
 }
 
 async function archiveExpiredTokens(
-	supabase: NonNullable<ReturnType<typeof createAdminClient>>
+	supabase: ReturnType<typeof createPostgresClient>
 ): Promise<number> {
 	const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 	const { data, error } = await supabase

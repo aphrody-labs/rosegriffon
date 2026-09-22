@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import type { ResolutionMethod, RgSubscriptionStatus } from "./types";
 
@@ -22,10 +22,7 @@ export async function reconcileLegacyMember(
 	userId: string,
 	method: ResolutionMethod
 ): Promise<ReconcileResult> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		throw new Error("no admin supabase client");
-	}
+	const supabase = createPostgresClient();
 	const { error } = await supabase
 		.from("patreon_legacy_members")
 		.update({
@@ -41,10 +38,7 @@ export async function reconcileLegacyMember(
 }
 
 export async function reconcileAll(): Promise<ReconcileSummary> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		throw new Error("no admin supabase client");
-	}
+	const supabase = createPostgresClient();
 
 	let byEmail = 0;
 	let byDiscord = 0;
@@ -114,10 +108,7 @@ export async function reconcileAll(): Promise<ReconcileSummary> {
 }
 
 export async function markReactivated(userId: string, subscriptionRef?: string): Promise<number> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return 0;
-	}
+	const supabase = createPostgresClient();
 	const { data, error } = await supabase
 		.from("patreon_legacy_members")
 		.update({

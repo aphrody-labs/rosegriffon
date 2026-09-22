@@ -1,7 +1,7 @@
 import { patreonFetch } from "@/lib/patreon/client";
 import { decryptToken, encryptToken } from "@/lib/patreon/encryption";
 import { isTokenFresh, refreshOAuthToken } from "@/lib/oauth/refresh";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import type {
 	JsonApiResource,
 	PatreonAddressAttrs,
@@ -11,7 +11,7 @@ import type {
 	PatreonUserAttrs,
 } from "@/lib/patreon/types";
 
-type AdminClient = NonNullable<ReturnType<typeof createAdminClient>>;
+type AdminClient = ReturnType<typeof createPostgresClient>;
 
 interface CreatorTokenRow {
 	id: string;
@@ -183,10 +183,7 @@ function getRel(resource: JsonApiResource<unknown>, name: string): { id: string;
  * Une campagne RG ~700 patrons = 4-5 appels HTTP.
  */
 export async function fetchLiveCampaignSnapshot(): Promise<LiveSnapshotResult> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return { ok: false, reason: "no_admin_client" };
-	}
+	const supabase = createPostgresClient();
 
 	const { data: tokenRow } = await supabase
 		.from("patreon_oauth_tokens")

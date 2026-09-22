@@ -119,6 +119,9 @@ export function MobileHeader({
 
 	const isHome = pathname === "/" || pathname === homeHref;
 	const title = resolvePageTitle(pathname, titleMap);
+	const loginHref = pathname.startsWith("/achillea")
+		? `/login?redirect=${encodeURIComponent(pathname)}`
+		: "/login";
 
 	const publicProfileHref =
 		accountHref && accountHref !== "/settings"
@@ -221,7 +224,7 @@ export function MobileHeader({
 					) : (
 						(loginSlot ?? (
 							<Link
-								href="/login"
+									href={loginHref}
 								className="size-12 rounded-full flex items-center justify-center text-sidebar-foreground/85 hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors"
 								aria-label="Se connecter"
 							>
@@ -261,6 +264,9 @@ export function DesktopTopBar({
 	const { toggleSidebar, open } = useSidebar();
 	const title = resolvePageTitle(pathname, titleMap);
 	const isHome = pathname === "/" || pathname === homeHref;
+	const loginHref = pathname.startsWith("/achillea")
+		? `/login?redirect=${encodeURIComponent(pathname)}`
+		: "/login";
 	const goBack = () => (window.history.length > 1 ? router.back() : router.push(homeHref));
 
 	const publicProfileHref =
@@ -399,7 +405,7 @@ export function DesktopTopBar({
 					) : (
 						(loginSlot ?? (
 							<Link
-								href="/login"
+								href={loginHref}
 								className="h-9 px-4 rounded-full flex items-center gap-2 text-sidebar-foreground type-label-large hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors duration-200"
 							>
 								<CircleUser size={20} aria-hidden="true" />

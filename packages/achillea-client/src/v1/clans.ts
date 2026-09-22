@@ -20,7 +20,7 @@ import {
 	apiDateSchema,
 	clanMemberDistinctionSchema,
 	clanMemberRoleSchema,
-	paginatedSchema,
+	pageMetaSchema,
 	successResponseSchema,
 	userDtoSchema,
 } from "./common";
@@ -41,7 +41,7 @@ import type {
 
 export const clanStateSchema = z.enum(ClanState) satisfies z.ZodType<ClanState>;
 
-export const clanDtoSchema = z.object({
+const canonicalClanDtoSchema = z.object({
 	id: z.number(),
 	founders: z.array(z.string()),
 	name: z.string(),
@@ -65,7 +65,68 @@ export const clanDtoSchema = z.object({
 	experience: z.object({ currentLevel: z.number(), totalXp: z.number() }),
 	membersCount: z.number(),
 	president: userDtoSchema,
+	});
+
+/**
+ * The first unified Elysia projection intentionally shipped the compact clan
+ * shape used by the legacy Angular client.  Accept it at this boundary while
+ * normalising it to the canonical shared DTO; otherwise Zod rejects the whole
+ * list and the UI renders an empty state despite a non-empty database.
+ */
+const compactClanDtoSchema = z.object({
+	id: z.number(),
+	name: z.string(),
+	shortName: z.string(),
+	avatarUrl: z.string(),
+	biography: z.string(),
+	fame: z.number(),
+	isRecruiting: z.boolean(),
+	membersLimit: z.boolean(),
+});
+
+export const clanDtoSchema = z.union([canonicalClanDtoSchema, compactClanDtoSchema]).transform((value): ClanDTO => {
+	if ("founders" in value) return value;
+	return {
+		id: value.id,
+		founders: [],
+		name: value.name,
+		shortenedName: value.shortName,
+		normalizedShortName: value.shortName.toLowerCase(),
+		clanAvatarUrl: value.avatarUrl,
+		clanBiography: value.biography,
+		fame: value.fame,
+		xUrl: null,
+		instagramUrl: null,
+		tiktokUrl: null,
+		isRecruiting: value.isRecruiting,
+		isInactive: false,
+		isHidden: false,
+		isDisbanded: false,
+		autoAcceptMembers: false,
+		state: ClanState.Approved,
+		createdAt: new Date(0),
+		languages: [],
+		origin: "legacy",
+		experience: { currentLevel: 1, totalXp: 0 },
+		membersCount: 0,
+		president: { id: "", username: value.name },
+	};
 }) satisfies z.ZodType<ClanDTO>;
+
+const compactClanListSchema = z.object({
+	data: z.array(clanDtoSchema),
+	count: z.number(),
+}).transform(({ data, count }) => ({
+	data,
+	meta: { total: count },
+}));
+
+const canonicalClanListSchema = z.object({
+	data: z.array(clanDtoSchema),
+	meta: pageMetaSchema,
+});
+
+const clanListSchema = z.union([canonicalClanListSchema, compactClanListSchema]);
 
 export const clanMemberDtoSchema = z.object({
 	clanRole: clanMemberRoleSchema,
@@ -147,7 +208,7 @@ export type ClanListQuery = {
 export class ClansResource extends AchilleaResource {
 	/** `GET /clans` — annuaire paginé, filtré par état de validation. */
 	list(query: ClanListQuery = {}): Promise<AchilleaClientResult<Paginated<ClanDTO>>> {
-		return this.http.get("/clans", paginatedSchema(clanDtoSchema), {
+		return this.http.get("/clans", clanListSchema, {
 			query,
 		});
 	}

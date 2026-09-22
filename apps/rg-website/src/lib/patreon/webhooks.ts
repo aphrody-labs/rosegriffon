@@ -1,4 +1,5 @@
 import { verify as patreonVerify } from "@rosegriffon/patreon-bun";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import type {
 	JsonApiResource,
@@ -6,7 +7,6 @@ import type {
 	PatreonMemberAttrs,
 	PatreonTierAttrs,
 } from "./types";
-import { createAdminClient } from "@/lib/supabase/server";
 
 /**
  * Tous les triggers Patreon v2 — référence officielle :
@@ -130,12 +130,9 @@ function parseAddress(
  * ne connaît pas encore le user RG → on stocke quand même côté legacy).
  */
 async function resolveRgUserId(
-	supabase: ReturnType<typeof createAdminClient>,
+	supabase: ReturnType<typeof createPostgresClient>,
 	patreonUserId: string
 ): Promise<string | null> {
-	if (!supabase) {
-		return null;
-	}
 	const { data } = await supabase
 		.from("patreon_oauth_tokens")
 		.select("user_id")
@@ -154,10 +151,7 @@ export async function processPatreonEvent(
 	payload: PatreonWebhookPayload,
 	trigger: PatreonTrigger
 ): Promise<void> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		throw new Error("no admin supabase client");
-	}
+	const supabase = createPostgresClient();
 
 	if (trigger.startsWith("posts:")) {
 		await processPostEvent(payload, trigger);
@@ -174,10 +168,7 @@ async function processPostEvent(
 	payload: PatreonWebhookPayload,
 	trigger: PatreonTrigger
 ): Promise<void> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return;
-	}
+	const supabase = createPostgresClient();
 
 	const post = payload.data as JsonApiResource<PatreonPostAttrs>;
 	const attrs = post.attributes;
@@ -231,10 +222,7 @@ async function processMemberEvent(
 	payload: PatreonWebhookPayload,
 	trigger: PatreonTrigger
 ): Promise<void> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		throw new Error("no admin supabase client");
-	}
+	const supabase = createPostgresClient();
 
 	const member = payload.data as JsonApiResource<PatreonMemberAttrs>;
 	const attrs = member.attributes;

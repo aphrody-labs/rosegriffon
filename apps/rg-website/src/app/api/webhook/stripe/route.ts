@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { getStripe } from "@/lib/shop/stripe";
 
 export const runtime = "nodejs";
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 				// Stripe reste la source de vérité — un échec d'upsert est loggué
 				// En ERROR (monitoring catch) mais ne fait pas planter le webhook.
 				let dbSync: "ok" | "skipped" | "failed" = "skipped";
-				const supabase = createAdminClient();
+				const supabase = createPostgresClient();
 				if (!supabase) {
 					console.error("[stripe-webhook] no admin supabase client — order NOT mirrored", {
 						session_id: session.id,

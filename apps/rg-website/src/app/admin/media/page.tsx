@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MediaManager } from "@/components/admin/media/media-manager";
 
 import { ChevronLeft, ChevronRight } from "@/lib/icons-config";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,7 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
 	const limit = 24;
 	const offset = (page - 1) * limit;
 
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 	if (!supabase) {
 		return (
 			<div className="p-6">

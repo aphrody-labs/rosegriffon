@@ -9,7 +9,7 @@ import { PatreonMembershipCard } from "@/components/patreon/PatreonMembershipCar
 import { BreadcrumbSchema, ProfileSchema } from "@/components/shared/StructuredData";
 import { getServerUser } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { ProfileAbout } from "./_components/profile-about";
 import { ProfileActivity } from "./_components/profile-activity";
@@ -296,26 +296,24 @@ export default async function UserProfilePage({
 	let patreonLinked = false;
 	let hasPatreonHistory = false;
 	if (isOwnProfile) {
-		const admin = createAdminClient();
-		if (admin) {
-			const [tokensCount, membershipsCount, legacyCount] = await Promise.all([
-				admin
+		const db = createPostgresClient();
+		const [tokensCount, membershipsCount, legacyCount] = await Promise.all([
+			db
 					.from("patreon_oauth_tokens")
 					.select("id", { count: "exact", head: true })
 					.eq("user_id", profile.id)
 					.eq("is_creator", false),
-				admin
+			db
 					.from("patreon_memberships")
 					.select("id", { count: "exact", head: true })
 					.eq("user_id", profile.id),
-				admin
+			db
 					.from("patreon_legacy_members")
 					.select("id", { count: "exact", head: true })
 					.eq("resolved_user_id", profile.id),
-			]);
-			patreonLinked = (tokensCount.count ?? 0) > 0;
-			hasPatreonHistory = (membershipsCount.count ?? 0) > 0 || (legacyCount.count ?? 0) > 0;
-		}
+		]);
+		patreonLinked = (tokensCount.count ?? 0) > 0;
+		hasPatreonHistory = (membershipsCount.count ?? 0) > 0 || (legacyCount.count ?? 0) > 0;
 	}
 
 	return (

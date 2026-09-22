@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { requireApiPatreonCreator } from "@/lib/api-auth";
-import { createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,10 +26,7 @@ export async function POST(req: Request) {
 		return NextResponse.json({ error: "bad_request" }, { status: 400 });
 	}
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return NextResponse.json({ error: "no_admin_client" }, { status: 503 });
-	}
+	const supabase = createPostgresClient();
 
 	const { error } = await supabase
 		.from("patreon_legacy_members")

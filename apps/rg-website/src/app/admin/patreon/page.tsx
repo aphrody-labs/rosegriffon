@@ -9,6 +9,7 @@ import {
 	DashboardStatsCard as StatsCard,
 	AdminPageHeader,
 } from "@rosegriffon/ui";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { AlertCircle, BarChart3, Heart, RefreshCw, TrendingUp, Users } from "lucide-react";
 
 import { PatreonAdminActions } from "@/components/patreon/admin/PatreonAdminActions";
@@ -19,7 +20,6 @@ import { PatreonConnectButton } from "@/components/patreon/PatreonConnectButton"
 
 import { requirePatreonCreator } from "@/lib/auth-helpers";
 import { fetchLiveCampaignSnapshot } from "@/lib/patreon/live";
-import { createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -41,18 +41,11 @@ function formatEurCompact(cents: number): string {
 
 export default async function AdminPatreonPage() {
 	await requirePatreonCreator();
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return (
-			<div className="mx-auto max-w-7xl p-6">
-				<AdminPageHeader title="Patreon" description="Service indisponible" />
-			</div>
-		);
-	}
+	const db = createPostgresClient();
 
 	const [liveResult, { data: tokenRow }] = await Promise.all([
 		fetchLiveCampaignSnapshot(),
-		supabase
+		db
 			.from("patreon_oauth_tokens")
 			.select("id,is_creator,expires_at,scope,updated_at")
 			.eq("is_creator", true)
