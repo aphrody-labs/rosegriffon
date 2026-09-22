@@ -10,6 +10,7 @@ import { CookieAuthorize } from "@/api/middlewares";
 import { isSafeInternalPath } from "@rosegriffon/achillea-core";
 import { env } from "@/env";
 import { urlsConfig } from "@/configs";
+import type { UserDTO } from "@/services";
 import { BaseController } from "@/utils/classes";
 
 /** L'identité du site est désormais exclusivement gérée par Better Auth/RG. */
