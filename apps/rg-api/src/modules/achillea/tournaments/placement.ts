@@ -1,4 +1,4 @@
-import { applyEloUpdate, DEFAULT_BASE_RATING, placementPrizeAp } from "@rosegriffon/achillea-core";
+import { applyEloUpdate, DEFAULT_BASE_RATING, MatchMode, placementPrizeAp } from "@rosegriffon/achillea-core";
 import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 import { finalTournamentStandings } from "./bracket";
@@ -39,7 +39,7 @@ export async function applyPlacementPrizes(
 			const prize = placementPrizeAp(size, placement.rank);
 			if (prize <= 0) continue;
 			const current = await trx.selectFrom("user_elo").select(["elo", "peak_rating"])
-				.where("user_id", "=", placement.userId).where("mode", "=", 1).executeTakeFirst();
+				.where("user_id", "=", placement.userId).where("mode", "=", MatchMode.ONE_VS_ONE).executeTakeFirst();
 			const previous = Number(current?.elo ?? base);
 			const next = applyEloUpdate(previous, prize);
 			if (current) {
@@ -47,10 +47,10 @@ export async function applyPlacementPrizes(
 					elo: next.newElo,
 					peak_rating: Math.max(Number(current.peak_rating ?? previous), next.newElo),
 					updated_at: new Date(),
-				}).where("user_id", "=", placement.userId).where("mode", "=", 1).execute();
+				}).where("user_id", "=", placement.userId).where("mode", "=", MatchMode.ONE_VS_ONE).execute();
 			} else {
 				await trx.insertInto("user_elo").values({
-					user_id: placement.userId, season_id: season?.id ?? null, mode: 1,
+					user_id: placement.userId, season_id: season?.id ?? null, mode: MatchMode.ONE_VS_ONE,
 					elo: next.newElo, peak_rating: next.newElo, games_played: 0, wins: 0, losses: 0,
 					updated_at: new Date(),
 				}).execute();
