@@ -114,42 +114,12 @@ export class ClansController extends BaseController {
 			res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
 			return res.json({ data: payload.data ?? [], meta: { page: page ?? 1, limit: pagination ?? 25, total, pageCount: Math.ceil(total / (pagination ?? 25)) } });
 		}
-		if (upstream.status !== 404 && upstream.status !== 501) {
-			return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
-		}
-		const [items, total] = await this.clanService.getClans(page, pagination, state);
-
-		// Liste de clans publique : tres peu changeante (creation/dissolution clan
-		// est rare). 60s + SWR 5min.
-		res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
-
-		if (total === 0) {
-			return res.json({
-				data: [],
-				meta: {
-					limit: pagination,
-					page,
-					total: 0,
-					pageCount: 0,
-				},
-			});
-		}
-
-		if (page >= 1 && (page - 1) * pagination >= total) {
-			throw new BadRequest(`Page ${page} is out of range`);
-		}
-
-		const safeItems = JSON.parse(JSON.stringify(items));
-
-		return res.json({
-			data: safeItems,
-			meta: {
-				page,
-				limit: pagination,
-				total,
-				pageCount: Math.ceil(total / pagination),
-			},
-		});
+		// Les lectures publiques ne doivent plus retomber sur MikroORM dans le bot :
+		// une panne de l'API unifiée doit être visible et surveillable, pas produire
+		// deux projections divergentes de la même table.
+		return res.status(upstream.status || 503).json(
+			await upstream.json().catch(() => ({ message: "Unified API unavailable" }))
+		);
 	}
 
 	@Get("/member-limits")
@@ -784,17 +754,11 @@ export class ClansController extends BaseController {
 
 	@Get("/:id")
 	async getClanById(@PathParams("id") id: number, @Res() res: Response): Promise<any> {
-		const clan = await this.clanService.findById(id);
-		if (!clan) {
-			throw new BadRequest(`Clan with id ${id} not found`);
-		}
-
-		// Profil clan : metadata stable (avatar, nom, biographie). 60s + SWR 5min.
+		const upstream = await fetch(new URL(`/v1/achillea/clans/${id}`, urlsConfig.unifiedApi));
 		res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
-
-		const safeClan = JSON.parse(JSON.stringify(clan));
-
-		return res.json(safeClan);
+		return res.status(upstream.status || 503).json(
+			await upstream.json().catch(() => ({ message: "Unified API unavailable" }))
+		);
 	}
 
 	@Get("/:id/poster.png")

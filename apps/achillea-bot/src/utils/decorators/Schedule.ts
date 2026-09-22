@@ -43,9 +43,9 @@ export function Schedule(cronExpression: string, jobName?: string) {
 			// Les ticks cron se déclenchent sur un timer (lib `cron`) HORS du pipeline
 			// discordx → aucun RequestContext actif → `db.em` / `db.get()` retomberaient
 			// sur l'EM global (MikroORM v7 refuse). On enrobe CHAQUE tick dans son propre
-			// fork de contexte : couvre tous les @Schedule touchant la DB (Matchmaker,
-			// Stats…) ; les crons qui forkent déjà (WeeklyPayout/SeasonRollover) restent
-			// sains (le fork imbriqué est inoffensif).
+			// fork de contexte : couvre tous les @Schedule touchant encore la DB
+			// (matchmaking Discord et statistiques). Les traitements métier Achilléa
+			// (saisons/paiements) vivent exclusivement dans @rosegriffon/cron.
 			return getSchedulerDb().then((db) =>
 				runInRequestContext(db, () => oldDescriptor.apply(instance, args))
 			);

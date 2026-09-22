@@ -243,6 +243,25 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		}
 	});
 
+	it("ranked public reads use the canonical unified contract", async () => {
+		const leaderboard = await app.handle(new Request("http://localhost/v1/achillea/ranked/leaderboard?mode=2&page=0&pageSize=5"));
+		expect(leaderboard.status).toBe(200);
+		const ladder = await leaderboard.json() as { mode: number; total: number; entries: unknown[] };
+		expect(ladder.mode).toBe(2);
+		expect(typeof ladder.total).toBe("number");
+		expect(Array.isArray(ladder.entries)).toBe(true);
+
+		const tiers = await app.handle(new Request("http://localhost/v1/achillea/ranked/tiers?mode=2"));
+		expect(tiers.status).toBe(200);
+		const tierData = await tiers.json() as unknown[];
+		expect(tierData.length).toBeGreaterThan(0);
+	});
+
+	it("ranked profile read requires the unified Achillea session", async () => {
+		const response = await app.handle(new Request("http://localhost/v1/achillea/ranked/me?mode=2"));
+		expect(response.status).toBe(401);
+	});
+
 	it("GET /v1/achillea/organizations returns a typed list", async () => {
 		const res = await api.v1.achillea.organizations.get({ query: { page: 1, pageSize: 5 } });
 		expect(res.status).toBe(200);

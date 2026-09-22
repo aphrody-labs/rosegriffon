@@ -275,6 +275,29 @@ function corsMiddleware(req: express.Request, res: express.Response, next: expre
 	next();
 }
 
+/** Compatibility transport: public ranked reads are owned by the unified API. */
+async function proxyUnifiedRankedRead(req: express.Request, res: express.Response, path: string) {
+	const target = new URL(
+		path.startsWith("/users/") ? `/v1/achillea${path}` : `/v1/achillea/ranked${path}`,
+		process.env.UNIFIED_API_URL ?? "http://127.0.0.1:8800"
+	);
+	const query = req.originalUrl.split("?", 2)[1];
+	if (query) target.search = query;
+	const headers: Record<string, string> = { accept: "application/json" };
+	if (req.headers.cookie) headers.cookie = req.headers.cookie;
+	if (typeof req.headers.authorization === "string") headers.authorization = req.headers.authorization;
+	try {
+		const upstream = await fetch(target, { headers });
+		const body = await upstream.text();
+		res.status(upstream.status).setHeader("Content-Type", "application/json");
+		if (upstream.headers.get("cache-control")) res.setHeader("Cache-Control", upstream.headers.get("cache-control")!);
+		return res.send(body);
+	} catch (error) {
+		console.error("[ranked] unified read proxy failed", error);
+		return res.status(503).json({ error: "unified_api_unavailable" });
+	}
+}
+
 const server = defineServer({
 	transport: new BunWebSockets({}),
 	rooms: {
@@ -294,248 +317,23 @@ const server = defineServer({
 			res.json({ ok: true, ts: Date.now(), activeChallenges: activeChallengeCount() });
 		});
 
-		// GET /api/ranked/tiers — liste des paliers + nb joueurs par mode
-		app.get("/api/ranked/tiers", async (req, res) => {
-			const mode = Number(req.query.mode ?? 2);
-			if (!Number.isFinite(mode)) {
-				res.status(400).json({ error: "invalid_mode" });
-				return;
-			}
-			try {
-				// Compteurs sur la saison active (alignés sur /me et /leaderboard).
-				const season = await getActiveSeason();
-				const seasonExpr = season?.id
-					? sql`ue.season_id = ${season.id}`
-					: sql`ue.season_id IS NULL`;
-				const rows = await sql<
-					Array<{
-						id: number;
-						key: string;
-						min_elo: number;
-						max_elo: number;
-						gradient: string[];
-						emoji_id: string;
-						emoji_key: string;
-						player_count: string | number;
-					}>
-				>`
-					SELECT r.id, r.key, r.min_elo, r.max_elo, r.gradient, r.emoji_id, r.emoji_key,
-						(SELECT COUNT(*) FROM user_elo ue
-						 WHERE ${seasonExpr} AND ue.elo >= r.min_elo AND ue.elo <= r.max_elo AND ue.mode = ${mode}
-						) AS player_count
-					FROM rank r
-					ORDER BY r.min_elo ASC
-				`;
-				// Tiers + count = donnee tres peu changeante (paliers fixes, count
-				// recompute sur match termine). 60s cache + 5min SWR.
-				res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
-				res.json(
-					rows.map((r) => ({
-						key: r.key,
-						minElo: r.min_elo,
-						maxElo: r.max_elo,
-						gradient: r.gradient,
-						emojiId: r.emoji_id,
-						emojiKey: r.emoji_key,
-						playerCount: Number(r.player_count),
-					}))
-				);
-			} catch (err) {
-				console.error("[ranked] /api/ranked/tiers failed", err);
-				res.status(500).json({ error: "internal" });
-			}
-		});
+		// Public reads are compatibility routes; the unified API owns their SQL.
+		app.get("/api/ranked/tiers", (req, res) => proxyUnifiedRankedRead(req, res, "/tiers"));
 
 		// GET /api/users/me — user enrichi (role, clanId, etc.) pour le rewrite nginx
 		// Le frontend Angular appelle ça au lieu de /api/auth/me pour avoir
 		// le rôle (Administrator) qui débloque l'admin dashboard.
-		app.get("/api/users/me", async (req, res) => {
-			res.setHeader("Cache-Control", "no-store");
-			const auth = resolveAuth(req);
-			if (!auth) {
-				res.status(401).json({ error: "unauthenticated" });
-				return;
-			}
-			try {
-				const rows = await sql<
-					Array<{
-						id: string;
-						display_name: string | null;
-						username: string | null;
-						avatar: string | null;
-						role: number;
-						has_challonge: boolean | null;
-					}>
-				>`
-				SELECT u.id, u.display_name, u.username, u.avatar, u.role,
-				       EXISTS(SELECT 1 FROM user_connection uc WHERE uc.user_id = u.id AND uc.provider = 'challonge') AS has_challonge
-				FROM "user" u
-				WHERE u.id = ${auth.id}
-				LIMIT 1
-			`;
-				const u = rows[0];
-				if (!u) {
-					res.status(404).json({ error: "user_not_found" });
-					return;
-				}
-				const clanRows = await sql<Array<{ clan_id: number }>>`
-				SELECT clan_id FROM clan_member WHERE user_id = ${auth.id} LIMIT 1
-			`;
-				res.json({
-					id: u.id,
-					username: u.username ?? auth.username ?? "",
-					displayName: u.display_name ?? "",
-					avatar: u.avatar
-						? u.avatar.startsWith("http")
-							? u.avatar
-							: `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png`
-						: `https://cdn.discordapp.com/embed/avatars/${(BigInt(u.id) >> 22n) % 6n}.png`,
-					role: u.role,
-					clanId: clanRows[0]?.clan_id ?? null,
-					hasChallonge: u.has_challonge ?? false,
-				});
-			} catch (err) {
-				console.error("[ranked] /api/users/me failed", err);
-				res.status(500).json({ error: "internal" });
-			}
-		});
+		app.get("/api/users/me", (req, res) => proxyUnifiedRankedRead(req, res, "/users/me"));
 
 		// GET /api/ranked/me — profil ELO du user courant
-		app.get("/api/ranked/me", async (req, res) => {
-			const auth = resolveAuth(req);
-			if (!auth) {
-				res.status(401).json({ error: "unauthenticated" });
-				return;
-			}
-			try {
-				const mode = Number(req.query.mode ?? 2);
-				const season = await getActiveSeason();
-				const baseRating = season?.config?.baseRating ?? 0;
-				const elo = await getOrCreateElo(auth.id, mode, season?.id ?? null, baseRating);
-				const ranks = await getRanks();
-				const tier = findTier(elo.elo, ranks);
-
-				// Rang global + percentile : DENSE_RANK + count total. On ranke dans
-				// la meme saison que celle stockee pour le user lui-meme (pas la
-				// saison active globale, car les sync historiques utilisent season_id=NULL).
-				const seasonExpr = elo.season_id
-					? sql`ue.season_id = ${elo.season_id}`
-					: sql`ue.season_id IS NULL`;
-				const rankRows = await sql<Array<{ rank: string | number; total: string | number }>>`
-					WITH ranked AS (
-						SELECT ue.user_id, DENSE_RANK() OVER (ORDER BY ue.elo DESC) AS rank
-						FROM user_elo ue
-						WHERE ${seasonExpr} AND ue.mode = ${mode}
-					)
-					SELECT
-						(SELECT rank FROM ranked WHERE user_id = ${auth.id}) AS rank,
-						(SELECT COUNT(*) FROM ranked) AS total
-				`;
-				const globalRank = rankRows[0]?.rank ? Number(rankRows[0].rank) : null;
-				const totalPlayers = Number(rankRows[0]?.total ?? 0);
-				const percentile =
-					globalRank && totalPlayers > 0
-						? Math.max(0.1, Math.round((globalRank / totalPlayers) * 1000) / 10)
-						: null;
-
-				res.json({
-					userId: elo.user_id,
-					mode: elo.mode,
-					elo: elo.elo,
-					peakRating: elo.peak_rating,
-					gamesPlayed: elo.games_played,
-					wins: elo.wins,
-					losses: elo.losses,
-					seasonId: elo.season_id,
-					globalRank,
-					totalPlayers,
-					percentile,
-					tier: tier
-						? {
-								key: tier.key,
-								minElo: tier.min_elo,
-								maxElo: tier.max_elo,
-								emojiId: tier.emoji_id,
-								emojiKey: tier.emoji_key,
-								gradient: tier.gradient,
-							}
-						: null,
-				});
-			} catch (err) {
-				console.error("[ranked] /me failed", err);
-				res.status(500).json({ error: "internal" });
-			}
-		});
+		app.get("/api/ranked/me", (req, res) => proxyUnifiedRankedRead(req, res, "/me"));
 
 		// GET /api/ranked/leaderboard?mode=&page=&pageSize= — classement LIVE de la saison
 		// active (DENSE_RANK par mode, tri Elo desc), enrichi displayName/avatar. Remplace
 		// l'ancienne lecture directe de la vue Supabase `leaderboard_view`, qui filtrait
 		// `season_id IS NULL` → vide depuis la création de « Saison 1 » (toutes les lignes
 		// user_elo portent désormais un season_id non-null). Source de vérité unique = cette DB.
-		app.get("/api/ranked/leaderboard", async (req, res) => {
-			const mode = Number(req.query.mode ?? 2);
-			if (!Number.isFinite(mode)) {
-				res.status(400).json({ error: "invalid_mode" });
-				return;
-			}
-			const page = Math.max(0, Math.floor(Number(req.query.page ?? 0)) || 0);
-			const pageSize = Math.min(
-				200,
-				Math.max(1, Math.floor(Number(req.query.pageSize ?? 50)) || 50)
-			);
-			try {
-				const season = await getActiveSeason();
-				const seasonExpr = season?.id
-					? sql`ue.season_id = ${season.id}`
-					: sql`ue.season_id IS NULL`;
-				const offset = page * pageSize;
-				const rows = await sql<
-					Array<{
-						rank: string | number;
-						user_id: string;
-						elo: number;
-						peak_rating: number;
-						games_played: number;
-						display_name: string;
-						avatar: string | null;
-					}>
-				>`
-					WITH ranked AS (
-						SELECT ue.user_id, ue.elo, ue.peak_rating, ue.games_played,
-							DENSE_RANK() OVER (ORDER BY ue.elo DESC) AS rank
-						FROM user_elo ue
-						WHERE ${seasonExpr} AND ue.mode = ${mode}
-					)
-					SELECT r.rank, r.user_id, r.elo, r.peak_rating, r.games_played,
-						COALESCE(u.display_name, u.username, r.user_id) AS display_name, u.avatar
-					FROM ranked r
-					LEFT JOIN "user" u ON u.id = r.user_id
-					ORDER BY r.rank ASC, r.user_id ASC
-					LIMIT ${pageSize} OFFSET ${offset}
-				`;
-				const totalRows = await sql<Array<{ total: string | number }>>`
-					SELECT COUNT(*) AS total FROM user_elo ue WHERE ${seasonExpr} AND ue.mode = ${mode}
-				`;
-				const total = Number(totalRows[0]?.total ?? 0);
-				res.setHeader("Cache-Control", "public, s-maxage=15, stale-while-revalidate=60");
-				res.json({
-					mode,
-					total,
-					entries: rows.map((r) => ({
-						rank: Number(r.rank),
-						userId: r.user_id,
-						displayName: r.display_name,
-						avatar: discordAvatar(r.user_id, r.avatar),
-						elo: r.elo,
-						peakRating: r.peak_rating,
-						gamesPlayed: r.games_played,
-					})),
-				});
-			} catch (err) {
-				console.error("[ranked] /api/ranked/leaderboard failed", err);
-				res.status(500).json({ error: "internal" });
-			}
-		});
+		app.get("/api/ranked/leaderboard", (req, res) => proxyUnifiedRankedRead(req, res, "/leaderboard"));
 
 		// POST /api/ranked/challenge — crée un lien de défi partageable. Body : { mode, ranked,
 		// toUserId? }. Si `toUserId` est fourni (revanche), une notification `rematch_offer` est

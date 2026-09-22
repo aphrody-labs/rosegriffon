@@ -7,6 +7,31 @@ import { resolveAchilleaSession } from "../../auth/session";
 /** Compatibility resource for the versioned client; the query lives in one service. */
 export const usersController = new Elysia({ prefix: "/users" })
 	.use(dbPlugin)
+	.get("/me", async ({ db, headers }) => {
+		const session = await resolveAchilleaSession(headers);
+		if (!session) return status(401, { message: "Authentication required" as const });
+		const user = await db.selectFrom("user")
+			.select(["id", "username", "display_name", "avatar", "role"])
+			.where("id", "=", session.id)
+			.executeTakeFirst();
+		if (!user) return status(404, { message: "User not found" as const });
+		const clan = await db.selectFrom("clan_member").select("clan_id").where("user_id", "=", session.id).executeTakeFirst();
+		const connection = await db.selectFrom("user_connection").select("user_id")
+			.where("user_id", "=", session.id).where("provider", "=", "challonge").executeTakeFirst();
+		const avatar = user.avatar
+			? user.avatar.startsWith("http") ? user.avatar : `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+			: `https://cdn.discordapp.com/embed/avatars/${(BigInt(user.id) >> 22n) % 6n}.png`;
+		return {
+			id: user.id, username: user.username ?? session.username ?? "", displayName: user.display_name ?? "",
+			avatar, role: Number(user.role ?? 0), clanId: clan?.clan_id ?? null, hasChallonge: Boolean(connection),
+		};
+	}, {
+		response: {
+			200: UsersModel.enriched,
+			401: t.Object({ message: t.Literal("Authentication required") }),
+			404: t.Object({ message: t.Literal("User not found") }),
+		},
+	})
 	.put("/me/profile", async ({ db, headers, body }) => {
 		const session = await resolveAchilleaSession(headers);
 		if (!session) return status(401, { message: "Authentication required" as const });

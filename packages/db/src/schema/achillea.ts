@@ -3,6 +3,7 @@ import type { ColumnType, Generated } from "kysely";
 export interface AchilleaTables {
 	// Clans
 	clan: ClanTable;
+	clan_member: ClanMemberTable;
 	clan_experience: ClanExperienceTable;
 	clan_experience_log: ClanExperienceLogTable;
 
@@ -79,6 +80,16 @@ export interface ClanExperienceTable {
 	updated_at: Generated<Date>;
 	current_level: Generated<number>;
 	total_xp: Generated<number>;
+}
+
+export interface ClanMemberTable {
+	clan_id: number;
+	user_id: string;
+	created_at: Generated<Date>;
+	updated_at: Generated<Date>;
+	clan_fame_contributed: Generated<number>;
+	role: Generated<number>;
+	distinctions: Generated<string[]>;
 }
 
 export interface ClanExperienceLogTable {
