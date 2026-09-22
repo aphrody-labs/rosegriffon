@@ -2,9 +2,24 @@ import { Elysia, status, t } from "elysia";
 import { dbPlugin } from "../../../plugins/db";
 import { ClanModel } from "./model";
 import { ClanService } from "./service";
+import { resolveAchilleaSession } from "../../auth/session";
 
 export const clanController = new Elysia({ prefix: "/clans" })
 	.use(dbPlugin)
+	.get("/me", async ({ db, headers }) => {
+		const session = await resolveAchilleaSession(headers);
+		if (!session) return status(401, { message: "Authentication required" as const });
+		const membership = await db.selectFrom("clan_member as cm")
+			.innerJoin("clan as c", "c.id", "cm.clan_id")
+			.select("cm.clan_id")
+			.where("cm.user_id", "=", session.id)
+			.where("c.is_inactive", "=", false)
+			.where("c.is_disbanded", "=", false)
+			.executeTakeFirst();
+		return { clanId: membership?.clan_id ?? null };
+	}, {
+		response: { 200: t.Object({ clanId: t.Nullable(t.Number()) }), 401: t.Object({ message: t.Literal("Authentication required") }) },
+	})
 	.get("/", async ({ db, query }) => {
 		return await ClanService.findAll(db, query.page, query.pageSize);
 	}, {

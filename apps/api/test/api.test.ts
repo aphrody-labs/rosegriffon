@@ -280,6 +280,11 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		}
 	});
 
+	it("GET /v1/achillea/clans/me requires the unified session", async () => {
+		const res = await app.handle(new Request("http://localhost/v1/achillea/clans/me"));
+		expect(res.status).toBe(401);
+	});
+
 	it("ranked public reads use the canonical unified contract", async () => {
 		const leaderboard = await app.handle(new Request("http://localhost/v1/achillea/ranked/leaderboard?mode=2&page=0&pageSize=5"));
 		expect(leaderboard.status).toBe(200);
