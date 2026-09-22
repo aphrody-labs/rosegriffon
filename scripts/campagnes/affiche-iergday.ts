@@ -113,7 +113,7 @@ const GLYPHES_DATE = {
  *      curl -A "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)" \
  *           "https://fonts.googleapis.com/css2?family=Karla:wght@600"   # → URL du .ttf
  *  L'UA hérité fait servir un TTF statique plutôt que le woff2 variable ; c'est indispensable
- *  car @aphrody-code/canvas (moteur Skia) N'APPLIQUE PAS l'axe `wght` d'une police variable
+ *  car @aphrody/canvas (moteur Skia) N'APPLIQUE PAS l'axe `wght` d'une police variable
  *  (wght 300..800 rendent tous la même chasse). Équivalent hors ligne à partir de la variable :
  *      fonttools varLib.instancer "Karla[wght].ttf" wght=600 -o karla-600.ttf
  *  Vérification faite : le fichier livré n'a pas de table `fvar` et annonce usWeightClass 600.
@@ -211,14 +211,14 @@ interface ModuleCanvas {
 	GlobalFonts: { registerFromPath(chemin: string, alias: string): boolean };
 }
 
-/** @aphrody-code/canvas est déclaré par `@rose-griffon/bot` (catalog: du dépôt) et non à la
+/** @aphrody/canvas est déclaré par `@rose-griffon/bot` (catalog: du dépôt) et non à la
  *  racine : on tente la résolution normale, puis celle depuis le workspace qui le porte.
  *  Aucune installation n'est déclenchée (le Bun local écrirait un lockfile v2 illisible par la CI). */
 async function chargerCanvas(): Promise<ModuleCanvas> {
 	try {
-		return (await import("@aphrody-code/canvas")) as unknown as ModuleCanvas;
+		return (await import("@aphrody/canvas")) as unknown as ModuleCanvas;
 	} catch {
-		const chemin = Bun.resolveSync("@aphrody-code/canvas", join(RACINE, "apps/bot"));
+		const chemin = Bun.resolveSync("@aphrody/canvas", join(RACINE, "apps/bot"));
 		return (await import(chemin)) as unknown as ModuleCanvas;
 	}
 }
