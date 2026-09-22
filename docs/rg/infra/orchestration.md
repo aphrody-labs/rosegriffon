@@ -10,8 +10,10 @@ Nginx reste la gateway publique.
 
 ```bash
 bun scripts/ops/stack.ts check          # contrat statique, aucune mutation
-bun scripts/ops/stack.ts status         # units + probes + disque
+bun scripts/ops/stack.ts status         # units + probes + hôte + disque + réseau
 bun scripts/ops/stack.ts status --json --strict
+bun scripts/ops/stack.ts status --json --deep # inventaire du stockage (du), plus coûteux
+bun run infra:inventory                     # alias de l’inventaire profond
 bun scripts/ops/stack.ts plan           # check + état live, aucune mutation
 bun scripts/ops/infra.ts check          # drift fichier dépôt ↔ machine
 ```
@@ -29,9 +31,17 @@ automatiquement par ce chemin. Les mutations restent dans `deploy.ts`,
 `release-stack.ts` et `infra.ts pull`, chacune explicitement appelée.
 
 Le manifest signale aussi l’espace disque : avertissement à 85 %, échec critique à
-95 %. L’état courant du VPS présente `/tmp` à environ 93 % : c’est un warning
-opérationnel à traiter avant un prochain build lourd, pas une raison pour supprimer
-automatiquement des artefacts potentiellement utiles.
+95 %. L’état courant du VPS présente `/tmp` autour de 93 % et `/` autour de 90 % :
+ce sont des warnings opérationnels à traiter avant un prochain build lourd, pas une
+raison pour supprimer automatiquement des artefacts potentiellement utiles.
+
+Le JSON de `status` centralise également l’observation hôte : mémoire et swap,
+load average, kernel PSI CPU/IO/mémoire, descripteurs de fichiers, événements OOM,
+débit RX/TX par interface (échantillon d’une seconde), processus CPU/mémoire,
+sockets via l’état systemd, et ressources des services actifs. Aucun argument de
+ligne de commande de processus n’est journalisé afin de ne pas exposer de secrets.
+Le mode `--deep` lance `du -x` uniquement à la demande sur les arbres `/`,
+`/home/ubuntu`, `/home/ubuntu/rg`, `/home/ubuntu/niers`, `/var` et `/tmp`.
 
 ## Règles de déduplication
 
