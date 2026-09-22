@@ -306,6 +306,13 @@ export {
 	createAccountOptions,
 } from "./account-options";
 
+export {
+	createRoseGriffonAuth,
+	type PatreonAuthIntegration,
+	type RoseGriffonAuth,
+	type RoseGriffonAuthOptions,
+} from "./factory";
+
 /**
  * Common field mappings for Better Auth tables.
  * Ensures consistent column names across all apps.
