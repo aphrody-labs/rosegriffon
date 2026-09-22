@@ -6,7 +6,7 @@ import type { BaseMessageOptions, GuildMember, TextChannel, User } from "discord
 import { Colors, escapeMarkdown, roleMention, userMention } from "discord.js";
 import { Client } from "@aphrody/discordx";
 
-import type { ClanApplicationDTO, ClanInviteDTO } from "@/api/models/dtos";
+import type { ClanInviteDTO } from "@/api/models/dtos";
 import { coreManagerConfig, urlsConfig } from "@/configs";
 import { env } from "@/env";
 import { Service } from "@/decorators";
@@ -16,7 +16,6 @@ import {
 	ClanExperience,
 	ClanInvite,
 	ClanMember,
-	ClanMemberHistory,
 	Notification,
 	User as UserEntity,
 	VoteProposal,
@@ -37,7 +36,6 @@ import {
 	logDemote,
 	logMemberDeparture,
 	logPromote,
-	normalizeNames,
 	onMembershipChange,
 	removeClanRoleFromUser,
 	resolveDependency,
@@ -48,7 +46,6 @@ import {
 } from "@/utils/functions";
 
 import { ClanDTO } from "../api/models/dtos/clanDTO";
-import type { ClanMemberDTO } from "../api/models/dtos/clanMemberDTO";
 import type { NewClanDTO } from "../api/models/dtos/newClanDTO";
 import {
 	ClanMemberDistinction,
@@ -73,7 +70,6 @@ import { Database } from "./Database";
 import { Logger } from "./Logger";
 import { NotificationService } from "./NotificationService";
 import type { UserDTO } from "./UserService";
-import { UserService } from "./UserService";
 
 @Service()
 export class ClanService {
@@ -96,20 +92,6 @@ export class ClanService {
 			{ user: userId },
 			{ populate: ["clan", "user"], refresh: true }
 		);
-	}
-
-	async getMemberOrHistory(userId: string, clan?: Clan, periodFilter?: Date) {
-		const member = await this.getMember(userId);
-		if (member) return member;
-
-		const historyMember = await this.db.em.findOne(ClanMemberHistory, {
-			user: userId,
-			clan,
-			joinDate: { $lt: periodFilter },
-			createdAt: { $gt: periodFilter },
-		});
-		if (historyMember) return historyMember;
-		else return null;
 	}
 
 	async UpdateMemberRolesAndDistinctions(
@@ -406,51 +388,6 @@ export class ClanService {
 		await logOnAchilleaSpecificClanChannel(logger, voteMsg, newClan.channelId);
 	}
 
-	async getClanMemberDTO(
-		member: ClanMember | ClanMemberHistory,
-		userService: UserService
-	): Promise<ClanMemberDTO> {
-		return {
-			clanRole: member.role,
-			distinctions: [],
-			clanFameContributed: member.clanFameContributed,
-			createdAt: member.createdAt,
-			updatedAt: member.updatedAt,
-			user: await userService.getUserDTO(member.user.id),
-		};
-	}
-
-	async toClanInviteDTO(invite: ClanInvite) {
-		const userService = new UserService(this.db);
-		const inviterAsMember = await this.getMemberOrHistory(invite.inviter.id);
-		if (!inviterAsMember) return null;
-
-		return {
-			id: invite.id,
-			user: await userService.getUserDTO(invite.user.id),
-			inviter: await this.getClanMemberDTO(inviterAsMember, userService),
-			threadId: invite.threadId,
-			distinctions: invite.distinctions,
-			clan: await this.toDTO(invite.clan),
-			createdAt: invite.createdAt,
-			updatedAt: invite.updatedAt,
-			lastNotifiedAt: invite.lastNotifiedAt,
-		} as ClanInviteDTO;
-	}
-
-	async toClanApplicationDTO(application: ClanApplication) {
-		const userService = new UserService(this.db);
-
-		return {
-			id: application.id,
-			user: await userService.getUserDTO(application.user.id),
-			distinctions: application.distinctions,
-			clan: await this.toDTO(application.clan),
-			createdAt: application.createdAt,
-			updatedAt: application.updatedAt,
-		} as ClanApplicationDTO;
-	}
-
 	async verifyClanMemberManagementPermissions(executor: UserDTO, targetId: string) {
 		const executorAsMember = await this.getMember(executor.id);
 		if (!executorAsMember) {
@@ -492,16 +429,6 @@ export class ClanService {
 
 		// ✅ Success case — return both members for later use
 		return { success: true, executorAsMember, targetAsMember };
-	}
-
-	async getAllInvites(clanId: number) {
-		const [invites] = await this.db.em.getRepository(ClanInvite).getAllInvites(clanId);
-
-		const formattedInvites = await Promise.all(
-			invites.map(async (invite) => this.toClanInviteDTO(invite))
-		);
-
-		return formattedInvites.filter((i) => i !== null);
 	}
 
 	async revokeInvite(invite: ClanInviteDTO) {
@@ -596,18 +523,6 @@ export class ClanService {
 
 			await createInviteThread(this.client, user, invite, em, inviter);
 		});
-	}
-
-	async getAllApplications(clanId: number) {
-		const [applications] = await this.db.em
-			.getRepository(ClanApplication)
-			.getAllApplications(clanId);
-
-		const formattedInvites = await Promise.all(
-			applications.map(async (app) => this.toClanApplicationDTO(app))
-		);
-
-		return formattedInvites.filter((i) => i !== null);
 	}
 
 	async rejectApplication(applicationId: number, executor: ClanMember) {

@@ -1,7 +1,9 @@
 import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
-import { normalizeNames } from "@rosegriffon/achillea-core";
+import { normalizeNames, resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core";
 import type { ClanDTO } from "./model";
+
+const CLAN_MANAGER_ROLE = 2;
 
 type ClanUpdate = {
 	name?: string; shortenedName?: string; clanBiography?: string; clanAvatarUrl?: string;
@@ -28,6 +30,107 @@ function socialUrl(value: string, platform: "x" | "instagram" | "tiktok"): strin
 }
 
 export abstract class ClanService {
+	private static user(row: { id: string; display_name: string; username: string | null; avatar: string | null; role: number }, clanId: number | null) {
+		return {
+			id: row.id,
+			type: "user" as const,
+			username: row.display_name || row.username || row.id,
+			avatar: resolveDiscordAvatarUrl(row.id, row.avatar),
+			clanId,
+			role: Number(row.role ?? 0),
+		};
+	}
+
+	private static async managedClanId(db: Kysely<Database>, actorId: string) {
+		const membership = await db.selectFrom("clan_member")
+			.select(["clan_id", "role"])
+			.where("user_id", "=", actorId)
+			.executeTakeFirst();
+		if (!membership) return { ok: false as const, status: 403 as const, message: "Vous n'êtes pas dans un clan" };
+		if (Number(membership.role) < CLAN_MANAGER_ROLE) {
+			return { ok: false as const, status: 403 as const, message: "Vous n'avez pas les droits pour effectuer cette action" };
+		}
+		return { ok: true as const, clanId: membership.clan_id };
+	}
+
+	private static async clanProjection(db: Kysely<Database>, clanId: number) {
+		const [clan, experience, captain, count] = await Promise.all([
+			db.selectFrom("clan").selectAll().where("id", "=", clanId).executeTakeFirstOrThrow(),
+			db.selectFrom("clan_experience").select(["current_level", "total_xp"]).where("clan_id", "=", clanId).executeTakeFirst(),
+			db.selectFrom("clan_member as cm").innerJoin("user as u", "u.id", "cm.user_id")
+				.select(["u.id", "u.display_name", "u.username", "u.avatar", "u.role"])
+				.where("cm.clan_id", "=", clanId).where("cm.role", "=", 3).executeTakeFirst(),
+			db.selectFrom("clan_member").select(({ fn }) => fn.countAll<number>().as("count"))
+				.where("clan_id", "=", clanId).executeTakeFirstOrThrow(),
+		]);
+		const fallbackId = clan.founders[0] ?? "0";
+		return {
+			id: clan.id, founders: clan.founders, name: clan.name, shortenedName: clan.shortened_name,
+			normalizedShortName: clan.normalized_short_name, clanAvatarUrl: clan.clan_avatar_url,
+			clanBiography: clan.clan_biography, fame: Number(clan.clan_fame), xUrl: clan.x_url,
+			instagramUrl: clan.instagram_url, tiktokUrl: clan.tiktok_url,
+			isRecruiting: Boolean(clan.is_recruiting), isInactive: Boolean(clan.is_inactive),
+			isHidden: Boolean(clan.is_hidden), isDisbanded: Boolean(clan.is_disbanded),
+			autoAcceptMembers: Boolean(clan.auto_accept_members), state: Number(clan.state),
+			createdAt: clan.created_at, languages: clan.languages ?? [], origin: clan.origin ?? "",
+			experience: { currentLevel: Number(experience?.current_level ?? 0), totalXp: Number(experience?.total_xp ?? 0) },
+			membersCount: Number(count.count),
+			president: captain ? this.user(captain, clanId) : {
+				id: fallbackId, type: "user" as const, username: clan.name,
+				avatar: resolveDiscordAvatarUrl(fallbackId, null), clanId, role: 0,
+			},
+		};
+	}
+
+	private static async users(db: Kysely<Database>, ids: string[]) {
+		if (ids.length === 0) return new Map<string, ReturnType<typeof ClanService.user>>();
+		const rows = await db.selectFrom("user").select(["id", "display_name", "username", "avatar", "role"])
+			.where("id", "in", [...new Set(ids)]).execute();
+		return new Map(rows.map((row) => [row.id, ClanService.user(row, null)]));
+	}
+
+	public static async listInvitesForManager(db: Kysely<Database>, actorId: string) {
+		const access = await ClanService.managedClanId(db, actorId);
+		if (!access.ok) return access;
+		const invitations = await db.selectFrom("clan_invite").selectAll()
+			.where("clan_id", "=", access.clanId).orderBy("created_at", "asc").execute();
+		const inviterIds = [...new Set(invitations.map((invite) => invite.inviter_id))];
+		const [clan, users, members, histories] = await Promise.all([
+			ClanService.clanProjection(db, access.clanId),
+			ClanService.users(db, invitations.flatMap((invite) => [invite.user_id, invite.inviter_id])),
+			inviterIds.length ? db.selectFrom("clan_member").selectAll().where("clan_id", "=", access.clanId).where("user_id", "in", inviterIds).execute() : [],
+			inviterIds.length ? db.selectFrom("clan_member_history").selectAll().where("clan_id", "=", access.clanId).where("user_id", "in", inviterIds).orderBy("created_at", "desc").execute() : [],
+		]);
+		const memberByUser = new Map(members.map((member) => [member.user_id, member]));
+		const historyByUser = new Map<string, (typeof histories)[number]>();
+		for (const history of histories) if (!historyByUser.has(history.user_id)) historyByUser.set(history.user_id, history);
+		return { ok: true as const, data: invitations.flatMap((invite) => {
+			const target = users.get(invite.user_id); const inviter = users.get(invite.inviter_id);
+			const membership = memberByUser.get(invite.inviter_id) ?? historyByUser.get(invite.inviter_id);
+			if (!target || !inviter || !membership) return [];
+			return [{
+				id: invite.id, user: target, clan,
+				inviter: { clanRole: Number(membership.role), distinctions: "distinctions" in membership ? membership.distinctions ?? [] : [], clanFameContributed: Number(membership.clan_fame_contributed ?? 0), createdAt: membership.created_at, updatedAt: membership.updated_at, user: { ...inviter, clanId: access.clanId } },
+				...(invite.thread_id ? { threadId: invite.thread_id } : {}), distinctions: invite.distinctions ?? [],
+				createdAt: invite.created_at, updatedAt: invite.updated_at, lastNotifiedAt: invite.last_notified_at,
+			}];
+		}) };
+	}
+
+	public static async listApplicationsForManager(db: Kysely<Database>, actorId: string) {
+		const access = await ClanService.managedClanId(db, actorId);
+		if (!access.ok) return access;
+		const applications = await db.selectFrom("clan_application").selectAll()
+			.where("clan_id", "=", access.clanId).orderBy("created_at", "asc").execute();
+		const [clan, users] = await Promise.all([
+			ClanService.clanProjection(db, access.clanId), ClanService.users(db, applications.map((application) => application.user_id)),
+		]);
+		return { ok: true as const, data: applications.flatMap((application) => {
+			const user = users.get(application.user_id);
+			return user ? [{ id: application.id, user, clan, distinctions: application.distinctions ?? [], createdAt: application.created_at, updatedAt: application.updated_at }] : [];
+		}) };
+	}
+
 	private static graphemeCount(value: string): number {
 		return Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(value)).length;
 	}
