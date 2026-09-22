@@ -12,7 +12,8 @@ export abstract class LeaderboardService {
 	}
 
 	static async findTop(db: Kysely<Database>, mode: number, seasonId: string | null, limit = 50, offset = 0) {
-		const safeLimit = Math.min(100, Math.max(1, limit));
+		// Keep parity with the legacy ranked transport, which allowed 200 rows per page.
+		const safeLimit = Math.min(200, Math.max(1, limit));
 		const safeOffset = Math.max(0, offset);
 		let query = db.selectFrom("user_elo as ue")
 			.leftJoin("user as u", "u.id", "ue.user_id")
