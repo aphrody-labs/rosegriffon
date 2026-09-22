@@ -6,7 +6,6 @@ import {
 	ACHILLEA_SESSION_TTL_SECONDS,
 } from "@rosegriffon/auth/achillea-session";
 import { getServerSession } from "@/lib/auth-helpers";
-import { getPgPool } from "@/lib/db/pg";
 
 /**
  * Passerelle d'identité : une session Rose Griffon vaut une session Achilléa.
@@ -53,12 +52,6 @@ const COOKIE = {
 	secure: process.env.NODE_ENV === "production",
 } as const;
 
-interface LigneCompteDiscord {
-	discord_id: string;
-	username: string | null;
-	avatar_url: string | null;
-}
-
 export async function POST() {
 	const internalToken = process.env.API_ADMIN_TOKEN;
 	if (!internalToken) {
@@ -71,39 +64,18 @@ export async function POST() {
 	}
 
 	try {
-		const pool = getPgPool();
-
-		// Le compte Discord lié à CETTE session, et le profil qui porte le pseudo et
-		// l'avatar affichés côté Rose Griffon.
-		const { rows } = await pool.query<LigneCompteDiscord>(
-			`SELECT a.account_id AS discord_id,
-			        COALESCE(p.username, u.name) AS username,
-			        COALESCE(p.avatar_url, u.image) AS avatar_url
-			 FROM public.account a
-			 JOIN public."user" u ON u.id = a.user_id
-			 LEFT JOIN public.profiles p ON p.id = a.user_id
-			 WHERE a.user_id = $1 AND a.provider_id = 'discord'
-			 LIMIT 1`,
-			[session.user.id]
-		);
-
-		const compte = rows[0];
-		if (!compte?.discord_id) {
-			return NextResponse.json({ error: "discord_non_lie" }, { status: 409 });
-		}
-
 		const apiUrl = (process.env.ACHILLEA_API_URL ?? process.env.NEXT_PUBLIC_ACHILLEA_API_URL ?? "https://api.rosegriffon.fr").replace(/\/$/, "");
 		const exchange = await fetch(`${apiUrl}/v1/auth/session/exchange`, {
 			method: "POST",
 			headers: { authorization: `Bearer ${internalToken}`, "content-type": "application/json" },
-			body: JSON.stringify({ id: compte.discord_id, username: compte.username, avatar: compte.avatar_url }),
+			body: JSON.stringify({ betterAuthUserId: session.user.id }),
 			cache: "no-store",
 		});
 		if (!exchange.ok) {
 			console.error("[achillea/session] API exchange failed", exchange.status);
 			return NextResponse.json({ error: "api_unifiee_indisponible" }, { status: 503 });
 		}
-		const payload = (await exchange.json()) as { token?: string };
+		const payload = (await exchange.json()) as { token?: string; user?: { id: string | null } };
 		if (!payload.token) return NextResponse.json({ error: "session_invalide" }, { status: 503 });
 
 		const magasin = await cookies();
@@ -112,7 +84,7 @@ export async function POST() {
 			maxAge: ACHILLEA_SESSION_TTL_SECONDS,
 		});
 
-		return NextResponse.json({ id: compte.discord_id, username: compte.username });
+		return NextResponse.json(payload.user ?? { id: null });
 	} catch (error) {
 		console.error("[achillea/session] Erreur session Achilléa:", error);
 		return NextResponse.json({ error: "base_de_donnees_indisponible" }, { status: 503 });
