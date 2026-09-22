@@ -4,34 +4,8 @@
  * @module @/lib/inagle
  */
 
-// Domain APIs
-export {
-	type BasaraAPI,
-	type BasaraBuild,
-	type BasaraCharacter,
-	type BasaraDatabase,
-	type BasaraIcons,
-	type BasaraIndexes,
-	type BasaraStats,
-	type Element,
-	type EnrichedBasara,
-	type HeroVariants,
-	POSITION_MAP,
-	type Position,
-} from "./basara/index.js";
-
-// Characters API
-export {
-	type CharacterDetail,
-	type CharacterIdMapping,
-	type CharacterNametag,
-	type CharacterStarSign as CharacterStarSignRarity,
-	type CharactersAPI,
-	type CharactersDatabase,
-	type EnrichedCharacter,
-	PERSONALITY_NAMES,
-	RARITY_NAMES,
-} from "./characters/api.js";
+// Canonical character and BASARA types.
+export * from "./basara/types.js";
 export * from "./characters/comparison-engine.js";
 
 // Constellation
@@ -64,7 +38,6 @@ export type {
 	CharacterVariant,
 	MultiLevelStats,
 } from "./core/types.js";
-export * from "./drops/index.js";
 // New entity builders
 export {
 	type BaseCharacterStats,
@@ -80,9 +53,6 @@ export * from "./analysis/index.js";
 export * from "./stat-calculator.js";
 export * from "./zukan/index.js";
 
-// === AZALEE COMPATIBILITY LAYER ===
-
-export type { ItemsAPI, ItemsDatabase } from "./items/api.js";
 // Items
 export type { ItemCategory, ParsedItem as Item } from "./parsers/item-config.js";
 // Global Search
@@ -92,29 +62,14 @@ export {
 	type SearchableType,
 	type SearchConfig,
 } from "./search/index.js";
-// Skills
-export type {
-	EnrichedAuraSkill as Aura,
-	EnrichedPassiveSkill as Passive,
-	EnrichedSkill as Skill,
-	SkillsAPI,
-	SkillsDatabase,
-	SkillType,
-	TeamPassive,
-} from "./skills/api.js";
+// Canonical skill types and labels.
+export type { TeamPassive } from "./skills/types.js";
 export {
 	CATEGORY_NAMES,
 	ELEMENT_NAMES,
 	PASSIVE_BOOST_NAMES,
 	PASSIVE_SCOPE_NAMES,
-} from "./skills/api.js";
-// Teams & Formations
-export type {
-	EnrichedFormation as Formation,
-	EnrichedTeam as Team,
-	TeamsAPI,
-	TeamsDatabase,
-} from "./teams/api.js";
+} from "./skills/types.js";
 
 // Romaji & Transliteration
 export { initRomaji, toRomaji, toRomajiTitleCase, toKana } from "./utils/romaji.js";

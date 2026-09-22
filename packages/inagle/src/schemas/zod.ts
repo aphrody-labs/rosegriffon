@@ -5,7 +5,6 @@
  */
 
 import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
 
 // ============================================================================
 // Base Types
@@ -274,8 +273,7 @@ export const schemaRegistry = {};
  * Generate JSON Schema from Zod schema
  */
 export function toJSONSchema<T extends z.ZodType>(schema: T) {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	return zodToJsonSchema(schema as any, { target: "jsonSchema7" });
+	return z.toJSONSchema(schema, { target: "draft-7" });
 }
 
 /**

@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { ELEMENT_NAMES as BASARA_ELEMENT_NAMES } from "../basara/types.js";
-import { RARITY_NAMES as CHARACTER_RARITY_NAMES } from "../characters/api.js";
 import { ElementNames, RarityNames } from "./types.js";
 import {
 	CATEGORY_NAMES,
@@ -28,7 +27,7 @@ describe("canonical game code tables", () => {
 	});
 
 	it("keeps gacha and progression rarity spaces explicit", () => {
-		expect(CHARACTER_RARITY_NAMES).toBe(GACHA_RARITY_NAMES);
+		expect(GACHA_RARITY_NAMES[20]).toBe("BASARA");
 		expect(RarityNames).toBe(RANK_RARITY_NAMES);
 		expect(rarityCodeToName(5)).toBe(GACHA_RARITY_NAMES[5]);
 		expect(rarityCodeToName(999)).toBe("Rank999");

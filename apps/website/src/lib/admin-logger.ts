@@ -1,8 +1,8 @@
 "use server";
 
 import { resolveProfile, isAdmin } from "@rosegriffon/auth";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { getServerUser } from "@/lib/auth-helpers";
-import { createAdminClient } from "@/lib/supabase/server";
 
 export async function logAdminAction(
 	action: string,
@@ -16,7 +16,7 @@ export async function logAdminAction(
 			return;
 		}
 
-		const admin = createAdminClient();
+		const admin = createPostgresClient();
 
 		// Vérifier les permissions admin/staff
 		const profile = await resolveProfile(admin, user);

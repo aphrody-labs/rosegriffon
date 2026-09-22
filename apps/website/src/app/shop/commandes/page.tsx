@@ -2,7 +2,7 @@ import { ArrowRight, PackageOpen, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { formatEuros } from "@/lib/shop/products";
 import { getServerUser } from "@/lib/auth-helpers";
 
@@ -43,8 +43,7 @@ interface OrderRow {
 
 async function fetchOrders(userId: string): Promise<OrderRow[]> {
 	try {
-		const supabase = createAdminClient();
-		const { data, error } = await supabase
+		const { data, error } = await createPostgresClient()
 			.from("orders")
 			.select(
 				"id, stripe_session_id, amount_total_cents, patron_discount_applied, status, created_at, items"

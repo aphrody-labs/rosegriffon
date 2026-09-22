@@ -1,13 +1,6 @@
-import type { BasaraAPI } from "./basara/index.js";
-import type { CharactersAPI } from "./characters/api.js";
-
 import { createImageAPI } from "./core/index.js";
 import type { BaseCharacter, CharacterVariant } from "./core/types.js";
-import type { ItemsAPI } from "./items/api.js";
-import type { QuestsAPI } from "./quests/index.js";
 import { createGlobalSearch } from "./search/index.js";
-import type { SkillsAPI } from "./skills/index.js";
-import type { TeamsAPI } from "./teams/index.js";
 import { loadInagleServiceData } from "./sql/service-data.js";
 
 // Re-export types for use in components
@@ -65,7 +58,7 @@ type SqlData = NonNullable<Awaited<ReturnType<typeof loadInagleServiceData>>>;
 type SqlCharacter = Record<string, any>;
 type SqlSkill = Record<string, any>;
 
-function createSqlBasaraAPI(rows: SqlData["basara"]): BasaraAPI {
+function createSqlBasaraAPI(rows: SqlData["basara"]): any {
 	const all: Record<string, any>[] = rows.map((row, index) => {
 		const element = ({ Wind: 1, Forest: 2, Fire: 3, Mountain: 4 } as Record<string, number>)[row.element ?? ""] ?? 1;
 		const position = ({ GK: 1, FW: 2, MF: 3, DF: 4 } as Record<string, number>)[row.position ?? ""] ?? 1;
@@ -77,12 +70,12 @@ function createSqlBasaraAPI(rows: SqlData["basara"]): BasaraAPI {
 	const byCode = new Map(all.map((row) => [row.internalCode, row]));
 	const byElement = (element: number) => all.filter((row) => row.elementRaw === element);
 	const byPosition = (position: number) => all.filter((row) => row.positionRaw === position);
-	return { meta: { generatedAt: new Date().toISOString(), totalCount: all.length, buildsPerCharacter: 6, totalBuilds: all.length * 6 }, all: () => all, get: (id: string) => byParam.get(id), getByCharaId: (id: string) => byChar.get(id), getByCode: (id: string) => byCode.get(id), byElement, byPosition, search: (query: string, options?: { limit?: number }) => all.filter((row) => Object.values(row.names).some((name) => String(name ?? "").toLowerCase().includes(query.toLowerCase()))).slice(0, options?.limit ?? 20), goalkeepers: () => byPosition(1), forwards: () => byPosition(2), midfielders: () => byPosition(3), defenders: () => byPosition(4), fire: () => byElement(3), wood: () => byElement(2), wind: () => byElement(1), mountain: () => byElement(4), withHeroVariants: () => [], topByStats: (limit = 10) => [...all].sort((a, b) => b.totalStatsLv99 - a.totalStatsLv99).slice(0, limit), topByStat: (stat: string, limit = 10) => [...all].sort((a, b) => b.stats.lv99[stat] - a.stats.lv99[stat]).slice(0, limit), withVariant: () => [], elements: {}, positions: {} } as unknown as BasaraAPI;
+	return { meta: { generatedAt: new Date().toISOString(), totalCount: all.length, buildsPerCharacter: 6, totalBuilds: all.length * 6 }, all: () => all, get: (id: string) => byParam.get(id), getByCharaId: (id: string) => byChar.get(id), getByCode: (id: string) => byCode.get(id), byElement, byPosition, search: (query: string, options?: { limit?: number }) => all.filter((row) => Object.values(row.names).some((name) => String(name ?? "").toLowerCase().includes(query.toLowerCase()))).slice(0, options?.limit ?? 20), goalkeepers: () => byPosition(1), forwards: () => byPosition(2), midfielders: () => byPosition(3), defenders: () => byPosition(4), fire: () => byElement(3), wood: () => byElement(2), wind: () => byElement(1), mountain: () => byElement(4), withHeroVariants: () => [], topByStats: (limit = 10) => [...all].sort((a, b) => b.totalStatsLv99 - a.totalStatsLv99).slice(0, limit), topByStat: (stat: string, limit = 10) => [...all].sort((a, b) => b.stats.lv99[stat] - a.stats.lv99[stat]).slice(0, limit), withVariant: () => [], elements: {}, positions: {} } as any;
 }
 
 /** SQL read model adapter. It deliberately exposes the historical API shape
  * so callers can migrate without reintroducing filesystem JSON reads. */
-function createSqlCharactersAPI(rows: SqlData["characters"]): CharactersAPI {
+function createSqlCharactersAPI(rows: SqlData["characters"]): any {
 	const characters: SqlCharacter[] = rows.map((row) => ({
 		...(row.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : {}),
 		charaId: row.chara_id ?? row.id, charaParamId: row.id, internalCode: row.internal_code ?? undefined,
@@ -109,10 +102,10 @@ function createSqlCharactersAPI(rows: SqlData["characters"]): CharactersAPI {
 		midfielders: () => characters.filter((row) => row.position === "MF"), defenders: () => characters.filter((row) => row.position === "DF"),
 		windCharacters: () => characters.filter((row) => row.elementRaw === 1), forestCharacters: () => characters.filter((row) => row.elementRaw === 2), fireCharacters: () => characters.filter((row) => row.elementRaw === 3), mountainCharacters: () => characters.filter((row) => row.elementRaw === 4),
 		gentle: () => [], cool: () => [], hot: () => [], withRarity: () => characters.filter((row) => row.rarityCode > 0), rarityNames: {}, personalityNames: {},
-	} as unknown as CharactersAPI;
+	} as any;
 }
 
-function createSqlSkillsAPI(skillRows: SqlData["skills"], passiveRows: SqlData["passives"], auraRows: Record<string, unknown>[] = []): SkillsAPI {
+function createSqlSkillsAPI(skillRows: SqlData["skills"], passiveRows: SqlData["passives"], auraRows: Record<string, unknown>[] = []): any {
 	const skills: SqlSkill[] = skillRows.map((row) => ({ ...(row.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : {}), id: row.id, internalCode: row.internal_code ?? undefined, name_FR: row.name_fr ?? undefined, name_EN: row.name_en ?? undefined, name_JA: row.name_ja ?? undefined, category: row.category_id ?? 0, element: row.element_id ?? 0, power_min: row.power_min ?? 0, power_max: row.power_max ?? 0, partnerCount: row.partner_count ?? 0, hasPartner: (row.partner_count ?? 0) > 0 }));
 	const passives: SqlSkill[] = passiveRows.map((row) => ({ ...(row.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : {}), passiveId: row.id, passiveIdStr: row.id, name_FR: row.name_fr ?? undefined, name_EN: row.name_en ?? undefined, name_JA: row.name_ja ?? undefined }));
 	const auras: SqlSkill[] = auraRows.map((row) => {
@@ -126,10 +119,10 @@ function createSqlSkillsAPI(skillRows: SqlData["skills"], passiveRows: SqlData["
 		byElement: (element: number | string) => skills.filter((row) => row.element === element), byCategory: (category: number | string) => skills.filter((row) => row.category === category),
 		shoots: () => skills.filter((row) => row.category === 1), dribbles: () => skills.filter((row) => row.category === 3), blocks: () => skills.filter((row) => row.category === 2), catches: () => skills.filter((row) => row.category === 4), specials: () => skills.filter((row) => row.category === 5), talents: () => skills.filter((row) => row.category === 6), fire: () => skills.filter((row) => row.element === 1), forest: () => skills.filter((row) => row.element === 2), wind: () => skills.filter((row) => row.element === 3), mountain: () => skills.filter((row) => row.element === 4), strongest: (limit = 20) => [...skills].sort((a, b) => b.power_max - a.power_max).slice(0, limit), partnerSkills: () => skills.filter((row) => row.hasPartner), oldorado: () => [],
 		auraAll: () => auras, auraGet: (id: string) => auras.find((row) => row.auraId === id || row.id === id), auraByElement: (element: number | string) => auras.filter((row) => row.element === element), auraSearch: (query: string) => auras.filter((row) => [row.name_FR, row.name_EN, row.name_JA].some((name) => String(name ?? "").toLowerCase().includes(query.toLowerCase()))), auraByType: (type: string) => auras.filter((row) => row.type === type), keshins: () => auras.filter((row) => row.type === "Keshin"), souls: () => auras.filter((row) => row.type === "Soul"), awakenings: () => auras.filter((row) => row.type === "Awakening"), modeChanges: () => auras.filter((row) => row.type === "ModeChange"), passiveAll: () => passives, passiveGet: (id: string) => passives.find((row) => row.passiveId === id), passiveByRarity: () => [], passiveByEffect: () => [], passiveTeam: () => [], passivePlayer: () => [], passiveEnemy: () => [], passiveByScope: () => [], passiveBreach: () => [], passiveJustice: () => [], passiveConfrontation: () => [], passiveAttack: () => [], passiveDefense: () => [], passiveShoot: () => [], passiveDribble: () => [], passiveBlock: () => [], passiveCatch: () => [], passiveSpeed: () => [], passiveStamina: () => [], passiveTension: () => [], passiveMixed: () => [], passiveSpecial: () => [], passiveByBoostType: () => [], passiveSearch: (query: string) => passives.filter((row) => String(row.name_FR ?? row.name_EN ?? "").toLowerCase().includes(query.toLowerCase())), teamPassives: () => [], getTeamPassive: () => undefined, elements: {}, categories: {}, passiveScopes: {}, passiveBoostTypes: {}, raw: undefined,
-	} as unknown as SkillsAPI;
+	} as any;
 }
 
-function createSqlItemsAPI(rows: SqlData["items"], capsules: SqlData["capsules"], gallery: SqlData["gallery"]): ItemsAPI {
+function createSqlItemsAPI(rows: SqlData["items"], capsules: SqlData["capsules"], gallery: SqlData["gallery"]): any {
 	const byId = new Map(rows.map((item) => [item.itemId, item]));
 	const searchItems = (query: string, options?: { lang?: "en" | "ja" | "fr"; limit?: number }) => {
 		const q = query.toLowerCase();
@@ -155,10 +148,10 @@ function createSqlItemsAPI(rows: SqlData["items"], capsules: SqlData["capsules"]
 		allCapsules: () => capsules, getCapsule: (id: string) => capsules.find((capsule) => capsule.capsuleId === id), capsulesByRarity: (rarity: number) => capsules.filter((capsule) => capsule.rarity === rarity),
 		allGallery: () => gallery, getGalleryItem: (id: string) => gallery.find((item) => item.galleryId === id), galleryByCategory: (category: number) => gallery.filter((item) => item.categoryId === category),
 		categoryNames: {},
-	} as unknown as ItemsAPI;
+	} as any;
 }
 
-function createSqlTeamsAPI(teams: SqlData["teams"], formations: SqlData["formations"]): TeamsAPI {
+function createSqlTeamsAPI(teams: SqlData["teams"], formations: SqlData["formations"]): any {
 	const teamMap = new Map(teams.map((team) => [team.teamId, team]));
 	const formationMap = new Map(formations.map((formation) => [formation.formId, formation]));
 	return {
@@ -171,10 +164,10 @@ function createSqlTeamsAPI(teams: SqlData["teams"], formations: SqlData["formati
 		getFormation: (id: string) => formationMap.get(id),
 		offensiveFormations: () => [], defensiveFormations: () => [], balancedFormations: () => formations,
 		allUniforms: () => [], getUniform: (_id: string) => undefined,
-	} as unknown as TeamsAPI;
+	} as any;
 }
 
-function createSqlQuestsAPI(rows: SqlData["quests"]): QuestsAPI {
+function createSqlQuestsAPI(rows: SqlData["quests"]): any {
 	const quests = rows.map((quest) => ({ ...quest, id: quest.questId, displayText: quest.titles?.en ?? quest.titles?.fr ?? quest.titles?.ja }));
 	const byId = new Map(quests.map((quest) => [quest.id, quest]));
 	return {
@@ -183,7 +176,7 @@ function createSqlQuestsAPI(rows: SqlData["quests"]): QuestsAPI {
 		byPhase: (phase: number) => quests.filter((quest) => quest.phase === phase),
 		search: (query: string) => quests.filter((quest) => Object.values(quest.titles ?? {}).some((title) => String(title).toLowerCase().includes(query.toLowerCase()))),
 		meta: { totalQuests: quests.length, stats: { withTitleEN: quests.filter((q) => q.titles?.en).length, withTitleJA: quests.filter((q) => q.titles?.ja).length, withTitleFR: quests.filter((q) => q.titles?.fr).length } },
-	} as unknown as QuestsAPI;
+	} as any;
 }
 
 function createSqlDropsAPI(data: SqlData["drops"]): any {

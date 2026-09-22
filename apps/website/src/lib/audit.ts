@@ -1,6 +1,6 @@
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
-const supabaseAdmin = createSupabaseServiceClient();
+const db = createPostgresClient();
 
 export async function logAudit(
 	userId: string,
@@ -9,7 +9,7 @@ export async function logAudit(
 	meta?: { ipAddress?: string; userAgent?: string }
 ) {
 	try {
-		await supabaseAdmin.from("audit_logs").insert({
+		await db.from("audit_logs").insert({
 			action,
 			details: details || {},
 			ip_address: meta?.ipAddress || null,

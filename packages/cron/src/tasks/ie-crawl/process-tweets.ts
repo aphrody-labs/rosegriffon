@@ -1,4 +1,4 @@
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import type { Tables } from "@rosegriffon/db";
 import { grokChat } from "./grok-oidc";
 import { sql } from "../../lib/db.js";
@@ -171,7 +171,7 @@ Règles Azalée:
 
 export async function processTweets() {
 	console.log("=== Starting Tweet Processing (Media, Translation, Classification) ===");
-	const supabase = createSupabaseServiceClient();
+	const db = createPostgresClient();
 
 	// Load names directly from the canonical SQL projections; no generated file is
 	// needed and the same source is shared by the website and Azalée CLI.
@@ -261,7 +261,7 @@ export async function processTweets() {
 						const storagePath = `${tweet.id}/${tweet.id}_${i}.${ext}`;
 						console.log(`[Media] Uploading to Storage: tweets/${storagePath}`);
 
-						const { error: uploadErr } = await supabase.storage
+						const { error: uploadErr } = await db.storage
 							.from("tweets")
 							.upload(storagePath, buffer, {
 								contentType,
@@ -415,7 +415,7 @@ export async function processTweets() {
 			}
 
 			if (needsUpdate) {
-				const { error: updateErr } = await supabase
+				const { error: updateErr } = await db
 					.from("tweets")
 					.update({
 						media: updatedMedia as any,

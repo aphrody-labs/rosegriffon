@@ -1,10 +1,10 @@
 import "server-only";
 
 import { isAdmin, resolveProfile } from "@rosegriffon/auth";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { revalidatePath } from "next/cache";
 
 import { getServerUser } from "@/lib/auth-helpers";
-import { createAdminClient } from "@/lib/supabase/server";
 
 /*
  * Garde d'administration des écrans de campagne, et rafraîchissement des pages
@@ -52,8 +52,7 @@ export async function exigerAdmin(): Promise<Garde> {
 	const user = await getServerUser();
 	if (!user) return { message: "Non authentifié", ok: false };
 
-	const admin = createAdminClient();
-	const profil = admin ? await resolveProfile(admin, user) : null;
+	const profil = await resolveProfile(createPostgresClient(), user);
 	if (!profil || !isAdmin(profil.role)) {
 		return { message: "Permissions insuffisantes", ok: false };
 	}

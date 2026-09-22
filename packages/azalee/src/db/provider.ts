@@ -1,5 +1,4 @@
 import { createPostgresClient } from "@rosegriffon/db/postgres-client";
-import { createSqliteClient } from "./sqlite-client";
 
 export type DatabaseClient = { from(table: string): any };
 export type DatabaseClientFactory = () => DatabaseClient | Promise<DatabaseClient>;
@@ -9,7 +8,5 @@ export function hasDatabaseProvider(): boolean { return factory !== null; }
 export async function createClient(): Promise<DatabaseClient> {
 	if (factory) return await factory();
 	const connectionString = process.env.DATABASE_URL ?? process.env.ROSE_GRIFFON_DATABASE_URL ?? process.env.RG_DATABASE_URL;
-	// PostgreSQL is the production/runtime source. SQLite is deliberately
-	// limited to test/offline mode and is never selected silently in services.
-	return process.env.NODE_ENV !== "test" ? createPostgresClient(connectionString) : createSqliteClient();
+	return createPostgresClient(connectionString);
 }

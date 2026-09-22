@@ -1,25 +1,5 @@
-/**
- * BASARA Module - Entry point for BASARA/FABLED character API
- *
- * @example
- * ```typescript
- * import { createBasaraAPI } from '@rosegriffon/inagle/basara';
- *
- * const basara = createBasaraAPI();
- *
- * // Get all BASARA
- * const all = basara.all();
- *
- * // Search by name
- * const shuya = basara.search('Shuya');
- *
- * // By element/position
- * const fireFW = basara.fire().filter(b => b.position === 'FW');
- * ```
- */
+/** Types canoniques BASARA et règles de positionnement. */
 
-export type { BasaraAPI, BasaraIndexes, EnrichedBasara } from "./api.js";
-export { buildBasaraDatabase, createBasaraAPI } from "./api.js";
 export type {
 	BasaraBuild,
 	BasaraCharacter,

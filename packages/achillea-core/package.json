@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/achillea-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Logique métier portable (multi-runtime : navigateur, edge Deno/Web, Node, Bun) — Elo, classement, sanctions, licences, votes, validation. Aucune dépendance Discord / ORM / DI.",
   "type": "module",

@@ -4,9 +4,9 @@ Package database partagé pour l'écosystème Rose Griffon.
 
 ## Contenu
 
-- **Types Supabase :** Source de vérité générée via `bun run types:gen`.
-- **Clients Clients/Serveur :** Helpers pour instancier le client Supabase selon l'environnement (Next.js SSR, Browser, Service Role).
-- **Storage :** Utilitaires pour la gestion des assets sur Supabase Storage.
+- **Types PostgreSQL :** Source de vérité générée via `bun run types:gen`.
+- **Accès SQL :** `@rosegriffon/db/achillea-sql`, `@rosegriffon/db/pg` et `@rosegriffon/db/bun-sql` sont les frontières SQL communes.
+- **Compatibilité HTTP :** les helpers browser/server et Storage restent isolés pour les surfaces auth/fichiers uniquement.
 - **Services :** Logique métier transverse (ex: agrégation de statistiques dashboard).
 - **Accès SQL Achilléa :** `@rosegriffon/db/achillea-sql` expose Kysely + `pg`,
   avec `search_path=achillea,public` et l’URL PostgreSQL unifiée `rg`.
@@ -22,11 +22,14 @@ Package database partagé pour l'écosystème Rose Griffon.
 ## Utilisation
 
 ```typescript
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
-const supabase = createSupabaseServiceClient();
-const { data } = await supabase.from("profiles").select("*");
+const db = createPostgresClient();
+const { data } = await db.from("profiles").select("*");
 ```
+
+`createSupabaseServiceClient()` reste uniquement un alias de migration ; il
+exécute le même SQL PostgreSQL et ne constitue pas un second backend.
 
 ## Scripts
 

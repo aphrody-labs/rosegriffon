@@ -52,7 +52,7 @@ import { runDiscordPollsImport } from "./tasks/discord-polls";
 import { runNoctalyImport } from "./tasks/discord-noctaly";
 import { ServerWebSocket } from "bun";
 import { CATALOGUE_TACHES, PLANIFICATIONS, TACHES_CRON } from "@rosegriffon/types/cron";
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { resolveProfile, isAdmin } from "@rosegriffon/auth";
 import { getOpenApiDocument, getSwaggerHtml } from "./lib/openapi";
 import { demarrerPontBot } from "./lib/bot-signal";
@@ -809,15 +809,15 @@ const server = Bun.serve({
 			const sessionToken = getCookie(req, "better-auth.session-token");
 			if (sessionToken) {
 				try {
-					const supabase = createSupabaseServiceClient();
-					const { data: session } = await supabase
+					const db = createPostgresClient();
+					const { data: session } = await db
 						.from("session")
 						.select("user_id, expires_at")
 						.eq("token", sessionToken)
 						.maybeSingle();
 
 					if (session && new Date(session.expires_at) > new Date()) {
-						const profile = await resolveProfile(supabase as never, { id: session.user_id });
+					const profile = await resolveProfile(db as never, { id: session.user_id });
 						if (profile && isAdmin(profile.role)) {
 							isAuthorized = true;
 							console.log(`[Cron Auth] Accès autorisé pour l'administrateur : ${profile.username}`);

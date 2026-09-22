@@ -7,7 +7,7 @@
  * floue. Aucun `bun:sqlite`, aucun `node:fs` — elle se bundle donc dans une
  * webview Tauri, un navigateur ou un worker.
  *
- * L'accès réel aux données (miroir SQLite, index CPK, index de texte, API HTTP)
+ * L'accès réel aux données (PostgreSQL, index CPK, index de texte, API HTTP)
  * vit dans `@rosegriffon/azalee/server`, réservé à un runtime Bun/Node.
  *
  * ```ts

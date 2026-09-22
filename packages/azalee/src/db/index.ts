@@ -1,11 +1,10 @@
 /**
- * Couche d'accès aux données de jeu.
+ * Façade publique de l'accès durable aux données de jeu.
  *
- * ⚠ Module **serveur** : touche `bun:sqlite` / `node:sqlite`. À ne jamais
- * importer depuis un contexte navigateur (webview Tauri, composant client).
+ * Ce module n'expose que PostgreSQL. Les adaptateurs SQLite sont réservés aux
+ * sous-commandes d'extraction/dev et doivent être importés explicitement.
  */
 
-export { createSqliteClient, SqliteQueryBuilder } from "./sqlite-client";
 export { createPostgresClient, PostgresQueryBuilder } from "@rosegriffon/db/postgres-client";
 export {
 	createClient,
@@ -13,4 +12,3 @@ export {
 	setDatabaseProvider,
 	type DatabaseClient, type DatabaseClientFactory,
 } from "./provider";
-export { resolveMirrorPath } from "../config";

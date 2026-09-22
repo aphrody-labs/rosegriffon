@@ -28,7 +28,7 @@
     },
     "apps/achillea-bot": {
       "name": "@rosegriffon/achillea-bot",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@aphrody/canvas": "0.1.99",
         "@aphrody/discordx": "^0.1.0",
@@ -137,7 +137,7 @@
     },
     "apps/api": {
       "name": "@rosegriffon/api",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@elysia/eden": "^1.4.10",
         "@elysiajs/cors": "^1.4.2",
@@ -155,7 +155,7 @@
     },
     "apps/bot": {
       "name": "@rosegriffon/bot",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@aphrody-code/canvas": "catalog:",
         "@rosegriffon/achillea-client": "workspace:*",
@@ -177,7 +177,7 @@
     },
     "apps/cdn": {
       "name": "cdn",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@rosegriffon/assets": "workspace:*",
       },
@@ -188,7 +188,7 @@
     },
     "apps/realtime": {
       "name": "realtime",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "pg": "catalog:",
       },
@@ -200,7 +200,7 @@
     },
     "apps/storage": {
       "name": "storage",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "devDependencies": {
         "@types/bun": "catalog:",
         "typescript": "catalog:",
@@ -208,7 +208,7 @@
     },
     "apps/website": {
       "name": "@rosegriffon/website",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@better-auth/agent-auth": "catalog:",
         "@colyseus/sdk": "^0.17.42",
@@ -293,7 +293,6 @@
         "@tiptap/extension-placeholder": "catalog:",
         "@tiptap/starter-kit": "catalog:",
         "@types/nodemailer": "catalog:",
-        "@types/pg": "catalog:",
         "@types/pica": "catalog:",
         "bcryptjs": "catalog:",
         "better-auth": "catalog:",
@@ -322,7 +321,6 @@
         "next-themes": "catalog:",
         "node-ipinfo": "catalog:",
         "nodemailer": "catalog:",
-        "pg": "catalog:",
         "pica": "catalog:",
         "radix-ui": "catalog:",
         "react": "catalog:",
@@ -383,7 +381,7 @@
     },
     "packages/achillea-client": {
       "name": "@rosegriffon/achillea-client",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@rosegriffon/achillea-types": "workspace:*",
         "zod": "catalog:",
@@ -396,7 +394,7 @@
     },
     "packages/achillea-contract": {
       "name": "@rosegriffon/achillea-contract",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@rosegriffon/achillea-types": "workspace:*",
       },
@@ -408,7 +406,7 @@
     },
     "packages/achillea-core": {
       "name": "@rosegriffon/achillea-core",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@casl/ability": "catalog:",
         "@rosegriffon/achillea-types": "workspace:*",
@@ -422,7 +420,7 @@
     },
     "packages/achillea-types": {
       "name": "@rosegriffon/achillea-types",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "devDependencies": {
         "@types/bun": "catalog:",
         "brackets-model": "catalog:",
@@ -432,7 +430,7 @@
     },
     "packages/app-shell": {
       "name": "@rosegriffon/app-shell",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@rosegriffon/ui": "workspace:*",
         "lucide-react": "catalog:",
@@ -455,11 +453,11 @@
     },
     "packages/assets": {
       "name": "@rosegriffon/assets",
-      "version": "1.0.0",
+      "version": "1.0.1",
     },
     "packages/auth": {
       "name": "@rosegriffon/auth",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@rosegriffon/achillea-core": "workspace:*",
         "@rosegriffon/db": "workspace:*",
@@ -477,7 +475,7 @@
     },
     "packages/azalee": {
       "name": "@rosegriffon/azalee",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "bin": {
         "azalee": "./src/cli.ts",
       },
@@ -487,7 +485,6 @@
         "@rosegriffon/inagle": "workspace:*",
         "@rosegriffon/inagle-cross": "workspace:*",
         "commander": "catalog:",
-        "kysely": "catalog:",
         "wanakana": "catalog:",
       },
       "devDependencies": {
@@ -500,11 +497,11 @@
     },
     "packages/config": {
       "name": "@rosegriffon/config",
-      "version": "1.0.0",
+      "version": "1.0.1",
     },
     "packages/cron": {
       "name": "@rosegriffon/cron",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@aphrody-code/x": "catalog:",
         "@asteasolutions/zod-to-openapi": "catalog:",
@@ -524,9 +521,9 @@
     },
     "packages/db": {
       "name": "@rosegriffon/db",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
-        "@rosegriffon/types": "workspace:*",
+        "@rosegriffon/types": "^1.0.1",
         "@supabase/ssr": "catalog:",
         "kysely": "catalog:",
         "pg": "catalog:",
@@ -541,15 +538,15 @@
     },
     "packages/i18n": {
       "name": "@rosegriffon/i18n",
-      "version": "1.0.0",
+      "version": "1.0.1",
     },
     "packages/identity": {
       "name": "@rosegriffon/identity",
-      "version": "1.0.0",
+      "version": "1.0.1",
     },
     "packages/inagle": {
       "name": "@rosegriffon/inagle",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "bin": {
         "inagle": "./dist/cli.js",
       },
@@ -557,7 +554,6 @@
         "@aphrody-code/zukan": "catalog:",
         "@leeoniya/ufuzzy": "catalog:",
         "@rosegriffon/db": "workspace:*",
-        "@streamparser/json": "catalog:",
         "cheerio": "catalog:",
         "commander": "catalog:",
         "dotenv": "catalog:",
@@ -566,7 +562,6 @@
         "pg": "catalog:",
         "picocolors": "catalog:",
         "zod": "catalog:",
-        "zod-to-json-schema": "catalog:",
       },
       "devDependencies": {
         "@types/bun": "catalog:",
@@ -578,7 +573,7 @@
     },
     "packages/inagle-cross": {
       "name": "@rosegriffon/inagle-cross",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "zod": "catalog:",
       },
@@ -589,7 +584,7 @@
     },
     "packages/patreon-bun": {
       "name": "@rosegriffon/patreon-bun",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "devDependencies": {
         "@types/bun": "catalog:",
         "msw": "catalog:",
@@ -600,29 +595,29 @@
     },
     "packages/preferences": {
       "name": "@rosegriffon/preferences",
-      "version": "1.0.0",
+      "version": "1.0.1",
     },
     "packages/search": {
       "name": "@rosegriffon/search",
-      "version": "1.0.0",
+      "version": "1.0.1",
     },
     "packages/types": {
       "name": "@rosegriffon/types",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
-        "zod": "catalog:",
+        "zod": "^4.4.3",
       },
       "devDependencies": {
         "@rosegriffon/config": "workspace:*",
         "typescript": "catalog:",
       },
       "peerDependencies": {
-        "@rosegriffon/db": "workspace:*",
+        "@rosegriffon/db": "^1.0.0",
       },
     },
     "packages/ui": {
       "name": "@rosegriffon/ui",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@hookform/resolvers": "catalog:",
         "@radix-ui/react-accordion": "catalog:",
@@ -651,9 +646,9 @@
         "@radix-ui/react-toggle": "catalog:",
         "@radix-ui/react-toggle-group": "catalog:",
         "@radix-ui/react-tooltip": "catalog:",
-        "@rosegriffon/db": "workspace:*",
-        "@rosegriffon/preferences": "workspace:*",
-        "@rosegriffon/types": "workspace:*",
+        "@rosegriffon/db": "^1.0.1",
+        "@rosegriffon/preferences": "^1.0.0",
+        "@rosegriffon/types": "^1.0.1",
         "@tanstack/react-table": "catalog:",
         "class-variance-authority": "catalog:",
         "clsx": "catalog:",
@@ -697,7 +692,6 @@
     "@aphrody-code/xai": "npm:@aphrody/xai@^1.0.5",
     "@aphrody-code/xcom": "npm:@aphrody/xcom@^0.1.6",
     "@aphrody-code/zukan": "npm:@aphrody/zukan@^0.1.5",
-    "kysely": "0.28.17",
   },
   "catalog": {
     "@aphrody-code/canvas": "0.1.99-fork.4",
@@ -761,7 +755,6 @@
     "@sindresorhus/transliterate": "^2.3.1",
     "@spacedrive/primitives": "^0.2.3",
     "@spacedrive/tokens": "^0.2.3",
-    "@streamparser/json": "^0.0.22",
     "@stripe/stripe-js": "^9.7.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.107.0",
@@ -883,7 +876,6 @@
     "web-tree-sitter": "^0.26.9",
     "wrangler": "^4.97.0",
     "zod": "^4.4.3",
-    "zod-to-json-schema": "^3.25.2",
     "zustand": "^5.0.14",
   },
   "packages": {
@@ -1964,8 +1956,6 @@
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
     "@standard-schema/utils": ["@standard-schema/utils@0.3.0", "", {}, "sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g=="],
-
-    "@streamparser/json": ["@streamparser/json@0.0.22", "", {}, "sha512-b6gTSBjJ8G8SuO3Gbbj+zXbVx8NSs1EbpbMKpzGLWMdkR+98McH9bEjSz3+0mPJf68c5nxa3CrJHp5EQNXM6zQ=="],
 
     "@stripe/stripe-js": ["@stripe/stripe-js@9.7.0", "", {}, "sha512-r1ElolvWXM4aYnZZVHvKW3EDL8JcwEuIgTuWxlB5lvC+YsvjkQ0gX35x9d8dTDubX395fViLVqkaolVs1PmIQQ=="],
 
@@ -3591,7 +3581,7 @@
 
     "kuroshiro-analyzer-kuromoji": ["kuroshiro-analyzer-kuromoji@1.1.0", "", { "dependencies": { "kuromoji": "^0.1.1" } }, "sha512-BSJFhpsQdPwfFLfjKxfLA9iL+/PC6LCR9vgwgb5Jc7jZwk9ilX8SAV6CwhAQZY611tiuhbB52ONYKDO8hgY1bA=="],
 
-    "kysely": ["kysely@0.28.17", "", {}, "sha512-nbD8lB9EB3wNdMhOCdx5Li8DxnLbvKByylRLcJ1h+4SkrowVeECAyZlyiKMThF7xFdRz0jSQ2MoJr+wXux2y0Q=="],
+    "kysely": ["kysely@0.29.6", "", {}, "sha512-hHaB8C/rfzDDtr/t8YZwxAuPJTT0zHyaPoVzcXwDYhYNAgH/4sIfVhi/XLLIY+bL/FqaIJnjATDbi8ObSELmxg=="],
 
     "kysely-supabase": ["kysely-supabase@0.2.1", "", { "peerDependencies": { "kysely": ">= 0.24.0 < 1", "supabase": ">= 1.0.0 < 3" } }, "sha512-3oL6pLXACy4QfoidvwIBc+g+01fAx46sQGlIaEl4cScMskuIC/GbEDjzsSwPHzfw80XX0gYZ9eytXikfzV5oew=="],
 
@@ -4850,6 +4840,10 @@
     "@isaacs/cliui/string-width": ["string-width@5.1.2", "", { "dependencies": { "eastasianwidth": "^0.2.0", "emoji-regex": "^9.2.2", "strip-ansi": "^7.0.1" } }, "sha512-HnLOCR3vjcY8beoNLtcjZ5/nxn2afmME6lhrDrebokqMap+XbeW8n9TXpPDOqdGK5qcI3oT0GKTW6wC7EMiVqA=="],
 
     "@isaacs/cliui/wrap-ansi": ["wrap-ansi@8.1.0", "", { "dependencies": { "ansi-styles": "^6.1.0", "string-width": "^5.0.1", "strip-ansi": "^7.0.1" } }, "sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ=="],
+
+    "@mikro-orm/postgresql/kysely": ["kysely@0.29.5", "", {}, "sha512-ooa+eSbBNPTo3MycPEuW5jdrxQdQwdtB3LC3h43FiXQbIry5tR0C5lDG7eealK0E4D7XjrnOP5DIUg/LyjRMYQ=="],
+
+    "@mikro-orm/sql/kysely": ["kysely@0.29.5", "", {}, "sha512-ooa+eSbBNPTo3MycPEuW5jdrxQdQwdtB3LC3h43FiXQbIry5tR0C5lDG7eealK0E4D7XjrnOP5DIUg/LyjRMYQ=="],
 
     "@modelcontextprotocol/sdk/ajv": ["ajv@8.20.0", "", { "dependencies": { "fast-deep-equal": "^3.1.3", "fast-uri": "^3.0.1", "json-schema-traverse": "^1.0.0", "require-from-string": "^2.0.2" } }, "sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA=="],
 

@@ -69,55 +69,6 @@ export function hexToUnsigned(hex: string): number {
 	return Number.parseInt(hex.replace("0x", ""), 16) >>> 0;
 }
 
-// ============================================================================
-// Hash Lookup Cache
-// ============================================================================
-
-let hashLookup: {
-	path_to_hash: Record<string, string>;
-	hash_to_path: Record<string, string>;
-} | null = null;
-
-/**
- * Load the hash lookup table from generated JSON.
- */
-export async function loadHashLookup(
-	lookupPath = "../../../data/all-gamedata/_hash_lookup.json"
-): Promise<typeof hashLookup> {
-	if (hashLookup) return hashLookup;
-
-	try {
-		const fs = await import("node:fs/promises");
-		const path = await import("node:path");
-		const fullPath = path.resolve(import.meta.dirname ?? ".", lookupPath);
-		const content = await fs.readFile(fullPath, "utf-8");
-		hashLookup = JSON.parse(content);
-		return hashLookup;
-	} catch {
-		console.warn("Hash lookup file not found, using empty lookup");
-		hashLookup = { path_to_hash: {}, hash_to_path: {} };
-		return hashLookup;
-	}
-}
-
-/**
- * Resolve a hash to its texture path.
- * @param hash - Hash in "0xABCD1234" format or as number
- * @returns Texture path or undefined
- */
-export async function resolveHash(hash: string | number): Promise<string | undefined> {
-	const lookup = await loadHashLookup();
-
-	let hexHash: string;
-	if (typeof hash === "number") {
-		hexHash = signedToHex(hash);
-	} else {
-		hexHash = hash.toUpperCase();
-	}
-
-	return lookup?.hash_to_path[hexHash];
-}
-
 /**
  * Get hash for a texture path.
  * @param path - Texture path (with or without #/ prefix)

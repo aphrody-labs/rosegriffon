@@ -215,8 +215,3 @@ export async function buildPassiveDatabaseAsync(dataPath: string) {
 		},
 	};
 }
-
-// Keep sync version for compatibility if needed, but simplified to wrap async in future
-export function buildPassiveDatabase(_dataPath: string) {
-	throw new Error("Synchronous buildPassiveDatabase is deprecated. Use Async version.");
-}

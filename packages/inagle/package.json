@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/inagle",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Universal Game Data API for Inazuma Eleven: Victory Road — parsers, types, and tools for IEVR game data",
   "keywords": [
     "cfg-bin",
@@ -73,7 +73,6 @@
     "@aphrody-code/zukan": "catalog:",
     "@rosegriffon/db": "workspace:*",
     "@leeoniya/ufuzzy": "catalog:",
-    "@streamparser/json": "catalog:",
     "cheerio": "catalog:",
     "commander": "catalog:",
     "dotenv": "catalog:",
@@ -81,8 +80,7 @@
     "kuroshiro-analyzer-kuromoji": "catalog:",
     "pg": "catalog:",
     "picocolors": "catalog:",
-    "zod": "catalog:",
-    "zod-to-json-schema": "catalog:"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "catalog:",

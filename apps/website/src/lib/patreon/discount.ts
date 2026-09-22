@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 /**
  * Pourcentage de réduction accordé aux patrons actifs sur la boutique Stripe RG.
@@ -76,12 +76,7 @@ export function remiseDepuisAdhesion(ligne: LigneAdhesionPatreon | null): Patron
 export async function getPatronDiscount(userId: string): Promise<PatronDiscount> {
 	const empty = REMISE_ABSENTE;
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return empty;
-	}
-
-	const { data, error } = await supabase
+	const { data, error } = await createPostgresClient()
 		.from("patreon_memberships")
 		.select("patron_status, tier_titles, currently_entitled_cents")
 		.eq("user_id", userId)

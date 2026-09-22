@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/assets",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Shared static assets for Rose Griffon apps",
   "type": "module",
   "exports": {

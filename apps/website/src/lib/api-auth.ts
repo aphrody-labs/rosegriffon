@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { isPatreonAdmin } from "@/lib/patreon/admin-access";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import type { Database } from "@rosegriffon/db";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -53,19 +53,13 @@ export async function requireApiAdmin(): Promise<ApiAuthResult> {
 		return authed;
 	}
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return {
-			ok: false,
-			response: NextResponse.json({ error: "Service indisponible" }, { status: 503 }),
-		};
-	}
+	const db = createPostgresClient();
 
 	const tryFetch = async (
 		column: keyof Profile,
 		value: string
 	): Promise<Pick<Profile, "role"> | null> => {
-		const { data } = await supabase
+		const { data } = await db
 			.from("profiles")
 			.select("role")
 			.eq(column as string, value)
@@ -78,7 +72,7 @@ export async function requireApiAdmin(): Promise<ApiAuthResult> {
 	let profile = await tryFetch("id", user.id);
 
 	if (!profile) {
-		const { data: account } = await supabase
+		const { data: account } = await db
 			.from("account")
 			.select("account_id")
 			.eq("user_id", user.id)

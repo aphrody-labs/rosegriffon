@@ -1,7 +1,7 @@
 import { Heart } from "lucide-react";
 
 import { PatreonConnectButton } from "./PatreonConnectButton";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 interface Props {
 	userId: string;
@@ -15,12 +15,7 @@ interface LegacyMember {
 }
 
 export async function LegacyBanner({ userId }: Props) {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return null;
-	}
-
-	const { data } = await supabase
+	const { data } = await createPostgresClient()
 		.from("patreon_legacy_members")
 		.select("id,full_name,tier_titles,rg_subscription_status")
 		.eq("resolved_user_id", userId)

@@ -160,8 +160,3 @@ export async function buildSkillDatabaseAsync(dataPath: string) {
 		},
 	};
 }
-
-// Deprecate Sync
-export function buildSkillDatabase(_dataPath: string) {
-	throw new Error("Synchronous buildSkillDatabase is deprecated. Use Async version.");
-}

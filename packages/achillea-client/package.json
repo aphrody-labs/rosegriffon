@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/achillea-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Versioned HTTP client and runtime contracts for the Achillea guild API",
   "type": "module",

@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import { PATRON_DISCOUNT_PERCENT } from "@/lib/patreon/discount";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 type PatronStatus = "active_patron" | "declined_patron" | "former_patron" | null;
 
@@ -119,13 +119,10 @@ function formatDate(iso: string | null | undefined): string {
  * pour garantir performance (server component RSC + cache Next).
  */
 export async function PatreonMembershipCard({ userId }: { userId: string }) {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return null;
-	}
+	const db = createPostgresClient();
 
 	const [liveRes, legacyRes] = await Promise.all([
-		supabase
+		db
 			.from("patreon_memberships")
 			.select(
 				"patron_status, patreon_email, patreon_full_name, patreon_thumb_url, patreon_url, last_charge_date, last_charge_status, currently_entitled_cents, lifetime_support_cents, pledge_start, pledge_cadence, will_pay_amount_cents, next_charge_date, is_free_trial, is_gifted, member_email, address, tier_titles, tier_amounts_cents, tier_requires_shipping, discord_role_ids, scope, fetched_at, created_at"
@@ -134,7 +131,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
 			.order("currently_entitled_cents", { ascending: false })
 			.limit(1)
 			.maybeSingle(),
-		supabase
+		db
 			.from("patreon_legacy_members")
 			.select(
 				"patron_status, currently_entitled_cents, lifetime_support_cents, tier_titles, last_charge_date, last_charge_status, pledge_start, rg_subscription_status, resolution_method, resolved_at"

@@ -27,7 +27,7 @@
 | Formations | `rpg_battle_formation_config` | formation-config | `inagle_formations` | **FAIT** |
 | Teams | `team_*` | belong-team, opponent-team | `inagle_teams`,`inagle_opponent_teams` | **FAIT** |
 | Capsules (gacha) | `capsule_config` | capsule-config | `inagle_capsules` | **FAIT** |
-| Drops | `soccer_drop_config`, treasure | drops-parser | `inagle_drops_battles/tables/treasures` | **FAIT** |
+| Drops | `soccer_drop_config`, treasure | SQL projection / service | `inagle_drops` | **FAIT** |
 | EXP / Growth | `chara_exp_table`, growth | chara-exp-table, growth-table | `inagle_exp_table`,`inagle_growth_tables` | **FAIT** |
 | Keshin/Soul/Miximax/Awakening | divers | playstyle, star-sign… | `inagle_keshins/souls/miximax/awakenings` | **FAIT** |
 | Costumes / Gallery / Quests / Mode-changes | divers | chara-costume, gallery, quest… | `inagle_costumes/gallery/quests/mode_changes` | **FAIT** |
@@ -50,7 +50,7 @@
 | **Missions** | `mission_config` (1 placeholder réel) | mission-config | `inagle_missions` (1) | **FAIT** (config = placeholder ; vrai contenu = `inagle_quests`) |
 | Textures chr (g4tx) | CPK assets | — (iecode C#) | — (assets, pas DB) | iecode (embed GLB FAIT) |
 | Modèles chr (g4mg/g4md/g4sk) | CPK assets | — (iecode/niers) | — (assets) | iecode/niers partiel |
-| Drop-rates par élément | `soccer_drop_config`, `item_emission_rarity_table`, `win_treasure_lot_table` | drops-parser (partiel) | `inagle_drops_*` | **FAIT** |
+| Drop-rates par élément | `soccer_drop_config`, `item_emission_rarity_table`, `win_treasure_lot_table` | SQL projection / service | `inagle_drops` | **FAIT** |
 | Lua (677) | `lua_scripts/**` | analyse p0/p1/p2 | `inagle_lua_scripts` (666) | **FAIT** |
 | Code C (nie.exe) | RE niers | niers (pdata/disasm/propagate) | sqlite niers | **FAIT 92,43 %** |
 
@@ -127,7 +127,7 @@ video waza) demandent un **nouveau parseur**. Plus : vérifier les drop-rates **
    star-signs, trophées, missions.
 2. **Nouveaux parseurs** (P0) : emblèmes (localiser le config), telop waza (`skill_telop_info_config`),
    video waza (`event_movie_config`) → parseur + type + table + push + vérif.
-3. **Drop-rates par élément** (P1) : confirmer/compléter `drops-parser` pour ventiler par élément
+3. **Drop-rates par élément** (P1) : confirmer/compléter la projection SQL pour ventiler par élément
    (`item_emission_rarity_table`, `win_treasure_lot_table`).
 4. **Lua** (P1) : indexer + typer les 677 scripts (table `inagle_lua_scripts` : nom, version, catégorie p0/p1/p2,
    symboles/fonctions, hash).

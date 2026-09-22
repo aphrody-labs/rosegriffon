@@ -14,7 +14,7 @@
  * - types: Complete TypeScript type definitions
  */
 
-export { loadJsonAsync as loadJsonFileAsync, loadJsonStream, measureTime } from "./async-loader.js";
+export { loadJsonAsync as loadJsonFileAsync, measureTime } from "./async-loader.js";
 export {
 	CONFIG_SCHEMA_VERSION,
 	type CharaBaseData,

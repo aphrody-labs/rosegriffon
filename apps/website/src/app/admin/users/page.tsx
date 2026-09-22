@@ -1,7 +1,7 @@
 import { Users } from "lucide-react";
 
 import { AdminPageHeader, PaginationControls } from "@rosegriffon/ui";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { UserStats } from "./user-stats";
 import { UsersTable } from "./users-table";
@@ -23,20 +23,8 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
 	const from = (page - 1) * limit;
 	const to = from + limit - 1;
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return (
-			<div className="mx-auto max-w-7xl space-y-8 px-4 py-8 lg:px-8">
-				<AdminPageHeader
-					icon={<Users className="size-5" />}
-					title="Utilisateurs"
-					description="Service Supabase indisponible."
-				/>
-			</div>
-		);
-	}
-
-	let usersQuery = supabase
+	const db = createPostgresClient();
+	let usersQuery = db
 		.from("profiles")
 		.select("*", { count: "exact" })
 		.order("updated_at", { ascending: false })
@@ -56,9 +44,9 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
 		{ count: newUsersCount },
 	] = await Promise.all([
 		usersQuery,
-		supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "admin"),
-		supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "moderator"),
-		supabase
+		db.from("profiles").select("*", { count: "exact", head: true }).eq("role", "admin"),
+		db.from("profiles").select("*", { count: "exact", head: true }).eq("role", "moderator"),
+		db
 			.from("profiles")
 			.select("*", { count: "exact", head: true })
 			.gt("updated_at", thirtyDaysAgo.toISOString()),

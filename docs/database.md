@@ -10,11 +10,13 @@ publication.
 
 ---
 
-## 1. Architecture Hybride d'Azalée
+## 1. Architecture actuelle d'Azalée
 
-Afin d'obtenir une latence minimale, de réduire la charge réseau et de rester
-lisible même en cas d'incident sur les services applicatifs, Azalée utilise une
-architecture hybride :
+La source durable est PostgreSQL. Les chemins runtime, recherche, parsing
+persisté et développement partagé utilisent les façades SQL de `@rosegriffon/db`.
+SQLite est limité aux imports/extractions et au développement hors ligne ; il ne
+remplace pas PostgreSQL en production et aucun fallback silencieux ne doit être
+ajouté.
 
 ```mermaid
 graph TD
@@ -23,28 +25,25 @@ graph TD
     end
     subgraph VPS
         Next[Next.js Server / Bun — apps/website]
-        SQLite[Miroir SQLite local <br> apps/website/data/mirror.sqlite]
         PG[PostgreSQL 18 local — base rg]
         BetterAuth[Better Auth Engine]
     end
 
     Browser -->|Navigation Wiki| Next
-    Next -->|Lectures statiques 0.5ms| SQLite
-    Next -->|Auth / Profils / Écritures| PG
+    Next -->|Lectures / recherche / écritures SQL| PG
     BetterAuth -->|Sessions / Users| PG
 ```
 
 ### A. Flux de données
 
-1. **Données statiques du Wiki (Personnages, Techniques, Objets, Drops)** :
-   - Sources dans les tables `inagle_*` de la base `rg` (PostgreSQL local).
-   - Matérialisées dans un miroir SQLite portable (`apps/website/data/mirror.sqlite`),
-     produit par le dépôt `niers` puis consommé en lecture directe par les
-     packages de données et Website (0 latence réseau).
-2. **Données dynamiques (Utilisateurs, Sessions, Favoris, Logs d'audit)** :
-   - Gérées en temps réel via PostgreSQL local et Better Auth, exposées en
-     compatibilité Supabase par PostgREST/Storage/Realtime self-hostés
-     (voir [self-host-supabase.md](self-host-supabase.md)).
+1. **Données du Wiki (personnages, techniques, objets, drops, texte, CPK)** :
+   - importées depuis les sources du jeu via les outils d’extraction ;
+   - persistées dans les projections PostgreSQL `inagle_*` ;
+   - lues par le runtime via SQL/Kysely.
+2. **Données dynamiques (utilisateurs, sessions, favoris, logs)** :
+   - persistées dans PostgreSQL ;
+   - les endpoints HTTP/Storage/Realtime restent des adaptateurs de transport,
+     pas des sources de données concurrentes.
 
 ---
 

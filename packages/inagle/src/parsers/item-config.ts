@@ -363,14 +363,3 @@ export async function buildItemDatabaseAsync(
 		},
 	};
 }
-
-// Deprecate sync
-export function buildItemDatabase(_dataPath: string) {
-	throw new Error("Synchronous buildItemDatabase is deprecated.");
-}
-export function loadFashionItemMapping(_dataPath: string) {
-	throw new Error("Synchronous loadFashionItemMapping is deprecated.");
-}
-export function loadItemConfig(_dataPath: string) {
-	throw new Error("Synchronous loadItemConfig is deprecated.");
-}

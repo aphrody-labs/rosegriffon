@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/achillea-types",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Contrats d'API partagés (DTO + enums) — source unique pour le bot et le web",
   "type": "module",

@@ -3,13 +3,13 @@ import type { Command } from "commander";
 import * as dotenv from "dotenv";
 import {
 	CATEGORY_NAMES,
-	RARITY_NAMES as CHAR_RARITY_NAMES,
 	createInagleService,
 	ELEMENT_NAMES,
 	PASSIVE_BOOST_NAMES,
 	PASSIVE_SCOPE_NAMES,
 	PositionNames,
 } from "./index.js";
+import { GACHA_RARITY_NAMES as CHAR_RARITY_NAMES } from "./core/game-codes.js";
 import { loadTextFile } from "./parsers/text-parser.js";
 // Pushers de catégories câblées (source unique sous src/, réutilisée par les
 // scripts standalone scripts/push-<cat>.ts).

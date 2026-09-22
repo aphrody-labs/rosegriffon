@@ -1,7 +1,7 @@
 {
 	"name": "@rosegriffon/db",
-	"version": "1.0.0",
-	"description": "Client Supabase partagé + Database types générés (site + bot)",
+	"version": "1.0.2",
+	"description": "Accès PostgreSQL partagé, façades SQL et types Database générés (site + bot)",
 	"type": "module",
 	"exports": {
 		".": "./src/index.ts",
@@ -15,6 +15,9 @@
 		"./platform": "./src/platform.ts",
 		"./achillea": "./src/achillea.ts",
 		"./achillea-sql": "./src/achillea-sql.ts",
+		"./inagle": "./src/inagle.ts",
+		"./pg": "./src/pg.ts",
+		"./bun-sql": "./src/bun-sql.ts",
 		"./postgres-client": "./src/postgres-client.ts",
 		"./kysely-types": "./src/kysely-types.ts",
 		"./schema": "./src/schema/index.ts"
@@ -30,7 +33,7 @@
 		"lint": "bunx oxlint -c ../../.oxlintrc.json src"
 	},
 	"dependencies": {
-		"@rosegriffon/types": "workspace:*",
+		"@rosegriffon/types": "^1.0.1",
 		"@supabase/ssr": "catalog:",
 		"kysely": "catalog:",
 		"pg": "catalog:"

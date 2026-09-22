@@ -1,15 +1,28 @@
 # Décision : architecture de données azalée
 
-Statut : ADOPTÉE — 2026-09-05. Cible : `apps/azalee` (wiki IEVR, self-host VPS).
+Statut : REMPLACÉE — 2026-09-22. La décision historique ci-dessous est conservée
+pour traçabilité ; la cible actuelle est PostgreSQL durable + SQL partagé.
+
+## Architecture actuelle
+
+- Les projections `inagle_*`, le texte, le CPK, la recherche et les lectures wiki
+  runtime viennent de PostgreSQL via `@rosegriffon/db`/Kysely.
+- `@rosegriffon/db/postgres-client` ne fournit qu’une façade de migration vers
+  ce même PostgreSQL ; il n’existe pas de backend Supabase ou SQLite parallèle.
+- SQLite est réservé aux imports, à l’extraction et au développement hors ligne.
+- Le publisher peut produire un miroir SQLite de travail, mais ce miroir n’est
+  jamais la source de vérité ni un fallback silencieux du runtime durable.
+
+Les sections suivantes décrivent l’ancienne stratégie hybride et ne doivent plus
+être utilisées pour implémenter de nouveaux chemins.
 
 ## État d'implémentation
 
-- **Miroir** : le publisher canonique est `niers/scripts/donnees/miroir-inagle.sh`
-  et son unité `nie-miroir.timer`. Azalée consomme le chemin stable fourni par
-  `SQLITE_DB_PATH` et réouvre le handle après un échange d'inode.
-- **Accès données** : le pont Drizzle dual-runtime est présent derrière la façade
-  de compatibilité `SqliteQueryBuilder`. La façade reste conservée tant que la
-  parité PostgREST des 1445 call-sites n'est pas démontrée par comparaison.
+- **Miroir** : le publisher `niers` reste un outil d’extraction/dev ; son SQLite
+  n’est jamais consommé comme source runtime durable.
+- **Accès données** : les projections runtime passent par PostgreSQL via Kysely
+  et les façades SQL partagées `@rosegriffon/db`. Aucun `SqliteQueryBuilder` ne
+  réimplémente la surface PostgREST en production.
 - **Rendu** : les six fiches détail `/chara`, `/skill`, `/item`, `/passive`,
   `/tactic` et `/aura` sont en ISR horaire avec `dynamicParams=true`; les listes,
   filtres, comptes et surfaces authentifiées restent dynamiques.
@@ -27,19 +40,21 @@ Statut : ADOPTÉE — 2026-09-05. Cible : `apps/azalee` (wiki IEVR, self-host VP
 
 Azalée est un wiki IEVR public, read-heavy, intégré à l'application Website. La donnée de jeu = ~44-63 tables `inagle_*` STATIQUES (ne changent qu'à un re-dump du jeu) : ~6148 personnages (5204 base_slug), ~1002 skills, ~1668 items, auras/keshins/tactics, etc. → des milliers de pages adressables.
 
-Source de vérité = inagle (TS) → Supabase ; le publisher `niers` en extrait le miroir de lecture canonique. État réel constaté dans le code :
-
-- **Miroir SQLite canonique** (`/home/ubuntu/niers/var/mirror.sqlite`, publié par `nie-miroir.timer`) + **`SqliteQueryBuilder`** (494 LOC, `lib/supabase/sqlite-client.ts`) qui RÉ-IMPLÉMENTE À LA MAIN la surface PostgREST (eq/neq/ilike/or/range/count, vues `*_clean` émulées via GROUP BY name_fr, json_extract pour `->>`, parser `.or()` splitTopLevel maison). Les snapshots de `data/backups/` ne sont plus que le repli local.
-- **Proxy** (`lib/supabase/server.ts` l.105) : SEULES les tables `inagle_*` sont servies depuis SQLite ; tout le reste (auth, RAG, RPC, éditorial) reste sur Supabase. Fallback Postgres silencieux sur exception.
+Source de vérité = projections PostgreSQL alimentées par Inagle. Le publisher
+`niers` ne produit qu’un artefact SQLite d’extraction/dev ; il n’existe aucun
+fallback SQLite silencieux dans le runtime.
 - **Rendu** : les fiches détail `/skill /item /aura /tactic /chara` sont en ISR horaire, avec les chemins restants rendus à la demande ; les listes, filtres et surfaces authentifiées restent dynamiques.
 
-Fragilités Supabase DOCUMENTÉES et confirmées : `DATABASE_URL` pointe l'hôte direct IPv6-only (`getaddrinfo ENOTFOUND` / login 500), env « sensitive » scellé en blob `eyJ2Ijo` (filtré dans server.ts l.14/20). Le miroir local sert justement à DÉCOUPLER de ça.
+Les anciens incidents Supabase restent documentés pour l’historique ; ils ne
+justifient plus une seconde source de vérité, puisque les lectures durables
+passent par PostgreSQL direct.
 
 Fragilités historiques du miroir corrigées : `SQLITE_DB_PATH` est maintenant épinglé sur le chemin canonique et `nie-miroir.timer` valide puis publie les snapshots. Les anciens fichiers de `data/backups/` peuvent encore contenir de la PII et restent donc un repli local à purger selon la politique de rétention, jamais une source de production.
 
 ## 2. Axes de durabilité évalués
 
-Maintenabilité (tuer le PostgREST maison) · Fraîcheur/automatisation (fini les snapshots périmés) · Performance (latence wiki) · Résilience (découplage Supabase) · Simplicité ops (1 VPS) · Coût/temps de build · Pérennité (peu de churn).
+Ces axes appartiennent à la décision historique. La décision actuelle est la
+réduction des couches : PostgreSQL durable, SQL partagé, SQLite extraction/dev.
 
 ## 3. Options comparées
 
@@ -47,7 +62,8 @@ Maintenabilité (tuer le PostgREST maison) · Fraîcheur/automatisation (fini le
 
 ## 4. Décision
 
-**On retient (e) l'hybride.** Trois chantiers orthogonaux, chacun adossé à une recherche :
+**La décision historique retenait un hybride. Elle est remplacée par la cible
+SQL/PostgreSQL décrite en tête de ce document.**
 
 1. **Couche data → Drizzle ORM** (tue les 494 LOC d'émulation PostgREST). Le schéma partagé couvre les lecteurs Node/Bun derrière le garde `typeof Bun`; le runtime frontend actuel est Website.
 2. **Sync → industrialiser le miroir** (tue le snapshot périmé) : épingler `SQLITE_DB_PATH` (chemin stable `mirror.sqlite`) + publisher systemd quotidien post-`inagle push` (dump validé → swap atomique → purge de rétention). Le lecteur rouvre son handle sans redémarrage.
@@ -60,7 +76,9 @@ Supabase reste : (i) fallback durci (pooler Supavisor session-mode IPv4) pour le
 - **Résilience (axe prioritaire)** : double découplage — HTML ISR caché + data locale SQLite. Une fiche cachée ne touche ni miroir ni Supabase à la requête → immunité aux fragilités IPv6/env scellé/login 500.
 - **Maintenabilité** : Drizzle supprime l'émulation PostgREST fragile (parser .or() splitTopLevel, *_clean GROUP BY, NULLS FIRST/LAST) ; typage introspecté de bout en bout.
 - **Fraîcheur** : publication quotidienne validée, swap atomique et détection d'inode sans restart ; invalidation ISR on-demand au swap.
-- **Pérennité** : ISR stable depuis v13 ; Drizzle dual-runtime natif ; SQLite = format portable lisible par niers (Rust) → aligné sur la convergence Rust long terme sans coupler azalée au Cloud fragile. Kysely écarté (SqliteDialect core = better-sqlite3 only + pin 0.28.2 gelé-interdit-au-bump).
+- **Pérennité** : ISR stable depuis v13 ; PostgreSQL/Kysely est la couche
+  durable ; SQLite reste un format portable réservé aux imports et à l’extraction
+  hors ligne.
 - **Ops** : 1 timer + 1 var d'env + 1 purge, homogène avec l'infra cron existante (1 seul VPS, pas de Redis, pas de 2e Postgres).
 
 ## 6. Chemin de migration (prod-safe, non destructif)

@@ -1,6 +1,6 @@
 import type { Command } from "commander";
 import pc from "picocolors";
-import { ITEM_CATEGORY_NAMES } from "./items/api.js";
+import { ITEM_CATEGORY_NAMES } from "./items/categories.js";
 import { createInagleService } from "./service.js";
 
 // === STATS COMMAND ===
@@ -97,7 +97,7 @@ export function registerCharacterCommand(program: Command) {
 				return;
 			}
 
-			results.forEach((char) => {
+				results.forEach((char: any) => {
 				console.log(pc.dim("--------------------------------"));
 				console.log(pc.bold(pc.cyan(char.names.fr || char.names.en || "Unknown Name")));
 				console.log(`ID: ${pc.dim(char.charaId)} / ParamID: ${pc.dim(char.charaParamId)}`);
@@ -148,7 +148,7 @@ export function registerItemsCommand(program: Command) {
 			console.log(pc.bold(`\nFound ${results.length} items`));
 			const limit = parseInt(options.limit, 10);
 
-			results.slice(0, limit).forEach((item) => {
+				results.slice(0, limit).forEach((item: any) => {
 				const name = item.names?.fr || item.names?.en || "???";
 				const cat = item.category;
 				console.log(`  ${pc.yellow(item.itemId)}: ${pc.bold(name)} ${pc.dim(`(${cat})`)}`);
@@ -171,7 +171,7 @@ export function registerItemsCommand(program: Command) {
 				return;
 			}
 
-			results.forEach((item) => {
+				results.forEach((item: any) => {
 				const name = item.names?.fr || item.names?.en || "???";
 				const desc = item.descriptions?.fr || item.descriptions?.en || "";
 
@@ -203,7 +203,7 @@ export function registerSkillsCommand(program: Command) {
 				return;
 			}
 
-			results.forEach((skill) => {
+				results.forEach((skill: any) => {
 				const name = skill.name_FR || skill.displayName || "???";
 				console.log(pc.dim("--------------------------------"));
 				const code = skill.internalCode || skill.skillIDStr || "???";
@@ -240,7 +240,7 @@ export function registerTeamsCommand(program: Command) {
 			const all = service.teams.allTeams();
 
 			console.log(pc.bold(`\nFound ${all.length} teams`));
-			all.forEach((team) => {
+				all.forEach((team: any) => {
 				const name = team.name || team.displayName || "???";
 				console.log(`  ${pc.magenta(team.teamIdStr)}: ${pc.bold(name)}`);
 			});

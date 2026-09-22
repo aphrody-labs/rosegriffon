@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { logAdminAction } from "@/lib/admin-logger";
 import { getServerUser } from "@/lib/auth-helpers";
-import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 const userEditSchema = z.object({
 	full_name: z.string().optional(),
@@ -15,14 +15,14 @@ type UserEditValues = z.infer<typeof userEditSchema>;
 
 export async function updateUserProfile(userId: string, values: UserEditValues) {
 	// 1. Check if current user is admin
-	const supabase = await createClient();
 	const user = await getServerUser();
 
 	if (!user) {
 		return { error: "Non authentifié" };
 	}
 
-	const { data: currentUserProfile } = await supabase
+	const db = createPostgresClient();
+	const { data: currentUserProfile } = await db
 		.from("profiles")
 		.select("role")
 		.eq("id", user.id)
@@ -42,12 +42,7 @@ export async function updateUserProfile(userId: string, values: UserEditValues) 
 	}
 
 	// 3. Update target user using Admin Client
-	const adminClient = createAdminClient();
-	if (!adminClient) {
-		return { error: "Erreur configuration serveur" };
-	}
-
-	const { error } = await adminClient
+	const { error } = await db
 		.from("profiles")
 		.update({
 			full_name: validation.data.full_name,

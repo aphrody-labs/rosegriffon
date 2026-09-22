@@ -13,7 +13,7 @@ import "server-only";
  * titre — mieux vaut un code affiché qu'un libellé inventé.
  */
 
-import { selectInagle } from "@/lib/db/inagle-sql";
+import { selectInagle } from "@rosegriffon/db/inagle";
 
 /** Un libellé résolu : ce qu'on affiche, et dans quel ordre. */
 export interface MediaLabel {

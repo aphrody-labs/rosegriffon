@@ -84,8 +84,8 @@ export interface CharacterGrowthParams {
 // Rarity Mapping
 // ============================================================================
 
-// Source unique : voir src/lib/rarity.ts. Réexporté ici pour préserver l'API
-// publique de stat-calculator (importé par characters/evolution.ts et les tests).
+// Source unique : voir src/lib/rarity.ts. Réexporté pour le calculateur public
+// et les tests.
 export { rarityToGrowthRank } from "./lib/rarity.js";
 
 // Réimporté en interne pour les usages locaux (calculateStats/generateGrowthCurve).

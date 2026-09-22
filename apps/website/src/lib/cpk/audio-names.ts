@@ -14,7 +14,7 @@ import "server-only";
  */
 
 import { voiceBankCharacterCode } from "@rosegriffon/azalee/cpk/audio";
-import { selectInagle } from "@/lib/db/inagle-sql";
+import { selectInagle } from "@rosegriffon/db/inagle";
 
 /** Ce qu'une banque sonorise, quand on sait le dire. */
 export interface BankOwner {

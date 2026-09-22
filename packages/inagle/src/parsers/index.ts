@@ -232,11 +232,9 @@ export {
 } from "./inacode-config.js";
 // Item config parser
 export {
-	buildItemDatabase,
 	buildItemDatabaseAsync,
 	type ItemCategory,
 	loadFashionItemMappingAsync,
-	loadItemConfig,
 	type ParsedItem,
 } from "./item-config.js";
 // Mission parser
@@ -273,7 +271,6 @@ export {
 } from "./override-skill-config.js";
 // Passive Skill parser
 export {
-	buildPassiveDatabase,
 	buildPassiveDatabaseAsync,
 	type ParsedPassive,
 } from "./passive-skill-config.js";
@@ -313,7 +310,7 @@ export {
 // Shop parser
 export { loadShopConfig, type ShopInfo, type ShopItem } from "./shop-config.js";
 // Skill parser
-export { buildSkillDatabase, buildSkillDatabaseAsync, type ParsedSkill } from "./skill-config.js";
+export { buildSkillDatabaseAsync, type ParsedSkill } from "./skill-config.js";
 // Skill technic parser
 export {
 	buildSkillTechnicDatabase,

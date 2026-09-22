@@ -1,7 +1,4 @@
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
-import { sql } from "kysely";
-
-const db = createAchilleaSql();
+import { createAchilleaSql, sql } from "./achillea-sql";
 
 const INAGLE_TABLES = new Set([
 	"inagle_characters",
@@ -9,7 +6,7 @@ const INAGLE_TABLES = new Set([
 	"inagle_items",
 ]);
 
-/** Lecture serveur des projections Inagle sans passer par le miroir SQLite. */
+/** Read-only SQL projection access for the durable Inagle catalog. */
 export async function selectInagle<T extends object>(
 	table: string,
 	columns: string,
@@ -17,6 +14,8 @@ export async function selectInagle<T extends object>(
 	if (!INAGLE_TABLES.has(table)) {
 		throw new Error(`Table Inagle non autorisée: ${table}`);
 	}
-	const result = await sql<T>`select ${sql.raw(columns)} from public.${sql.raw(table)}`.execute(db);
+
+	const database = createAchilleaSql();
+	const result = await sql<T>`select ${sql.raw(columns)} from public.${sql.raw(table)}`.execute(database);
 	return result.rows;
 }
