@@ -4,14 +4,12 @@ import {
 	checkPublicationWindow,
 	circuitPointsForRank,
 	circuitPointsToTier,
-	computeWaitlistPositions,
 	denseRankToTier,
 	goalAverage,
 	userIsTournamentOrganizer,
 } from "@rosegriffon/achillea-core";
 import { rel } from "@mikro-orm/core";
 import { BadRequest, Conflict, NotFound, NotImplemented, Unauthorized } from "@tsed/exceptions";
-import type { DataTypes, ValueToArray } from "brackets-manager";
 
 import type { NewTournamentDTO } from "@/api/models/dtos";
 import { tournamentRulesConfig, urlsConfig } from "@/configs";
@@ -348,46 +346,6 @@ export class TournamentsService {
 			.getAllTournaments(page, pageSize, organizationId, states);
 
 		return [tournaments, total];
-	}
-
-	async getSingleTournament(
-		tournamentId: number
-	): Promise<[Tournament, ParticipantDTO[], ValueToArray<DataTypes>]> {
-		const tournament = await this.db.em.findOne(
-			Tournament,
-			{ id: tournamentId },
-			{
-				populate: [
-					"organization",
-					"organization.managers.user",
-					"organization.owner",
-					"managers",
-					"participants",
-				],
-				refresh: true,
-			}
-		);
-
-		if (!tournament) throw new NotFound("Tournament not found");
-
-		const participants = await this.db.em.find(
-			TournamentParticipant,
-			{ tournament },
-			{ refresh: true, orderBy: { seed: "ASC" } }
-		);
-
-		// Position en liste d'attente : ordre d'inscription parmi les seuls `Waitlisted`
-		// (règle pure, testée dans tests/unit/tournament-publication-rules.test.ts).
-		const waitlistOrder = computeWaitlistPositions(participants);
-
-		const participantsDTO = await Promise.all(
-			participants.map(async (participant) =>
-				this.toDTO(participant, waitlistOrder.get(participant.id) ?? null)
-			)
-		);
-		const tournamentData = await this.bracketService.getTournamentData(tournamentId);
-
-		return [tournament, participantsDTO, tournamentData];
 	}
 
 	async toDTO(
