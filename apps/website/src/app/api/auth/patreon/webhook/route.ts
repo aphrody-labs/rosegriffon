@@ -1,9 +1,9 @@
 import { parseWebhookRequest } from "@rosegriffon/patreon-bun";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { NextResponse } from "next/server";
 
 import { processPatreonEvent } from "@/lib/patreon/webhooks";
 import type { PatreonTrigger, PatreonWebhookPayload } from "@/lib/patreon/webhooks";
-import { createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -53,15 +53,7 @@ export async function POST(req: Request) {
 
 	const trigger = parsed.event as PatreonTrigger;
 	const payload = parsed.payload as unknown as PatreonWebhookPayload;
-	const supabase = createAdminClient();
-
-	if (!supabase) {
-		// Pas de DB → on log mais on rentre 200 quand même pour ne pas se faire
-		// Désactiver. Patreon réenverra l'event manuellement via dashboard si
-		// L'admin le veut.
-		console.error("[patreon/webhook] no admin supabase client");
-		return NextResponse.json({ deferred: true, ok: true });
-	}
+	const supabase = createPostgresClient();
 
 	const nowIso = new Date().toISOString();
 
@@ -97,7 +89,7 @@ export async function POST(req: Request) {
 			},
 			{ onConflict: "id" }
 		)
-		.then((res) => {
+		.then((res: { error: Error | null }) => {
 			if (res.error) {
 				console.error("[patreon/webhook] insert audit failed", res.error);
 			}
@@ -139,7 +131,7 @@ export async function POST(req: Request) {
  * concurremment (Patreon peut envoyer 5+ events en burst).
  */
 async function heartbeat(
-	supabase: NonNullable<ReturnType<typeof createAdminClient>>,
+	supabase: ReturnType<typeof createPostgresClient>,
 	opts: { eventId: string; trigger: PatreonTrigger; success: boolean }
 ): Promise<void> {
 	const { error } = await supabase.rpc("patreon_heartbeat", {
@@ -157,10 +149,7 @@ async function heartbeat(
  * POST signé, mais aussi pour pinger nous-même depuis le cron).
  */
 export async function GET() {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return NextResponse.json({ ok: false, reason: "no_db" }, { status: 200 });
-	}
+	const supabase = createPostgresClient();
 	const { data } = await supabase
 		.from("patreon_webhook_state")
 		.select(

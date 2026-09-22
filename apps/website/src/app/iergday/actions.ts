@@ -57,7 +57,7 @@ import { z } from "zod";
 
 import { getServerUser } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 /** Retour uniforme du formulaire. */
 export interface ResultatDepot {
@@ -192,7 +192,7 @@ export async function deposerCreationInstagram(donnees: FormData): Promise<Resul
 		// le même objet au lieu d'en empiler une copie par tentative.
 		const extension = EXTENSIONS[fichier.type] ?? "bin";
 		const chemin = `campagnes/${campagne.slug}/instagram/${lien.shortcode}.${extension}`;
-		const admin = createAdminClient();
+		const admin = createPostgresClient();
 		if (!admin) {
 			return { error: "Service de stockage indisponible. Réessaie dans un moment.", success: false };
 		}

@@ -8,7 +8,6 @@ import { auth } from "@/lib/auth";
 import { isPatreonAdmin } from "@/lib/patreon/admin-access";
 import { isAdmin, resolveProfile } from "@rosegriffon/auth";
 import { createPostgresClient } from "@rosegriffon/db/service";
-import { createAdminClient } from "@/lib/supabase/server";
 
 /**
  * Récupère la session Better Auth côté serveur (avec cache React par requête).
@@ -41,7 +40,7 @@ export async function requireAuth() {
  */
 export async function requireAdmin() {
 	const user = await requireAuth();
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 	const profile = await resolveProfile(supabase, user);
 
 	if (!profile || !isAdmin(profile.role)) {
@@ -91,7 +90,7 @@ export async function requireAdminOrFail() {
 		throw new Error("Non autorisé");
 	}
 
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 	const profile = await resolveProfile(supabase, user);
 
 	if (!profile || !isAdmin(profile.role)) {
@@ -144,7 +143,7 @@ export async function requireEditorOrFail() {
 		throw new Error("Non autorisé");
 	}
 
-	const supabase = createAdminClient();
+	const supabase = createPostgresClient();
 	const profile = await resolveProfile(supabase, session.user);
 
 	if (!profile) {

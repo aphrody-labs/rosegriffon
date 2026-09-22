@@ -5,9 +5,9 @@ import { z } from "zod";
 
 import { badgeMerite, filtrerBadges, SchemaProfilPublic } from "@rosegriffon/types/profil";
 import { isAdminRole } from "@rosegriffon/types/roles";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { getServerUser } from "@/lib/auth-helpers";
-import { createAdminClient } from "@/lib/supabase/server";
 
 /**
  * Actions du compte.
@@ -51,7 +51,7 @@ export async function updateProfile(
 		return { error: firstIssue(parsed.error) };
 	}
 
-	const admin = createAdminClient();
+	const admin = createPostgresClient();
 	const badges = await badgesAutorises(user.id, parsed.data.badges);
 
 	const { error } = await admin
@@ -84,7 +84,7 @@ async function badgesAutorises(userId: string, demandes: string[]): Promise<stri
 		return [...demandes];
 	}
 
-	const admin = createAdminClient();
+	const admin = createPostgresClient();
 	const [{ data: profil }, { data: mecenat }] = await Promise.all([
 		admin.from("profiles").select("role, badges").eq("id", userId).maybeSingle(),
 		admin
@@ -117,7 +117,7 @@ export async function updateAddress(
 		return { error: firstIssue(parsed.error) };
 	}
 
-	const { error } = await createAdminClient()
+	const { error } = await createPostgresClient()
 		.from("profiles")
 		.update({ ...parsed.data, updated_at: new Date().toISOString() })
 		.eq("id", user.id);
@@ -144,7 +144,7 @@ export async function updateAvatarUrl(avatarUrl: string): Promise<{ error?: stri
 		return { error: "Session expirée — reconnecte-toi." };
 	}
 
-	const admin = createAdminClient();
+	const admin = createPostgresClient();
 	const { error } = await admin
 		.from("profiles")
 		.update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })

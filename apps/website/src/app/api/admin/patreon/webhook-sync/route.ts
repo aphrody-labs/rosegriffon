@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { requirePatreonCreator } from "@/lib/auth-helpers";
 import { PatreonApiError, patreonFetch } from "@/lib/patreon/client";
 import { decryptToken } from "@/lib/patreon/encryption";
 import { ALL_TRIGGERS } from "@/lib/patreon/webhooks";
-import { createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -39,10 +39,7 @@ interface PatreonWebhookResource {
  */
 export async function POST(req: Request) {
 	await requirePatreonCreator();
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return NextResponse.json({ ok: false, reason: "no_db" }, { status: 500 });
-	}
+	const supabase = createPostgresClient();
 
 	const url = new URL(req.url);
 	const targetUri =
@@ -190,10 +187,7 @@ export async function POST(req: Request) {
  */
 export async function GET() {
 	await requirePatreonCreator();
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return NextResponse.json({ ok: false, reason: "no_db" }, { status: 500 });
-	}
+	const supabase = createPostgresClient();
 
 	const { data: tokenRow } = await supabase
 		.from("patreon_oauth_tokens")

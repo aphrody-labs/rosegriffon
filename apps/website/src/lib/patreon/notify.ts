@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export type ReminderStage = "announce" | "reminder1" | "reminder2" | "lastcall";
 
@@ -127,10 +127,7 @@ export interface ReminderRunSummary {
 }
 
 export async function runReminderBatch(stage: ReminderStage): Promise<ReminderRunSummary> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		throw new Error("no admin supabase client");
-	}
+	const supabase = createPostgresClient();
 
 	const minNotificationCount = (
 		{

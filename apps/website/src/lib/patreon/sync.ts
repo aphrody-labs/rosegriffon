@@ -2,10 +2,10 @@ import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/clien
 import { decryptToken, encryptToken } from "@/lib/patreon/encryption";
 import { isTokenFresh, refreshOAuthToken } from "@/lib/oauth/refresh";
 import { SCOPES_PATRON } from "@/lib/patreon/types";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import type { ParsedIdentity } from "@/lib/patreon/types";
 
-type AdminClient = NonNullable<ReturnType<typeof createAdminClient>>;
+type AdminClient = ReturnType<typeof createPostgresClient>;
 
 interface TokenRow {
 	id: string;
@@ -110,10 +110,7 @@ async function ensureFreshAccessToken(
 export async function refreshPatreonMembership(
 	userId: string
 ): Promise<{ ok: boolean; reason?: string; identity?: ParsedIdentity }> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return { ok: false, reason: "no_admin_client" };
-	}
+	const supabase = createPostgresClient();
 
 	const { data: tokenRow } = await supabase
 		.from("patreon_oauth_tokens")
@@ -187,10 +184,7 @@ export async function refreshAllMemberships(opts: {
 	olderThanMs?: number;
 	limit?: number;
 }): Promise<{ refreshed: number; failed: number }> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return { refreshed: 0, failed: 0 };
-	}
+	const supabase = createPostgresClient();
 
 	const olderThan = new Date(Date.now() - (opts.olderThanMs ?? 6 * 24 * 3600 * 1000)).toISOString();
 	const limit = opts.limit ?? 200;

@@ -1,10 +1,10 @@
 import { resolveAccountTab, type AccountSession, type AccountTabId } from "@rosegriffon/ui";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { getServerSession } from "@/lib/auth-helpers";
-import { createAdminClient } from "@/lib/supabase/server";
 
 import { AccountClient } from "./account-client";
 
@@ -30,7 +30,7 @@ export default async function AccountPage({
 	// client anon échoue en 42501 sur `profiles`, ce qui renvoyait un profil
 	// `null` et affichait un formulaire vide. La session est vérifiée ci-dessus
 	// et la requête est filtrée sur l'identifiant de session.
-	const admin = createAdminClient();
+	const admin = createPostgresClient();
 	const { data: profileRow, error: profileError } = await admin
 		.from("profiles")
 		.select("*")
@@ -98,7 +98,7 @@ export default async function AccountPage({
 				country: str("country"),
 				postal_code: str("postal_code"),
 			}}
-			accounts={(accountRows ?? []).map((row) => {
+			accounts={(accountRows ?? []).map((row: unknown) => {
 				const r = row as { provider_id: string; created_at: string; scope: string | null };
 				return { createdAt: r.created_at, provider: r.provider_id, scope: r.scope };
 			})}

@@ -4,11 +4,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { google } from "googleapis";
 import { revalidatePath } from "next/cache";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { getServerSession } from "@/lib/auth-helpers";
 import { isAdminRole } from "@/lib/auth-roles";
 import { convertGoogleDocToHtml } from "@/lib/google-docs";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 
 const DRIVE_FOLDER_ID = "19UJsSXVRV0sEd67JCwHSu9Atm3H_5D6K";
 
@@ -57,7 +56,7 @@ async function requireDocAdmin() {
 		return { error: "Non authentifié" as const, user: null };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { data: profile } = await supabase
 		.from("profiles")
 		.select("role")
@@ -100,7 +99,7 @@ export async function importGoogleDoc(docId: string) {
 		const slug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
 
 		// Use Admin Client to bypass RLS
-		const supabase = createAdminClient();
+		const supabase = createPostgresClient();
 		const { data, error } = await (supabase as any)
 			.from("articles")
 			.insert({
@@ -185,7 +184,7 @@ export async function exportToGoogleDrive(newsId: string) {
 			return { success: false, error: authError };
 		}
 
-		const supabase = await createClient();
+		const supabase = createPostgresClient();
 		const { data: news, error: fetchError } = await supabase
 			.from("articles")
 			.select("*")

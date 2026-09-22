@@ -10,7 +10,7 @@ import type {
 	PatreonTierAttrs,
 	PatreonUserAttrs,
 } from "./types";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 const MEMBER_FIELDS = [
 	"full_name",
@@ -60,10 +60,7 @@ export interface CreatorTokens {
 }
 
 export async function loadCreatorTokens(): Promise<CreatorTokens> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		throw new Error("no admin supabase client");
-	}
+	const supabase = createPostgresClient();
 	const { data, error } = await supabase
 		.from("patreon_oauth_tokens")
 		.select("id,access_token_enc,refresh_token_enc,expires_at")
@@ -116,10 +113,7 @@ export async function ensureFreshAccessToken(tokens: CreatorTokens): Promise<Cre
 		tokenRowId: tokens.tokenRowId,
 	};
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return newTokens;
-	}
+	const supabase = createPostgresClient();
 
 	if (tokens.tokenRowId === "env") {
 		// Promote env fallback to a real DB row so subsequent refreshes persist
@@ -168,10 +162,7 @@ export async function exportPatreonMembers(): Promise<ExportSummary> {
 	let tokens = await loadCreatorTokens();
 	tokens = await ensureFreshAccessToken(tokens);
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		throw new Error("no admin supabase client");
-	}
+	const supabase = createPostgresClient();
 
 	const campaignId = process.env.PATREON_CAMPAIGN_ID;
 	if (!campaignId) {
@@ -281,10 +272,7 @@ export async function exportSingleMember(
 		let tokens = await loadCreatorTokens();
 		tokens = await ensureFreshAccessToken(tokens);
 
-		const supabase = createAdminClient();
-		if (!supabase) {
-			return { ok: false, error: "no admin client" };
-		}
+		const supabase = createPostgresClient();
 
 		const res: JsonApiResponse<PatreonMemberAttrs> = await patreonFetch(
 			tokens.accessToken,
@@ -356,10 +344,7 @@ export async function exportSingleMember(
 }
 
 async function countTiers(): Promise<number> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return 0;
-	}
+	const supabase = createPostgresClient();
 	const { count } = await supabase
 		.from("patreon_legacy_tiers")
 		.select("*", { count: "exact", head: true });
@@ -367,10 +352,7 @@ async function countTiers(): Promise<number> {
 }
 
 export async function syncTiers(accessToken: string, campaignId: string): Promise<void> {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return;
-	}
+	const supabase = createPostgresClient();
 
 	const res = await patreonFetch<PatreonTierAttrs>(accessToken, `/campaigns/${campaignId}`, {
 		"fields[tier]": TIER_FIELDS,
