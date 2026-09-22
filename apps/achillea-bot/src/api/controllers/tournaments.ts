@@ -78,7 +78,7 @@ export class TournamentsController extends BaseController {
 
 	/**
 	 * Classement circuit : cumul de points sur tous les tournois élimination
-	 * terminés (voir `TournamentsService.getCircuitRanking`). Public, aucune auth
+	 * terminés (projection de l'API unifiée). Public, aucune auth
 	 * requise — mêmes données que la page "Tournois" liste déjà publiquement.
 	 */
 	@Get("/circuit/ranking")
