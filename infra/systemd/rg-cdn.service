@@ -12,7 +12,7 @@ ExecStart=/home/ubuntu/.bun/bin/bun server.ts
 Restart=always
 RestartSec=3
 
-# Plafond mémoire (raisonnement complet dans azalee-api.service). Mesuré : 8 Mio ; le
+# Plafond mémoire (raisonnement complet dans les unités de production). Mesuré : 8 Mio ; le
 # service diffuse des fichiers, il ne les charge pas.
 MemoryHigh=512M
 MemoryMax=1G

@@ -37,13 +37,13 @@ import {
 import { analyserLiveEnv } from "./deploiement";
 
 const SERVICE_FICTIF: DescriptionService = {
-	nom: "azalee-api",
-	titre: "API Azalée",
-	base: "http://127.0.0.1:8807",
+	nom: "rg-api",
+	titre: "API unifiée (Azalée inclus)",
+	base: "http://127.0.0.1:8800",
 	sante: "/health",
-	publique: "https://azalee.rosegriffon.fr",
-	unite: "azalee-api.service",
-	role: "41 routes JSON en lecture seule",
+	publique: "https://api.rosegriffon.fr",
+	unite: "rg-api.service",
+	role: "API unifiée",
 };
 
 describe("pastilleEtat", () => {
@@ -168,7 +168,7 @@ describe("ligneSonde", () => {
 			erreur: null,
 		};
 		expect(ligneSonde(sonde)).toBe(
-			"🟢 `azalee-api` — API Azalée · 11 ms · `azalee-api.service`\n   └ cpkFiles : 250800"
+			"🟢 `rg-api` — API unifiée (Azalée inclus) · 11 ms · `rg-api.service`\n   └ cpkFiles : 250800"
 		);
 	});
 

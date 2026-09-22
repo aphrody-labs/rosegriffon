@@ -664,7 +664,7 @@ Rose Griffon le lui demande.
 
 ```bash
 # après toute modification de apps/bot
-sudo systemctl restart rg-bot.service azalee-bot.service
+sudo systemctl restart rg-bot.service
 journalctl -u rg-bot.service --since "-1 min" | tail -20
 ```
 

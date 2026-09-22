@@ -9,7 +9,7 @@ ExecStart=/usr/local/bin/postgrest /etc/postgrest.conf
 Restart=always
 RestartSec=2
 
-# Plafond mémoire (raisonnement complet dans azalee-api.service). Mesuré : 92 Mio ;
+# Plafond mémoire (raisonnement complet dans les unités de production). Mesuré : 92 Mio ;
 # PostgREST garde un pool de connexions, pas les résultats.
 MemoryHigh=1G
 MemoryMax=2G

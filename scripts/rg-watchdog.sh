@@ -64,7 +64,6 @@ CIBLE="${1:-}"
 # (90 %), directement depuis systemd.
 case "$CIBLE" in
 	website-web)     PORT=3004; SEUIL_GIB=3.4; SANTE="/";       RELEASES=/home/ubuntu/rg-releases/website ;;
-	azalee-api)      PORT=8807; SEUIL_GIB=1.6; SANTE="/";       RELEASES="" ;;
 	nie-model-serve) PORT=8790; SEUIL_GIB=8.5; SANTE="/health"; RELEASES="" ;;
 	# `nie-site` sert le site public. Il etait le SEUL service de facade sans sonde,
 	# alors que son propre amont (`nie-model-serve`) en avait une : la panne surveillee

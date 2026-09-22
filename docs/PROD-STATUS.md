@@ -22,8 +22,8 @@ Last verified: **2026-09-20 UTC** on the Rose Griffon VPS.
   Socket.IO (:4005) restent adossés à `achillea-bot` (:4000) et à sa pile de données isolée.
 - `nie.aphrody.com` : servi depuis le VPS derrière nginx.
 - Postgres (port 5432), PostgREST (:8809), Storage (:8810), Realtime (:8812), CDN (:8804, :8788),
-  API headless Azalée (:8807), Auth, et bots Discord (`rg-bot.service`, `azalee-bot.service`,
-  `achillea-bot.service`) actifs. `systemctl --failed` est vide.
+  API unifiée (`rg-api.service`, montage Azalée `/v1/azalee`) et bot Achilléa (`achillea-bot.service`)
+  actifs. Les anciens `azalee-api` et `azalee-bot` sont retirés.
 - Toutes les sondes HTTP publiques et internes retournent `200 OK`.
 - Validation automatisée monorepo : 100% tests unitaires verts (18/18 tâches Turborepo, 850+ tests),
   100% type-check vert (20/20 tâches Turborepo), 100% lint vert (14/14 tâches Turborepo), build de
