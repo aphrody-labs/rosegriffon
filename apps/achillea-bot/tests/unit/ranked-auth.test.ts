@@ -11,13 +11,12 @@
 
 import { beforeAll, describe, expect, test } from "bun:test";
 import jwt from "jsonwebtoken";
+import { signAchilleaRealtimeToken, signAchilleaSessionToken } from "@rosegriffon/auth/achillea-session";
 
 import { authFromColyseus, getCookie, verifyToken } from "../../src/ranked/auth";
 import {
 	AUTH_ISSUER,
 	REALTIME_AUDIENCE,
-	signRealtimeToken,
-	signSessionToken,
 } from "../../src/auth/session";
 
 const TEST_SECRET = "secret-de-test-unitaire-ranked-auth";
@@ -118,7 +117,7 @@ describe("verifyToken", () => {
 
 describe("authFromColyseus", () => {
 	const validToken = () => signValid({ id: "100", username: "Endou" });
-	const validCookie = () => signSessionToken({ id: "100", username: "Endou" });
+	const validCookie = () => signAchilleaSessionToken({ id: "100", username: "Endou" }, TEST_SECRET);
 
 	test("authentifie via context.token (source prioritaire)", () => {
 		const user = authFromColyseus({}, { token: validToken() });
@@ -174,8 +173,8 @@ describe("authFromColyseus", () => {
 	});
 
 	test("keeps web sessions in cookies and realtime tokens in handshakes", () => {
-		const session = signSessionToken({ id: "session-user" });
-		const realtime = signRealtimeToken({ id: "realtime-user" });
+		const session = signAchilleaSessionToken({ id: "session-user" }, TEST_SECRET);
+		const realtime = signAchilleaRealtimeToken({ id: "realtime-user" }, TEST_SECRET);
 		expect(authFromColyseus({}, { headers: { cookie: `token=${session}` } })?.id).toBe(
 			"session-user"
 		);
