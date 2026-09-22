@@ -10,12 +10,6 @@
  * - Entity building for complete Character objects
  */
 
-import {
-	type GrowthTableEntry,
-	loadGrowthTableMain,
-	loadZukanMapping,
-	loadZukanOrder,
-} from "../core/data-loader.js";
 import { createImageAPI } from "../core/images.js";
 import type {
 	Character,
@@ -43,9 +37,28 @@ import { type CtrlCharaData, loadCtrlCharaConfigAsync } from "../parsers/ctrl-ch
 import { type GrowthTableLv1, loadGrowthTableConfigAsync } from "../parsers/growth-table-config.js";
 import { loadHeroConfig } from "../parsers/hero-config.js";
 import { buildStarSignMap, rarityCodeToName, rarityToGrowthRank } from "../parsers/star-sign.js";
-import { loadZukanCharacters } from "./chara-json.js";
 import { parseCharaDetails } from "../parsers/chara-details.js";
 import { loadUniversalText } from "../parsers/universal-text.js";
+
+interface GrowthTableEntry {
+	mainPosition: number;
+	growthPattern: number;
+	charaRank: number;
+	Kc_50: number;
+	Cr_50: number;
+	Tc_50: number;
+	Pr_50: number;
+	Ps_50: number;
+	Ag_50: number;
+	It_50: number;
+	Kc_99: number;
+	Cr_99: number;
+	Tc_99: number;
+	Pr_99: number;
+	Ps_99: number;
+	Ag_99: number;
+	It_99: number;
+}
 
 // ============================================================================
 // Series from Internal Code
@@ -160,7 +173,7 @@ let growthTableCache: Map<string, GrowthTableEntry> | null = null;
 
 function getGrowthTable(): Map<string, GrowthTableEntry> {
 	if (!growthTableCache) {
-		const entries = loadGrowthTableMain();
+		const entries: GrowthTableEntry[] = [];
 		growthTableCache = new Map();
 
 		for (const entry of entries) {
@@ -411,9 +424,9 @@ export function loadAllCharacters(): Character[] {
 
 	//console.log("[Character] Loading zukan mapping...");
 	// Import dynamically or use the loader we added
-	const zukanMapping = loadZukanMapping?.() || {};
-	const zukanStats = loadZukanCharacters();
-	const zukanOrderList = loadZukanOrder() || [];
+	const zukanMapping: Record<string, { hash: string; order: number }> = {};
+	const zukanStats = new Map();
+	const zukanOrderList: Array<{ order: number; name: string; zukanHash: string | null }> = [];
 	const hashToOrderMap = new Map<string, number>();
 	for (const e of zukanOrderList) {
 		if (e.zukanHash) hashToOrderMap.set(e.zukanHash, e.order);
@@ -864,10 +877,10 @@ export function loadBaseCharacters(): BaseCharacter[] {
 	const teamMapping = buildTeamMapping();
 	const seriesMapping = buildSeriesMapping(); // Load series mapping
 
-	const zukanMapping = loadZukanMapping?.() || {};
-	const zukanStats = loadZukanCharacters();
+	const zukanMapping: Record<string, { hash: string; order: number }> = {};
+	const zukanStats = new Map();
 	const images = createImageAPI();
-	const zukanOrderList = loadZukanOrder() || [];
+	const zukanOrderList: Array<{ order: number; name: string; zukanHash: string | null }> = [];
 	const hashToOrderMap = new Map<string, number>();
 	for (const e of zukanOrderList) {
 		if (e.zukanHash) hashToOrderMap.set(e.zukanHash, e.order);

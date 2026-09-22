@@ -153,7 +153,6 @@ Sur cette machine, les artefacts web vivent dans `apps/website/data/` :
 ```text
 apps/website/data/
 ├── backups/mirror.sqlite            # fallback local ; la prod lit le miroir niers
-├── cpk-index.ndjson.gz              # 250 800 fichiers des CPK
 └── backups/mirror.sqlite            # miroir local de développement uniquement
 ```
 
@@ -164,18 +163,12 @@ apps/website/data/
 | `SQLITE_DB_PATH` | `src/config.ts` | Chemin explicite du miroir SQLite. **Épinglé en production** (drop-in systemd) : sans lui, le repli essaie le miroir canonique niers puis, à défaut, le snapshot `supabase-*.sqlite` au nom le plus grand. |
 | `NIERS_MIRROR` | `src/config.ts` | Chemin du miroir canonique niers utilisé par le fallback CLI/tests quand `SQLITE_DB_PATH` n'est pas défini. |
 | `AZALEE_DATA_DIR` | `src/config.ts` | Dossier des artefacts runtime, testé avant les chemins conventionnels (`<cwd>/data`, `<cwd>/apps/website/data`, `<pkg>/../../apps/website/data`). |
-| `AZALEE_CACHE_DIR` | `src/config.ts` | Base des SQLite matérialisés (défaut : `os.tmpdir()`, tmpfs sur le VPS). |
-| `CPK_INDEX_PATH` | `src/cpk/index.ts` | Chemin explicite de `cpk-index.ndjson.gz`. |
-| `CPK_CACHE_DIR` | `src/cpk/index.ts` | Dossier du SQLite matérialisé de l'index CPK (défaut : `<tmpdir>/azalee-cpk`). |
-| `GAME_TEXT_DATA_DIR` | `src/game-text/index.ts` | Dossier contenant les `game-text-*.ndjson.gz`. |
 | `AZALEE_PORT` / `AZALEE_HOST` | `src/server/serve.ts` | Défauts de l'API headless (`3010` / `127.0.0.1`). |
 | `DATABASE_URL` | `src/cli.ts` | PostgreSQL pour les commandes CLI qui ne passent pas par le miroir (`db`, `data push`…). |
 | `DATA_ROOT` / `DATA_PATH` | `src/cli.ts` | Racine du dump de jeu pour `azalee data` (défaut `/home/ubuntu/niers/data`). |
 
-Note : `AZALEE_DATA_DIR` / `AZALEE_CACHE_DIR` couvrent la résolution de `config.ts`
-(miroir, `resolveDataDir`, `resolveDataFile`, `getCacheDir`). Les modules `cpk` et
-`game-text` gardent pour l'instant leur propre résolution — utiliser `CPK_INDEX_PATH`,
-`CPK_CACHE_DIR` et `GAME_TEXT_DATA_DIR` pour les déplacer.
+Note : `AZALEE_DATA_DIR` couvre uniquement la découverte du miroir local de développement ;
+les modules `cpk` et `game-text` interrogent directement les projections PostgreSQL.
 
 ### Configuration explicite
 

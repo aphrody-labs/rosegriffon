@@ -13,7 +13,7 @@
  * sont jamais la source canonique de l'API de production.
  */
 
-import { basename, dirname, join } from "node:path";
+import { join } from "node:path";
 import {
 	cfgbinDbAvailable,
 	cfgbinDbFindLatest,
@@ -178,14 +178,6 @@ export async function findConfigFileAsync(category: string, prefix: string): Pro
 }
 
 /**
- * Load a pre-processed JSON file from all-gamedata (Async)
- */
-export async function loadGamedataAsync<T>(filename: string): Promise<T> {
-	const filePath = join(PATHS.allGamedata, filename);
-	return loadJSONAsync<T>(filePath);
-}
-
-/**
  * Legacy Sync Loaders (kept for transitional compatibility).
  * Tries cfgbin SQLite DB first, falls back to filesystem.
  */
@@ -201,11 +193,6 @@ export function loadConfig(category: string, filename: string): ConfigFile {
 	const filePath = join(PATHS.gamedata, category, filename);
 	const raw = loadJSON<ConfigDocument>(filePath);
 	return { name: filename, variables: [], children: raw.entries || [] };
-}
-
-export function loadGamedata<T>(filename: string): T {
-	const filePath = join(PATHS.allGamedata, filename);
-	return loadJSON<T>(filePath);
 }
 
 /**
@@ -311,161 +298,6 @@ export function loadCharaTextRoma(locale: Locale): ConfigFile {
 }
 
 // ============================================================================
-// Pre-processed data loaders
-// ============================================================================
-
-/**
- * Growth table entry from all-gamedata
- */
-export interface GrowthTableEntry {
-	mainPosition: number;
-	growthPattern: number;
-	charaRank: number;
-	Kc_50: number;
-	Cr_50: number;
-	Tc_50: number;
-	Pr_50: number;
-	Ps_50: number;
-	Ag_50: number;
-	It_50: number;
-	Kc_99: number;
-	Cr_99: number;
-	Tc_99: number;
-	Pr_99: number;
-	Ps_99: number;
-	Ag_99: number;
-	It_99: number;
-}
-
-interface GrowthTableFile {
-	_meta: { count: number };
-	data: GrowthTableEntry[];
-}
-
-/**
- * Load main growth table
- */
-export function loadGrowthTableMain(): GrowthTableEntry[] {
-	const file = loadGamedata<{ main: GrowthTableEntry[] }>("growth_tables.json");
-	return file.main || [];
-}
-
-/**
- * Star sign character info
- */
-export interface StarSignCharaInfo {
-	charaParamId: string;
-	charaRarity: number;
-	charaRateDefault: number;
-	charaRateBoostA: number;
-	charaRateBoostB: number;
-	charaRateBoostC: number;
-	charaRateBoostD: number;
-	isRemarkable: boolean;
-	enableCond: string;
-}
-
-interface StarSignFile {
-	_meta: { count: number };
-	data: StarSignCharaInfo[];
-}
-
-/**
- * Load star sign character info (Players Universe)
- */
-export function loadStarSignCharaInfo(): StarSignCharaInfo[] {
-	const file = loadGamedata<StarSignFile>("starSignCharaInfo.json");
-	return file.data;
-}
-
-/**
- * Character series info
- */
-export interface CharaSeriesInfo {
-	charaSeriesId: string;
-	charaSeriesType: number;
-	charaSeriesNameTextId: string;
-}
-
-interface CharaSeriesFile {
-	_meta: { count: number };
-	data: CharaSeriesInfo[];
-}
-
-/**
- * Load character series info
- */
-export function loadCharaSeriesInfo(): CharaSeriesInfo[] {
-	const file = loadGamedata<CharaSeriesFile>("charaSeriesInfo.json");
-	return file.data;
-}
-
-/**
- * Character details
- */
-export interface CharaDetails {
-	chara_id: string;
-	personality_type: number;
-	first_person: string;
-	second_person_male: string;
-	second_person_female: string;
-}
-
-interface CharaDetailsFile {
-	_meta: { count: number };
-	data: CharaDetails[];
-}
-
-/**
- * Load character details
- */
-export function loadCharaDetails(): CharaDetails[] {
-	const file = loadGamedata<CharaDetailsFile>("charaDetails.json");
-	return file.data;
-}
-
-/**
- * Load Zukan hash mapping (sync — utilise loadJSON qui supporte sync via require()).
- */
-export function loadZukanMapping(): Record<string, { hash: string; order: number }> {
-	const filePath = join(DATA_ROOT, "zukan/zukan_mapping.json");
-	try {
-		return loadJSON<Record<string, { hash: string; order: number }>>(filePath);
-	} catch {
-		return {};
-	}
-}
-
-/**
- * Load Zukan order list (sync)
- */
-export function loadZukanOrder(): Array<{ order: number; name: string; zukanHash: string | null }> {
-	const filePath = join(DATA_ROOT, "zukan/zukan_order_en.json");
-	try {
-		return loadJSON<Array<{ order: number; name: string; zukanHash: string | null }>>(filePath);
-	} catch {
-		return [];
-	}
-}
-
-/**
- * Load Zukan hash mapping (async, Bun-native).
- */
-export async function loadZukanMappingAsync(): Promise<
-	Record<string, { hash: string; order: number }>
-> {
-	const filePath = join(DATA_ROOT, "zukan/zukan_mapping.json");
-	const f = Bun.file(filePath);
-	if (!(await f.exists())) return {};
-	try {
-		return (await f.json()) as Record<string, { hash: string; order: number }>;
-	} catch (_e) {
-		console.warn("Failed to load zukan mapping", _e);
-		return {};
-	}
-}
-
-// ============================================================================
 // Utility functions
 // ============================================================================
 
@@ -487,41 +319,6 @@ export function fromHex(hex: string): number {
 	const unsigned = Number.parseInt(hex.replace("0x", ""), 16);
 	// Convert to signed 32-bit if needed
 	return unsigned > 0x7fffffff ? unsigned - 0x100000000 : unsigned;
-}
-
-/**
- * List all JSON files in a directory (sync, uses Bun.Glob.scanSync).
- */
-export function listJsonFiles(dir: string): string[] {
-	try {
-		return [...new Bun.Glob("*.json").scanSync({ cwd: dir, onlyFiles: true })].sort();
-	} catch {
-		return [];
-	}
-}
-
-/**
- * Check if a data path exists (async — prefer this over the sync variant).
- */
-export async function dataExistsAsync(path: string): Promise<boolean> {
-	return Bun.file(path).exists();
-}
-
-/**
- * Check if a data path exists (sync shim — kept for call sites that cannot be async).
- * @deprecated Prefer dataExistsAsync().
- */
-export function dataExists(path: string): boolean {
-	// Bun n'a pas de sync exists API. Glob.scanSync sert de stat shim O(1) sur FS hot.
-	try {
-		const found = new Bun.Glob(basename(path)).scanSync({
-			cwd: dirname(path),
-			onlyFiles: false,
-		});
-		return !found.next().done;
-	} catch {
-		return false;
-	}
 }
 
 /**

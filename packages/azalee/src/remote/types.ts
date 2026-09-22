@@ -10,8 +10,7 @@
  * `serve.ts` (404 sinon), d'où le `NonNullable<…>`.
  *
  * Tous les imports sont **`import type`** : ils sont intégralement effacés à la
- * compilation, ce module reste donc bundlable pour le navigateur alors même
- * qu'il référence des modules `bun:sqlite`.
+ * compilation, ce module reste donc bundlable pour le navigateur.
  */
 
 import type { categoryStats, searchText } from "../game-text/index";
