@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"outDir": "dist",
 		"noEmit": true,
-		"declaration": false
+		"declaration": false,
+		"types": ["bun"]
 	},
 	"include": ["src/**/*.ts"],
 	"exclude": ["node_modules", "dist"]
