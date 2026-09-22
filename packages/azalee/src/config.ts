@@ -7,9 +7,8 @@
  *    catalogue métier) viennent de PostgreSQL ; les modules embarqués ne
  *    contiennent que les types et projections explicitement nécessaires au
  *    client.
- * 2. Les **artefacts volumineux** (miroir SQLite de compatibilité, index CPK et index de
- *    texte en NDJSON gz) restent hors du package et sont localisés au runtime
- *    par ce module.
+ * 2. Le **miroir SQLite de compatibilité** reste hors du package et est localisé
+ *    au runtime par ce module.
  *
  * L'ordre de résolution est explicite → variable d'environnement → chemins
  * conventionnels, ce qui permet à la lib de fonctionner à l'identique sous
@@ -18,17 +17,14 @@
  */
 
 import { existsSync, readdirSync } from "node:fs";
-import { tmpdir } from "node:os";
 import path from "node:path";
 
 /** Options de configuration explicites (priorité maximale). */
 export interface AzaleeConfig {
-	/** Dossier contenant les artefacts runtime (`cpk-index.ndjson.gz`, `game-text-*.ndjson.gz`, `backups/`). */
+	/** Dossier contenant le miroir SQLite de développement (`backups/mirror.sqlite`). */
 	dataDir?: string;
 	/** Chemin du miroir SQLite des tables `inagle_*`. */
 	mirrorPath?: string;
-	/** Dossier de cache pour les SQLite matérialisés (défaut : `os.tmpdir()`). */
-	cacheDir?: string;
 }
 
 const explicit: AzaleeConfig = {};
@@ -40,7 +36,6 @@ const explicit: AzaleeConfig = {};
 export function configureAzalee(config: AzaleeConfig): void {
 	if (config.dataDir !== undefined) explicit.dataDir = path.resolve(config.dataDir);
 	if (config.mirrorPath !== undefined) explicit.mirrorPath = path.resolve(config.mirrorPath);
-	if (config.cacheDir !== undefined) explicit.cacheDir = path.resolve(config.cacheDir);
 }
 
 /** Renvoie la configuration explicite courante (lecture seule). */
@@ -52,7 +47,6 @@ export function getAzaleeConfig(): Readonly<AzaleeConfig> {
 export function resetAzaleeConfig(): void {
 	delete explicit.dataDir;
 	delete explicit.mirrorPath;
-	delete explicit.cacheDir;
 }
 
 /**
@@ -91,7 +85,6 @@ function dataDirCandidates(): string[] {
  * silencieuse » qu'on veut éviter.
  */
 const DATA_DIR_MARKERS = [
-	"cpk-index.ndjson.gz",
 	"backups/mirror.sqlite",
 	"schema-snapshot",
 ];
@@ -108,18 +101,6 @@ export function resolveDataDir(): string | null {
 		if (DATA_DIR_MARKERS.some((marker) => existsSync(path.join(candidate, marker)))) {
 			return candidate;
 		}
-	}
-	return null;
-}
-
-/**
- * Résout un fichier d'artefact par son nom (ex. `cpk-index.ndjson.gz`). Chaque
- * dossier candidat est testé, le premier fichier existant gagne.
- */
-export function resolveDataFile(name: string): string | null {
-	for (const dir of dataDirCandidates()) {
-		const candidate = path.join(dir, name);
-		if (existsSync(candidate)) return candidate;
 	}
 	return null;
 }
@@ -158,14 +139,4 @@ export function resolveMirrorPath(): string | null {
 		}
 	}
 	return null;
-}
-
-/**
- * Dossier de cache des SQLite matérialisés (index CPK, index de texte). Sur le
- * VPS `os.tmpdir()` est un tmpfs : matérialisation en RAM, reconstruite au
- * redémarrage si l'artefact source est plus récent.
- */
-export function getCacheDir(sub?: string): string {
-	const base = explicit.cacheDir ?? process.env.AZALEE_CACHE_DIR ?? tmpdir();
-	return sub ? path.join(base, sub) : base;
 }

@@ -13,6 +13,9 @@ import { ACHILLEA_SCHEMA, getAchilleaDatabaseUrl } from "./achillea";
 
 const { Pool } = pg;
 
+/** SQL template shared by packages without a direct Kysely dependency. */
+export { sql } from "kysely";
+
 export interface AchilleaSqlOptions {
 	url?: string;
 	maxConnections?: number;

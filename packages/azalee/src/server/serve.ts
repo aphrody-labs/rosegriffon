@@ -141,11 +141,11 @@ function route(pattern: string, handler: Route["handler"]): void {
 	ROUTES.push({ segments: pattern.split("/").filter(Boolean), handler });
 }
 
-route("health", () => ({
+route("health", async () => ({
 	ok: true,
 	mirror: resolveMirrorPath(),
 	dataDir: resolveDataDir(),
-	cpkFiles: safe(() => totalFiles(), 0),
+	cpkFiles: await safeAsync(() => totalFiles(), 0),
 }));
 
 route("api/characters", ({ query }) => wikiService.getCharactersList(listParams(query) as never));
@@ -226,14 +226,14 @@ route("api/capsules", ({ query }) => getCapsuleList({ q: query.get("q") ?? undef
 route("api/costumes", ({ query }) => getCostumeList({ q: query.get("q") ?? undefined } as never));
 route("api/invocation", () => getInvocationRates());
 
-route("api/cpk", ({ query }) =>
-	listDirPaged(query.get("path") ?? "", Math.min(num(query, "limit", 200), 1000), num(query, "offset", 0)),
+route("api/cpk", async ({ query }) =>
+	await listDirPaged(query.get("path") ?? "", Math.min(num(query, "limit", 200), 1000), num(query, "offset", 0)),
 );
-route("api/cpk/search", ({ query }) =>
-	searchFiles(query.get("q") ?? "", Math.min(num(query, "limit", 200), 1000)),
+route("api/cpk/search", async ({ query }) =>
+	await searchFiles(query.get("q") ?? "", Math.min(num(query, "limit", 200), 1000)),
 );
-route("api/cpk/file", ({ query }) =>
-	required(fileMeta(query.get("path") ?? ""), "fichier CPK"),
+route("api/cpk/file", async ({ query }) =>
+	required(await fileMeta(query.get("path") ?? ""), "fichier CPK"),
 );
 
 route("api/text/:hash", async ({ params }) => required(await resolveTextAll(params.hash), "texte"));
@@ -270,6 +270,14 @@ route("", () => ({ name: "@rosegriffon/azalee", routes: listRoutes() }));
 function safe<T>(fn: () => T, fallback: T): T {
 	try {
 		return fn();
+	} catch {
+		return fallback;
+	}
+}
+
+async function safeAsync<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+	try {
+		return await fn();
 	} catch {
 		return fallback;
 	}
