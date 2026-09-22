@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireApiAdmin } from "@/lib/api-auth";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export async function GET(req: Request) {
 	const auth = await requireApiAdmin();
@@ -10,10 +10,7 @@ export async function GET(req: Request) {
 	}
 
 	try {
-		const supabase = createAdminClient();
-		if (!supabase) {
-			return NextResponse.json({ error: "Service indisponible" }, { status: 503 });
-		}
+		const supabase = createPostgresClient();
 
 		const url = new URL(req.url);
 		const page = Math.max(1, Number(url.searchParams.get("page")) || 1);

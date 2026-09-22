@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 const TOKEN = process.env.BOT_API_TOKEN;
 
@@ -26,10 +26,7 @@ export function assertBotAuth(request: NextRequest): NextResponse | null {
  * Returns null if no link exists.
  */
 export async function resolveDiscordToProfile(discordId: string) {
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return null;
-	}
+	const supabase = createPostgresClient();
 
 	const { data: account } = await supabase
 		.from("account")
@@ -78,10 +75,7 @@ export async function resolveBotDiscordIdentity(
 		return { ...profile, linked: true };
 	}
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return null;
-	}
+	const supabase = createPostgresClient();
 
 	const { data: profile } = await supabase
 		.from("profiles")
@@ -160,10 +154,7 @@ export async function logBotAction(opts: {
 	details?: Record<string, unknown>;
 }): Promise<void> {
 	try {
-		const supabase = createAdminClient();
-		if (!supabase) {
-			return;
-		}
+		const supabase = createPostgresClient();
 		await supabase.from("admin_audit_log").insert({
 			action: opts.action,
 			details: { discord_id: opts.principal.discord_id, via: "bot-api", ...opts.details },

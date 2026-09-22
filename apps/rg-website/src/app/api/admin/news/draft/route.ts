@@ -1,7 +1,7 @@
 import { ADMIN_ROLES } from "@rosegriffon/types/roles";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * POST /api/admin/news/draft
@@ -371,7 +371,7 @@ export async function POST(request: NextRequest) {
 	}
 
 	try {
-		const supabase = createAdminClient();
+		const supabase = createPostgresClient();
 		const authorId = await resolveAuthorId(supabase, body);
 
 		const baseSlug = body.slug ? generateSlug(body.slug) : generateSlug(body.title);
