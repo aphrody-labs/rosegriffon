@@ -15,10 +15,11 @@ d'automatisation dans Niers.
 | CDN originaux et variantes | service partagé du VPS | RG et Niers | `rg-cdn.service` et `cdn-variants.service` restent actifs : les arrêter casserait les deux sites. |
 
 `niers/data/azalee` (ex-`niers/apps/azalee/data` : l'app `apps/azalee` de
-`niers` n'existe plus) est encore un chemin de compatibilité consommé par
-`azalee-api`, le MCP et certains scripts. Il ne s'agit pas d'une seconde
-source de code web. Le nettoyage automatique ne supprime donc pas ce
-répertoire.
+`niers` n'existe plus) est encore un chemin de compatibilité consommé par le
+MCP et certains scripts. L'API publique Azalée est désormais montée dans
+`rg-api.service`; il n'existe plus de démon `azalee-api` séparé. Il ne s'agit
+pas d'une seconde source de code web. Le nettoyage automatique ne supprime
+donc pas ce répertoire.
 
 Les dépôts ne sont jamais fusionnés par un `pull` : chacun suit son propre
 remote et sa propre branche. Un changement transversal est un changement

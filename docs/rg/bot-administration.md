@@ -2,8 +2,7 @@
 
 Le bot Discord n'avait aucune surface web. Ses réglages ne se voyaient que
 depuis `/administration réglages`, dans Discord, et son état d'exécution nulle
-part : pour savoir si `azalee-bot.service` tournait encore, il fallait ouvrir
-une session SSH.
+part. Le tableau de bord interroge désormais l'unique `rg-bot.service`.
 
 Cette page décrit ce qui a été ajouté : un **contrat de types partagé**, un
 **serveur d'administration** dans chaque processus de bot, une **API** côté
@@ -16,7 +15,7 @@ site, et **quatre pages** sous `/admin`.
 | Avant | Maintenant |
 | --- | --- |
 | Réglages éditables seulement par slash command | `/admin/bot/reglages` — les six sections, avec des noms de salons au lieu de flocons |
-| Aucune vue de l'état des deux bots | `/admin/bot` — passerelle, latence, serveurs, mémoire, commandes |
+| Aucune vue de l'état du bot | `/admin/bot` — passerelle, latence, serveurs, mémoire, commandes |
 | Aucun inventaire des slash commands hors du code | `/admin/bot/commandes` — lu dans les processus, filtrable |
 | Classement visible seulement dans Discord, dix lignes à la fois | `/admin/bot/membres` — 283 profils, 4 tris, provenance de chaque XP |
 | Tâches cron déclenchables depuis Discord seulement | `/admin/cron` — catalogue, planification, déclenchement |
@@ -106,7 +105,6 @@ CI, avec le nom manquant dans le message.
 | Profil | Port | Unité |
 | --- | --- | --- |
 | `rg` | 3007 | `rg-bot.service` |
-| `azalee` | 3008 | `azalee-bot.service` |
 
 Surchargeable par `BOT_ADMIN_PORT` (poste de développement).
 
@@ -239,7 +237,7 @@ consulte la page.
 ### Variables d'environnement
 
 ```bash
-# /home/ubuntu/rg/.env.local — lu par rg-bot.service et azalee-bot.service
+# /home/ubuntu/rg/.env.local — lu par rg-bot.service
 BOT_ADMIN_TOKEN=<64 caractères hexadécimaux>
 
 # /home/ubuntu/rg/apps/website/.env — lu par website-web.service
@@ -254,12 +252,12 @@ avertissement dans le journal, et `/admin/bot` affiche « injoignable ». Rien n
 casse — la surface web est simplement muette.
 
 Surcharges facultatives, pour un poste de développement :
-`BOT_ADMIN_PORT`, `BOT_ADMIN_URL_RG`, `BOT_ADMIN_URL_AZALEE`, `CRON_API_URL`.
+`BOT_ADMIN_PORT`, `BOT_ADMIN_URL_RG`, `CRON_API_URL`.
 
 ### Après déploiement
 
 ```bash
-sudo systemctl restart rg-bot.service azalee-bot.service
+sudo systemctl restart rg-bot.service
 sudo systemctl restart rg-cron.service
 bun run deploy website
 ```
@@ -267,9 +265,8 @@ bun run deploy website
 Contrôle :
 
 ```bash
-journalctl -u rg-bot.service -u azalee-bot.service --since "-1 min" | grep "Serveur d'administration"
+journalctl -u rg-bot.service --since "-1 min" | grep "Serveur d'administration"
 curl -s http://127.0.0.1:3007/sante
-curl -s http://127.0.0.1:3008/sante
 ```
 
 ---
