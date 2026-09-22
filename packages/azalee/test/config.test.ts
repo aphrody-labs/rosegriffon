@@ -50,12 +50,7 @@ describe("resolveDataDir — découverte du dossier d'artefacts", () => {
 		expect(existsSync(dataDir as string)).toBe(true);
 		// Au moins un des marqueurs Azalée doit exister — sinon c'est un `data/`
 		// homonyme (dumps Postgres à la racine du monorepo) qu'on doit rejeter.
-		const markers = [
-			"cpk-index.ndjson.gz",
-			"game-text-names.ndjson.gz",
-			"backups/mirror.sqlite",
-			"schema-snapshot",
-		];
+		const markers = ["cpk-index.ndjson.gz", "backups/mirror.sqlite", "schema-snapshot"];
 		expect(markers.some((m) => existsSync(path.join(dataDir as string, m)))).toBe(true);
 	});
 
@@ -101,16 +96,11 @@ describe("configureAzalee / getAzaleeConfig / resetAzaleeConfig", () => {
 });
 
 describe("resolveDataFile — localisation d'un artefact nommé", () => {
-	test.skipIf(!hasData)("trouve l'index CPK et l'index de texte", () => {
+	test.skipIf(!hasData)("trouve l'index CPK", () => {
 		const cpk = resolveDataFile("cpk-index.ndjson.gz");
-		const names = resolveDataFile("game-text-names.ndjson.gz");
-		// Au moins un des deux artefacts doit exister sur une machine de dev.
-		expect(cpk !== null || names !== null).toBe(true);
-		for (const found of [cpk, names]) {
-			if (found === null) continue;
-			expect(existsSync(found)).toBe(true);
-			expect(path.dirname(found)).toBe(dataDir as string);
-		}
+		expect(cpk).toBeString();
+		expect(existsSync(cpk as string)).toBe(true);
+		expect(path.dirname(cpk as string)).toBe(dataDir as string);
 	});
 
 	test("renvoie null pour un artefact inexistant", () => {

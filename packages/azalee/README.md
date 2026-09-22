@@ -144,8 +144,9 @@ La lib distingue deux familles de données.
 1. **Projections SQL** — PostgreSQL porte les formations, cut-ins, passifs,
    manifestes d'assets et données métier. Les clients qui en ont besoin utilisent
    uniquement les projections typées du package Inagle.
-2. **Artefacts volumineux** — miroir SQLite de compatibilité, index CPK et index de texte
-   (NDJSON gz). Ils restent hors du package et sont localisés au runtime.
+2. **Artefacts volumineux** — miroir SQLite de compatibilité et index CPK pour les outils
+   offline. Les textes de jeu sont importés dans PostgreSQL et ne sont plus matérialisés
+   en fichiers locaux.
 
 Sur cette machine, les artefacts web vivent dans `apps/website/data/` :
 
@@ -153,8 +154,7 @@ Sur cette machine, les artefacts web vivent dans `apps/website/data/` :
 apps/website/data/
 ├── backups/mirror.sqlite            # fallback local ; la prod lit le miroir niers
 ├── cpk-index.ndjson.gz              # 250 800 fichiers des CPK
-├── game-text-names.ndjson.gz        # noms/descriptions (fr/en/ja)
-└── game-text-dialogue.ndjson.gz     # dialogues event/map/phase/purpose
+└── icon-texture-index.ndjson.gz     # index local d’assets CPK
 ```
 
 ### Variables d'environnement

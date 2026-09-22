@@ -236,11 +236,11 @@ route("api/cpk/file", ({ query }) =>
 	required(fileMeta(query.get("path") ?? ""), "fichier CPK"),
 );
 
-route("api/text/:hash", ({ params }) => required(resolveTextAll(params.hash), "texte"));
-route("api/text", ({ query }) =>
-	searchText(query.get("q") ?? "", (query.get("locale") ?? "fr") as never, Math.min(num(query, "limit", 50), 500)),
+route("api/text/:hash", async ({ params }) => required(await resolveTextAll(params.hash), "texte"));
+route("api/text", async ({ query }) =>
+	await searchText(query.get("q") ?? "", (query.get("locale") ?? "fr") as never, Math.min(num(query, "limit", 50), 500)),
 );
-route("api/text/stats", () => categoryStats());
+route("api/text/stats", async () => await categoryStats());
 
 route("api/cross/tables", () => getCrossTables());
 route("api/cross/stats", () => getCrossCatalogStats());
