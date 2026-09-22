@@ -1,7 +1,7 @@
 "use server";
 
 import { getServerSession } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export type SharePlatform =
 	| "twitter"
@@ -53,7 +53,7 @@ export async function trackShare(
 	const session = await getServerSession();
 	const userId = session?.user?.id ?? null;
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -93,7 +93,7 @@ export async function getShareCounts(articleIds: string[]): Promise<Record<strin
 		return {};
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -162,7 +162,7 @@ export async function getShareCounts(articleIds: string[]): Promise<Record<strin
  * total, répartition par plateforme, et timeline des 30 derniers jours.
  */
 export async function getArticleShareStats(articleId: string): Promise<ArticleShareStats> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 

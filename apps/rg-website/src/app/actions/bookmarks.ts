@@ -1,7 +1,7 @@
 "use server";
 
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { getServerSession } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
 
 export async function toggleBookmark(articleId: string): Promise<{ bookmarked: boolean }> {
 	const session = await getServerSession();
@@ -10,7 +10,7 @@ export async function toggleBookmark(articleId: string): Promise<{ bookmarked: b
 	}
 
 	const userId = session.user.id;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const { data: existing } = await supabase
 		.from("article_bookmarks")
@@ -34,7 +34,7 @@ export async function getBookmarkStates(articleIds: string[]): Promise<Record<st
 		return {};
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { data } = await supabase
 		.from("article_bookmarks")
 		.select("article_id")
@@ -56,7 +56,7 @@ export async function getUserBookmarks(): Promise<string[]> {
 		return [];
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { data } = await supabase
 		.from("article_bookmarks")
 		.select("article_id")

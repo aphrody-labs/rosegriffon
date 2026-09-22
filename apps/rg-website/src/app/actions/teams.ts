@@ -2,7 +2,7 @@
 
 import type { MovesetSkill } from "@/components/wiki/MovesetList";
 import { getServerSession } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import type { SavedTeam, TeamData } from "@rosegriffon/azalee/game/team-types";
 import { wikiService } from "@/lib/wiki-service";
 
@@ -16,7 +16,7 @@ export async function saveTeam(
 		return { error: "Non authentifié" };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { data: result, error } = await (supabase as any)
 		.from("user_teams")
 		.insert({
@@ -46,7 +46,7 @@ export async function updateTeam(
 		return { error: "Non authentifié" };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { error } = await (supabase as any)
 		.from("user_teams")
 		.update({
@@ -73,7 +73,7 @@ export async function deleteTeam(
 		return { error: "Non authentifié" };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { error } = await (supabase as any)
 		.from("user_teams")
 		.delete()
@@ -93,7 +93,7 @@ export async function getUserTeams(): Promise<SavedTeam[]> {
 		return [];
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { data } = await (supabase as any)
 		.from("user_teams")
 		.select("*")
@@ -106,7 +106,7 @@ export async function getUserTeams(): Promise<SavedTeam[]> {
 /** Get a single team (public or owned) */
 export async function getTeam(teamId: string): Promise<SavedTeam | null> {
 	const session = await getServerSession();
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	let query = (supabase as any).from("user_teams").select("*").eq("id", teamId);
 
@@ -135,7 +135,7 @@ export async function toggleTeamVisibility(
 		return { error: "Non authentifié" };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const { data: team } = await (supabase as any)
 		.from("user_teams")
@@ -165,7 +165,7 @@ export async function toggleTeamVisibility(
 export async function getCharacterSkills(charaId: string): Promise<MovesetSkill[]> {
 	const PHANTOM_IDS = new Set(["0xDBEDB6B8"]);
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { data: rows } = await (supabase as any)
 		.from("inagle_characters")
 		.select("skills, sheet_data")

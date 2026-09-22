@@ -13,9 +13,9 @@ import { Calendar, ChevronRight, Edit, Eye, FileText, PenSquare, Plus, Trash2 } 
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { getServerUser } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
 
 interface Article {
 	id: string;
@@ -34,7 +34,7 @@ interface Article {
 }
 
 export default async function ArticlesPage() {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const user = await getServerUser();
 	if (!user) {

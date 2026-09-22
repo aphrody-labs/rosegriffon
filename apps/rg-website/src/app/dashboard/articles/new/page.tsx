@@ -3,12 +3,12 @@ export const dynamic = "force-dynamic";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { ArticleEditor } from "@/components/articles/ArticleEditor";
 
 import { getServerUser } from "@/lib/auth-helpers";
 import { ArrowLeft, PenSquare } from "@/lib/icons-config";
-import { createClient } from "@/lib/supabase/server";
 
 export default async function NewArticlePage() {
 	const user = await getServerUser();
@@ -16,7 +16,7 @@ export default async function NewArticlePage() {
 		redirect("/login");
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	// Récupérer les catégories
 	const { data: categoriesData } = await supabase

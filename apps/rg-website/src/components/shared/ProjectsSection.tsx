@@ -21,7 +21,7 @@ export function ProjectsSection() {
 					id="other-projects-heading"
 					className="text-3xl font-black tracking-tight text-foreground sm:text-4xl md:text-5xl text-balance"
 				>
-					Autres projets Rose Griffon
+					Projets Rose Griffon
 				</h2>
 				<p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-muted-foreground sm:text-lg text-pretty">
 					Créations et outils communautaires.

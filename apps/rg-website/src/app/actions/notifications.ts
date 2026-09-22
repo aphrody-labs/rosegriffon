@@ -1,7 +1,7 @@
 "use server";
 
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { getServerSession } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || "";
@@ -45,7 +45,7 @@ export async function getNotifications(limit = 20): Promise<
 		return [];
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data } = await (supabase as any)
 		.from("notifications")
@@ -63,7 +63,7 @@ export async function getUnreadCount(): Promise<number> {
 		return 0;
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { count } = await (supabase as any)
 		.from("notifications")
@@ -80,7 +80,7 @@ export async function markAsRead(notificationId: string): Promise<void> {
 		return;
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	await (supabase as any)
 		.from("notifications")
@@ -95,7 +95,7 @@ export async function markAllAsRead(): Promise<void> {
 		return;
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	await (supabase as any)
 		.from("notifications")
@@ -113,7 +113,7 @@ export async function subscribeToPush(subscription: {
 		throw new Error("Non authentifié");
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	await (supabase as any).from("push_subscriptions").upsert(
 		{
@@ -134,7 +134,7 @@ export async function unsubscribeFromPush(endpoint: string): Promise<void> {
 		return;
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	await (supabase as any)
 		.from("push_subscriptions")
@@ -148,7 +148,7 @@ export async function sendPushToAll(
 	body: string,
 	data: Record<string, unknown> = {}
 ): Promise<{ sent: number; failed: number }> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 

@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import { cookies, headers } from "next/headers";
 
 import { lato, notoSans, poppins, roboto } from "@/lib/fonts";
+import { NETWORK_SAME_AS } from "@/lib/social-links";
 import { Geist } from "next/font/google";
 
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -164,21 +165,7 @@ export default async function RootLayout({
 									// Réseau Rose Griffon : 3 domaines siblings + tous les réseaux sociaux
 									// (X/YouTube/Twitch/Instagram/Discord). sameAs partagé à l'identique
 									// sur website / azalee / achillea pour une entité Organization cohérente.
-									sameAs: [
-										"https://rosegriffon.fr",
-										"https://azalee.rosegriffon.fr",
-										"https://achillea.rosegriffon.fr",
-										"https://x.com/rose_griffon",
-										"https://x.com/Azalee_IE",
-										"https://x.com/Achillea_IE",
-										"https://www.youtube.com/@RoseGriffon",
-										"https://twitch.tv/rose_griffontv",
-										"https://www.instagram.com/rose_griffonfr",
-										"https://www.instagram.com/azaleefr",
-										"https://discord.gg/TYzQvbByv4",
-										"https://disboard.org/server/1072991720268111892",
-										"https://discord.do/fr/inazuma-eleven-fr-%E2%9A%BD-rose-griffon/",
-									],
+									sameAs: NETWORK_SAME_AS,
 									subOrganization: [
 										{ "@id": "https://azalee.rosegriffon.fr/#website" },
 										{ "@id": "https://achillea.rosegriffon.fr/#website" },

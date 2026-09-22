@@ -275,7 +275,7 @@ describe("chemins et verbes par ressource", () => {
 		expect(calls[3]?.method).toBe("DELETE");
 		expect(calls[3]?.body).toBe(JSON.stringify({ pk: { id: 3 } }));
 		expect(client.auth.discordLoginUrl("/ranked")).toBe(
-			"https://a.test/api/auth/discord?state=%2Franked"
+			"https://rosegriffon.fr/login?redirect=%2Franked"
 		);
 		expect(client.auth.callbackUrl()).toBe("https://rosegriffon.fr/api/auth/callback/discord");
 	});

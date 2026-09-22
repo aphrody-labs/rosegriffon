@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import jwt from "jsonwebtoken";
+import { signAchilleaRealtimeToken, signAchilleaSessionToken } from "@rosegriffon/auth/achillea-session";
 
 import {
 	AUTH_ISSUER,
@@ -7,8 +8,6 @@ import {
 	SESSION_AUDIENCE,
 	sessionClearCookieOptions,
 	sessionCookieOptions,
-	signRealtimeToken,
-	signSessionToken,
 	verifyRealtimeToken,
 	verifySessionToken,
 } from "../../src/auth/session";
@@ -17,7 +16,7 @@ process.env.JWT_SECRET_KEY = "secret-de-test-unitaire-auth-centralisee";
 
 describe("central auth session contract", () => {
 	test("issues a purpose-bound web session", () => {
-		const token = signSessionToken({ id: "42", username: "Aphrodi" });
+		const token = signAchilleaSessionToken({ id: "42", username: "Aphrodi" }, process.env.JWT_SECRET_KEY!);
 		const decoded = jwt.decode(token) as jwt.JwtPayload & { tokenUse: string };
 		expect(decoded.sub).toBe("42");
 		expect(decoded.iss).toBe(AUTH_ISSUER);
@@ -33,7 +32,7 @@ describe("central auth session contract", () => {
 	});
 
 	test("issues a short, purpose-bound realtime token", () => {
-		const token = signRealtimeToken({ id: "7", avatar: "hash" });
+		const token = signAchilleaRealtimeToken({ id: "7", avatar: "hash" }, process.env.JWT_SECRET_KEY!);
 		const decoded = jwt.decode(token) as jwt.JwtPayload & { tokenUse: string };
 		expect(decoded.aud).toBe(REALTIME_AUDIENCE);
 		expect(decoded.tokenUse).toBe("realtime");

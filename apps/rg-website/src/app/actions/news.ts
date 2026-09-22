@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export interface PatchNoteSummary {
 	id: string;
@@ -22,7 +22,7 @@ export async function getPatchNotes(
 	platform?: string,
 	limit?: number
 ): Promise<PatchNoteSummary[]> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	let query = supabase
 		.from("patch_notes")
@@ -62,7 +62,7 @@ export async function getPatchNotes(
  * Récupère le détail d'un patch note par son ID ou slug
  */
 export async function getPatchNoteDetail(idOrSlug: string): Promise<PatchNoteDetail | null> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const { data, error } = await supabase
 		.from("patch_notes")

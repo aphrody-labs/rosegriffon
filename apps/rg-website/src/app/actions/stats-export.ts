@@ -1,7 +1,7 @@
 "use server";
 
 import { getServerSession, requireAdmin } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 // ─── Helpers CSV ──────────────────────────────────────────────────────────────
 
@@ -25,7 +25,7 @@ function buildCsvRow(fields: unknown[]): string {
 export async function exportArticleStatsCSV(): Promise<string> {
 	await requireAdmin();
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -93,7 +93,7 @@ export async function exportArticleStatsCSV(): Promise<string> {
 export async function exportAuthorStatsCSV(): Promise<string> {
 	await requireAdmin();
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -241,7 +241,7 @@ export async function getAuthorDashboard(): Promise<{
 	}
 
 	const userId = session.user.id;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 

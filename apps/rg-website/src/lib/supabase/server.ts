@@ -1,6 +1,4 @@
-// Wrapper rétro-compat — délègue à `@rosegriffon/db/{server,service}`. L'API publique
-// `createClient()` / `createAdminClient()` / `createPublicClient()` est conservée
-// Pour ne pas casser les ~50 call sites de l'app.
+// Wrapper serveur pour les surfaces auth/session historiques.
 //
 // `as SupabaseClient` (sans generic) bypasse le typage strict <Database> hérité
 // Du package — le code historique référence des colonnes obsolètes vs le schéma
@@ -8,7 +6,6 @@
 // Le temps de la migration : les call sites restent typés `any`, à durcir par
 // Vague avec types stricts opt-in.
 import { createSupabaseServerClient } from "@rosegriffon/db/server";
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
@@ -57,8 +54,4 @@ export function createPublicClient(): SupabaseClient {
 			persistSession: false,
 		},
 	});
-}
-
-export function createAdminClient(): SupabaseClient {
-	return createSupabaseServiceClient() as unknown as SupabaseClient;
 }

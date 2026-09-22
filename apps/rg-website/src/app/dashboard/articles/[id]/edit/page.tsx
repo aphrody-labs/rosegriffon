@@ -6,9 +6,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ArticleEditor } from "@/components/articles/ArticleEditor";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { getServerUser } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
 
 export default async function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
@@ -17,7 +17,7 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
 		redirect("/login");
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	// Récupérer l'article
 	const { data: article } = await supabase

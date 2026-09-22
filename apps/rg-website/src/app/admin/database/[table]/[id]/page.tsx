@@ -1,7 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@rosegriffon/ui";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { GenericEditorForm } from "./generic-editor-form";
 
 export default async function GenericRowPage({
@@ -10,7 +10,7 @@ export default async function GenericRowPage({
 	params: Promise<{ table: string; id: string }>;
 }) {
 	const { table, id } = await params;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const { data: row } = await (supabase as any).from(table).select("*").eq("id", id).single();
 

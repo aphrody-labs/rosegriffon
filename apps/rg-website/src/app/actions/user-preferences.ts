@@ -1,7 +1,7 @@
 "use server";
 
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { getServerSession } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
 
 export type FontSize = "small" | "medium" | "large" | "x-large";
 
@@ -33,7 +33,7 @@ export async function getPreferences(): Promise<Preferences> {
 		throw new Error("Non authentifié");
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -83,7 +83,7 @@ export async function updatePreferences(updates: Partial<Preferences>): Promise<
 		throw new Error("Non authentifié");
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
@@ -136,7 +136,7 @@ export async function toggleReadingMode(): Promise<boolean> {
 		throw new Error("Non authentifié");
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 
