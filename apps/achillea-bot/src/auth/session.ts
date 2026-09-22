@@ -1,9 +1,5 @@
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import {
-	signAchilleaRealtimeToken,
-	signAchilleaSessionToken,
-} from "@rosegriffon/auth/achillea-session";
-import {
 	ACHILLEA_AUTH_ISSUER,
 	ACHILLEA_REALTIME_AUDIENCE,
 	ACHILLEA_REALTIME_TTL_SECONDS,
@@ -19,19 +15,6 @@ export const SESSION_AUDIENCE = ACHILLEA_SESSION_AUDIENCE;
 export const REALTIME_AUDIENCE = ACHILLEA_REALTIME_AUDIENCE;
 export const SESSION_TTL_SECONDS = ACHILLEA_SESSION_TTL_SECONDS;
 export const REALTIME_TTL_SECONDS = ACHILLEA_REALTIME_TTL_SECONDS;
-
-/**
- * Signing is owned by the shared auth package. These tiny environment-bound
- * adapters keep the Discord/ranked application API stable while preventing a
- * second JWT format from being implemented here.
- */
-export function signSessionToken(identity: AchilleaSessionIdentity): string {
-	return signAchilleaSessionToken(identity, secret());
-}
-
-export function signRealtimeToken(identity: AchilleaSessionIdentity): string {
-	return signAchilleaRealtimeToken(identity, secret());
-}
 
 export type AuthTokenUse = "session" | "realtime";
 
