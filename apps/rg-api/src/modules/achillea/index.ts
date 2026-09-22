@@ -11,12 +11,14 @@ import { sanctionController } from "./sanctions";
 import { adminController } from "./admin";
 import { playerNotesController } from "./player-notes";
 import { notificationsController } from "./notifications";
+import { rankedController } from "./ranked";
 
 export const achilleaModule = new Elysia({ prefix: "/achillea" })
 	.use(tournamentController)
 	.use(clanController)
 	.use(organizationController)
 	.use(leaderboardController)
+	.use(rankedController)
 	.use(walletController)
 	.use(leagueController)
 	.use(usersController)

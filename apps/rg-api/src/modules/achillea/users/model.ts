@@ -1,6 +1,10 @@
 import { t } from "elysia";
 
 export const UsersModel = {
+	enriched: t.Object({
+		id: t.String(), username: t.String(), displayName: t.String(), avatar: t.String(),
+		role: t.Number(), clanId: t.Nullable(t.Number()), hasChallonge: t.Boolean(),
+	}),
 	profile: t.Object({
 		id: t.String(), username: t.Nullable(t.String()), displayName: t.String(),
 		avatar: t.Nullable(t.String()), bio: t.Nullable(t.String()), twitchUrl: t.Nullable(t.String()),
