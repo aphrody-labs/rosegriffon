@@ -1,8 +1,10 @@
 import type { Guild } from "discord.js";
 import { Client } from "@aphrody/discordx";
+import { CompiledQuery, type Kysely } from "kysely";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 
 import { Service } from "@/decorators";
-import { Clan, ClanMember, Rank, User, UserView } from "@/entities";
+import { UserView } from "@/entities";
 import {
 	freshDiscordAvatarUrl,
 	hasActiveClanMembership,
@@ -12,7 +14,7 @@ import {
 } from "@/utils/functions";
 
 import type { EnrichedUserDTO } from "../api/models/dtos/enrichedUserDTO";
-import { MatchMode, Provider, UserRole } from "../utils/enums";
+import { ClanMemberDistinction, MatchMode, Provider } from "../utils/enums";
 import type { LobbyUserStruct } from "../utils/types/lobbyStruct";
 import { Database } from "./Database";
 import type { SuggestionRank } from "./Suggestions";
@@ -32,6 +34,48 @@ function emptyCompetitionStats() {
 	};
 }
 
+interface UserServiceSqlDatabase {
+	query_boundary: never;
+	user: {
+		id: string;
+		blacklist_id: number | null;
+		avatar: string | null;
+		username: string | null;
+		display_name: string;
+		normalized_display_name: string;
+		bio: string | null;
+		twitch_url: string | null;
+	};
+	user_view: UserViewSqlRow;
+	user_elo: { user_id: string; mode: number; elo: number };
+	user_connection: { user_id: string; provider: string; external_id: string | null; external_username: string | null };
+	rank: { key: string; gradient: string[] };
+	clan_member: { user_id: string; clan_id: number; role: number; distinctions: string[] };
+	clan: { id: number; normalized_short_name: string; clan_emoji_id: string; shortened_name: string; name: string; clan_avatar_url: string };
+}
+
+interface UserViewSqlRow {
+	id: string;
+	username: string;
+	lastInteract: Date;
+	role: number;
+	currentLevel: number;
+	totalXp: number;
+	clanId: number | null;
+	solo_elo: number | null;
+	solo_key: string | null;
+	duo_elo: number | null;
+	duo_key: string | null;
+	hasTwitch: boolean;
+	hasChallonge: boolean;
+	hasYoutube: boolean;
+	displayName: string;
+	normalizedDisplayName: string;
+	isBlacklisted: boolean;
+}
+
+const sqlDb = createAchilleaSql<UserServiceSqlDatabase>() as Kysely<UserServiceSqlDatabase>;
+
 @Service()
 export class UserService {
 	constructor(
@@ -45,7 +89,7 @@ export class UserService {
 	}
 
 	async getUserDTO(userId: string): Promise<UserDTO> {
-		const userView = await this.db.em.findOne(UserView, { id: userId });
+		const userView = await sqlDb.selectFrom("user_view").selectAll().where("id", "=", userId).executeTakeFirst();
 
 		// fallback if no UserView yet
 		if (!userView) {
@@ -61,19 +105,19 @@ export class UserService {
 
 		// Avatar stocké (sync Discord) — normalisé (gif animé, fallback embed).
 		// Pas de fetch Discord live ici (évite N+1 sur les listes tournoi).
-		const user = await this.db.em.findOne(User, { id: userId });
+		const user = await sqlDb.selectFrom("user").select("avatar").where("id", "=", userId).executeTakeFirst();
 		const avatar = resolveDiscordAvatarUrl(userId, user?.avatar);
 
-		return await this.toDTO(userView, avatar, 0);
+		return await this.toDTO(userView as unknown as UserView, avatar, 0);
 	}
 
 	async isBlacklisted(userId: string): Promise<boolean> {
-		const count = await this.db.em.count(User, {
-			id: userId,
-			blacklist: { $ne: null },
-		});
-
-		return count > 0;
+		const row = await sqlDb
+			.selectFrom("user")
+			.select("blacklist_id")
+			.where("id", "=", userId)
+			.executeTakeFirst();
+		return row?.blacklist_id !== null && row?.blacklist_id !== undefined;
 	}
 
 	async isClanMember(userId: string) {
@@ -82,22 +126,19 @@ export class UserService {
 	}
 
 	async getLobbyPlayerInfo(userId: string, mode: MatchMode) {
-		const user = await this.db.em.findOne(User, userId, {
-			populate: ["connections", "elos"],
-		});
+		const [user, eloEntry, twitchConn] = await Promise.all([
+			sqlDb.selectFrom("user").select("id").where("id", "=", userId).executeTakeFirst(),
+			sqlDb.selectFrom("user_elo").select(["elo"]).where("user_id", "=", userId).where("mode", "=", mode).executeTakeFirst(),
+			sqlDb.selectFrom("user_connection").select(["external_id", "external_username"]).where("user_id", "=", userId).where("provider", "=", Provider.TWITCH).executeTakeFirst(),
+		]);
 
 		if (!user) {
 			throw new Error(`User not found: ${userId}`);
 		}
 
-		const eloEntry = user.elos.getItems().find((e) => e.mode === mode);
-		const elo = eloEntry ? eloEntry.elo : 0;
-
-		const twitchConn = user.connections
-			.getItems()
-			.find((conn) => conn.provider === Provider.TWITCH);
-		const twitchId = twitchConn?.externalId;
-		const twitchLogin = twitchConn?.externalUsername;
+		const elo = eloEntry?.elo ?? 0;
+		const twitchId = twitchConn?.external_id;
+		const twitchLogin = twitchConn?.external_username;
 
 		return { userId, elo, twitchId, twitchLogin } as LobbyUserStruct;
 	}
@@ -111,18 +152,21 @@ export class UserService {
 		const user = await guild.members.fetch(userId);
 
 		// 2) check clan membership
-		const cm = await this.db.em.findOne(
-			ClanMember,
-			{ user: { id: userId } },
-			{ populate: ["clan"] }
-		);
+		const cm = await sqlDb
+			.selectFrom("clan_member")
+			.innerJoin("clan", "clan.id", "clan_member.clan_id")
+			.select([
+				"clan.normalized_short_name",
+				"clan.clan_emoji_id",
+			])
+			.where("clan_member.user_id", "=", userId)
+			.executeTakeFirst();
 		let name = "";
 
 		// 3) if they’re in a clan, append its emoji
 		if (isFirst) {
-			if (cm?.clan) {
-				const { normalizedShortName, clanEmojiId } = cm.clan as Clan;
-				name += `<:${normalizedShortName}:${clanEmojiId}>`;
+			if (cm) {
+				name += `<:${cm.normalized_short_name}:${cm.clan_emoji_id}>`;
 			} else {
 				name += `<:Achillea:1391477048488497212>`; // Default emoji if not in a clan
 			}
@@ -130,9 +174,8 @@ export class UserService {
 			name += ` ${user.displayName}`;
 		} else {
 			name += `${user.displayName} `;
-			if (cm?.clan) {
-				const { normalizedShortName, clanEmojiId } = cm.clan as Clan;
-				name += `<:${normalizedShortName}:${clanEmojiId}>`;
+			if (cm) {
+				name += `<:${cm.normalized_short_name}:${cm.clan_emoji_id}>`;
 			} else {
 				name += `<:Achillea:1391477048488497212>`; // Default emoji if not in a clan
 			}
@@ -159,14 +202,17 @@ export class UserService {
 	}
 
 	async getUserData(userId: string) {
-		return await this.db.em.findOne(UserView, { id: userId }, { refresh: true });
+		const row = await sqlDb.selectFrom("user_view").selectAll().where("id", "=", userId).executeTakeFirst();
+		return (row as unknown as UserView | undefined) ?? null;
 	}
 
 	async syncWebUser(userId: string) {
 		const dUser = await this.getDiscordUser(userId);
 		if (dUser) {
 			await syncUser(dUser);
-			await this.db.em.getRepository(User).updateLastInteract(dUser);
+			await sqlDb.executeQuery(
+				CompiledQuery.raw('UPDATE "user" SET last_interact = NOW() WHERE id = $1', [dUser.id])
+			);
 		}
 		// Discord injoignable (ou utilisateur de test) → on retombe sur la donnée stockée.
 		// La protection contre les jetons forgés reste la vérification centralisée du JWT
@@ -181,24 +227,24 @@ export class UserService {
 	 * Batché (10 / lot, 1.2 s) pour le rate-limit Discord.
 	 */
 	async resyncAvatars(): Promise<{ scanned: number; updated: number; failed: number }> {
-		const em = this.db.em.fork();
-		const all = await em.find(User, {}, { fields: ["id"] });
-		const targetIds = all.map((u) => u.id);
+		const all = await sqlDb
+			.selectFrom("user")
+			.select(["id", "avatar", "username", "display_name", "normalized_display_name"])
+			.execute();
 		let updated = 0;
 		let failed = 0;
 		const CHUNK = 10;
-		for (let i = 0; i < targetIds.length; i += CHUNK) {
-			const batch = targetIds.slice(i, i + CHUNK);
-			const rows = await em.find(User, { id: { $in: batch } });
-			await Promise.all(
-				rows.map(async (u) => {
+		for (let i = 0; i < all.length; i += CHUNK) {
+			const rows = all.slice(i, i + CHUNK);
+			const changes: Array<[string, string | null, string | null, string, string]> = [];
+			await Promise.all(rows.map(async (u) => {
 					try {
 						const d = await this.getDiscordUser(u.id);
 						if (!d) {
 							// Discord introuvable → normalise l'URL stockée / fallback embed
 							const normalized = resolveDiscordAvatarUrl(u.id, u.avatar);
 							if (u.avatar !== normalized) {
-								u.avatar = normalized;
+								changes.push([u.id, normalized, u.username, u.display_name, u.normalized_display_name]);
 								updated++;
 							}
 							return;
@@ -206,28 +252,41 @@ export class UserService {
 						const url = freshDiscordAvatarUrl(d);
 						// username/displayName sont NOT NULL en base : jamais d'écrasement
 						// par une valeur Discord vide (payload partiel/inconnu de discord.js).
-						const safeUsername = d.username || u.username;
-						const safeDisplayName = d.displayName || safeUsername || u.displayName;
+						const safeUsername = d.username || u.username || "";
+						const safeDisplayName = d.displayName || safeUsername || u.display_name;
 						if (
 							u.avatar !== url ||
 							u.username !== safeUsername ||
-							u.displayName !== safeDisplayName
+							u.display_name !== safeDisplayName
 						) {
-							u.avatar = url;
-							u.username = safeUsername;
-							u.displayName = safeDisplayName;
-							u.normalizedDisplayName = normalizeNames(safeDisplayName);
+							changes.push([u.id, url, safeUsername, safeDisplayName, normalizeNames(safeDisplayName)]);
 							updated++;
 						}
 					} catch {
 						failed++;
 					}
-				})
-			);
-			await em.flush();
-			if (i + CHUNK < targetIds.length) await new Promise((r) => setTimeout(r, 1200));
+				}));
+			if (changes.length) {
+				const placeholders = changes
+					.map((_, index) => {
+						const base = index * 5;
+						return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5})`;
+					})
+					.join(", ");
+				await sqlDb.executeQuery(
+					CompiledQuery.raw(
+						`UPDATE "user" AS u
+						 SET avatar = v.avatar, username = v.username,
+						     display_name = v.display_name, normalized_display_name = v.normalized_display_name
+						 FROM (VALUES ${placeholders}) AS v(id, avatar, username, display_name, normalized_display_name)
+						 WHERE u.id = v.id`,
+						changes.flatMap((change) => change)
+					)
+				);
+			}
+			if (i + CHUNK < all.length) await new Promise((r) => setTimeout(r, 1200));
 		}
-		return { scanned: targetIds.length, updated, failed };
+		return { scanned: all.length, updated, failed };
 	}
 
 	/**
@@ -237,31 +296,31 @@ export class UserService {
 	 * (gardé par un secret), jamais déclenché par un vrai login.
 	 */
 	async createTestUser(): Promise<{ id: string; username: string; avatar: string }> {
-		const em = this.db.em.fork();
 		const id = `99${Date.now()}${Math.floor(Math.random() * 900 + 100)}`; // 18-19 chiffres, préfixe 99
 		const tag = id.slice(-4);
 		const displayName = `Testeur ${tag}`;
 		const avatar = `https://cdn.discordapp.com/embed/avatars/${Number(id.slice(-1)) % 6}.png`;
-		const user = em.create(
-			User,
-			{
-				id,
-				username: `tester_${tag}`,
-				displayName,
-				normalizedDisplayName: normalizeNames(displayName),
-				avatar,
-				role: UserRole.User,
-				lastInteract: new Date(),
-			},
-			{ partial: true }
+		const username = `tester_${tag}`;
+		await sqlDb.executeQuery(
+			CompiledQuery.raw(
+				`INSERT INTO "user" (id, last_interact, role, username, avatar, display_name, normalized_display_name)
+				 VALUES ($1, NOW(), 0, $2, $3, $4, $5)`,
+				[id, username, avatar, displayName, normalizeNames(displayName)]
+			)
 		);
-		await em.persist(user).flush();
-		return { id, username: user.username, avatar };
+		return { id, username, avatar };
 	}
 
 	async toDTO(userView: UserView, avatar: string, sim: number): Promise<UserDTO> {
-		const soloRank = await this.db.em.findOne(Rank, { key: userView.solo_key });
-		const duoRank = await this.db.em.findOne(Rank, { key: userView.solo_key });
+		const rankKeys = [userView.solo_key, userView.duo_key].filter(
+			(key): key is string => Boolean(key)
+		);
+		const ranks = rankKeys.length
+			? await sqlDb.selectFrom("rank").select(["key", "gradient"]).where("key", "in", rankKeys).execute()
+			: [];
+		const rankByKey = new Map(ranks.map((rank) => [rank.key, rank]));
+		const soloRank = userView.solo_key ? rankByKey.get(userView.solo_key) : undefined;
+		const duoRank = userView.duo_key ? rankByKey.get(userView.duo_key) : undefined;
 
 		return {
 			id: userView.id,
@@ -295,34 +354,35 @@ export class UserService {
 		if (!userData) return null;
 		const discordUser = await this.getDiscordUser(userId);
 		if (!discordUser) return null;
+		const stored = await sqlDb
+			.selectFrom("user")
+			.select(["avatar", "bio", "twitch_url"])
+			.where("id", "=", userId)
+			.executeTakeFirst();
 		// Profil enrichi : avatar frais Discord si dispo, sinon stock normalisé.
 		let avatar = resolveDiscordAvatarUrl(userId, undefined);
 		if (discordUser) {
 			avatar = freshDiscordAvatarUrl(discordUser);
 			// Persiste le refresh pour les listes (qui lisent la colonne stockée)
 			try {
-				const u = await this.db.em.findOne(User, { id: userId });
-				if (u && u.avatar !== avatar) {
-					u.avatar = avatar;
-					u.username = discordUser.username;
-					u.displayName = discordUser.displayName;
-					u.normalizedDisplayName = normalizeNames(discordUser.displayName);
-					await this.db.em.flush();
+				if (stored && stored.avatar !== avatar) {
+					await sqlDb
+						.updateTable("user")
+						.set({
+							avatar,
+							username: discordUser.username,
+							display_name: discordUser.displayName,
+							normalized_display_name: normalizeNames(discordUser.displayName),
+						})
+						.where("id", "=", userId)
+						.execute();
 				}
 			} catch {
 				/* non bloquant */
 			}
-		} else {
-			const stored = await this.db.em.findOne(User, { id: userId });
-			avatar = resolveDiscordAvatarUrl(userId, stored?.avatar);
 		}
 		const userDTO = await this.toDTO(userData, avatar, 0);
 		// bio/twitchUrl : éditables par le titulaire (PUT /users/me/profile), pas dans UserView.
-		const profileFields = await this.db.em.findOne(
-			User,
-			{ id: userId },
-			{ fields: ["bio", "twitchUrl"] }
-		);
 
 		const dto: EnrichedUserDTO = {
 			id: userDTO.id,
@@ -333,8 +393,8 @@ export class UserService {
 			avatar: userDTO.avatar,
 			soloRank: userDTO.soloRank,
 			duoRank: userDTO.duoRank,
-			bio: profileFields?.bio ?? null,
-			twitchUrl: profileFields?.twitchUrl ?? null,
+			bio: stored?.bio ?? null,
+			twitchUrl: stored?.twitch_url ?? null,
 			lastInteract: userDTO.lastInteract,
 			role: userDTO.role,
 			currentLevel: userDTO.currentLevel,
@@ -369,19 +429,27 @@ export class UserService {
 
 		// 🏰 Clan info
 		if (userDTO.clanId) {
-			const clanMember = await this.db.em.findOne(
-				ClanMember,
-				{ user: userDTO.id },
-				{ populate: ["clan"] }
-			);
+			const clanMember = await sqlDb
+				.selectFrom("clan_member")
+				.innerJoin("clan", "clan.id", "clan_member.clan_id")
+				.select([
+					"clan.id",
+					"clan.shortened_name",
+					"clan.name",
+					"clan.clan_avatar_url",
+					"clan_member.role",
+					"clan_member.distinctions",
+				])
+				.where("clan_member.user_id", "=", userDTO.id)
+				.executeTakeFirst();
 			if (clanMember) {
 				dto.clan = {
-					id: clanMember.clan.id,
-					shortenedName: clanMember.clan.shortenedName,
-					name: clanMember.clan.name,
-					avatarUrl: clanMember.clan.clanAvatarUrl,
+					id: clanMember.id,
+					shortenedName: clanMember.shortened_name,
+					name: clanMember.name,
+					avatarUrl: clanMember.clan_avatar_url,
 					role: clanMember.role,
-					distinctions: clanMember.distinctions,
+					distinctions: clanMember.distinctions as ClanMemberDistinction[],
 				};
 			} else {
 				userDTO.clanId = undefined;
@@ -478,7 +546,10 @@ export class UserService {
 			FROM participations p, personal_stats ps, goal_avgs g;
 		`;
 
-		const [result] = await this.db.em.getConnection().execute(sql, [userId, userId, userId]);
+		const { rows: tournamentRows } = await sqlDb.executeQuery(
+			CompiledQuery.raw(sql, [userId, userId, userId])
+		);
+		const [result] = tournamentRows as Array<Record<string, unknown>>;
 
 		const personalWins = Number(result?.personal_wins ?? 0);
 		const personalLosses = Number(result?.personal_losses ?? 0);
@@ -553,11 +624,14 @@ export class UserService {
 			FROM interclan_stats i, personal_stats p, goal_avgs g;
 		`;
 
-		const [result] = await this.db.em.getConnection().execute(sql, [
-			userId, // first placeholder → ilm.user_id
-			userId, // second placeholder → lu.user_id (personal_stats)
-			userId, // third placeholder → lu.user_id (goal_avgs)
-		]);
+		const { rows: interclanRows } = await sqlDb.executeQuery(
+			CompiledQuery.raw(sql, [
+				userId, // first placeholder → ilm.user_id
+				userId, // second placeholder → lu.user_id (personal_stats)
+				userId, // third placeholder → lu.user_id (goal_avgs)
+			])
+		);
+		const [result] = interclanRows as Array<Record<string, unknown>>;
 
 		return {
 			total: Number(result.total ?? 0),
@@ -579,7 +653,8 @@ export class UserService {
 	 * dont l'Elo a été appliqué (`ranked_elo_applied`).
 	 */
 	async getRankedStatsForUser(userId: string) {
-		const rows = await this.db.em.getConnection().execute(
+		const { rows } = await sqlDb.executeQuery(
+			CompiledQuery.raw(
 			`
 			WITH user_matches AS (
 				SELECT
@@ -640,12 +715,13 @@ export class UserService {
 				COALESCE(gt.goals_received, 0) AS goals_received
 			FROM ranked_stats rs
 			FULL JOIN goal_totals gt ON gt.mode = rs.mode;
-		`,
+			`,
 			[userId]
+			)
 		);
 
-		return rows.map((r) => ({
-			mode: r.mode,
+		return (rows as Array<Record<string, unknown>>).map((r) => ({
+			mode: r.mode as MatchMode,
 			total: Number(r.total ?? 0),
 			wins: Number(r.wins ?? 0),
 			losses: Number(r.losses ?? 0),

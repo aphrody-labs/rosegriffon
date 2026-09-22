@@ -8,6 +8,17 @@ export interface BunSqlOptions {
 	connectionTimeout?: number;
 }
 
+export interface BunPgQueryResult<Row = Record<string, unknown>> {
+	rows: Row[];
+	rowCount: number;
+}
+
+export interface BunPgClient {
+	connect(): Promise<void>;
+	query<Row = Record<string, unknown>>(text: string, params?: unknown[]): Promise<BunPgQueryResult<Row>>;
+	end(): Promise<void>;
+}
+
 /** Build the canonical Bun PostgreSQL client used by Bun workers and bots. */
 export function createBunSql(options: BunSqlOptions = {}): SQL {
 	const url = options.url ?? Bun.env.DATABASE_URL;
@@ -22,4 +33,22 @@ export function createBunSql(options: BunSqlOptions = {}): SQL {
 		maxLifetime: options.maxLifetime ?? 1_800,
 		connectionTimeout: options.connectionTimeout ?? 10,
 	});
+}
+
+/** Adaptateur client minimal pour les scripts historiques connect/query/end. */
+export function createBunPgClient(connectionString: string): BunPgClient {
+	const sql = createBunSql({ url: connectionString, max: 1 });
+	return {
+		async connect(): Promise<void> {},
+		async query<Row = Record<string, unknown>>(
+			text: string,
+			params: unknown[] = []
+		): Promise<BunPgQueryResult<Row>> {
+			const rows = (await sql.unsafe(text, params)) as Row[];
+			return { rows, rowCount: rows.length };
+		},
+		async end(): Promise<void> {
+			await sql.end();
+		},
+	};
 }

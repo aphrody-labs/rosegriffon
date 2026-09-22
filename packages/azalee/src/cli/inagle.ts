@@ -17,6 +17,15 @@ export type InagleService = Awaited<ReturnType<typeof createInagleService>>;
 /** Type d'aura tel qu'affiché : dérivé du nom de table `inagle_*`. */
 export type AuraKind = "keshin" | "soul" | "miximax" | "aura";
 
+/** Identifiants d'auras issus des projections SQL, sans lecture des configs JSON. */
+export function getAuraHashSet(svc: InagleService): Set<string> {
+	return new Set(
+		svc.skills.auraAll().flatMap((a: any) =>
+			[a.auraId, a.auraIdStr, a.id].filter((value): value is string => typeof value === "string"),
+		),
+	);
+}
+
 /** Aura résolue (identifiant, nom localisé, famille). */
 export interface ResolvedAura {
 	id: string;

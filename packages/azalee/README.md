@@ -186,22 +186,21 @@ configureAzalee({
 
 ### Injection du client de données
 
-Par défaut, la lib lit **le miroir SQLite seul** : zéro réseau, zéro clé,
-utilisable en CLI, en test et en sidecar. Une application hôte peut injecter son
-propre client — c'est ce que fait le wiki web, qui route les tables `inagle_*`
-vers le miroir et tout le reste (éditorial, social, `tweets`…) vers PostgREST.
+Par défaut, la lib utilise PostgreSQL quand `DATABASE_URL` est disponible. Une
+application hôte peut injecter son propre client SQL ; le miroir SQLite est
+réservé aux tests, à l'extraction et au mode offline explicitement demandé.
 
 ```ts
 import { setDatabaseProvider, hasDatabaseProvider } from "@rosegriffon/azalee/db";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
-setDatabaseProvider(createClient); // fabrique sync ou async
+setDatabaseProvider(createPostgresClient);
 hasDatabaseProvider();             // true
-setDatabaseProvider(null);         // retour au miroir SQLite seul
+setDatabaseProvider(null);         // retour à la fabrique PostgreSQL par défaut
 ```
 
-Les modules `wiki/*` n'utilisent que la surface `.from(table).select(...)`, commune
-au client Supabase et au client miroir — c'est ce qui rend l'injection transparente.
+Les modules `wiki/*` n'utilisent que la surface SQL `.from(table).select(...)` ;
+le miroir SQLite reste une option explicite pour l'extraction et l'offline.
 
 ## API HTTP headless
 

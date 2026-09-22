@@ -1,9 +1,8 @@
 import { Service } from "@/decorators";
-import { Data } from "@/entities";
 import { PlayerNoteCategory, PlayerNoteSeverity } from "@/utils/enums";
 import type { PlayerNoteRecord } from "./PlayerNoteService";
 
-import { Database } from "./Database";
+import { DataStore } from "./DataStore";
 import { GoogleWorkspaceService } from "./GoogleWorkspaceService";
 
 const DOC_NAME = "Achilléa — Registre des signalements joueurs";
@@ -40,7 +39,7 @@ const SEVERITY_LABELS: Record<PlayerNoteSeverity, string> = {
 @Service()
 export class PlayerNoteDocsSync {
 	constructor(
-		private db: Database,
+		private dataStore: DataStore,
 		private google: GoogleWorkspaceService
 	) {}
 
@@ -55,10 +54,8 @@ export class PlayerNoteDocsSync {
 		const pinned = process.env.GOOGLE_PLAYER_NOTES_DOC_ID?.trim();
 		if (pinned) return pinned;
 
-		const dataRepo = this.db.get(Data);
-
 		try {
-			const stored = await dataRepo.get("playerNotesDocId");
+			const stored = await this.dataStore.get("playerNotesDocId");
 			if (stored) return stored;
 		} catch {
 			// Clé absente (base antérieure à cette fonctionnalité) : on continue.
@@ -70,7 +67,7 @@ export class PlayerNoteDocsSync {
 			(await this.google.findDocumentByName(DOC_NAME)) ??
 			(await this.google.createDocument(DOC_NAME));
 
-		if (existing) await dataRepo.set("playerNotesDocId", existing);
+		if (existing) await this.dataStore.set("playerNotesDocId", existing);
 
 		return existing;
 	}

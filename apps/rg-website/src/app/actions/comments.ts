@@ -28,6 +28,15 @@ export interface CommentWithProfile {
 	profiles: CommentProfile | null;
 }
 
+export async function getPublicCommentProfile(userId: string): Promise<CommentProfile | null> {
+	const { data } = await createPostgresClient()
+		.from("profiles")
+		.select("username, avatar_url, role, badges")
+		.eq("id", userId)
+		.maybeSingle();
+	return (data as CommentProfile | null) ?? null;
+}
+
 interface CommentRow {
 	id: string;
 	content: string;

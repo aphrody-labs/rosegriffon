@@ -27,7 +27,6 @@ import {
 import type { Client } from "@aphrody/discordx";
 import { Guard } from "@aphrody/discordx";
 
-import type { EntityManager } from "@mikro-orm/core";
 import { coreManagerConfig } from "@/configs";
 import { Discord, Injectable, Slash, SlashGroup } from "@/decorators";
 import type { Clan } from "@/entities";
@@ -897,9 +896,6 @@ async function handleAvatar(
 						attachment,
 						true,
 						true,
-						// Cast nécessaire : SqlEntityManager n'est pas structurellement
-						// assignable à EntityManager générique en MikrORM v7.
-						tem as unknown as EntityManager,
 						clan.normalizedShortName,
 						clan.clanEmojiId
 					)) as { url: string; emojiId?: string };

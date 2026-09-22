@@ -65,7 +65,7 @@ export class PlayerNote extends CustomBaseEntity {
 	/**
 	 * Lien du registre Drive où le signalement vient d'être consigné.
 	 * Non persisté : c'est une information de retour immédiat (réponse Discord, API),
-	 * pas un état — le document, lui, est retrouvé par son nom ou par `Data`.
+	 * pas un état — le document, lui, est retrouvé par son nom ou par `DataStore`.
 	 */
 	@Property({ persist: false })
 	docsUrl?: string | null;

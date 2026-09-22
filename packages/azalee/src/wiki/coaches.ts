@@ -1,8 +1,8 @@
 /**
  * Couche données « Entraîneurs / Coachs » (section wiki dédiée).
  *
- * Source : miroir SQLite embarqué (tables `inagle_coordinators` + `inagle_manager_passives`),
- * lu via le client Supabase-compatible (`@/lib/supabase/server`). NE TOUCHE PAS
+ * Source : projections PostgreSQL (tables `inagle_coordinators` + `inagle_manager_passives`),
+ * lues via le client SQL canonique. NE TOUCHE PAS
  * `lib/wiki-service.ts` (partagé entre agents) — tout l'accès données de cette
  * section vit ici.
  *
@@ -29,7 +29,7 @@
  */
 
 
-import { createClient } from "../db/provider";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 
 /** Marqueur d'erreur tableur figé dans certaines cellules (stat/buff). */
 const VLOOKUP_ERROR_PREFIX = "#N/A";
@@ -217,6 +217,14 @@ interface RawCharacterRef {
 	internal_code: string | null;
 }
 
+interface CoachesDatabase {
+	inagle_coordinators: RawCoordinator;
+	inagle_manager_passives: RawManagerPassive;
+	inagle_characters: RawCharacterRef;
+}
+
+const sql = createAchilleaSql<CoachesDatabase>();
+
 /**
  * Construit l'index `name_en` → `internal_code` depuis `inagle_characters`.
  * Le premier code rencontré est conservé (les homonymes éventuels sont ignorés).
@@ -275,18 +283,14 @@ export interface CoachListParams {
  * Le jeu est petit (102 lignes) → un seul SELECT * + filtrage côté serveur.
  */
 export async function getCoachesList(params: CoachListParams = {}): Promise<Coach[]> {
-	const supabase = await createClient();
-
-	const [coordRes, passiveRes, charRes] = await Promise.all([
-		supabase.from("inagle_coordinators").select("*").order("id", { ascending: true }),
-		supabase.from("inagle_manager_passives").select("*"),
-		supabase.from("inagle_characters").select("name_en, internal_code"),
+	const [rawCoords, rawPassives, charRows] = await Promise.all([
+		sql.selectFrom("inagle_coordinators").selectAll().orderBy("id", "asc").execute(),
+		sql.selectFrom("inagle_manager_passives").selectAll().execute(),
+		sql.selectFrom("inagle_characters").select(["name_en", "internal_code"]).execute(),
 	]);
 
-	const rawCoords = (coordRes.data ?? []) as RawCoordinator[];
-	const rawPassives = (passiveRes.data ?? []) as RawManagerPassive[];
 	const passiveIndex = indexPassives(rawPassives);
-	const codeByName = indexCharacterCodes((charRes.data ?? []) as RawCharacterRef[]);
+	const codeByName = indexCharacterCodes(charRows);
 
 	let coaches = rawCoords.map((raw) => {
 		const scaling = raw.passive_no != null ? (passiveIndex.get(raw.passive_no) ?? null) : null;
@@ -324,31 +328,28 @@ export async function getCoach(id: number): Promise<Coach | null> {
 	if (!Number.isFinite(id)) {
 		return null;
 	}
-	const supabase = await createClient();
-
-	const [coordRes, passiveRes] = await Promise.all([
-		supabase.from("inagle_coordinators").select("*").eq("id", id).maybeSingle(),
-		supabase.from("inagle_manager_passives").select("*"),
+	const [raw, rawPassives] = await Promise.all([
+		sql.selectFrom("inagle_coordinators").selectAll().where("id", "=", id).executeTakeFirst(),
+		sql.selectFrom("inagle_manager_passives").selectAll().execute(),
 	]);
 
-	const raw = coordRes.data as RawCoordinator | null;
 	if (!raw) {
 		return null;
 	}
-	const passiveIndex = indexPassives((passiveRes.data ?? []) as RawManagerPassive[]);
+	const passiveIndex = indexPassives(rawPassives);
 	const scaling = raw.passive_no != null ? (passiveIndex.get(raw.passive_no) ?? null) : null;
 
 	// Résolution du portrait : 1er personnage homonyme (`name_en` = `name_localised`).
 	let internalCode: string | null = null;
 	const name = raw.name_localised?.trim();
 	if (name) {
-		const charRes = await supabase
-			.from("inagle_characters")
+		const charRow = await sql
+			.selectFrom("inagle_characters")
 			.select("internal_code")
-			.eq("name_en", name)
+			.where("name_en", "=", name)
 			.limit(1)
-			.maybeSingle();
-		internalCode = (charRes.data as { internal_code: string | null } | null)?.internal_code ?? null;
+			.executeTakeFirst();
+		internalCode = charRow?.internal_code ?? null;
 	}
 
 	return toCoach(raw, scaling, internalCode);

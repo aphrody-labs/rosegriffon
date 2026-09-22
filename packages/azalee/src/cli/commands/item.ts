@@ -49,7 +49,7 @@ export function registerItemCommand(program: Command): void {
 						if (options.json) {
 							console.log(
 								JSON.stringify(
-									matches.map((m) => ({ id: m.itemId, name: m.names?.fr || m.name })),
+									matches.map((m: any) => ({ id: m.itemId, name: m.names?.fr || m.name })),
 									null,
 									2,
 								),

@@ -24,6 +24,10 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		expect(agent.status).toBe(200);
 		expect((await agent.json()) as { provider_name: string }).toMatchObject({ provider_name: "Rose Griffon" });
 
+		const discovery = await app.handle(new Request("http://localhost/.well-known/agent-configuration"));
+		expect(discovery.status).toBe(200);
+		expect((await discovery.json()) as { provider_name: string }).toMatchObject({ provider_name: "Rose Griffon" });
+
 		const capabilities = await app.handle(new Request("http://localhost/v1/auth/capability/list"));
 		expect(capabilities.status).toBe(200);
 		expect((await capabilities.json()) as { capabilities: unknown[] }).toMatchObject({ capabilities: expect.any(Array) });
@@ -315,6 +319,15 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 			}),
 		];
 		for (const request of requests) expect((await app.handle(request)).status).toBe(401);
+	});
+
+	it("PATCH /v1/achillea/clans/:id requires the unified session", async () => {
+		const response = await app.handle(new Request("http://localhost/v1/achillea/clans/1", {
+			method: "PATCH",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({ clanBiography: "unauthorized" }),
+		}));
+		expect(response.status).toBe(401);
 	});
 
 	it("GET /v1/achillea/clans/:id/members is SQL-backed", async () => {

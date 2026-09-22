@@ -9,13 +9,20 @@ type Row = Record<string, unknown>;
 export class WikiSqlRepository {
 	constructor(private readonly db: Kysely<Database>) {}
 
-	private async list(table: string, query: string | undefined, limit: number, page: number) {
+	private async list(
+		table: string,
+		query: string | undefined,
+		limit: number,
+		page: number,
+		extraWhere: ReturnType<typeof sql> = sql.raw("true"),
+	) {
 		const offset = Math.max(0, page - 1) * limit;
 		const needle = query?.trim() ? `%${query.trim().replaceAll("%", "\\%")}%` : null;
 		try {
-			const where = needle
-				? sql`where name_fr ilike ${needle} escape '\\' or name_en ilike ${needle} escape '\\' or name_ja ilike ${needle} escape '\\'`
-				: sql``;
+			const textWhere = needle
+				? sql`(name_fr ilike ${needle} escape '\\' or name_en ilike ${needle} escape '\\' or name_ja ilike ${needle} escape '\\')`
+				: sql.raw("true");
+			const where = sql`where ${textWhere} and ${extraWhere}`;
 			const result = await sql<Row>`select * from public.${sql.raw(table)} ${where} order by id asc limit ${limit} offset ${offset}`.execute(this.db);
 			const count = await sql<{ count: string }>`select count(*)::text as count from public.${sql.raw(table)} ${where}`.execute(this.db);
 			return { data: result.rows, count: Number(count.rows[0]?.count ?? 0), page, limit, source: "postgres" as const };
@@ -26,8 +33,24 @@ export class WikiSqlRepository {
 
 	characters(query: string | undefined, limit = 24, page = 1) { return this.list("inagle_characters", query, limit, page); }
 	skills(query: string | undefined, limit = 24, page = 1) { return this.list("inagle_skills", query, limit, page); }
-	items(query: string | undefined, limit = 24, page = 1) { return this.list("inagle_items", query, limit, page); }
-	quests(query: string | undefined, limit = 24, page = 1) { return this.list("inagle_quests", query, limit, page); }
+	items(query: string | undefined, limit = 24, page = 1, category?: string) {
+		return this.list(
+			"inagle_items",
+			query,
+			limit,
+			page,
+			category === undefined ? sql.raw("true") : sql`category = ${category}`,
+		);
+	}
+	quests(query: string | undefined, limit = 24, page = 1, phase?: number) {
+		return this.list(
+			"inagle_quests",
+			query,
+			limit,
+			page,
+			phase === undefined ? sql.raw("true") : sql`phase = ${String(phase)}`,
+		);
+	}
 	passives(query: string | undefined, limit = 24, page = 1) { return this.list("inagle_passives", query, limit, page); }
 
 	async character(id: string) { return this.one("inagle_characters", sql`id = ${id}`); }
@@ -44,9 +67,21 @@ export class WikiSqlRepository {
 		}
 	}
 
-	async teams() {
-		try { return (await sql<Row>`select * from public.inagle_teams order by id asc`.execute(this.db)).rows; }
-		catch { return null; }
+	async teams(query?: string, limit = 500) {
+		try {
+			let request = this.db.selectFrom("inagle_teams").selectAll().orderBy("name_fr", "asc").limit(limit);
+			if (query?.trim()) {
+				const term = `%${query.trim()}%`;
+				request = request.where((eb) => eb.or([
+					eb("name_fr", "ilike", term),
+					eb("name_en", "ilike", term),
+					eb("name_ja", "ilike", term),
+				]));
+			}
+			return await request.execute();
+		} catch {
+			return null;
+		}
 	}
 
 	async team(id: string) { return this.one("inagle_teams", sql`id = ${id}`); }

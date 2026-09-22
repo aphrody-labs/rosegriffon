@@ -2,12 +2,10 @@
 
 import type { Command } from "commander";
 
-import { buildAuraHashSet } from "@rosegriffon/inagle/skills/mapper-aura";
-
 import { interpolateVariantStats } from "../../game/stats-interpolation";
 import type { CharaStats } from "../../wiki/chara-stats-shared";
 import { colors, errorMessage, reportError, restoreLogs, suppressLogs } from "../context";
-import { createInagleService, getSkillDetails, type InagleService, type SkillDetails } from "../inagle";
+import { createInagleService, getAuraHashSet, getSkillDetails, type InagleService, type SkillDetails } from "../inagle";
 import { exitUnlessRepl } from "../repl-state";
 import type { CompareOptions } from "../types";
 
@@ -281,7 +279,7 @@ export function registerCompareCommand(program: Command): void {
  * sœur si la variante courante n'en déclare aucun.
  */
 function resolveMoves(svc: InagleService, variant: any, baseChara: any): MovesetEntry[] {
-	const auraHashes = buildAuraHashSet();
+	const auraHashes = getAuraHashSet(svc);
 	const rawSkills = variant.skills || [];
 	let skillList = rawSkills.filter(
 		(sk: any) => sk.skillId && !PHANTOM_SKILL_IDS.has(sk.skillId) && !auraHashes.has(sk.skillId),

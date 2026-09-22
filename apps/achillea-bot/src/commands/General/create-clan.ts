@@ -1,5 +1,4 @@
 import { Category } from "@aphrody/utilities";
-import type { EntityManager } from "@mikro-orm/core";
 import { rel } from "@mikro-orm/core";
 import type { BaseMessageOptions, CommandInteraction, GuildMember } from "discord.js";
 import {
@@ -291,9 +290,6 @@ export default class CreateClanCommand {
 							attachment,
 							true,
 							false,
-							// Cast nécessaire : PostgreSqlEntityManager n'est pas structurellement
-							// assignable à EntityManager générique en MikrORM v7.
-							this.db.em as unknown as EntityManager,
 							normalizeNames(clanShortenedName)
 						);
 						// processAttachment renvoie une STRING (hash déjà connu, ou pas d'upload emoji)

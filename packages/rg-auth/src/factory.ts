@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { agentAuth } from "@better-auth/agent-auth";
 import { apiKey } from "@better-auth/api-key";
 import { oauthProvider } from "@better-auth/oauth-provider";
+import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
 import { admin, bearer, genericOAuth, jwt } from "better-auth/plugins";
 import {
@@ -47,6 +48,7 @@ export interface RoseGriffonAuthOptions {
 	executerSql?: (requete: string, parametres: unknown[]) => Promise<unknown>;
 	nextCookiesPlugin?: unknown;
 	patreon?: PatreonAuthIntegration;
+	passkey?: { rpID?: string; origin?: string };
 }
 
 /**
@@ -56,8 +58,35 @@ export interface RoseGriffonAuthOptions {
  */
 export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
 	const patreon = options.patreon;
+	const discordClientId = process.env.DISCORD_CLIENT_ID ?? "";
+	const discordClientSecret = process.env.DISCORD_CLIENT_SECRET ?? "";
+	const twitchClientId = process.env.TWITCH_AUTH_CLIENT_ID ?? process.env.TWITCH_CLIENT_ID ?? "";
+	const twitchClientSecret = process.env.TWITCH_AUTH_CLIENT_SECRET ?? process.env.TWITCH_CLIENT_SECRET ?? "";
+	const configuredSocialProviders = {
+		...(discordClientId && discordClientSecret
+			? {
+					discord: {
+						clientId: discordClientId,
+						clientSecret: discordClientSecret,
+						overrideUserInfoOnSignIn: true,
+						prompt: "consent" as const,
+					},
+				}
+			: {}),
+		...(twitchClientId && twitchClientSecret
+			? {
+					twitch: {
+						clientId: twitchClientId,
+						clientSecret: twitchClientSecret,
+						scope: ["user:read:email", "user:read:follows", "user:read:subscriptions"],
+					},
+				}
+			: {}),
+		...(googleProvider.google.clientId && googleProvider.google.clientSecret ? googleProvider : {}),
+	};
+	const trustedSocialProviders = Object.keys(configuredSocialProviders);
 	const plugins = [
-		admin({ defaultRole: "member", adminRoles: ["admin", "staff", "super_admin"] }),
+		admin({ defaultRole: "user", adminRoles: ["admin"] }),
 		apiKey({
 			defaultPrefix: "rg_",
 			requireName: true,
@@ -65,7 +94,13 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
 			rateLimit: { enabled: true, maxRequests: 1_000, timeWindow: 60 * 60 * 1_000 },
 		}) as unknown as ReturnType<typeof admin>,
 		jwt(),
-		oauthProvider({ loginPage: "/login", consentPage: "/oauth/consent" }),
+		oauthProvider({
+			loginPage: "/login",
+			consentPage: "/oauth/consent",
+			// The Next.js app exposes the RFC 8414 route at
+			// /.well-known/oauth-authorization-server/[issuer-path].
+			silenceWarnings: { oauthAuthServerConfig: true },
+		}),
 		agentAuth({
 			providerName: "Rose Griffon",
 			providerDescription: "Rose Griffon authentication and community capabilities.",
@@ -84,6 +119,7 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
 		}),
 		deuxFacteurs("Rose Griffon"),
 		bearer(),
+		...(options.passkey ? [passkey(options.passkey)] : []),
 		...(patreon
 			? [
 					genericOAuth({
@@ -138,27 +174,14 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
 				});
 			},
 		},
-		socialProviders: {
-			discord: {
-				clientId: process.env.DISCORD_CLIENT_ID ?? "",
-				clientSecret: process.env.DISCORD_CLIENT_SECRET ?? "",
-				overrideUserInfoOnSignIn: true,
-				prompt: "consent",
-			},
-			twitch: {
-				clientId: process.env.TWITCH_AUTH_CLIENT_ID ?? process.env.TWITCH_CLIENT_ID ?? "",
-				clientSecret: process.env.TWITCH_AUTH_CLIENT_SECRET ?? process.env.TWITCH_CLIENT_SECRET ?? "",
-				scope: ["user:read:email", "user:read:follows", "user:read:subscriptions"],
-			},
-			...googleProvider,
-		},
+		socialProviders: configuredSocialProviders,
 		account: {
 			...commonAuthOptions.account,
 			storeStateStrategy: "database",
 			encryptOAuthTokens: true,
 			accountLinking: {
 				enabled: true,
-				trustedProviders: ["discord", "google", "twitch", "patreon"],
+				trustedProviders: [...trustedSocialProviders, ...(patreon ? ["patreon"] : [])],
 			},
 		},
 		trustedOrigins: [

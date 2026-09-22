@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 
 import { subscribeTable } from "@/lib/realtime";
-import { createClient } from "@/lib/supabase/client";
-import type { Database } from "@rosegriffon/db";
+import { getCurrentPublicProfile, updatePublicProfile } from "@/app/settings/actions";
+import type { PublicProfile } from "@rosegriffon/db/profiles";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+type Profile = PublicProfile;
 
 interface UseProfileSyncOptions {
 	userId?: string | null;
@@ -46,9 +46,6 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
  * Hook pour mettre à jour le profil avec gestion d'erreurs
  */
 export function useUpdateProfile() {
-	// Memoize the Supabase client to avoid recreating it on each render
-	const supabase = useMemo(() => createClient(), []);
-
 	const updateProfile = useCallback(
 		async (
 			userId: string,
@@ -66,17 +63,8 @@ export function useUpdateProfile() {
 					console.info(`[useUpdateProfile] Mise à jour du profil ${userId}`, updates);
 				}
 
-				const { data, error } = await supabase
-					.from("profiles")
-					.update(updates)
-					.eq("id", userId)
-					.select()
-					.single();
-
-				if (error) {
-					console.error("[useUpdateProfile] Erreur Supabase:", error);
-					return { data: null, error };
-				}
+				const result = await updatePublicProfile(updates);
+				if (result.error) return result;
 
 				if (process.env.NODE_ENV === "development") {
 					console.info(`[useUpdateProfile] ✅ Profil ${userId} mis à jour`);
@@ -84,14 +72,14 @@ export function useUpdateProfile() {
 
 				// Le trigger DB enverra automatiquement la mise à jour à tous les abonnés
 				// Via l'événement broadcast
-				return { data, error: null };
+				return result;
 			} catch (error) {
 				const normalizedError = error instanceof Error ? error : new Error("Erreur inconnue");
 				console.error("[useUpdateProfile] Erreur inattendue:", normalizedError);
 				return { data: null, error: normalizedError };
 			}
 		},
-		[supabase]
+		[]
 	);
 
 	return { updateProfile };
@@ -101,8 +89,6 @@ export function useUpdateProfile() {
  * Hook combiné pour lire et synchroniser le profil
  */
 export function useProfile(userId?: string | null) {
-	// Memoize the Supabase client to keep a stable reference
-	const supabase = useMemo(() => createClient(), []);
 	const { updateProfile } = useUpdateProfile();
 
 	const fetchProfile = useCallback(async () => {
@@ -111,19 +97,12 @@ export function useProfile(userId?: string | null) {
 		}
 
 		try {
-			const { data, error } = await supabase.from("profiles").select("id, updated_at, username, avatar_url, role, website, discord_id, bio, banner_url, twitter_handle, badges").eq("id", userId).single();
-
-			if (error) {
-				console.error("[useProfile] Erreur lors de la récupération:", error);
-				return null;
-			}
-
-			return data;
+			return await getCurrentPublicProfile();
 		} catch (error) {
 			console.error("[useProfile] Erreur inattendue:", error);
 			return null;
 		}
-	}, [userId, supabase]);
+	}, [userId]);
 
 	return {
 		fetchProfile,

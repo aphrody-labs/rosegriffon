@@ -3,6 +3,7 @@ export * from "./Logger";
 export * from "./Scheduler";
 export * from "./PluginsManager";
 export * from "./Database";
+export * from "./DataStore";
 export * from "./Stats";
 export * from "./ErrorHandler";
 export * from "./EventManager";

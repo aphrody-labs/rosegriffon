@@ -15,7 +15,7 @@ import {
 	TableRow,
 	Badge,
 } from "@rosegriffon/ui";
-import { createClient } from "@/lib/supabase/client";
+import { updateInagleTranslation } from "../actions";
 
 interface VerificationClientProps {
 	initialCharacters: any[];
@@ -44,8 +44,6 @@ export function VerificationClient({
 		items: initialItems,
 	});
 
-	const supabase = createClient();
-
 	const handleFieldChange = (table: TableType, id: string, field: string, value: string) => {
 		setData((prev) => ({
 			...prev,
@@ -73,12 +71,8 @@ export function VerificationClient({
 				updated_at: new Date().toISOString(),
 			};
 
-			const { error } = await supabase
-				.from(tableName as any)
-				.update(payload)
-				.eq("id", id);
-
-			if (error) throw error;
+			const result = await updateInagleTranslation(tableName, id, payload);
+			if (result.error) throw new Error(result.error);
 
 			setData((prev) => ({
 				...prev,
@@ -117,12 +111,8 @@ export function VerificationClient({
 					updated_at: new Date().toISOString(),
 				};
 
-				const { error } = await supabase
-					.from(tableName as any)
-					.update(payload)
-					.eq("id", row.id);
-
-				if (error) throw error;
+				const result = await updateInagleTranslation(tableName, row.id, payload);
+				if (result.error) throw new Error(result.error);
 				successCount++;
 			} catch (err) {
 				console.error(`Error saving ${row.id}:`, err);

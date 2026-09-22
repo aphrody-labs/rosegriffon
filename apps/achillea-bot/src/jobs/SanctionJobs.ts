@@ -1,7 +1,6 @@
 import type { Job } from "bullmq";
 import { Client } from "@aphrody/discordx";
 
-import { Database } from "@/services/Database";
 import { MetricsService } from "@/services/MetricsService";
 import { SanctionService } from "@/services/SanctionService";
 import { CrossSyncService } from "@/services/CrossSyncService";
@@ -9,12 +8,8 @@ import { CrossSyncService } from "@/services/CrossSyncService";
 export class SanctionJobs {
 	private sanctionService: SanctionService;
 
-	constructor(
-		private db: Database,
-		private client: Client
-	) {
+	constructor(private client: Client) {
 		this.sanctionService = new SanctionService(
-			db,
 			client,
 			new CrossSyncService(),
 			new MetricsService()

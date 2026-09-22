@@ -7,9 +7,9 @@
 //
 // Contrat client : GET /realtime/v1/stream?table=comments&filter=target_id=eq.42
 // Chaque message SSE porte { schema, table, eventType, new, old, truncated? }.
-// `Bun.SQL` n'expose pas LISTEN/NOTIFY (1.4.0) : on garde `pg`, déjà utilisé
-// par les deux apps Next pour leurs pools Postgres directs.
-import { Client } from "pg";
+// `Bun.SQL` n'expose pas LISTEN/NOTIFY (1.4.0) : la fabrique SQL commune
+// fournit donc la connexion dédiée nécessaire à ce flux long.
+import { createPgClient } from "@rosegriffon/db/pg";
 
 const PORT = Number(process.env.RG_REALTIME_PORT ?? 8812);
 const HOST = process.env.RG_REALTIME_HOST ?? "127.0.0.1";
@@ -61,7 +61,7 @@ function matches(sub: Subscriber, event: Event): boolean {
 // jamais laisser le service muet sans le signaler.
 async function listen(): Promise<void> {
 	for (;;) {
-		const client = new Client({ connectionString: DATABASE_URL });
+		const client = createPgClient(DATABASE_URL);
 		try {
 			await client.connect();
 			client.on("notification", (message) => {

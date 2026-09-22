@@ -29,7 +29,7 @@ Le flux part des binaires bruts du jeu (extraits de Steam via iecode) et finit d
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ inagle (@rosegriffon/inagle, Bun/TS) — parse / join / calcul des données      │
-│  src/parsers/* ──▶ src/entities/* ──▶ stat-calculator ──▶ mapper-aura          │
+│  src/parsers/* ──▶ src/entities/* ──▶ stat-calculator ──▶ PostgreSQL projections │
 │  createInagleService()  : characters / skills / items / auras / teams / …      │
 └───────────────────────────────┬──────────────────────────────────────────────┘
                                  │ src/cli-push.ts  (commande `inagle push`)
@@ -168,7 +168,7 @@ API universelle de données de jeu pour IEVR. Package `@rosegriffon/inagle` v1.2
 
 `DATA_ROOT` est résolu dans `src/core/paths.ts` : `DATA_PATH` env (azalee `.env` = `/home/ubuntu/niers/data`) → sinon `packages/inagle/data` → sinon `cwd/data`. Les chemins par catégorie sont dans `PATHS` ; les fichiers connus (versionnés) dans `FILES`. `resolveGameDataFile(relDir, baseName)` choisit la **version la plus haute** par tri numérique segment-par-segment (regex `^<base>_\d[\d.]*\.cfg\.bin\.json$`, qui empêche les collisions de préfixe comme `chara_param` captant `chara_param_table_config`).
 
-Option `cfgbin-db` (`src/core/cfgbin-db.ts`) : une DB SQLite `~/data/cache/cfgbin.sqlite` (~2.3 Go, produite par le toolkit iecode) peut remplacer les loose `.cfg.bin.json` ; **opt-in**, désactivée par défaut dans azalee. Les fichiers texte sont **bypassés** par défaut (le parser cfg.bin corrompt les chaînes localisées → `vars[N]=null`) ; réactivable via `IEVR_CFGBIN_DB_TEXT=1`.
+Option `cfgbin-db` (`src/core/cfgbin-db.ts`) : une DB SQLite `~/data/cache/cfgbin.sqlite` (~2.3 Go, produite par le toolkit iecode) remplace les loose `.cfg.bin.json` pour l’extraction/dev. Le runtime tente PostgreSQL puis SQLite ; la lecture de fichiers JSON libres est désactivée par défaut et ne s’active qu’avec `IEVR_ALLOW_LOOSE_JSON=1`. Les fichiers texte restent soumis au garde-fou `IEVR_CFGBIN_DB_TEXT=1` tant que le parseur SQLite local n’est pas corrigé.
 
 ### 2.2 Parseurs (`src/parsers/`)
 
@@ -210,13 +210,13 @@ Pur (découplé du FS). Stats : `Kc Cr Tc Pr Ps Ag It` (Kick/Control/Technique/P
 - **Lookups avec fallbacks en cascade** : pattern exact → si pattern≥2 retombe sur pattern 0 → subPosition 0 → charaRank 0 (Normal) → mainPosition seul. La growth table ne contient que **patterns 0 et 1**.
 - **`rarityToGrowthRank(code)`** : 0→0, 2→2, 3→3, 4→4, 5→5, **6/7/20→5** (LR/Legend/BASARA utilisent les stats UR). Piège : **deux implémentations** coexistent — `stat-calculator.ts` ET `parsers/star-sign.ts` (les entités importent celle de star-sign). Idem `rarityCodeToName` triple (chara-param, star-sign, et inline cli-push) avec mappings légèrement différents (ex. `chara-param` mappe 5/6/7→"Normal", `star-sign`→"Légendaire") — incohérence préexistante à connaître, non corrigée (lecture seule).
 
-### 2.5 Résolution auras/hissatsu native (`src/skills/mapper-aura.ts`)
+### 2.5 Résolution auras/hissatsu depuis SQL JSONB
 
-`loadAuraSkills()` parse `aura_skill_config` (`AURA_CMD_INFO_*` sous `AURA_CMD_INFO_LIST_BEG_0`, exclut `REF_`). Offsets aura : `[0]` auraId, `[1]` assetCode, `[2]` nameId, `[3]` descId, `[8]` element, `[6]` skillId1, `[7]` skillId2, `[12]` buffId, `[16]` rank.
+Les configurations d’aura sont importées une fois dans les projections PostgreSQL (`inagle_auras`, `inagle_keshins`, `inagle_souls`, `inagle_miximax`, `inagle_awakenings`, `inagle_mode_changes`). Les lectures runtime utilisent les colonnes et le JSONB `data/sheet_data`, jamais les fichiers JSON du dump.
 
-**Hissatsu 100% natif** : `resolveAuraHissatsu(config)` prend `config.skillId1` (fallback `skillId2`), normalise le hex, et résout dans la Map issue de `loadSkillInfoMap()` (fusion des `skill_config_*`, versions antérieures prioritaires). Retourne `{ skillId, skillIdStr, name (FR>EN>JA via skill_text), type (CATEGORY_LABELS), element (ELEMENT_LABELS), power{min,max} }`. **`undefined` si non résoluble — aucune invention.** Cela **remplace** le hissatsu du Google Sheet communautaire (l'ancien `name` du sheet reste seulement comme alias d'affichage). Exemple cité : Lancelot → "Botte de Lancelot" (Tir/Feu/100-640) ; ~228/387 auras ont un hissatsu natif.
+**Hissatsu SQL** : la projection conserve `{ skillId, skillIdStr, name, type, element, power{min,max} }` dans `data/sheet_data`. Les champs absents restent `undefined` : aucune valeur n’est inventée et le runtime ne relit aucun fichier de configuration.
 
-`determineSubType` classe l'aura (Keshin/Soul/Awakening/ModeChange/Miximax/Aura) par préfixe assetCode (wks/wko/wkk/wkd/wkt/was, awakening_, mode_change_, wm*) puis heuristiques de nom. `buildImagePath` construit le chemin webp par sous-type. `buildAuraHashSet()` produit l'ensemble des hex d'auras — **clé pour séparer skills et auras** qui partagent les mêmes slots dans chara_param (cf. cli-push). Owner enrichi via `change_aura_skill_config` (`m_ChangeAuraSkillDataList` : id → charaParamId).
+La séparation skills/auras est dérivée des mêmes projections SQL par `service.skills.auraAll()`. L’ensemble des identifiants est partagé par le CLI et le renderer, sans mapper JSON dédié.
 
 ### 2.6 Service (`src/service.ts`)
 
@@ -228,8 +228,8 @@ Commande `inagle push` (`registerPushCommand`). Deux adapters : `SupabaseAdapter
 
 Points sensibles :
 - **Préservation des colonnes curatées hors-pipeline** : avant `delete+reinsert`, snapshot de `sheet_data` + `zukan_order` (characters) et `sheet_data` (items), réinjectés par id pour ne pas écraser la donnée communautaire/officielle. Les movesets natifs sont fusionnés dans `sheet_data`.
-- **Séparation skills/auras** dans chara_param : `buildAuraHashSet()` sépare les slots ; on retire aussi `0x00000002` (sentinelle). `data` JSONB porte `{...c, skills, auras}`.
-- **Auras** : source de vérité = parse natif (`loadAuraSkills`) s'il est ≥ au snapshot du service ; hissatsu natif écrit dans `sheet_data.hissatsu` (ce que `getAura` côté azalee consomme), réparti par sous-type vers `inagle_keshins/souls/awakenings/mode_changes/miximax/auras`.
+- **Séparation skills/auras** dans chara_param : l’ensemble issu de `service.skills.auraAll()` sépare les slots ; on retire aussi `0x00000002` (sentinelle). `data` JSONB porte `{...c, skills, auras}`.
+- **Auras** : les projections SQL sont la source unique ; `sheet_data.hissatsu` est conservé et consommé par `getAura`, réparti par sous-type vers les tables `inagle_*`.
 - Skills filtrés : exclut catégories passif (6/"Passive") et stat-boost (9). Vidéos depuis `skill-videos.json` (`.wmv`→`.webm`).
 
 Déclenché par cron : `packages/cron/src/tasks/db.ts` → `runInaglePush()` = `bun run --filter @rosegriffon/inagle push`, puis `runSQLiteBackup()` = `niers/scripts/donnees/miroir-inagle.sh`, qui valide et republie le miroir SQLite canonique. `backup:supabase` reste disponible pour fabriquer un snapshot local de secours, hors chemin de production.
@@ -256,13 +256,13 @@ Déclenché par cron : `packages/cron/src/tasks/db.ts` → `runInaglePush()` = `
 - `rarityToGrowthRank` / `rarityCodeToName` **dupliqués** entre `stat-calculator`, `star-sign`, `chara-param`, inline cli-push — mappings non strictement identiques (préexistant).
 - charaRank vient de **starSignCharaInfo**, pas de chara_param ; BASARA injecté depuis `basaraBuildInfo.json`.
 - skill_config/passive : **fusion multi-versions, antérieures prioritaires** (override skip).
-- text cfgbin-db **désactivé** par défaut (parser corrompt les chaînes → fallback FS).
-- skills/auras **partagent les slots** chara_param → séparation obligatoire via `buildAuraHashSet`.
+- text cfgbin-db reste **explicitement activable** via `IEVR_CFGBIN_DB_TEXT=1`; aucun fallback JSON libre n’est utilisé par défaut.
+- skills/auras **partagent les slots** chara_param → séparation par l’ensemble des identifiants de `service.skills.auraAll()`.
 - cli-push **préserve** `sheet_data`/`zukan_order` avant delete+reinsert (donnée curatée communautaire/officielle).
 - `inagle_skills.category_id`/`element_id` = **NULL** → filtrer via colonne texte FR `category` ; les auras, elles, utilisent `element_id`.
 - ne jamais committer `apps/website/data/backups/*.sqlite` (PII emails, gitignoré).
 
-Fichiers clés : `packages/inagle/src/parsers/{chara-param,chara-base,skill-config,passive-skill-config,chara-exp-table,item-config,star-sign}.ts`, `src/entities/character.ts`, `src/stat-calculator.ts`, `src/skills/mapper-aura.ts`, `src/service.ts`, `src/cli-push.ts`, `src/core/{paths,data-loader,cfgbin-db}.ts`, `src/azalee-inagle-integration.test.ts` ; consommateurs : `apps/website/src/lib/wiki-service.ts`, `packages/azalee/src/db/sqlite-client.ts`, `packages/cron/src/tasks/db.ts`.
+Fichiers clés : `packages/inagle/src/parsers/{chara-param,chara-base,skill-config,passive-skill-config,chara-exp-table,item-config,star-sign}.ts`, `src/entities/character.ts`, `src/stat-calculator.ts`, `src/service.ts`, `src/cli-push.ts`, `src/core/{paths,data-loader,cfgbin-db}.ts`, `src/azalee-inagle-integration.test.ts` ; consommateurs : `apps/website/src/lib/wiki-service.ts`, `packages/azalee/src/db/sqlite-client.ts`, `packages/cron/src/tasks/db.ts`.
 
 ---
 
@@ -392,7 +392,7 @@ Liens inter-étages vérifiés entre les trois audits :
 - **iecode `FormatCatalog.cs` → niers `nie-seed/src/formats.rs`** : niers re-porte le catalogue iecode (magics + chemins de parser de référence) en table Rust `FormatDef`, sourcée sur `FormatDetector.cs` et les parsers Level-5/Criware. La clé XOR `0x1717E18E`, le décodeur CRILAYLA et les offsets G4MD/G4TX/NXTCH sont directement portables. `iecode export-knowledge` est le canal d'interop (JSON régénérable, non commité). La boucle RE niers est donc câblée sur les ancres de vérité iecode.
 - **iecode (extraction) → inagle (`/home/ubuntu/niers/data`)** : ce que iecode dump (cfg.bin clair issu des CPK) est exactement ce qu'inagle attend dans `DATA_PATH`. `/home/ubuntu/niers/data` est un **corpus parsé**, pas un dump Steam brut — cohérent des deux côtés (iecode §1.5 le dit, inagle §2.1 le confirme). L'option `cfgbin-db` d'inagle (`~/data/cache/cfgbin.sqlite`, ~2.3 Go) est **produite par le toolkit iecode** : pont concret entre les deux étages.
 - **inagle (cli-push) → Supabase (tables `inagle_*`)** : les tables `inagle_*` sont des projections écrasées par `cli-push.ts` (delete+reinsert) ; cohérent avec l'absence totale de FK Postgres entre elles (audit Supabase §3.4) et avec leur corrélation par champs métier (`internal_code`, `team_id`, `partner_ids`). Le piège `category_id`/`element_id = NULL` est constaté des deux côtés : décrit dans inagle (`wiki-service.ts` filtre via texte FR) et **mesuré** dans Supabase (`skills_null_catid=1002` sur 1 002 lignes). Triple confirmation avec CLAUDE.md.
-- **inagle (auras hissatsu natif) → Supabase répartition** : le `loadAuraSkills`/`resolveAuraHissatsu` d'inagle (228/387 auras résolues) alimente `sheet_data.hissatsu` et la répartition par sous-type → tables `inagle_keshins (282) / souls (56) / miximax (70) / auras (9)`. Les comptes Supabase reflètent cette ventilation.
+- **inagle (auras SQL) → PostgreSQL répartition** : `sheet_data.hissatsu` et les colonnes normalisées alimentent la répartition par sous-type (`inagle_keshins`, `inagle_souls`, `inagle_miximax`, `inagle_awakenings`, `inagle_mode_changes`, `inagle_auras`).
 - **cron ie-crawl → `inagle_rag_chunks`** : le RAG est alimenté par le cron, pas par cli-push. La répartition `source_kind` le prouve : `sqlite` 6 962 (miroir inagle embarqué côté azalee re-chunké), `tweet` 1 328, `json/doc/lua/ts/cfg` (sources iecode/docs). La dédup `(source_id, content_hash)` rend le crawl idempotent. La RPC `rag_hybrid_search` (HNSW + GIN fusionnés par RRF) est consommée par azalee.
 - **Supabase → azalee (miroir SQLite)** : `nie-miroir.timer` publie atomiquement `/home/ubuntu/niers/var/mirror.sqlite` depuis les tables `inagle_*`; azalee le lit via `lib/supabase/sqlite-client.ts` avec détection d'inode. Le test d'intégration inagle §2.9 vérifie l'alignement `COUNT(*) inagle_characters` (SQLite) ≥ parsé : cohérence bout-en-bout testée.
 - **Idempotence par buildid** : iecode garde le pipeline par buildid Steam (`.build-snapshot.json`). Réserve cohérente des deux côtés : ce buildid **n'est pas propagé** jusqu'au RAG (`inagle_rag_chunks.buildid = NULL` partout, `rag_distinct_builds=0`).

@@ -1,4 +1,5 @@
 import { createAuthClient } from "better-auth/react";
+import { passkeyClient } from "@better-auth/passkey/client";
 import { twoFactorClient } from "better-auth/client/plugins";
 
 const getBaseURL = () => {
@@ -19,6 +20,7 @@ const getBaseURL = () => {
 export const authClient = createAuthClient({
 	baseURL: getBaseURL(),
 	plugins: [
+		passkeyClient(),
 		twoFactorClient({
 			onTwoFactorRedirect() {
 				if (typeof window !== "undefined") {

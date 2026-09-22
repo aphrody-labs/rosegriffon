@@ -1,10 +1,21 @@
 import { Client } from "@aphrody/discordx";
+import type { Kysely } from "kysely";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 
 import { coreManagerConfig } from "@/configs";
 import { Service } from "@/decorators";
 import type { Tournament } from "@/entities";
 
-import { Database } from "./Database";
+
+interface TournamentRoleDatabase {
+	event: {
+		id: number;
+		discord_role_id: string | null;
+		discord_guild_id: string | null;
+	};
+}
+
+const sql = createAchilleaSql<TournamentRoleDatabase>() as Kysely<TournamentRoleDatabase>;
 
 /**
  * Rôle Discord attribué automatiquement aux inscrits d'un tournoi.
@@ -18,10 +29,6 @@ import { Database } from "./Database";
  */
 @Service()
 export class TournamentRoleService {
-	constructor(
-		private db: Database
-	) {}
-
 	private get client(): Client {
 		const client = (globalThis as typeof globalThis & { __roseGriffonDiscordClient?: Client }).__roseGriffonDiscordClient;
 		if (!client) throw new Error("Discord client is not initialized");
@@ -51,7 +58,11 @@ export class TournamentRoleService {
 
 			tournament.discordRoleId = role.id;
 			tournament.discordGuildId = guild.id;
-			await this.db.em.flush();
+			await sql
+				.updateTable("event")
+				.set({ discord_role_id: role.id, discord_guild_id: guild.id })
+				.where("id", "=", tournament.id)
+				.executeTakeFirstOrThrow();
 
 			return role.id;
 		} catch (error) {
@@ -126,7 +137,12 @@ export class TournamentRoleService {
 			// La référence est oubliée même si Discord a refusé : garder l'id d'un rôle
 			// qu'on ne sait plus manipuler ferait échouer chaque attribution suivante.
 			tournament.discordRoleId = null;
-			await this.db.em.flush().catch(() => undefined);
+			await sql
+				.updateTable("event")
+				.set({ discord_role_id: null })
+				.where("id", "=", tournament.id)
+				.executeTakeFirst()
+				.catch(() => undefined);
 		}
 	}
 

@@ -8,11 +8,11 @@ import type React from "react";
 // On override les deux modules ici pour que leur code original ne soit
 // jamais evalue : le SUT (useSidebarAuth) est importe dynamiquement plus bas.
 
-const mockCreateClient = mock();
+const mockGetCurrentProfile = mock();
 const mockUseSession = mock();
 
-mock.module("@/lib/supabase/client", () => ({
-	createClient: mockCreateClient,
+mock.module("@/app/settings/actions", () => ({
+	getCurrentPublicProfile: mockGetCurrentProfile,
 }));
 
 mock.module("@/lib/auth-client", () => ({
@@ -57,16 +57,11 @@ describe("useSidebarAuth", () => {
 		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 	);
 
-	const mockSelect = mock();
-	const mockFrom = mock();
-
 	beforeEach(async () => {
 		// Pas de vi.clearAllMocks() en bun:test : on reset chaque mock a la main
 		// pour eviter toute fuite entre tests.
-		mockCreateClient.mockClear();
+		mockGetCurrentProfile.mockClear();
 		mockUseSession.mockClear();
-		mockSelect.mockClear();
-		mockFrom.mockClear();
 
 		// Import dynamique du SUT APRES les mock.module ci-dessus.
 		({ useSidebarAuth } = await import("../useSidebarAuth"));
@@ -81,20 +76,7 @@ describe("useSidebarAuth", () => {
 			},
 		});
 
-		// Setup default mock implementation
-		mockCreateClient.mockReturnValue({
-			from: mockFrom,
-		});
-
-		mockFrom.mockReturnValue({
-			select: mockSelect,
-		});
-
-		mockSelect.mockReturnValue({
-			eq: mock().mockReturnValue({
-				maybeSingle: mock().mockResolvedValue({ data: null, error: null }),
-			}),
-		});
+		mockGetCurrentProfile.mockResolvedValue(null);
 	});
 
 	it("should return initial loading state", () => {
@@ -129,13 +111,7 @@ describe("useSidebarAuth", () => {
 
 		mockUseSession.mockReturnValue({ data: { user: mockUser }, isPending: false });
 
-		mockFrom.mockReturnValue({
-			select: mock().mockReturnValue({
-				eq: mock().mockReturnValue({
-					maybeSingle: mock().mockResolvedValue({ data: mockProfile, error: null }),
-				}),
-			}),
-		});
+		mockGetCurrentProfile.mockResolvedValue(mockProfile);
 
 		const { result } = renderHook(() => useSidebarAuth(), { wrapper });
 
@@ -161,13 +137,7 @@ describe("useSidebarAuth", () => {
 		const mockUser = { email: "test@example.com", id: "user-123" };
 		mockUseSession.mockReturnValue({ data: { user: mockUser }, isPending: false });
 
-		mockFrom.mockReturnValue({
-			select: mock().mockReturnValue({
-				eq: mock().mockReturnValue({
-					maybeSingle: mock().mockRejectedValue(new Error("Network error")),
-				}),
-			}),
-		});
+		mockGetCurrentProfile.mockRejectedValue(new Error("Network error"));
 
 		const { result } = renderHook(() => useSidebarAuth(), { wrapper });
 

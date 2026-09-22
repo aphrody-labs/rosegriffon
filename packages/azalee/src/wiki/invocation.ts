@@ -16,7 +16,7 @@
  * Anti-hallucination : aucune valeur inventée. Si le décodage CDN échoue, on renvoie `[]`.
  */
 
-import { createClient } from "../db/provider";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { fetchJson } from "../net";
 import type { InvocationSign, InvocationTier } from "./invocation-shared";
 import { rarityLabel } from "./invocation-shared";
@@ -38,6 +38,16 @@ interface SignRow {
 	starSignNo: number;
 }
 
+interface InvocationDatabase {
+	inagle_constellations: {
+		idx: number;
+		name_fr: string;
+		character_count: number;
+	};
+}
+
+const sql = createAchilleaSql<InvocationDatabase>();
+
 /** Décode les taux d'invocation et les joint aux noms de constellations. */
 export async function getInvocationRates(): Promise<InvocationSign[]> {
 	const cfg = await fetchJson<{ lists?: Array<{ name: string; rows: unknown[] }> }>(
@@ -55,15 +65,11 @@ export async function getInvocationRates(): Promise<InvocationSign[]> {
 	// Noms des constellations (idx = signNo - 1).
 	const byIdx = new Map<number, { name_fr: string; character_count: number }>();
 	try {
-		const supabase = await createClient();
-		const { data } = await supabase
-			.from("inagle_constellations")
-			.select("idx,name_fr,character_count");
-		for (const c of (data ?? []) as Array<{
-			idx: number;
-			name_fr: string;
-			character_count: number;
-		}>) {
+		const data = await sql
+			.selectFrom("inagle_constellations")
+			.select(["idx", "name_fr", "character_count"])
+			.execute();
+		for (const c of data) {
 			byIdx.set(c.idx, { name_fr: c.name_fr, character_count: c.character_count });
 		}
 	} catch {

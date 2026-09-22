@@ -1,7 +1,7 @@
 "use server";
 
 import { getServerSession, requireAdmin } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
 
 export interface AuditLogEntry {
 	id: string;
@@ -29,6 +29,43 @@ export interface ExportAuditLogOptions {
 	to?: string;
 }
 
+type AuditRow = Omit<AuditLogEntry, "user"> & {
+	user_id: string | null;
+	username: string | null;
+	full_name: string | null;
+	avatar_url: string | null;
+};
+
+async function fetchAuditRows(options: {
+	limit?: number;
+	entityType?: string;
+	userId?: string;
+	from?: string;
+	to?: string;
+} = {}): Promise<AuditRow[]> {
+	const values: unknown[] = [];
+	const where: string[] = [];
+	const add = (sql: string, value: unknown) => {
+		values.push(value);
+		where.push(`${sql} $${values.length}`);
+	};
+	if (options.entityType) add("a.entity_type =", options.entityType);
+	if (options.userId) add("a.user_id =", options.userId);
+	if (options.from) add("a.created_at >=", options.from);
+	if (options.to) add("a.created_at <=", options.to);
+	const limit = Math.max(1, Math.min(options.limit ?? 5000, 5000));
+	values.push(limit);
+	const { rows } = await getPgPool().query<AuditRow>(
+		`SELECT a.id, a.action, a.entity_type, a.entity_id, a.details, a.created_at, a.user_id,
+			p.username, p.full_name, p.avatar_url
+		 FROM admin_audit_log a LEFT JOIN profiles p ON p.id = a.user_id
+		 ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+		 ORDER BY a.created_at DESC LIMIT $${values.length}`,
+		values
+	);
+	return rows;
+}
+
 /**
  * Insère une entrée dans le journal d'audit.
  * Nécessite d'être authentifié.
@@ -44,20 +81,13 @@ export async function logAuditAction(
 		throw new Error("Non authentifié");
 	}
 
-	const supabase = await createClient();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const client = supabase as any;
-
-	const { error } = await client.from("admin_audit_log").insert({
-		action,
-		created_at: new Date().toISOString(),
-		details: details ?? null,
-		entity_id: entityId,
-		entity_type: entityType,
-		user_id: session.user.id,
-	});
-
-	if (error) {
+	try {
+		await getPgPool().query(
+			`INSERT INTO admin_audit_log (action, created_at, details, entity_id, entity_type, user_id)
+			 VALUES ($1, $2, $3, $4, $5, $6)`,
+			[action, new Date().toISOString(), details ?? null, entityId, entityType, session.user.id]
+		);
+	} catch (error) {
 		console.error("logAuditAction error:", error);
 		// On ne remonte pas l'erreur pour ne pas bloquer l'action principale
 	}
@@ -73,62 +103,16 @@ export async function getAuditLog(options: GetAuditLogOptions = {}): Promise<Aud
 
 	const { limit = 50, entityType, userId } = options;
 
-	const supabase = await createClient();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const client = supabase as any;
-
-	let query = client
-		.from("admin_audit_log")
-		.select(
-			`id, action, entity_type, entity_id, details, created_at,
-       profiles:user_id ( id, username, full_name, avatar_url )`
-		)
-		.order("created_at", { ascending: false })
-		.limit(limit);
-
-	if (entityType) {
-		query = query.eq("entity_type", entityType);
-	}
-
-	if (userId) {
-		query = query.eq("user_id", userId);
-	}
-
-	const { data, error } = await query;
-
-	if (error) {
+	try {
+		return (await fetchAuditRows({ entityType, limit, userId })).map((row) => ({
+			action: row.action, created_at: row.created_at, details: row.details,
+			entity_id: row.entity_id, entity_type: row.entity_type, id: row.id,
+			user: row.user_id ? { id: row.user_id, username: row.username, full_name: row.full_name, avatar_url: row.avatar_url } : null,
+		}));
+	} catch (error) {
 		console.error("getAuditLog error:", error);
 		return [];
 	}
-
-	if (!data) {
-		return [];
-	}
-
-	return (
-		data as Array<{
-			id: string;
-			action: string;
-			entity_type: string;
-			entity_id: string;
-			details: Record<string, unknown> | null;
-			created_at: string;
-			profiles: {
-				id: string;
-				username: string | null;
-				full_name: string | null;
-				avatar_url: string | null;
-			} | null;
-		}>
-	).map((row) => ({
-		action: row.action,
-		created_at: row.created_at,
-		details: row.details,
-		entity_id: row.entity_id,
-		entity_type: row.entity_type,
-		id: row.id,
-		user: row.profiles ?? null,
-	}));
 }
 
 /**
@@ -141,48 +125,7 @@ export async function exportAuditLogCSV(options: ExportAuditLogOptions = {}): Pr
 
 	const { from, to } = options;
 
-	const supabase = await createClient();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const client = supabase as any;
-
-	let query = client
-		.from("admin_audit_log")
-		.select(
-			`id, action, entity_type, entity_id, details, created_at,
-       profiles:user_id ( id, username, full_name, avatar_url )`
-		)
-		.order("created_at", { ascending: false });
-
-	if (from) {
-		query = query.gte("created_at", from);
-	}
-
-	if (to) {
-		query = query.lte("created_at", to);
-	}
-
-	const { data, error } = await query;
-
-	if (error) {
-		console.error("exportAuditLogCSV error:", error);
-		throw new Error("Impossible d'exporter le journal d'audit");
-	}
-
-	const rows =
-		(data as Array<{
-			id: string;
-			action: string;
-			entity_type: string;
-			entity_id: string;
-			details: Record<string, unknown> | null;
-			created_at: string;
-			profiles: {
-				id: string;
-				username: string | null;
-				full_name: string | null;
-				avatar_url: string | null;
-			} | null;
-		}>) || [];
+	const rows = await fetchAuditRows({ from, to });
 
 	// En-têtes CSV
 	const headers = [
@@ -218,9 +161,9 @@ export async function exportAuditLogCSV(options: ExportAuditLogOptions = {}): Pr
 			escapeCSV(row.action),
 			escapeCSV(row.entity_type),
 			escapeCSV(row.entity_id),
-			escapeCSV(row.profiles?.id ?? null),
-			escapeCSV(row.profiles?.username ?? null),
-			escapeCSV(row.profiles?.full_name ?? null),
+			escapeCSV(row.user_id),
+			escapeCSV(row.username),
+			escapeCSV(row.full_name),
 			escapeCSV(row.details ? JSON.stringify(row.details) : null),
 		].join(",");
 		csvLines.push(line);

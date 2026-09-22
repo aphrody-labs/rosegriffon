@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { updateAvatarUrl } from "@/app/settings/actions";
 
 import { useSidebarAuth } from "@/hooks/useSidebarAuth";
-import { createClient } from "@/lib/supabase/client";
+import { getBrowserStorage } from "@/lib/storage/browser";
 import { InstagramIcon as Instagram } from "@/shared/icons/instagram";
 
 // Icons
@@ -152,9 +152,9 @@ export default function PfpGenerator() {
 			}
 
 			// 2. Upload to Supabase Storage
-			const supabase = createClient();
+			const storage = getBrowserStorage();
 			const filePath = `${user.id}/avatar.png`; // Overwrite existing avatar
-			const { error: uploadError } = await supabase.storage
+			const { error: uploadError } = await storage
 				.from("avatars")
 				.upload(filePath, blob, { upsert: true });
 
@@ -165,7 +165,7 @@ export default function PfpGenerator() {
 			// 3. Get Public URL
 			const {
 				data: { publicUrl },
-			} = supabase.storage.from("avatars").getPublicUrl(filePath);
+			} = storage.from("avatars").getPublicUrl(filePath);
 
 			// 4. Enregistrement en base. L'horodatage force le rafraîchissement du
 			// cache navigateur, l'URL de stockage étant sinon identique.

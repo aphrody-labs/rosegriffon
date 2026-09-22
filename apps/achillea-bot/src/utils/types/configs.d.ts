@@ -23,15 +23,6 @@ type GeneralConfigType = {
 	}[];
 };
 
-type DatabaseConfigType = {
-	path: `${string}/`;
-
-	backup: {
-		enabled: boolean;
-		path: `${string}/`;
-	};
-};
-
 type LogsConfigType = {
 	debug: boolean;
 	logTailMaxSize: number;

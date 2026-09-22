@@ -1,12 +1,12 @@
 
 import { galleryVariantUrl } from "../images";
-import { createClient } from "../db/provider";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 
 /**
  * Accès data dédié à la section « Stades » (terrains/salles de match IEVR).
  *
- * Source : table `inagle_stadiums` (81 lignes) du miroir SQLite embarqué, lue via
- * le client Supabase-compatible (`@/lib/supabase/server`). Fichier ISOLÉ — ne
+ * Source : projection PostgreSQL `inagle_stadiums` (81 lignes), lue via Kysely.
+ * Fichier ISOLÉ — ne
  * dépend PAS de `lib/wiki-service.ts` (partagé entre agents).
  *
  * Vérité terrain (schéma réel inspecté) : chaque stade porte seulement un `id`
@@ -27,6 +27,12 @@ interface StadiumRow {
 	image_path: string | null;
 	condition: string | null;
 }
+
+interface StadiumDatabase {
+	inagle_stadiums: StadiumRow;
+}
+
+const sql = createAchilleaSql<StadiumDatabase>();
 
 /** Stade normalisé pour l'UI (aucune donnée inventée). */
 export interface Stadium {
@@ -117,16 +123,17 @@ export async function getStadiumsList(params: { q?: string } = {}): Promise<{
 	data: Stadium[];
 	total: number;
 }> {
-	const supabase = await createClient();
-	const { data, error } = await supabase
-		.from("inagle_stadiums")
-		.select("id, field_index, image_path, condition");
-
-	if (error || !data) {
+	let data: StadiumRow[];
+	try {
+		data = await sql
+			.selectFrom("inagle_stadiums")
+			.select(["id", "field_index", "image_path", "condition"])
+			.execute();
+	} catch {
 		return { data: [], total: 0 };
 	}
 
-	let stadiums = (data as StadiumRow[]).map(rowToStadium);
+	let stadiums = data.map(rowToStadium);
 
 	const q = params.q?.trim().toLowerCase();
 	if (q) {
@@ -146,16 +153,14 @@ export async function getStadiumsList(params: { q?: string } = {}): Promise<{
 
 /** Récupère un stade par son `id` (hash de champ), ou `null` si introuvable. */
 export async function getStadium(id: string): Promise<Stadium | null> {
-	const supabase = await createClient();
-	const { data, error } = await supabase
-		.from("inagle_stadiums")
-		.select("id, field_index, image_path, condition")
-		.eq("id", id)
-		.limit(1)
-		.maybeSingle();
-
-	if (error || !data) {
+	try {
+		const data = await sql
+			.selectFrom("inagle_stadiums")
+			.select(["id", "field_index", "image_path", "condition"])
+			.where("id", "=", id)
+			.executeTakeFirst();
+		return data ? rowToStadium(data) : null;
+	} catch {
 		return null;
 	}
-	return rowToStadium(data as StadiumRow);
 }

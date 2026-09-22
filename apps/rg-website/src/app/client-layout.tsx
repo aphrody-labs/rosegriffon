@@ -21,7 +21,6 @@ import EdgeSwipeDetector from "@/components/shared/EdgeSwipeDetector";
 import MobileWatermark from "@/components/shared/MobileWatermark";
 import { DynamicUniverseHead } from "@/components/layout/DynamicUniverseHead";
 import { AuthProvider as AuthProviderProfil } from "@/components/providers/AuthProvider";
-import { SupabaseProvider } from "@/components/providers/SupabaseProvider";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import {
 	LanguageProvider,
@@ -203,15 +202,7 @@ export default function ClientLayout({
 					 * l'ancien frontend autonome, avant l'unification dans Website
 					 * identiques octet à octet.
 					 */}
-					{/*
-					 * `AuthProviderProfil` lit le profil via `useSupabase()`, donc il
-					 * exige un `SupabaseProvider` AU-DESSUS de lui. Celui-ci n'était
-					 * monté que dans `wiki/layout.tsx` : le monter ici est la
-					 * condition pour que le contexte de profil existe sur tout le site,
-					 * et pas seulement sous `/wiki`.
-					 */}
-					<SupabaseProvider>
-						<AuthProviderProfil>
+					<AuthProviderProfil>
 							<ProfileProvider>
 								<LanguageProvider initialLanguage={initialLanguage}>
 									<AchilleaAuthProvider>
@@ -298,7 +289,6 @@ export default function ClientLayout({
 								<Toaster richColors position="top-right" />
 							</ProfileProvider>
 						</AuthProviderProfil>
-					</SupabaseProvider>
 				</AuthProvider>
 			</Providers>
 		</ThemeProvider>

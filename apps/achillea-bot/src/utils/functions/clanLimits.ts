@@ -1,4 +1,4 @@
-import { Data, DataRepository, defaultData } from "@/entities/Data";
+import { DataStore, defaultData } from "@/services/DataStore";
 import { ClanMemberDistinction } from "@/utils/enums";
 
 export type ClanMemberLimits = {
@@ -66,37 +66,21 @@ export function checkClanMemberLimitExceeded(
 	return null;
 }
 
-async function readDataKey<T extends keyof typeof defaultData>(
-	repo: DataRepository,
-	key: T
-): Promise<(typeof defaultData)[T]> {
-	const row = await repo.findOne({ key });
-	if (!row) {
-		const value = defaultData[key];
-		await repo.add(key, value);
-		return value;
-	}
-
-	return JSON.parse(row.value) as (typeof defaultData)[T];
-}
-
-export async function getClanMemberLimits(em: DatabaseEntityManager): Promise<ClanMemberLimits> {
-	const repo = em.getRepository(Data) as DataRepository;
+export async function getClanMemberLimits(store = new DataStore()): Promise<ClanMemberLimits> {
 	const [playerLimit, staffLimit] = await Promise.all([
-		readDataKey(repo, "clanPlayerLimit"),
-		readDataKey(repo, "clanStaffLimit"),
+		store.getOrDefault("clanPlayerLimit", defaultData.clanPlayerLimit),
+		store.getOrDefault("clanStaffLimit", defaultData.clanStaffLimit),
 	]);
 
 	return normalizeClanMemberLimits({ playerLimit, staffLimit });
 }
 
 export async function setClanMemberLimits(
-	em: DatabaseEntityManager,
-	limits: ClanMemberLimits
+	limits: ClanMemberLimits,
+	store = new DataStore()
 ): Promise<ClanMemberLimits> {
 	const normalized = normalizeClanMemberLimits(limits);
-	const repo = em.getRepository(Data) as DataRepository;
-	await repo.set("clanPlayerLimit", normalized.playerLimit);
-	await repo.set("clanStaffLimit", normalized.staffLimit);
+	await store.set("clanPlayerLimit", normalized.playerLimit);
+	await store.set("clanStaffLimit", normalized.staffLimit);
 	return normalized;
 }

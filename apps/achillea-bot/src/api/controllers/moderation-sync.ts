@@ -13,12 +13,39 @@
 import { BodyParams, Controller, HeaderParams, Post, Req } from "@tsed/common";
 import { Forbidden, UnprocessableEntity } from "@tsed/exceptions";
 import type { Request } from "express";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { sql } from "kysely";
+import type { Generated, Selectable } from "kysely";
 
-import { Sanction } from "@/entities";
-import { CrossSyncService, Database } from "@/services";
+import { CrossSyncService } from "@/services";
 import { BaseController } from "@/utils/classes";
 import { resolveDependenciesSync } from "@/utils/functions";
 import { SanctionIssuerType, SanctionType } from "@/utils/enums";
+
+interface SanctionTable {
+	id: Generated<string>;
+	user_id: string;
+	guild_id: string;
+	type: string;
+	reason: string | null;
+	duration_sec: number | null;
+	issued_by: string;
+	issued_by_type: string;
+	expires_at: Date | null;
+	revoked_at: Date | null;
+	revoked_by: string | null;
+	revoke_reason: string | null;
+	evidence: Record<string, unknown>[] | null;
+	created_at: Generated<Date>;
+	updated_at: Generated<Date>;
+}
+
+interface SanctionDatabase {
+	sanction: SanctionTable;
+}
+
+const db = createAchilleaSql<SanctionDatabase>();
+type SanctionRow = Selectable<SanctionTable>;
 
 // =============================================================================
 // DTO / payload shape (permissive — validated inline)
@@ -52,11 +79,10 @@ interface CrossSyncBody {
 @Controller("/moderation/sync")
 export class ModerationSyncController extends BaseController {
 	private crossSync: CrossSyncService;
-	private db: Database;
 
 	constructor() {
 		super();
-		[this.crossSync, this.db] = resolveDependenciesSync([CrossSyncService, Database]);
+		[this.crossSync] = resolveDependenciesSync([CrossSyncService]);
 	}
 
 	@Post("/")
@@ -122,19 +148,8 @@ export class ModerationSyncController extends BaseController {
 		// 4. Persist locally
 		//    evidence[0].from = source_bot_id to prevent re-propagation
 		// -------------------------------------------------------------------------
-		const em = this.db.em.fork();
-
 		if (action === "create") {
-			const sanction = new Sanction();
-			sanction.userId = s.userId;
-			sanction.guildId = source_guild_id;
-			sanction.type = sanctionType;
-			sanction.reason = s.reason ?? null;
-			sanction.durationSec = s.durationSec ?? null;
-			sanction.issuedBy = s.issuedBy;
-			sanction.issuedByType = SanctionIssuerType.System;
-			sanction.expiresAt = s.expiresAt ? new Date(s.expiresAt) : null;
-			sanction.evidence = [
+			const evidence = [
 				{
 					from: source_bot_id,
 					source_guild: source_guild_id,
@@ -142,34 +157,57 @@ export class ModerationSyncController extends BaseController {
 					...s.evidence?.[0],
 				},
 			];
-
-			await em.persist(sanction).flush();
-			return { ok: true, sanctionId: sanction.id };
+			const inserted = await db
+				.insertInto("sanction")
+				.values({
+					user_id: s.userId,
+					guild_id: source_guild_id,
+					type: sanctionType,
+					reason: s.reason ?? null,
+					duration_sec: s.durationSec ?? null,
+					issued_by: s.issuedBy,
+					issued_by_type: SanctionIssuerType.System,
+					expires_at: s.expiresAt ? new Date(s.expiresAt) : null,
+					revoked_at: null,
+					revoked_by: null,
+					revoke_reason: null,
+					evidence,
+				})
+				.returning("id")
+				.executeTakeFirstOrThrow();
+			return { ok: true, sanctionId: inserted.id };
 		}
 
 		// action === "revoke"
 		// Try to find the original sanction by original_id stored in evidence
 		const original_id = s.id;
-		let resolved: Sanction | null = null;
+		let resolved: Pick<SanctionRow, "id"> | null = null;
 
 		if (original_id) {
 			// Échappe les wildcards LIKE (% _ \) pour éviter de révoquer une mauvaise
 			// sanction si l'id distant en contient.
 			const escapedId = original_id.replace(/[\\%_]/g, "\\$&");
-			// Look for an existing local sanction that mirrors the remote one
-			resolved = await em.findOne(Sanction, {
-				userId: s.userId,
-				guildId: source_guild_id,
-				evidence: { $like: `%"original_id":"${escapedId}"%` } as any,
-				revokedAt: null,
-			});
+			resolved = await db
+				.selectFrom("sanction")
+				.select(["id", "user_id", "guild_id", "type", "reason", "duration_sec", "issued_by", "issued_by_type", "expires_at", "revoked_at", "revoked_by", "revoke_reason", "evidence", "created_at", "updated_at"])
+				.where("user_id", "=", s.userId)
+				.where("guild_id", "=", source_guild_id)
+				.where("revoked_at", "is", null)
+				.where(sql<boolean>`evidence::text LIKE ${`%\"original_id\":\"${escapedId}\"%`} ESCAPE '\\'`)
+				.executeTakeFirst() ?? null;
 		}
 
 		if (resolved) {
-			resolved.revokedAt = new Date();
-			resolved.revokedBy = source_bot_id;
-			resolved.revokeReason = `Cross-sync revoke from ${source_bot_id}`;
-			await em.flush();
+			await db
+				.updateTable("sanction")
+				.set({
+					revoked_at: new Date(),
+					revoked_by: source_bot_id,
+					revoke_reason: `Cross-sync revoke from ${source_bot_id}`,
+				})
+				.where("id", "=", resolved.id)
+				.where("revoked_at", "is", null)
+				.executeTakeFirst();
 			return { ok: true, sanctionId: resolved.id };
 		}
 
@@ -181,14 +219,7 @@ export class ModerationSyncController extends BaseController {
 					? SanctionType.Unmute
 					: sanctionType;
 
-		const revokeSanction = new Sanction();
-		revokeSanction.userId = s.userId;
-		revokeSanction.guildId = source_guild_id;
-		revokeSanction.type = revokeType;
-		revokeSanction.reason = `Cross-sync revoke from ${source_bot_id}`;
-		revokeSanction.issuedBy = source_bot_id;
-		revokeSanction.issuedByType = SanctionIssuerType.System;
-		revokeSanction.evidence = [
+		const evidence = [
 			{
 				from: source_bot_id,
 				source_guild: source_guild_id,
@@ -196,7 +227,24 @@ export class ModerationSyncController extends BaseController {
 			},
 		];
 
-		await em.persist(revokeSanction).flush();
-		return { ok: true, sanctionId: revokeSanction.id };
+		const inserted = await db
+			.insertInto("sanction")
+			.values({
+				user_id: s.userId,
+				guild_id: source_guild_id,
+				type: revokeType,
+				reason: `Cross-sync revoke from ${source_bot_id}`,
+				duration_sec: null,
+				issued_by: source_bot_id,
+				issued_by_type: SanctionIssuerType.System,
+				expires_at: null,
+				revoked_at: null,
+				revoked_by: null,
+				revoke_reason: null,
+				evidence,
+			})
+			.returning("id")
+			.executeTakeFirstOrThrow();
+		return { ok: true, sanctionId: inserted.id };
 	}
 }

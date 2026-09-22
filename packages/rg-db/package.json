@@ -6,7 +6,6 @@
 	"exports": {
 		".": "./src/index.ts",
 		"./browser": "./src/browser.ts",
-		"./server": "./src/server.ts",
 		"./service": "./src/service.ts",
 		"./redis": "./src/redis.ts",
 		"./storage": "./src/storage.ts",

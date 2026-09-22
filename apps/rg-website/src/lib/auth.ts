@@ -35,6 +35,10 @@ export const auth = createRoseGriffonAuth({
 	sendEmail,
 	executerSql: (query, parameters) => pool.query(query, parameters as unknown[]),
 	nextCookiesPlugin: nextCookies(),
+	passkey: {
+		rpID: process.env.BETTER_AUTH_PASSKEY_RP_ID ?? new URL(getBetterAuthURL()).hostname,
+		origin: process.env.BETTER_AUTH_PASSKEY_ORIGIN ?? getBetterAuthURL(),
+	},
 	patreon: {
 		authorizationUrl: "https://www.patreon.com/oauth2/authorize",
 		tokenUrl: "https://www.patreon.com/api/oauth2/token",

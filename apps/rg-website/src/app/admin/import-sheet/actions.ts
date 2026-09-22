@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "@/lib/auth-helpers";
 import { isAdminRole } from "@/lib/auth-roles";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { convertTableToHtml, fetchGoogleSheetData, parseCsvData } from "@/lib/table-importer";
 
 async function requireImportAdmin() {
@@ -12,7 +12,7 @@ async function requireImportAdmin() {
 		return { error: "Non authentifié" as const, user: null };
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const { data: profile } = await supabase
 		.from("profiles")
 		.select("role")
@@ -28,7 +28,7 @@ async function requireImportAdmin() {
 
 // Common helper to save article
 async function saveArticle(title: string, content: string, userId: string, category: string) {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	// Unique slug
 	const baseSlug = title

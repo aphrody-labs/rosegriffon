@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 
 import { EventForm } from "@/components/admin/events/event-form";
 
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 interface PageProps {
 	params: Promise<{ id: string }>;
@@ -13,7 +13,7 @@ interface PageProps {
 
 export default async function EditEventPage({ params }: PageProps) {
 	const { id } = await params;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const { data: event } = await supabase.from("events").select("*").eq("id", id).single();
 

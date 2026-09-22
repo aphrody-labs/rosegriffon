@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { isPatreonAdmin } from "@/lib/patreon/admin-access";
+import { isAdmin, resolveProfile } from "@rosegriffon/auth";
 import { createPostgresClient } from "@rosegriffon/db/service";
-import type { Database } from "@rosegriffon/db";
+import type { RgRole } from "@rosegriffon/types/roles";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-type Role = "admin" | "staff" | "user" | "premium" | "banned" | null;
+type Role = RgRole | null;
 
 export interface ApiAuthSuccess {
 	user: { id: string; email: string; name: string };
@@ -53,43 +53,10 @@ export async function requireApiAdmin(): Promise<ApiAuthResult> {
 		return authed;
 	}
 
-	const db = createPostgresClient();
-
-	const tryFetch = async (
-		column: keyof Profile,
-		value: string
-	): Promise<Pick<Profile, "role"> | null> => {
-		const { data } = await db
-			.from("profiles")
-			.select("role")
-			.eq(column as string, value)
-			.maybeSingle();
-		return data as Pick<Profile, "role"> | null;
-	};
-
 	const { user } = authed.data;
-
-	let profile = await tryFetch("id", user.id);
-
-	if (!profile) {
-		const { data: account } = await db
-			.from("account")
-			.select("account_id")
-			.eq("user_id", user.id)
-			.eq("provider_id", "discord")
-			.maybeSingle();
-		const discordId = (account as { account_id?: string } | null)?.account_id;
-		if (discordId) {
-			profile = await tryFetch("discord_id", discordId);
-		}
-	}
-
-	if (!profile && user.email) {
-		profile = await tryFetch("email", user.email);
-	}
-
+	const profile = await resolveProfile(createPostgresClient(), user);
 	const role = (profile?.role ?? null) as Role;
-	if (role !== "admin" && role !== "staff") {
+	if (!isAdmin(role)) {
 		return {
 			ok: false,
 			response: NextResponse.json({ error: "Forbidden" }, { status: 403 }),

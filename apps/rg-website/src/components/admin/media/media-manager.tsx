@@ -30,7 +30,7 @@ import {
 	Search,
 	Trash2,
 } from "@/lib/icons-config";
-import { createClient } from "@/lib/supabase/client";
+import { getBrowserStorage } from "@/lib/storage/browser";
 
 import { MediaUploader } from "./media-uploader";
 
@@ -60,7 +60,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
 	const [searchQuery, setSearchQuery] = useState(searchParams?.get("query") || "");
 
 	const router = useRouter();
-	const supabase = createClient();
+	const storage = getBrowserStorage();
 
 	const handleSearch = useCallback(
 		(term: string) => {
@@ -93,7 +93,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
 	};
 
 	const copyToClipboard = (name: string) => {
-		const { data } = supabase.storage.from("assets").getPublicUrl(name);
+		const { data } = storage.from("assets").getPublicUrl(name);
 		navigator.clipboard.writeText(data.publicUrl);
 		toast.success("URL copiée !");
 	};
@@ -104,7 +104,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
 		}
 
 		setDeletingId(id);
-		const { error } = await supabase.storage.from("assets").remove([name]);
+		const { error } = await storage.from("assets").remove([name]);
 
 		if (error) {
 			toast.error("Erreur lors de la suppression");

@@ -130,15 +130,15 @@ L'injection est centralisée dans un module unique, importé par chaque façade 
 est donc garantie avant le premier accès données, quelle que soit la route :
 
 ```ts
-// apps/azalee/lib/azalee-runtime.ts
+// apps/website/src/lib/azalee-runtime.ts
 import "server-only";
 
 import { setDatabaseProvider } from "@rosegriffon/azalee/db";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
-setDatabaseProvider(createClient);
+setDatabaseProvider(createPostgresClient);
 
-export { createClient };
+export { createPostgresClient };
 ```
 
 Le client injecté est le client Supabase enveloppé du `Proxy` maison : les tables
@@ -147,8 +147,8 @@ reste sur PostgREST, avec repli Postgres si le miroir est indisponible. Sémanti
 strictement identique à l'avant-extraction : les pages du wiki n'ont pas changé de
 comportement, seul le lieu du code a changé.
 
-Sans injection — CLI, tests, sidecar Tauri — la lib retombe sur le miroir SQLite seul :
-zéro réseau, zéro clé. C'est ce défaut qui rend la bibliothèque autonome.
+Sans injection, la lib utilise PostgreSQL si une URL est configurée. Les outils CLI,
+tests et sidecars peuvent sélectionner explicitement le miroir SQLite offline.
 
 Façades présentes : `lib/wiki-service.ts`, `lib/wiki/{teams,shops,quests,coaches,stadiums,drops,gacha,trophies,invocation,chara-stats,game-text}.ts`,
 `lib/cpk/index.ts`, `lib/game-text/index.ts`, `lib/azalee-runtime.ts`.

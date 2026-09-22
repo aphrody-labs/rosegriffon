@@ -65,7 +65,7 @@ export const elysiaAuth = betterAuth({
 			sendAuthEmail(user.email, "Confirme ton adresse — Rose Griffon", url),
 	},
 	plugins: [
-		admin({ defaultRole: "member", adminRoles: ["admin", "staff", "super_admin"] }),
+		admin({ defaultRole: "user", adminRoles: ["admin"] }),
 		// The workspace can retain two compatible @better-auth/core peer instances
 		// under Bun; the runtime package versions are pinned together in the lockfile.
 		apiKey({

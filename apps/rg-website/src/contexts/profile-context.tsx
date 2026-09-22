@@ -4,7 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 
 import { useAuth } from "@/contexts/auth-context";
 import { useProfileSync, useUpdateProfile } from "@/hooks/use-profile-sync";
-import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rosegriffon/db";
+import { getCurrentPublicProfile } from "@/app/settings/actions";
+import type { PublicProfile } from "@rosegriffon/db";
 
 // Le client navigateur (clé anon) ne peut lire QUE les colonnes publiques :
 // typer le contexte avec la ligne complète promettait des champs (adresse,
@@ -46,20 +47,10 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 			setIsLoading(true);
 			setError(null);
 
-			const { createClient } = await import("@/lib/supabase/client");
-			const supabase = createClient();
-
-			const { data, error: fetchError } = await supabase
-				.from("profiles")
-				// `select("*")` échoue en 42501 depuis la fermeture PII : le contexte
-				// restait en erreur permanente pour tout utilisateur connecté.
-				.select(PUBLIC_PROFILE_COLUMNS)
-				.eq("id", user.id)
-				.single();
-
-			if (fetchError) {
-				console.error("[ProfileProvider] Erreur lors de la récupération:", fetchError);
-				setError(fetchError.message);
+			const data = await getCurrentPublicProfile();
+			if (!data) {
+				console.error("[ProfileProvider] Profil introuvable");
+				setError("Profil introuvable");
 				setProfile(null);
 				return;
 			}

@@ -23,16 +23,16 @@ export function registerAuditCommand(program: Command): void {
 				const chars = svc.characters.all();
 				const skills = svc.skills.all();
 
-				const missingName = chars.filter((c) => !c.names?.fr && !c.names?.en);
+				const missingName = chars.filter((c: any) => !c.names?.fr && !c.names?.en);
 				// Champs hérités des anciens dumps (absents du type inagle courant) : on les
 				// teste quand même pour ne pas signaler à tort un personnage illustré.
 				const legacyImage = (c: unknown) =>
 					(c as { image_url?: string; zukan_hash?: string; image?: string }).image_url ??
 					(c as { zukan_hash?: string }).zukan_hash ??
 					(c as { image?: string }).image;
-				const missingImg = chars.filter((c) => !c.icons?.face && !legacyImage(c) && !c.zukanHash);
-				const missingStats = chars.filter((c) => !c.stats || Object.keys(c.stats).length === 0);
-				const missingSkillName = skills.filter((s) => !s.name_FR && !s.name_EN);
+				const missingImg = chars.filter((c: any) => !c.icons?.face && !legacyImage(c) && !c.zukanHash);
+				const missingStats = chars.filter((c: any) => !c.stats || Object.keys(c.stats).length === 0);
+				const missingSkillName = skills.filter((s: any) => !s.name_FR && !s.name_EN);
 
 				if (options.json) {
 					restoreLogs(true);

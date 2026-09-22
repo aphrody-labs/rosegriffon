@@ -1,10 +1,44 @@
 import { EmbedBuilder } from "discord.js";
 import { Client } from "@aphrody/discordx";
 import { singleton } from "tsyringe";
+import type { Generated, Kysely } from "kysely";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 
-import { CastAttribution, CastEvent, CastSlot } from "@/entities";
+interface CastNotificationDatabase {
+	cast_event: {
+		id: Generated<string>;
+		name: string;
+		kind: string;
+		scheduled_at: Date;
+		twitch_url: string | null;
+		status: string;
+	};
+	cast_slot: { id: Generated<string>; event_id: string; role: string };
+	cast_attribution: {
+		id: Generated<string>;
+		slot_id: string;
+		user_id: string | null;
+		confirmed_at: Date | null;
+		notified_j2: boolean;
+		notified_h2: boolean;
+	};
+}
 
-import { Database } from "./Database";
+interface CastEventLike {
+	id: string;
+	name: string;
+	kind: string;
+	scheduledAt: Date;
+	twitchUrl: string | null;
+}
+
+interface CastAttributionRow {
+	id: string;
+	user_id: string;
+	role: string;
+}
+
+const sql = createAchilleaSql<CastNotificationDatabase>() as Kysely<CastNotificationDatabase>;
 
 export interface NotifyResult {
 	sent: number;
@@ -32,39 +66,35 @@ const H2_OFFSET_MS = 2 * 60 * 60 * 1000;
  */
 @singleton()
 export class CastNotificationService {
-	constructor(private db: Database) {}
-
 	// notifyJ2
 
 	/**
 	 * Envoie les DM J-2 à tous les casters confirmés dont notifiedJ2 = false.
 	 * Met à jour notifiedJ2 = true et envoie un récap sur le channel staff.
 	 */
-	async notifyJ2(event: CastEvent, client: Client): Promise<NotifyResult> {
-		const em = this.db.em.fork();
-
-		const attributions = await em.find(
-			CastAttribution,
-			{
-				slot: { event: { id: event.id } },
-				confirmedAt: { $ne: null },
-				notifiedJ2: false,
-				userId: { $ne: null },
-			},
-			{ populate: ["slot", "slot.event"] }
-		);
+	async notifyJ2(event: CastEventLike, client: Client): Promise<NotifyResult> {
+		const attributions = await sql
+			.selectFrom("cast_attribution as ca")
+			.innerJoin("cast_slot as cs", "cs.id", "ca.slot_id")
+			.select(["ca.id as id", "ca.user_id", "cs.role"])
+			.where("cs.event_id", "=", event.id)
+			.where("ca.confirmed_at", "is not", null)
+			.where("ca.notified_j2", "=", false)
+			.where("ca.user_id", "is not", null)
+			.execute() as CastAttributionRow[];
 
 		let sent = 0;
 		let failed = 0;
 		const notifiedUsers: string[] = [];
+		const notifiedIds: string[] = [];
 
 		for (const attribution of attributions) {
-			const userId = attribution.userId!;
+			const userId = attribution.user_id;
 			try {
 				const user = await client.users.fetch(userId);
-				const embed = this._buildJ2Embed(event, attribution.slot);
+				const embed = this._buildJ2Embed(event, attribution);
 				await user.send({ embeds: [embed] });
-				attribution.notifiedJ2 = true;
+				notifiedIds.push(attribution.id);
 				notifiedUsers.push(`<@${userId}>`);
 				sent++;
 			} catch (err: any) {
@@ -74,7 +104,7 @@ export class CastNotificationService {
 						`[CastNotificationService] J-2 DM bloqué pour userId=${userId} (50007) — event=${event.id}`
 					);
 					// On marque quand même notifiedJ2 pour éviter de respammer à chaque cron
-					attribution.notifiedJ2 = true;
+					notifiedIds.push(attribution.id);
 				} else {
 					console.error(
 						`[CastNotificationService] J-2 DM échoué pour userId=${userId} — event=${event.id}`,
@@ -86,8 +116,8 @@ export class CastNotificationService {
 			}
 		}
 
-		if (attributions.length > 0) {
-			await em.flush();
+		if (notifiedIds.length > 0) {
+			await sql.updateTable("cast_attribution").set({ notified_j2: true }).where("id", "in", notifiedIds).execute();
 			await this._pingStaffChannel(client, event, "J-2", notifiedUsers, sent, failed);
 		}
 
@@ -100,31 +130,29 @@ export class CastNotificationService {
 	 * Envoie les DM H-2 à tous les casters confirmés dont notifiedH2 = false.
 	 * Template plus urgent que J-2.
 	 */
-	async notifyH2(event: CastEvent, client: Client): Promise<NotifyResult> {
-		const em = this.db.em.fork();
-
-		const attributions = await em.find(
-			CastAttribution,
-			{
-				slot: { event: { id: event.id } },
-				confirmedAt: { $ne: null },
-				notifiedH2: false,
-				userId: { $ne: null },
-			},
-			{ populate: ["slot", "slot.event"] }
-		);
+	async notifyH2(event: CastEventLike, client: Client): Promise<NotifyResult> {
+		const attributions = await sql
+			.selectFrom("cast_attribution as ca")
+			.innerJoin("cast_slot as cs", "cs.id", "ca.slot_id")
+			.select(["ca.id as id", "ca.user_id", "cs.role"])
+			.where("cs.event_id", "=", event.id)
+			.where("ca.confirmed_at", "is not", null)
+			.where("ca.notified_h2", "=", false)
+			.where("ca.user_id", "is not", null)
+			.execute() as CastAttributionRow[];
 
 		let sent = 0;
 		let failed = 0;
 		const notifiedUsers: string[] = [];
+		const notifiedIds: string[] = [];
 
 		for (const attribution of attributions) {
-			const userId = attribution.userId!;
+			const userId = attribution.user_id;
 			try {
 				const user = await client.users.fetch(userId);
-				const embed = this._buildH2Embed(event, attribution.slot);
+				const embed = this._buildH2Embed(event, attribution);
 				await user.send({ embeds: [embed] });
-				attribution.notifiedH2 = true;
+				notifiedIds.push(attribution.id);
 				notifiedUsers.push(`<@${userId}>`);
 				sent++;
 			} catch (err: any) {
@@ -132,7 +160,7 @@ export class CastNotificationService {
 					console.warn(
 						`[CastNotificationService] H-2 DM bloqué pour userId=${userId} (50007) — event=${event.id}`
 					);
-					attribution.notifiedH2 = true;
+					notifiedIds.push(attribution.id);
 				} else {
 					console.error(
 						`[CastNotificationService] H-2 DM échoué pour userId=${userId} — event=${event.id}`,
@@ -144,8 +172,8 @@ export class CastNotificationService {
 			}
 		}
 
-		if (attributions.length > 0) {
-			await em.flush();
+		if (notifiedIds.length > 0) {
+			await sql.updateTable("cast_attribution").set({ notified_h2: true }).where("id", "in", notifiedIds).execute();
 			await this._pingStaffChannel(client, event, "H-2", notifiedUsers, sent, failed);
 		}
 
@@ -174,66 +202,52 @@ export class CastNotificationService {
 		const h2Low = new Date(h2Target.getTime() - H2_WINDOW_MS);
 		const h2High = new Date(h2Target.getTime() + H2_WINDOW_MS);
 
-		const em = this.db.em.fork();
-
 		// Events J-2 : scheduledAt dans la fenêtre ET au moins 1 attribution notifiedJ2=false+confirmed
-		const j2Events = await em.getConnection().execute<Array<{ id: string }>>(
-			`
-      SELECT DISTINCT ce.id
-      FROM cast_event ce
-      JOIN cast_slot cs ON cs.event_id = ce.id
-      JOIN cast_attribution ca ON ca.slot_id = cs.id
-      WHERE ce.scheduled_at >= $1
-        AND ce.scheduled_at <= $2
-        AND ce.status NOT IN ('done', 'cancelled')
-        AND ca.confirmed_at IS NOT NULL
-        AND ca.notified_j2 = FALSE
-        AND ca.user_id IS NOT NULL
-      `,
-			[j2Low.toISOString(), j2High.toISOString()]
-		);
+		const j2Events = await this.upcomingEvents(j2Low, j2High, "j2");
 
-		for (const { id } of j2Events) {
+		for (const event of j2Events) {
 			try {
-				const event = await em.findOneOrFail(CastEvent, { id });
 				const { sent, failed } = await this.notifyJ2(event, client);
-				console.info(`[CastNotificationService] J-2 event=${id} — sent=${sent}, failed=${failed}`);
+				console.info(`[CastNotificationService] J-2 event=${event.id} — sent=${sent}, failed=${failed}`);
 			} catch (err) {
-				console.error(`[CastNotificationService] dispatchUpcoming J-2 event=${id} error:`, err);
+				console.error(`[CastNotificationService] dispatchUpcoming J-2 event=${event.id} error:`, err);
 			}
 		}
 
 		// Events H-2 : scheduledAt dans la fenêtre ET au moins 1 attribution notifiedH2=false+confirmed
-		const h2Events = await em.getConnection().execute<Array<{ id: string }>>(
-			`
-      SELECT DISTINCT ce.id
-      FROM cast_event ce
-      JOIN cast_slot cs ON cs.event_id = ce.id
-      JOIN cast_attribution ca ON ca.slot_id = cs.id
-      WHERE ce.scheduled_at >= $1
-        AND ce.scheduled_at <= $2
-        AND ce.status NOT IN ('done', 'cancelled')
-        AND ca.confirmed_at IS NOT NULL
-        AND ca.notified_h2 = FALSE
-        AND ca.user_id IS NOT NULL
-      `,
-			[h2Low.toISOString(), h2High.toISOString()]
-		);
+		const h2Events = await this.upcomingEvents(h2Low, h2High, "h2");
 
-		for (const { id } of h2Events) {
+		for (const event of h2Events) {
 			try {
-				const event = await em.findOneOrFail(CastEvent, { id });
 				const { sent, failed } = await this.notifyH2(event, client);
-				console.info(`[CastNotificationService] H-2 event=${id} — sent=${sent}, failed=${failed}`);
+				console.info(`[CastNotificationService] H-2 event=${event.id} — sent=${sent}, failed=${failed}`);
 			} catch (err) {
-				console.error(`[CastNotificationService] dispatchUpcoming H-2 event=${id} error:`, err);
+				console.error(`[CastNotificationService] dispatchUpcoming H-2 event=${event.id} error:`, err);
 			}
 		}
 	}
 
 	// Private helpers
 
-	private _buildJ2Embed(event: CastEvent, slot: CastSlot): EmbedBuilder {
+	private async upcomingEvents(low: Date, high: Date, flag: "j2" | "h2"): Promise<CastEventLike[]> {
+		const query = sql
+			.selectFrom("cast_event as ce")
+			.innerJoin("cast_slot as cs", "cs.event_id", "ce.id")
+			.innerJoin("cast_attribution as ca", "ca.slot_id", "cs.id")
+			.select(["ce.id", "ce.name", "ce.kind", "ce.scheduled_at", "ce.twitch_url"])
+			.distinct()
+			.where("ce.scheduled_at", ">=", low)
+			.where("ce.scheduled_at", "<=", high)
+			.where("ce.status", "not in", ["done", "cancelled"])
+			.where("ca.confirmed_at", "is not", null)
+			.where("ca.user_id", "is not", null);
+		const rows = await (flag === "j2"
+			? query.where("ca.notified_j2", "=", false)
+			: query.where("ca.notified_h2", "=", false)).execute();
+		return rows.map((row) => ({ id: row.id, name: row.name, kind: row.kind, scheduledAt: row.scheduled_at, twitchUrl: row.twitch_url }));
+	}
+
+	private _buildJ2Embed(event: CastEventLike, slot: { role: string }): EmbedBuilder {
 		const scheduledAtTs = Math.floor(event.scheduledAt.getTime() / 1000);
 		return new EmbedBuilder()
 			.setTitle("Rappel de cast — J-2")
@@ -249,7 +263,7 @@ export class CastNotificationService {
 			.setTimestamp();
 	}
 
-	private _buildH2Embed(event: CastEvent, slot: CastSlot): EmbedBuilder {
+	private _buildH2Embed(event: CastEventLike, slot: { role: string }): EmbedBuilder {
 		const scheduledAtTs = Math.floor(event.scheduledAt.getTime() / 1000);
 		return new EmbedBuilder()
 			.setTitle("Rappel de cast — H-2 (dans 2h !)")
@@ -267,7 +281,7 @@ export class CastNotificationService {
 
 	private async _pingStaffChannel(
 		client: Client,
-		event: CastEvent,
+		event: CastEventLike,
 		label: "J-2" | "H-2",
 		mentionedUsers: string[],
 		sent: number,

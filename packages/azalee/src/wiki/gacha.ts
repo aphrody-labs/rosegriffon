@@ -30,7 +30,7 @@
  */
 
 
-import { createClient } from "../db/provider";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import {
 	type CapsuleListResult,
 	type CapsulePool,
@@ -92,6 +92,22 @@ type CapsuleRow = {
 	prize_data: string | number[] | null;
 };
 
+type CostumeRow = {
+	id: string;
+	costume_index: number;
+	type: number;
+	model_ref: string;
+	flag1: number;
+	flag2: number;
+};
+
+interface GachaDatabase {
+	inagle_capsules: CapsuleRow;
+	inagle_costumes: CostumeRow;
+}
+
+const sql = createAchilleaSql<GachaDatabase>();
+
 function mapCapsuleRow(row: CapsuleRow): CapsulePrize {
 	const vars = parseVars(row.prize_data);
 	const contentRef = vars.length > 1 ? toHexU32(vars[1]) : "0x00000000";
@@ -111,12 +127,10 @@ export async function getCapsuleList(params: CapsuleListParams = {}): Promise<Ca
 	const q = (params.q ?? "").trim().toLowerCase();
 	const pool = (params.pool ?? "").trim();
 
-	const supabase = await createClient();
-	const { data: rows, error } = await supabase
-		.from("inagle_capsules")
-		.select("id, prize_data");
-
-	if (error || !rows) {
+	let rows: CapsuleRow[];
+	try {
+		rows = await sql.selectFrom("inagle_capsules").select(["id", "prize_data"]).execute();
+	} catch {
 		return { data: [], total: 0, page, limit, pools: [] };
 	}
 
@@ -148,28 +162,20 @@ export async function getCapsuleList(params: CapsuleListParams = {}): Promise<Ca
 
 /** Détail d'un lot par hash. Retourne `null` si introuvable. */
 export async function getCapsulePrize(id: string): Promise<CapsulePrize | null> {
-	const supabase = await createClient();
-	const { data: row, error } = await supabase
-		.from("inagle_capsules")
-		.select("id, prize_data")
-		.eq("id", id)
-		.single();
-
-	if (error || !row) return null;
-	return mapCapsuleRow(row as CapsuleRow);
+	const row = await sql
+		.selectFrom("inagle_capsules")
+		.select(["id", "prize_data"])
+		.where("id", "=", id)
+		.executeTakeFirst();
+	return row ? mapCapsuleRow(row) : null;
 }
 
 /**
  * Tous les lots d'un même pool (pour afficher la composition d'un pool en détail).
  */
 export async function getCapsulePoolPrizes(poolRef: string): Promise<CapsulePrize[]> {
-	const supabase = await createClient();
-	const { data: rows, error } = await supabase
-		.from("inagle_capsules")
-		.select("id, prize_data");
-
-	if (error || !rows) return [];
-	return (rows as CapsuleRow[]).map(mapCapsuleRow).filter((p) => p.poolRef === poolRef);
+	const rows = await sql.selectFrom("inagle_capsules").select(["id", "prize_data"]).execute();
+	return rows.map(mapCapsuleRow).filter((p) => p.poolRef === poolRef);
 }
 
 // ============================================================================
@@ -184,15 +190,6 @@ interface CostumeListParams {
 	/** Filtre sur un type (0/1/2). */
 	type?: number;
 }
-
-type CostumeRow = {
-	id: string;
-	costume_index: number;
-	type: number;
-	model_ref: string;
-	flag1: number;
-	flag2: number;
-};
 
 function mapCostumeRow(row: CostumeRow): Costume {
 	return {
@@ -213,16 +210,17 @@ export async function getCostumeList(params: CostumeListParams = {}): Promise<Co
 	const q = (params.q ?? "").trim().toLowerCase();
 	const typeFilter = params.type;
 
-	const supabase = await createClient();
-	const { data: rows, error } = await supabase
-		.from("inagle_costumes")
-		.select("id, costume_index, type, model_ref, flag1, flag2");
-
-	if (error || !rows) {
+	let rows: CostumeRow[];
+	try {
+		rows = await sql
+			.selectFrom("inagle_costumes")
+			.select(["id", "costume_index", "type", "model_ref", "flag1", "flag2"])
+			.execute();
+	} catch {
 		return { data: [], total: 0, page, limit, types: [] };
 	}
 
-	const all = (rows as CostumeRow[]).map(mapCostumeRow).sort((a, b) => a.index - b.index);
+	const all = rows.map(mapCostumeRow).sort((a, b) => a.index - b.index);
 
 	// Recensement des types (avant filtrage).
 	const typeCounts = new Map<number, number>();
@@ -253,10 +251,9 @@ export async function getCostumeList(params: CostumeListParams = {}): Promise<Co
 // ============================================================================
 
 export async function getGachaCounts(): Promise<GachaCounts> {
-	const supabase = await createClient();
-	const [{ count: capsules }, { count: costumes }] = await Promise.all([
-		supabase.from("inagle_capsules").select("id", { count: "exact" }),
-		supabase.from("inagle_costumes").select("id", { count: "exact" }),
+	const [capsuleRow, costumeRow] = await Promise.all([
+		sql.selectFrom("inagle_capsules").select((eb) => eb.fn.countAll<number>().as("count")).executeTakeFirst(),
+		sql.selectFrom("inagle_costumes").select((eb) => eb.fn.countAll<number>().as("count")).executeTakeFirst(),
 	]);
-	return { capsules: capsules ?? 0, costumes: costumes ?? 0 };
+	return { capsules: Number(capsuleRow?.count ?? 0), costumes: Number(costumeRow?.count ?? 0) };
 }

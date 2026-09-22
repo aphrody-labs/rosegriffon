@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { EmoteGallery } from "@/components/shared/emotes/EmoteGallery";
 
 import { authClient } from "@/lib/auth-client";
-import { createClient } from "@/lib/supabase/client";
+import { getBrowserStorage } from "@/lib/storage/browser";
 
 interface MediaDialogProps {
 	open: boolean;
@@ -54,7 +54,7 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
 
 		setIsUploading(true);
 		try {
-			const supabase = createClient();
+			const storage = getBrowserStorage();
 
 			// Vérifier que l'utilisateur est bien authentifié
 			// `authClient.getSession()` est async — un check sans await renvoyait toujours une Promise truthy.
@@ -67,7 +67,7 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
 			const fileExt = file.name.split(".").pop()?.toLowerCase();
 			const fileName = `chronicles/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
 
-			const { error: uploadError } = await supabase.storage.from("assets").upload(fileName, file, {
+			const { error: uploadError } = await storage.from("assets").upload(fileName, file, {
 				cacheControl: "3600",
 				upsert: false,
 			});
@@ -85,7 +85,7 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
 
 			const {
 				data: { publicUrl },
-			} = supabase.storage.from("assets").getPublicUrl(fileName);
+			} = storage.from("assets").getPublicUrl(fileName);
 
 			onInsert({
 				alt: file.name.split(".")[0],

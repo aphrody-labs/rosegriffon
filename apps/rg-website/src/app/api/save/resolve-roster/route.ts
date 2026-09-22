@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 /**
  * Résolution serveur des IDs du roster d'une sauvegarde IEVR → noms réels.
@@ -100,9 +100,8 @@ export async function POST(req: Request): Promise<Response> {
 	}
 
 	try {
-		const supabase = await createClient();
-		// Résolution par chunks : un `.in()` de plusieurs milliers d'IDs génère trop
-		// de placeholders pour SQLite (limite ~32k variables, marge confortable à 900).
+		const supabase = createPostgresClient();
+		// Résolution par chunks : bornes mémoire et taille de requête maîtrisées.
 		const byId = new Map<string, ResolvedChara>();
 		const CHUNK = 900;
 		for (let i = 0; i < ids.length; i += CHUNK) {

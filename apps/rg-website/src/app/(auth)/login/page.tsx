@@ -6,10 +6,10 @@ import {
 	Button,
 	Card,
 	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	DiscordIcon,
+		CardDescription,
+		CardHeader,
+		DiscordIcon,
+		PatreonIcon,
 	Separator,
 	Skeleton,
 	TwitchIcon,
@@ -22,7 +22,7 @@ import { Suspense } from "react";
 import { AlertCircle, CheckCircle } from "@/lib/icons-config";
 
 import { XIcon, YouTubeIcon } from "./_components/social-icons";
-import { AuthForm } from "./auth-form";
+import { LoginForm } from "@/components/auth/login-form";
 
 function safeDecode(value: string | null | undefined): string | null {
 	if (!value) {
@@ -80,9 +80,9 @@ function LoginPageContent() {
 									priority
 								/>
 							</Link>
-							<CardTitle className="text-2xl font-bold">Rose Griffon</CardTitle>
+							<h1 className="text-2xl font-bold">Rose Griffon</h1>
 							<CardDescription>
-								Connecte-toi avec Discord ou Google. Le bouton Patreon lie ton mécénat au passage.
+								Connecte-toi avec Discord, Google, Patreon ou ton adresse e-mail.
 							</CardDescription>
 						</CardHeader>
 
@@ -100,7 +100,7 @@ function LoginPageContent() {
 								</Alert>
 							)}
 
-							<AuthForm />
+							<LoginForm returnTo={searchParams?.get("redirect") ?? undefined} />
 
 							<div className="space-y-3 pt-4">
 								<div className="flex items-center gap-3">
@@ -126,7 +126,7 @@ function LoginPageContent() {
 							</div>
 
 							<p className="pt-2 text-center text-xs text-muted-foreground">
-								Pas de mot de passe — connexion 100 % OAuth.
+								Ton compte peut utiliser OAuth ou une connexion e-mail sécurisée.
 							</p>
 						</CardContent>
 					</div>

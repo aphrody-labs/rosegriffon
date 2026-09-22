@@ -1,14 +1,12 @@
-import { Data } from "@/entities";
-import { Database } from "@/services";
+import { DataStore } from "@/services/DataStore";
 import { resolveDependency } from "@/utils/functions";
 
 /**
  * Get the maintenance state of the bot.
  */
 export async function isInMaintenance(): Promise<boolean> {
-	const db = await resolveDependency(Database);
-	const dataRepository = db.get(Data);
-	const maintenance = await dataRepository.get("maintenance");
+	const store = await resolveDependency(DataStore);
+	const maintenance = await store.get("maintenance");
 
 	return maintenance;
 }
@@ -17,7 +15,6 @@ export async function isInMaintenance(): Promise<boolean> {
  * Set the maintenance state of the bot.
  */
 export async function setMaintenance(maintenance: boolean) {
-	const db = await resolveDependency(Database);
-	const dataRepository = db.get(Data);
-	await dataRepository.set("maintenance", maintenance);
+	const store = await resolveDependency(DataStore);
+	await store.set("maintenance", maintenance);
 }

@@ -49,7 +49,7 @@ export function registerTeamCommand(program: Command): void {
 						if (options.json) {
 							console.log(
 								JSON.stringify(
-									matches.map((m) => ({ id: m.teamId, name: m.name })),
+									matches.map((m: any) => ({ id: m.teamId, name: m.name })),
 									null,
 									2,
 								),

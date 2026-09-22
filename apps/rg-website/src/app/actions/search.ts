@@ -152,8 +152,7 @@ export async function searchGlobal(
 	// Separate queries for non-game content (teams, articles, patch notes).
 	// `articles`/`patch_notes` ne sont PAS des tables `inagle_*` : elles passent en
 	// Postgres DIRECT (bypass le Data API PostgREST — cf. lib/db/pg.ts) au lieu du
-	// Proxy `createClient()`. `inagle_teams` reste inchangé (redirigé vers le
-	// miroir SQLite par le Proxy).
+	// Les équipes passent elles aussi par la couche PostgreSQL canonique.
 	const pool = getPgPool();
 	// Comme le client Supabase (qui ne throw jamais, il renvoie { data: null, error }),
 	// on avale les erreurs pg ici pour ne pas faire planter toute la recherche globale

@@ -23,12 +23,13 @@
  * aussi bien dans un composant React que dans une commande Discord.
  */
 
-/** Les 26 tâches servies par `GET :3005/tasks`. */
+/** Les tâches servies par `GET :3005/tasks`. */
 export const TACHES_CRON = [
 	"db",
 	"zukan:videos",
 	"cdn",
 	"crawl",
+	"website:qa",
 	"rag",
 	"publish",
 	"github-publish",
@@ -74,6 +75,7 @@ export const FAMILLES_TACHES = [
 	"seo",
 	"publication",
 	"stats",
+	"qa",
 ] as const;
 
 export type FamilleTache = (typeof FAMILLES_TACHES)[number];
@@ -150,6 +152,16 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
 		motifInterdiction:
 			"plusieurs minutes et consommation des quotas X (429 documentés) — le quota ne se rembourse pas",
 		dureeIndicative: "plusieurs minutes",
+	},
+	{
+		nom: "website:qa",
+		titre: "QA navigateur du site",
+		role: "contrôle read-only des routes, sitemaps, layouts, assets Next, API et redirections via agent-browser",
+		planification: "manuel",
+		famille: "qa",
+		niveau: "admin-strict",
+		motifInterdiction: null,
+		dureeIndicative: "quelques minutes",
 	},
 	{
 		nom: "rag",

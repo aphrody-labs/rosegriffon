@@ -4,14 +4,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button, Input, Textarea } from "@rosegriffon/ui";
-import { createClient } from "@/lib/supabase/client";
+import { updateGenericTable } from "../../actions";
 
 export function GenericEditorForm({ table, initialData }: { table: string; initialData: any }) {
 	// We maintain local state for all fields
 	const [formData, setFormData] = useState(initialData);
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
-	const supabase = createClient();
 
 	const handleChange = (key: string, value: any) => {
 		setFormData((prev: any) => ({ ...prev, [key]: value }));
@@ -37,14 +36,8 @@ export function GenericEditorForm({ table, initialData }: { table: string; initi
 				}
 			});
 
-			const { error } = await supabase
-				.from(table as any)
-				.update(payload)
-				.eq("id", initialData.id);
-
-			if (error) {
-				throw error;
-			}
+			const result = await updateGenericTable(table, initialData.id, payload);
+			if (result.error) throw new Error(result.error);
 
 			toast.success("Enregistré !");
 			router.refresh();

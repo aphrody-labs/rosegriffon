@@ -7,9 +7,8 @@ import { sql as sqlTag } from "kysely";
 import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { coreManagerConfig, urlsConfig } from "@/configs";
 import { Service } from "@/decorators";
-import { Data } from "@/entities";
 
-import { Database } from "./Database";
+import { DataStore } from "./DataStore";
 
 interface ResultRow {
 	p1: string | null;
@@ -36,10 +35,7 @@ const sql = createAchilleaSql<RankedQueueDatabase>() as Kysely<RankedQueueDataba
 export class RankedQueuePanelService {
 	private timer: ReturnType<typeof setInterval> | null = null;
 
-	constructor(
-		private db: Database,
-		private client: Client
-	) {}
+	constructor(private dataStore: DataStore, private client: Client) {}
 
 	start(): void {
 		if (this.timer) return;
@@ -130,10 +126,9 @@ export class RankedQueuePanelService {
 			return;
 		}
 
-		const store = this.db.get(Data);
 		let existing = "";
 		try {
-			existing = await store.get("rankedQueueMessageId");
+			existing = await this.dataStore.get("rankedQueueMessageId");
 		} catch {
 			existing = "";
 		}
@@ -152,7 +147,7 @@ export class RankedQueuePanelService {
 			}
 		}
 		const sent = await channel.send(payload);
-		await store.set("rankedQueueMessageId", sent.id);
+		await this.dataStore.set("rankedQueueMessageId", sent.id);
 		console.info(`[ranked-queue] panneau publié (${sent.id})`);
 	}
 }

@@ -16,8 +16,7 @@
  * - `phase >= 1000` → QUÊTE ANNEXE nommée, regroupée par zone (`floor(phase/10000)`).
  */
 
-
-import { createClient } from "../db/provider";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 
 /** Catégorie dérivée du `phase` (pas une colonne DB). */
 export type QuestKind = "main" | "side";
@@ -61,6 +60,12 @@ interface QuestRow {
 	id: string;
 	data: QuestData | string | null;
 }
+
+interface QuestDatabase {
+	inagle_quests: QuestRow;
+}
+
+const sql = createAchilleaSql<QuestDatabase>();
 
 /** Seuil au-delà duquel un `phase` code une quête annexe (et non un chapitre d'histoire). */
 const SIDE_PHASE_THRESHOLD = 1000;
@@ -118,17 +123,18 @@ let _cache: Quest[] | null = null;
 /** Charge et normalise toutes les quêtes (182) depuis le miroir. Cache process-local. */
 export async function getAllQuests(): Promise<Quest[]> {
 	if (_cache) return _cache;
-	const supabase = await createClient();
-	const { data, error } = await supabase
-		.from("inagle_quests")
-		.select("id, data")
-		.limit(2000);
-
-	if (error || !data) {
+	let data: QuestRow[];
+	try {
+		data = await sql
+			.selectFrom("inagle_quests")
+			.select(["id", "data"])
+			.limit(2000)
+			.execute();
+	} catch {
 		return [];
 	}
 
-	const quests = (data as QuestRow[]).map(toQuest).sort(byPhase);
+	const quests = data.map(toQuest).sort(byPhase);
 	_cache = quests;
 	return quests;
 }

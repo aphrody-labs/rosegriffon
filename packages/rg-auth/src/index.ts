@@ -246,7 +246,7 @@ export async function ensureUserProfile(
 					username: usernameLibre,
 					full_name: user.name || "",
 					avatar_url: user.image || null,
-					role: options.defaultRole || "member",
+					role: options.defaultRole || "user",
 					discord_id: discordId,
 					patreon_id: patreonId,
 					// Profil réel, par opposition à un profil pré-créé depuis Discord :

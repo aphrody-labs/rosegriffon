@@ -13,11 +13,15 @@ import {
 	Badge,
 } from "@rosegriffon/ui";
 import { MessageSquare, Trash2, Send, ShieldAlert, Award } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { subscribeTable } from "@/lib/realtime";
 import { authClient } from "@/lib/auth-client";
 import { useAuth } from "@/contexts/auth-context";
-import { addCommentAction, deleteCommentAction, getCommentsAction } from "@/app/actions/comments";
+import {
+	addCommentAction,
+	deleteCommentAction,
+	getCommentsAction,
+	getPublicCommentProfile,
+} from "@/app/actions/comments";
 import { toast } from "sonner";
 
 interface CommentProfile {
@@ -60,7 +64,6 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
 	// n'arrivaient plus qu'en squelette, sans <h1> ni texte, donc sans contenu
 	// indexable). `usePathname` donne le même chemin des deux côtés.
 	const pathname = usePathname();
-	const supabase = createClient();
 	const commentsEndRef = useRef<HTMLDivElement>(null);
 
 	// Charger les commentaires initiaux
@@ -96,11 +99,7 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
 					if (!inserted || inserted.target_type !== targetType) return;
 
 					// Récupérer les informations de profil de l'auteur
-					const { data: profile } = await supabase
-						.from("profiles")
-						.select("username, avatar_url, role, badges")
-						.eq("id", inserted.user_id)
-						.maybeSingle();
+					const profile = await getPublicCommentProfile(inserted.user_id);
 
 					const enriched: Comment = {
 						id: inserted.id,
@@ -138,7 +137,7 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
 				}
 			}
 		);
-	}, [targetId, targetType, supabase]);
+	}, [targetId, targetType]);
 
 	// Scroller en bas au chargement initial ou lors de nouveaux messages (pour le stream)
 	useEffect(() => {

@@ -11,6 +11,7 @@
   "scripts": {
     "test": "bun test src",
     "start": "bun src/index.ts",
+    "qa:website": "bun src/index.ts --run website:qa",
     "build": "bun build src/index.ts --compile --minify --sourcemap --bytecode --format esm --outfile dist/rg-cron",
     "type-check": "bun --bun tsc -p tsconfig.typecheck.json --noEmit",
     "lint": "bunx oxlint -c ../../.oxlintrc.json src"

@@ -1,8 +1,8 @@
 import { Controller, Get, UseBefore } from "@tsed/common";
 import { Client } from "@aphrody/discordx";
 
-import { Data } from "@/entities";
-import { Database, Logger, Stats } from "@/services";
+import { DataStore } from "@/services/DataStore";
+import { Logger, Stats } from "@/services";
 import { BaseController } from "@/utils/classes";
 import { isInMaintenance, resolveDependenciesSync } from "@/utils/functions";
 
@@ -11,15 +11,19 @@ import { DevAuthenticated } from "../middlewares/devAuthenticated";
 @Controller("/health")
 export class HealthController extends BaseController {
 	private client: Client;
-	private db: Database;
 	private stats: Stats;
 	private logger: Logger;
+	private dataStore: DataStore;
 
 	constructor() {
 		super();
 
 		this.client = (globalThis as typeof globalThis & { __roseGriffonDiscordClient?: Client }).__roseGriffonDiscordClient ?? resolveDependenciesSync([Client])[0];
-		[this.db, this.stats, this.logger] = resolveDependenciesSync([Database, Stats, Logger]);
+		[this.stats, this.logger, this.dataStore] = resolveDependenciesSync([
+			Stats,
+			Logger,
+			DataStore,
+		]);
 	}
 
 	@Get("/check")
@@ -27,7 +31,7 @@ export class HealthController extends BaseController {
 		return {
 			online: this.client.user?.presence.status !== "offline",
 			uptime: this.client.uptime,
-			lastStartup: await this.db.get(Data).get("lastStartup"),
+			lastStartup: await this.dataStore.get("lastStartup"),
 		};
 	}
 

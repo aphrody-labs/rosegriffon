@@ -1,8 +1,8 @@
 /**
  * Accès données SECTION ÉQUIPES (`/equipe`).
  *
- * Lit les projections PostgreSQL `inagle_*` via le fournisseur Supabase
- * injecté par l'hôte. Le miroir SQLite n'est utilisé qu'en mode offline.
+ * Lit les projections PostgreSQL `inagle_*` via le client SQL canonique.
+ * Le miroir SQLite n'est utilisé qu'en mode offline.
  *
  * Tables sources (vérité terrain miroir) :
  *   - `inagle_teams`    (208) : nom multi-langue, emblèmes (CRC/série), kits (CRC/série),
@@ -20,7 +20,8 @@
  */
 
 
-import { createClient } from "../db/provider";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createClient, hasDatabaseProvider } from "../db/provider";
 import { getCharacterFaceUrl } from "../images";
 import {
 	SERIES_LABELS,
@@ -53,14 +54,14 @@ interface RawTeamRow {
 	emblems: string | null;
 	kits: string | null;
 	data: string | null;
-	description_fr: string | null;
-	description_en: string | null;
+	description_fr?: string | null;
+	description_en?: string | null;
 }
 
 interface RawUniformRow {
 	name_id: string;
 	models: string | null;
-	data: string | null;
+	data?: string | null;
 }
 
 interface RawCharaRow {
@@ -73,6 +74,24 @@ interface RawCharaRow {
 	position: string | null;
 	element: string | null;
 	rarity: string | null;
+}
+
+interface TeamsDatabase {
+	inagle_teams: RawTeamRow;
+	inagle_uniforms: RawUniformRow;
+	inagle_characters: RawCharaRow & { team_id: string | null };
+}
+
+const sql = createAchilleaSql<TeamsDatabase>();
+
+/**
+ * Le provider reste un point d'injection de santé pour les hôtes historiques.
+ * Les données durables sont toujours lues par Kysely ; l'appel préalable
+ * permet toutefois au mode local de détecter immédiatement un client injecté
+ * hors ligne et d'activer son repli HTTP.
+ */
+async function verifyInjectedProvider(): Promise<void> {
+	if (hasDatabaseProvider()) await createClient();
 }
 
 /** Parse JSON-or-object en sécurité (les colonnes TEXT peuvent déjà être désérialisées). */
@@ -129,19 +148,28 @@ function resolveTeamEmblem(row: RawTeamRow): string | null {
  * 208 lignes — chargées d'un coup, filtrage/recherche côté client.
  */
 export async function getTeamsList(): Promise<TeamListItem[]> {
-	const supabase = await createClient();
-	const { data: teamsRaw } = await supabase
-		.from("inagle_teams")
-		.select("id, name_fr, name_en, name_ja, emblem_url, emblems, kits, data");
-
-	const rows = (teamsRaw ?? []) as RawTeamRow[];
+	await verifyInjectedProvider();
+	const rows = await sql
+		.selectFrom("inagle_teams")
+		.select([
+			"id",
+			"name_fr",
+			"name_en",
+			"name_ja",
+			"emblem_url",
+			"emblems",
+			"kits",
+			"data",
+		])
+		.execute();
 
 	// Compte roster (personnages distincts) par team_id en une passe.
-	const { data: charaRaw } = await supabase
-		.from("inagle_characters")
-		.select("chara_id, team_id");
+	const charaRaw = await sql
+		.selectFrom("inagle_characters")
+		.select(["chara_id", "team_id"])
+		.execute();
 	const rosterByTeam = new Map<string, Set<string>>();
-	for (const c of (charaRaw ?? []) as Array<{ chara_id: string; team_id: string | null }>) {
+	for (const c of charaRaw) {
 		if (!c.team_id) continue;
 		let set = rosterByTeam.get(c.team_id);
 		if (!set) {
@@ -192,17 +220,26 @@ function mapUniformModels(modelsRaw: string | null): TeamKitModel[] {
 
 /** Détail d'une équipe : emblèmes, kits (uniformes résolus), roster lié. */
 export async function getTeamDetail(id: string): Promise<TeamDetail | null> {
-	const supabase = await createClient();
-	const { data: row } = await supabase
-		.from("inagle_teams")
-		.select(
-			"id, name_fr, name_en, name_ja, emblem_url, emblems, kits, data, description_fr, description_en"
-		)
-		.eq("id", id)
-		.maybeSingle();
+	await verifyInjectedProvider();
+	const row = await sql
+		.selectFrom("inagle_teams")
+		.select([
+			"id",
+			"name_fr",
+			"name_en",
+			"name_ja",
+			"emblem_url",
+			"emblems",
+			"kits",
+			"data",
+			"description_fr",
+			"description_en",
+		])
+		.where("id", "=", id)
+		.executeTakeFirst();
 
 	if (!row) return null;
-	const team = row as RawTeamRow;
+	const team = row;
 
 	const emblemsObj = parseJson<Record<string, string>>(team.emblems) ?? {};
 	const emblems: TeamEmblem[] = Object.entries(emblemsObj).map(([series, crc]) => ({
@@ -217,11 +254,12 @@ export async function getTeamDetail(id: string): Promise<TeamDetail | null> {
 	// Résout les uniformes référencés par les CRC de kit.
 	const uniformsById = new Map<string, RawUniformRow>();
 	if (kitNameIds.length > 0) {
-		const { data: uniformsRaw } = await supabase
-			.from("inagle_uniforms")
-			.select("name_id, models")
-			.in("name_id", kitNameIds);
-		for (const u of (uniformsRaw ?? []) as RawUniformRow[]) {
+		const uniformsRaw = await sql
+			.selectFrom("inagle_uniforms")
+			.select(["name_id", "models"])
+			.where("name_id", "in", kitNameIds)
+			.execute();
+		for (const u of uniformsRaw) {
 			uniformsById.set(u.name_id, u);
 		}
 	}
@@ -236,16 +274,25 @@ export async function getTeamDetail(id: string): Promise<TeamDetail | null> {
 		}));
 
 	// Roster : personnages liés (dédup par chara_id, image via internal_code).
-	const { data: charaRaw } = await supabase
-		.from("inagle_characters")
-		.select(
-			"chara_id, name_fr, name_ja, base_slug, slug, internal_code, position, element, rarity"
-		)
-		.eq("team_id", id);
+	const charaRaw = await sql
+		.selectFrom("inagle_characters")
+		.select([
+			"chara_id",
+			"name_fr",
+			"name_ja",
+			"base_slug",
+			"slug",
+			"internal_code",
+			"position",
+			"element",
+			"rarity",
+		])
+		.where("team_id", "=", id)
+		.execute();
 
 	const seen = new Set<string>();
 	const roster: TeamRosterMember[] = [];
-	for (const c of (charaRaw ?? []) as RawCharaRow[]) {
+	for (const c of charaRaw) {
 		if (!c.chara_id || seen.has(c.chara_id)) continue;
 		seen.add(c.chara_id);
 		roster.push({
@@ -278,7 +325,7 @@ export async function getTeamDetail(id: string): Promise<TeamDetail | null> {
 
 /** IDs de toutes les équipes (pour `generateStaticParams`). */
 export async function getAllTeamIds(): Promise<string[]> {
-	const supabase = await createClient();
-	const { data } = await supabase.from("inagle_teams").select("id");
-	return ((data ?? []) as Array<{ id: string }>).map((r) => r.id).filter(Boolean);
+	await verifyInjectedProvider();
+	const rows = await sql.selectFrom("inagle_teams").select("id").execute();
+	return rows.map((r) => r.id).filter(Boolean);
 }
