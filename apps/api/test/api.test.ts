@@ -22,6 +22,7 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		}
 	});
 
+
 	it("GET /v1/achillea/tournaments/circuit/ranking returns the unified circuit projection", async () => {
 		const res = await app.handle(new Request("http://localhost/v1/achillea/tournaments/circuit/ranking"));
 		expect(res.status).toBe(200);
@@ -374,6 +375,16 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 
 	it("PUT /v1/achillea/users/me/profile requires the unified session", async () => {
 		const res = await api.v1.achillea.users.me.profile.put({ bio: "x" });
+		expect(res.status).toBe(401);
+	});
+
+	it("GET /v1/achillea/users/me/ranked-history is owned by the unified API", async () => {
+		const res = await app.handle(new Request("http://localhost/v1/achillea/users/me/ranked-history?limit=20"));
+		expect(res.status).toBe(401);
+	});
+
+	it("GET /v1/achillea/users/me/ranked-trend is owned by the unified API", async () => {
+		const res = await app.handle(new Request("http://localhost/v1/achillea/users/me/ranked-trend?days=7&last=20"));
 		expect(res.status).toBe(401);
 	});
 
