@@ -1,4 +1,5 @@
 import { Elysia, status, t } from "elysia";
+import { sql } from "kysely";
 import { dbPlugin } from "../../../plugins/db";
 import { LeaderboardService } from "../leaderboard/service";
 import { UsersModel } from "./model";
@@ -7,6 +8,84 @@ import { resolveAchilleaSession } from "../../auth/session";
 /** Compatibility resource for the versioned client; the query lives in one service. */
 export const usersController = new Elysia({ prefix: "/users" })
 	.use(dbPlugin)
+	.get("/me/ranked-history", async ({ db, headers, query }) => {
+		const session = await resolveAchilleaSession(headers);
+		if (!session) return status(401, { message: "Authentication required" as const });
+		const limit = Math.max(1, Math.min(100, Number(query.limit ?? 20) || 20));
+		const offset = Math.max(0, Number(query.offset ?? 0) || 0);
+		const mode = query.mode == null ? null : Number(query.mode);
+		let request = db.selectFrom("lobby as l")
+			.innerJoin("lobby_user as me", (join) => join.onRef("me.lobby_id", "=", "l.id").on("me.user_id", "=", session.id))
+			.innerJoin("lobby_user as opp", (join) => join.onRef("opp.lobby_id", "=", "l.id").onRef("opp.user_id", "<>", "me.user_id"))
+			.innerJoin("user as u", "u.id", "opp.user_id")
+			.select([
+				"l.id as lobby_id", "l.mode", "l.state", "l.created_at",
+				"me.score as my_score", "me.elo_variation as my_elo_delta", "me.forfeit as my_forfeit",
+				"opp.user_id as opp_user_id", "opp.score as opp_score", "opp.forfeit as opp_forfeit",
+				"u.display_name as opp_display_name", "u.username as opp_username", "u.avatar as opp_avatar",
+			])
+			.where("l.state", "in", ["Finished", "Forfeited"])
+			.where((eb) => eb.or([
+				eb("l.event_type", "=", "RANKED"),
+				eb.and([eb("l.event_type", "=", "TOURNAMENT"), eb("l.ranked_elo_applied", "=", true)]),
+			]));
+		if (mode !== null && Number.isFinite(mode)) request = request.where("l.mode", "=", mode);
+		const rows = await request.orderBy("l.created_at", "desc").limit(limit).offset(offset).execute();
+		const avatar = (id: string, value: string | null) => {
+			if (value?.startsWith("http")) return value;
+			try { return `https://cdn.discordapp.com/embed/avatars/${(BigInt(id) >> 22n) % 6n}.png`; }
+			catch { return "https://cdn.discordapp.com/embed/avatars/0.png"; }
+		};
+		return rows.map((row) => {
+			const mine = Number(row.my_score ?? 0);
+			const theirs = Number(row.opp_score ?? 0);
+			const forfeited = Boolean(row.my_forfeit);
+			const opponentForfeited = Boolean(row.opp_forfeit);
+			return {
+				lobbyId: Number(row.lobby_id), mode: Number(row.mode), state: String(row.state),
+				endedAt: new Date(row.created_at).toISOString(), myScore: mine, opponentScore: theirs,
+				eloDelta: Number(row.my_elo_delta ?? 0),
+				result: forfeited ? "forfeit" : opponentForfeited || mine > theirs ? "win" : mine < theirs ? "loss" : "draw",
+				opponent: { userId: String(row.opp_user_id), displayName: row.opp_display_name ?? row.opp_username ?? String(row.opp_user_id), avatar: avatar(String(row.opp_user_id), row.opp_avatar) },
+			};
+		});
+	}, {
+		query: t.Object({ mode: t.Optional(t.Numeric()), limit: t.Optional(t.Numeric()), offset: t.Optional(t.Numeric()) }),
+		response: { 200: t.Array(t.Any()), 401: t.Object({ message: t.Literal("Authentication required") }) },
+	})
+	.get("/me/ranked-trend", async ({ db, headers, query }) => {
+		const session = await resolveAchilleaSession(headers);
+		if (!session) return status(401, { message: "Authentication required" as const });
+		const days = Math.max(1, Math.min(90, Number(query.days ?? 7) || 7));
+		const last = Math.max(1, Math.min(50, Number(query.last ?? 20) || 20));
+		const mode = query.mode == null ? null : Number(query.mode);
+		const modeClause = mode !== null && Number.isFinite(mode) ? sql`and l.mode = ${mode}` : sql``;
+		const spark = await sql<{ delta: number | string }>`
+			select lu.elo_variation as delta
+			from lobby l join lobby_user lu on lu.lobby_id = l.id and lu.user_id = ${session.id}
+			where l.event_type = 'RANKED' and l.state in ('Finished', 'Forfeited') ${modeClause}
+			order by l.created_at desc limit ${last}
+		`.execute(db);
+		const period = await sql<{ delta_total: number | string; games: number | string; wins: number | string }>`
+			select coalesce(sum(lu.elo_variation), 0) as delta_total, count(*) as games,
+			count(*) filter (where not lu.forfeit and lu.score > (
+				select opp.score from lobby_user opp where opp.lobby_id = l.id and opp.user_id <> lu.user_id limit 1
+			)) as wins
+			from lobby l join lobby_user lu on lu.lobby_id = l.id and lu.user_id = ${session.id}
+			where l.event_type = 'RANKED' and l.state in ('Finished', 'Forfeited')
+			and l.created_at >= now() - (${days} || ' days')::interval ${modeClause}
+		`.execute(db);
+		const row = period.rows[0];
+		const games = Number(row?.games ?? 0);
+		return {
+			sparkline: spark.rows.map((item) => Number(item.delta ?? 0)).reverse(),
+			deltaPeriod: Number(row?.delta_total ?? 0), gamesInPeriod: games,
+			winRatePeriod: games > 0 ? Number(row?.wins ?? 0) / games : 0, days,
+		};
+	}, {
+		query: t.Object({ mode: t.Optional(t.Numeric()), days: t.Optional(t.Numeric()), last: t.Optional(t.Numeric()) }),
+		response: { 200: t.Any(), 401: t.Object({ message: t.Literal("Authentication required") }) },
+	})
 	.get("/:id", async ({ db, params: { id } }) => {
 		const user = await db.selectFrom("user").select(["id", "username", "display_name", "avatar", "role", "bio", "twitch_url", "last_interact"]).where("id", "=", id).executeTakeFirst();
 		if (!user) return status(404, { message: "User not found" as const });

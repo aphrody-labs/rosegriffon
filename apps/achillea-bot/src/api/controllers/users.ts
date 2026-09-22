@@ -90,6 +90,8 @@ export class UsersController extends BaseController {
 	@UseBefore(CookieAuthorize)
 	async myRankedHistory(
 		@Context("user") user: UserDTO,
+		@Req() req: any,
+		@Res() res: Response,
 		@QueryParams("mode") mode?: number,
 		@QueryParams("limit") limit: number = 20,
 		@QueryParams("offset") offset: number = 0
@@ -97,14 +99,18 @@ export class UsersController extends BaseController {
 		const safeLimit = Math.max(1, Math.min(50, Number(limit) || 20));
 		const safeOffset = Math.max(0, Number(offset) || 0);
 		const safeMode = mode != null ? Number(mode) : null;
-
-		return this.userService.getRankedMatchHistory(user.id, safeMode, safeLimit, safeOffset);
+		const query = new URLSearchParams({ limit: String(safeLimit), offset: String(safeOffset) });
+		if (safeMode !== null && Number.isFinite(safeMode)) query.set("mode", String(safeMode));
+		const upstream = await this.forwardAuthenticated(req, `/v1/achillea/users/me/ranked-history?${query}`);
+		return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
 	}
 
 	@Get("/me/ranked-trend")
 	@UseBefore(CookieAuthorize)
 	async myRankedTrend(
 		@Context("user") user: UserDTO,
+		@Req() req: any,
+		@Res() res: Response,
 		@QueryParams("mode") mode?: number,
 		@QueryParams("days") days: number = 7,
 		@QueryParams("last") last: number = 20
@@ -112,8 +118,18 @@ export class UsersController extends BaseController {
 		const safeMode = mode != null ? Number(mode) : null;
 		const safeDays = Math.max(1, Math.min(90, Number(days) || 7));
 		const safeLast = Math.max(1, Math.min(50, Number(last) || 20));
+		const query = new URLSearchParams({ days: String(safeDays), last: String(safeLast) });
+		if (safeMode !== null && Number.isFinite(safeMode)) query.set("mode", String(safeMode));
+		const upstream = await this.forwardAuthenticated(req, `/v1/achillea/users/me/ranked-trend?${query}`);
+		return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
+	}
 
-		return this.userService.getRankedTrend(user.id, safeMode, safeDays, safeLast);
+	/** Compatibility transport only: identity and ranked reads belong to the unified API. */
+	private async forwardAuthenticated(req: any, path: string): Promise<globalThis.Response> {
+		const headers: Record<string, string> = { accept: "application/json" };
+		if (req.headers.cookie) headers.cookie = req.headers.cookie;
+		if (req.headers.authorization) headers.authorization = req.headers.authorization;
+		return fetch(`${process.env.UNIFIED_API_URL ?? "http://127.0.0.1:8800"}${path}`, { headers });
 	}
 
 
