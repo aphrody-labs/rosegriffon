@@ -1,6 +1,23 @@
 import { t } from "elysia";
 
+const clanUser = t.Object({
+	id: t.String(), type: t.Literal("user"), username: t.String(), avatar: t.String(),
+	clanId: t.Nullable(t.Number()), role: t.Number(),
+});
+
+const fullClan = t.Object({
+	id: t.Number(), founders: t.Array(t.String()), name: t.String(), shortenedName: t.String(),
+	normalizedShortName: t.String(), clanAvatarUrl: t.String(), clanBiography: t.String(),
+	fame: t.Number(), xUrl: t.Nullable(t.String()), instagramUrl: t.Nullable(t.String()),
+	tiktokUrl: t.Nullable(t.String()), isRecruiting: t.Boolean(), isInactive: t.Boolean(),
+	isHidden: t.Boolean(), isDisbanded: t.Boolean(), autoAcceptMembers: t.Boolean(),
+	state: t.Number(), createdAt: t.Date(), languages: t.Array(t.String()), origin: t.String(),
+	experience: t.Object({ currentLevel: t.Number(), totalXp: t.Number() }),
+	membersCount: t.Number(), president: clanUser,
+});
+
 export const ClanModel = {
+	user: clanUser,
 	validation: t.Object({
 		valid: t.Boolean(),
 		code: t.Optional(t.Union([
@@ -27,6 +44,25 @@ export const ClanModel = {
 		clanRole: t.Number(), distinctions: t.Array(t.String()), clanFameContributed: t.Number(),
 		createdAt: t.Date(), updatedAt: t.Date(),
 		user: t.Object({ id: t.String(), type: t.Literal("user"), username: t.String(), avatar: t.String(), clanId: t.Number(), role: t.Number() }),
+	}),
+	fullClan,
+	invite: t.Object({
+		id: t.Number(),
+		user: clanUser,
+		clan: fullClan,
+		inviter: t.Object({
+			clanRole: t.Number(), distinctions: t.Array(t.String()), clanFameContributed: t.Number(),
+			createdAt: t.Date(), updatedAt: t.Date(),
+			user: clanUser,
+		}),
+		threadId: t.Optional(t.String()), distinctions: t.Array(t.String()),
+		createdAt: t.Date(), updatedAt: t.Date(), lastNotifiedAt: t.Date(),
+	}),
+	application: t.Object({
+		id: t.Number(),
+		user: clanUser,
+		clan: fullClan, distinctions: t.Array(t.String()),
+		createdAt: t.Date(), updatedAt: t.Date(),
 	}),
 	members: t.Array(t.Object({
 		clanRole: t.Number(), distinctions: t.Array(t.String()), clanFameContributed: t.Number(),

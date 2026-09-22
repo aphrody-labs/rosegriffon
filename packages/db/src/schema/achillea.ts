@@ -4,6 +4,9 @@ export interface AchilleaTables {
 	// Clans
 	clan: ClanTable;
 	clan_member: ClanMemberTable;
+	clan_member_history: ClanMemberHistoryTable;
+	clan_invite: ClanInviteTable;
+	clan_application: ClanApplicationTable;
 	clan_experience: ClanExperienceTable;
 	clan_experience_log: ClanExperienceLogTable;
 
@@ -91,6 +94,41 @@ export interface ClanMemberTable {
 	clan_fame_contributed: Generated<number>;
 	role: Generated<number>;
 	distinctions: Generated<string[]>;
+}
+
+export interface ClanMemberHistoryTable {
+	id: Generated<number>;
+	created_at: Generated<Date>;
+	updated_at: Generated<Date>;
+	user_id: string;
+	clan_id: number;
+	join_date: Date;
+	leave_reason: number;
+	kick_reason: string | null;
+	clan_fame_contributed: Generated<number>;
+	role: number;
+}
+
+export interface ClanInviteTable {
+	id: Generated<number>;
+	created_at: Generated<Date>;
+	updated_at: Generated<Date>;
+	user_id: string;
+	clan_id: number;
+	inviter_id: string;
+	thread_id: string | null;
+	distinctions: Generated<string[]>;
+	last_notified_at: Generated<Date>;
+}
+
+export interface ClanApplicationTable {
+	id: Generated<number>;
+	created_at: Generated<Date>;
+	updated_at: Generated<Date>;
+	user_id: string;
+	clan_id: number;
+	distinctions: Generated<string[]>;
+	message_id: string | null;
 }
 
 export interface ClanExperienceLogTable {

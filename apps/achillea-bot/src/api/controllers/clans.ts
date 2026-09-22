@@ -98,6 +98,16 @@ export class ClansController extends BaseController {
 		return await upstream.json() as ClanMemberDTO[];
 	}
 
+	private async proxyUnifiedClanRead(path: "/invites" | "/applications", req: Request, res: Response): Promise<Response> {
+		const headers: Record<string, string> = { accept: "application/json" };
+		if (req.headers.cookie) headers.cookie = req.headers.cookie;
+		if (req.headers.authorization) headers.authorization = req.headers.authorization;
+		const upstream = await fetch(new URL(`/v1/achillea/clans${path}`, urlsConfig.unifiedApi), { headers });
+		return res.status(upstream.status || 503).json(
+			await upstream.json().catch(() => ({ message: "Unified API unavailable" }))
+		);
+	}
+
 	@Get("/")
 	async getClans(
 		@Res() res: Response,
@@ -569,20 +579,8 @@ export class ClansController extends BaseController {
 
 	@Get("/invites")
 	@UseBefore(CookieAuthorize)
-	async getClanInvites(@Context() ctx: Context, @Res() res: Response): Promise<any> {
-		const executor = ctx.get("user");
-		if (!executor) throw new Unauthorized("Not authenticated");
-
-		const executorAsMember = await this.clanService.getMember(executor.id);
-		if (!executorAsMember) {
-			throw new BadRequest("Vous ne faites pas partie d'un Clan.");
-		}
-		if (executorAsMember.role < ClanMemberRole.SubCaptain) {
-			throw new Unauthorized("Vous n'avez pas les droits pour effectuer cette action");
-		}
-
-		const invites = await this.clanService.getAllInvites(executorAsMember.clan.id);
-		return res.json(JSON.parse(JSON.stringify(invites)));
+	async getClanInvites(@Req() req: Request, @Res() res: Response): Promise<any> {
+		return this.proxyUnifiedClanRead("/invites", req, res);
 	}
 
 	@Post("/applications/create")
@@ -702,20 +700,8 @@ export class ClansController extends BaseController {
 
 	@Get("/applications")
 	@UseBefore(CookieAuthorize)
-	async getClanApplications(@Context() ctx: Context, @Res() res: Response): Promise<any> {
-		const executor = ctx.get("user") as UserDTO;
-		if (!executor) throw new Unauthorized("Non authentifié");
-
-		const executorAsMember = await this.clanService.getMember(executor.id);
-		if (!executorAsMember) {
-			throw new Unauthorized("Vous n'êtes pas dans un clan");
-		}
-		if (executorAsMember.role < ClanMemberRole.SubCaptain) {
-			throw new Unauthorized("Vous n'avez pas les droits pour effectuer cette action");
-		}
-
-		const applications = await this.clanService.getAllApplications(executorAsMember.clan.id);
-		return res.json(JSON.parse(JSON.stringify(applications)));
+	async getClanApplications(@Req() req: Request, @Res() res: Response): Promise<any> {
+		return this.proxyUnifiedClanRead("/applications", req, res);
 	}
 
 	@Patch("/:id")
