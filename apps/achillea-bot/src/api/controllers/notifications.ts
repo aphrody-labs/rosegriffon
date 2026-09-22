@@ -10,101 +10,50 @@ import {
 	Res,
 	UseBefore,
 } from "@tsed/common";
-import { Unauthorized } from "@tsed/exceptions";
 import type { Request, Response } from "express";
 
-import { CookieAuthorize } from "@/api/middlewares";
-import type { UserDTO } from "@/services";
-import { NotificationService, RankedDisputeNotifier } from "@/services";
+import { RankedDisputeNotifier } from "@/services";
 import { BaseController } from "@/utils/classes";
-import { resolveDependenciesSync, resolveDependency } from "@/utils/functions";
+import { resolveDependency } from "@/utils/functions";
+import { urlsConfig } from "@/configs";
 import { emitToUsers } from "../../websockets/socket-server";
 
 @Controller("/notifications")
 export class NotificationsController extends BaseController {
-	private notificationService: NotificationService;
-
-	constructor() {
-		super();
-
-		[this.notificationService] = resolveDependenciesSync([NotificationService]);
+	private async forward(req: Request, res: Response, path: string, method = req.method) {
+		const headers: Record<string, string> = { accept: "application/json" };
+		if (req.headers.cookie) headers.cookie = req.headers.cookie;
+		if (req.headers.authorization) headers.authorization = req.headers.authorization;
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea${path}`, { method, headers });
+		const text = await upstream.text();
+		res.status(upstream.status).type("json");
+		return res.send(text);
 	}
 
 	@Get("/me")
-	@UseBefore(CookieAuthorize)
-	async getUserNotifications(@Context() ctx: Context, @Res() res: Response) {
-		try {
-			const user = ctx.get("user") as UserDTO;
-			if (!user) throw new Unauthorized("Not authenticated");
-
-			const userNotifications = await this.notificationService.getUnreadUserNotifications(user);
-
-			return res.status(200).json({ success: true, data: userNotifications });
-		} catch (error: any) {
-			console.error("Erreur lors de la récupération des notifications de l'utilisateur :", error);
-
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible de récupérer la liste de vos notifications.",
-			});
-		}
+	async getUserNotifications(@Req() req: Request, @Res() res: Response) {
+		return this.forward(req, res, "/notifications/me", "GET");
 	}
 
 	@Patch("/read/:id")
-	@UseBefore(CookieAuthorize)
-	async markAsRead(@Context() ctx: Context, @PathParams("id") id: number, @Res() res: Response) {
-		try {
-			const user = ctx.get("user");
-			if (!user) throw new Unauthorized("Not authenticated");
-
-			await this.notificationService.markAsRead(user, id);
-
-			return res.status(200).json({ success: true });
-		} catch (error: any) {
-			console.error(error);
-
-			return res.status(error.status || 400).json({ success: false, error: error.message });
-		}
+	async markAsRead(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forward(req, res, `/notifications/read/${encodeURIComponent(String(id))}`, "PATCH");
 	}
 
 	/**
 	 * Mark a single notification as unread
 	 */
 	@Patch("/unread/:id")
-	@UseBefore(CookieAuthorize)
-	async markAsUnread(@Context() ctx: Context, @PathParams("id") id: number, @Res() res: Response) {
-		try {
-			const user = ctx.get("user");
-			if (!user) throw new Unauthorized("Not authenticated");
-
-			await this.notificationService.markAsUnread(user, id);
-
-			return res.status(200).json({ success: true });
-		} catch (error: any) {
-			console.error(error);
-
-			return res.status(error.status || 400).json({ success: false, error: error.message });
-		}
+	async markAsUnread(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forward(req, res, `/notifications/unread/${encodeURIComponent(String(id))}`, "PATCH");
 	}
 
 	/**
 	 * Mark all user notifications as read
 	 */
 	@Patch("/read-all")
-	@UseBefore(CookieAuthorize)
-	async markAllAsRead(@Context() ctx: Context, @Res() res: Response) {
-		try {
-			const user = ctx.get("user");
-			if (!user) throw new Unauthorized("Not authenticated");
-
-			await this.notificationService.markAllAsRead(user.id);
-
-			return res.status(200).json({ success: true });
-		} catch (error: any) {
-			console.error(error);
-
-			return res.status(error.status || 400).json({ success: false, error: error.message });
-		}
+	async markAllAsRead(@Req() req: Request, @Res() res: Response) {
+		return this.forward(req, res, "/notifications/read-all", "PATCH");
 	}
 
 	// Endpoint interne appele par le sub-process Colyseus pour emettre un event
