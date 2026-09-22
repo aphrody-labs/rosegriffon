@@ -2365,4 +2365,3 @@ export class TournamentsService {
 }
 
 /** Points/résultats — uniquement les tournois élimination dont le classement final est résolu. */
-}
