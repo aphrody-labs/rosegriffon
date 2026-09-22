@@ -3,10 +3,8 @@
  * @description Parser for trophy_config files (Achievements)
  */
 
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { ConfigNode } from "../core/config-parser.js";
-import { toHex } from "../core/data-loader.js";
+import { findConfigFile, loadConfig, toHex } from "../core/data-loader.js";
 import { loadTextFile } from "./text-parser.js";
 
 export interface ParsedTrophy {
@@ -16,24 +14,13 @@ export interface ParsedTrophy {
 	descriptions: { en?: string; fr?: string; ja?: string };
 }
 
-function findTrophyConfigFile(dir: string): string | null {
-	if (!existsSync(dir)) return null;
-	const files = readdirSync(dir);
-	const configFile = files
-		.filter((f) => f.startsWith("trophy_config_") && f.endsWith(".cfg.bin.json"))
-		.sort()
-		.pop();
-	return configFile ? join(dir, configFile) : null;
-}
-
 export function buildTrophyDatabase(dataPath: string) {
-	const dir = join(dataPath, "common", "gamedata", "trophy");
-	const configPath = findTrophyConfigFile(dir);
+	const configPath = findConfigFile("trophy", "trophy_config_");
 
 	const trophies: ParsedTrophy[] = [];
 
 	if (!configPath) {
-		console.warn("[trophy-config] Config not found in", dir);
+		console.warn("[trophy-config] No SQL/SQLite trophy_config projection found.");
 		return { trophies };
 	}
 
@@ -45,8 +32,7 @@ export function buildTrophyDatabase(dataPath: string) {
 	const validHashes = new Set(textFr.keys());
 
 	try {
-		const content = JSON.parse(readFileSync(configPath, "utf-8"));
-		const entries = content.entries as ConfigNode[];
+		const entries = loadConfig("trophy", configPath).children as ConfigNode[];
 
 		function traverse(node: ConfigNode) {
 			// TROPHY_INFO_0

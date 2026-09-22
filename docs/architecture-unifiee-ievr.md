@@ -41,7 +41,7 @@ Le pipeline unifié est une chaîne unique. Pour chaque étape, l'implémentatio
 ### Étape 3 — Parsing des données (cfg.bin → entités typées → Supabase)
 
 - **Entrée** : `cfg.bin.json` (nœuds `ConfigNode {name, variables[{type, value}], children[]}`) sous `DATA_PATH=/home/ubuntu/niers/data` — corpus de dump réel partagé.
-- **Actuel (inagle, TS)** : **68 parseurs** sous `packages/inagle/src/parsers/` (chara-param, chara-base, skill-config, passive-skill-config, item-config, aura, star-sign, growth/exp tables, uniform, shop, drops, telop/video-waza, emblems, lua…). Join central `src/entities/character.ts` (fusion chara_base + chara_param + textes + rareté + zukan). `stat-calculator.ts` (interpolation 3 segments). `skills/mapper-aura.ts` (résolution auras/hissatsu native). Service en mémoire + API hono. CLI push (`cli-push.ts`) : projection vers **22 tables `inagle_*`** (vérifié) via Supabase/Postgres adapter, avec préservation des colonnes curatées `sheet_data`/`zukan_order` ; `push-categories`/`lua` poussent ~22 tables supplémentaires (44 distinctes au total).
+- **Actuel (inagle, TS)** : les parseurs servent l’extraction/import initial, puis le runtime lit les projections PostgreSQL. `service.ts` expose les DTO unifiés et `cli-push.ts` conserve les colonnes curatées `sheet_data`/`zukan_order`; Azalée et le CLI partagent les identifiants d’auras issus de `service.skills.auraAll()`.
 - **Cible Rust (niers, partiel)** : `crate nie-data` (2250 LOC, no_std+alloc, wasm-compatible) — port 1:1 explicite d'inagle (chaque module cite son fichier-source TS + lignes). skill/item/growth/exp/passive (5/7 FAIT, validés byte) ; chara_param et aura **INCOMPLET** (hallucinations documentées : pairing off-by-one, aura-cmd 61/1548). `nie-data/cfgbin.rs` lit le JSON déjà parsé (contrat ConfigNode), tandis que `nie-formats/cfgbin.rs` reparse le binaire RDBN brut.
 - **Sortie** : tables `inagle_*` Supabase (source de vérité données) ; côté Rust, structs no_std (SkillInfo, CharaParam, AuraCmd…).
 
@@ -89,7 +89,7 @@ Le pipeline unifié est une chaîne unique. Pour chaque étape, l'implémentatio
 | cfg.bin RDBN (binaire chiffré) | iecode `Formats/Level5/CfgBin` + Rdbn | `nie-formats` cfgbin.rs | FAIT |
 | cfg.bin (JSON déjà extrait) | inagle `core/parser.ts`, `cfgbin-db.ts` | `nie-data` cfgbin.rs | port (vues minimales sur JSON) |
 | Modèles données (skill/item/growth/exp/passive) | inagle `src/parsers/*` | `nie-data` skill/item/growth/exp/passive.rs | 5/7 FAIT (validés byte) |
-| chara_param + aura | inagle `chara-param.ts`, `mapper-aura.ts` | `nie-data` chara_param.rs / aura.rs | INCOMPLET (pairing off-by-one, aura 61/1548) |
+| chara_param + aura | projections SQL `inagle_characters` + `inagle_*` aura | `nie-data` chara_param.rs / aura.rs | runtime SQL unifié ; port Rust encore séparé |
 | Calcul de stats (croissance 3 segments) | inagle `stat-calculator.ts` | `nie-core` stats.rs/growth.rs/exp.rs **ET** `nie-data` growth.rs/exp.rs | FAIT mais **triple implémentation** (TS + nie-core + nie-data) |
 | Logique de match/gameplay | (pas de C#/TS — RE Ghidra) | `nie-core` (13 modules) | partiel (porté du C décompilé) |
 | GameData persos/skills/passives | iecode `GameData/`/`Game/` **et** inagle (domaine riche) | `nie-data` | iecode délègue à inagle (reconnu) ; 7 types max en C# |

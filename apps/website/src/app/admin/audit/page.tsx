@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AdminPageHeader as DashboardPageHeader } from "@rosegriffon/ui";
 import { requireAdmin } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { AuditTable } from "./AuditTable";
 import { Icon } from "@/components/ui/Icon";
 
@@ -25,7 +25,7 @@ export default async function AuditPage({ searchParams }: PageProps) {
 	const page = Math.max(1, Number.parseInt(params.page || "1", 10));
 	const actionFilter = params.action || "";
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	let query = supabase
 		.from("audit_logs")

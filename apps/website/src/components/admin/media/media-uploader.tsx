@@ -7,7 +7,7 @@ import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 
 import { Loader2, Upload, X } from "@/lib/icons-config";
-import { createClient } from "@/lib/supabase/client";
+import { getBrowserStorage } from "@/lib/storage/browser";
 
 interface MediaUploaderProps {
 	onUploadComplete: () => void;
@@ -39,7 +39,7 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
 		}
 
 		setUploading(true);
-		const supabase = createClient();
+		const storage = getBrowserStorage();
 
 		try {
 			// Vérifier que l'utilisateur est bien authentifié (via cookie de session)
@@ -49,7 +49,7 @@ export function MediaUploader({ onUploadComplete }: MediaUploaderProps) {
 				const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
 				const filePath = `chronicles/${fileName}`;
 
-				const { error } = await supabase.storage.from("assets").upload(filePath, file, {
+				const { error } = await storage.from("assets").upload(filePath, file, {
 					cacheControl: "3600",
 					upsert: false,
 				});

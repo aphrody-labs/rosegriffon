@@ -86,7 +86,7 @@ export async function cfgbinPostgresFindLatest(category: string, prefix: string)
 	}
 }
 
-async function cfgbinPostgresLoadByPath(path: string): Promise<unknown> {
+export async function cfgbinPostgresLoadByPath(path: string): Promise<unknown> {
 	if (!cfgbinPostgresEnabled()) throw new Error("cfgbin-postgres: disabled");
 	const row = await postgresDb()
 		.selectFrom("inagle_cfgbin")

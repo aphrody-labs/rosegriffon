@@ -10,11 +10,10 @@
     "dev": "bun --watch server.ts"
   },
   "dependencies": {
-    "pg": "catalog:"
+    "@rosegriffon/db": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
-    "@types/pg": "catalog:",
     "typescript": "catalog:"
   }
 }

@@ -12,7 +12,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { mkdir, rename, rm, stat } from "node:fs/promises";
 import { dirname, join as pathJoin, normalize as pathNormalize, resolve } from "node:path";
-import { SQL } from "bun";
+import { createBunSql } from "@rosegriffon/db/bun-sql";
 import { boundaryOf, extractFilePart } from "./multipart";
 
 const PORT = Number(process.env.RG_STORAGE_PORT ?? 8810);
@@ -24,16 +24,7 @@ const DATABASE_URL = process.env.DATABASE_URL ?? "";
 if (!JWT_SECRET) throw new Error("[rg-storage] SUPABASE_JWT_SECRET manquant");
 if (!DATABASE_URL) throw new Error("[rg-storage] DATABASE_URL manquant");
 
-const configuredPoolMax = Number.parseInt(process.env.DATABASE_POOL_MAX ?? "", 10);
-const poolMax = configuredPoolMax > 0 ? Math.min(configuredPoolMax, 4) : 4;
-
-const sql = new SQL({
-	url: DATABASE_URL,
-	max: poolMax,
-	idleTimeout: 30,
-	maxLifetime: 1_800,
-	connectionTimeout: 10,
-});
+const sql = createBunSql({ url: DATABASE_URL });
 
 const CORS: Record<string, string> = {
 	"access-control-allow-origin": "*",

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import EditChronicleClient from "./EditChronicleClient";
 
@@ -10,7 +10,7 @@ interface PageProps {
 
 export default async function EditChroniclePage({ params }: PageProps) {
 	const { id } = await params;
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	const { data: article } = await supabase
 		.from("articles")

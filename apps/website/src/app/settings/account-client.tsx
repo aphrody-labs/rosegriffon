@@ -22,7 +22,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
-import { createClient } from "@/lib/supabase/client";
+import { getBrowserStorage } from "@/lib/storage/browser";
 
 import { updateAddress, updateAvatarUrl, updateProfile } from "./actions";
 
@@ -75,13 +75,13 @@ export function AccountClient({
 	const router = useRouter();
 
 	const uploadAvatar = async (file: File) => {
-		const supabase = createClient();
+		const storage = getBrowserStorage();
 		const extension = file.name.split(".").pop()?.toLowerCase() ?? "png";
 		// Chemin unique par téléversement : un nom fixe renverrait la même URL
 		// publique, que le navigateur et le CDN resservent depuis leur cache.
 		const path = `${userId}/avatar-${Date.now()}.${extension}`;
 
-		const { error: uploadError } = await supabase.storage
+		const { error: uploadError } = await storage
 			.from("avatars")
 			.upload(path, file, { contentType: file.type, upsert: true });
 		if (uploadError) {
@@ -90,7 +90,7 @@ export function AccountClient({
 
 		const {
 			data: { publicUrl },
-		} = supabase.storage.from("avatars").getPublicUrl(path);
+		} = storage.from("avatars").getPublicUrl(path);
 
 		const res = await updateAvatarUrl(publicUrl);
 		if (res.error) {

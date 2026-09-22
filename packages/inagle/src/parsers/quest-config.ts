@@ -3,10 +3,8 @@
  * @description Parser for quest_config files
  */
 
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { ConfigNode } from "../core/config-parser.js";
-import { type Locale, toHex } from "../core/data-loader.js";
+import { findConfigFile, loadConfig, type Locale, toHex } from "../core/data-loader.js";
 import { loadTextFile } from "./text-parser.js";
 
 /** Quest type */
@@ -82,30 +80,18 @@ function parseQuestNode(node: ConfigNode): ParsedQuest | null {
 /**
  * Find quest config file
  */
-function findQuestConfigFile(dir: string): string | null {
-	if (!existsSync(dir)) return null;
-
-	const files = readdirSync(dir);
-	const configFile = files.find(
-		(f) => f.startsWith("quest_config_") && f.endsWith(".cfg.bin.json")
-	);
-	return configFile ? join(dir, configFile) : null;
-}
-
 /**
  * Load and parse quest config
  */
 export function loadQuestConfig(dataPath: string): ParsedQuest[] {
-	const questDir = join(dataPath, "common", "gamedata", "quest");
-	const configPath = findQuestConfigFile(questDir);
+	const configPath = findConfigFile("quest", "quest_config_");
 
 	if (!configPath) {
-		console.warn("[quest-config] No quest_config file found in", questDir);
+		console.warn("[quest-config] No SQL/SQLite quest_config projection found.");
 		return [];
 	}
 
-	const content = JSON.parse(readFileSync(configPath, "utf-8"));
-	const entries = content.entries as ConfigNode[];
+	const entries = loadConfig("quest", configPath).children as ConfigNode[];
 	const quests: ParsedQuest[] = [];
 
 	function traverse(node: ConfigNode) {

@@ -1,4 +1,4 @@
-import { Pool, type PoolClient } from "pg";
+import { createPgPool, type PoolClient } from "@rosegriffon/db/pg";
 
 type Json = Record<string, any>;
 
@@ -142,7 +142,10 @@ async function upsertGuild(db: PoolClient, token: string, guild: Json): Promise<
 async function main(): Promise<void> {
 	if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL manquante");
 	if (!tokens.length) throw new Error("BOT_TOKEN/DEV_BOT_TOKEN manquants");
-	const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
+	const pool = createPgPool(process.env.DATABASE_URL, {
+		applicationName: "achillea-discord-sync",
+		max: 2,
+	});
 	const db = await pool.connect();
 	const seen = new Set<string>();
 	let totals = { channels: 0, guilds: 0, members: 0, roles: 0 };

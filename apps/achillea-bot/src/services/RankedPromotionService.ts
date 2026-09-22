@@ -6,10 +6,9 @@ import type { Kysely } from "kysely";
 import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { coreManagerConfig } from "@/configs";
 import { Service } from "@/decorators";
-import { Data } from "@/entities";
 import { MatchMode } from "@/utils/enums";
 
-import { Database } from "./Database";
+import { DataStore } from "./DataStore";
 
 /** Au-delà de ce nombre de promotions détectées en une passe, on suspecte une anomalie
  *  (ex. reset/snapshot corrompu) et on ré-initialise sans rien annoncer (anti-spam). */
@@ -53,17 +52,14 @@ const sql = createAchilleaSql<RankedPromotionDatabase>() as Kysely<RankedPromoti
  * Détecte les montées de palier (1v1) entre deux passes et :
  *  - annonce dans 🚨・annonces-ranked (#2)
  *  - félicite dans 💬・général-ranked (#4)
- * Lecture seule sur user_elo + snapshot persistant (Data). Au premier passage, on
+ * Lecture seule sur user_elo + snapshot persistant (DataStore). Au premier passage, on
  * initialise le snapshot sans annoncer pour éviter un flot de fausses promotions.
  */
 @Service()
 export class RankedPromotionService {
 	private timer: ReturnType<typeof setInterval> | null = null;
 
-	constructor(
-		private db: Database,
-		private client: Client
-	) {}
+	constructor(private dataStore: DataStore, private client: Client) {}
 
 	start(): void {
 		if (this.timer) return;
@@ -100,10 +96,9 @@ export class RankedPromotionService {
 				.where("games_played", ">", 0)
 				.execute();
 
-			const store = this.db.get(Data);
 			let snapshot: Record<string, number> = {};
 			try {
-				snapshot = (await store.get("rankedTierSnapshot")) ?? {};
+				snapshot = (await this.dataStore.get("rankedTierSnapshot")) ?? {};
 			} catch {
 				snapshot = {};
 			}
@@ -119,7 +114,7 @@ export class RankedPromotionService {
 			}
 
 			const firstRun = Object.keys(snapshot).length === 0;
-			await store.set("rankedTierSnapshot", next);
+			await this.dataStore.set("rankedTierSnapshot", next);
 
 			if (firstRun) {
 				console.info(

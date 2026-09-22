@@ -1,10 +1,10 @@
 /**
- * Fuzzy search using uFuzzy
+ * Compatibility facade for the canonical fuzzy search engine.
  *
  * Provides fast fuzzy search across game data
  */
 
-import uFuzzy from "@leeoniya/ufuzzy";
+import { createSearchIndex as createCanonicalSearchIndex } from "../search/fuzzy.js";
 
 /**
  * Searchable item interface
@@ -34,46 +34,20 @@ export function createSearchIndex<T extends SearchableItem>(
 	search: (query: string, limit?: number) => SearchResult<T>[];
 	items: T[];
 } {
-	const texts = items.map(textGetter);
-	const uf = new uFuzzy({
-		intraMode: 1, // Allow fuzzy matching within words
-		intraIns: 1, // Allow 1 insertion within words
-		interIns: 3, // Allow 3 insertions between words
-	});
+	const canonical = createCanonicalSearchIndex(items, textGetter);
 
 	return {
 		items,
 		search(query: string, limit = 20): SearchResult<T>[] {
-			const [idxs, info, order] = uf.search(texts, query);
-
-			if (!idxs || !order) {
-				return [];
-			}
-
-			const results: SearchResult<T>[] = [];
-
-			for (let i = 0; i < Math.min(order.length, limit); i++) {
-				const infoIdx = order[i];
-				const itemIdx = idxs[infoIdx];
-				const item = items[itemIdx];
-
-				// Extract match ranges
-				const matches: [number, number][] = [];
-				if (info?.ranges) {
-					const ranges = info.ranges[infoIdx];
-					for (let j = 0; j < ranges.length; j += 2) {
-						matches.push([ranges[j], ranges[j + 1] - ranges[j]]);
-					}
-				}
-
-				results.push({
-					item,
-					score: infoIdx, // Lower is better
-					matches,
-				});
-			}
-
-			return results;
+			return canonical.search(query, { limit }).map((result) => ({
+				item: result.item,
+				score: 1 - result.score,
+				matches: Array.from({ length: Math.floor(result.matches.length / 2) }, (_, index) => {
+					const start = result.matches[index * 2]!;
+					const end = result.matches[index * 2 + 1]!;
+					return [start, end - start] as [number, number];
+				}),
+			}));
 		},
 	};
 }

@@ -17,8 +17,7 @@ import { Client, MetadataStorage } from "@aphrody/discordx";
 import { CookieAuthorize } from "@/api/middlewares";
 import { urlsConfig } from "@/configs";
 import type { UserDTO } from "@/services";
-import { Database, Logger, MetricsService, Stats, WalletService } from "@/services";
-import { User, Wallet, Transaction, Sanction, License } from "@/entities";
+import { AuditLogService, Logger, MetricsService, Stats } from "@/services";
 import { BaseController } from "@/utils/classes";
 import { UserRole } from "@/utils/enums";
 import { isInMaintenance, resolveDependenciesSync, setMaintenance } from "@/utils/functions";
@@ -31,8 +30,7 @@ import { isInMaintenance, resolveDependenciesSync, setMaintenance } from "@/util
 @Controller("/admin/ops")
 @UseBefore(CookieAuthorize)
 export class AdminOpsController extends BaseController {
-	private db: Database;
-	private wallet: WalletService;
+	private auditLog: AuditLogService;
 	private stats: Stats;
 	private client: Client;
 	private metrics: MetricsService;
@@ -40,8 +38,8 @@ export class AdminOpsController extends BaseController {
 
 	constructor() {
 		super();
-		[this.db, this.wallet, this.stats, this.metrics, this.logger] =
-			resolveDependenciesSync([Database, WalletService, Stats, MetricsService, Logger]);
+		[this.auditLog, this.stats, this.metrics, this.logger] =
+			resolveDependenciesSync([AuditLogService, Stats, MetricsService, Logger]);
 		this.client = (globalThis as typeof globalThis & { __roseGriffonDiscordClient?: Client }).__roseGriffonDiscordClient ?? resolveDependenciesSync([Client])[0];
 	}
 
@@ -57,126 +55,6 @@ export class AdminOpsController extends BaseController {
 	async overview(@Context() ctx: Context, @Req() req: Request, @Res() res: Response) {
 		this.requireStaff(ctx);
 		return this.forwardAdmin("/ops/overview", req, res);
-	}
-
-	/** Legacy implementation retained only as a migration reference; not routed. */
-	async overviewLegacy(@Context() ctx: Context, @Res() res: Response) {
-		this.requireStaff(ctx);
-		const em = this.db.em.fork();
-		const conn = em.getConnection();
-
-		const [
-			usersTotal,
-			usersStaff,
-			walletsTotal,
-			balanceSum,
-			txToday,
-			sanctionsActive,
-			licensesActive,
-			tournamentsOngoing,
-			clansPending,
-			orgsPending,
-			castEventsOpen,
-			auditRecent,
-		] = await Promise.all([
-			em.count(User, {}),
-			em.count(User, { role: { $gte: UserRole.Moderator } }),
-			em.count(Wallet, {}),
-			conn
-				.execute(`SELECT COALESCE(SUM(balance::numeric), 0) AS s FROM wallet`)
-				.then((r: any) => Number(r?.[0]?.s ?? 0)),
-			conn
-				.execute(
-					`SELECT COUNT(*)::int AS c FROM transaction WHERE created_at >= date_trunc('day', now())`
-				)
-				.then((r: any) => Number(r?.[0]?.c ?? 0))
-				.catch(() => 0),
-			em.count(Sanction, { revokedAt: null }).catch(() => 0),
-			em.count(License, { status: "Active" as any }).catch(() =>
-				conn
-					.execute(`SELECT COUNT(*)::int AS c FROM license WHERE status = 'Active'`)
-					.then((r: any) => Number(r?.[0]?.c ?? 0))
-					.catch(() => 0)
-			),
-			conn
-				.execute(
-					`SELECT COUNT(*)::int AS c FROM event WHERE type = 'TOURNAMENT' AND internal_state = 'Ongoing'`
-				)
-				.then((r: any) => Number(r?.[0]?.c ?? 0))
-				.catch(() => 0),
-			conn
-				.execute(`SELECT COUNT(*)::int AS c FROM clan WHERE state = 1`)
-				.then((r: any) => Number(r?.[0]?.c ?? 0))
-				.catch(() => 0),
-			conn
-				.execute(`SELECT COUNT(*)::int AS c FROM organization WHERE state = 0`)
-				.then((r: any) => Number(r?.[0]?.c ?? 0))
-				.catch(() => 0),
-			conn
-				.execute(
-					`SELECT COUNT(*)::int AS c FROM cast_event WHERE status IN ('planned','open_signup','attributed','live')`
-				)
-				.then((r: any) => Number(r?.[0]?.c ?? 0))
-				.catch(() => 0),
-			conn
-				.execute(`SELECT COUNT(*)::int AS c FROM audit_log WHERE ts >= now() - interval '24 hours'`)
-				.then((r: any) => Number(r?.[0]?.c ?? 0))
-				.catch(() => 0),
-		]);
-
-		let ranked = {
-			activeMatches: 0,
-			contestedMatches: 0,
-			finishedToday: 0,
-			matchesToday: 0,
-			totalPlayers: 0,
-		};
-		try {
-			const rows = await conn.execute(`
-				SELECT
-					(SELECT COUNT(*) FROM lobby WHERE event_type = 'RANKED' AND state = 'Ongoing') AS active_matches,
-					(SELECT COUNT(*) FROM lobby WHERE event_type = 'RANKED' AND state = 'Contested') AS contested_matches,
-					(SELECT COUNT(*) FROM lobby WHERE event_type = 'RANKED' AND state = 'Finished'
-						AND updated_at >= date_trunc('day', now())) AS finished_today,
-					(SELECT COUNT(*) FROM lobby WHERE event_type = 'RANKED'
-						AND created_at >= date_trunc('day', now())) AS matches_today,
-					(SELECT COUNT(*) FROM user_elo WHERE games_played > 0) AS total_players
-			`);
-			const r = rows?.[0] ?? {};
-			ranked = {
-				activeMatches: Number(r.active_matches ?? 0),
-				contestedMatches: Number(r.contested_matches ?? 0),
-				finishedToday: Number(r.finished_today ?? 0),
-				matchesToday: Number(r.matches_today ?? 0),
-				totalPlayers: Number(r.total_players ?? 0),
-			};
-		} catch {
-			/* ranked tables may be missing in some envs */
-		}
-
-		const maintenance = await isInMaintenance();
-		const botOnline = this.client.user?.presence?.status !== "offline";
-
-		return res.json({
-			users: { total: usersTotal, staff: usersStaff },
-			wallet: { wallets: walletsTotal, totalBalance: balanceSum, txToday },
-			moderation: { sanctionsActive, licensesActive },
-			community: {
-				tournamentsOngoing,
-				clansPending,
-				orgsPending,
-				castEventsOpen,
-			},
-			ranked,
-			audit24h: auditRecent,
-			bot: {
-				online: botOnline,
-				uptime: this.client.uptime ?? 0,
-				maintenance,
-				guilds: this.client.guilds?.cache?.size ?? 0,
-			},
-			generatedAt: new Date().toISOString(),
-		});
 	}
 
 	/** Liste utilisateurs DB (pagination + recherche). */
@@ -277,18 +155,15 @@ export class AdminOpsController extends BaseController {
 	@Get("/audit")
 	async audit(@Context() ctx: Context, @Res() res: Response, @QueryParams("limit") limit = 50) {
 		this.requireStaff(ctx, UserRole.Administrator);
-		const em = this.db.em.fork();
-		const lim = Math.min(200, Math.max(1, Number(limit) || 50));
-		const { AuditLog } = await import("@/entities");
-		const rows = await em.find(AuditLog, {}, { orderBy: { ts: "DESC" }, limit: lim });
+		const rows = await this.auditLog.listRecent(Number(limit));
 		return res.json({
 			data: rows.map((r) => ({
 				id: r.id,
 				ts: r.ts,
-				actorId: r.actorId,
+				actorId: r.actor_id,
 				action: r.action,
-				targetType: r.targetType,
-				targetId: r.targetId,
+				targetType: r.target_type,
+				targetId: r.target_id,
 				reason: r.reason,
 			})),
 		});

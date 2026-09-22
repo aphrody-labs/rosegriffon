@@ -14,7 +14,7 @@
  * Indispensable pour les répertoires massifs (`common/sound/ja` ≈ 15 k fichiers
  * directs) — sans ça l'arbre/la grille téléchargeaient le répertoire entier d'un coup.
  *
- * `runtime = "nodejs"` (bun:sqlite, pas Edge). Listing immutable côté client
+ * `runtime = "nodejs"` (accès PostgreSQL, pas Edge). Listing immutable côté client
  * (l'index ne change qu'à la régénération de l'artefact) → cache court.
  */
 import { NextResponse } from "next/server";

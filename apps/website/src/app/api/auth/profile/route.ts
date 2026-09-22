@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { getServerUser } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 /**
  * GET /api/auth/profile
@@ -14,7 +14,7 @@ export async function GET() {
 			return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 		}
 
-		const supabase = await createClient();
+		const supabase = createPostgresClient();
 		const { data: profile, error } = await supabase
 			.from("profiles")
 			.select("*")
@@ -67,7 +67,7 @@ export async function PUT(request: NextRequest) {
 			return NextResponse.json({ error: "bio trop longue (max 2000)" }, { status: 400 });
 		}
 
-		const supabase = await createClient();
+		const supabase = createPostgresClient();
 		const { error: profileError } = await supabase.from("profiles").upsert(
 			{
 				bio: bio || "",

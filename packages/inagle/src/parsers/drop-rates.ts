@@ -22,11 +22,8 @@
  * seules dimensions de taux sont item / rareté / coffre. Rien n'est fabriqué.
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { ConfigNode } from "../core/config-parser.js";
-import { toHex } from "../core/data-loader.js";
-import { DATA_ROOT } from "../core/paths.js";
+import { findConfigFile, loadConfigData, toHex } from "../core/data-loader.js";
 
 export type DropRateSource = "item_emission" | "spirit_drop" | "win_treasure";
 
@@ -60,21 +57,13 @@ interface TreeConfig {
 	entries: ConfigNode[];
 }
 
-function gamedataPath(category: string, filename: string): string {
-	return join(DATA_ROOT, "common", "gamedata", category, filename);
-}
-
-function readJson<T>(filePath: string): T | null {
-	if (!existsSync(filePath)) {
-		console.warn(`[DropRates] Config introuvable : ${filePath}`);
-		return null;
-	}
-	try {
-		return JSON.parse(readFileSync(filePath, "utf-8")) as T;
-	} catch (e) {
-		console.error(`[DropRates] Échec parse ${filePath}`, e);
-		return null;
-	}
+function loadDropConfig<T>(category: string, prefix: string, filename: string): T | null {
+	const resolved = filename === prefix + "0.00.00.cfg.bin.json"
+		? (findConfigFile(category, prefix) ?? filename)
+		: filename;
+	const data = loadConfigData<T>(category, resolved);
+	if (!data) console.warn(`[DropRates] Projection SQL/SQLite introuvable : ${category}/${resolved}`);
+	return data;
 }
 
 /**
@@ -85,7 +74,7 @@ function readJson<T>(filePath: string): T | null {
 export function loadItemEmissionRates(
 	filename = "item_emission_rarity_table_config_0.00.00.cfg.bin.json"
 ): DropRateRow[] {
-	const cfg = readJson<ListConfig>(gamedataPath("item", filename));
+	const cfg = loadDropConfig<ListConfig>("item", "item_emission_rarity_table_config_", filename);
 	if (!cfg?.lists) return [];
 
 	const info = cfg.lists.find((l) => l.name === "m_itemEmissionRarityTableConfigInfoList")?.values;
@@ -123,7 +112,7 @@ export function loadItemEmissionRates(
 export function loadSpiritDropRates(
 	filename = "soccer_drop_config_5.00.27.00.cfg.bin.json"
 ): DropRateRow[] {
-	const cfg = readJson<ListConfig>(gamedataPath("soccer", filename));
+	const cfg = loadDropConfig<ListConfig>("soccer", "soccer_drop_config_", filename);
 	if (!cfg?.lists) return [];
 
 	const spirit = cfg.lists.find((l) => l.name === "m_spiritDropDataList")?.values;
@@ -162,7 +151,7 @@ export function loadSpiritDropRates(
 export function loadWinTreasureRates(
 	filename = "win_treasure_lot_table_config_0.00.00.cfg.bin.json"
 ): DropRateRow[] {
-	const cfg = readJson<TreeConfig>(gamedataPath("item", filename));
+	const cfg = loadDropConfig<TreeConfig>("item", "win_treasure_lot_table_config_", filename);
 	if (!cfg?.entries) return [];
 
 	const flat: { itemId: string; weight: number }[] = [];

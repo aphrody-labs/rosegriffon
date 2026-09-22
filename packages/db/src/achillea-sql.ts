@@ -7,11 +7,9 @@
  * generated/contract layer as tables are migrated one service at a time.
  */
 import { Kysely, PostgresDialect } from "kysely";
-import pg from "pg";
 
 import { ACHILLEA_SCHEMA, getAchilleaDatabaseUrl } from "./achillea";
-
-const { Pool } = pg;
+import { createPgPool } from "./pg";
 
 /** SQL template shared by packages without a direct Kysely dependency. */
 export { sql } from "kysely";
@@ -39,11 +37,11 @@ export function createAchilleaSql<DB extends object = never>(
 		? false
 		: { rejectUnauthorized: false };
 
-	const pool = new Pool({
-		connectionString: url,
-		max: maxConnections,
-		options: `-c search_path=${ACHILLEA_SCHEMA},public`,
+	const pool = createPgPool(url, {
+		applicationName: "rosegriffon-achillea",
 		keepAlive: true,
+		max: maxConnections,
+		searchPath: `${ACHILLEA_SCHEMA},public`,
 		ssl: sslConfig,
 	});
 

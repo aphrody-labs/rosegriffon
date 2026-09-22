@@ -1,7 +1,8 @@
-import type { BaseCharacter, Item, Skill, Team } from "@rosegriffon/inagle";
+import type { BaseCharacter, Item } from "@rosegriffon/inagle";
+import type { Skill, Team } from "@rosegriffon/inagle";
 import { ElementNames } from "@rosegriffon/inagle/core/types";
 import type { Database } from "@rosegriffon/db";
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createAchilleaSql, sql } from "@rosegriffon/db/achillea-sql";
 import type { Database as SqlDatabase } from "@rosegriffon/db/schema";
 import {
 	extractKeshinModelCode,
@@ -17,12 +18,145 @@ import {
 	resolveAssetUrl,
 	resolveAuraTelopUrl,
 } from "../images";
-import { createClient } from "../db/provider";
+import { getTeamsList } from "./teams";
 import { SHOP_FR, TACTIC_FR, tacticSlug } from "../text/translations";
 import { LEGACY_FORMATIONS, type Formation, type PositionCoord } from "../game/formations";
 import type { SkillCutinEntry } from "../game/skills-cutin";
 
 type SqlFormationRow = SqlDatabase["inagle_formations"];
+interface CoordinatorSqlRow {
+	id: number;
+	image: string | null;
+	name_kanji: string | null;
+	name_localised: string | null;
+	name_romaji: string | null;
+	gender: string | null;
+	role: string | null;
+	game: string | null;
+	element: string | null;
+	passive_no: number | null;
+	requirements: string | null;
+	stat: string | null;
+	buff: string | null;
+}
+interface ManagerPassiveSqlRow {
+	id: number | string;
+	data: unknown;
+	text_fr: string | null;
+	text_en: string | null;
+	text_ja: string | null;
+}
+interface AuraSqlRow {
+	id: string;
+	name_en: string | null;
+	name_fr: string | null;
+	name_ja?: string | null;
+	image_url?: string | null;
+	icon_code?: string | null;
+	asset_code?: string | null;
+	element_id?: number | null;
+	sheet_data?: unknown;
+	description_fr?: string | null;
+	data?: unknown;
+	sub_type: string | null;
+}
+interface TacticSqlRow {
+	id: string | null;
+	name: string;
+	name_fr: string | null;
+	name_ja: string | null;
+	description_fr: string | null;
+	description_en: string | null;
+	description_ja: string | null;
+	effect1: string | null;
+	effect2: string | null;
+	effect3: string | null;
+	duration: number | null;
+	cooldown: number | null;
+	shop: string | null;
+	internal_code: string | null;
+	element: string | null;
+	power: number | null;
+	recast_time: number | null;
+	partner_count: number | null;
+	partner_ids: unknown;
+	image_url: string | null;
+}
+interface SpecialTacticSqlRow {
+	id: string;
+	internal_code: string | null;
+	name_en: string | null;
+	name_fr: string | null;
+	name_ja: string | null;
+	description_en: string | null;
+	description_fr: string | null;
+	description_ja: string | null;
+	element: string | null;
+	element_id: number;
+	power: number;
+	recast_time: number;
+	partner_count: number;
+	partner_ids: unknown;
+	data: unknown;
+}
+interface TweetSqlRow {
+	author_id: string | null;
+	author_name: string | null;
+	author_username: string | null;
+	category: string | null;
+	created_at: string | null;
+	id: string;
+	is_thread: boolean | null;
+	media: unknown;
+	metrics: unknown;
+	quoted_tweets: unknown;
+	raw_tweets: unknown;
+	text: string | null;
+	translation: string | null;
+	tweet_count: number | null;
+	updated_at: string | null;
+}
+type AuraTableName =
+	| "inagle_keshins"
+	| "inagle_souls"
+	| "inagle_miximax"
+	| "inagle_awakenings"
+	| "inagle_mode_changes"
+	| "inagle_auras"
+	| "inagle_keshins_clean"
+	| "inagle_souls_clean"
+	| "inagle_miximax_clean"
+	| "inagle_awakenings_clean"
+	| "inagle_mode_changes_clean";
+type WikiSqlDatabase = SqlDatabase & {
+	inagle_override_skills: {
+		id: string;
+		conditions: unknown;
+		name_fr: string | null;
+		name_en: string | null;
+		name_ja: string | null;
+		element_id: number | null;
+		category_id: number | null;
+		power_min: number | null;
+		power_max: number | null;
+	};
+	inagle_coordinators: CoordinatorSqlRow;
+	inagle_manager_passives: ManagerPassiveSqlRow;
+	inagle_keshins: AuraSqlRow;
+	inagle_souls: AuraSqlRow;
+	inagle_miximax: AuraSqlRow;
+	inagle_awakenings: AuraSqlRow;
+	inagle_mode_changes: AuraSqlRow;
+	inagle_auras: AuraSqlRow;
+	inagle_keshins_clean: AuraSqlRow;
+	inagle_souls_clean: AuraSqlRow;
+	inagle_miximax_clean: AuraSqlRow;
+	inagle_awakenings_clean: AuraSqlRow;
+	inagle_mode_changes_clean: AuraSqlRow;
+	inagle_tactics: TacticSqlRow;
+	inagle_special_tactics: SpecialTacticSqlRow;
+	tweets: TweetSqlRow;
+};
 
 interface SqlFormationData {
 	valid?: boolean;
@@ -445,18 +579,18 @@ export const wikiService = {
 	async _getHeroConstellations(row: any): Promise<Array<{ name: string; index: number }>> {
 		const name = row?.name_en;
 		if (!name) return [];
-		const supabase = await createClient();
-		const { data } = await supabase
-			.from("inagle_characters")
-			.select("constellation, constellation_index")
-			.eq("name_en", name)
-			.not("constellation", "is", null);
-		if (!data) return [];
+		const db = createAchilleaSql<SqlDatabase>();
+		const data = await db
+			.selectFrom("inagle_characters")
+			.select(["constellation", "constellation_index"])
+			.where("name_en", "=", name)
+			.where("constellation", "is not", null)
+			.execute();
 		// Deduplicate by constellation name
 		const seen = new Set<string>();
 		const results: Array<{ name: string; index: number }> = [];
-		for (const r of data as any[]) {
-			if (!seen.has(r.constellation)) {
+		for (const r of data) {
+			if (r.constellation && !seen.has(r.constellation)) {
 				seen.add(r.constellation);
 				results.push({
 					name: r.constellation,
@@ -470,17 +604,17 @@ export const wikiService = {
 	/** If character has no constellation (e.g. BASARA/Hero), inherit from counterpart via chara_id or name */
 	async _inheritConstellation(base: BaseCharacter, row: any): Promise<void> {
 		if ((base as any).constellation) return;
-		const supabase = await createClient();
+		const db = createAchilleaSql<SqlDatabase>();
 
 		// Try 1: inherit from sibling with same chara_id
 		if (row?.chara_id) {
-			const { data: sibling } = await supabase
-				.from("inagle_characters")
-				.select("constellation, constellation_index")
-				.eq("chara_id", row.chara_id)
-				.not("constellation", "is", null)
+			const sibling = await db
+				.selectFrom("inagle_characters")
+				.select(["constellation", "constellation_index"])
+				.where("chara_id", "=", row.chara_id)
+				.where("constellation", "is not", null)
 				.limit(1)
-				.maybeSingle();
+				.executeTakeFirst();
 			if (sibling?.constellation) {
 				(base as any).constellation = {
 					index: sibling.constellation_index ?? 0,
@@ -493,13 +627,13 @@ export const wikiService = {
 		// Try 2: inherit from name-matched variant (hero forms have different chara_id)
 		const name = row?.name_en;
 		if (name) {
-			const { data: nameMatch } = await supabase
-				.from("inagle_characters")
-				.select("constellation, constellation_index")
-				.eq("name_en", name)
-				.not("constellation", "is", null)
+			const nameMatch = await db
+				.selectFrom("inagle_characters")
+				.select(["constellation", "constellation_index"])
+				.where("name_en", "=", name)
+				.where("constellation", "is not", null)
 				.limit(1)
-				.maybeSingle();
+				.executeTakeFirst();
 			if (nameMatch?.constellation) {
 				(base as any).constellation = {
 					index: nameMatch.constellation_index ?? 0,
@@ -517,7 +651,7 @@ export const wikiService = {
 		sub_type?: string;
 		categorySlug?: string;
 	} | null> {
-		const supabase = await createClient();
+		const db = createAchilleaSql<WikiSqlDatabase>();
 		// Clean the search name (remove common prefixes)
 		const cleanName = name
 			.replace(/^Mix 'n' Match: /i, "")
@@ -531,39 +665,50 @@ export const wikiService = {
 			{ table: "inagle_miximax", slug: "miximax" },
 			{ table: "inagle_auras", slug: "autres" },
 		] as const;
-		const safeCleanName = sanitizeFilter(cleanName);
-		const searchPromises = tables.map(({ table }) =>
-			(supabase as any)
-				.from(table)
-				.select("id, name_en, name_fr, sub_type")
-				.or(`name_en.ilike.%${safeCleanName}%,name_fr.ilike.%${safeCleanName}%`)
+		const pattern = `%${cleanName}%`;
+		for (const { table, slug } of tables) {
+			const row = await db
+				.selectFrom(table)
+				.select(["id", "name_en", "name_fr", "sub_type"])
+				.where((eb) => eb.or([
+					eb("name_en", "ilike", pattern),
+					eb("name_fr", "ilike", pattern),
+				]))
 				.limit(1)
-		);
-		const results = await Promise.all(searchPromises);
-		for (let i = 0; i < tables.length; i++) {
-			const data = results[i].data;
-			if (data && data.length > 0) {
-				return { ...data[0], categorySlug: tables[i].slug };
-			}
+				.executeTakeFirst();
+			if (row) return {
+				...row,
+				name_en: row.name_en ?? row.name_fr ?? "",
+				name_fr: row.name_fr ?? row.name_en ?? "",
+				sub_type: row.sub_type ?? undefined,
+				categorySlug: slug,
+			};
 		}
 		// Exact match: use parameterized .eq() to avoid filter injection
-		const { data: exact } = await supabase
-			.from("inagle_auras")
-			.select("id, name_en, name_fr, sub_type")
-			.or(`name_en.eq.${sanitizeFilter(name)},name_fr.eq.${sanitizeFilter(name)}`)
-			.limit(1);
-		if (exact && exact.length > 0) return { ...exact[0], categorySlug: "autres" } as any;
+		const exact = await db
+			.selectFrom("inagle_auras")
+			.select(["id", "name_en", "name_fr", "sub_type"])
+			.where((eb) => eb.or([eb("name_en", "=", name), eb("name_fr", "=", name)]))
+			.limit(1)
+			.executeTakeFirst();
+		if (exact) return {
+			...exact,
+			name_en: exact.name_en ?? exact.name_fr ?? "",
+			name_fr: exact.name_fr ?? exact.name_en ?? "",
+			sub_type: exact.sub_type ?? undefined,
+			categorySlug: "autres",
+		};
 		return null;
 	},
 
 	/** Get all distinct base_slugs for generateStaticParams */
 	async getAllBaseSlugParams(): Promise<Array<{ id: string }>> {
-		const supabase = await createClient();
-		const { data } = await supabase
-			.from("inagle_characters")
+		const db = createAchilleaSql<SqlDatabase>();
+		const data = await db
+			.selectFrom("inagle_characters")
 			.select("base_slug")
-			.not("base_slug", "is", null);
-		if (!data) return [];
+			.where("base_slug", "is not", null)
+			.execute();
 		// Deduplicate
 		const seen = new Set<string>();
 		const params: Array<{ id: string }> = [];
@@ -577,15 +722,11 @@ export const wikiService = {
 	},
 
 	async getAllTeams(): Promise<Array<{ id: string; name: string }>> {
-		const supabase = await createClient();
-		const { data } = await supabase
-			.from("inagle_teams")
-			.select("id, name_fr, name_ja")
-			.order("name_fr");
-		return (data || []).map((t: any) => ({
-			id: t.id,
-			name: t.name_fr,
-			name_ja: t.name_ja,
+		const teams = await getTeamsList();
+		return teams.map((team) => ({
+			id: team.id,
+			name: team.name,
+			name_ja: team.nameJa,
 		}));
 	},
 
@@ -606,15 +747,18 @@ export const wikiService = {
 			hissatsuName?: string;
 		}>
 	> {
-		const supabase = await createClient();
+		const db = createAchilleaSql<WikiSqlDatabase>();
 		const supabaseHexIds = new Set<string>();
 
 		// 1. Get from database: inagle_characters (data->'auras')
-		const { data: charData } = await supabase
-			.from("inagle_characters")
+		const charData = await db
+			.selectFrom("inagle_characters")
 			.select("data")
-			.or(`chara_id.eq.${sanitizeFilter(charaId)},id.eq.${sanitizeFilter(charaParamId)}`)
-			.maybeSingle();
+			.where((eb) => eb.or([
+				eb("chara_id", "=", charaId),
+				eb("id", "=", charaParamId),
+			]))
+			.executeTakeFirst();
 
 		if (charData) {
 			const dbAuras = (charData.data as any)?.auras || [];
@@ -625,9 +769,9 @@ export const wikiService = {
 
 		// 2. SQL projection: imported aura rows carry their owner and skill ids in data.
 		for (const table of ["inagle_auras", "inagle_keshins", "inagle_souls", "inagle_miximax"] as const) {
-			const { data: auraRows } = await supabase.from(table).select("id, data");
-			for (const row of (auraRows ?? []) as any[]) {
-				const payload = row.data && typeof row.data === "object" ? row.data : {};
+			const auraRows = await db.selectFrom(table).select(["id", "data"]).execute();
+			for (const row of auraRows) {
+				const payload: any = row.data && typeof row.data === "object" ? row.data : {};
 				const owner = String(payload.ownerCharaParamId ?? payload.charaParamId ?? "").toLowerCase();
 				if (owner === charaId.toLowerCase() || owner === charaParamId.toLowerCase()) {
 					supabaseHexIds.add(String(payload.skillId ?? payload.id ?? row.id).toLowerCase());
@@ -652,17 +796,14 @@ export const wikiService = {
 
 				// `icon_code` n'existe que sur inagle_miximax (pas keshins/souls) — sélection
 				// conditionnelle pour éviter l'erreur PostgREST « column does not exist ».
-				const selectCols =
-					t.table === "inagle_miximax"
-						? "id, name_fr, name_en, name_ja, image_url, icon_code, asset_code, element_id, sheet_data"
-						: "id, name_fr, name_en, name_ja, image_url, asset_code, element_id, sheet_data";
-				const { data: auraRows } = await supabase
-					.from(t.table as any)
-					.select(selectCols)
-					.in("id", possibleIds);
+				const auraRows = await db
+					.selectFrom(t.table)
+					.select(["id", "name_fr", "name_en", "name_ja", "image_url", "asset_code", "element_id", "sheet_data", "description_fr"])
+					.where("id", "in", possibleIds)
+					.execute();
 
-				if (auraRows && auraRows.length > 0) {
-					const a = auraRows[0] as any;
+				if (auraRows.length > 0) {
+					const a = auraRows[0];
 					const sd = normalizeAuraSheetData(a.sheet_data) || {};
 					// Miximax : icône manifeste (cn/ca), jamais le telop périmé `aura_mixi_c05028*`
 					// du DB (= bannière d'un autre perso, cf. bug Arthur). Autres types : icône
@@ -701,7 +842,7 @@ export const wikiService = {
 	},
 
 	async getAura(id: string, typeSlug: string): Promise<any | undefined> {
-		const supabase = await createClient();
+		const db = createAchilleaSql<WikiSqlDatabase>();
 
 		// Map slug to the actual table (not view) for detail lookups
 		const tableMap: Record<string, string> = {
@@ -717,21 +858,23 @@ export const wikiService = {
 		if (!table) return undefined;
 
 		// For "éveil", also search in inagle_auras (generic auras used as awakenings)
-		const tablesToSearch = typeSlug === "eveil" ? [table, "inagle_auras"] : [table];
+		const tablesToSearch: AuraTableName[] =
+			typeSlug === "eveil" ? [table as AuraTableName, "inagle_auras"] : [table as AuraTableName];
 
 		// Try match by ID or asset_code across all candidate tables in parallel.
 		// sanitizeFilter : `id` vient d'un param d'URL → éviter l'injection de filtre
 		// PostgREST (virgules/points/parenthèses casseraient le .or()).
-		const safeId = sanitizeFilter(id);
-		const searchPromises = tablesToSearch.map((t) =>
-			(supabase as any)
-				.from(t)
-				.select("*")
-				.or(`id.eq.${safeId},asset_code.eq.${safeId}`)
-				.maybeSingle()
+		const searchResults = await Promise.all(
+			tablesToSearch.map((tableName) =>
+				db
+					.selectFrom(tableName)
+					.selectAll()
+					.where((eb) => eb.or([eb("id", "=", id), eb("asset_code", "=", id)]))
+					.limit(1)
+					.executeTakeFirst()
+			)
 		);
-		const searchResults = await Promise.all(searchPromises);
-		const row = searchResults.find((res) => res.data)?.data || null;
+		const row = searchResults.find(Boolean) || null;
 
 		if (!row) return undefined;
 
@@ -754,28 +897,33 @@ export const wikiService = {
 			(sid: string) => sid && sid !== "0x00000000"
 		);
 
-		const parallelPromises: Array<PromiseLike<any>> = [];
+		const parallelPromises: Array<Promise<{ type: "skill" | "owner"; data: any }>> = [];
 
 		// Push skill queries
 		if (a.skill_id) {
 			parallelPromises.push(
-				supabase
-					.from("inagle_skills")
-					.select("video_url, internal_code, name_fr, name_en")
-					.eq("id", a.skill_id)
-					.maybeSingle()
-				.then(({ data }: any) => ({ type: "skill", data }))
+				db
+					.selectFrom("inagle_skills")
+					.select(["video_url", "internal_code", "name_fr", "name_en"])
+					.where("id", "=", a.skill_id)
+					.executeTakeFirst()
+					.then((data) => ({ type: "skill" as const, data }))
 			);
 		}
 		for (const sid of possibleSkillIds) {
 			parallelPromises.push(
-				supabase
-					.from("inagle_skills")
-					.select("video_url, internal_code, name_fr, name_en")
-					.or(`data->>skillID.eq.${sid},sheet_data->>skillID.eq.${sid}`)
+				 db
+					.selectFrom("inagle_skills")
+					.select(["video_url", "internal_code", "name_fr", "name_en"])
+					.where((eb) =>
+						eb.or([
+							sql<boolean>`data->>'skillID' = ${sid}`,
+							sql<boolean>`sheet_data->>'skillID' = ${sid}`,
+						])
+					)
 					.limit(1)
-					.maybeSingle()
-				.then(({ data }: any) => ({ type: "skill", data }))
+					.executeTakeFirst()
+					.then((data) => ({ type: "skill" as const, data }))
 			);
 		}
 
@@ -783,12 +931,12 @@ export const wikiService = {
 		let ownerCharaId = a.owner_chara_id || (a.data as any)?.ownerCharaParamId;
 		if (ownerCharaId) {
 			parallelPromises.push(
-				supabase
-					.from("inagle_characters")
-					.select("name_fr, name_en, slug, base_slug")
-					.eq("id", ownerCharaId)
-					.maybeSingle()
-				.then(({ data }: any) => ({ type: "owner", data }))
+				db
+					.selectFrom("inagle_characters")
+					.select(["name_fr", "name_en", "slug", "base_slug"])
+					.where("id", "=", ownerCharaId)
+					.executeTakeFirst()
+					.then((data) => ({ type: "owner" as const, data }))
 			);
 		}
 
@@ -885,11 +1033,11 @@ export const wikiService = {
 		keshin: Array<{ code: string; name: string; glbUrl: string }>;
 		armures: Array<{ code: string; name: string; glbUrl: string }>;
 	}> {
-		const supabase = await createClient();
-		const { data } = await (supabase as any)
-			.from("inagle_keshins")
-			.select("name_fr, name_en, image_url, data");
-		const rows = (data as any[]) || [];
+		const db = createAchilleaSql<WikiSqlDatabase>();
+		const rows = await db
+			.selectFrom("inagle_keshins")
+			.select(["name_fr", "name_en", "image_url", "data"])
+			.execute();
 
 		// Index code keshin (`k<NNNNNN>`) -> nom FR, extrait icône/data.
 		const nameByCode = new Map<string, string>();
@@ -919,7 +1067,7 @@ export const wikiService = {
 	},
 
 	async getAurasList(params: ListParams & { typeSlug: string }): Promise<ListResult<any>> {
-		const supabase = await createClient();
+		const db = createAchilleaSql<WikiSqlDatabase>();
 		const page = params.page || 1;
 		const limit = params.limit || 50;
 		const from = (page - 1) * limit;
@@ -935,33 +1083,36 @@ export const wikiService = {
 			autres: "inagle_auras",
 		};
 
-		const view = viewMap[params.typeSlug];
+		const view = viewMap[params.typeSlug] as AuraTableName | undefined;
 		if (!view) return { data: [], total: 0, page, limit };
 
 		// For "éveil", combine awakenings + generic auras (which contain the real awakening entries)
 		if (params.typeSlug === "eveil") {
-			const buildQuery = (table: string) => {
-				let q = (supabase as any).from(table).select("*");
+			const buildQuery = (table: AuraTableName) => {
+				let query = db.selectFrom(table).select([
+					"id", "name_en", "name_fr", "name_ja", "image_url", "asset_code",
+					"element_id", "sheet_data", "description_fr", "sub_type",
+				]);
 				if (params.q) {
-					const sq = sanitizeFilter(params.q);
-					q = q.or(
-						`name_fr.ilike.%${sq}%,name_en.ilike.%${sq}%,sheet_data->>name_FR.ilike.%${sq}%,sheet_data->>name_EN.ilike.%${sq}%`
-					);
+					const pattern = `%${params.q}%`;
+					query = query.where((eb) => eb.or([
+						eb("name_fr", "ilike", pattern), eb("name_en", "ilike", pattern),
+						sql<boolean>`sheet_data->>'name_FR' ILIKE ${pattern}`,
+						sql<boolean>`sheet_data->>'name_EN' ILIKE ${pattern}`,
+					]));
 				}
 				if (params.element) {
 					const elIds = getElementIds(params.element);
-					if (elIds.length === 1) q = q.eq("element_id", elIds[0]);
-					else if (elIds.length > 1) q = q.in("element_id", elIds);
+					if (elIds.length) query = query.where("element_id", "in", elIds);
 				}
-				return q.order("name_fr", { nullsFirst: false });
+				return query.orderBy("name_fr", "asc").limit(2000).execute();
 			};
 
-			const [{ data: awakenings }, { data: auras }] = await Promise.all([
-				buildQuery("inagle_awakenings_clean").limit(2000),
-				buildQuery("inagle_auras").limit(2000),
+			const [awakenings, auras] = await Promise.all([
+				buildQuery("inagle_awakenings_clean"), buildQuery("inagle_auras"),
 			]);
 
-			const combined = [...(awakenings || []), ...(auras || [])];
+			const combined = [...awakenings, ...auras];
 			combined.sort((a: any, b: any) => (a.name_fr || "").localeCompare(b.name_fr || "", "fr"));
 			const total = combined.length;
 			const paged = combined.slice(from, to + 1);
@@ -993,40 +1144,36 @@ export const wikiService = {
 			return { data: results, total, page, limit };
 		}
 
-		let query = (supabase as any).from(view).select("*", { count: "exact" });
+		let query = db.selectFrom(view).select([
+			"id", "name_en", "name_fr", "name_ja", "image_url", "asset_code",
+			"element_id", "sheet_data", "description_fr", "sub_type",
+		]);
 
 		// Filter out Keshin Armed (wa*) and Link Transformations (wkt*) from Keshin list to avoid duplicates
 		if (view === "inagle_keshins_clean") {
-			query = query.not("asset_code", "ilike", "wa%").not("asset_code", "ilike", "wkt%");
+			query = query.where("asset_code", "not ilike", "wa%").where("asset_code", "not ilike", "wkt%");
 		}
 
 		if (params.q) {
-			const sq = sanitizeFilter(params.q);
+			const pattern = `%${params.q}%`;
 			// Search in both DB columns and sheet_data names (some auras only have names in sheet_data)
-			query = query.or(
-				`name_fr.ilike.%${sq}%,name_en.ilike.%${sq}%,sheet_data->>name_FR.ilike.%${sq}%,sheet_data->>name_EN.ilike.%${sq}%`
-			);
+			query = query.where((eb) => eb.or([
+				eb("name_fr", "ilike", pattern), eb("name_en", "ilike", pattern),
+				sql<boolean>`sheet_data->>'name_FR' ILIKE ${pattern}`,
+				sql<boolean>`sheet_data->>'name_EN' ILIKE ${pattern}`,
+			]));
 		}
 		if (params.element) {
 			const elIds = getElementIds(params.element);
-			if (elIds.length === 1) query = query.eq("element_id", elIds[0]);
-			else if (elIds.length > 1) query = query.in("element_id", elIds);
+			if (elIds.length) query = query.where("element_id", "in", elIds);
 		}
 
 		// Miximax: prioritize entries with icon (image) first
-		if (params.typeSlug === "miximax") {
-			query = query.order("icon_code", { ascending: false, nullsFirst: false });
-		}
-		const { data, count, error } = await query
-			.range(from, to)
-			.order("name_fr", { nullsFirst: false });
+		const data = await query.orderBy("name_fr", "asc").execute();
+		const count = data.length;
+		const pagedData = data.slice(from, to + 1);
 
-		if (error) {
-			console.error("Error fetching auras:", error);
-			return { data: [], total: 0, page, limit };
-		}
-
-		const results = (data as unknown as DbAura[]).map((a) => {
+		const results = (pagedData as unknown as DbAura[]).map((a) => {
 			const elementInfo =
 				ElementNames[a.element_id as keyof typeof ElementNames] || ElementNames[0];
 			const sd = (a.sheet_data || {}) as any;
@@ -1059,34 +1206,32 @@ export const wikiService = {
 
 		return {
 			data: results,
-			total: count || 0,
+			total: count,
 			page,
 			limit,
 		};
 	},
 
 	async getCharacter(id: string): Promise<BaseCharacter | undefined> {
-		const supabase = await createClient();
-		const { data: row } = await supabase
-			.from("inagle_characters")
-			.select("*")
-			.eq("id", id)
-			.maybeSingle();
+		const db = createAchilleaSql<SqlDatabase>();
+		const row = await db
+			.selectFrom("inagle_characters")
+			.selectAll()
+			.where("id", "=", id)
+			.executeTakeFirst();
 		if (!row) return undefined;
 
 		// Fetch all variants sharing this base_slug (or chara_id if base_slug is null)
-		let query = supabase.from("inagle_characters").select("*");
+		let query = db.selectFrom("inagle_characters").selectAll();
 		if (row.base_slug) {
-			query = query.eq("base_slug", row.base_slug);
+			query = query.where("base_slug", "=", row.base_slug);
 		} else {
-			query = query.eq("chara_id", row.chara_id);
+			query = query.where("chara_id", "=", row.chara_id);
 		}
-		const { data: rows } = await query
-			.order("zukan_order", { ascending: true, nullsFirst: false })
-			.order("id", { ascending: true });
+		const rows = await query.orderBy("zukan_order", "asc").orderBy("id", "asc").execute();
 
-		const allRows = rows && rows.length > 0 ? rows : [row];
-		const mapped = allRows.map((r: any) => this.mapDbCharacterToBase(r)!).filter(Boolean);
+		const allRows = rows.length > 0 ? rows : [row];
+		const mapped = allRows.map((r) => this.mapDbCharacterToBase(r)!).filter(Boolean);
 		const base = this.groupVariants(mapped)[0];
 
 		if (base) {
@@ -1100,17 +1245,18 @@ export const wikiService = {
 
 	/** Fetch character by base_slug (name_en + internal_code) — returns best variant as BaseCharacter */
 	async getCharacterByBaseSlug(baseSlug: string): Promise<BaseCharacter | undefined> {
-		const supabase = await createClient();
+		const db = createAchilleaSql<SqlDatabase>();
 		// Fetch all variants sharing this base_slug, ordered by age ASC (youngest first)
-		const { data: rows } = await supabase
-			.from("inagle_characters")
-			.select("*")
-			.eq("base_slug", baseSlug)
-			.order("zukan_order", { ascending: true, nullsFirst: false })
-			.order("id", { ascending: true });
-		if (!rows || rows.length === 0) return undefined;
+		const rows = await db
+			.selectFrom("inagle_characters")
+			.selectAll()
+			.where("base_slug", "=", baseSlug)
+			.orderBy("zukan_order", "asc")
+			.orderBy("id", "asc")
+			.execute();
+		if (rows.length === 0) return undefined;
 
-		const mapped = rows.map((r: any) => this.mapDbCharacterToBase(r)!).filter(Boolean);
+		const mapped = rows.map((r) => this.mapDbCharacterToBase(r)!).filter(Boolean);
 		const base = this.groupVariants(mapped)[0];
 
 		if (base) {
@@ -1124,27 +1270,25 @@ export const wikiService = {
 	},
 
 	async getCharacterBySlug(slug: string): Promise<BaseCharacter | undefined> {
-		const supabase = await createClient();
-		const { data: row } = await supabase
-			.from("inagle_characters")
-			.select("*")
-			.eq("slug", slug)
-			.maybeSingle();
+		const db = createAchilleaSql<SqlDatabase>();
+		const row = await db
+			.selectFrom("inagle_characters")
+			.selectAll()
+			.where("slug", "=", slug)
+			.executeTakeFirst();
 		if (!row) return undefined;
 
 		// Fetch all variants sharing this base_slug (or chara_id if base_slug is null)
-		let query = supabase.from("inagle_characters").select("*");
+		let query = db.selectFrom("inagle_characters").selectAll();
 		if (row.base_slug) {
-			query = query.eq("base_slug", row.base_slug);
+			query = query.where("base_slug", "=", row.base_slug);
 		} else {
-			query = query.eq("chara_id", row.chara_id);
+			query = query.where("chara_id", "=", row.chara_id);
 		}
-		const { data: rows } = await query
-			.order("zukan_order", { ascending: true, nullsFirst: false })
-			.order("id", { ascending: true });
+		const rows = await query.orderBy("zukan_order", "asc").orderBy("id", "asc").execute();
 
-		const allRows = rows && rows.length > 0 ? rows : [row];
-		const mapped = allRows.map((r: any) => this.mapDbCharacterToBase(r)!).filter(Boolean);
+		const allRows = rows.length > 0 ? rows : [row];
+		const mapped = allRows.map((r) => this.mapDbCharacterToBase(r)!).filter(Boolean);
 		const base = this.groupVariants(mapped)[0];
 
 		if (base) {
@@ -1178,23 +1322,22 @@ export const wikiService = {
 			zukanOrder?: number;
 		}>
 	> {
-		const supabase = await createClient();
-		let query = supabase
-			.from("inagle_characters")
-			.select(
-				"id, slug, position, element, rarity_label, rarity, zukan_hash, zukan_order, internal_code, stat_frappe, hero_type, series, age_group, school_year"
-			);
+		const db = createAchilleaSql<SqlDatabase>();
+		const fields = [
+			"id", "slug", "position", "element", "rarity_label", "rarity", "zukan_hash", "zukan_order",
+			"internal_code", "stat_frappe", "hero_type", "series",
+			sql<string | null>`age_group`.as("age_group"),
+			sql<string | null>`school_year`.as("school_year"),
+		] as const;
+		let query = db.selectFrom("inagle_characters").select(fields);
 		if (baseSlug) {
-			query = query.eq("base_slug", baseSlug);
+			query = query.where("base_slug", "=", baseSlug);
 		} else if (sheetId) {
-			query = query.eq("sheet_data->>sheetId", sheetId);
+			query = query.where(sql<boolean>`sheet_data->>'sheetId' = ${sheetId}`);
 		} else {
-			query = query.eq("chara_id", charaId);
+			query = query.where("chara_id", "=", charaId);
 		}
-		const { data } = await query
-			.order("zukan_order", { ascending: true, nullsFirst: false })
-			.order("id", { ascending: true });
-		if (!data) return [];
+		const data = await query.orderBy("zukan_order", "asc").orderBy("id", "asc").execute();
 		const groupByZukanVersion = baseSlug?.startsWith("shawn-froste") ?? false;
 		// Sort within groups: prefer versions with zukan_hash, then highest stat_frappe
 		// This ensures dedup picks the most enriched version as canonical
@@ -1266,18 +1409,15 @@ export const wikiService = {
 			return this.getCoordinatorsList(params);
 		}
 
-		const supabase = await createClient();
+		const db = createAchilleaSql<SqlDatabase>();
 		const page = params.page || 1;
 		const limit = params.limit || 50;
 		const from = (page - 1) * limit;
-		const to = from + limit - 1;
-
-		let query = supabase.from("inagle_characters").select("*", { count: "exact" });
+		const predicates = [sql<boolean>`name_en is not null and name_en <> ''`];
 
 		if (params.q) {
-			query = query.or(
-				`name_fr.ilike.%${sanitizeFilter(params.q)}%,name_en.ilike.%${sanitizeFilter(params.q)}%`
-			);
+			const pattern = `%${params.q}%`;
+			predicates.push(sql<boolean>`(name_fr ilike ${pattern} or name_en ilike ${pattern})`);
 		}
 		if (params.element) {
 			// Filter by exact text code ("Fire", "Wind"). DB columns are in French.
@@ -1288,7 +1428,7 @@ export const wikiService = {
 				Mountain: "Montagne",
 			};
 			const dbElement = elementMap[params.element] || params.element;
-			query = query.eq("element", dbElement);
+			predicates.push(sql<boolean>`element = ${dbElement}`);
 		}
 		if (params.position) {
 			// Filter by exact text code ("GK", "FW"). DB columns are in French.
@@ -1299,45 +1439,43 @@ export const wikiService = {
 				FW: "Attaquant",
 			};
 			const dbPosition = positionMap[params.position] || params.position;
-			query = query.eq("position", dbPosition);
+			predicates.push(sql<boolean>`position = ${dbPosition}`);
 		}
 		if (params.rarity === "Héros") {
-			query = query.eq("rarity_label", "Héros");
+			predicates.push(sql<boolean>`rarity_label = 'Héros'`);
 		} else if (params.rarity === "BASARA") {
-			query = query.eq("rarity_label", "BASARA");
+			predicates.push(sql<boolean>`rarity_label = 'BASARA'`);
 		} else {
 			if (params.rarity) {
-				query = query.eq("rarity_label", params.rarity);
+				predicates.push(sql<boolean>`rarity_label = ${params.rarity}`);
 			}
-			query = query.eq("is_primary", true);
+			predicates.push(sql<boolean>`is_primary = true`);
 		}
 		// Exclude _5000 variant entries (duplicates of normal characters)
-		query = query.not("internal_code", "like", "%_5000");
+		predicates.push(sql<boolean>`internal_code not like '%_5000'`);
 		// Exclude MixiMax forms (c05028*) and fusions (× in name)
-		query = query.not("internal_code", "like", "c05028%");
-		query = query.not("name_en", "like", "%×%");
+		predicates.push(sql<boolean>`internal_code not like 'c05028%'`);
+		predicates.push(sql<boolean>`name_en not like '%×%'`);
 		// Exclude animal/NPC entries (an* prefix) and nameless entries
-		query = query.not("internal_code", "like", "an%");
-		query = query.not("name_en", "is", null);
-		query = query.neq("name_en", "");
+		predicates.push(sql<boolean>`internal_code not like 'an%'`);
 		if (params.team) {
 			// Use parameterized .eq() for team_id and separate JSONB containment
 			// (avoid string-interpolating values with quotes into the filter)
-			const safeTeam = sanitizeFilter(params.team);
-			query = query.or(`team_id.eq.${safeTeam},teams.cs.${JSON.stringify([{ id: safeTeam }])}`);
+			const safeTeam = params.team;
+			predicates.push(sql<boolean>`(team_id = ${safeTeam} or teams @> ${JSON.stringify([{ id: safeTeam }])}::jsonb)`);
 		}
 		if (params.gender) {
 			// FilterChips: "1" = male, "2" = female; DB column: "M" / "F"
 			const genderMap: Record<string, string> = { "1": "M", "2": "F" };
 			const dbGender = genderMap[params.gender];
-			if (dbGender) query = query.eq("gender", dbGender);
+			if (dbGender) predicates.push(sql<boolean>`gender = ${dbGender}`);
 		}
 		if (params.playstyle) {
 			// "Freedom" (Orion) = "Breach" (Victory Road) — meme style de jeu
 			if (params.playstyle === "Breach") {
-				query = query.in("sheet_data->>playstyle", ["Breach", "Freedom"]);
+				predicates.push(sql<boolean>`sheet_data->>'playstyle' in ('Breach', 'Freedom')`);
 			} else {
-				query = query.eq("sheet_data->>playstyle", params.playstyle);
+				predicates.push(sql<boolean>`sheet_data->>'playstyle' = ${params.playstyle}`);
 			}
 		}
 		if (params.status !== "all") {
@@ -1346,38 +1484,37 @@ export const wikiService = {
 			// Sans la clause zukan_order, les persos emblématiques sans sheet_data
 			// (Mark Evans #0, etc.) disparaissaient → la liste ne commençait plus
 			// au #0 du zukan. On ne masque désormais que les entrées hors-zukan.
-			query = query.or("sheet_data.not.is.null,is_controllable.eq.true,zukan_order.not.is.null");
+			predicates.push(sql<boolean>`(sheet_data is not null or is_controllable = true or zukan_order is not null)`);
 		}
 		if (params.status === "jouable") {
-			query = query.eq("is_controllable", true);
+			predicates.push(sql<boolean>`is_controllable = true`);
 		}
 		if (params.series) {
 			// Series column is authoritative (from cfg.bin seriesId + zukan game)
 			// No prefix-based fallback needed — DB series are correct
-			query = query.eq("series", params.series);
+			predicates.push(sql<boolean>`series = ${params.series}`);
 		}
 		if (params.ageGroup) {
 			// Valeur brute EN, telle que capturée par crawlZukanOrder (zukan.inazuma.jp
 			// `ul.basic`) — pas de table de correspondance FR côté DB, l'UI traduit à
 			// l'affichage (cf. CharacterFilters).
-			query = query.eq("age_group", params.ageGroup);
+			predicates.push(sql<boolean>`age_group = ${params.ageGroup}`);
 		}
 		if (params.schoolYear) {
 			// Valeur EN officielle du Zukan (Grade 7/8/9), alimentée par le même crawl
 			// que zukan_order et filtrée en base avant pagination.
-			query = query.eq("school_year", params.schoolYear);
+			predicates.push(sql<boolean>`school_year = ${params.schoolYear}`);
 		}
 		// Default sort: zukan_order ASC (official zukan.inazuma.jp order), fallback internal_code
-		const { data, count, error } = await query
-			.order("zukan_order", { ascending: true, nullsFirst: false })
-			.order("internal_code", { ascending: true, nullsFirst: false })
-			.range(from, to);
-
-		if (error) {
-			// PGRST103 = offset hors range (page demandée > total pages) → silencieux
-			if ((error as { code?: string }).code === "PGRST103") {
-				return { data: [], total: 0, page, limit };
-			}
+		const where = sql<boolean>`${sql.join(predicates, sql` and `)}`;
+		let data: any[] = [];
+		let count = 0;
+		try {
+			[data, count] = await Promise.all([
+				db.selectFrom("inagle_characters").selectAll().where(where).orderBy("zukan_order", "asc").orderBy("internal_code", "asc").limit(limit).offset(from).execute(),
+				db.selectFrom("inagle_characters").select((eb) => eb.fn.countAll<number>().as("count")).where(where).executeTakeFirst().then((row) => Number(row?.count ?? 0)),
+			]);
+		} catch (error) {
 			console.error("Error fetching characters:", error);
 			return { data: [], total: 0, page, limit };
 		}
@@ -1404,12 +1541,12 @@ export const wikiService = {
 	},
 
 	async getCoordinatorPools(): Promise<{ coaches: any[]; managers: any[] }> {
-		const supabase = await createClient();
-		const { data } = await supabase
-			.from("inagle_coordinators")
-			.select("*")
-			.in("role", ["Coach", "Manager", "Coordinator"]);
-		const rows = data || [];
+		const db = createAchilleaSql<WikiSqlDatabase>();
+		const rows = await db
+			.selectFrom("inagle_coordinators")
+			.selectAll()
+			.where("role", "in", ["Coach", "Manager", "Coordinator"])
+			.execute();
 		// DB "Manager" + "Coach" = coachs in-game, DB "Coordinator" = manageuses
 		return {
 			coaches: rows.filter((r: any) => r.role === "Manager" || r.role === "Coach"),
@@ -1418,23 +1555,21 @@ export const wikiService = {
 	},
 
 	async getCoordinatorsList(params: ListParams): Promise<ListResult<BaseCharacter>> {
-		const supabase = await createClient();
+		const db = createAchilleaSql<WikiSqlDatabase>();
 		const page = params.page || 1;
 		const limit = params.limit || 50;
 		const from = (page - 1) * limit;
-		const to = from + limit - 1;
-
-		let query = supabase.from("inagle_coordinators").select("*", { count: "exact" });
+		const predicates = [sql<boolean>`role is not null`];
 
 		if (params.q) {
-			const q = sanitizeFilter(params.q);
-			query = query.or(`name_localised.ilike.%${q}%,name_romaji.ilike.%${q}%`);
+			const q = `%${params.q}%`;
+			predicates.push(sql<boolean>`(name_localised ilike ${q} or name_romaji ilike ${q})`);
 		}
 
 		if (params.role === "Coordinator") {
-			query = query.eq("role", "Coordinator");
+			predicates.push(sql<boolean>`role = 'Coordinator'`);
 		} else if (params.role === "Coach") {
-			query = query.or("role.eq.Coach,role.eq.Manager");
+			predicates.push(sql<boolean>`role in ('Coach', 'Manager')`);
 		}
 
 		// Element filter for Coordinators (stored as Kanji)
@@ -1449,160 +1584,122 @@ export const wikiService = {
 				Void: "無",
 			};
 			const kanji = elementMap[params.element];
-			if (kanji) query = query.eq("element", kanji);
+			if (kanji) predicates.push(sql<boolean>`element = ${kanji}`);
 		}
 
-		const { data, count, error } = await query.range(from, to).order("name_localised");
-
-		if (error) {
+		const where = sql<boolean>`${sql.join(predicates, sql` and `)}`;
+		try {
+			const [data, countRow] = await Promise.all([
+				db.selectFrom("inagle_coordinators").selectAll().where(where).orderBy("name_localised", "asc").limit(limit).offset(from).execute(),
+				db.selectFrom("inagle_coordinators").select((eb) => eb.fn.countAll<number>().as("count")).where(where).executeTakeFirst(),
+			]);
+			const count = Number(countRow?.count ?? 0);
+			// Zukan hash mapping for coordinators/coaches (matched from zukan.inazuma.jp by name)
+			const COORD_ZUKAN: Record<number, string> = {
+				1: "k/c/b/cb88nfolkwe",
+				2: "k/z/p/zpndk6oxjls",
+				3: "k/x/i/xikbkjcdmjs",
+				4: "k/t/2/t2vvykaoccs",
+				5: "k/n/z/nz2ghxvgpic",
+				6: "k/q/u/quvzfkeq5ns",
+				7: "k/o/3/o32tnwlthge",
+				8: "k/k/h/kh5u-b7dslk",
+				9: "k/v/v/vvi1tkdn_4m",
+				10: "k/h/f/hf3tipefyhk",
+				11: "k/k/5/k5er_or9jem",
+				12: "k/o/y/oyxxlfats7e",
+				13: "k/6/x/6xd84b32hzk",
+				14: "k/b/x/bxrne-6vwfk",
+				15: "k/e/u/euxp3_h_s_c",
+				16: "k/o/z/ozsfcxwjxve",
+				17: "k/u/g/ugqtm_smug0",
+				18: "k/d/d/dddirygeelc",
+				19: "k/h/c/hcb0r88rb-s",
+				20: "k/k/f/kfck9hlg5js",
+				21: "k/y/a/yaeyhvxpmwc",
+				22: "k/s/y/sy5iwvawaj0",
+				23: "k/u/t/ut_eshg5f8e",
+				24: "k/n/l/nl_glun8epm",
+				25: "k/c/m/cmtsbm0og6u",
+				26: "k/t/k/tkcz2zs0rj8",
+				27: "k/h/j/hjc80umli2k",
+				28: "k/o/m/om1n5jmhidm",
+				29: "k/7/8/78eqog2k9du",
+				30: "k/y/5/y5zbdtcoxo8",
+				31: "k/9/i/9ixx-wa6jqu",
+				32: "k/8/w/8wocttgsuu0",
+				33: "k/n/y/ny_j-sgwdnc",
+				34: "k/p/5/p54_qlu6ghc",
+				35: "k/e/-/e-qruphieye",
+				36: "k/v/w/vwbkdwhyzbs",
+				37: "k/b/8/b8ksybiqu-e",
+				38: "k/e/8/e8o-flnjyhm",
+				39: "k/1/u/1u_foarz1sk",
+				40: "k/v/7/v7cq7herayu",
+				41: "k/v/v/vvrzhm1aiie",
+				42: "k/k/t/kttlw44rtb8",
+				43: "k/s/n/snbzvhuzhmm",
+				44: "k/m/i/mi4sg8b7ug8",
+				45: "k/u/g/ugcf748fkgm",
+				46: "k/9/g/9gjnrd9b51u",
+				47: "k/o/p/op_woljxra8",
+				48: "k/f/u/futkwhaljtk",
+				49: "k/c/f/cft3awvkb0e",
+				50: "k/g/-/g-obvenkgrc",
+				51: "k/b/w/bwxwy2_pw90",
+				52: "k/8/w/8w28mu4bix0",
+				53: "k/c/f/cfvj1znj93e",
+				54: "k/t/3/t3koymrzqes",
+				55: "k/v/w/vwj02v5fvcs",
+				56: "k/e/-/e-svbqfl4xe",
+				57: "k/-/r/-rxgi3qtnr0",
+				58: "k/p/5/p5ablimxgic",
+				59: "k/7/t/7t_zufp1hd0",
+				60: "k/k/7/k7o456ppquc",
+			};
+			const results = data.map((c) => {
+				const revMap: Record<string, string> = { 風: "Wind", 林: "Forest", 火: "Fire", 山: "Mountain", 無: "Void" };
+				const elEn = revMap[c.element ?? ""] || "Void";
+				const zukanHash = COORD_ZUKAN[c.id] || undefined;
+				const imageUrl = zukanHash ? `https://dxi4wb638ujep.cloudfront.net/1/${zukanHash}.png` : null;
+				return {
+					charaId: `coord_${c.id}`, internalCode: `COORD_${c.id}`,
+					names: { fr: c.name_localised, en: c.name_localised, ja: c.name_kanji },
+					gender: c.gender === "女" ? 1 : 0,
+					variants: [{ charaParamId: `coord_${c.id}`, position: "COACH", positionRaw: 0, element: elEn, rarity: c.role || "Coach", rarityCode: 1, stats: { lv99: {} }, skills: [], image: imageUrl, zukanHash }],
+					bestRarity: c.role || "Coach", bestRarityCode: 1, isBasara: false, image: imageUrl,
+					descriptions: { fr: `Rôle: ${c.role}\nEffet: ${c.stat} +${c.buff}\nCondition: ${c.requirements}` },
+					sheetData: { passive_no: c.passive_no, buff: c.buff, stat: c.stat, requirements: c.requirements },
+					wikiSections: [], slug: `coord-${c.id}`, series: c.game || "Inazuma Eleven", teamId: null, teamName: "Coach/Manager", zukanHash,
+				} as any;
+			});
+			return { data: results, total: count, page, limit };
+		} catch (error) {
 			console.error("Error fetching coordinators:", error);
 			return { data: [], total: 0, page, limit };
 		}
-
-		// Zukan hash mapping for coordinators/coaches (matched from zukan.inazuma.jp by name)
-		const COORD_ZUKAN: Record<number, string> = {
-			1: "k/c/b/cb88nfolkwe",
-			2: "k/z/p/zpndk6oxjls",
-			3: "k/x/i/xikbkjcdmjs",
-			4: "k/t/2/t2vvykaoccs",
-			5: "k/n/z/nz2ghxvgpic",
-			6: "k/q/u/quvzfkeq5ns",
-			7: "k/o/3/o32tnwlthge",
-			8: "k/k/h/kh5u-b7dslk",
-			9: "k/v/v/vvi1tkdn_4m",
-			10: "k/h/f/hf3tipefyhk",
-			11: "k/k/5/k5er_or9jem",
-			12: "k/o/y/oyxxlfats7e",
-			13: "k/6/x/6xd84b32hzk",
-			14: "k/b/x/bxrne-6vwfk",
-			15: "k/e/u/euxp3_h_s_c",
-			16: "k/o/z/ozsfcxwjxve",
-			17: "k/u/g/ugqtm_smug0",
-			18: "k/d/d/dddirygeelc",
-			19: "k/h/c/hcb0r88rb-s",
-			20: "k/k/f/kfck9hlg5js",
-			21: "k/y/a/yaeyhvxpmwc",
-			22: "k/s/y/sy5iwvawaj0",
-			23: "k/u/t/ut_eshg5f8e",
-			24: "k/n/l/nl_glun8epm",
-			25: "k/c/m/cmtsbm0og6u",
-			26: "k/t/k/tkcz2zs0rj8",
-			27: "k/h/j/hjc80umli2k",
-			28: "k/o/m/om1n5jmhidm",
-			29: "k/7/8/78eqog2k9du",
-			30: "k/y/5/y5zbdtcoxo8",
-			31: "k/9/i/9ixx-wa6jqu",
-			32: "k/8/w/8wocttgsuu0",
-			33: "k/n/y/ny_j-sgwdnc",
-			34: "k/p/5/p54_qlu6ghc",
-			35: "k/e/-/e-qruphieye",
-			36: "k/v/w/vwbkdwhyzbs",
-			37: "k/b/8/b8ksybiqu-e",
-			38: "k/e/8/e8o-flnjyhm",
-			39: "k/1/u/1u_foarz1sk",
-			40: "k/v/7/v7cq7herayu",
-			41: "k/v/v/vvrzhm1aiie",
-			42: "k/k/t/kttlw44rtb8",
-			43: "k/s/n/snbzvhuzhmm",
-			44: "k/m/i/mi4sg8b7ug8",
-			45: "k/u/g/ugcf748fkgm",
-			46: "k/9/g/9gjnrd9b51u",
-			47: "k/o/p/op_woljxra8",
-			48: "k/f/u/futkwhaljtk",
-			49: "k/c/f/cft3awvkb0e",
-			50: "k/g/-/g-obvenkgrc",
-			51: "k/b/w/bwxwy2_pw90",
-			52: "k/8/w/8w28mu4bix0",
-			53: "k/c/f/cfvj1znj93e",
-			54: "k/t/3/t3koymrzqes",
-			55: "k/v/w/vwj02v5fvcs",
-			56: "k/e/-/e-svbqfl4xe",
-			57: "k/-/r/-rxgi3qtnr0",
-			58: "k/p/5/p5ablimxgic",
-			59: "k/7/t/7t_zufp1hd0",
-			60: "k/k/7/k7o456ppquc",
-		};
-
-		const results = (data || []).map((c: any) => {
-			// Map Kanji element to EN
-			const revMap: Record<string, string> = {
-				風: "Wind",
-				林: "Forest",
-				火: "Fire",
-				山: "Mountain",
-				無: "Void",
-			};
-			const elEn = revMap[c.element] || "Void";
-			const zukanHash = COORD_ZUKAN[c.id] || undefined;
-			const imageUrl = zukanHash ? `https://dxi4wb638ujep.cloudfront.net/1/${zukanHash}.png` : null;
-
-			return {
-				charaId: `coord_${c.id}`,
-				internalCode: `COORD_${c.id}`,
-				names: { fr: c.name_localised, en: c.name_localised, ja: c.name_kanji },
-				gender: c.gender === "女" ? 1 : 0,
-				variants: [
-					{
-						charaParamId: `coord_${c.id}`,
-						position: "COACH",
-						positionRaw: 0,
-						element: elEn,
-						rarity: c.role || "Coach",
-						rarityCode: 1,
-						stats: { lv99: {} },
-						skills: [],
-						image: imageUrl,
-						zukanHash,
-					},
-				],
-				bestRarity: c.role || "Coach",
-				bestRarityCode: 1,
-				isBasara: false,
-				image: imageUrl,
-				descriptions: {
-					fr: `Rôle: ${c.role}\nEffet: ${c.stat} +${c.buff}\nCondition: ${c.requirements}`,
-				},
-				sheetData: {
-					passive_no: c.passive_no,
-					buff: c.buff,
-					stat: c.stat,
-					requirements: c.requirements,
-				},
-				wikiSections: [],
-				slug: `coord-${c.id}`,
-				series: c.game || "Inazuma Eleven",
-				teamId: null,
-				teamName: "Coach/Manager",
-				zukanHash,
-			} as any;
-		});
-
-		return {
-			data: results,
-			total: count || 0,
-			page,
-			limit,
-		};
 	},
-
 	async getItem(id: string): Promise<Item | undefined> {
 		// ... existing getItem ...
-		const supabase = await createClient();
+		const db = createAchilleaSql<SqlDatabase>();
 		// Try exact match on ID first (hex), then internal_code/name if needed
-		let { data: row } = await supabase
-			.from("inagle_items")
-			.select("*")
-			.eq("id", id)
-			.maybeSingle();
+		let row = await db
+			.selectFrom("inagle_items")
+			.selectAll()
+			.where("id", "=", id)
+			.executeTakeFirst();
 
 		if (!row) {
-			const safeId = sanitizeFilter(id);
-			const { data: fallbackRow } = await supabase
-				.from("inagle_items")
-				.select("*")
-				.or(`internal_code.eq.${safeId},name_en.eq.${safeId},name_fr.eq.${safeId}`)
+			const fallbackRow = await db
+				.selectFrom("inagle_items")
+				.selectAll()
+				.where((eb) => eb.or([
+					eb("internal_code", "=", id),
+					eb("name_en", "=", id),
+					eb("name_fr", "=", id),
+				]))
 				.limit(1)
-				.maybeSingle();
+				.executeTakeFirst();
 			row = fallbackRow;
 		}
 
@@ -1674,75 +1771,76 @@ export const wikiService = {
 			return this.getTacticsList(params);
 		}
 
-		const supabase = await createClient();
+		const db = createAchilleaSql<SqlDatabase>();
 		const page = params.page || 1;
 		const limit = params.limit || 50;
 		const from = (page - 1) * limit;
-		const to = from + limit - 1;
-
-		let query = supabase.from("inagle_items").select("*", { count: "exact" });
+		let query = db.selectFrom("inagle_items");
+		let countQuery = db.selectFrom("inagle_items");
 
 		if (params.q) {
-			query = query.or(
-				`name_fr.ilike.%${sanitizeFilter(params.q)}%,name_en.ilike.%${sanitizeFilter(params.q)}%`
-			);
+			const pattern = `%${sanitizeFilter(params.q)}%`;
+			const condition = (builder: typeof query) =>
+				builder.where((eb) => eb.or([
+					eb("name_fr", "ilike", pattern),
+					eb("name_en", "ilike", pattern),
+				]));
+			query = condition(query);
+			countQuery = condition(countQuery);
 		}
 		if (params.category) {
-			query = query.eq("category", params.category);
+			query = query.where("category", "=", params.category);
+			countQuery = countQuery.where("category", "=", params.category);
 		}
 
-		const { data, count, error } = await query.range(from, to).order("id");
-
-		if (error) {
+		try {
+			const [data, countRow] = await Promise.all([
+				query.selectAll().orderBy("id", "asc").limit(limit).offset(from).execute(),
+				countQuery.select((eb) => eb.fn.countAll<number>().as("count")).executeTakeFirst(),
+			]);
+			const count = Number(countRow?.count ?? 0);
+			const results = (data as unknown as DbItem[]).map((item) => {
+				const sd = (item.sheet_data || {}) as any;
+				const parsed = ((item as any).data || {}) as any;
+				const community = sd.sheetData || {};
+				// Bonus de stats réels (kick +6, …) provenant de la ligne SQL canonique.
+				const bonuses =
+					sd.bonuses && Object.keys(sd.bonuses).length
+						? sd.bonuses
+						: parsed.bonuses && Object.keys(parsed.bonuses).length
+							? parsed.bonuses
+							: null;
+				return {
+					itemId: item.id,
+					internalCode: item.internal_code,
+					names: { fr: item.name_fr, en: item.name_en, ja: item.name_ja },
+					name_FR: item.name_fr,
+					category: item.category,
+					rarity: item.rarity,
+					image: resolveAssetUrl(item.image_url) || item.image_url,
+					price: sd.price || parsed.price || null,
+					location: community.location || null,
+					stats: community.stats || null,
+					bonuses,
+					shops: (item as any).shops || sd.shops || null,
+				} as any;
+			});
+			return { data: results, total: count, page, limit };
+		} catch (error) {
 			console.error("Error fetching items:", error);
 			return { data: [], total: 0, page, limit };
 		}
-
-		const results = (data as unknown as DbItem[]).map((item) => {
-			const sd = (item.sheet_data || {}) as any;
-			const parsed = ((item as any).data || {}) as any;
-			const community = sd.sheetData || {};
-			// Bonus de stats réels (kick +6, …) provenant de la ligne SQL canonique.
-			const bonuses =
-				sd.bonuses && Object.keys(sd.bonuses).length
-					? sd.bonuses
-					: parsed.bonuses && Object.keys(parsed.bonuses).length
-						? parsed.bonuses
-						: null;
-			return {
-				itemId: item.id,
-				internalCode: item.internal_code,
-				names: { fr: item.name_fr, en: item.name_en, ja: item.name_ja },
-				name_FR: item.name_fr,
-				category: item.category,
-				rarity: item.rarity,
-				image: resolveAssetUrl(item.image_url) || item.image_url,
-				// Note: top-level 'price' column contains catalog sort IDs (not real GP prices) — do not use
-				price: sd.price || parsed.price || null,
-				location: community.location || null,
-				stats: community.stats || null,
-				bonuses,
-				shops: (item as any).shops || sd.shops || null,
-			} as any;
-		});
-
-		return {
-			data: results,
-			total: count || 0,
-			page,
-			limit,
-		};
 	},
 
 	async getOverrideSkillsForSkill(skillId: string): Promise<any[]> {
-		const supabase = await createClient();
+		const db = createAchilleaSql<WikiSqlDatabase>();
 
 		// Two cases:
 		// A) This skill IS the override result → query by id
 		// B) This skill appears in conditions → must scan JSONB (no index), fetch all and filter in JS
 		const [{ data: directMatch }, { data: allOverrides }] = await Promise.all([
-			supabase.from("inagle_override_skills").select("*").eq("id", skillId),
-			supabase.from("inagle_override_skills").select("*"),
+			db.selectFrom("inagle_override_skills").selectAll().where("id", "=", skillId).execute().then((data) => ({ data })),
+			db.selectFrom("inagle_override_skills").selectAll().execute().then((data) => ({ data })),
 		]);
 
 		if (!allOverrides) return directMatch || [];
@@ -1784,7 +1882,7 @@ export const wikiService = {
 		mf: BaseCharacter[];
 		fw: BaseCharacter[];
 	}> {
-		const supabase = await createClient();
+		const db = createAchilleaSql<SqlDatabase>();
 		const positionMap: Record<string, string> = {
 			GK: "Gardien",
 			DF: "Défenseur",
@@ -1793,20 +1891,17 @@ export const wikiService = {
 		};
 		const fetchPool = async (position: string, limit: number) => {
 			const dbPosition = positionMap[position] || position;
-			let query = supabase
-				.from("inagle_characters")
-				.select("*")
-				.eq("position", dbPosition)
-				.not("stat_frappe", "is", null)
-				.not("zukan_hash", "is", null);
+			let query = db
+				.selectFrom("inagle_characters")
+				.selectAll()
+				.where("position", "=", dbPosition)
+				.where("stat_frappe", "is not", null)
+				.where("zukan_hash", "is not", null);
 			if (playstyles && playstyles.length > 0) {
-				const filter = playstyles
-					.map((p) => `sheet_data->>playstyle.eq.${sanitizeFilter(p)}`)
-					.join(",");
-				query = query.or(filter);
+				query = query.where(sql<boolean>`sheet_data->>'playstyle' in (${sql.join(playstyles.map((p) => sql`${p}`), sql`, `)})`);
 			}
-			const { data } = await query.limit(limit);
-			return ((data as any[]) || []).map((c: any) => this.mapDbCharacterToBase(c)!).filter(Boolean);
+			const data = await query.limit(limit).execute();
+			return data.map((c) => this.mapDbCharacterToBase(c)!).filter(Boolean);
 		};
 		const [gk, df, mf, fw] = await Promise.all([
 			fetchPool("GK", 200),
@@ -1818,29 +1913,28 @@ export const wikiService = {
 	},
 
 	async getSkill(id: string): Promise<Skill | undefined> {
-		const supabase = await createClient();
-		const safeId = sanitizeFilter(id);
-		let row: any;
-
-		if (id.startsWith("0x")) {
-			const { data } = await supabase
-				.from("inagle_skills")
-				.select("*")
-				// Le hash chara_param matche le skill via skillID, qui vit dans la colonne
-				// `data` (sheet_data est vide depuis la migration) — d'où data->>skillID.
-				.or(`id.eq.${safeId},data->>skillID.eq.${safeId},sheet_data->>skillID.eq.${safeId}`)
-				.limit(1)
-				.maybeSingle();
-			row = data;
-		} else {
-			const { data } = await supabase
-				.from("inagle_skills")
-				.select("*")
-				.or(`id.eq.${safeId},internal_code.eq.${safeId},name_en.eq.${safeId},name_fr.eq.${safeId}`)
-				.limit(1)
-				.maybeSingle();
-			row = data;
-		}
+		const db = createAchilleaSql<SqlDatabase>();
+		const row = await db
+			.selectFrom("inagle_skills")
+			.selectAll()
+			.where((eb) =>
+				eb.or(
+					id.startsWith("0x")
+						? [
+							 eb("id", "=", id),
+							 sql<boolean>`data->>'skillID' = ${id}`,
+							 sql<boolean>`sheet_data->>'skillID' = ${id}`,
+						  ]
+						: [
+							 eb("id", "=", id),
+							 eb("internal_code", "=", id),
+							 eb("name_en", "=", id),
+							 eb("name_fr", "=", id),
+						  ]
+				)
+			)
+			.limit(1)
+			.executeTakeFirst();
 
 		if (row) {
 			const h = row as unknown as DbSkill;
@@ -1908,23 +2002,16 @@ export const wikiService = {
 	},
 
 	async getSkillsList(params: ListParams): Promise<ListResult<Skill>> {
-		const supabase = await createClient();
+		const db = createAchilleaSql<WikiSqlDatabase>();
 		const page = params.page || 1;
 		const limit = params.limit || 50;
 		const from = (page - 1) * limit;
-		const to = from + limit - 1;
-
-		// Only real hissatsu skills (wh*/rh*), exclude _or element variants
-		let query = supabase
-			.from("inagle_skills")
-			.select("*", { count: "exact" })
-			.or("internal_code.like.wh%,internal_code.like.rh%")
-			.not("id", "like", "%_or");
+		// Only real hissatsu skills (wh*/rh*), exclude _or element variants.
+		const predicates = [sql<boolean>`(internal_code like 'wh%' or internal_code like 'rh%')`, sql<boolean>`id not like '%_or'`];
 
 		if (params.q) {
-			query = query.or(
-				`name_fr.ilike.%${sanitizeFilter(params.q)}%,name_en.ilike.%${sanitizeFilter(params.q)}%`
-			);
+			const pattern = `%${params.q}%`;
+			predicates.push(sql<boolean>`(name_fr ilike ${pattern} or name_en ilike ${pattern})`);
 		}
 		if (params.element) {
 			// element column stores values like 'Feu', 'Vent', 'Forêt', 'Montagne', 'Néant', 'Aucun'
@@ -1937,7 +2024,7 @@ export const wikiService = {
 				void: "Néant",
 			};
 			const searchElem = elementMap[params.element.toLowerCase()] || params.element;
-			query = query.eq("element", searchElem);
+			predicates.push(sql<boolean>`element = ${searchElem}`);
 		}
 		if (params.category) {
 			// category column stores values like 'Tir', 'Défense', 'Dribble', 'Arrêt'
@@ -1949,29 +2036,30 @@ export const wikiService = {
 				catch: "Arrêt",
 			};
 			const searchCat = categoryMap[params.category.toLowerCase()] || params.category;
-			query = query.eq("category", searchCat);
+			predicates.push(sql<boolean>`category = ${searchCat}`);
 		}
 		if (params.has_video) {
-			query = query.not("video_url", "is", null);
+			predicates.push(sql<boolean>`video_url is not null`);
 		}
 		if (params.power_min) {
-			query = query.gte("power_max", parseInt(params.power_min, 10));
+			predicates.push(sql<boolean>`power_max >= ${parseInt(params.power_min, 10)}`);
 		}
 		if (params.power_max) {
-			query = query.lte("power_max", parseInt(params.power_max, 10));
+			predicates.push(sql<boolean>`power_max <= ${parseInt(params.power_max, 10)}`);
 		}
 		if (!params.show_aura) {
-			query = query.eq("is_hyper", false);
+			predicates.push(sql<boolean>`is_hyper = false`);
 		}
 
 		// Overdrive filter: only show required skills for overdrive combinations
 		// inagle_override_skills uses hex IDs; inagle_skills stores the hex ID in sheet_data->>'skillID'
 		if (params.overdrive) {
-			const { data: overrides } = await supabase
-				.from("inagle_override_skills")
-				.select("conditions");
+			const overrides = await db
+				.selectFrom("inagle_override_skills")
+				.select("conditions")
+				.execute();
 			const hexIds = new Set<string>();
-			for (const o of overrides || []) {
+			for (const o of overrides) {
 				for (const c of (o.conditions as any[]) || []) {
 					for (const rs of c.required_skills || []) {
 						if (rs.skill_id) hexIds.add(rs.skill_id);
@@ -1979,132 +2067,109 @@ export const wikiService = {
 				}
 			}
 			if (hexIds.size > 0) {
-				query = query.in("data->>skillID", Array.from(hexIds));
+				predicates.push(sql<boolean>`data->>'skillID' in (${sql.join([...hexIds].map((id) => sql`${id}`), sql`, `)})`);
 			} else {
-				query = query.eq("id", "__no_match__");
+				predicates.push(sql<boolean>`false`);
 			}
 		}
 
-		// Sorting: explicit user sort takes priority; default = videos first then tension desc
+		const where = sql<boolean>`${sql.join(predicates, sql` and `)}`;
+		let query = db.selectFrom("inagle_skills").where(where);
+		let countQuery = db.selectFrom("inagle_skills").where(where);
 		if (params.sort === "power") {
-			query = query.order("power_max", { ascending: false, nullsFirst: false });
+			query = query.orderBy("power_max", "desc");
 		} else if (params.sort === "tension_asc") {
-			query = query.order("tension_cost", {
-				ascending: true,
-				nullsFirst: false,
-			});
+			query = query.orderBy("tension_cost", "asc");
 		} else {
-			// Default: videos first, then highest tension
-			query = query
-				.order("video_url", { ascending: true, nullsFirst: false })
-				.order("tension_cost", { ascending: false, nullsFirst: false });
+			query = query.orderBy("video_url", "asc").orderBy("tension_cost", "desc");
 		}
 
-		const { data, count, error } = await query.range(from, to);
-
-		if (error) {
+		try {
+			const [data, countRow] = await Promise.all([
+				query.selectAll().limit(limit).offset(from).execute(),
+				countQuery.select((eb) => eb.fn.countAll<number>().as("count")).executeTakeFirst(),
+			]);
+			const count = Number(countRow?.count ?? 0);
+			const results = (data as unknown as DbSkill[]).map((h) => {
+				const elementMap: Record<string, { en: string; ja: string; fr: string }> = {
+					Feu: { en: "Fire", ja: "火", fr: "Feu" },
+					Vent: { en: "Wind", ja: "風", fr: "Vent" },
+					Forêt: { en: "Forest", ja: "林", fr: "Forêt" },
+					Montagne: { en: "Mountain", ja: "山", fr: "Montagne" },
+					Néant: { en: "Void", ja: "無", fr: "Néant" },
+					Aucun: { en: "Void", ja: "無", fr: "Néant" },
+				};
+				const categoryMap: Record<string, { en: string; ja: string; fr: string }> = {
+					Tir: { en: "Shoot", ja: "シュート", fr: "Tir" },
+					Dribble: { en: "Dribble", ja: "ドリブル", fr: "Dribble" },
+					Défense: { en: "Block", ja: "ブロック", fr: "Défense" },
+					Arrêt: { en: "Catch", ja: "キャッチ", fr: "Arrêt" },
+				};
+				const elementInfo = elementMap[h.element || ""] || { en: "Void", ja: "無", fr: "Néant" };
+				const categoryInfo = categoryMap[h.category || ""] || { en: "None", ja: "なし", fr: "Aucun" };
+				return {
+					skillId: h.id,
+					skillID: h.id,
+					skillIDStr: h.internal_code || h.id,
+					internalCode: h.internal_code,
+					category: h.category_id,
+					names: { en: h.name_en, fr: h.name_fr, ja: h.name_ja },
+					displayName: h.name_fr || h.name_en || "Inconnu",
+					name_FR: h.name_fr,
+					name_EN: h.name_en,
+					power_min: h.power_min,
+					power_max: h.power_max,
+					consumeTp: h.tension_cost,
+					elementName: elementInfo,
+					categoryName: categoryInfo,
+					image: resolveAssetUrl(h.image_url) || h.image_url,
+					videoUrl: h.video_url || null,
+					posterUrl: h.poster_url || null,
+					thumbnailUrl: h.thumbnail_url || null,
+					shop: (() => {
+						const s = (h.sheet_data as any)?.shop;
+						return s ? SHOP_FR[s] || s : null;
+					})(),
+					sheetData: h.sheet_data,
+				} as any;
+			});
+			return { data: results, total: count, page, limit };
+		} catch (error) {
 			console.error("Error fetching skills:", error);
 			return { data: [], total: 0, page, limit };
 		}
-
-		const results = (data as unknown as DbSkill[]).map((h) => {
-			const elementMap: Record<string, { en: string; ja: string; fr: string }> = {
-				Feu: { en: "Fire", ja: "火", fr: "Feu" },
-				Vent: { en: "Wind", ja: "風", fr: "Vent" },
-				Forêt: { en: "Forest", ja: "林", fr: "Forêt" },
-				Montagne: { en: "Mountain", ja: "山", fr: "Montagne" },
-				Néant: { en: "Void", ja: "無", fr: "Néant" },
-				Aucun: { en: "Void", ja: "無", fr: "Néant" },
-			};
-			const categoryMap: Record<string, { en: string; ja: string; fr: string }> = {
-				Tir: { en: "Shoot", ja: "シュート", fr: "Tir" },
-				Dribble: { en: "Dribble", ja: "ドリブル", fr: "Dribble" },
-				Défense: { en: "Block", ja: "ブロック", fr: "Défense" },
-				Arrêt: { en: "Catch", ja: "キャッチ", fr: "Arrêt" },
-			};
-			const elementInfo = elementMap[h.element || ""] || { en: "Void", ja: "無", fr: "Néant" };
-			const categoryInfo = categoryMap[h.category || ""] || { en: "None", ja: "なし", fr: "Aucun" };
-
-			return {
-				skillId: h.id,
-				skillID: h.id,
-				skillIDStr: h.internal_code || h.id,
-				internalCode: h.internal_code,
-				category: h.category_id,
-				names: { en: h.name_en, fr: h.name_fr, ja: h.name_ja },
-				displayName: h.name_fr || h.name_en || "Inconnu",
-				name_FR: h.name_fr,
-				// `getSkill` expose les deux ; la liste et son JSON-LD lisent
-				// `name_FR || name_EN` — sans ce champ le repli anglais était mort, et
-				// une technique sans nom français serait retombée sur « Technique ».
-				name_EN: h.name_en,
-				power_min: h.power_min,
-				power_max: h.power_max,
-				consumeTp: h.tension_cost,
-				elementName: elementInfo,
-				categoryName: categoryInfo,
-				image: resolveAssetUrl(h.image_url) || h.image_url,
-				videoUrl: h.video_url || null,
-				posterUrl: h.poster_url || null,
-				// Vignette webp zukan (~6 Ko) : c'est elle qu'on veut dans une grille de 60,
-				// pas le poster jpg (~70 Ko).
-				thumbnailUrl: h.thumbnail_url || null,
-				shop: (() => {
-					const s = (h.sheet_data as any)?.shop;
-					return s ? SHOP_FR[s] || s : null;
-				})(),
-				sheetData: h.sheet_data,
-			} as any;
-		});
-
-		return {
-			data: results,
-			total: count || 0,
-			page,
-			limit,
-		};
 	},
 
 	async getTactic(slug: string): Promise<any | null> {
-		const supabase = await createClient();
+		const db = createAchilleaSql<WikiSqlDatabase>();
 		// Fast path: query by internal_code directly (avoids full table scan)
-		const safeSlug = sanitizeFilter(slug);
-		const { data: direct } = await supabase
-			.from("inagle_tactics")
-			.select("*")
-			.eq("internal_code", safeSlug)
-			.maybeSingle();
+		const direct = await db.selectFrom("inagle_tactics").selectAll()
+			.where("internal_code", "=", slug).executeTakeFirst();
 		if (direct) {
 			// Complète les champs manquants (power/element/partenaires) depuis le superset.
-			const { data: special } = await supabase
-				.from("inagle_special_tactics")
-				.select("*")
-				.eq("internal_code", safeSlug)
-				.maybeSingle();
+			const special = await db.selectFrom("inagle_special_tactics").selectAll()
+				.where("internal_code", "=", slug).executeTakeFirst();
 			return tacticDetailFromTactics(direct, special);
 		}
 		// La tactique peut n'exister QUE dans le superset (wht* de scénario absentes d'inagle_tactics).
-		const { data: directSpecial } = await supabase
-			.from("inagle_special_tactics")
-			.select("*")
-			.eq("internal_code", safeSlug)
-			.maybeSingle();
+		const directSpecial = await db.selectFrom("inagle_special_tactics").selectAll()
+			.where("internal_code", "=", slug).executeTakeFirst();
 		if (directSpecial && !isPlaceholderSpecialTactic(directSpecial)) {
 			return specialTacticToDetail(directSpecial);
 		}
 		// Fallback: slug is derived from name — must fetch all to compute slug match (les deux tables).
-		const [{ data: allT }, { data: allS }] = await Promise.all([
-			supabase.from("inagle_tactics").select("*"),
-			supabase.from("inagle_special_tactics").select("*"),
+		const [allT, allS] = await Promise.all([
+			db.selectFrom("inagle_tactics").selectAll().execute(),
+			db.selectFrom("inagle_special_tactics").selectAll().execute(),
 		]);
-		const matchT = ((allT as any[]) || []).find((t: any) => tacticSlug(t.name) === slug);
+		const matchT = allT.find((t) => tacticSlug(t.name) === slug);
 		if (matchT) {
-			const special = ((allS as any[]) || []).find(
+			const special = allS.find(
 				(s: any) => s.internal_code === matchT.internal_code
 			);
 			return tacticDetailFromTactics(matchT, special);
 		}
-		const matchS = ((allS as any[]) || []).find(
+		const matchS = allS.find(
 			(s: any) =>
 				!isPlaceholderSpecialTactic(s) &&
 				tacticSlug(s.name_en || s.name_fr || s.internal_code) === slug
@@ -2114,7 +2179,7 @@ export const wikiService = {
 	},
 
 	async getTacticsList(params: ListParams): Promise<ListResult<Item>> {
-		const supabase = await createClient();
+		const db = createAchilleaSql<WikiSqlDatabase>();
 		const page = params.page || 1;
 		const limit = params.limit || 50;
 		const from = (page - 1) * limit;
@@ -2123,19 +2188,12 @@ export const wikiService = {
 		// Fusion `inagle_tactics` (70) + extras `inagle_special_tactics` (~10 wht* de scénario).
 		// Volume total ~80 → on lit tout et on pagine en mémoire (pagination serveur non
 		// combinable entre deux tables).
-		const [tacticsRes, specialRes] = await Promise.all([
-			supabase.from("inagle_tactics").select("*"),
-			supabase.from("inagle_special_tactics").select("*"),
+		const [tactics, specialRows] = await Promise.all([
+			db.selectFrom("inagle_tactics").selectAll().execute(),
+			db.selectFrom("inagle_special_tactics").selectAll().execute(),
 		]);
-
-		if (tacticsRes.error) {
-			console.error("Error fetching tactics:", tacticsRes.error);
-			return { data: [], total: 0, page, limit };
-		}
-
-		const tactics = (tacticsRes.data || []) as any[];
 		const knownCodes = new Set(tactics.map((t) => t.internal_code).filter(Boolean));
-		const extras = ((specialRes.data as any[]) || []).filter(
+		const extras = specialRows.filter(
 			(s) => s.internal_code && !knownCodes.has(s.internal_code) && !isPlaceholderSpecialTactic(s)
 		);
 
@@ -2464,40 +2522,48 @@ export const wikiService = {
 		const page = params.page || 1;
 		const limit = params.limit || 48;
 		const from = (page - 1) * limit;
-		const to = from + limit - 1;
-
-		const supabase = await createClient();
-
-		let query = supabase.from("inagle_gallery").select("*", { count: "exact" });
+		const db = createAchilleaSql<SqlDatabase>();
+		let query = db.selectFrom("inagle_gallery");
+		let countQuery = db.selectFrom("inagle_gallery");
 
 		// Catégorie = préfixe `img_<category>_` du `img_path` (filtre serveur via LIKE).
 		if (params.category && GALLERY_CATEGORIES.some((c) => c.value === params.category)) {
-			query = query.ilike("img_path", `img_${sanitizeFilter(params.category)}_%`);
+			const pattern = `img_${sanitizeFilter(params.category)}_%`;
+			query = query.where("img_path", "ilike", pattern);
+			countQuery = countQuery.where("img_path", "ilike", pattern);
 		}
 		if (params.q) {
-			query = query.ilike("img_path", `%${sanitizeFilter(params.q)}%`);
+			const pattern = `%${sanitizeFilter(params.q)}%`;
+			query = query.where("img_path", "ilike", pattern);
+			countQuery = countQuery.where("img_path", "ilike", pattern);
 		}
 
-		const { data, count, error } = await query
-			.order("flg_no", { ascending: true, nullsFirst: false })
-			.range(from, to);
-
-		if (error) {
+		try {
+			const [data, countRow] = await Promise.all([
+				query
+					.selectAll()
+					.orderBy("flg_no", "asc")
+					.limit(limit)
+					.offset(from)
+					.execute(),
+				countQuery
+					.select((eb) => eb.fn.countAll<number>().as("count"))
+					.executeTakeFirst(),
+			]);
+			const results = data.map((row) => galleryRowToItem(row));
+			return { data: results, total: Number(countRow?.count ?? 0), page, limit };
+		} catch (error) {
 			console.error("Error fetching gallery:", error);
 			return { data: [], total: 0, page, limit };
 		}
-
-		const results = (data as any[]).map((row) => galleryRowToItem(row));
-
-		return { data: results, total: count || 0, page, limit };
 	},
 
 	/** Compte les illustrations par catégorie (pour les chips de filtre). */
 	async getGalleryCategoryCounts(): Promise<Record<string, number>> {
-		const supabase = await createClient();
-		const { data } = await supabase.from("inagle_gallery").select("img_path");
+		const db = createAchilleaSql<SqlDatabase>();
+		const data = await db.selectFrom("inagle_gallery").select("img_path").execute();
 		const counts: Record<string, number> = { all: 0 };
-		for (const row of (data as any[]) || []) {
+		for (const row of data) {
 			counts.all += 1;
 			const cat = galleryCategoryOf(row.img_path);
 			counts[cat] = (counts[cat] || 0) + 1;
@@ -2506,26 +2572,21 @@ export const wikiService = {
 	},
 
 	async getTweets(limit: number = 20): Promise<any[]> {
-		const supabase = await createClient();
-		const { data } = await supabase
-			.from("tweets")
-			.select("*")
-			.eq("author_username", "Azalee_IE")
-			.eq("is_thread", true)
-			.order("created_at", { ascending: false })
-			.limit(limit);
-		return data || [];
+		const db = createAchilleaSql<WikiSqlDatabase>();
+		return db.selectFrom("tweets").selectAll()
+			.where("author_username", "=", "Azalee_IE")
+			.where("is_thread", "=", true)
+			.orderBy("created_at", "desc")
+			.limit(limit)
+			.execute();
 	},
 
 	async getTweetById(id: string): Promise<any | null> {
-		const supabase = await createClient();
-		const { data } = await supabase
-			.from("tweets")
-			.select("*")
-			.eq("id", id)
-			.eq("author_username", "Azalee_IE")
-			.maybeSingle();
-		return data;
+		const db = createAchilleaSql<WikiSqlDatabase>();
+		return (await db.selectFrom("tweets").selectAll()
+			.where("id", "=", id)
+			.where("author_username", "=", "Azalee_IE")
+			.executeTakeFirst()) ?? null;
 	},
 
 	// ── Passifs (projection SQL `inagle_passives`) ──
@@ -2594,12 +2655,12 @@ export const wikiService = {
 
 		let imageUrl: string | null = null;
 		try {
-			const supabase = await createClient();
-			const { data: row } = await supabase
-				.from("inagle_passives")
+			const db = createAchilleaSql<SqlDatabase>();
+			const row = await db
+				.selectFrom("inagle_passives")
 				.select("image_url")
-				.eq("id", inst.passive_id)
-				.maybeSingle();
+				.where("id", "=", inst.passive_id)
+				.executeTakeFirst();
 			if (row?.image_url) {
 				imageUrl = resolveAssetUrl(row.image_url);
 			}
@@ -2618,10 +2679,10 @@ export const wikiService = {
 	/** Les 21 passifs d'équipe (soccer_team_passive_config). */
 	async getTeamPassives(): Promise<PassiveTeamItem[]> {
 		try {
-			const supabase = await createClient();
-			const { data } = await supabase.from("inagle_manager_passives").select("*");
-			return ((data ?? []) as any[]).map((row) => {
-				const raw = row.data && typeof row.data === "object" ? row.data : row;
+			const db = createAchilleaSql<WikiSqlDatabase>();
+			const data = await db.selectFrom("inagle_manager_passives").selectAll().execute();
+			return data.map((row) => {
+				const raw: any = row.data && typeof row.data === "object" ? row.data : row;
 				return {
 					team_passive_id: String(raw.team_passive_id ?? raw.id ?? row.id),
 					effect_id: String(raw.effect_id ?? raw.effectId ?? ""),
@@ -2639,13 +2700,14 @@ export const wikiService = {
 	/** Passive sheets historiques normalisées dans la projection SQL canonique. */
 	async getPassiveSheets(): Promise<PassiveSheets> {
 		try {
-			const supabase = await createClient();
-			const { data } = await supabase
-				.from("inagle_passive_sheets")
-				.select("kind, data")
-				.order("kind", { ascending: true });
+			const db = createAchilleaSql<SqlDatabase>();
+			const data = await db
+				.selectFrom("inagle_passive_sheets")
+				.select(["kind", "data"])
+				.orderBy("kind", "asc")
+				.execute();
 			const result: PassiveSheets = { playerPassives: [], customPassives: [], coordinatorPassives: [] };
-			for (const row of (data ?? []) as Array<{ kind?: string; data?: unknown }>) {
+			for (const row of data as Array<{ kind?: string; data?: unknown }>) {
 				if (row.kind === "player") result.playerPassives.push(row.data as PlayerPassiveSheet);
 				if (row.kind === "custom") result.customPassives.push(row.data as CustomPassiveSheet);
 				if (row.kind === "coordinator") result.coordinatorPassives.push(row.data as CoordinatorPassiveSheet);
@@ -2772,10 +2834,9 @@ async function loadPassiveRows(): Promise<PassiveListItem[]> {
 	if (!passiveCache) {
 		passiveCache = (async () => {
 			try {
-				const supabase = await createClient();
-				const { data, error } = await supabase.from("inagle_passives").select("*");
-				if (error) throw error;
-				return ((data ?? []) as any[]).map(passiveRowToItem);
+				const db = createAchilleaSql<SqlDatabase>();
+				const data = await db.selectFrom("inagle_passives").selectAll().execute();
+				return data.map(passiveRowToItem);
 			} catch {
 				return [];
 			}

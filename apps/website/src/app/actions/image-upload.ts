@@ -2,7 +2,7 @@
 
 import sharp from "sharp";
 import { requireEditorOrFail } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 // --- Configuration ---
 
@@ -64,7 +64,7 @@ async function processAndUpload(
 	inputBuffer: Buffer,
 	filenameBase: string
 ): Promise<UploadResult | { error: string }> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const metadata = await sharp(inputBuffer).metadata();
 
 	if (!metadata.width || !metadata.height) {

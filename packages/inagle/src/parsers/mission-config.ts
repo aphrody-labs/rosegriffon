@@ -3,10 +3,8 @@
  * @description Parser for mission_config files
  */
 
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { ConfigNode } from "../core/config-parser.js";
-import { toHex } from "../core/data-loader.js";
+import { findConfigFile, loadConfig, toHex } from "../core/data-loader.js";
 import { loadTextFile } from "./text-parser.js";
 
 export interface ParsedMission {
@@ -16,25 +14,14 @@ export interface ParsedMission {
 	names: { en?: string; fr?: string; ja?: string };
 }
 
-function findMissionConfigFile(dir: string): string | null {
-	if (!existsSync(dir)) return null;
-	const files = readdirSync(dir);
-	const configFile = files
-		.filter((f) => f.startsWith("mission_config_") && f.endsWith(".cfg.bin.json"))
-		.sort()
-		.pop();
-	return configFile ? join(dir, configFile) : null;
-}
-
 export function buildMissionDatabase(dataPath: string) {
-	const missionDir = join(dataPath, "common", "gamedata", "mission");
-	const configPath = findMissionConfigFile(missionDir);
+	const configPath = findConfigFile("mission", "mission_config_");
 
 	const missions: ParsedMission[] = [];
 	const byId = new Map<string, ParsedMission>();
 
 	if (!configPath) {
-		console.warn("[mission-config] Config not found in", missionDir);
+		console.warn("[mission-config] No SQL/SQLite mission_config projection found.");
 		return { missions, byId };
 	}
 
@@ -44,8 +31,7 @@ export function buildMissionDatabase(dataPath: string) {
 	const textJa = loadTextFile("mission", "ja");
 
 	try {
-		const content = JSON.parse(readFileSync(configPath, "utf-8"));
-		const entries = content.entries as ConfigNode[];
+		const entries = loadConfig("mission", configPath).children as ConfigNode[];
 
 		function traverse(node: ConfigNode) {
 			// MISSION_CONFIG_INFO_0

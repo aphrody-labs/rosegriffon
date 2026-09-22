@@ -4,6 +4,8 @@
 		"outDir": "dist",
 		"noEmit": true,
 		"declaration": false,
+		"types": ["bun"],
+		"lib": ["ESNext", "DOM"],
 		"baseUrl": ".",
 		"ignoreDeprecations": "6.0",
 		"rootDir": "..",

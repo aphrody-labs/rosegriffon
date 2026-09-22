@@ -8,7 +8,7 @@
 //   bun scripts/ops/refetch-tweet-media.ts [--dry] [--limit N] [--concurrency N]
 import { mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { SQL } from "bun";
+import { createBunSql } from "@rosegriffon/db/bun-sql";
 
 const ROOT = process.env.RG_STORAGE_ROOT ?? "/var/www/rg-storage";
 const BUCKET = "tweets";
@@ -17,7 +17,7 @@ const DRY = args.includes("--dry");
 const LIMIT = Number(args[args.indexOf("--limit") + 1]) || Number.POSITIVE_INFINITY;
 const CONCURRENCY = Number(args[args.indexOf("--concurrency") + 1]) || 8;
 
-const sql = new SQL(process.env.DATABASE_URL);
+const sql = createBunSql();
 
 interface Media {
 	url?: string;

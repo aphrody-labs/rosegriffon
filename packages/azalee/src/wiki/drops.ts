@@ -1,8 +1,8 @@
 /**
  * Accès données pour la section Wiki « Drops / Taux » (route `/drops`).
  *
- * Source de vérité = miroir SQLite embarqué (lecture via le client PostgREST-compatible
- * `@/lib/supabase/server`). Trois tables réelles (vérifiées sur le miroir, db 2026-06-05) :
+ * Source de vérité = miroir SQLite embarqué (lecture via le provider SQL commun
+ * `../db/provider`). Trois tables réelles (vérifiées sur le miroir, db 2026-06-05) :
  *
  *  - `inagle_drop_rates` (177) : table maîtresse. Colonne `source` ∈ {`win_treasure`,
  *    `item_emission`, `spirit_drop`}. Pour `win_treasure`/`item_emission`, `item_id` est
@@ -27,7 +27,7 @@
  * (les `inagle_items` sont des hash `0x…`). Aucune résolution fiable → on ne forge rien.
  */
 
-import { createClient } from "../db/provider";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import type {
 	DropEntry,
 	DropsPageData,
@@ -82,29 +82,36 @@ interface BeanRow {
 	value: string | null;
 }
 
+interface DropsDatabase {
+	inagle_drop_rates: DropRateRow;
+	inagle_items: ItemRow;
+	inagle_drops_battles: { battle_group_id: number; item_table_id: number | null };
+	inagle_drops: BeanRow;
+}
+
+const sql = createAchilleaSql<DropsDatabase>();
+
 const SUPPORTED_CONCRETE_SOURCES = ["win_treasure", "item_emission"] as const;
 
 /** Récupère et résout toutes les sources de drops concrets (objet nommé + taux). */
 async function fetchConcreteDrops(): Promise<DropEntry[]> {
-	const supabase = await createClient();
-
-	const { data: rateData } = await supabase
-		.from("inagle_drop_rates")
-		.select("*")
-		.in("source", [...SUPPORTED_CONCRETE_SOURCES]);
-
-	const rows = (rateData ?? []) as DropRateRow[];
+	const rows = await sql
+		.selectFrom("inagle_drop_rates")
+		.selectAll()
+		.where("source", "in", [...SUPPORTED_CONCRETE_SOURCES])
+		.execute();
 	const withItem = rows.filter((r) => !!r.item_id);
 
 	// Résolution des objets en un seul `in` (les hash sont distincts et peu nombreux).
 	const itemIds = [...new Set(withItem.map((r) => r.item_id as string))];
 	const itemMap = new Map<string, ItemRow>();
 	if (itemIds.length > 0) {
-		const { data: itemData } = await supabase
-			.from("inagle_items")
-			.select("id,name_fr,name_en,category,rarity,internal_code,image_url")
-			.in("id", itemIds);
-		for (const it of (itemData ?? []) as ItemRow[]) {
+		const itemData = await sql
+			.selectFrom("inagle_items")
+			.select(["id", "name_fr", "name_en", "category", "rarity", "internal_code", "image_url"])
+			.where("id", "in", itemIds)
+			.execute();
+		for (const it of itemData) {
 			itemMap.set(it.id, it);
 		}
 	}
@@ -139,21 +146,17 @@ async function fetchConcreteDrops(): Promise<DropEntry[]> {
 
 /** Récupère les groupes d'esprit (paliers de rareté) + leurs combats associés. */
 async function fetchSpiritGroups(): Promise<SpiritGroup[]> {
-	const supabase = await createClient();
-
-	const { data: rateData } = await supabase
-		.from("inagle_drop_rates")
-		.select("*")
-		.eq("source", "spirit_drop");
-	const rows = (rateData ?? []) as DropRateRow[];
+	const rows = await sql
+		.selectFrom("inagle_drop_rates")
+		.selectAll()
+		.where("source", "=", "spirit_drop")
+		.execute();
 
 	// Lien combat → table (item_table_id stocké en INTEGER, reconverti en hash).
-	const { data: battleData } = await supabase.from("inagle_drops_battles").select("*");
+	const battleData = await sql.selectFrom("inagle_drops_battles").selectAll().execute();
 	const battleByTable = new Map<string, number[]>();
-	for (const b of (battleData ?? []) as Array<{
-		battle_group_id: number;
-		item_table_id: number;
-	}>) {
+	for (const b of battleData) {
+		if (b.item_table_id === null) continue;
 		const hex = `0x${(b.item_table_id >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
 		const list = battleByTable.get(hex) ?? [];
 		list.push(b.battle_group_id);
@@ -209,9 +212,7 @@ async function fetchSpiritGroups(): Promise<SpiritGroup[]> {
 
 /** Récupère les bonus « Fèves » d'équipe (mécanique distincte du drop d'objet). */
 async function fetchTeamBeans(): Promise<TeamBean[]> {
-	const supabase = await createClient();
-	const { data } = await supabase.from("inagle_drops").select("*").order("id");
-	const rows = (data ?? []) as BeanRow[];
+	const rows = await sql.selectFrom("inagle_drops").selectAll().orderBy("id", "asc").execute();
 	return rows.map(
 		(r): TeamBean => ({
 			id: r.id,

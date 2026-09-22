@@ -17,8 +17,8 @@ import {
 	auditSpearmanCorrelation as spearmanCorrelation,
 	auditZukanGameToSeries as zukanGameToSeries,
 } from "@rosegriffon/inagle/zukan/audit.ts";
+import { createPgClient } from "@rosegriffon/db/pg";
 import dotenv from "dotenv";
-import { Client } from "pg";
 
 const __dirname = import.meta.dir;
 const envPath = path.resolve(__dirname, "../../../.env");
@@ -83,7 +83,7 @@ async function main() {
 
 	// Connect to DB
 	const dbUrl = envConfig.DATABASE_URL || "";
-	const client = new Client({ connectionString: dbUrl });
+	const client = createPgClient(dbUrl);
 	await client.connect();
 
 	const { rows } = await client.query<DbRow>(

@@ -26,8 +26,8 @@
 
 import { readFile, readdir, stat } from "node:fs/promises";
 import { extname, join, relative } from "node:path";
+import { createPgClient } from "@rosegriffon/db/pg";
 import dotenv from "dotenv";
-import { Client } from "pg";
 
 const REPO_ROOT = join(import.meta.dir, "../../..");
 const DUMP_ROOT = "/home/ubuntu/.local/share/Steam/iecode/inazuma/data/dx11";
@@ -153,7 +153,7 @@ async function main(): Promise<void> {
 	if (!dbUrl) {
 		throw new Error("DATABASE_URL absent");
 	}
-	const client = new Client({ connectionString: dbUrl });
+	const client = createPgClient(dbUrl);
 	await client.connect();
 
 	const BATCH = 1000;

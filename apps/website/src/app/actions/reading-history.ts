@@ -1,7 +1,8 @@
 "use server";
 
 import { getServerSession } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { getPgPool } from "@/lib/db/pg";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export interface ReadingHistoryEntry {
 	article_id: string;
@@ -31,7 +32,7 @@ export async function trackReading(articleId: string, progress: number): Promise
 		throw new Error("Non authentifié");
 	}
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	await supabase.rpc("upsert_reading_progress", {
 		p_article_id: articleId,
 		p_progress: progress,
@@ -49,36 +50,16 @@ export async function getReadingHistory(limit = 10): Promise<ReadingHistoryEntry
 		throw new Error("Non authentifié");
 	}
 
-	const supabase = await createClient();
-	const { data } = await supabase
-		.from("reading_history")
-		.select(
-			"article_id, progress, last_read_at, read_count, articles(title, slug, featured_image_url, excerpt, category)"
-		)
-		.eq("user_id", session.user.id)
-		.eq("articles.status", "published")
-		.eq("articles.app", "azalee")
-		.order("last_read_at", { ascending: false })
-		.limit(limit);
-
-	if (!data) {
-		return [];
-	}
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	return (data as any[])
-		.filter((row) => row.articles !== null)
-		.map((row) => ({
-			article_id: row.article_id,
-			category: row.articles.category,
-			excerpt: row.articles.excerpt,
-			featured_image_url: row.articles.featured_image_url,
-			last_read_at: row.last_read_at,
-			progress: row.progress,
-			read_count: row.read_count,
-			slug: row.articles.slug,
-			title: row.articles.title,
-		}));
+	const { rows } = await getPgPool().query<ReadingHistoryEntry>(
+		`SELECT h.article_id, a.title, a.slug, a.featured_image_url, a.excerpt, a.category,
+			h.progress, h.last_read_at, h.read_count
+		 FROM reading_history h
+		 JOIN articles a ON a.id = h.article_id
+		 WHERE h.user_id = $1 AND a.status = 'published' AND a.app = 'azalee'
+		 ORDER BY h.last_read_at DESC LIMIT $2`,
+		[session.user.id, limit]
+	);
+	return rows;
 }
 
 /**
@@ -91,37 +72,16 @@ export async function getContinueReading(limit = 4): Promise<ReadingHistoryEntry
 		return [];
 	}
 
-	const supabase = await createClient();
-	const { data } = await supabase
-		.from("reading_history")
-		.select(
-			"article_id, progress, last_read_at, read_count, articles(title, slug, featured_image_url, excerpt, category)"
-		)
-		.eq("user_id", session.user.id)
-		.lt("progress", 100)
-		.eq("articles.status", "published")
-		.eq("articles.app", "azalee")
-		.order("last_read_at", { ascending: false })
-		.limit(limit);
-
-	if (!data) {
-		return [];
-	}
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	return (data as any[])
-		.filter((row) => row.articles !== null)
-		.map((row) => ({
-			article_id: row.article_id,
-			category: row.articles.category,
-			excerpt: row.articles.excerpt,
-			featured_image_url: row.articles.featured_image_url,
-			last_read_at: row.last_read_at,
-			progress: row.progress,
-			read_count: row.read_count,
-			slug: row.articles.slug,
-			title: row.articles.title,
-		}));
+	const { rows } = await getPgPool().query<ReadingHistoryEntry>(
+		`SELECT h.article_id, a.title, a.slug, a.featured_image_url, a.excerpt, a.category,
+			h.progress, h.last_read_at, h.read_count
+		 FROM reading_history h
+		 JOIN articles a ON a.id = h.article_id
+		 WHERE h.user_id = $1 AND h.progress < 100 AND a.status = 'published' AND a.app = 'azalee'
+		 ORDER BY h.last_read_at DESC LIMIT $2`,
+		[session.user.id, limit]
+	);
+	return rows;
 }
 
 /**
@@ -136,32 +96,21 @@ export async function getReadingStats(): Promise<ReadingStats> {
 		throw new Error("Non authentifié");
 	}
 
-	const supabase = await createClient();
-	const [{ count: totalRead }, { count: totalInProgress }, { data: history }] = await Promise.all([
-		supabase
-			.from("reading_history")
-			.select("article_id", { count: "exact", head: true })
-			.eq("user_id", session.user.id)
-			.eq("progress", 100),
-		supabase
-			.from("reading_history")
-			.select("article_id", { count: "exact", head: true })
-			.eq("user_id", session.user.id)
-			.lt("progress", 100),
-		supabase
-			.from("reading_history")
-			.select("last_read_at")
-			.eq("user_id", session.user.id)
-			.order("last_read_at", { ascending: false }),
+	const pool = getPgPool();
+	const [{ rows: readRows }, { rows: progressRows }, { rows: history }] = await Promise.all([
+		pool.query<{ count: string }>("SELECT COUNT(*)::text AS count FROM reading_history WHERE user_id = $1 AND progress = 100", [session.user.id]),
+		pool.query<{ count: string }>("SELECT COUNT(*)::text AS count FROM reading_history WHERE user_id = $1 AND progress < 100", [session.user.id]),
+		pool.query<{ last_read_at: string }>("SELECT last_read_at FROM reading_history WHERE user_id = $1 ORDER BY last_read_at DESC", [session.user.id]),
 	]);
+	const totalRead = Number(readRows[0]?.count ?? 0);
+	const totalInProgress = Number(progressRows[0]?.count ?? 0);
 
 	// Calcul du streak : jours consécutifs avec activité en remontant depuis aujourd'hui
 	let streak = 0;
 	if (history && history.length > 0) {
 		// Construire un Set des jours (format YYYY-MM-DD) ayant une activité
 		const activeDays = new Set<string>(
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(history as any[]).map((row) => new Date(row.last_read_at).toISOString().slice(0, 10))
+		history.map((row) => new Date(row.last_read_at).toISOString().slice(0, 10))
 		);
 
 		const today = new Date();

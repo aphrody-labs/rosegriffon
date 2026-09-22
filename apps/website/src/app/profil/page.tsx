@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerUser } from "@/lib/auth-helpers";
 
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import type { Metadata } from "next";
 
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 
 export default async function ProfilPage() {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const user = await getServerUser();
 
 	if (!user) {

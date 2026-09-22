@@ -12,6 +12,7 @@ import { inagleModule } from "./modules/inagle";
 import { azaleeBridgeModule } from "./modules/azalee-bridge";
 import { authController } from "./modules/auth";
 import { dbPlugin } from "./plugins/db";
+import { elysiaAuth } from "@rosegriffon/auth/elysia";
 
 const allowedOrigins = new Set(
 	[
@@ -47,6 +48,12 @@ export const app = new Elysia()
 			}
 		}
 	}))
+	.mount(elysiaAuth.handler)
+	.get("/.well-known/agent-configuration", ({ request }) =>
+		(elysiaAuth.api as unknown as {
+			getAgentConfiguration: (input: { headers: Headers }) => Promise<Response>;
+		}).getAgentConfiguration({ headers: request.headers })
+	)
 	.get("/health", () => ({
 		status: "ok",
 		service: "rg-api",

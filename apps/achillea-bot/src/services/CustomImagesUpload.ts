@@ -4,29 +4,39 @@ import crypto from "node:crypto";
 import axios from "axios";
 import type { Attachment } from "discord.js";
 import sharp from "sharp";
+import type { Generated, Kysely } from "kysely";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 
 import { coreManagerConfig } from "@/configs";
 import { discordBotProfile } from "@/configs/discord-profile";
 import { Service } from "@/decorators";
-import type { ImageRepository } from "@/entities";
-import { Image } from "@/entities";
-import { Database } from "@/services";
 import { SupabaseImageStorage } from "@/services/SupabaseImageStorage";
-import type { EntityManager } from "@mikro-orm/core";
 
 /** Cloisonne les images issues des flux Discord (attachments/emojis) dans le bucket Supabase Storage. */
 const STORAGE_FOLDER = "discord";
 
+interface ImageDatabase {
+	image: {
+		id: Generated<number>;
+		created_at: Generated<Date>;
+		updated_at: Generated<Date>;
+		file_name: string;
+		base_path: string;
+		url: string;
+		size: number;
+		tags: string[];
+		hash: string;
+		delete_hash: string;
+	};
+}
+
+const sql = createAchilleaSql<ImageDatabase>() as Kysely<ImageDatabase>;
+
 @Service()
 export class CustomImagesUpload {
-	private imageRepo: ImageRepository;
-
 	constructor(
-		private db: Database,
 		private imageStorage: SupabaseImageStorage
-	) {
-		this.imageRepo = this.db.get(Image);
-	}
+	) {}
 
 	async hashAttachmentStream(url: string): Promise<{ hash: string; buffer: Buffer }> {
 		const res = await axios.get(url, { responseType: "stream" });
@@ -58,9 +68,8 @@ export class CustomImagesUpload {
 		attachment: Attachment,
 		uploadEmoji: boolean,
 		overrideEmoji: boolean,
-		em: EntityManager,
 		emojiName?: string,
-		emojiId?: string
+	emojiId?: string
 	): Promise<string | { url: string; emoji?: string }> {
 		// Only process images (png, jpg, jpeg)
 		const ext = attachment.name ? attachment.name.split(".").pop()?.toLowerCase() : "";
@@ -73,7 +82,11 @@ export class CustomImagesUpload {
 		const { hash, buffer } = await this.hashAttachmentStream(attachment.url);
 
 		// Step 2: check DB for existing hash
-		const existing = await em.getRepository(Image).findOne({ hash });
+		const existing = await sql
+			.selectFrom("image")
+			.select("url")
+			.where("hash", "=", hash)
+			.executeTakeFirst();
 		if (existing) {
 			// Already stored, return existing URL
 			return existing.url;
@@ -83,16 +96,17 @@ export class CustomImagesUpload {
 		const [fileName, uploadedUrl] = await this.uploadImageBuffer(buffer, mimeType);
 
 		// Step 4: store new record in DB
-		const newImage = new Image();
-		newImage.deleteHash = "";
-		newImage.fileName = fileName;
-		newImage.size = buffer.length;
-		newImage.tags = [];
-		newImage.hash = hash;
-		newImage.url = uploadedUrl;
-
-		em.persist(newImage);
-
+		await sql.insertInto("image").values({
+			created_at: new Date(),
+			updated_at: new Date(),
+			file_name: fileName,
+			base_path: STORAGE_FOLDER,
+			url: uploadedUrl,
+			size: buffer.length,
+			tags: [],
+			hash,
+			delete_hash: "",
+		}).execute();
 		// Step 5: delete emoji if override is true
 		if (overrideEmoji && emojiId) this.deleteEmoji(emojiId).catch((err) => console.error(err));
 
@@ -102,7 +116,7 @@ export class CustomImagesUpload {
 			: uploadedUrl;
 	}
 
-	async deleteDistantImage(image: Image) {
+	async deleteDistantImage(image: { fileName: string }) {
 		return this.imageStorage.deleteImage(image.fileName, STORAGE_FOLDER);
 	}
 

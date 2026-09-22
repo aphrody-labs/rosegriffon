@@ -4,7 +4,7 @@ import {
 	AdminPageHeader as DashboardPageHeader,
 } from "@rosegriffon/ui";
 import { requireAdmin } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { ZukanReviewClient } from "./ZukanReviewClient";
 import type { ZukanCandidate } from "./ZukanReviewClient";
 import { Icon } from "@/components/ui/Icon";
@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 export default async function ZukanReviewPage() {
 	await requireAdmin();
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
 

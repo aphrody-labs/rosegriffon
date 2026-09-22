@@ -13,9 +13,8 @@
  *       [0] = Item ID Hash
  */
 
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { ConfigNode } from "../core/config-parser.js";
+import { findConfigFile, loadConfig } from "../core/data-loader.js";
 
 export interface ShopItem {
 	itemId: number; // Unsigned Int
@@ -28,30 +27,15 @@ export interface ShopInfo {
 }
 
 /**
- * Find shop config file in a directory
- */
-function findShopConfigFile(dir: string): string | null {
-	if (!existsSync(dir)) return null;
-
-	const files = readdirSync(dir);
-	const configFile = files.find((f) => f.startsWith("shop_config_") && f.endsWith(".cfg.bin.json"));
-	return configFile ? join(dir, configFile) : null;
-}
-
-/**
  * Load and parse shop config
  */
-export function loadShopConfig(dataPath: string): ShopInfo[] {
-	const shopDir = join(dataPath, "common", "gamedata", "shop");
-	const configPath = findShopConfigFile(shopDir);
-
-	if (!configPath) {
-		console.warn("[shop-config] No shop_config file found in", shopDir);
+export function loadShopConfig(_dataPath: string): ShopInfo[] {
+	const filename = findConfigFile("shop", "shop_config_");
+	if (!filename) {
+		console.warn("[shop-config] No SQL/SQLite shop_config projection found.");
 		return [];
 	}
-
-	const content = JSON.parse(readFileSync(configPath, "utf-8"));
-	const entries = content.entries as ConfigNode[];
+	const entries = loadConfig("shop", filename).children as ConfigNode[];
 	const shops: ShopInfo[] = [];
 
 	function parseShopNode(node: ConfigNode): ShopInfo | null {

@@ -17,7 +17,11 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Eye, Loader2, Save } from "@/lib/icons-config";
-import { createClient } from "@/lib/supabase/client";
+import {
+	createChronicle,
+	updateChronicle,
+} from "@/app/admin/chroniques/actions";
+import type { ArticleInput } from "@/app/admin/chroniques/schema";
 
 interface ArticleEditorProps {
 	categories: {
@@ -61,8 +65,6 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
 		}
 
 		setIsLoading(true);
-		const supabase = createClient();
-
 		try {
 			const slug =
 				initialData?.slug ||
@@ -84,21 +86,10 @@ export function ArticleEditor({ categories, userId, initialData }: ArticleEditor
 				status,
 			};
 
-			let result;
-			if (initialData?.id) {
-				result = await supabase
-					.from("articles")
-					.update(articleData)
-					.eq("id", initialData.id)
-					.select()
-					.single();
-			} else {
-				result = await supabase.from("articles").insert(articleData).select().single();
-			}
-
-			if (result.error) {
-				throw result.error;
-			}
+			const result = initialData?.id
+				? await updateChronicle(initialData.id, articleData as ArticleInput)
+				: await createChronicle(articleData as ArticleInput);
+			if (!result.success) throw new Error(result.error || "Erreur lors de l'enregistrement");
 
 			toast.success(
 				status === "published" ? "Chronique publiée avec succès !" : "Brouillon enregistré !"

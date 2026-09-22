@@ -28,6 +28,7 @@ const LIBELLES_FAMILLES: Readonly<Record<FamilleTache, string>> = {
 	seo: "Référencement",
 	publication: "Publication",
 	stats: "Statistiques",
+	qa: "Qualité et QA",
 };
 
 type Retour = { statut: "ok" | "erreur"; message: string };

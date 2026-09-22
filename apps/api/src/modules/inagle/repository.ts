@@ -1,5 +1,6 @@
 import type { Database } from "@rosegriffon/db/schema";
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
+import { WikiSqlRepository } from "../wiki/repository";
 
 type Db = Kysely<Database>;
 
@@ -8,24 +9,15 @@ function json(value: unknown): unknown {
 }
 
 export class InagleRepository {
-	constructor(private readonly db: Db) {}
+	private readonly wiki: WikiSqlRepository;
+
+	constructor(private readonly db: Db) {
+		this.wiki = new WikiSqlRepository(db);
+	}
 
 	async teams(query?: string, limit = 50) {
 		try {
-			let request = this.db
-				.selectFrom("inagle_teams")
-				.selectAll()
-				.orderBy("name_fr", "asc")
-				.limit(limit);
-			if (query) {
-				const term = `%${query.toLowerCase()}%`;
-				request = request.where((eb) => eb.or([
-					eb("name_fr", "ilike", term),
-					eb("name_en", "ilike", term),
-					eb("name_ja", "ilike", `%${query}%`),
-				]));
-			}
-			const rows = await request.execute();
+			const rows = (await this.wiki.teams(query, limit)) ?? [];
 			return rows.map((row) => ({
 				...row,
 				name: row.name_fr ?? row.name_en ?? row.name_ja ?? row.id,
@@ -41,7 +33,7 @@ export class InagleRepository {
 
 	async team(id: string) {
 		try {
-			const row = await this.db.selectFrom("inagle_teams").selectAll().where("id", "=", id).executeTakeFirst();
+			const row = await this.wiki.team(id);
 			return row ? {
 				...row,
 				name: row.name_fr ?? row.name_en ?? row.name_ja ?? row.id,
@@ -54,22 +46,7 @@ export class InagleRepository {
 
 	async quests(query?: string, phase?: number, limit = 50) {
 		try {
-			let request = this.db
-				.selectFrom("inagle_quests")
-				.selectAll()
-				.orderBy("id", "asc")
-				.limit(limit);
-			if (query) {
-				const term = `%${query.toLowerCase()}%`;
-				request = request.where((eb) => eb.or([
-					eb("display_text", "ilike", term),
-					eb("name_fr", "ilike", term),
-					eb("name_en", "ilike", term),
-					eb("name_ja", "ilike", `%${query}%`),
-				]));
-			}
-			if (phase !== undefined) request = request.where("phase", "=", String(phase));
-			const rows = await request.execute();
+			const rows = (await this.wiki.quests(query, limit, 1, phase))?.data ?? [];
 			return rows.map((row) => ({
 				...row,
 				id: row.id,
@@ -85,7 +62,7 @@ export class InagleRepository {
 
 	async quest(id: string) {
 		try {
-			const row = await this.db.selectFrom("inagle_quests").selectAll().where("id", "=", id).executeTakeFirst();
+			const row = await this.wiki.quest(id);
 			return row ? {
 				...row,
 				displayText: row.display_text ?? row.name_fr ?? row.name_en ?? row.name_ja ?? row.id,
@@ -100,21 +77,7 @@ export class InagleRepository {
 
 	async items(query?: string, category?: string, limit = 50) {
 		try {
-			let request = this.db
-				.selectFrom("inagle_items")
-				.selectAll()
-				.orderBy("id", "asc")
-				.limit(limit);
-			if (query) {
-				const term = `%${query.toLowerCase()}%`;
-				request = request.where((eb) => eb.or([
-					eb("name_fr", "ilike", term),
-					eb("name_en", "ilike", term),
-					eb("name_ja", "ilike", `%${query}%`),
-				]));
-			}
-			if (category) request = request.where("category", "=", category);
-			const rows = await request.execute();
+			const rows = (await this.wiki.items(query, limit, 1, category))?.data ?? [];
 			return rows.map((row) => ({
 				...row,
 				names: { fr: row.name_fr, en: row.name_en, ja: row.name_ja },
@@ -176,7 +139,7 @@ export class InagleRepository {
 
 	async item(id: string) {
 		try {
-			const row = await this.db.selectFrom("inagle_items").selectAll().where("id", "=", id).executeTakeFirst();
+			const row = await this.wiki.item(id);
 			return row ? { ...row, names: { fr: row.name_fr, en: row.name_en, ja: row.name_ja } } : null;
 		} catch {
 			return null;
@@ -193,10 +156,16 @@ export class InagleRepository {
 
 	async battleDrops(id: number) {
 		try {
-			const battle = await this.db.selectFrom("inagle_drops_battles").selectAll().where("battle_group_id", "=", id).executeTakeFirst();
-			if (!battle?.item_table_id) return [];
-			const table = await this.dropTable(String(battle.item_table_id));
-			return table ? [{ items: table.entries }] : [];
+			const row = await sql<{ entries: unknown }>`
+				select t.entries
+				from public.inagle_drops_battles b
+				join public.inagle_drops_tables t
+				  on t.table_id = b.item_table_id::text
+				where b.battle_group_id = ${id}
+				  and b.item_table_id is not null
+				limit 1
+			`.execute(this.db);
+			return row.rows[0] ? [{ items: row.rows[0].entries }] : [];
 		} catch {
 			return null;
 		}
@@ -204,30 +173,32 @@ export class InagleRepository {
 
 	async dropSources(itemId: string) {
 		try {
-			const normalized = itemId.toLowerCase();
-			const [tables, battles, treasures] = await Promise.all([
-				this.db.selectFrom("inagle_drops_tables").selectAll().execute(),
-				this.db.selectFrom("inagle_drops_battles").selectAll().execute(),
-				this.db.selectFrom("inagle_drops_treasures").selectAll().execute(),
-			]);
-			const tableIds = new Set(tables.filter((row) => {
-				const entries = Array.isArray(row.entries) ? row.entries : [];
-				return entries.some((entry) => {
-					if (!entry || typeof entry !== "object") return false;
-					const value = (entry as { itemId?: unknown; item_id?: unknown }).itemId ?? (entry as { item_id?: unknown }).item_id;
-					return String(value).toLowerCase() === normalized || String(value) === itemId;
-				});
-			}).map((row) => row.table_id));
-			const sources: Array<{ type: "battle" | "treasure"; id: string; mapId?: string }> = battles
-				.filter((row) => row.item_table_id !== null && tableIds.has(String(row.item_table_id)))
-				.map((row) => ({ type: "battle" as const, id: String(row.battle_group_id) }));
-			for (const treasure of treasures) {
-				const items = Array.isArray(treasure.items) ? treasure.items : [];
-				if (items.some((entry) => String(entry).toLowerCase() === normalized)) {
-					sources.push({ type: "treasure" as const, id: treasure.id, mapId: treasure.map_id ?? undefined });
-				}
-			}
-			return sources;
+			const normalized = itemId.trim().toLowerCase();
+			if (!normalized) return [];
+			const result = await sql<{ type: "battle" | "treasure"; id: string; map_id: string | null }>`
+				select 'battle'::text as type,
+				       b.battle_group_id::text as id,
+				       null::text as map_id
+				from public.inagle_drops_battles b
+				join public.inagle_drops_tables t
+				  on t.table_id = b.item_table_id::text
+				cross join lateral jsonb_array_elements(coalesce(t.entries, '[]'::jsonb)) entry
+				where b.item_table_id is not null
+				  and lower(coalesce(entry->>'itemId', entry->>'item_id', '')) = ${normalized}
+				union all
+				select 'treasure'::text as type,
+				       tr.id,
+				       tr.map_id
+				from public.inagle_drops_treasures tr
+				cross join lateral jsonb_array_elements_text(coalesce(tr.items, '[]'::jsonb)) item
+				where lower(item) = ${normalized}
+				order by type, id
+			`.execute(this.db);
+			return result.rows.map((row) => ({
+				type: row.type,
+				id: row.id,
+				...(row.map_id ? { mapId: row.map_id } : {}),
+			}));
 		} catch {
 			return null;
 		}

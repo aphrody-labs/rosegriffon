@@ -1,10 +1,13 @@
-import { Pool } from "pg";
+import { Client, Pool } from "pg";
 
 export type { PoolClient, QueryResultRow } from "pg";
 
 export interface PgPoolOptions {
 	applicationName?: string;
+	keepAlive?: boolean;
 	max?: number;
+	searchPath?: string;
+	ssl?: boolean | { rejectUnauthorized?: boolean };
 }
 
 export function getDatabaseURL(): string {
@@ -22,19 +25,39 @@ export function isDatabaseConfigured(): boolean {
 
 let sharedPool: Pool | null = null;
 
+/** Crée un pool PostgreSQL isolé pour les CLI/imports qui fournissent leur URL. */
+export function createPgPool(connectionString = getDatabaseURL(), options: PgPoolOptions = {}): Pool {
+	const configuredMax = Number.parseInt(process.env.DATABASE_POOL_MAX ?? "", 10);
+	const max = options.max ?? (configuredMax > 0 ? Math.min(configuredMax, 4) : 4);
+	const pool = new Pool({
+		application_name: options.applicationName ?? "rosegriffon",
+		connectionString,
+		connectionTimeoutMillis: 5_000,
+		idleTimeoutMillis: 30_000,
+		keepAlive: options.keepAlive,
+		max,
+		options: options.searchPath ? `-c search_path=${options.searchPath}` : undefined,
+		ssl: options.ssl,
+	});
+	pool.on("error", (error) => console.error("[pg] Erreur inattendue sur le pool partagé :", error));
+	return pool;
+}
+
+/** Crée une connexion PostgreSQL isolée pour LISTEN/NOTIFY ou un flux long. */
+export function createPgClient(connectionString = getDatabaseURL()): Client {
+	const client = new Client({
+		application_name: "rosegriffon",
+		connectionString,
+		connectionTimeoutMillis: 5_000,
+	});
+	client.on("error", (error) => console.error("[pg] Erreur inattendue sur la connexion :", error));
+	return client;
+}
+
 /** Singleton pg pool for server-side SQL consumers across the monorepo. */
 export function getPgPool(options: PgPoolOptions = {}): Pool {
 	if (!sharedPool) {
-		const configuredMax = Number.parseInt(process.env.DATABASE_POOL_MAX ?? "", 10);
-		const max = options.max ?? (configuredMax > 0 ? Math.min(configuredMax, 4) : 4);
-		sharedPool = new Pool({
-			application_name: options.applicationName ?? "rosegriffon",
-			connectionString: getDatabaseURL(),
-			connectionTimeoutMillis: 5_000,
-			idleTimeoutMillis: 30_000,
-			max,
-		});
-		sharedPool.on("error", (error) => console.error("[pg] Erreur inattendue sur le pool partagé :", error));
+		sharedPool = createPgPool(getDatabaseURL(), options);
 	}
 	return sharedPool;
 }

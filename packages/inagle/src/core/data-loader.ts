@@ -14,6 +14,7 @@
  */
 
 import { join } from "node:path";
+import { clearJsonCache, loadJsonAsync } from "./async-loader.js";
 import {
 	cfgbinDbAvailable,
 	cfgbinDbFindLatest,
@@ -36,14 +37,18 @@ export type Locale = (typeof LOCALES)[number];
  * Cache for loaded data files
  */
 const dataCache = new Map<string, unknown>();
-const asyncDataCache = new Map<string, Promise<unknown>>();
+
+/** Legacy loose JSON is disabled by default; extraction must use SQL/SQLite. */
+function allowLooseJson(): boolean {
+	return process.env.IEVR_ALLOW_LOOSE_JSON === "1";
+}
 
 /**
  * Clear the data cache
  */
 export function clearCache(): void {
 	dataCache.clear();
-	asyncDataCache.clear();
+	clearJsonCache();
 }
 
 /**
@@ -54,14 +59,15 @@ export function getDataPath(): string {
 }
 
 /**
- * Read and parse a JSON file with caching (Synchronous - Deprecated)
- * @deprecated Use loadJSONAsync instead. Bun n'a pas de Bun.file sync, on
+ * Read and parse a local extraction artifact with caching (synchronous compatibility).
+ * Async callers use the SQL-first `loadJsonAsync` boundary. Bun n'a pas de Bun.file sync, on
  * route via require() qui supporte JSON nativement et reste sync.
  */
 export function loadJSON<T>(filePath: string): T {
 	if (dataCache.has(filePath)) {
 		return dataCache.get(filePath) as T;
 	}
+	if (!allowLooseJson()) return { data: [], _meta: { count: 0 } } as unknown as T;
 
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-require-imports, no-undef
@@ -71,32 +77,6 @@ export function loadJSON<T>(filePath: string): T {
 	} catch {
 		return { data: [], _meta: { count: 0 } } as unknown as T;
 	}
-}
-
-/**
- * Read and parse a JSON file with caching (Asynchronous)
- */
-export async function loadJSONAsync<T>(filePath: string): Promise<T> {
-	if (asyncDataCache.has(filePath)) {
-		return asyncDataCache.get(filePath) as Promise<T>;
-	}
-
-	// Deduplicating promise — prevents concurrent loads of the same path.
-	const loadPromise = (async () => {
-		const f = Bun.file(filePath);
-		if (!(await f.exists())) {
-			return { data: [], _meta: { count: 0 } } as unknown as T;
-		}
-		try {
-			return (await f.json()) as T;
-		} catch (error) {
-			console.error(`Failed to load JSON file async: ${filePath}`, error);
-			throw new Error(`Failed to parse ${filePath}: ${error}`);
-		}
-	})();
-
-	asyncDataCache.set(filePath, loadPromise);
-	return loadPromise;
 }
 
 /**
@@ -110,6 +90,7 @@ export function findConfigFile(category: string, prefix: string): string | null 
 		const fromDb = cfgbinDbFindLatest(category, prefix);
 		if (fromDb) return fromDb;
 	}
+	if (!allowLooseJson()) return null;
 
 	// 2. Filesystem fallback (loose .cfg.bin.json files)
 	const dir = join(PATHS.gamedata, category);
@@ -150,9 +131,10 @@ export async function loadConfigAsync(category: string, filename: string): Promi
 			// Fallback to filesystem on miss
 		}
 	}
+	if (!allowLooseJson()) return { name: filename, variables: [], children: [] };
 
 	const filePath = join(PATHS.gamedata, category, filename);
-	const raw = await loadJSONAsync<ConfigDocument>(filePath);
+	const raw = (await loadJsonAsync<ConfigDocument>(filePath)) ?? { entries: [] };
 
 	return {
 		name: filename,
@@ -169,6 +151,7 @@ export async function findConfigFileAsync(category: string, prefix: string): Pro
 		const fromDb = cfgbinDbFindLatest(category, prefix);
 		if (fromDb) return fromDb;
 	}
+	if (!allowLooseJson()) return null;
 	const dir = join(PATHS.gamedata, category);
 	try {
 		return [...new Bun.Glob(`${prefix}*.cfg.bin.json`).scanSync({ cwd: dir, onlyFiles: true })].sort().pop() ?? null;
@@ -190,9 +173,27 @@ export function loadConfig(category: string, filename: string): ConfigFile {
 			// Fallback to filesystem
 		}
 	}
+	if (!allowLooseJson()) return { name: filename, variables: [], children: [] };
 	const filePath = join(PATHS.gamedata, category, filename);
 	const raw = loadJSON<ConfigDocument>(filePath);
 	return { name: filename, variables: [], children: raw.entries || [] };
+}
+
+/**
+ * Load a raw cfgbin projection for parsers whose format uses `lists` instead
+ * of the normalized `entries` tree. SQLite is the synchronous extraction
+ * source; loose JSON remains an explicit compatibility escape hatch.
+ */
+export function loadConfigData<T = ConfigDocument>(category: string, filename: string): T | null {
+	if (cfgbinDbAvailable()) {
+		try {
+			return cfgbinDbLoad(category, filename) as T;
+		} catch {
+			// Continue to the explicit legacy fallback below.
+		}
+	}
+	if (!allowLooseJson()) return null;
+	return loadJSON<T>(join(PATHS.gamedata, category, filename));
 }
 
 /**
@@ -260,6 +261,7 @@ export function loadCharaText(locale: Locale): ConfigFile {
 			// Fallback to filesystem
 		}
 	}
+	if (!allowLooseJson()) return { name: `chara_text_${locale}`, variables: [], children: [] };
 	const filePath = join(PATHS.textRoot, locale, FILES.charaText);
 	const raw = loadJSON<{ entries?: ConfigNode[] }>(filePath);
 	return {
@@ -288,6 +290,7 @@ export function loadCharaTextRoma(locale: Locale): ConfigFile {
 			// Fallback to filesystem
 		}
 	}
+	if (!allowLooseJson()) return { name: `chara_text_roma_${locale}`, variables: [], children: [] };
 	const filePath = join(PATHS.textRoot, locale, FILES.charaTextRoma);
 	const raw = loadJSON<{ entries?: ConfigNode[] }>(filePath);
 	return {

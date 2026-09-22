@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 import ImageCropper from "@/components/shared/ImageCropper";
 
-import { createClient } from "@/lib/supabase/client";
+import { getBrowserStorage } from "@/lib/storage/browser";
 
 interface ChronicleMetaProps {
 	title: string;
@@ -74,11 +74,11 @@ export function ChronicleMeta({
 	const handleCropComplete = async (croppedBlob: Blob) => {
 		setIsUploading(true);
 		try {
-			const supabase = createClient();
+			const storage = getBrowserStorage();
 
 			const fileName = `chronicles/${Date.now()}-cropped.jpg`;
 
-			const { error: uploadError } = await supabase.storage
+			const { error: uploadError } = await storage
 				.from("assets")
 				.upload(fileName, croppedBlob, {
 					contentType: "image/jpeg",
@@ -98,7 +98,7 @@ export function ChronicleMeta({
 
 			const {
 				data: { publicUrl },
-			} = supabase.storage.from("assets").getPublicUrl(fileName);
+			} = storage.from("assets").getPublicUrl(fileName);
 
 			setFeaturedImage(publicUrl);
 			toast.success("Image recadrée et uploadée !");

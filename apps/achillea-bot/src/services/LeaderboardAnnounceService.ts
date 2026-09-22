@@ -6,10 +6,9 @@ import type { Kysely } from "kysely";
 import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { coreManagerConfig } from "@/configs";
 import { Service } from "@/decorators";
-import { Data } from "@/entities";
 import { MatchMode, SeasonState } from "@/utils/enums";
 
-import { Database } from "./Database";
+import { DataStore } from "./DataStore";
 import { LeaderboardService, type LeaderboardPage } from "./LeaderboardService";
 
 interface LeaderboardAnnounceDatabase {
@@ -44,7 +43,7 @@ export class LeaderboardAnnounceService {
 	private timer: ReturnType<typeof setInterval> | null = null;
 
 	constructor(
-		private db: Database,
+		private dataStore: DataStore,
 		private leaderboard: LeaderboardService,
 		private client: Client
 	) {}
@@ -156,10 +155,9 @@ export class LeaderboardAnnounceService {
 			return;
 		}
 
-		const store = this.db.get(Data);
 		let existing = "";
 		try {
-			existing = await store.get("leaderboardMessageId");
+			existing = await this.dataStore.get("leaderboardMessageId");
 		} catch {
 			existing = "";
 		}
@@ -179,7 +177,7 @@ export class LeaderboardAnnounceService {
 		}
 
 		const sent = await channel.send({ embeds: [embed] });
-		await store.set("leaderboardMessageId", sent.id);
+		await this.dataStore.set("leaderboardMessageId", sent.id);
 		console.info(`[leaderboard] message publié (${sent.id})`);
 	}
 }

@@ -9,12 +9,11 @@
  * donc rien, on rend ce qui existe. La colonne JSON `data` ne contient que des
  * doublons des colonnes plates (`names`/`descriptions`).
  *
- * Fichier ISOLÉ — ne dépend PAS de `lib/wiki-service.ts`. Lit la DB via le client
- * Supabase-compatible (`@/lib/supabase/server`), comme `stadiums.ts`/`quests.ts`.
+ * Fichier ISOLÉ — ne dépend PAS de `lib/wiki-service.ts`. Lit la projection
+ * PostgreSQL canonique via Kysely.
  */
 
-
-import { createClient } from "../db/provider";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import {
 	type Trophy,
 	type TrophyCategory,
@@ -35,7 +34,11 @@ interface TrophyRow {
 	desc_ja: string | null;
 }
 
-const COLUMNS = "trophy_id, code, name_en, name_fr, name_ja, desc_en, desc_fr, desc_ja";
+interface TrophyDatabase {
+	inagle_trophies: TrophyRow;
+}
+
+const sql = createAchilleaSql<TrophyDatabase>();
 
 /** Nettoie une cellule texte (trim, null → ""). */
 function clean(v: string | null | undefined): string {
@@ -85,13 +88,14 @@ let _cache: Trophy[] | null = null;
 /** Charge et normalise tous les succès (228) depuis le miroir. Cache process-local. */
 export async function getAllTrophies(): Promise<Trophy[]> {
 	if (_cache) return _cache;
-	const supabase = await createClient();
-	const { data, error } = await supabase
-		.from("inagle_trophies")
-		.select(COLUMNS)
-		.limit(2000);
-
-	if (error || !data) {
+	let data: TrophyRow[];
+	try {
+		data = await sql
+			.selectFrom("inagle_trophies")
+			.select(["trophy_id", "code", "name_en", "name_fr", "name_ja", "desc_en", "desc_fr", "desc_ja"])
+			.limit(2000)
+			.execute();
+	} catch {
 		return [];
 	}
 

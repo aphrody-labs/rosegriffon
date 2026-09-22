@@ -3,10 +3,10 @@ import { Client } from "@aphrody/discordx";
 
 import { generalConfig } from "@/configs";
 import { Discord, Injectable, Once, Schedule } from "@/decorators";
-import { Data } from "@/entities";
 // Imports VALEUR obligatoires : ces classes sont injectées dans le constructeur → `import type`
 // efface le runtime et casse `design:paramtypes` (ReadyEvent jamais instancié, readyHandler mort).
-import { Database, Logger, Scheduler, Store } from "@/services";
+import { DataStore } from "@/services/DataStore";
+import { Logger, Scheduler, Store } from "@/services";
 import { resolveDependency, syncAllGuilds } from "@/utils/functions";
 
 import { Matchmaker } from "../services/Matchmaker";
@@ -16,10 +16,10 @@ import { RankedQueueService } from "../services/RankedQueueService";
 @Injectable()
 export default class ReadyEvent {
 	constructor(
-		private db: Database,
 		private logger: Logger,
 		private scheduler: Scheduler,
 		private store: Store,
+		private dataStore: DataStore,
 		private matchmaker: Matchmaker,
 		private queueService: RankedQueueService
 	) {
@@ -46,7 +46,7 @@ export default class ReadyEvent {
 		await this.changeActivity();
 
 		// update last startup time in the database
-		await this.db.get(Data).set("lastStartup", Date.now());
+		await this.dataStore.set("lastStartup", Date.now());
 
 		// start scheduled jobs
 		this.scheduler.startAllJobs();

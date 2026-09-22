@@ -10,7 +10,7 @@
  * module ne fait QUE persister des lignes déjà construites depuis le dump réel.
  */
 
-import pg from "pg";
+import { createPgPool } from "@rosegriffon/db/pg";
 
 // === Interface ===
 
@@ -38,9 +38,9 @@ export function dedup(records: any[], key = "id") {
 // === Adapters ===
 
 export class PostgresAdapter implements DataAdapter {
-	private pool: pg.Pool;
+	private pool: ReturnType<typeof createPgPool>;
 	constructor(connectionString: string) {
-		this.pool = new pg.Pool({ connectionString });
+		this.pool = createPgPool(connectionString, { applicationName: "inagle-push" });
 	}
 
 	async upsert(table: string, records: any[], onConflict = "id") {

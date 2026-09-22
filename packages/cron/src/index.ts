@@ -7,6 +7,7 @@
 import { runInaglePush, runSQLiteBackup } from "./tasks/db";
 import { syncCdnAssets } from "./tasks/cdn";
 import { runIeCrawl } from "./tasks/ie-crawl";
+import { runWebsiteQa } from "./tasks/ie-crawl/website-qa";
 import { crawlTwitterSearch } from "./tasks/ie-crawl/harvest-search";
 import { crawlTwitter } from "./tasks/ie-crawl/twitter";
 import { crawlHashtagCampaigns } from "./tasks/ie-crawl/hashtag-harvest";
@@ -142,6 +143,7 @@ const tacheCli = indexRun >= 0 ? args[indexRun + 1] : undefined;
 /** Une tâche a-t-elle besoin de la passerelle Discord connectée ? */
 function exigeLaPasserelleDiscord(tache: string | undefined): boolean {
 	if (!tache) return true; // mode démon : tout est planifié, la passerelle est requise.
+	if (tache === "website:qa" || tache === "web:qa") return false;
 	return tache.startsWith("discord") || tache === "crawl" || tache === "all";
 }
 
@@ -203,6 +205,7 @@ const DELAI_TACHE_DEFAUT_MS = 30 * 60_000;
  * Discord, et 30 minutes les couperaient en plein travail légitime.
  */
 const DELAIS_TACHES_MS: Record<string, number> = {
+	"website:qa": 2 * 3600_000,
 	crawl: 4 * 3600_000,
 	rag: 2 * 3600_000,
 	"rag:wiki": 2 * 3600_000,
@@ -389,6 +392,8 @@ if (indexRun >= 0) {
 		await executeTask("cdn", syncCdnAssets);
 	} else if (task === "crawl") {
 		await executeTask("crawl", runIeCrawl);
+	} else if (task === "website:qa" || task === "web:qa") {
+		await executeTask("website:qa", runWebsiteQa);
 	} else if (task === "rag") {
 		await executeTask("rag", runRagSync);
 	} else if (task === "x" || task === "twitter" || task === "x:timelines") {
@@ -532,7 +537,7 @@ if (indexRun >= 0) {
 		await executeTask("achillea:weekly-payout", runAchilleaWeeklyPayout);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, sync:achillea, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, website:qa, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, sync:achillea, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
 		);
 	}
 	process.exit(0);
@@ -861,6 +866,7 @@ const server = Bun.serve({
 				db: runInaglePush,
 				cdn: syncCdnAssets,
 				crawl: runIeCrawl,
+				"website:qa": runWebsiteQa,
 				rag: runRagSync,
 				publish: triggerPublishScheduled,
 				"github-publish": triggerGithubPublishWorkflow,

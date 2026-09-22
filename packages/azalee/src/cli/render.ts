@@ -9,13 +9,11 @@
  * Largeur de référence : 78 colonnes utiles dans un cadre de 80.
  */
 
-import { buildAuraHashSet } from "@rosegriffon/inagle/skills/mapper-aura";
-
 import { PERSONALITY_NAMES } from "../game/personality";
 import { getItemCategoryLabel } from "../game/item-categories";
 import { interpolateVariantStats } from "../game/stats-interpolation";
 import { colors } from "./context";
-import { getAuraMetadataFromDb, getAurasForChara, getSkillName, type InagleService, type ResolvedAura } from "./inagle";
+import { getAuraHashSet, getAuraMetadataFromDb, getAurasForChara, getSkillName, type InagleService, type ResolvedAura } from "./inagle";
 
 /**
  * Longueur d'affichage d'une chaîne dans un terminal : les séquences ANSI ne
@@ -209,7 +207,7 @@ export function renderCharaProfile(chara: any, svc: InagleService): string {
 				lines.push(`│       └──────────────┴─────────┴─────────┴─────────┘                         │`);
 			}
 
-			const auraHashes = buildAuraHashSet();
+			const auraHashes = getAuraHashSet(svc);
 			const trueSkills = (v.skills || []).filter(
 				(s: any) => s.skillId !== "0x00000002" && !auraHashes.has(s.skillId),
 			);

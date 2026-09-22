@@ -10,7 +10,6 @@ import {
 	PositionNames,
 } from "./index.js";
 import { GACHA_RARITY_NAMES as CHAR_RARITY_NAMES } from "./core/game-codes.js";
-import { loadTextFile } from "./parsers/text-parser.js";
 // Pushers de catégories câblées (source unique sous src/, réutilisée par les
 // scripts standalone scripts/push-<cat>.ts).
 import {
@@ -48,7 +47,7 @@ import {
 	importVideoWaza,
 } from "./push-categories.js";
 import { type DataAdapter, dedup, PostgresAdapter } from "./push-adapter.js";
-import { type AuraHissatsu, buildAuraHashSet, loadAuraSkills } from "./skills/mapper-aura.js";
+import type { AuraHissatsu } from "./skills/types.js";
 import { importLuaScripts } from "./lua/pusher.js";
 
 // === Helpers ===
@@ -227,8 +226,12 @@ async function importCharacters(service: any, db: DataAdapter) {
 		}
 	}
 
-	// Build aura hash set to separate auras from skills in chara_param slots
-	const auraHashes = buildAuraHashSet();
+	// Build aura hash set from the canonical SQL projection; no loose JSON config is read.
+	const auraHashes = new Set<string>(
+		service.skills.auraAll().flatMap((a: any) =>
+			[a.auraId, a.auraIdStr, a.id].filter((value): value is string => typeof value === "string"),
+		),
+	);
 	console.log(`  Loaded ${auraHashes.size} aura hashes for skill/aura separation`);
 
 	// Postgres safe batch size
@@ -600,38 +603,10 @@ async function importAuras(service: any, db: DataAdapter) {
 	console.log("🔄 Importing Auras...");
 	const serviceAuras = service.skills.auraAll();
 
-	// HISSATSU NATIF : on résout les auras + leur hissatsu directement depuis le dump
-	// (loadAuraSkills → config.skillId1 → skill_config). Le service SQL peut fournir
-	// une projection incomplète ; si le parse natif est plus riche (dump présent),
-	// il devient la source de vérité, puis fusionne par auraId / assetCode.
-	const nativeHissatsu = new Map<string, AuraHissatsu>();
-	let nativeAuras: any[] = [];
-	try {
-		const fr = loadTextFile("skill", "fr");
-		const en = loadTextFile("skill", "en");
-		const ja = loadTextFile("skill", "ja");
-		nativeAuras = loadAuraSkills("", "", fr, en, ja);
-		for (const a of nativeAuras) {
-			if (!a.hissatsu) continue;
-			if (a.auraId) nativeHissatsu.set(a.auraId, a.hissatsu);
-			if (a.auraIdStr) nativeHissatsu.set(a.auraIdStr, a.hissatsu);
-			if (a.assetCode) nativeHissatsu.set(a.assetCode, a.hissatsu);
-		}
-		console.log(
-			`   ↳ ${nativeAuras.length} auras natives, ${nativeAuras.filter((x) => x.hissatsu).length} avec hissatsu natif.`
-		);
-	} catch (e) {
-		console.warn("   ⚠️ Résolution hissatsu native indisponible:", (e as Error)?.message);
-	}
-
-	// Source de vérité : le dump natif s'il est plus complet que le snapshot du service.
-	const auras = nativeAuras.length >= serviceAuras.length ? nativeAuras : serviceAuras;
-
-	const resolveHissatsu = (a: any): AuraHissatsu | undefined =>
-		a.hissatsu ||
-		nativeHissatsu.get(a.auraId) ||
-		nativeHissatsu.get(a.auraIdStr) ||
-		(a.assetCode ? nativeHissatsu.get(a.assetCode) : undefined);
+	// Hissatsu et configuration sont déjà matérialisés dans JSONB des projections SQL.
+	// Le push ne relit donc jamais les fichiers cfg.bin.json du filesystem.
+	const auras = serviceAuras;
+	const resolveHissatsu = (a: any): AuraHissatsu | undefined => a.hissatsu;
 	const keshins: any[] = [];
 	const souls: any[] = [];
 	const awakenings: any[] = [];

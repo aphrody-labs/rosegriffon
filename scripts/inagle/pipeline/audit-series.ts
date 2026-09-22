@@ -18,8 +18,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as cheerio from "cheerio";
+import { createPgClient } from "@rosegriffon/db/pg";
 import dotenv from "dotenv";
-import { Client } from "pg";
 
 const __dirname = import.meta.dir;
 const PACKAGE_ROOT = resolve(__dirname, "../../..");
@@ -360,7 +360,7 @@ async function main() {
 		return;
 	}
 
-	const client = new Client({ connectionString: dbUrl });
+	const client = createPgClient(dbUrl);
 	await client.connect();
 	const report = await auditAgainstDB(characters, client);
 

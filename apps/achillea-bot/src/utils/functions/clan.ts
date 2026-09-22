@@ -617,7 +617,7 @@ export async function validateClanMemberLimits(
 	em: DatabaseEntityManager,
 	desiredDistinctions: ClanMemberDistinction[]
 ) {
-	const limits = await getClanMemberLimits(em);
+	const limits = await getClanMemberLimits();
 
 	if (
 		!desiredDistinctions.includes(ClanMemberDistinction.Player) &&

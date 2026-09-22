@@ -34,7 +34,7 @@ export class WorkerService {
 
 		// 🧩 Register job processors
 		const clanJobs = new ClanJobs(this.db, this.client);
-		const sanctionJobs = new SanctionJobs(this.db, this.client);
+		const sanctionJobs = new SanctionJobs(this.client);
 
 		// Les processeurs BullMQ se déclenchent sur un pull Redis, HORS du pipeline
 		// discordx → aucun RequestContext actif. On enrobe chaque job dans un fork de

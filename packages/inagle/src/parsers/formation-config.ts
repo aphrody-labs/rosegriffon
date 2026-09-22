@@ -4,9 +4,7 @@
  */
 
 import { Buffer } from "node:buffer";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { toHex } from "../core/data-loader.js";
+import { findConfigFile, loadConfigData, toHex } from "../core/data-loader.js";
 import { loadTextFile } from "./text-parser.js";
 
 export interface FormationPosition {
@@ -38,17 +36,6 @@ export interface ParsedFormation {
 	positions: FormationPosition[];
 }
 
-function findFormationConfigFile(dir: string): string | null {
-	if (!existsSync(dir)) return null;
-	const files = readdirSync(dir);
-	// formation_config_0.02.16.cfg.bin.json
-	const configFile = files
-		.filter((f) => f.startsWith("formation_config_") && f.endsWith(".cfg.bin.json"))
-		.sort()
-		.pop();
-	return configFile ? join(dir, configFile) : null;
-}
-
 function hexToFloats(hex: string): [number, number] {
 	// 8 bytes -> 2 interleaved Float32
 	if (hex.length < 16) return [0, 0];
@@ -60,14 +47,13 @@ function hexToFloats(hex: string): [number, number] {
 }
 
 export function buildFormationDatabase(dataPath: string) {
-	const formationDir = join(dataPath, "common", "gamedata", "formation");
-	const configPath = findFormationConfigFile(formationDir);
+	const configPath = findConfigFile("formation", "formation_config_");
 
 	const formations: ParsedFormation[] = [];
 	const byId = new Map<string, ParsedFormation>();
 
 	if (!configPath) {
-		console.warn("[formation-config] Config not found in", formationDir);
+		console.warn("[formation-config] No SQL/SQLite formation_config projection found.");
 		return { formations, byId };
 	}
 
@@ -76,7 +62,8 @@ export function buildFormationDatabase(dataPath: string) {
 	const textJa = loadTextFile("formation", "ja");
 
 	try {
-		const content = JSON.parse(readFileSync(configPath, "utf-8"));
+		const content = loadConfigData<{ lists?: { name: string; values?: any[] }[] }>("formation", configPath);
+		if (!content) return { formations, byId };
 
 		if (content.lists) {
 			const infoList = content.lists.find((l: any) => l.name === "m_SoccerFormationInfoList");

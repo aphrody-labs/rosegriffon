@@ -1,9 +1,11 @@
 import process from "node:process";
 
-import type { EntityRepository } from "@mikro-orm/core";
 import { constant } from "case";
 import type { SimpleCommandMessage } from "@aphrody/discordx";
 import { Client } from "@aphrody/discordx";
+import type { Generated, Kysely } from "kysely";
+import { sql } from "kysely";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 // node-os-utils v2 : l'export default est la classe OSUtils (pas une instance).
 // On instancie une fois pour accéder aux moniteurs cpu / memory / system.
 import OSUtils from "node-os-utils";
@@ -14,8 +16,6 @@ import { delay, inject } from "tsyringe";
 
 import { statsConfig } from "@/configs";
 import { Schedule, Service } from "@/decorators";
-import { Guild, Stat, User } from "@/entities";
-import { Database } from "@/services";
 import {
 	datejs,
 	formatDate,
@@ -26,25 +26,38 @@ import {
 	resolveUser,
 } from "@/utils/functions";
 
-const allInteractions = {
-	$or: [
-		{ type: "SIMPLE_COMMAND_MESSAGE" },
-		{ type: "CHAT_INPUT_COMMAND_INTERACTION" },
-		{ type: "USER_CONTEXT_MENU_COMMAND_INTERACTION" },
-		{ type: "MESSAGE_CONTEXT_MENU_COMMAND_INTERACTION" },
-	],
-};
+interface StatsDatabase {
+	stat: {
+		id: Generated<number>;
+		type: string;
+		value: Generated<string>;
+		additional_data: Record<string, unknown> | null;
+		created_at: Generated<Date>;
+	};
+	user: { id: string };
+	guild: {
+		id: string;
+		prefix: string | null;
+		deleted: boolean;
+		created_at: Date;
+		updated_at: Date;
+		last_interact: Date;
+	};
+}
+
+const sqlDb = createAchilleaSql<StatsDatabase>() as Kysely<StatsDatabase>;
+const interactionTypes = [
+	"SIMPLE_COMMAND_MESSAGE",
+	"CHAT_INPUT_COMMAND_INTERACTION",
+	"USER_CONTEXT_MENU_COMMAND_INTERACTION",
+	"MESSAGE_CONTEXT_MENU_COMMAND_INTERACTION",
+] as const;
 
 @Service()
 export class Stats {
-	private statsRepo: EntityRepository<Stat>;
-
 	constructor(
-		private db: Database,
 		@inject(delay(() => Client)) private client: Client
-	) {
-		this.statsRepo = this.db.get(Stat);
-	}
+	) {}
 
 	/**
 	 * Add an entry to the stats table.
@@ -52,13 +65,12 @@ export class Stats {
 	 * @param value
 	 * @param additionalData in JSON format
 	 */
-	async register(type: string, value: string, additionalData?: any) {
-		const stat = new Stat();
-		stat.type = type;
-		stat.value = value;
-		if (additionalData) stat.additionalData = additionalData;
-
-		await this.db.em.persist(stat).flush();
+	async register(type: string, value: string, additionalData?: Record<string, unknown>) {
+		await sqlDb.insertInto("stat").values({
+			type,
+			value,
+			additional_data: additionalData ?? null,
+		}).execute();
 	}
 
 	/**
@@ -106,8 +118,8 @@ export class Stats {
 		const totalStatsObj = {
 			TOTAL_USERS: this.client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0),
 			TOTAL_GUILDS: this.client.guilds.cache.size,
-			TOTAL_ACTIVE_USERS: await this.db.get(User).count(),
-			TOTAL_COMMANDS: await this.statsRepo.count(allInteractions),
+			TOTAL_ACTIVE_USERS: Number((await sqlDb.selectFrom("user").select(sql<number>`count(*)`.as("count")).executeTakeFirstOrThrow()).count),
+			TOTAL_COMMANDS: Number((await sqlDb.selectFrom("stat").select(sql<number>`count(*)`.as("count")).where("type", "in", interactionTypes).executeTakeFirstOrThrow()).count),
 		};
 
 		return totalStatsObj;
@@ -117,66 +129,39 @@ export class Stats {
 	 * Get the last saved interaction.
 	 */
 	async getLastInteraction() {
-		const lastInteraction = await this.statsRepo.findOne(allInteractions, {
-			orderBy: { createdAt: "DESC" },
-		});
-
-		return lastInteraction;
+		const row = await sqlDb.selectFrom("stat").selectAll().where("type", "in", interactionTypes).orderBy("created_at", "desc").executeTakeFirst();
+		return row ? {
+			id: row.id,
+			type: row.type,
+			value: row.value,
+			additionalData: row.additional_data,
+			createdAt: row.created_at,
+		} : null;
 	}
 
 	/**
 	 * Get the last guild added to the database.
 	 */
 	async getLastGuildAdded() {
-		const guilds = await this.db.get(Guild).find(
-			{},
-			{
-				orderBy: { createdAt: "DESC" },
-			}
-		);
-
-		return guilds[0];
+		const row = await sqlDb.selectFrom("guild").select(["id", "created_at", "updated_at", "last_interact", "deleted", "prefix"]).orderBy("created_at", "desc").executeTakeFirst();
+		return row ? {
+			id: row.id,
+			createdAt: row.created_at,
+			updatedAt: row.updated_at,
+			lastInteract: row.last_interact,
+			deleted: row.deleted,
+			prefix: row.prefix,
+		} : null;
 	}
 
 	/**
 	 * Get commands sorted by total amount of uses in DESC order.
 	 */
 	async getTopCommands() {
-		if ("createQueryBuilder" in this.db.em) {
-			const qb = this.db.em.createQueryBuilder(Stat);
-			const query = qb
-				.select(["type", "value as name", "count(*) as count"])
-				.where(allInteractions)
-				.groupBy(["type", "value"]);
-
-			const slashCommands = await query.execute();
-
-			return slashCommands.toSorted((a: any, b: any) => b.count - a.count);
-		} else if ("aggregate" in this.db.em) {
-			// @ts-expect-error
-			const slashCommands = await this.db.em.aggregate(Stat, [
-				{
-					$match: allInteractions,
-				},
-				{
-					$group: {
-						_id: { type: "$type", value: "$value" },
-						count: { $sum: 1 },
-					},
-				},
-				{
-					$replaceRoot: {
-						newRoot: {
-							$mergeObjects: ["$_id", { count: "$count" }],
-						},
-					},
-				},
-			]);
-
-			return slashCommands.toSorted((a: any, b: any) => b.count - a.count);
-		} else {
-			return [];
-		}
+		const rows = await sqlDb.selectFrom("stat").select([
+			"type", "value", sql<number>`count(*)`.as("count"),
+		]).where("type", "in", interactionTypes).groupBy(["type", "value"]).execute();
+		return rows.map((row) => ({ type: row.type, name: row.value, count: Number(row.count) })).toSorted((a, b) => b.count - a.count);
 	}
 
 	/**
@@ -191,15 +176,20 @@ export class Stats {
 			">1000": 0,
 		};
 
-		const users = await this.db.get(User).findAll();
+		const rows = await sqlDb.selectFrom("stat")
+			.select([
+				sql<string>`additional_data->>'user'`.as("user_id"),
+				sql<number>`count(*)`.as("count"),
+			])
+			.where("type", "in", interactionTypes)
+			.where(sql<boolean>`additional_data ? 'user'`)
+			.groupBy(sql<string>`additional_data->>'user'`)
+			.execute();
+		const counts = new Map(rows.map((row) => [row.user_id, Number(row.count)]));
+		const users = await sqlDb.selectFrom("user").select("id").execute();
 
 		for (const user of users) {
-			const commandsCount = await this.db.get(Stat).count({
-				...allInteractions,
-				additionalData: {
-					user: user.id,
-				},
-			});
+			const commandsCount = counts.get(user.id) ?? 0;
 
 			if (commandsCount <= 10) usersActivity["1-10"]++;
 			else if (commandsCount <= 50) usersActivity["11-50"]++;
@@ -221,23 +211,26 @@ export class Stats {
 			totalCommands: number;
 		}[] = [];
 
-		const guilds = await this.db.get(Guild).getActiveGuilds();
+		const guilds = await sqlDb.selectFrom("guild").select(["id"]).where("deleted", "=", false).execute();
+		const counts = await sqlDb.selectFrom("stat")
+			.select([
+				sql<string>`additional_data->>'guild'`.as("guild_id"),
+				sql<number>`count(*)`.as("count"),
+			])
+			.where("type", "in", interactionTypes)
+			.where(sql<boolean>`additional_data ? 'guild'`)
+			.groupBy(sql<string>`additional_data->>'guild'`)
+			.execute();
+		const countsByGuild = new Map(counts.map((row) => [row.guild_id, Number(row.count)]));
 
 		for (const guild of guilds) {
 			const discordGuild = await this.client.guilds.fetch(guild.id).catch(() => null);
 			if (!discordGuild) continue;
 
-			const commandsCount = await this.db.get(Stat).count({
-				...allInteractions,
-				additionalData: {
-					guild: guild.id,
-				},
-			});
-
 			topGuilds.push({
 				id: guild.id,
 				name: discordGuild?.name || "",
-				totalCommands: commandsCount,
+				totalCommands: countsByGuild.get(guild.id) ?? 0,
 			});
 		}
 
@@ -324,15 +317,10 @@ export class Stats {
 		const start = datejs(date).startOf("day").toDate();
 		const end = datejs(date).endOf("day").toDate();
 
-		const stats = await this.statsRepo.find({
-			type,
-			createdAt: {
-				$gte: start,
-				$lte: end,
-			},
-		});
-
-		return stats.length;
+		const row = await sqlDb.selectFrom("stat").select(sql<number>`count(*)`.as("count"))
+			.where("type", "=", type).where("created_at", ">=", start).where("created_at", "<=", end)
+			.executeTakeFirstOrThrow();
+		return Number(row.count);
 	}
 
 	/**

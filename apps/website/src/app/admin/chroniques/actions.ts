@@ -3,13 +3,13 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { logAdminAction } from "@/lib/admin-logger";
 import { getServerUser } from "@/lib/auth-helpers";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { ArticleSchema } from "./schema";
 import type { ArticleInput } from "./schema";
 
 async function checkStaffPermission() {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const user = await getServerUser();
 
 	if (!user) {
@@ -44,7 +44,7 @@ export async function createChronicle(
 			return { error: "Non autorisé : Réservé au staff", success: false };
 		}
 
-		const supabase = await createClient();
+		const supabase = createPostgresClient();
 
 		// 3. Check Slug Uniqueness
 		const { data: existingSlug } = await supabase
@@ -122,7 +122,7 @@ export async function updateChronicle(
 			return { error: "Non autorisé : Réservé au staff", success: false };
 		}
 
-		const supabase = await createClient();
+		const supabase = createPostgresClient();
 
 		// 3. Check Slug Uniqueness (excluding current article)
 		const { data: existingSlug } = await supabase
@@ -188,7 +188,7 @@ export async function toggleChronicleStatus(
 			return { error: "Non autorisé : Réservé au staff", success: false };
 		}
 
-		const supabase = await createClient();
+		const supabase = createPostgresClient();
 		const newStatus = currentStatus ? "draft" : "published";
 
 		const { data: updatedArticle, error } = await supabase
@@ -232,7 +232,7 @@ export async function deleteChronicle(id: string): Promise<{ success: boolean; e
 			return { error: "Non autorisé : Réservé au staff", success: false };
 		}
 
-		const supabase = await createClient();
+		const supabase = createPostgresClient();
 		const { error } = await supabase.from("articles").delete().eq("id", id);
 
 		if (error) {

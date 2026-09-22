@@ -3,10 +3,8 @@
  * @description Parser for music_app_config
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { ConfigNode } from "../core/config-parser.js";
-import { toHex } from "../core/data-loader.js";
+import { findConfigFile, loadConfig, toHex } from "../core/data-loader.js";
 import { loadTextList } from "./text-parser.js";
 
 export interface ParsedMusic {
@@ -15,13 +13,12 @@ export interface ParsedMusic {
 }
 
 export function buildMusicDatabase(dataPath: string) {
-	const dir = join(dataPath, "common", "gamedata", "music_app");
-	const configPath = join(dir, "music_app_config.cfg.bin.json");
+	const configPath = findConfigFile("music_app", "music_app_config");
 
 	const musics: ParsedMusic[] = [];
 
-	if (!existsSync(configPath)) {
-		console.warn("[music-config] Config not found:", configPath);
+	if (!configPath) {
+		console.warn("[music-config] No SQL/SQLite music_app_config projection found.");
 		return { musics };
 	}
 
@@ -31,8 +28,7 @@ export function buildMusicDatabase(dataPath: string) {
 	const listJa = loadTextList("music", "ja");
 
 	try {
-		const content = JSON.parse(readFileSync(configPath, "utf-8"));
-		const entries = content.entries as ConfigNode[];
+		const entries = loadConfig("music_app", configPath).children as ConfigNode[];
 
 		function traverse(node: ConfigNode) {
 			// MUSIC_APP_INFO_ITEM_0

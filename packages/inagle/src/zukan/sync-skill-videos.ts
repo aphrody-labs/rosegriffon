@@ -22,7 +22,7 @@
  * Module SERVEUR (ouvre une connexion Postgres) : il n'est pas ré-exporté par le
  * barrel `zukan/index.ts`, on l'importe en leaf.
  */
-import { SQL } from "bun";
+import { createBunSql } from "@rosegriffon/db/bun-sql";
 import { fetchZukanSkillIndex, normalizeSkillName } from "./skill-videos.js";
 import type { ZukanSkill, ZukanSkillVideo } from "./types.js";
 
@@ -107,7 +107,7 @@ export async function syncZukanSkillVideos(
 		throw new Error("DATABASE_URL manquante : impossible de peupler les vidéos de techniques.");
 	}
 	const apply = options.apply ?? false;
-	const sql = new SQL(databaseUrl);
+	const sql = createBunSql({ url: databaseUrl });
 
 	try {
 		// Les techniques réelles du jeu : `wh%` (hissatsu) et `rh%` (moves de base).

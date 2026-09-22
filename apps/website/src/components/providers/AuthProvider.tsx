@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { signOutAction } from "@/app/actions/auth";
-import { useSupabase } from "@/hooks/use-supabase";
+import { getCurrentPublicProfile } from "@/app/settings/actions";
 import { authClient } from "@/lib/auth-client";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
-import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rosegriffon/db";
+import type { PublicProfile } from "@rosegriffon/db";
 
 // Le client navigateur (clé anon) ne lit QUE les colonnes publiques :
 // typer avec la ligne complète promettait adresse et e-mail, que la
@@ -48,32 +48,18 @@ export function AuthProvider({
 	const [user, setUser] = useState<BetterAuthUser | null>(initialUser);
 	const [profile, setProfile] = useState<AzaleeProfile | null>(initialProfile);
 	const [loading, setLoading] = useState(!initialUser);
-	const supabase = useSupabase();
 	const router = useRouter();
 
 	const fetchProfile = useCallback(
 		async (userId: string) => {
 			try {
-				const { data, error } = await supabase
-					.from("profiles")
-					// Depuis la fermeture PII, un `select("*")` en clé anon échoue
-					// entièrement (42501) : profile restait null, donc avatar générique
-					// pour tous et `isAdmin` toujours faux (bouton Admin jamais affiché).
-					.select(PUBLIC_PROFILE_COLUMNS)
-					.eq("id", userId)
-					.maybeSingle();
-
-				if (error && error.code !== "PGRST116") {
-					console.error("Error fetching profile:", error);
-					return null;
-				}
-				return data;
+				return await getCurrentPublicProfile();
 			} catch (error) {
 				console.error("Profile catch error:", error);
 				return null;
 			}
 		},
-		[supabase]
+		[]
 	);
 
 	const refreshProfile = useCallback(async () => {

@@ -65,13 +65,8 @@ async function exigerAdmin(): Promise<{ ok: true } | { ok: false; message: strin
 /**
  * Récupère tous les membres d'équipe, actifs comme inactifs.
  *
- * La lecture passait par `createClient()`, c'est-à-dire le client à cookies. Or
- * l'authentification du site est Better Auth : aucune session Supabase n'est
- * posée, le client reste donc en rôle `anon` et subit la policy
- * « Active team members viewable by everyone » (`USING (is_active = true)`).
- * Les 7 membres désactivés — dont les imports Discord en attente de validation —
- * étaient invisibles, ce qui vidait par construction les sections « À valider »
- * et « Désactivés ». D'où la lecture en client service, derrière la garde admin.
+ * La lecture passe par le client PostgreSQL service, derrière la garde admin,
+ * afin d'inclure les membres désactivés et les imports en attente.
  */
 export async function getAllTeamMembers(): Promise<{
 	data: TeamMember[] | null;

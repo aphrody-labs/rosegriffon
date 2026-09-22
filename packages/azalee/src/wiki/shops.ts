@@ -1,5 +1,5 @@
 
-import { createClient } from "../db/provider";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import {
 	type ShopDetail,
 	type ShopItem,
@@ -72,46 +72,43 @@ interface RawItemRow {
 	internal_code: string | null;
 }
 
+interface ShopDatabase {
+	inagle_shops: RawShopRow;
+	inagle_items: RawItemRow;
+}
+
+const sql = createAchilleaSql<ShopDatabase>();
+
 /** Charge toutes les lignes `inagle_shops` (pagination interne pour dépasser la limite 1000). */
 async function fetchAllShopRows(): Promise<RawShopRow[]> {
-	const supabase = await createClient();
-	const rows: RawShopRow[] = [];
-	const pageSize = 1000;
-	for (let from = 0; ; from += pageSize) {
-		const { data, error } = await supabase
-			.from("inagle_shops")
-			.select("shop_id, name_fr, name_en, name_ja, item_db_id, item_name_fr, item_name_en, slot_index")
-			.range(from, from + pageSize - 1);
-		if (error) {
-			console.error("[shops] fetch error:", error.message);
-			break;
-		}
-		const batch = (data || []) as unknown as RawShopRow[];
-		rows.push(...batch);
-		if (batch.length < pageSize) break;
+	try {
+		return await sql
+			.selectFrom("inagle_shops")
+			.select(["shop_id", "name_fr", "name_en", "name_ja", "item_db_id", "item_name_fr", "item_name_en", "slot_index"])
+			.orderBy("shop_id", "asc")
+			.orderBy("slot_index", "asc")
+			.execute();
+	} catch (error) {
+		console.error("[shops] fetch error:", error);
+		return [];
 	}
-	return rows;
 }
 
 /** Index `inagle_items.id` → métadonnées (nom FR, catégorie, icône) pour un set d'ids. */
 async function fetchItemsByIds(ids: string[]): Promise<Map<string, RawItemRow>> {
 	const map = new Map<string, RawItemRow>();
 	if (ids.length === 0) return map;
-	const supabase = await createClient();
-	const chunkSize = 300;
-	for (let i = 0; i < ids.length; i += chunkSize) {
-		const chunk = ids.slice(i, i + chunkSize);
-		const { data, error } = await supabase
-			.from("inagle_items")
-			.select("id, name_fr, name_en, category, image_url, internal_code")
-			.in("id", chunk);
-		if (error) {
-			console.error("[shops] items fetch error:", error.message);
-			continue;
-		}
-		for (const row of (data || []) as unknown as RawItemRow[]) {
+	try {
+		const rows = await sql
+			.selectFrom("inagle_items")
+			.select(["id", "name_fr", "name_en", "category", "image_url", "internal_code"])
+			.where("id", "in", ids)
+			.execute();
+		for (const row of rows) {
 			map.set(row.id, row);
 		}
+	} catch (error) {
+		console.error("[shops] items fetch error:", error);
 	}
 	return map;
 }
@@ -164,18 +161,18 @@ export async function getShopsList(): Promise<ShopSummary[]> {
 export async function getShop(shopId: number | string): Promise<ShopDetail | null> {
 	const numId = typeof shopId === "number" ? shopId : Number(shopId);
 	if (!Number.isFinite(numId)) return null;
-	const supabase = await createClient();
-	const { data, error } = await supabase
-		.from("inagle_shops")
-		.select("shop_id, name_fr, name_en, name_ja, item_db_id, item_name_fr, item_name_en, slot_index")
-		.eq("shop_id", numId)
-		.order("slot_index", { ascending: true });
-
-	if (error) {
-		console.error("[shops] getShop error:", error.message);
+	let rows: RawShopRow[];
+	try {
+		rows = await sql
+			.selectFrom("inagle_shops")
+			.select(["shop_id", "name_fr", "name_en", "name_ja", "item_db_id", "item_name_fr", "item_name_en", "slot_index"])
+			.where("shop_id", "=", numId)
+			.orderBy("slot_index", "asc")
+			.execute();
+	} catch (error) {
+		console.error("[shops] getShop error:", error);
 		return null;
 	}
-	const rows = (data || []) as unknown as RawShopRow[];
 	if (rows.length === 0) return null;
 
 	const itemIds = Array.from(

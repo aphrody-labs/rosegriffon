@@ -3,10 +3,10 @@ import crypto from "node:crypto";
 import { Controller, Get, PathParams, Post, Req, Res, UseBefore } from "@tsed/common";
 import type { NextFunction, Request, Response } from "express";
 import multer from "multer";
+import type { Generated, Kysely } from "kysely";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 
 import { CookieAuthorize } from "@/api/middlewares";
-import { Image } from "@/entities";
-import { Database } from "@/services";
 import { SupabaseImageStorage } from "@/services/SupabaseImageStorage";
 import { BaseController } from "@/utils/classes";
 import { resolveDependenciesSync } from "@/utils/functions";
@@ -18,6 +18,23 @@ const STORAGE_FOLDER = "proxy";
 const MAX_UPLOAD_BYTES = 6 * 1024 * 1024;
 
 const ALLOWED_MIME = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
+
+interface ImageDatabase {
+	image: {
+		id: Generated<number>;
+		created_at: Generated<Date>;
+		updated_at: Generated<Date>;
+		file_name: string;
+		base_path: string;
+		url: string;
+		size: number;
+		tags: string[];
+		hash: string;
+		delete_hash: string;
+	};
+}
+
+const db = createAchilleaSql<ImageDatabase>() as Kysely<ImageDatabase>;
 
 const upload = multer({
 	storage: multer.memoryStorage(),
@@ -62,12 +79,10 @@ function isSafeImageId(id: string): boolean {
 export class ProxyUploadController extends BaseController {
 	private imageStorage: SupabaseImageStorage;
 
-	private db: Database;
-
 	constructor() {
 		super();
 
-		[this.imageStorage, this.db] = resolveDependenciesSync([SupabaseImageStorage, Database]);
+		[this.imageStorage] = resolveDependenciesSync([SupabaseImageStorage]);
 	}
 
 	@Post("/upload")
@@ -92,9 +107,13 @@ export class ProxyUploadController extends BaseController {
 			const hash = crypto.createHash("md5").update(buffer).digest("hex");
 
 			// Dédup : même contenu déjà connu → pas de re-upload
-			const existing = await this.db.em.findOne(Image, { hash });
+			const existing = await db
+				.selectFrom("image")
+				.select(["file_name", "url"])
+				.where("hash", "=", hash)
+				.executeTakeFirst();
 			if (existing) {
-				return res.status(200).json({ id: existing.fileName, url: existing.url });
+				return res.status(200).json({ id: existing.file_name, url: existing.url });
 			}
 
 			const { id, url } = await this.imageStorage.uploadImageBuffer(
@@ -103,15 +122,18 @@ export class ProxyUploadController extends BaseController {
 				STORAGE_FOLDER
 			);
 
-			const newImg = new Image();
-			newImg.url = url;
-			newImg.hash = hash;
-			newImg.size = buffer.byteLength;
-			newImg.deleteHash = "";
-			newImg.tags = [];
-			newImg.fileName = id;
-
-			await this.db.em.persist(newImg).flush();
+			const now = new Date();
+			await db.insertInto("image").values({
+				created_at: now,
+				updated_at: now,
+				file_name: id,
+				base_path: STORAGE_FOLDER,
+				url,
+				size: buffer.byteLength,
+				tags: [],
+				hash,
+				delete_hash: "",
+			}).execute();
 
 			return res.status(200).json({ id, url });
 		} catch (err: any) {
@@ -137,8 +159,7 @@ export class ProxyUploadController extends BaseController {
 			const ok = await this.imageStorage.deleteImage(id, STORAGE_FOLDER);
 
 			if (ok) {
-				const img = await this.db.em.findOne(Image, { fileName: id });
-				if (img) await this.db.em.remove(img).flush();
+				await db.deleteFrom("image").where("file_name", "=", id).execute();
 			}
 
 			return res.status(200).json({ success: ok });

@@ -11,8 +11,6 @@ export abstract class WikiService {
 	}
 
 	public static async getCharacter(idOrSlug: string) {
-		const sqlData = await sqlWiki.character(idOrSlug);
-		if (sqlData) return sqlData;
 		return await sqlWiki.character(idOrSlug);
 	}
 
@@ -53,8 +51,6 @@ export abstract class WikiService {
 	}
 
 	public static async getSkill(id: string) {
-		const sqlData = await sqlWiki.skill(id);
-		if (sqlData) return sqlData;
 		return await sqlWiki.skill(id);
 	}
 
@@ -63,8 +59,6 @@ export abstract class WikiService {
 	}
 
 	public static async getTeam(id: string) {
-		const sqlData = await sqlWiki.team(id);
-		if (sqlData) return sqlData;
 		return await sqlWiki.team(id);
 	}
 

@@ -173,6 +173,10 @@ playwright-report/
 **/playwright-report/
 **/tests-e2e/__snapshots__/
 
+# Rapports locaux agent-browser : JSON, captures et états de session.
+.agent-browser/
+**/.agent-browser/
+
 # RAG ingestion state (local, idempotence reprise)
 .rag-ingest-state.json
 

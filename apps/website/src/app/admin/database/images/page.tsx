@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type React from "react";
 import { AdminPageHeader as DashboardPageHeader, Badge } from "@rosegriffon/ui";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { Icon } from "@/components/ui/Icon";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +48,7 @@ export default async function ImageValidationPage({
 	const page = Math.max(1, Number.parseInt(pageStr, 10) || 1);
 	const perPage = 50;
 
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	const db = supabase as any;
 
 	let characters: CharRow[] = [];

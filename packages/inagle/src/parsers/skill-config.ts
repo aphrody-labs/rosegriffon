@@ -35,11 +35,6 @@ function findAllSkillConfigFiles(dir: string): string[] {
 		.map((f) => join(dir, f));
 }
 
-function _findSkillConfigFile(dir: string): string | null {
-	const all = findAllSkillConfigFiles(dir);
-	return all.length > 0 ? all[all.length - 1] : null;
-}
-
 export async function buildSkillDatabaseAsync(dataPath: string) {
 	const skillDir = join(dataPath, "common", "gamedata", "skill");
 	const allConfigPaths = findAllSkillConfigFiles(skillDir);

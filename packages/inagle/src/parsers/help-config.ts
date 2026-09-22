@@ -3,10 +3,8 @@
  * @description Parser for help_list_config files (Tutorials)
  */
 
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { ConfigNode } from "../core/config-parser.js";
-import { toHex } from "../core/data-loader.js";
+import { findConfigFile, loadConfig, toHex } from "../core/data-loader.js";
 import { loadTextList } from "./text-parser.js";
 
 export interface ParsedHelp {
@@ -17,24 +15,13 @@ export interface ParsedHelp {
 	image?: string;
 }
 
-function findHelpConfigFile(dir: string): string | null {
-	if (!existsSync(dir)) return null;
-	const files = readdirSync(dir);
-	const configFile = files
-		.filter((f) => f.startsWith("help_list_config_") && f.endsWith(".cfg.bin.json"))
-		.sort()
-		.pop();
-	return configFile ? join(dir, configFile) : null;
-}
-
 export function buildHelpDatabase(dataPath: string) {
-	const dir = join(dataPath, "common", "gamedata", "help");
-	const configPath = findHelpConfigFile(dir);
+	const configPath = findConfigFile("help", "help_list_config_");
 
 	const helpItems: ParsedHelp[] = [];
 
 	if (!configPath) {
-		console.warn("[help-config] Config not found in", dir);
+		console.warn("[help-config] No SQL/SQLite help_list_config projection found.");
 		return { helpItems };
 	}
 
@@ -44,8 +31,7 @@ export function buildHelpDatabase(dataPath: string) {
 	const listJa = loadTextList("help", "ja");
 
 	try {
-		const content = JSON.parse(readFileSync(configPath, "utf-8"));
-		const entries = content.entries as ConfigNode[];
+		const entries = loadConfig("help", configPath).children as ConfigNode[];
 
 		function traverse(node: ConfigNode) {
 			// HELP_LIST_IMAGE matches are better for finding the "Slide" type tutorials

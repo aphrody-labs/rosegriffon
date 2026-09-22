@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import pg from "pg";
+import { createPgPool } from "@rosegriffon/db/pg";
 import dotenv from "dotenv";
 
 const root = resolve(import.meta.dir, "../../..");
@@ -30,7 +30,7 @@ async function syncPatchNotes() {
 		process.exit(1);
 	}
 
-	const pool = new pg.Pool({ connectionString: dbUrl });
+	const pool = createPgPool(dbUrl, { applicationName: "inagle-patch-notes" });
 	const jsonPath = "/home/ubuntu/niers/data/translations/patch-notes-fr.json";
 	
 	console.log(`📖 Reading patch notes from: ${jsonPath}`);

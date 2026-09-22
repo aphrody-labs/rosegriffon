@@ -1,7 +1,5 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { ConfigNode } from "../core/config-parser.js";
-import { findConfigFile, toHex } from "../core/data-loader.js";
+import { findConfigFile, loadConfig, toHex } from "../core/data-loader.js";
 import { DATA_ROOT } from "../core/paths.js";
 
 export interface AbilityBoardEffect {
@@ -22,8 +20,7 @@ export async function loadAbilityLearningConfig(dataPath: string = DATA_ROOT) {
 	const filename = findConfigFile("skill", "ability_learning_config");
 	if (!filename) return null;
 
-	const path = join(dataPath, "common/gamedata/skill", filename);
-	const content = JSON.parse(readFileSync(path, "utf-8")) as { entries?: ConfigNode[] };
+	const content = { entries: loadConfig("skill", filename).children as ConfigNode[] };
 
 	const effects = new Map<number, AbilityBoardEffect>();
 	const boards = new Map<string, number[]>();

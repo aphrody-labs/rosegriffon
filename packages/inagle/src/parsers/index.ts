@@ -200,15 +200,6 @@ export {
 	type UnlockCondition,
 	type UnlockOp,
 } from "./unlock-condition.js";
-// Gameplay parser (Events, Craft, Routes)
-export {
-	buildCraftDatabase,
-	buildEventDatabase,
-	buildVsRouteDatabase,
-	type ParsedCraft,
-	type ParsedEvent,
-	type ParsedVsRoute,
-} from "./gameplay-config.js";
 // Growth table parser
 export {
 	buildGrowthTableDatabase,

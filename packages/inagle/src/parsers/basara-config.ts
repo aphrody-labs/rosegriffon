@@ -3,10 +3,8 @@
  * @description Parser for BASARA configuration
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import { loadJsonAsync } from "../core/async-loader.js";
-import { findConfigFile } from "../core/data-loader.js";
+import { findConfigFile, loadConfigData } from "../core/data-loader.js";
 import { DATA_ROOT } from "../core/paths.js";
 
 export interface BasaraBuildInfo {
@@ -49,11 +47,9 @@ export function loadBasaraConfig(dataPath: string = DATA_ROOT) {
 	const filename = findConfigFile("character", "basara_chara_config");
 	if (!filename) return null;
 
-	const path = join(dataPath, "common/gamedata/character", filename);
-	if (!existsSync(path)) return null;
-
 	try {
-		const content = JSON.parse(readFileSync(path, "utf-8"));
+		const content = loadConfigData("character", filename);
+		if (!content) return null;
 		return parseContent(content);
 	} catch (e) {
 		console.error("Failed to load basara config sync", e);
@@ -65,7 +61,7 @@ export async function loadBasaraConfigAsync(dataPath: string = DATA_ROOT) {
 	const filename = findConfigFile("character", "basara_chara_config");
 	if (!filename) return null;
 
-	const path = join(dataPath, "common/gamedata/character", filename);
+	const path = `${dataPath}/common/gamedata/character/${filename}`;
 	const content = await loadJsonAsync<any>(path);
 
 	return parseContent(content);

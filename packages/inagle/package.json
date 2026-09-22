@@ -78,14 +78,12 @@
     "dotenv": "catalog:",
     "kuroshiro": "catalog:",
     "kuroshiro-analyzer-kuromoji": "catalog:",
-    "pg": "catalog:",
     "picocolors": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
     "@types/node": "catalog:",
-    "@types/pg": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },

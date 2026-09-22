@@ -38,12 +38,22 @@ export type {
 	CharacterVariant,
 	MultiLevelStats,
 } from "./core/types.js";
+import type { Skill as CoreSkill, Team as CoreTeam } from "./core/types.js";
+
+/** Canonical cross-package DTOs. Wiki/API enrich these game entities with
+ * localized SQL projections while preserving the game-level core contract. */
+export interface Skill extends CoreSkill {
+	[key: string]: any;
+}
+export interface Team extends CoreTeam {
+	[key: string]: any;
+}
 // New entity builders
 export {
 	type BaseCharacterStats,
 	type CharacterFilter,
 	type CharacterStatsSummary,
-} from "./entities/character.js";
+} from "./entities/types.js";
 export * from "./menu/index.js";
 // APIs
 export * from "./service.js";

@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { requireEditorOrFail } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
-import { createClient } from "@/lib/supabase/server";
 
 const APP_SCOPE = "azalee";
 
@@ -208,7 +207,7 @@ export async function checkSlugAvailability(
 	slug: string,
 	excludeId?: string
 ): Promise<{ available: boolean; suggestion?: string }> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let query = (supabase as any)
@@ -646,7 +645,7 @@ export async function getArticleStats(): Promise<{
 		published_at: string;
 	}>;
 }> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const client = supabase as any;
@@ -796,7 +795,7 @@ export async function getArticleVersions(articleId: string): Promise<
 		created_at: string;
 	}>
 > {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data } = await (supabase as any)
 		.from("article_versions")
@@ -823,7 +822,7 @@ export async function getArticleVersion(versionId: string): Promise<{
 	meta_description: string | null;
 	created_at: string;
 } | null> {
-	const supabase = await createClient();
+	const supabase = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const { data } = await (supabase as any)
 		.from("article_versions")

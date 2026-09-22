@@ -49,7 +49,7 @@
 // Défauts : slug `iergday`, mode de poids `par_oeuvre`, sortie
 // `apps/website/src/data/campagnes/<slug>-roster.json` (`--complet` → `<slug>-roster-complet.json`).
 // `--verifier` n'écrit rien : il recalcule tout et compare au fichier déjà sur disque.
-import { SQL } from "bun";
+import { createBunSql } from "@rosegriffon/db/bun-sql";
 
 import { SQL_CREATIONS } from "../../apps/website/src/lib/x-campagnes/sql-creations";
 
@@ -689,7 +689,7 @@ const arbitragesParCreation = new Map(ARBITRAGES_FICHIERS.map((a) => [`${a.sourc
 
 const URL_BASE = Bun.env.DATABASE_URL;
 if (!URL_BASE) throw new Error("DATABASE_URL manquant");
-const sql = new SQL(URL_BASE);
+const sql = createBunSql({ url: URL_BASE });
 
 const anomalies: string[] = [];
 

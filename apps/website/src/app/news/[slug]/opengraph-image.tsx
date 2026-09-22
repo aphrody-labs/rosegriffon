@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export const size = { height: 630, width: 1200 };
 export const contentType = "image/png";
@@ -38,7 +38,7 @@ export default async function Image({ params }: OgImageProps) {
 	let publishedAt: string | null = null;
 
 	try {
-		const supabase = await createClient();
+		const supabase = createPostgresClient();
 		const { data } = await (supabase as any)
 			.from("articles")
 			.select("title, category, featured_image_url, published_at, author_id")

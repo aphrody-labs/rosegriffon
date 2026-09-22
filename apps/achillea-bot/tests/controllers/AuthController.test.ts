@@ -129,10 +129,6 @@ const mockEntities = new Proxy(mockEntitiesTarget, {
 });
 
 mock.module(import.meta.resolve("@/entities"), () => mockEntities);
-mock.module(import.meta.resolve("../../src/entities/Data"), () => ({
-	defaultData: {},
-	Data: mockEntities.Data,
-}));
 mock.module(import.meta.resolve("../../src/entities/ClanTeam"), () => ({
 	ClanTeam: mockEntities.ClanTeam,
 }));

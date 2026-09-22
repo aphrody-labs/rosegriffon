@@ -23,7 +23,7 @@
 // Le script est idempotent : un visuel déjà présent dans `storage.objects` ET
 // servi par le service Storage n'est ni re-téléchargé ni ré-encodé (`--force`
 // pour l'y contraindre).
-import { SQL } from "bun";
+import { createBunSql } from "@rosegriffon/db/bun-sql";
 
 // ───────────────────────── Table de description ─────────────────────────
 
@@ -371,7 +371,7 @@ async function statutPublic(nom: string): Promise<number> {
 
 const URL_BASE = Bun.env.DATABASE_URL;
 if (!URL_BASE) throw new Error("DATABASE_URL manquant");
-const sql = new SQL(URL_BASE);
+const sql = createBunSql({ url: URL_BASE });
 const sharp = await chargerSharp();
 
 const aTraiter = VISUELS.filter((v) => !SLUG_FILTRE || v.slug === SLUG_FILTRE);

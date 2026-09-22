@@ -33,7 +33,7 @@
 import { existsSync, statSync } from "node:fs";
 import path from "node:path";
 
-import { SQL } from "bun";
+import { createBunSql } from "@rosegriffon/db/bun-sql";
 
 import { normalizeNames } from "../src/utils/functions/normalizeName";
 
@@ -274,7 +274,7 @@ export async function runImport(opts: CliOptions): Promise<ImportReport> {
 		unresolved: [],
 	};
 
-	const sql = new SQL(buildConnectionUrl());
+	const sql = createBunSql({ url: buildConnectionUrl() });
 
 	try {
 		// Transaction : commit si --apply, rollback systématique si dry-run.

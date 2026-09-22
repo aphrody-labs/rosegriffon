@@ -12,8 +12,12 @@
  * chaînes, ce sont les commandes qui décident du canal.
  */
 
-import { SQL } from "bun";
 import { Database } from "bun:sqlite";
+import {
+	createBunPgClient,
+	type BunPgClient,
+	type BunPgQueryResult,
+} from "@rosegriffon/db/bun-sql";
 
 import { resolveMirrorPath } from "../config";
 
@@ -158,35 +162,10 @@ export function renderAsciiTable(rows: readonly TableRow[]): string {
 // ─── Postgres (Bun.SQL) ──────────────────────────────────────────────
 
 /** Résultat d'une requête Postgres, calqué sur la surface `pg` historique. */
-export interface PgQueryResult<Row = TableRow> {
-	rows: Row[];
-	rowCount: number;
-}
-
-/**
- * Client Postgres minimal (`connect`/`query`/`end`) au-dessus de `Bun.SQL` :
- * zéro dépendance npm, mêmes placeholders `$1` et mêmes lignes renvoyées que
- * l'ancien client `pg`.
- */
-export interface PgClient {
-	connect(): Promise<void>;
-	query<Row = TableRow>(text: string, params?: unknown[]): Promise<PgQueryResult<Row>>;
-	end(): Promise<void>;
-}
-
-export function createPgClient(connectionString: string): PgClient {
-	const sql = new SQL({ url: connectionString, max: 1 });
-	return {
-		async connect(): Promise<void> {},
-		async query<Row = TableRow>(text: string, params: unknown[] = []): Promise<PgQueryResult<Row>> {
-			const rows = (await sql.unsafe(text, params)) as Row[];
-			return { rows, rowCount: rows.length };
-		},
-		async end(): Promise<void> {
-			await sql.end();
-		},
-	};
-}
+/** Compatibilité source pour les commandes historiques du CLI Azalée. */
+export type PgQueryResult<Row = TableRow> = BunPgQueryResult<Row>;
+export type PgClient = BunPgClient;
+export const createPgClient = createBunPgClient;
 
 // ─── SQLite (miroir `inagle_*`) ──────────────────────────────────────
 

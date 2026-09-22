@@ -8,6 +8,7 @@ import { isAdminRole } from "@rosegriffon/types/roles";
 import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { getServerUser } from "@/lib/auth-helpers";
+import { PUBLIC_PROFILE_COLUMNS, type PublicProfile } from "@rosegriffon/db/profiles";
 
 /**
  * Actions du compte.
@@ -29,6 +30,59 @@ const addressSchema = z.object({
 	country: z.string().optional(),
 	postal_code: z.string().optional(),
 });
+
+/** Lecture canonique du profil courant pour les composants client. */
+export async function getCurrentPublicProfile(): Promise<PublicProfile | null> {
+	const user = await getServerUser();
+	if (!user) return null;
+	const db = createPostgresClient();
+	const { data: direct } = await db
+		.from("profiles")
+		.select(PUBLIC_PROFILE_COLUMNS)
+		.eq("id", user.id)
+		.maybeSingle();
+	if (direct) return direct as PublicProfile;
+
+	const { data: account } = await db
+		.from("account")
+		.select("account_id")
+		.eq("user_id", user.id)
+		.eq("provider_id", "discord")
+		.maybeSingle();
+	const discordId = (account as { account_id?: string } | null)?.account_id;
+	if (!discordId) return null;
+	const { data: viaDiscord } = await db
+		.from("profiles")
+		.select(PUBLIC_PROFILE_COLUMNS)
+		.eq("discord_id", discordId)
+		.maybeSingle();
+	return (viaDiscord as PublicProfile | null) ?? null;
+}
+
+/** Mise à jour limitée aux colonnes publiques éditables du profil courant. */
+export async function updatePublicProfile(
+	updates: Partial<PublicProfile>
+): Promise<{ data: PublicProfile | null; error: Error | null }> {
+	const user = await getServerUser();
+	if (!user) return { data: null, error: new Error("Utilisateur non connecté") };
+	const editable = [
+		"username", "avatar_url", "website", "bio", "banner_url", "banner_position",
+		"poste", "twitter_handle", "badges",
+	] as const;
+	const payload = Object.fromEntries(
+		editable.filter((key) => updates[key] !== undefined).map((key) => [key, updates[key]])
+	);
+	const { data, error } = await createPostgresClient()
+		.from("profiles")
+		.update({ ...payload, updated_at: new Date().toISOString() })
+		.eq("id", user.id)
+		.select(PUBLIC_PROFILE_COLUMNS)
+		.single();
+	return {
+		data: (data as PublicProfile | null) ?? null,
+		error: error ? new Error(error.message) : null,
+	};
+}
 
 function firstIssue(error: z.ZodError): string {
 	return error.issues[0]?.message ?? "Données invalides.";

@@ -1,5 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolveGameDataFile } from "../core/paths.js";
+import { findConfigFile, loadConfigData } from "../core/data-loader.js";
 
 export interface ParsedCharaDetails {
 	charaId: string;
@@ -14,14 +13,14 @@ export interface ParsedCharaDetails {
  */
 export function parseCharaDetails(): Map<string, ParsedCharaDetails> {
 	const map = new Map<string, ParsedCharaDetails>();
-	const filePath = resolveGameDataFile("character", "chara_details_config");
-
-	if (!filePath || !existsSync(filePath)) {
+	const filename = findConfigFile("character", "chara_details_config");
+	if (!filename) {
 		return map;
 	}
 
 	try {
-		const data = JSON.parse(readFileSync(filePath, "utf-8"));
+		const data = loadConfigData<{ lists?: { name: string; values?: any[] }[] }>("character", filename);
+		if (!data) return map;
 		const list = data.lists?.find((l: any) => l.name === "m_charaDetailsList");
 		if (list?.values) {
 			for (const val of list.values) {

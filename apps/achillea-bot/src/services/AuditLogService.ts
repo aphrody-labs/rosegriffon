@@ -47,6 +47,11 @@ export interface AuditVerifyResult {
 	broken_at: string | null;
 }
 
+export type AuditLogSummary = Pick<
+	AuditRecord,
+	"id" | "ts" | "actor_id" | "action" | "target_type" | "target_id" | "reason"
+>;
+
 @Service()
 export class AuditLogService {
 	constructor(
@@ -163,6 +168,17 @@ export class AuditLogService {
 		}
 
 		return { valid: true, broken_at: null };
+	}
+
+	/** Lit les dernières entrées pour les interfaces d'administration. */
+	async listRecent(limit = 50): Promise<AuditLogSummary[]> {
+		const boundedLimit = Math.min(200, Math.max(1, Math.trunc(limit) || 50));
+		return sql
+			.selectFrom("audit_log")
+			.select(["id", "ts", "actor_id", "action", "target_type", "target_id", "reason"])
+			.orderBy("ts", "desc")
+			.limit(boundedLimit)
+			.execute();
 	}
 
 	/**

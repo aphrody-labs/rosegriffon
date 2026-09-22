@@ -2,13 +2,59 @@ import { ESCALATION_WINDOW_SEC, evaluateEscalation } from "@rosegriffon/achillea
 import type { Job } from "bullmq";
 import { Client } from "@aphrody/discordx";
 import { singleton } from "tsyringe";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import type { Generated, Selectable } from "kysely";
 
 import { Sanction } from "@/entities";
 import { sanctionsQueue } from "../queues/sanctions.queues";
 import { CrossSyncService } from "@/services/CrossSyncService";
-import { Database } from "@/services/Database";
 import { MetricsService } from "@/services/MetricsService";
 import { SanctionIssuerType, SanctionType } from "@/utils/enums";
+
+interface SanctionTable {
+	id: Generated<string>;
+	user_id: string;
+	guild_id: string;
+	type: string;
+	reason: string | null;
+	duration_sec: number | null;
+	issued_by: string;
+	issued_by_type: string;
+	expires_at: Date | null;
+	revoked_at: Date | null;
+	revoked_by: string | null;
+	revoke_reason: string | null;
+	evidence: Record<string, unknown>[] | null;
+	created_at: Generated<Date>;
+	updated_at: Generated<Date>;
+}
+
+interface SanctionDatabase {
+	sanction: SanctionTable;
+}
+
+type SanctionRow = Selectable<SanctionTable>;
+
+const sql = createAchilleaSql<SanctionDatabase>();
+
+function toEntity(row: SanctionRow): Sanction {
+	const sanction = new Sanction();
+	sanction.id = row.id;
+	sanction.userId = row.user_id;
+	sanction.guildId = row.guild_id;
+	sanction.type = row.type as SanctionType;
+	sanction.reason = row.reason;
+	sanction.durationSec = row.duration_sec;
+	sanction.issuedBy = row.issued_by;
+	sanction.issuedByType = row.issued_by_type as SanctionIssuerType;
+	sanction.expiresAt = row.expires_at;
+	sanction.revokedAt = row.revoked_at;
+	sanction.revokedBy = row.revoked_by;
+	sanction.revokeReason = row.revoke_reason;
+	sanction.evidence = row.evidence;
+	sanction.createdAt = row.created_at;
+	return sanction;
+}
 
 export interface IssueOpts {
 	userId: string;
@@ -24,7 +70,6 @@ export interface IssueOpts {
 @singleton()
 export class SanctionService {
 	constructor(
-		private db: Database,
 		private client: Client,
 		private crossSync: CrossSyncService,
 		private metrics: MetricsService
@@ -35,23 +80,28 @@ export class SanctionService {
 	 * if durationSec is provided.
 	 */
 	async issue(opts: IssueOpts): Promise<Sanction> {
-		const em = this.db.em.fork();
-
-		const sanction = new Sanction();
-		sanction.userId = opts.userId;
-		sanction.guildId = opts.guildId;
-		sanction.type = opts.type;
-		sanction.reason = opts.reason ?? null;
-		sanction.durationSec = opts.durationSec ?? null;
-		sanction.issuedBy = opts.issuedBy;
-		sanction.issuedByType = opts.issuerType ?? SanctionIssuerType.Staff;
-		sanction.evidence = opts.evidence ?? null;
-
-		if (opts.durationSec) {
-			sanction.expiresAt = new Date(Date.now() + opts.durationSec * 1000);
-		}
-
-		await em.persist(sanction).flush();
+		const expiresAt = opts.durationSec
+			? new Date(Date.now() + opts.durationSec * 1000)
+			: null;
+		const row = await sql
+			.insertInto("sanction")
+			.values({
+				user_id: opts.userId,
+				guild_id: opts.guildId,
+				type: opts.type,
+				reason: opts.reason ?? null,
+				duration_sec: opts.durationSec ?? null,
+				issued_by: opts.issuedBy,
+				issued_by_type: opts.issuerType ?? SanctionIssuerType.Staff,
+				expires_at: expiresAt,
+				revoked_at: null,
+				revoked_by: null,
+				revoke_reason: null,
+				evidence: opts.evidence ?? null,
+			})
+			.returningAll()
+			.executeTakeFirstOrThrow();
+		const sanction = toEntity(row);
 
 		if (opts.durationSec && sanction.id) {
 			await sanctionsQueue.add(
@@ -83,15 +133,19 @@ export class SanctionService {
 	 * the member has already left or the ban was already removed.
 	 */
 	async revoke(sanctionId: string, revokedBy: string, revokeReason?: string): Promise<Sanction> {
-		const em = this.db.em.fork();
-
-		const sanction = await em.findOneOrFail(Sanction, { id: sanctionId });
-
-		sanction.revokedAt = new Date();
-		sanction.revokedBy = revokedBy;
-		if (revokeReason) sanction.revokeReason = revokeReason;
-
-		await em.flush();
+		const row = await sql
+			.updateTable("sanction")
+			.set({
+				revoked_at: new Date(),
+				revoked_by: revokedBy,
+				...(revokeReason ? { revoke_reason: revokeReason } : {}),
+			})
+			.where("id", "=", sanctionId)
+			.where("revoked_at", "is", null)
+			.returningAll()
+			.executeTakeFirst();
+		if (!row) throw new Error(`Sanction ${sanctionId} not found or already revoked`);
+		const sanction = toEntity(row);
 
 		// Apply inverse Discord effect for active mute / ban
 		if (sanction.type === SanctionType.Mute || sanction.type === SanctionType.Ban) {
@@ -126,14 +180,17 @@ export class SanctionService {
 	 * not revoked AND (no expiry OR expiry in the future).
 	 */
 	async listActive(userId: string, guildId: string): Promise<Sanction[]> {
-		const em = this.db.em.fork();
-
-		return em.find(Sanction, {
-			userId,
-			guildId,
-			revokedAt: null,
-			$or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }],
-		});
+		const now = new Date();
+		const rows = await sql
+			.selectFrom("sanction")
+			.selectAll()
+			.where("user_id", "=", userId)
+			.where("guild_id", "=", guildId)
+			.where("revoked_at", "is", null)
+			.where((eb) => eb.or([eb("expires_at", "is", null), eb("expires_at", ">", now)]))
+			.orderBy("created_at", "desc")
+			.execute();
+		return rows.map(toEntity);
 	}
 
 	/**
@@ -184,18 +241,19 @@ export class SanctionService {
 	 * Returns the escalation Sanction created, or null if no threshold reached.
 	 */
 	async escalate(userId: string, guildId: string, issuedBy: string): Promise<Sanction | null> {
-		const em = this.db.em.fork();
-
 		const since = new Date(Date.now() - ESCALATION_WINDOW_SEC * 1000);
-
-		const activeWarns = await em.count(Sanction, {
-			userId,
-			guildId,
-			type: SanctionType.Warn,
-			revokedAt: null,
-			createdAt: { $gte: since },
-			$or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }],
-		});
+		const now = new Date();
+		const result = await sql
+			.selectFrom("sanction")
+			.select(({ fn }) => fn.countAll<number>().as("count"))
+			.where("user_id", "=", userId)
+			.where("guild_id", "=", guildId)
+			.where("type", "=", SanctionType.Warn)
+			.where("revoked_at", "is", null)
+			.where("created_at", ">=", since)
+			.where((eb) => eb.or([eb("expires_at", "is", null), eb("expires_at", ">", now)]))
+			.executeTakeFirstOrThrow();
+		const activeWarns = Number(result.count);
 
 		// Décision d'escalade : règle pure déléguée à @rosegriffon/achillea-core.
 		const decision = evaluateEscalation(activeWarns);

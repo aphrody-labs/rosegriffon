@@ -16,8 +16,8 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import * as cheerio from "cheerio";
+import { createPgClient } from "@rosegriffon/db/pg";
 import dotenv from "dotenv";
-import { Client } from "pg";
 
 // ─── Config ─────────────────────────────────────────────────
 
@@ -345,7 +345,7 @@ async function main() {
 		.replace("://postgres:", "://postgres.your-tenant-id:")
 		.replace(/@127\.0\.0\.1:5432\//, "@127.0.0.1:6543/");
 
-	const client = new Client({ connectionString: dbUrl });
+	const client = createPgClient(dbUrl);
 	await client.connect();
 	console.log("Connecte a la base de donnees.\n");
 
