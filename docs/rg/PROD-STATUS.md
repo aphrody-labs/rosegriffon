@@ -18,8 +18,11 @@ Last verified: **2026-09-20 UTC** on the Rose Griffon VPS.
 - `azalee.rosegriffon.fr` : domaine historique sans application ni service propre ; nginx applique une
   redirection permanente vers `https://rosegriffon.fr/wiki`.
 - `rosegriffon.fr/achillea` : tournois, classements ELO, licences et clans Achilléa, rendus par
-  `apps/website`; `achillea.rosegriffon.fr` redirige vers cette surface. Les API, ranked (:4002) et
-  Socket.IO (:4005) restent adossés à `achillea-bot` (:4000) et à sa pile de données isolée.
+  `apps/website`; `achillea.rosegriffon.fr` redirige vers cette surface. Les routes métier déjà
+  contractées (`tournaments`, `leagues`, `organizations`, `licenses/verify`, `wallet`,
+  `users/leaderboard`, liste `clans`, `sanctions`) passent par `rg-api` ; le ranked (:4002),
+  Socket.IO (:4005) et les mutations encore non portées restent temporairement dans
+  `achillea-bot` (:4000).
 - `nie.aphrody.com` : servi depuis le VPS derrière nginx.
 - Postgres (port 5432), PostgREST (:8809), Storage (:8810), Realtime (:8812), CDN (:8804, :8788),
   API unifiée (`rg-api.service`, montage Azalée `/v1/azalee`) et bot Achilléa (`achillea-bot.service`)
