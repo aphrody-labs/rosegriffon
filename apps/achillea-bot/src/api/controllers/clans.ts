@@ -36,7 +36,6 @@ import {
 	Database,
 	UserService,
 } from "@/services";
-import { User } from "@/entities";
 import { BaseController } from "@/utils/classes";
 import {
 	ClanCreationErrors,
@@ -78,10 +77,7 @@ export class ClansController extends BaseController {
 
 	private async assertAdmin(ctx: Context): Promise<void> {
 		const u = ctx.get("user") as UserDTO | undefined;
-		if (!u) throw new Unauthorized("Non authentifié");
-		const em = this.db.em.fork();
-		const row = await em.findOne(User, { id: u.id });
-		if (!row || row.role < UserRole.Administrator) {
+		if (!u || (u.role ?? 0) < UserRole.Administrator) {
 			throw new Forbidden("Réservé aux administrateurs");
 		}
 	}
@@ -144,7 +140,7 @@ export class ClansController extends BaseController {
 
 	@Get("/member-limits")
 	async getMemberLimits(@Res() res: Response) {
-		const limits = await getClanMemberLimits(this.db.em);
+		const limits = await getClanMemberLimits();
 		res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
 		return res.status(200).json(limits);
 	}
@@ -158,10 +154,7 @@ export class ClansController extends BaseController {
 		@Res() res: Response
 	) {
 		await this.assertAdmin(ctx);
-		const limits = await setClanMemberLimits(
-			this.db.em,
-			normalizeClanMemberLimits({ playerLimit, staffLimit })
-		);
+		const limits = await setClanMemberLimits(normalizeClanMemberLimits({ playerLimit, staffLimit }));
 		return res.status(200).json(limits);
 	}
 
@@ -733,9 +726,7 @@ export class ClansController extends BaseController {
 		const executor = ctx.get("user") as UserDTO | undefined;
 		if (!executor) throw new Unauthorized("Non authentifié");
 
-		const em = this.db.em.fork();
-		const userRow = await em.findOne(User, { id: executor.id });
-		const isSiteAdmin = !!userRow && userRow.role >= UserRole.Administrator;
+		const isSiteAdmin = (executor.role ?? 0) >= UserRole.Administrator;
 
 		if (!isSiteAdmin) {
 			const member = await this.clanService.getMember(executor.id);
