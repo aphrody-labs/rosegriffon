@@ -16,14 +16,14 @@ async function staff(db: Kysely<Database>, headers: { authorization?: string; co
 export const adminController = new Elysia({ prefix: "/admin" })
 	.use(dbPlugin)
 	.get("/ops/overview", async ({ db, headers }) => {
-		const auth = await staff(db, headers, 2);
+		const auth = await staff(db, headers, 1);
 		if (auth.error) return auth.error;
 		const count = async (table: "user" | "wallet" | "sanction" | "license" | "event" | "clan" | "organization" | "user_elo") => {
 			const row = await db.selectFrom(table).select(({ fn }) => fn.countAll<number>().as("count")).executeTakeFirst();
 			return Number(row?.count ?? 0);
 		};
-		const [usersTotal, walletsTotal, sanctionsTotal, licensesTotal, tournamentsOngoing, clansPending, orgsPending, totalPlayers] = await Promise.all([
-			count("user"), count("wallet"), db.selectFrom("sanction").select(({ fn }) => fn.countAll<number>().as("count")).where("revoked_at", "is", null).executeTakeFirst().then((r) => Number(r?.count ?? 0)),
+		const [usersTotal, usersStaff, walletsTotal, sanctionsTotal, licensesTotal, tournamentsOngoing, clansPending, orgsPending, totalPlayers] = await Promise.all([
+			count("user"), db.selectFrom("user").select(({ fn }) => fn.countAll<number>().as("count")).where("role", ">=", 1).executeTakeFirst().then((r) => Number(r?.count ?? 0)), count("wallet"), db.selectFrom("sanction").select(({ fn }) => fn.countAll<number>().as("count")).where("revoked_at", "is", null).executeTakeFirst().then((r) => Number(r?.count ?? 0)),
 			db.selectFrom("license").select(({ fn }) => fn.countAll<number>().as("count")).where("status", "=", "Active").executeTakeFirst().then((r) => Number(r?.count ?? 0)),
 			db.selectFrom("event").select(({ fn }) => fn.countAll<number>().as("count")).where("type", "=", "TOURNAMENT").where("internal_state", "=", "Ongoing").executeTakeFirst().then((r) => Number(r?.count ?? 0)),
 			db.selectFrom("clan").select(({ fn }) => fn.countAll<number>().as("count")).where("state", "=", 1).executeTakeFirst().then((r) => Number(r?.count ?? 0)),
@@ -42,7 +42,7 @@ export const adminController = new Elysia({ prefix: "/admin" })
 			]).where("event_type", "=", "RANKED").executeTakeFirst(),
 		]);
 		return {
-			users: { total: usersTotal, staff: 0 }, wallet: { wallets: walletsTotal, totalBalance: balance, txToday: transactionsToday },
+			users: { total: usersTotal, staff: usersStaff }, wallet: { wallets: walletsTotal, totalBalance: balance, txToday: transactionsToday },
 			moderation: { sanctionsActive: sanctionsTotal, licensesActive: licensesTotal },
 			community: { tournamentsOngoing, clansPending, orgsPending, castEventsOpen: 0 },
 			ranked: { activeMatches: Number(matches?.active ?? 0), contestedMatches: Number(matches?.contested ?? 0), finishedToday: Number(matches?.finishedToday ?? 0), matchesToday: Number(matches?.today ?? 0), totalPlayers },
