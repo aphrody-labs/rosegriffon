@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { createAchilleaClient } from "@/lib/achillea";
-import type { ClanDTO } from "@rosegriffon/achillea-types";
+import { achilleaApiUrl, createAchilleaClient } from "@/lib/achillea";
+import { ClanState, type ClanDTO } from "@rosegriffon/achillea-types";
 import { ClanCard } from "@/components/achillea/ClanCard";
 import { Button, Input, Skeleton, Badge } from "@rosegriffon/ui";
 import {
@@ -37,6 +37,48 @@ export default function ClansPage() {
 				const res = await client.clans.list({ page: 1, pagination: 100 });
 				if (res.ok && isMounted) {
 					setClans(res.value.data);
+				} else if (!res.ok) {
+					// Keep the directory usable while an older API node is draining:
+					// the public endpoint's compact projection is intentionally
+					// normalised here as a last-mile compatibility fallback.
+					const response = await fetch(`${achilleaApiUrl()}/clans?page=1&pagination=100`);
+					if (response.ok && isMounted) {
+						const payload = (await response.json()) as {
+							data?: Array<{
+								id: number;
+								name: string;
+								shortName: string;
+								avatarUrl: string;
+								biography: string;
+								fame: number;
+								isRecruiting: boolean;
+							}>;
+						};
+						setClans(
+							(payload.data ?? []).map((clan) => ({
+								...clan,
+								founders: [],
+								shortenedName: clan.shortName,
+								normalizedShortName: clan.shortName.toLowerCase(),
+								clanAvatarUrl: clan.avatarUrl,
+								clanBiography: clan.biography,
+								xUrl: null,
+								instagramUrl: null,
+								tiktokUrl: null,
+								isInactive: false,
+								isHidden: false,
+								isDisbanded: false,
+								autoAcceptMembers: false,
+								state: ClanState.Approved,
+								createdAt: new Date(0),
+								languages: [],
+								origin: "legacy",
+								experience: { currentLevel: 1, totalXp: 0 },
+								membersCount: 0,
+								president: { id: "", username: clan.name },
+							})) as unknown as ClanDTO[]
+						);
+					}
 				}
 			} finally {
 				if (isMounted) setLoading(false);
