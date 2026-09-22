@@ -31,7 +31,8 @@
 //   bun packages/cron/src/tasks/ie-crawl/hashtag-moderation.ts --demasquer <tweetId>
 //   bun packages/cron/src/tasks/ie-crawl/hashtag-moderation.ts --avant <tweetId> | --retirer-avant <tweetId>
 
-import { SQL } from "bun";
+import { createBunSql } from "@rosegriffon/db/bun-sql";
+import type { SQL } from "bun";
 import { urlTweet } from "./tweet-row";
 
 /** Ligne de modération telle qu'affichée par `--lister` et par les confirmations. */
@@ -47,7 +48,7 @@ export interface PostModere {
 }
 
 function sql(): SQL {
-	return new SQL(Bun.env.DATABASE_URL);
+	return createBunSql();
 }
 
 /** Résumé d'une ligne pour la sortie console. */

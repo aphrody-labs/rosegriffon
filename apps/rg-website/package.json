@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/website",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "dev": "bun run --bun next dev",
@@ -101,7 +101,6 @@
     "@tiptap/extension-placeholder": "catalog:",
     "@tiptap/starter-kit": "catalog:",
     "@types/nodemailer": "catalog:",
-    "@types/pg": "catalog:",
     "@types/pica": "catalog:",
     "bcryptjs": "catalog:",
     "better-auth": "catalog:",
@@ -130,7 +129,6 @@
     "next-themes": "catalog:",
     "node-ipinfo": "catalog:",
     "nodemailer": "catalog:",
-    "pg": "catalog:",
     "pica": "catalog:",
     "radix-ui": "catalog:",
     "react": "catalog:",
@@ -187,9 +185,6 @@
     "tailwindcss-animate": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
-  },
-  "overrides": {
-    "kysely": "0.28.2"
   },
   "engines": {
     "bun": ">=1.3.0"

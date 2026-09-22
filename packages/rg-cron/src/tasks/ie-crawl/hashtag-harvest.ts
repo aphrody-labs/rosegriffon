@@ -28,7 +28,8 @@
 //   bun packages/cron/src/tasks/ie-crawl/hashtag-harvest.ts [--campagne <slug>] [--limite N] [--dry]
 
 import { XClient, XSession, type Tweet } from "@aphrody-code/x";
-import { SQL } from "bun";
+import { createBunSql } from "@rosegriffon/db/bun-sql";
+import type { SQL } from "bun";
 import { ingestSources, type RagSource } from "./rag-store-local";
 import {
 	compterImages,
@@ -312,7 +313,7 @@ function rowToRagSource(row: DBTweetRow, slug: string): RagSource {
  */
 export async function crawlHashtagCampaigns(options: OptionsRecolte = {}): Promise<StatsRecolte> {
 	const { slug, limite = MAX_TWEETS_PAR_CAMPAGNE, dry = false, sansRag = false } = options;
-	const sql = new SQL(Bun.env.DATABASE_URL);
+	const sql = createBunSql();
 	const details: StatsCampagne[] = [];
 
 	try {

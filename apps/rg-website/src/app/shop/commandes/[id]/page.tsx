@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { formatEuros, getProduct } from "@/lib/shop/products";
 import { getServerUser } from "@/lib/auth-helpers";
 
@@ -62,8 +62,7 @@ interface OrderDetail {
 
 async function fetchOrder(orderId: string, userId: string): Promise<OrderDetail | null> {
 	try {
-		const supabase = createAdminClient();
-		const { data, error } = await supabase
+		const { data, error } = await createPostgresClient()
 			.from("orders")
 			.select("*")
 			.eq("id", orderId)

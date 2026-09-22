@@ -15,7 +15,7 @@ import "server-only";
 
 import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
 import { type ModelFamily, modelFamily } from "@rosegriffon/azalee/cpk/models";
-import { selectInagle } from "@/lib/db/inagle-sql";
+import { selectInagle } from "@rosegriffon/db/inagle";
 
 /** Un modèle du corpus. */
 export interface ModelEntry {

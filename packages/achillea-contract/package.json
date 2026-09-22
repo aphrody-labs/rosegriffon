@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/achillea-contract",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Contrat Achilléa exporté en JSON Schema et en types natifs (Rust, Swift, Kotlin) — la brique qui rend le domaine portable hors TypeScript",
   "type": "module",

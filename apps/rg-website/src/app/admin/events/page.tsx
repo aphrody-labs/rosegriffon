@@ -12,7 +12,7 @@ import Link from "next/link";
 
 import { SyncEventsButton } from "@/components/admin/events/sync-button";
 
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import type { Tables } from "@rosegriffon/db";
 
 export const dynamic = "force-dynamic";
@@ -30,15 +30,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 	const from = (page - 1) * limit;
 	const to = from + limit - 1;
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return (
-			<div className="p-6">
-				<AdminPageHeader title="Événements" description="Service indisponible." />
-			</div>
-		);
-	}
-	const { data: events, count } = await supabase
+	const { data: events, count } = await createPostgresClient()
 		.from("events")
 		.select("*", { count: "exact" })
 		.order("start_time", { ascending: true }) // Sort by start_time usually makes more sense for a calendar list

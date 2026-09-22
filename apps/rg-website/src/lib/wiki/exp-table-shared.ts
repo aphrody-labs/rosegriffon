@@ -16,7 +16,6 @@
  *
  * - `packages/inagle/src/parsers/chara-exp-table.ts` (`getCumulativeExp`) somme les
  *   entrées dont `entry.level < targetLevel` ;
- * - `packages/inagle/src/characters/evolution.ts:279` accumule
  *   `expEntries[entry.level - 2].needExp` pour le cumul du niveau `entry.level`,
  *   c'est-à-dire le `needExp` du niveau précédent.
  *

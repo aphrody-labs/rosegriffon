@@ -1,6 +1,6 @@
 // Façade SQL serveur partagée par le bot, cron, auth et les Route Handlers.
-// Les noms historiques sont conservés pour éviter une migration atomique de tous
-// les consommateurs ; l'implémentation ne passe plus par PostgREST.
+// `createSupabaseServiceClient` est un alias de migration vers PostgreSQL,
+// pas une implémentation ou une connexion distincte.
 import { createPostgresClient } from "./postgres-client";
 
 export { createPostgresClient } from "./postgres-client";

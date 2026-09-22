@@ -1,6 +1,6 @@
 {
 	"name": "@rosegriffon/types",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"description": "Types métier partagés (roles, user, discord) — source unique de vérité bot/azalee/website",
 	"type": "module",
 	"exports": {
@@ -32,13 +32,13 @@
 		"type-check": "bun --bun ../../node_modules/typescript/bin/tsc --noEmit"
 	},
 	"dependencies": {
-		"zod": "catalog:"
+		"zod": "^4.4.3"
 	},
 	"devDependencies": {
 		"@rosegriffon/config": "workspace:*",
 		"typescript": "catalog:"
 	},
 	"peerDependencies": {
-		"@rosegriffon/db": "workspace:*"
+		"@rosegriffon/db": "^1.0.0"
 	}
 }

@@ -5,7 +5,7 @@
  */
 
 import { cache } from "@rosegriffon/db/redis";
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { buildOrderMap, crawlZukanOrderPages } from "@rosegriffon/inagle/zukan/order";
 import { sql } from "../../lib/db.js";
 
@@ -24,7 +24,7 @@ export async function crawlZukanOrder(): Promise<{
 }> {
 	console.log("[Crawl Zukan] Démarrage du crawl de l'ordre officiel des personnages...");
 
-	const client = createSupabaseServiceClient();
+	const client = createPostgresClient();
 
 	try {
 		// Lue AVANT le crawl (indépendante de son résultat), et réellement `await`ée

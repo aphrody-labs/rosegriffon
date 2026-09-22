@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/achillea-bot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Achillea Backend — Bot Discord + API REST + WebSocket pour la plateforme Achillea (Bun + Ts.ED + PostgreSQL/Kysely)",
   "license": "UNLICENSED",

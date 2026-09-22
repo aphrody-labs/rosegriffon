@@ -16,7 +16,7 @@
 // Lecture/recherche seule : on ne publie RIEN.
 
 import { XClient, XSession, type Tweet } from "@aphrody-code/x";
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { ingestSources, type RagSource } from "./rag-store-local";
 // Conversion tweet → ligne de `public.tweets` : mutualisée dans `tweet-row.ts`
 // (le code y est repris à l'identique) pour que la récolte de campagnes à hashtag
@@ -156,7 +156,7 @@ export async function crawlTwitterSearch(
 		session = XSession.loadOrEnv();
 	}
 	const client = new XClient(session);
-	const supabase = createSupabaseServiceClient();
+	const db = createPostgresClient();
 
 	const collected = new Map<string, Tweet>();
 	let fetched = 0;
@@ -212,7 +212,7 @@ export async function crawlTwitterSearch(
 
 	// 1) Upsert dans `tweets` (réutilisé par le RAG sync timeline). Idempotent par id.
 	let upserted = 0;
-	const { error: upErr } = await supabase.from("tweets").upsert(rows, { onConflict: "id" });
+	const { error: upErr } = await db.from("tweets").upsert(rows, { onConflict: "id" });
 	if (upErr) {
 		console.warn("[X Search] Upsert table `tweets` échoué :", upErr.message);
 	} else {

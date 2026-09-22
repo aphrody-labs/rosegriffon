@@ -1,17 +1,16 @@
 /**
  * Client du VFS **live** d'Inazuma Eleven: Victory Road.
  *
- * L'index CPK de `cpk/index.ts` est une photo : un NDJSON gzippé matérialisé en SQLite, à
- * régénérer à la main, muet sur le rôle des dossiers et sur ce qu'un fichier sait produire.
- * Ce module interroge à la place le pont `/vfs/*` de `nie-model-serve` (crate Rust
+ * L'index CPK de `cpk/index.ts` est la projection PostgreSQL canonique. Ce module
+ * interroge le pont `/vfs/*` de `nie-model-serve` (crate Rust
  * `nie_explore::listing`) — exactement la vue qu'affiche l'explorateur desktop Tauri, sur le
  * VFS réellement monté (250 805 entrées, 921 CPK).
  *
  * ⚠ Module **client-safe** : `fetch` seul, ni `bun:sqlite` ni `node:fs`. Importable depuis un
  * composant `"use client"` comme depuis une page serveur — contrairement à `cpk/index.ts`.
  *
- * L'index figé reste en place et reste le repli : si le CDN ne répond pas, une page qui sait
- * dégrader (cf. `lsOrNull`) continue de rendre au lieu de casser.
+ * Si le CDN ne répond pas, une page qui sait dégrader (cf. `lsOrNull`) continue
+ * de rendre au lieu de casser.
  */
 
 import type { CpkDir, CpkFile } from "./shared";

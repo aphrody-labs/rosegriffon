@@ -13,7 +13,7 @@ import { NewsListClient } from "@/components/dashboard/news/NewsListClient";
 import { Icon } from "@/components/ui/Icon";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { parseSearchParams } from "@/lib/validations";
 import { DriveImportButton } from "./drive-actions-client";
 import { NewsFilters } from "./NewsFilters";
@@ -35,7 +35,7 @@ export default async function NewsListPage({
 	const { q, page: currentPage, status, view, sort, category } = params;
 	const authorParam = typeof rawParams.author === "string" ? rawParams.author : null;
 	const itemsPerPage = (params.perPage as number | undefined) ?? 20;
-	const supabase = createAdminClient();
+	const client = createPostgresClient();
 
 	// Validate status filter
 	const validStatuses = ["published", "draft", "scheduled", "archived"];
@@ -54,8 +54,6 @@ export default async function NewsListPage({
 	const searchTerm = sanitizeNewsSearchQuery(q);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const client = supabase as any;
-
 	const applyFilters = (query: ReturnType<typeof client.from>) => {
 		let q2 = query;
 		if (searchTerm) {

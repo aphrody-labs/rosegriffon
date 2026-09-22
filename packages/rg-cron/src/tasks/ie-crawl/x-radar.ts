@@ -5,7 +5,7 @@
  */
 
 import { Browser, Page } from "@aphrody-code/bxc";
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import type { Json } from "@rosegriffon/db";
 import { loadBxcXCookies, loadBxcXCookieHeader } from "./x-accounts";
 import { processTweets } from "./process-tweets";
@@ -204,7 +204,7 @@ export async function crawlXRadar(
 
 		// Normalize + upsert into same "tweets" table (so processTweets / RAG / Azalee wiki consume them)
 		// Same shape as twitter.ts DBTweetRow
-		const supabase = createSupabaseServiceClient();
+		const db = createPostgresClient();
 		const now = new Date().toISOString();
 		const rows: any[] = extracted.map((t) => ({
 			id: t.id,
@@ -222,7 +222,7 @@ export async function crawlXRadar(
 			updated_at: now,
 		}));
 
-		const { error: upErr } = await supabase.from("tweets").upsert(rows, { onConflict: "id" });
+		const { error: upErr } = await db.from("tweets").upsert(rows, { onConflict: "id" });
 		if (upErr) {
 			console.error("[Crawl X Radar] Upsert error:", upErr);
 		} else {

@@ -5,7 +5,7 @@
  */
 
 import { XClient, XSession, type Tweet } from "@aphrody-code/x";
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import type { Json } from "@rosegriffon/db";
 import { sql } from "../../lib/db.js";
 import { getOfficialXAccounts, loadBxcXCookieHeader } from "./x-accounts";
@@ -124,7 +124,7 @@ export async function crawlTwitter(options: {
 			session = XSession.loadOrEnv();
 		}
 		const client = new XClient(session);
-		const supabase = createSupabaseServiceClient();
+		const db = createPostgresClient();
 
 		// Charger le cache d'IDs depuis la DB pour éviter les requêtes API userByScreenName inutiles
 		const usernameToUserMap = new Map<string, { id: string; name: string }>();
@@ -517,7 +517,7 @@ export async function crawlTwitter(options: {
 					);
 					const { error } =
 						uniqueTweets.length > 0
-							? await supabase.from("tweets").upsert(uniqueTweets)
+							? await db.from("tweets").upsert(uniqueTweets)
 							: { error: null };
 					if (error) {
 						console.error(`[Crawl Twitter] Erreur d'upsert pour @${screenName} :`, error);
@@ -528,7 +528,7 @@ export async function crawlTwitter(options: {
 							console.log(
 								`[Crawl Twitter] Nettoyage de ${deleteOldTweetIds.length} doublons de threads de la base de données...`
 							);
-							const { error: deleteErr } = await supabase
+							const { error: deleteErr } = await db
 								.from("tweets")
 								.delete()
 								.in("id", deleteOldTweetIds);

@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { XClient, XSession } from "@aphrody-code/x";
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { syncThread } from "./sync-specific-thread";
 
 // Répare en masse les threads Azalee tronqués (timeline collapse / thread()
@@ -38,9 +38,9 @@ const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout
 async function main(): Promise<void> {
 	const screenName = process.argv[2] || "Azalee_IE";
 	const client = new XClient(XSession.loadOrEnv());
-	const supabase = createSupabaseServiceClient();
+	const db = createPostgresClient();
 
-	const { data: threads, error } = await supabase
+	const { data: threads, error } = await db
 		.from("tweets")
 		.select("id, tweet_count")
 		.eq("author_username", screenName)
@@ -72,7 +72,7 @@ async function main(): Promise<void> {
 		if (verified.has(id)) continue;
 
 		try {
-			const r = await syncThread(client, supabase, id, screenName, { onlyIfLarger: true });
+			const r = await syncThread(client, db, id, screenName, { onlyIfLarger: true });
 			consecutiveErrors = 0;
 			verified.add(id);
 			saveVerified(verified);

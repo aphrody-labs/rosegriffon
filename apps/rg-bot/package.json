@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/bot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Bot Discord Rose Griffon — slash commands public + admin, sync members, canvas cards",
   "type": "module",

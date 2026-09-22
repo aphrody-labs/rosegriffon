@@ -3,7 +3,7 @@
 import { cache } from "react";
 
 import { getServerUser } from "@/lib/auth-helpers";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export interface PatreonViewerAccess {
 	linked: boolean;
@@ -35,12 +35,8 @@ export const getViewerPatreonAccess = cache(async (): Promise<PatreonViewerAcces
 		return NO_ACCESS;
 	}
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return NO_ACCESS;
-	}
-
-	const { data: account } = await supabase
+	const db = createPostgresClient();
+	const { data: account } = await db
 		.from("account")
 		.select("user_id")
 		.eq("user_id", user.id)
@@ -51,7 +47,7 @@ export const getViewerPatreonAccess = cache(async (): Promise<PatreonViewerAcces
 		return NO_ACCESS;
 	}
 
-	const { data: membership } = await supabase
+	const { data: membership } = await db
 		.from("patreon_memberships")
 		.select("patron_status, currently_entitled_cents, tier_amounts_cents")
 		.eq("user_id", user.id)

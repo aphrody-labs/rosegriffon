@@ -6,8 +6,8 @@ import { z } from "zod";
 import { logAdminAction } from "@/lib/admin-logger";
 import { getCalendarEvents } from "@/lib/api/events";
 import { getServerUser } from "@/lib/auth-helpers";
-import { createAdminClient, createClient } from "@/lib/supabase/server";
-import { resolveProfile, isAdmin } from "@rosegriffon/auth";
+import { createPostgresClient } from "@rosegriffon/db/service";
+import { isAdmin, resolveProfile } from "@rosegriffon/auth";
 import type { Insert } from "@rosegriffon/db";
 
 async function ensureAdmin() {
@@ -15,7 +15,7 @@ async function ensureAdmin() {
 	if (!user) {
 		throw new Error("Non authentifié");
 	}
-	const adminClient = createAdminClient();
+	const adminClient = createPostgresClient();
 	const profile = await resolveProfile(adminClient, user);
 	if (!profile || !isAdmin(profile.role)) {
 		throw new Error("Accès refusé");
@@ -48,7 +48,7 @@ interface ActionState {
 
 export async function syncGoogleEvents() {
 	await ensureAdmin();
-	const supabase = await createClient();
+	const db = createPostgresClient();
 	const googleEvents = await getCalendarEvents();
 
 	const validEvents = googleEvents.filter((event) => event.summary && event.start);
@@ -71,7 +71,7 @@ export async function syncGoogleEvents() {
 	const maxTime = sortedTimes[sortedTimes.length - 1];
 
 	// Fetch all existing events within this time boundary
-	const { data: existingEvents, error: fetchError } = await supabase
+	const { data: existingEvents, error: fetchError } = await db
 		.from("events")
 		.select("id, title, start_time")
 		.gte("start_time", minTime)
@@ -82,7 +82,9 @@ export async function syncGoogleEvents() {
 		return { imported: 0, skipped: 0, success: false };
 	}
 
-	const existingSet = new Set((existingEvents || []).map((e) => `${e.title}|${e.start_time}`));
+	const existingSet = new Set(
+		(existingEvents || []).map((e: { title: string; start_time: string }) => `${e.title}|${e.start_time}`),
+	);
 
 	const eventsToInsert: Insert<"events">[] = [];
 	let skippedCount = 0;
@@ -114,7 +116,7 @@ export async function syncGoogleEvents() {
 
 	let importedCount = 0;
 	if (eventsToInsert.length > 0) {
-		const { error: insertError } = await supabase.from("events").insert(eventsToInsert);
+		const { error: insertError } = await db.from("events").insert(eventsToInsert);
 
 		if (insertError) {
 			console.error("Error batch inserting events:", insertError);
@@ -143,7 +145,7 @@ export async function createEvent(_prevState: ActionState, formData: FormData) {
 			message: "Accès refusé",
 		};
 	}
-	const supabase = await createClient();
+	const db = createPostgresClient();
 
 	const rawData = {
 		description: formData.get("description"),
@@ -174,7 +176,7 @@ export async function createEvent(_prevState: ActionState, formData: FormData) {
 		title: validatedFields.data.title,
 	};
 
-	const { error } = await supabase.from("events").insert([eventData]);
+	const { error } = await db.from("events").insert([eventData]);
 
 	if (error) {
 		return {
@@ -200,7 +202,7 @@ export async function updateEvent(id: string, _prevState: ActionState, formData:
 			message: "Accès refusé",
 		};
 	}
-	const supabase = await createClient();
+	const db = createPostgresClient();
 
 	const rawData = {
 		description: formData.get("description"),
@@ -226,7 +228,7 @@ export async function updateEvent(id: string, _prevState: ActionState, formData:
 		end_time: validatedFields.data.end_time || undefined,
 	};
 
-	const { error } = await supabase.from("events").update(updateData).eq("id", id);
+	const { error } = await db.from("events").update(updateData).eq("id", id);
 
 	if (error) {
 		return {
@@ -253,9 +255,9 @@ export async function deleteEvent(id: string) {
 			success: false,
 		};
 	}
-	const supabase = await createClient();
+	const db = createPostgresClient();
 
-	const { error } = await supabase.from("events").delete().eq("id", id);
+	const { error } = await db.from("events").delete().eq("id", id);
 
 	if (error) {
 		return {

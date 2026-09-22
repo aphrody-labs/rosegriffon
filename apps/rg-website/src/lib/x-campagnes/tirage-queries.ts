@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getPgPool } from "@/lib/db/pg";
-import type { PoolClient } from "pg";
+import type { PoolClient } from "@rosegriffon/db/pg";
 
 import {
 	BALISE_LOCALE,

@@ -27,7 +27,8 @@
 
 import { mkdir, readdir, stat } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { SQL } from "bun";
+import { createBunSql } from "@rosegriffon/db/bun-sql";
+import type { SQL } from "bun";
 import type { MediaItem } from "./tweet-row";
 
 /** Racine disque du Storage self-host (cf. apps/storage/server.ts). */
@@ -74,7 +75,7 @@ export interface ResultatRehebergement {
 // (utile pour les tests et pour un `--dry` qui n'écrit rien).
 let sqlPartage: SQL | null = null;
 function db(): SQL {
-	if (!sqlPartage) sqlPartage = new SQL(Bun.env.DATABASE_URL);
+	if (!sqlPartage) sqlPartage = createBunSql();
 	return sqlPartage;
 }
 

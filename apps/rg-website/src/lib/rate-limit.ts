@@ -1,6 +1,5 @@
 import type { NextRequest } from "next/server";
-
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 export interface RateLimitOptions {
 	limit: number;
@@ -18,24 +17,16 @@ export async function checkRateLimit(
 	const key = `${ip}:${request.nextUrl.pathname}`;
 	const now = Date.now();
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		// Fallback si Supabase n'est pas configuré
-		return {
-			allowed: true,
-			remaining: options.limit,
-			resetTime: now + options.windowMs,
-		};
-	}
+	const db = createPostgresClient();
 
 	// Récupérer l'entrée
-	const { data: entry, error } = await supabase
+	const { data: entry, error } = await db
 		.from("rate_limits")
 		.select("*")
 		.eq("key", key)
-		.single();
+		.maybeSingle();
 
-	if (error && error.code !== "PGRST116") {
+	if (error) {
 		console.error("Rate limit error:", error);
 		return {
 			allowed: true,
@@ -49,7 +40,7 @@ export async function checkRateLimit(
 
 	if (!entry || resetTime < now) {
 		// Nouvelle entrée ou expirée
-		await supabase.from("rate_limits").upsert({
+		await db.from("rate_limits").upsert({
 			count: 1,
 			key,
 			last_request: new Date().toISOString(),
@@ -68,7 +59,7 @@ export async function checkRateLimit(
 		return { allowed: false, remaining: 0, resetTime };
 	}
 
-	await supabase
+	await db
 		.from("rate_limits")
 		.update({ count: currentCount + 1 })
 		.eq("key", key);

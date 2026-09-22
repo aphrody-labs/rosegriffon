@@ -1,8 +1,7 @@
 "use server";
 
 import { cache } from "react";
-
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 /**
  * Email du compte créateur Patreon Rose Griffon (autorisation principale).
@@ -41,12 +40,9 @@ export const isPatreonAdmin = cache(async (user: UserLike | null): Promise<boole
 		return true;
 	}
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return false;
-	}
+	const db = createPostgresClient();
 
-	const { data: profile } = await supabase
+	const { data: profile } = await db
 		.from("profiles")
 		.select("discord_id")
 		.eq("id", user.id)
@@ -55,7 +51,7 @@ export const isPatreonAdmin = cache(async (user: UserLike | null): Promise<boole
 		return true;
 	}
 
-	const { data: account } = await supabase
+	const { data: account } = await db
 		.from("account")
 		.select("account_id")
 		.eq("user_id", user.id)

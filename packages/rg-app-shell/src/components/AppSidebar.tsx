@@ -379,7 +379,10 @@ function RecursiveNavItem({
 								</Link>
 							</SidebarMenuButton>
 							<CollapsibleTrigger asChild>
-								<button className="size-9 flex items-center justify-center rounded-lg text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors shrink-0">
+								<button
+									className="size-9 flex items-center justify-center rounded-lg text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors shrink-0"
+									aria-label={`${isOpen ? "Réduire" : "Développer"} ${traduireNav(item.label, t)}`}
+								>
 									<ChevronRight
 										size={18}
 										className={`transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}

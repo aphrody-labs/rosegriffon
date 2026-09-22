@@ -111,6 +111,12 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
 		this.where.push(`${identifier(column)} ILIKE ${this.value(value)}`);
 		return this;
 	}
+	textSearch(column: string, query: string, options?: { config?: string }) {
+		const config = options?.config ?? "simple";
+		if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(config)) throw new Error("Invalid text search config");
+		this.where.push(`${identifier(column)} @@ to_tsquery(${this.value(config)}, ${this.value(query)})`);
+		return this;
+	}
 	like(column: string, value: string) {
 		this.where.push(`${identifier(column)} LIKE ${this.value(value)}`);
 		return this;

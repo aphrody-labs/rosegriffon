@@ -37,7 +37,7 @@ packages/inagle/src/
 ## 2. API & Sous-modules Clés
 
 ### A. Gestion des Personnages & Variantes
-* **Fichiers** : [entities/character.ts](file:///packages/inagle/src/entities/character.ts), [characters/api.ts](file:///packages/inagle/src/characters/api.ts)
+* **Fichiers** : [entities/character.ts](file:///packages/inagle/src/entities/character.ts), [service.ts](file:///packages/inagle/src/service.ts)
 * **Description** : Les personnages possèdent un `charaId` unique mais peuvent comporter plusieurs `variants` (loadouts, versions jeunes, versions spéciales).
 * **Résolution de Rareté** : La fonction `loadBaseCharacters()` calcule dynamiquement la rareté globale d'un personnage de base en parcourant ses variantes pour retenir la meilleure rareté disponible (comme BASARA ou UR).
 

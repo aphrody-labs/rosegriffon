@@ -1,7 +1,7 @@
 import { XClient, XSession, type Tweet } from "@aphrody-code/x";
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
-type SupabaseService = ReturnType<typeof createSupabaseServiceClient>;
+type PostgresService = ReturnType<typeof createPostgresClient>;
 
 export type MediaItem = {
 	id: string;
@@ -62,7 +62,7 @@ export async function fetchFullThread(
 // Télécharge un binaire et l'upload dans le bucket `tweets`. Retourne l'URL
 // publique azalee, ou null en cas d'échec (on garde alors l'URL source).
 async function mirrorToStorage(
-	supabase: SupabaseService,
+	db: PostgresService,
 	srcUrl: string,
 	storagePath: string,
 	fallbackContentType: string
@@ -75,7 +75,7 @@ async function mirrorToStorage(
 		}
 		const buffer = Buffer.from(await res.arrayBuffer());
 		const contentType = res.headers.get("content-type") || fallbackContentType;
-		const { error } = await supabase.storage.from("tweets").upload(storagePath, buffer, {
+		const { error } = await db.storage.from("tweets").upload(storagePath, buffer, {
 			contentType,
 			upsert: true,
 		});
@@ -97,7 +97,7 @@ function extFromUrl(url: string, fallback: string): string {
 }
 
 async function processTweetMedia(
-	supabase: SupabaseService,
+	db: PostgresService,
 	rootId: string,
 	tweetId: string,
 	rawMedia: RawMedia[]
@@ -111,13 +111,13 @@ async function processTweetMedia(
 		if (isVideo && m.video_url) {
 			const vExt = extFromUrl(m.video_url, "mp4");
 			const vPath = `${rootId}/${tweetId}_${i}.${vExt}`;
-			const videoPublic = await mirrorToStorage(supabase, m.video_url, vPath, "video/mp4");
+			const videoPublic = await mirrorToStorage(db, m.video_url, vPath, "video/mp4");
 			const posterSrc = m.preview_url || m.url;
 			let posterPublic: string | null = null;
 			if (posterSrc) {
 				const pExt = extFromUrl(posterSrc, "jpg");
 				const pPath = `${rootId}/${tweetId}_${i}_poster.${pExt}`;
-				posterPublic = await mirrorToStorage(supabase, posterSrc, pPath, "image/jpeg");
+				posterPublic = await mirrorToStorage(db, posterSrc, pPath, "image/jpeg");
 			}
 			out.push({
 				id: m.id ?? "",
@@ -138,7 +138,7 @@ async function processTweetMedia(
 		if (!srcUrl) continue;
 		const ext = extFromUrl(srcUrl, "jpg");
 		const path = `${rootId}/${tweetId}_${i}.${ext}`;
-		const publicUrl = await mirrorToStorage(supabase, srcUrl, path, "image/jpeg");
+		const publicUrl = await mirrorToStorage(db, srcUrl, path, "image/jpeg");
 		out.push({
 			id: m.id ?? "",
 			type: m.type ?? "photo",
@@ -176,7 +176,7 @@ export type SyncResult = {
 // version stockée (réparation non destructive des threads tronqués).
 export async function syncThread(
 	client: XClient,
-	supabase: SupabaseService,
+	db: PostgresService,
 	convId: string,
 	screenName: string,
 	opts: { onlyIfLarger?: boolean } = {}
@@ -192,7 +192,7 @@ export async function syncThread(
 
 	let before = 0;
 	if (opts.onlyIfLarger) {
-		const { data: existing } = await supabase
+		const { data: existing } = await db
 			.from("tweets")
 			.select("tweet_count")
 			.eq("id", rootId)
@@ -206,7 +206,7 @@ export async function syncThread(
 	const allThreadMedia: MediaItem[] = [];
 	const processedRawTweets = [];
 	for (const t of threadTweets) {
-		const media = await processTweetMedia(supabase, rootId, t.id, (t.media || []) as RawMedia[]);
+		const media = await processTweetMedia(db, rootId, t.id, (t.media || []) as RawMedia[]);
 		allThreadMedia.push(...media);
 		processedRawTweets.push({
 			id: t.id,
@@ -249,12 +249,12 @@ export async function syncThread(
 		updated_at: new Date().toISOString(),
 	};
 
-	const { error: upsertErr } = await supabase.from("tweets").upsert(tweetRow);
+	const { error: upsertErr } = await db.from("tweets").upsert(tweetRow);
 	if (upsertErr) throw new Error(`upsert ${rootId}: ${upsertErr.message}`);
 
 	const deleteIds = threadTweets.map((t) => t.id).filter((id) => id !== rootId);
 	if (deleteIds.length > 0) {
-		await supabase.from("tweets").delete().in("id", deleteIds);
+		await db.from("tweets").delete().in("id", deleteIds);
 	}
 	return { convId, rootId, before, after: threadTweets.length, action: "healed" };
 }
@@ -264,8 +264,8 @@ async function main() {
 	const screenName = process.argv[3] || "Azalee_IE";
 	console.log(`=== Sync complet du thread ${convId} (@${screenName}) ===`);
 	const client = new XClient(XSession.loadOrEnv());
-	const supabase = createSupabaseServiceClient();
-	const r = await syncThread(client, supabase, convId, screenName);
+	const db = createPostgresClient();
+	const r = await syncThread(client, db, convId, screenName);
 	console.log(`✓ ${r.action} : thread ${convId} → ${r.after} tweets (root ${r.rootId}).`);
 }
 

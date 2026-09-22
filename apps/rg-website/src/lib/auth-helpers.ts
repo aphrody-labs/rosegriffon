@@ -7,6 +7,7 @@ import { cache } from "react";
 import { auth } from "@/lib/auth";
 import { isPatreonAdmin } from "@/lib/patreon/admin-access";
 import { isAdmin, resolveProfile } from "@rosegriffon/auth";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { createAdminClient } from "@/lib/supabase/server";
 
 /**
@@ -109,10 +110,9 @@ export async function hasMedailleAzaleeRole(
 	if (!discordId) {
 		return false;
 	}
-	const { createSupabaseServiceClient } = await import("@rosegriffon/db/service");
-	const supabase = createSupabaseServiceClient();
+	const db = createPostgresClient();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const { data } = (await (supabase as any)
+	const { data } = (await (db as any)
 		.from("discord_members")
 		.select("roles")
 		.eq("discord_id", discordId)

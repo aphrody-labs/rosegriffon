@@ -8,7 +8,7 @@ import {
 	type DescriptionTache,
 	type SanteCron,
 } from "@rosegriffon/types/cron";
-import { createSupabaseServiceClient } from "@rosegriffon/db/service";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 /**
  * Client de `rg-cron.service` — l'ordonnanceur, vu depuis le site.
@@ -197,8 +197,8 @@ export interface ExecutionCron {
 export async function historiqueDuCron(limite = 20): Promise<ExecutionCron[]> {
 	const plafond = Math.min(Math.max(Math.trunc(limite), 1), 100);
 	try {
-		const supabase = createSupabaseServiceClient() as any;
-		const { data, error } = await supabase
+		const db = createPostgresClient();
+		const { data, error } = await db
 			.from("cron_executions")
 			.select("tache, demarre_le, duree_ms, succes, erreur, origine")
 			.order("demarre_le", { ascending: false })

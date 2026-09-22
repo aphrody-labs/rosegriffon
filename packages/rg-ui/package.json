@@ -1,6 +1,6 @@
 {
 	"name": "@rosegriffon/ui",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"description": "Composants shadcn/ui partagés (new-york style, Tailwind v4)",
 	"type": "module",
 	"sideEffects": [
@@ -53,9 +53,9 @@
 		"@radix-ui/react-toggle": "catalog:",
 		"@radix-ui/react-toggle-group": "catalog:",
 		"@radix-ui/react-tooltip": "catalog:",
-		"@rosegriffon/db": "workspace:*",
-		"@rosegriffon/preferences": "workspace:*",
-		"@rosegriffon/types": "workspace:*",
+		"@rosegriffon/db": "^1.0.1",
+		"@rosegriffon/preferences": "^1.0.0",
+		"@rosegriffon/types": "^1.0.1",
 		"@tanstack/react-table": "catalog:",
 		"class-variance-authority": "catalog:",
 		"clsx": "catalog:",
