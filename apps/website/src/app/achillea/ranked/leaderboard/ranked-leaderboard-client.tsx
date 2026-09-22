@@ -25,7 +25,7 @@ import {
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedLeaderboardPage() {
-	const [mode, setMode] = useState<1 | 2>(1);
+	const [mode, setMode] = useState<2 | 4>(2);
 	const [page, setPage] = useState<number>(0);
 	const pageSize = 25;
 	const [data, setData] = useState<LeaderboardPage | null>(null);
@@ -102,11 +102,11 @@ export default function RankedLeaderboardPage() {
 					<button
 						type="button"
 						onClick={() => {
-							setMode(1);
+							setMode(2);
 							setPage(0);
 						}}
 						className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
-							mode === 1
+							mode === 2
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
 						}`}
@@ -116,11 +116,11 @@ export default function RankedLeaderboardPage() {
 					<button
 						type="button"
 						onClick={() => {
-							setMode(2);
+							setMode(4);
 							setPage(0);
 						}}
 						className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
-							mode === 2
+							mode === 4
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
 						}`}
