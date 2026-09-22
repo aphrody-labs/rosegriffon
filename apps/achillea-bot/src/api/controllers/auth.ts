@@ -10,10 +10,7 @@ import { CookieAuthorize } from "@/api/middlewares";
 import { isSafeInternalPath } from "@rosegriffon/achillea-core";
 import { env } from "@/env";
 import { urlsConfig } from "@/configs";
-import type { UserDTO } from "@/services";
-import { OAuthService } from "@/services";
 import { BaseController } from "@/utils/classes";
-import { resolveDependencies } from "@/utils/functions";
 
 /** L'identité du site est désormais exclusivement gérée par Better Auth/RG. */
 function unifiedLoginUrl(returnUrl: string): string {
@@ -26,20 +23,18 @@ function sessionIsSecure(): boolean {
 	return new URL(env.OAUTH_CALLBACK_BASE_URL).protocol === "https:";
 }
 
+/**
+ * Provider OAuth belongs to the unified Elysia API.  This controller only
+ * keeps the old browser URL alive long enough to forward an authenticated
+ * user; it never creates state, exchanges a code, or stores a provider token.
+ */
+function unifiedProviderStart(provider: "twitch" | "challonge"): string {
+	return `${urlsConfig.unifiedApi.replace(/\/+$/u, "")}/v1/auth/oauth/${provider}/start`;
+}
+
 @Controller("/auth")
 export class AuthController extends BaseController {
-	private oAuthService: OAuthService;
-	private readonly dependenciesReady: Promise<void>;
-
-	constructor() {
-		super();
-
-		this.dependenciesReady = resolveDependencies([OAuthService]).then(
-			([oAuthService]) => {
-				this.oAuthService = oAuthService;
-			}
-		);
-	}
+	constructor() { super(); }
 
 	@Get("/discord")
 	discordLogin(@QueryParams("state") state: string, @Res() res: Response) {
@@ -50,25 +45,15 @@ export class AuthController extends BaseController {
 	}
 
 	@Get("/challonge")
-	@UseBefore(CookieAuthorize) // On vérifie que l'user est connecté sur le site
-	async getChallongeUrl(@Context("user") user: UserDTO, @Res() res: Response) {
-		await this.dependenciesReady;
-		const discordId = user.id;
-
-		const url = await this.oAuthService.getChallongeOAuthUrl(discordId);
-
-		res.redirect(url);
+	@UseBefore(CookieAuthorize)
+	getChallongeUrl(@Res() res: Response) {
+		return res.redirect(unifiedProviderStart("challonge"));
 	}
 
 	@Get("/twitch")
 	@UseBefore(CookieAuthorize)
-	async getTwitchUrl(@Context("user") user: UserDTO, @Res() res: Response) {
-		await this.dependenciesReady;
-		const discordId = user.id;
-
-		const url = await this.oAuthService.getTwitchOAuthUrl(discordId);
-
-		res.redirect(url);
+	getTwitchUrl(@Res() res: Response) {
+		return res.redirect(unifiedProviderStart("twitch"));
 	}
 
 	// Authenticated user info endpoint
