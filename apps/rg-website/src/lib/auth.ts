@@ -1,7 +1,10 @@
 import crypto from "node:crypto";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { bearer, genericOAuth } from "better-auth/plugins";
+import { admin, bearer, genericOAuth, jwt, mcp } from "better-auth/plugins";
+import { apiKey } from "@better-auth/api-key";
+import { oauthProvider } from "@better-auth/oauth-provider";
+import { agentAuth } from "@better-auth/agent-auth";
 import {
 	commonAuthOptions,
 	createAccountOptions,
@@ -37,18 +40,23 @@ function detectCreatorScopes(scope: string | null | undefined): boolean {
 	return parts.some((s) => s === "campaigns.members" || s === "w:campaigns.webhook");
 }
 
-const getBetterAuthURL = () => {
-	const url = process.env.BETTER_AUTH_URL;
-	if (
-		!url ||
-		url === "undefined" ||
-		url === "null" ||
-		!url.startsWith("http") ||
-		url.startsWith("eyJ2Ijo")
-	) {
+const getBetterAuthURL = (): string => {
+	const configured = process.env.BETTER_AUTH_URL?.trim();
+	if (!configured || configured === "undefined" || configured === "null" || configured.startsWith("eyJ2Ijo")) {
 		return "https://rosegriffon.fr";
 	}
-	return url;
+
+	try {
+		const parsed = new URL(configured);
+		const isProduction = process.env.NODE_ENV === "production";
+		const isSecure = parsed.protocol === "https:";
+		const isLocalDevelopment = parsed.protocol === "http:" && !isProduction &&
+			(parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1");
+		if (!isSecure && !isLocalDevelopment) return "https://rosegriffon.fr";
+		return parsed.toString().replace(/\/+$/, "");
+	} catch {
+		return "https://rosegriffon.fr";
+	}
 };
 
 export const auth = betterAuth({
@@ -274,6 +282,44 @@ export const auth = betterAuth({
 	},
 
 	plugins: [
+		admin({
+			defaultRole: "member",
+			adminRoles: ["admin"],
+		}),
+		// @better-auth/api-key ships its own compatible peer graph; Bun can retain
+		// a second @better-auth/core instance in a workspace, so normalize the
+		// plugin type at this boundary while keeping runtime versions pinned.
+		apiKey({
+			defaultPrefix: "rg_",
+			requireName: true,
+			enableMetadata: true,
+			rateLimit: { enabled: true, maxRequests: 1_000, timeWindow: 60 * 60 * 1_000 },
+		}) as unknown as ReturnType<typeof admin>,
+		jwt(),
+		mcp({
+			loginPage: "/login",
+			resource: `${getBetterAuthURL()}/api/auth/mcp`,
+		}),
+		oauthProvider({
+			loginPage: "/login",
+			consentPage: "/oauth/consent",
+		}),
+		agentAuth({
+			providerName: "Rose Griffon",
+			providerDescription: "Rose Griffon authentication and community capabilities.",
+			deviceAuthorizationPage: "/device/capabilities",
+			capabilities: [
+				{
+					name: "profile.read",
+					description: "Read the authenticated Rose Griffon profile.",
+					input: { type: "object", properties: {}, additionalProperties: false },
+				},
+			],
+			async onExecute({ capability, agentSession }) {
+				if (capability !== "profile.read") throw new Error("Unsupported capability");
+				return { user: agentSession.user };
+			},
+		}),
 		deuxFacteurs("Rose Griffon"),
 		bearer(),
 		genericOAuth({
