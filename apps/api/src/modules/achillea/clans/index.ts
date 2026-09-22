@@ -27,4 +27,19 @@ export const clanController = new Elysia({ prefix: "/clans" })
 			200: ClanModel.clan,
 			404: ClanModel.notFound
 		}
-	});
+	})
+	.get("/:id/members", async ({ db, params: { id } }) => {
+		const rows = await db.selectFrom("clan_member as cm")
+			.innerJoin("user as u", "u.id", "cm.user_id")
+			.select(["cm.clan_id", "cm.user_id", "cm.created_at", "cm.updated_at", "cm.clan_fame_contributed", "cm.role", "cm.distinctions", "u.display_name", "u.username", "u.avatar", "u.role as user_role"])
+			.where("cm.clan_id", "=", id).orderBy("cm.role", "asc").execute();
+		return rows.map((row) => ({
+			clanRole: Number(row.role), distinctions: row.distinctions ?? [], clanFameContributed: Number(row.clan_fame_contributed ?? 0),
+			createdAt: row.created_at, updatedAt: row.updated_at,
+			user: {
+				id: row.user_id, type: "user" as const, username: row.display_name ?? row.username ?? row.user_id,
+				avatar: row.avatar?.startsWith("http") ? row.avatar : `https://cdn.discordapp.com/embed/avatars/${(BigInt(row.user_id) >> 22n) % 6n}.png`,
+				clanId: row.clan_id, role: Number(row.user_role ?? 0),
+			},
+		}));
+	}, { params: t.Object({ id: t.Numeric() }), response: { 200: ClanModel.members } });
