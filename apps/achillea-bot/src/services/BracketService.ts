@@ -464,7 +464,7 @@ export class BracketService {
 	 * pas résoluble (pas de stage, format non éligible, standings vides...).
 	 *
 	 * Partagé par {@link applyPlacementPrizes} (bonus AP) et le classement circuit
-	 * (`TournamentsService.getCircuitRanking`).
+	 * (the unified API circuit projection).
 	 */
 	async resolveFinalStandings(
 		tournament: Tournament
