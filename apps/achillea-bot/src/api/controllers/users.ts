@@ -119,14 +119,9 @@ export class UsersController extends BaseController {
 
 	@Get("/:id")
 	async getUser(@PathParams("id") id: string, @Res() res: Response) {
-		const enrichedDTO = await this.userService.getEnrichedUserDTO(id);
-		if (!enrichedDTO) throw new NotFound(`No user found for îd ${id}`);
-
-		// Profil user enrichi : ELO/stats bougent par match, mais 30s reste OK
-		// pour la perception. SWR 2min couvre les visites en rafale.
+		const upstream = await fetch(`${process.env.UNIFIED_API_URL ?? "http://127.0.0.1:8800"}/v1/achillea/users/${encodeURIComponent(id)}`);
 		res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=120");
-
-		return enrichedDTO;
+		return res.status(upstream.status || 503).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
 	}
 
 	@Get("/:id/card.png")

@@ -7,6 +7,44 @@ import { resolveAchilleaSession } from "../../auth/session";
 /** Compatibility resource for the versioned client; the query lives in one service. */
 export const usersController = new Elysia({ prefix: "/users" })
 	.use(dbPlugin)
+	.get("/:id", async ({ db, params: { id } }) => {
+		const user = await db.selectFrom("user").select(["id", "username", "display_name", "avatar", "role", "bio", "twitch_url", "last_interact"]).where("id", "=", id).executeTakeFirst();
+		if (!user) return status(404, { message: "User not found" as const });
+		const [elos, ranks, clan] = await Promise.all([
+			db.selectFrom("user_elo").select(["mode", "elo", "games_played", "wins", "losses"]).where("user_id", "=", id).execute(),
+			db.selectFrom("rank").selectAll().orderBy("min_elo", "asc").execute(),
+			db.selectFrom("clan_member as cm").innerJoin("clan as c", "c.id", "cm.clan_id").select(["cm.clan_id", "cm.role", "cm.distinctions", "c.name", "c.shortened_name", "c.clan_avatar_url"]).where("cm.user_id", "=", id).executeTakeFirst(),
+		]);
+		const modeStats = (mode: number) => {
+			const row = elos.find((elo) => Number(elo.mode) === mode);
+			const rating = Number(row?.elo ?? 0);
+			const tier = ranks.find((rank) => rating >= rank.min_elo && rating <= rank.max_elo);
+			return {
+				mode, total: Number(row?.games_played ?? 0), wins: Number(row?.wins ?? 0), losses: Number(row?.losses ?? 0), draws: 0, goalsScored: 0, goalsReceived: 0,
+				rank: { elo: rating, key: tier?.key ?? "Non classé", gradient: tier?.gradient ?? [] },
+			};
+		};
+		const solo = modeStats(2); const duo = modeStats(4);
+		const avatar = (() => {
+			if (user.avatar?.startsWith("http")) return user.avatar;
+			try {
+				return `https://cdn.discordapp.com/embed/avatars/${(BigInt(user.id) >> 22n) % 6n}.png`;
+			} catch {
+				return "https://cdn.discordapp.com/embed/avatars/0.png";
+			}
+		})();
+		const emptyCompetition = { total: 0, wins: 0, losses: 0, draws: 0, goalsScoredAvg: 0, goalsReceivedAvg: 0, personalTotal: 0, personalWins: 0, personalLosses: 0, personalDraws: 0 };
+		return {
+			id: user.id, type: "user", username: user.display_name ?? user.username ?? user.id, sim: 0,
+			avatar,
+			clanId: clan?.clan_id ?? null, soloRank: solo.rank, duoRank: duo.rank, lastInteract: user.last_interact, role: Number(user.role ?? 0),
+			bio: user.bio ?? null, twitchUrl: user.twitch_url ?? null, hasTwitch: Boolean(user.twitch_url), hasChallonge: false, hasYoutube: false,
+			clan: clan ? { id: clan.clan_id, shortenedName: clan.shortened_name, name: clan.name, avatarUrl: clan.clan_avatar_url, role: Number(clan.role), distinctions: clan.distinctions ?? [] } : undefined,
+			interclans: emptyCompetition, tournaments: emptyCompetition, ranked: { solo: { ...solo, rank: undefined }, duo: { ...duo, rank: undefined } },
+		};
+	}, {
+		params: t.Object({ id: t.String() }), response: { 200: UsersModel.publicProfile, 404: t.Object({ message: t.Literal("User not found") }) },
+	})
 	.get("/me", async ({ db, headers }) => {
 		const session = await resolveAchilleaSession(headers);
 		if (!session) return status(401, { message: "Authentication required" as const });
