@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth-helpers";
 
@@ -9,7 +9,7 @@ export async function GET() {
 	let profile = null;
 	if (user) {
 		// `full_name` fait partie des colonnes personnelles fermées à `anon`.
-		const supabase = createAdminClient();
+		const supabase = createPostgresClient();
 		const { data } = await supabase
 			.from("profiles")
 			.select("username, avatar_url, full_name, role")

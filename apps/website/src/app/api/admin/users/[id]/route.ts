@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { requireApiAdmin } from "@/lib/api-auth";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 const VALID_ROLES = new Set(["admin", "staff", "user", "premium", "banned"]);
 
@@ -39,10 +39,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 			);
 		}
 
-		const supabase = createAdminClient();
-		if (!supabase) {
-			return NextResponse.json({ error: "Service indisponible" }, { status: 503 });
-		}
+		const supabase = createPostgresClient();
 
 		if (email_notifications !== undefined) {
 			// email_notifications appartient à user_preferences, pas à profiles
@@ -112,10 +109,7 @@ export async function DELETE(
 				{ status: 400 }
 			);
 		}
-		const supabase = createAdminClient();
-		if (!supabase) {
-			return NextResponse.json({ error: "Service indisponible" }, { status: 503 });
-		}
+		const supabase = createPostgresClient();
 
 		const { data: user, error } = await supabase
 			.from("profiles")
