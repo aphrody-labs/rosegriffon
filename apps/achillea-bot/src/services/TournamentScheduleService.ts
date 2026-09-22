@@ -1,11 +1,25 @@
+import type { Kysely } from "kysely";
 import { Service } from "@/decorators";
-import { Tournament } from "@/entities";
-import { TournamentEventType, TournamentState } from "@/utils/enums";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { EventTypeEnum, TournamentEventType, TournamentState } from "@/utils/enums";
 import { resolveDependency } from "@/utils/functions";
 
-import { Database } from "./Database";
 import { TournamentEventService } from "./TournamentEventService";
 import { TournamentsService } from "./TournamentsService";
+
+interface TournamentScheduleDatabase {
+	event: {
+		id: number;
+		event_type: string;
+		internal_state: string;
+		registration_opens_at: Date | null;
+		registration_closes_at: Date | null;
+		starts_at: Date | null;
+		auto_start: boolean;
+	};
+}
+
+const sql = createAchilleaSql<TournamentScheduleDatabase>() as Kysely<TournamentScheduleDatabase>;
 
 export interface ScheduleTransition {
 	tournamentId: number;
@@ -40,7 +54,6 @@ export class TournamentScheduleService {
 	 * initialization ». Il est donc résolu à l'exécution, comme dans le cron.
 	 */
 	constructor(
-		private db: Database,
 		private events: TournamentEventService
 	) {}
 
@@ -59,10 +72,14 @@ export class TournamentScheduleService {
 	}
 
 	private async openDueRegistrations(now: Date): Promise<ScheduleTransition[]> {
-		const due = await this.db.em.fork().find(Tournament, {
-			internalState: TournamentState.PENDING,
-			registrationOpensAt: { $ne: null, $lte: now },
-		});
+		const due = await sql
+			.selectFrom("event")
+			.select("id")
+			.where("event_type", "=", EventTypeEnum.TOURNAMENT)
+			.where("internal_state", "=", TournamentState.PENDING)
+			.where("registration_opens_at", "is not", null)
+			.where("registration_opens_at", "<=", now)
+			.execute();
 
 		const applied: ScheduleTransition[] = [];
 
@@ -86,10 +103,14 @@ export class TournamentScheduleService {
 	}
 
 	private async closeDueRegistrations(now: Date): Promise<ScheduleTransition[]> {
-		const due = await this.db.em.fork().find(Tournament, {
-			internalState: TournamentState.PREREGISTERING,
-			registrationClosesAt: { $ne: null, $lte: now },
-		});
+		const due = await sql
+			.selectFrom("event")
+			.select("id")
+			.where("event_type", "=", EventTypeEnum.TOURNAMENT)
+			.where("internal_state", "=", TournamentState.PREREGISTERING)
+			.where("registration_closes_at", "is not", null)
+			.where("registration_closes_at", "<=", now)
+			.execute();
 
 		const applied: ScheduleTransition[] = [];
 
@@ -123,11 +144,14 @@ export class TournamentScheduleService {
 	}
 
 	private async startDueTournaments(now: Date): Promise<ScheduleTransition[]> {
-		const due = await this.db.em.fork().find(Tournament, {
-			internalState: TournamentState.PREPARING,
-			autoStart: true,
-			startsAt: { $lte: now },
-		});
+		const due = await sql
+			.selectFrom("event")
+			.select("id")
+			.where("event_type", "=", EventTypeEnum.TOURNAMENT)
+			.where("internal_state", "=", TournamentState.PREPARING)
+			.where("auto_start", "=", true)
+			.where("starts_at", "<=", now)
+			.execute();
 
 		const applied: ScheduleTransition[] = [];
 

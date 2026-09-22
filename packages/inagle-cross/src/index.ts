@@ -10,9 +10,12 @@
  * récupérables — serveur sous anti-triche). Phase 1 : parsers de bundles Unity
  * + import des lignes masterdata une fois `{AssetBaseUri}` débloqué.
  */
-import enums from "../data/enums.json";
-import schema from "../data/masterdata-schema.json";
-import status from "../data/extraction-status.json";
+import enums from "./data/enums.generated";
+import schema from "./data/masterdata-schema.generated";
+import status from "./data/extraction-status.generated";
+import audioManifest from "./data/audio-manifest.generated";
+import catalogStats from "./data/catalog-stats.generated";
+import typeSchema from "./data/type-schema.generated";
 import type { CrossEnums, CrossSchema } from "./schemas/types";
 import type { ExtractionStatus } from "./schemas/zod-schemas";
 
@@ -27,8 +30,6 @@ export type {
 export { crossTableName } from "./schemas/types";
 
 export * from "./schemas/zod-schemas";
-export * from "./analysis/classifier";
-
 /** Le schéma masterdata complet (153 tables). */
 export const crossSchema = schema as unknown as CrossSchema;
 
@@ -37,3 +38,9 @@ export const crossEnums = enums as unknown as CrossEnums;
 
 /** Statut d'extraction de données et d'assets de Cross. */
 export const crossExtractionStatus = status as unknown as ExtractionStatus;
+
+/** Shared Cross artefacts. Kept here so Azalée and the Cross package do not
+ * ship duplicate copies of the same extraction manifests. */
+export const crossAudioManifest = audioManifest;
+export const crossCatalogStats = catalogStats as Record<string, unknown>;
+export const crossTypeSchema = typeSchema as unknown as Record<string, string[]>;

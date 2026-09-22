@@ -1,4 +1,3 @@
-export * from "./library.js";
 export * from "./parser.js";
 export * from "./types.js";
 // NB : `./scraper.js` (live scraper, tire @aphrody-code/bxc) n'est volontairement

@@ -1,6 +1,7 @@
 import { rel } from "@mikro-orm/core";
 import { Conflict, NotFound } from "@tsed/exceptions";
 import { BracketsManager } from "brackets-manager";
+import { computeSeriesOutcome } from "@rosegriffon/achillea-core";
 import type { Id, IdSeeding, Match } from "brackets-model";
 
 import { Service } from "@/decorators";
@@ -24,11 +25,10 @@ import {
 	TournamentState,
 } from "@/utils/enums";
 
-import { MikroORMBracketAdapter } from "../utils/classes/MikroORMBracketAdapter";
+import { KyselyBracketAdapter } from "../utils/classes/KyselyBracketAdapter";
 import { buildSeedingPayload } from "../utils/functions/buildSeedingPayload";
 import { Database } from "./Database";
 import { EloService } from "./EloService";
-import { computeSeriesOutcome } from "./tournamentRules";
 
 @Service()
 export class BracketService {
@@ -38,7 +38,7 @@ export class BracketService {
 		private readonly db: Database,
 		private readonly eloService: EloService
 	) {
-		const adapter = new MikroORMBracketAdapter(this.db, "bm_");
+		const adapter = new KyselyBracketAdapter("bm_");
 		this.manager = new BracketsManager(adapter);
 	}
 
@@ -67,7 +67,7 @@ export class BracketService {
 		// `league` n'est pas un StageType brackets-manager (calendrier + classement maison).
 		if (type === StageType.league) {
 			throw new Conflict(
-				"Le format championnat (league) n'utilise pas de bracket technique — voir LeagueService."
+				"Le format championnat (league) n'utilise pas de bracket technique — il est géré par l'API unifiée."
 			);
 		}
 		// Cast : StageType Achillea ⊇ brackets-model ; league exclu ci-dessus.
@@ -452,15 +452,6 @@ export class BracketService {
 
 				await this.db.em.flush();
 
-				// Bonus AP podium (1er / 2e / demis) — non bloquant pour le cycle de vie.
-				try {
-					await this.applyPlacementPrizes(tournament, false);
-				} catch (e) {
-					console.warn(
-						`[BracketService] Échec bonus podium tournoi#${tournamentId}:`,
-						(e as Error)?.message
-					);
-				}
 			}
 		}
 	}
@@ -517,95 +508,6 @@ export class BracketService {
 			.filter(
 				(p): p is { userId: string; rank: number; bracketParticipantId: number } => p != null
 			);
-	}
-
-	/**
-	 * Résout le classement final via brackets-manager et verse les AP podium.
-	 * Formats élimination uniquement (single / double) ; RR / league hors scope.
-	 * Exposé pour le hook de fin automatique + l'action manuelle dashboard admin.
-	 *
-	 * @param requireFinished Si true (défaut), refuse les tournois non terminés.
-	 *   Le hook auto passe false car il vient de basculer l'état en mémoire.
-	 */
-	async applyPlacementPrizesForTournament(
-		tournamentId: number,
-		opts?: { requireFinished?: boolean }
-	): Promise<{
-		applied: boolean;
-		reason?: string;
-		deltas?: Record<string, number>;
-		tournamentSize?: number;
-	}> {
-		const tournament = await this.db.em.findOne(Tournament, { id: tournamentId });
-		if (!tournament) return { applied: false, reason: "tournoi_introuvable" };
-		return this.applyPlacementPrizes(tournament, opts?.requireFinished !== false);
-	}
-
-	/**
-	 * Résout le classement final via brackets-manager et verse les AP podium.
-	 * Formats élimination uniquement (single / double) ; RR / league hors scope.
-	 */
-	private async applyPlacementPrizes(
-		tournament: Tournament,
-		requireFinished = false
-	): Promise<{
-		applied: boolean;
-		reason?: string;
-		deltas?: Record<string, number>;
-		tournamentSize?: number;
-	}> {
-		if (tournament.placementEloApplied) {
-			return { applied: false, reason: "deja_applique" };
-		}
-
-		if (requireFinished && tournament.internalState !== TournamentState.FINISHED) {
-			return { applied: false, reason: "tournoi_non_termine" };
-		}
-
-		const type = tournament.tournamentType;
-		if (type !== StageType.single_elimination && type !== StageType.double_elimination) {
-			return { applied: false, reason: "format_non_eligible" };
-		}
-
-		const stages =
-			(await this.manager.storage.select("stage", { tournament_id: tournament.id })) ?? [];
-		if (stages.length === 0) return { applied: false, reason: "aucune_stage" };
-
-		// Dernière stage = phase finale (après groupes éventuels).
-		const stage = stages[stages.length - 1];
-		if (stage.type === "round_robin") {
-			return { applied: false, reason: "format_non_eligible" };
-		}
-
-		let standingsCheck: Array<{ id: number | string; rank: number }>;
-		try {
-			standingsCheck = await this.manager.get.finalStandings(stage.id);
-		} catch (e) {
-			return {
-				applied: false,
-				reason: `standings_indisponibles: ${(e as Error)?.message ?? "unknown"}`,
-			};
-		}
-		if (!standingsCheck?.length) return { applied: false, reason: "classement_vide" };
-
-		// Ré-utilise la même résolution (déjà validée ci-dessus) pour le mapping userId.
-		const resolved = await this.resolveFinalStandings(tournament);
-		const placements = (resolved ?? []).map((p) => ({ userId: p.userId, rank: p.rank }));
-
-		if (placements.length === 0) return { applied: false, reason: "aucun_placement_mappable" };
-
-		const result = await this.eloService.applyTournamentPlacementPrizes(tournament.id, placements, {
-			em: this.db.em,
-		});
-
-		if (result.applied && result.deltas && Object.keys(result.deltas).length > 0) {
-			console.info(
-				`[BracketService] Bonus podium tournoi#${tournament.id} (size=${result.tournamentSize})`,
-				result.deltas
-			);
-		}
-
-		return result;
 	}
 
 	/**

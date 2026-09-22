@@ -10,9 +10,9 @@
  */
 
 import { importVideoWaza } from "../src/push-categories.ts";
-import { createSupabaseAdapter } from "../src/push-adapter.ts";
+import { createPostgresAdapter } from "../src/push-adapter.ts";
 
-const db = createSupabaseAdapter();
+const db = createPostgresAdapter();
 await importVideoWaza(null, db)
 	.then(() => db.close())
 	.catch((e) => {

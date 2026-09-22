@@ -4,7 +4,7 @@
  * VRAI config de base (skill/super_tactics_config_*.cfg.bin.json). La logique
  * d'import vit dans `src/push-categories.ts` (`importSuperTactics`) — source
  * UNIQUE partagée avec le flux principal cli-push.ts. Ce fichier ne fait que
- * créer l'adaptateur Supabase et lancer l'importer. Upsert idempotent
+ * créer l'adaptateur PostgreSQL et lancer l'importer. Upsert idempotent
  * (ON CONFLICT id = "<kind>:<idx>").
  *
  * Lancement (depuis /home/ubuntu/rg) :
@@ -12,9 +12,9 @@
  */
 
 import { importSuperTactics } from "../src/push-categories.ts";
-import { createSupabaseAdapter } from "../src/push-adapter.ts";
+import { createPostgresAdapter } from "../src/push-adapter.ts";
 
-const db = createSupabaseAdapter();
+const db = createPostgresAdapter();
 await importSuperTactics(null, db)
 	.then(() => db.close())
 	.catch((e) => {

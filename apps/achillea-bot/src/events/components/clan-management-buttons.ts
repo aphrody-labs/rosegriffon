@@ -1,9 +1,8 @@
 import type { ButtonInteraction } from "discord.js";
 import { escapeMarkdown } from "discord.js";
 import type { Client } from "@aphrody/discordx";
-import { ButtonComponent, Guard, SelectMenuComponent } from "@aphrody/discordx";
 
-import { Discord, Injectable } from "@/decorators";
+import { ButtonComponent, Discord, Guard, Injectable, SelectMenuComponent } from "@/decorators";
 import { ClanMember } from "@/entities";
 import { ClanEnabled, ClanRole } from "@/guards";
 import { Database } from "@/services";

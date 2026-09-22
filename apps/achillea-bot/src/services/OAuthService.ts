@@ -1,48 +1,28 @@
-import crypto from "node:crypto";
-
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 
 import { urlsConfig } from "@/configs";
 import { Service } from "@/decorators";
-import { OauthCsrf } from "@/entities";
 import { env } from "@/env";
-
-import { Database } from "./Database";
 
 @Service()
 export class OAuthService {
-	constructor(private db: Database) {}
-
-	private async createOauthState(discordId: string) {
-		const token = crypto.randomBytes(24).toString("hex");
-		const nonce = new OauthCsrf();
-		nonce.discordId = discordId;
-		nonce.token = token;
-
-		await this.db.em.persist(nonce).flush();
-
-		return `${discordId}:${token}`;
+	private async startProviderOAuth(provider: "twitch" | "challonge", discordId: string) {
+		const endpoint = `${urlsConfig.unifiedApi}/v1/auth/oauth/${provider}/start?userId=${encodeURIComponent(discordId)}`;
+		const response = await fetch(endpoint, {
+			headers: env.API_ADMIN_TOKEN ? { Authorization: `Bearer ${env.API_ADMIN_TOKEN}` } : undefined,
+		});
+		if (!response.ok) throw new Error(`Unified OAuth start failed (${response.status})`);
+		const body = await response.json() as { url?: string };
+		if (!body.url) throw new Error("Unified OAuth start returned no URL");
+		return body.url;
 	}
 
 	async getTwitchOAuthUrl(discordId: string) {
-		const twitchUrl = `https://id.twitch.tv/oauth2/authorize`;
-		const clientArg = `?client_id=${env.TWITCH_CLIENT_ID}`;
-		const redirectArg = `&redirect_uri=${encodeURIComponent(`${urlsConfig.oauthCallback}?provider=twitch`)}`;
-		const scopeArg = `&response_type=code&scope=user:read:email`;
-		const stateArg = `&state=${encodeURIComponent(await this.createOauthState(discordId))}`;
-
-		return twitchUrl + clientArg + redirectArg + scopeArg + stateArg;
+		return this.startProviderOAuth("twitch", discordId);
 	}
 
 	async getChallongeOAuthUrl(discordId: string) {
-		const baseUrl = `https://api.challonge.com/oauth/authorize`;
-		const clientId = `?client_id=${env.isProd ? env.CHALLONGE_CLIENT_ID : env.CHALLONGE_CLIENT_ID_TEST}`;
-		const redirectUri = `&redirect_uri=${encodeURIComponent(`${urlsConfig.oauthCallback}?provider=challonge`)}`;
-		const scope = `&response_type=code&scope=${encodeURIComponent("me tournaments:read tournaments:write participants:write")}`;
-		const stateRaw = await this.createOauthState(discordId);
-		const state = `&state=${encodeURIComponent(stateRaw)}`;
-
-		return baseUrl + clientId + redirectUri + scope + state;
+		return this.startProviderOAuth("challonge", discordId);
 	}
 
 	OAuthButtons(url: string) {

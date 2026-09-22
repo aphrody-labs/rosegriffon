@@ -5,8 +5,11 @@ import {
 	placementPrizeAp,
 	progressiveEloDelta,
 	computeMatchElo,
+	resolveTournamentSideOutcome,
 } from "@rosegriffon/achillea-core";
 import { LockMode } from "@mikro-orm/core";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import type { Generated, Kysely } from "kysely";
 import { singleton } from "tsyringe";
 
 import { Lobby, Rank, Season, Tournament, User, UserElo } from "@/entities";
@@ -21,7 +24,6 @@ import {
 
 import { Database } from "./Database";
 import { MetricsService } from "./MetricsService";
-import { resolveTournamentSideOutcome } from "./tournamentRules";
 
 export interface EloCalculationResult {
 	newWinner: number;
@@ -56,6 +58,41 @@ export interface TournamentPlacementPrizeResult {
 	tournamentSize?: number;
 }
 
+interface EloDatabase {
+	user_elo: {
+		user_id: string;
+		season_id: string | null;
+		mode: number;
+		elo: Generated<number>;
+		peak_rating: Generated<number>;
+		games_played: Generated<number>;
+		wins: Generated<number>;
+		losses: Generated<number>;
+		updated_at: Generated<Date>;
+	};
+	season: {
+		id: Generated<string>;
+		name: string;
+		starts_at: Date;
+		ends_at: Date;
+		state: string;
+		config: Record<string, unknown> | null;
+	};
+}
+
+const eloSql = createAchilleaSql<EloDatabase>() as Kysely<EloDatabase>;
+
+interface EloSnapshot {
+	userId: string;
+	mode: MatchMode;
+	seasonId: string | null;
+	elo: number;
+	peakRating: number;
+	gamesPlayed: number;
+	wins: number;
+	losses: number;
+}
+
 @singleton()
 export class EloService {
 	constructor(
@@ -74,59 +111,43 @@ export class EloService {
 
 	async applyMatchResult(
 		opts: MatchResultOpts
-	): Promise<{ winnerElo: UserElo; loserElo: UserElo; delta: number }> {
-		const em = this.db.em.fork();
-
-		const activeSeason = await this.getCurrentSeason(em);
-		const seasonRef = activeSeason ?? null;
-
-		const kFactor = activeSeason?.config?.kFactor ?? DEFAULT_K_FACTOR;
-		const baseRating = activeSeason?.config?.baseRating ?? DEFAULT_BASE_RATING;
-
-		const findOrCreate = async (userId: string): Promise<UserElo> => {
-			const existing = await em.findOne(UserElo, {
-				user: { id: userId } as User,
-				mode: opts.mode,
-			});
-
-			if (existing) return existing;
-
-			const userRef = em.getReference(User, userId);
-			const elo = em.create(UserElo, {
-				user: userRef,
-				mode: opts.mode,
-				season: seasonRef,
-				elo: baseRating,
-				peakRating: baseRating,
-				gamesPlayed: 0,
-				wins: 0,
-				losses: 0,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			});
-			em.persist(elo);
-			return elo;
-		};
-
-		const winnerElo = await findOrCreate(opts.winnerId);
-		const loserElo = await findOrCreate(opts.loserId);
-
-		const { newWinner, newLoser, delta } = this.calculate(winnerElo.elo, loserElo.elo, kFactor);
-
-		winnerElo.elo = newWinner;
-		winnerElo.gamesPlayed += 1;
-		winnerElo.wins += 1;
-		if (newWinner > winnerElo.peakRating) winnerElo.peakRating = newWinner;
-
-		loserElo.elo = newLoser;
-		loserElo.gamesPlayed += 1;
-		loserElo.losses += 1;
-
-		await em.flush();
+	): Promise<{ winnerElo: EloSnapshot; loserElo: EloSnapshot; delta: number }> {
+		const result = await eloSql.transaction().execute(async (trx) => {
+			const activeSeason = await trx.selectFrom("season").selectAll()
+				.where("state", "=", SeasonState.Active)
+				.orderBy("starts_at", "desc").executeTakeFirst();
+			const kFactor = Number(activeSeason?.config?.kFactor ?? DEFAULT_K_FACTOR);
+			const baseRating = Number(activeSeason?.config?.baseRating ?? DEFAULT_BASE_RATING);
+			const seasonId = activeSeason?.id ?? null;
+			const findOrCreate = async (userId: string) => {
+				await trx.insertInto("user_elo").values({
+					user_id: userId, mode: opts.mode, season_id: seasonId,
+					elo: baseRating, peak_rating: baseRating, games_played: 0, wins: 0, losses: 0,
+				}).onConflict((oc) => oc.columns(["user_id", "mode"]).doNothing()).execute();
+				return trx.selectFrom("user_elo").selectAll().where("user_id", "=", userId)
+					.where("mode", "=", opts.mode).forUpdate().executeTakeFirstOrThrow();
+			};
+			const winner = await findOrCreate(opts.winnerId);
+			const loser = await findOrCreate(opts.loserId);
+			const { newWinner, newLoser, delta } = this.calculate(Number(winner.elo), Number(loser.elo), kFactor);
+			const now = new Date();
+			await trx.updateTable("user_elo").set({
+				elo: newWinner, peak_rating: Math.max(Number(winner.peak_rating), newWinner),
+				games_played: Number(winner.games_played) + 1, wins: Number(winner.wins) + 1, updated_at: now,
+			}).where("user_id", "=", opts.winnerId).where("mode", "=", opts.mode).execute();
+			await trx.updateTable("user_elo").set({
+				elo: newLoser, games_played: Number(loser.games_played) + 1,
+				losses: Number(loser.losses) + 1, updated_at: now,
+			}).where("user_id", "=", opts.loserId).where("mode", "=", opts.mode).execute();
+			return {
+				winnerElo: { userId: opts.winnerId, mode: opts.mode, seasonId, elo: newWinner, peakRating: Math.max(Number(winner.peak_rating), newWinner), gamesPlayed: Number(winner.games_played) + 1, wins: Number(winner.wins) + 1, losses: Number(winner.losses) },
+				loserElo: { userId: opts.loserId, mode: opts.mode, seasonId, elo: newLoser, peakRating: Number(loser.peak_rating), gamesPlayed: Number(loser.games_played) + 1, wins: Number(loser.wins), losses: Number(loser.losses) + 1 },
+				delta,
+			};
+		});
 
 		this.metrics.increment("achillea_elo_matches_total", { mode: String(opts.mode) });
-
-		return { winnerElo, loserElo, delta };
+		return result;
 	}
 
 	/**

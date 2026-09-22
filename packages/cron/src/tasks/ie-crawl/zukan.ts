@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createSupabaseServiceClient, cache } from "@rosegriffon/db";
+import { cache } from "@rosegriffon/db/redis";
+import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { buildOrderMap, crawlZukanOrderPages } from "@rosegriffon/inagle/zukan/order";
 import { sql } from "../../lib/db.js";
 

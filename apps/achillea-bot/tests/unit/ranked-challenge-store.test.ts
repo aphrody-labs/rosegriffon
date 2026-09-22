@@ -1,5 +1,6 @@
 /**
- * Tests unitaires — store en mémoire des défis ranked partageables (challenge-store.ts).
+ * Tests unitaires — store en mémoire des défis ranked partageables
+ * (`@rosegriffon/achillea-core/ranked`).
  * Couvre : création + code unique, lecture (preview), consommation à usage unique, ciblage
  * (toUserId), expiration (TTL), annulation.
  */
@@ -13,7 +14,7 @@ import {
 	createChallenge,
 	getChallenge,
 	purgeExpiredChallenges,
-} from "../../src/ranked/challenge-store";
+} from "@rosegriffon/achillea-core";
 
 function base(overrides: Partial<Parameters<typeof createChallenge>[0]> = {}) {
 	return createChallenge({

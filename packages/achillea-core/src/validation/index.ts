@@ -23,6 +23,31 @@ export function isValidUrl(url: string): boolean {
 	return URL.canParse(url);
 }
 
+/**
+ * Accepte uniquement un chemin de retour local.
+ *
+ * Cette garde est partagée par les adaptateurs HTTP : aucun adaptateur (bot,
+ * API, front) ne doit pouvoir transformer un `redirect` en URL externe.
+ */
+export function isSafeInternalPath(value: unknown): value is string {
+	if (
+		typeof value !== "string" ||
+		value.length > 2_048 ||
+		!value.startsWith("/") ||
+		value.startsWith("//") ||
+		value.includes("\\") ||
+		/[\u0000-\u001f\u007f]/.test(value)
+	) {
+		return false;
+	}
+
+	try {
+		return new URL(value, "https://achillea.invalid").origin === "https://achillea.invalid";
+	} catch {
+		return false;
+	}
+}
+
 /** Aligne un nombre à droite sur `align` caractères (padding espace). */
 export function numberAlign(value: number, align: number = 2): string {
 	return value.toString().padStart(align, " ");

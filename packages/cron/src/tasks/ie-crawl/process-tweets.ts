@@ -1,6 +1,5 @@
 import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import type { Tables } from "@rosegriffon/db";
-import { join } from "node:path";
 import { grokChat } from "./grok-oidc";
 import { sql } from "../../lib/db.js";
 
@@ -141,7 +140,7 @@ async function translateWithGlossary(
 
 /**
  * Traduction auto via Grok (OIDC SuperGrok keyless natif, comme dans bxc xai)
- * + sync avec glossaire Azalée (data/glossary.json partagé avec le traducteur Azalée /tools/translator).
+ * + synchronisation avec les projections SQL du glossaire Azalée.
  * Utilisé prioritairement pour tweets AkihiroHino (CEO) et contenus JA IE, pour qualité lore/termes jeu.
  */
 async function translateWithGrok(text: string, from: string, to: string): Promise<string> {
@@ -174,22 +173,22 @@ export async function processTweets() {
 	console.log("=== Starting Tweet Processing (Media, Translation, Classification) ===");
 	const supabase = createSupabaseServiceClient();
 
-	// Load Glossary for corrections
-	let glossary: any = null;
-	const glossaryPath = join(process.cwd(), "data", "glossary.json");
-	const glossaryFile = Bun.file(glossaryPath);
-	if (await glossaryFile.exists()) {
-		try {
-			glossary = await glossaryFile.json();
-			console.log(`[Glossary] Loaded glossary with ${glossary._meta?.counts?.total || 0} entries.`);
-		} catch (e) {
-			console.error("[Glossary] Failed to parse glossary.json:", e);
-		}
-	} else {
-		console.warn(
-			"[Glossary] glossary.json not found. Translation will proceed without glossary corrections."
-		);
-	}
+	// Load names directly from the canonical SQL projections; no generated file is
+	// needed and the same source is shared by the website and Azalée CLI.
+	const glossaryRows = await sql<Array<{
+		name_fr: string | null;
+		name_en: string | null;
+		name_ja: string | null;
+	}>>`
+		SELECT name_fr, name_en, name_ja FROM inagle_characters WHERE internal_code NOT LIKE '%_5000'
+		UNION ALL SELECT name_fr, name_en, name_ja FROM inagle_skills
+		UNION ALL SELECT name_fr, name_en, name_ja FROM inagle_keshins_clean
+		UNION ALL SELECT name_fr, name_en, name_ja FROM inagle_souls_clean
+		UNION ALL SELECT name_fr, name_en, name_ja FROM inagle_passives
+		UNION ALL SELECT name_fr, name_en, name_ja FROM inagle_teams
+		UNION ALL SELECT name_fr, name_en, name_ja FROM inagle_items WHERE category <> 'special_tactics'
+	`;
+	console.log(`[Glossary] Loaded ${glossaryRows.length} SQL names.`);
 
 	// Fetch all tweets (lecture Postgres directe)
 	console.log("[DB] Fetching tweets...");
@@ -201,28 +200,15 @@ export async function processTweets() {
 	const jpToFrMap = new Map<string, string>();
 	const enToFrMap = new Map<string, string>();
 
-	if (glossary) {
-		const categories = ["characters", "techniques", "auras", "passives", "teams", "items", "terms"];
-		for (const cat of categories) {
-			const list = glossary[cat] || [];
-			for (const entry of list) {
-				const frVal = entry.fr || entry.name_FR;
-				if (!frVal) continue;
-
-				if (entry.ja && entry.ja.trim()) {
-					// Clean ja from furigana / brackets
-					const cleanJa = entry.ja
-						.split(" ")[0]
-						.replaceAll(/[\[\]]/g, "")
-						.trim();
-					if (cleanJa.length > 1) {
-						jpToFrMap.set(cleanJa, frVal);
-					}
-				}
-				if (entry.en && entry.en.trim() && entry.en.toLowerCase() !== frVal.toLowerCase()) {
-					enToFrMap.set(entry.en.trim(), frVal);
-				}
-			}
+	for (const entry of glossaryRows) {
+		const frVal = entry.name_fr;
+		if (!frVal) continue;
+		if (entry.name_ja?.trim()) {
+			const cleanJa = entry.name_ja.split(" ")[0]!.replaceAll(/[\[\]]/g, "").trim();
+			if (cleanJa.length > 1) jpToFrMap.set(cleanJa, frVal);
+		}
+		if (entry.name_en?.trim() && entry.name_en.toLowerCase() !== frVal.toLowerCase()) {
+			enToFrMap.set(entry.name_en.trim(), frVal);
 		}
 	}
 

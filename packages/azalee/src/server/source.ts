@@ -13,7 +13,7 @@
  * routage, de sérialisation et de typage ; seul le transport change.
  *
  *   - `local`  → `handleAzaleeRequest` en appel direct (zéro socket, zéro réseau) ;
- *   - `remote` → `fetch` vers `https://api.rosegriffon.fr/azalee` ;
+ *   - `remote` → `fetch` vers l'API unifiée `/v1/azalee` ;
  *   - `auto`   → `local` si les artefacts sont présents, sinon `remote`, avec
  *     bascule à chaud si une lecture locale échoue (base corrompue, miroir
  *     remplacé pendant une synchronisation).
@@ -108,8 +108,8 @@ export interface AzaleeData extends AzaleeClient {
 }
 
 /**
- * Préfixe de chemin de la base d'URL distante (`/azalee` pour
- * `https://api.rosegriffon.fr/azalee`). La passerelle nginx le retire avant de
+ * Préfixe de chemin de la base d'URL distante (`/v1/azalee` pour
+ * `https://api.rosegriffon.fr/v1/azalee`). La passerelle nginx le retire avant de
  * transmettre au service ; le transport local doit faire la même chose, sinon
  * il chercherait la route `/azalee/api/characters` qui n'existe pas.
  */
@@ -189,12 +189,17 @@ function fallbackTransport(
 export function createAzaleeData(options: AzaleeDataOptions = {}): AzaleeData {
 	const { mode = "auto", fallbackOnError, cors = false, ...clientOptions } = options;
 	const local = inspectLocalData();
+	const unifiedApiConfigured = Boolean(process.env.AZALEE_UNIFIED_API_URL || process.env.NEXT_PUBLIC_AZALEE_API_URL);
 
-	const source: AzaleeSourceKind = mode === "auto" ? (local.available ? "local" : "remote") : mode;
+	const source: AzaleeSourceKind = mode === "auto"
+		? (unifiedApiConfigured ? "remote" : local.available ? "local" : "remote")
+		: mode;
 	const reason =
 		mode === "auto"
 			? local.available
-				? `source locale retenue : ${local.reason}`
+				? unifiedApiConfigured
+					? "API unifiée configurée (AZALEE_UNIFIED_API_URL)"
+					: `source locale retenue : ${local.reason}`
 				: `repli distant : ${local.reason}`
 			: `source ${source} imposée par l'appelant`;
 
@@ -202,7 +207,9 @@ export function createAzaleeData(options: AzaleeDataOptions = {}): AzaleeData {
 	const allowFallback = fallbackOnError ?? mode === "auto";
 	// La base d'URL reste toujours la distante : elle sert d'adresse de repli
 	// et rend les messages d'erreur lisibles même en mode local.
-	const baseUrl = resolveAzaleeApiUrl(clientOptions.baseUrl);
+	const baseUrl = resolveAzaleeApiUrl(
+		clientOptions.baseUrl ?? process.env.AZALEE_UNIFIED_API_URL ?? process.env.NEXT_PUBLIC_AZALEE_API_URL,
+	);
 
 	let transport: AzaleeTransport | undefined;
 	if (source === "local") {

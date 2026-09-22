@@ -1,6 +1,6 @@
 /**
  * @file pusher.ts
- * @description Pusher pour insérer ou mettre à jour les métadonnées des scripts Lua dans Supabase.
+ * @description Pusher pour insérer ou mettre à jour les métadonnées des scripts Lua dans PostgreSQL.
  */
 
 import { parseLuaIndex } from "../parsers/lua";

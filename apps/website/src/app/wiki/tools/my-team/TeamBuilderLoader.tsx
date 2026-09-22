@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type { PickerCharacter } from "@/components/tools/my-team/CharacterPicker";
+import type { Formation } from "@rosegriffon/azalee/game/formations";
 
 const TeamBuilder = dynamic(
 	() => import("@/components/tools/my-team/TeamBuilder").then((m) => m.TeamBuilder),
@@ -18,10 +19,12 @@ const TeamBuilder = dynamic(
 
 export function TeamBuilderLoader({
 	characters,
+	formations,
 	isAuthenticated,
 }: {
 	characters: PickerCharacter[];
+	formations: Formation[];
 	isAuthenticated: boolean;
 }) {
-	return <TeamBuilder characters={characters} isAuthenticated={isAuthenticated} />;
+	return <TeamBuilder characters={characters} formations={formations} isAuthenticated={isAuthenticated} />;
 }

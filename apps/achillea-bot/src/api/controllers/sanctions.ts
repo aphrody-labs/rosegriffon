@@ -1,198 +1,40 @@
-import {
-	BodyParams,
-	Context,
-	Controller,
-	Get,
-	PathParams,
-	Post,
-	QueryParams,
-	Res,
-	UseBefore,
-} from "@tsed/common";
-import { BadRequest, NotFound, Unauthorized } from "@tsed/exceptions";
-import { Default, Maximum, Minimum } from "@tsed/schema";
-import type { FilterQuery } from "@mikro-orm/core";
-import type { Response } from "express";
+import { BodyParams, Controller, Get, PathParams, Post, QueryParams, Req, Res } from "@tsed/common";
+import type { Request, Response } from "express";
 
-import { CookieAuthorize } from "@/api/middlewares";
-import { Sanction } from "@/entities";
-import { Database, SanctionService } from "@/services";
+import { urlsConfig } from "@/configs";
 import { BaseController } from "@/utils/classes";
-import { SanctionIssuerType, SanctionType } from "@/utils/enums";
-import { resolveDependenciesSync } from "@/utils/functions";
 
-// =============================================================================
-// Corps des requêtes
-// =============================================================================
-
-interface CreateSanctionBody {
-	userId: string;
-	guildId: string;
-	type: SanctionType;
-	reason?: string | null;
-	durationSec?: number | null;
-	evidence?: Record<string, unknown>[] | null;
-}
-
-interface RevokeSanctionBody {
-	reason?: string;
-}
-
-interface AppealSanctionBody {
-	message: string;
-}
-
-// =============================================================================
-// Contrôleur
-// =============================================================================
-
+/** Legacy moderation HTTP surface. Persistence and validation are API-owned;
+ * this controller only forwards the request while Discord jobs remain local. */
 @Controller("/sanctions")
 export class SanctionsController extends BaseController {
-	private sanctionService: SanctionService;
-	private db: Database;
+	constructor() { super(); }
 
-	constructor() {
-		super();
-		[this.sanctionService, this.db] = resolveDependenciesSync([SanctionService, Database]);
-	}
-
-	/**
-	 * GET /sanctions — liste paginée avec filtres optionnels
-	 */
 	@Get("/")
-	@UseBefore(CookieAuthorize)
-	async list(
-		@QueryParams("userId") userId: string | undefined,
-		@QueryParams("guildId") guildId: string | undefined,
-		@QueryParams("type") type: SanctionType | undefined,
-		@QueryParams("active") active: string | undefined,
-		@QueryParams("page") @Default(1) @Minimum(1) page: number,
-		@QueryParams("pageSize") @Default(50) @Minimum(1) @Maximum(100) pageSize: number,
-		@Res() res: Response
-	) {
-		const em = this.db.em.fork();
-
-		const where: FilterQuery<Sanction> = {};
-		if (userId) where.userId = userId;
-		if (guildId) where.guildId = guildId;
-		if (type) where.type = type;
-		if (active === "true") {
-			where.revokedAt = null;
-			where.$or = [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }];
-		} else if (active === "false") {
-			where.$or = [{ revokedAt: { $ne: null } }, { expiresAt: { $lte: new Date() } }];
-		}
-
-		const [items, total] = await em.findAndCount(Sanction, where as FilterQuery<Sanction>, {
-			orderBy: { createdAt: "DESC" },
-			limit: pageSize,
-			offset: (page - 1) * pageSize,
-		});
-
-		return res.status(200).json({
-			data: items,
-			total,
-			meta: {
-				page,
-				pageSize,
-				pageCount: Math.ceil(total / pageSize),
-			},
-		});
+	async list(@QueryParams() query: Record<string, unknown>, @Req() req: Request, @Res() res: Response) {
+		const params = new URLSearchParams();
+		for (const [key, value] of Object.entries(query ?? {})) if (value !== undefined && value !== null && value !== "") params.set(key, String(value));
+		return this.forward(`/sanctions${params.size ? `?${params}` : ""}`, req, res);
 	}
 
-	/**
-	 * POST /sanctions — créer une sanction (staff uniquement)
-	 */
 	@Post("/")
-	@UseBefore(CookieAuthorize)
-	async create(
-		@BodyParams() body: CreateSanctionBody,
-		@Context() ctx: Context,
-		@Res() res: Response
-	) {
-		const issuer = ctx.get("user");
-		if (!issuer) throw new Unauthorized("Non authentifié");
+	async create(@BodyParams() body: unknown, @Req() req: Request, @Res() res: Response) { return this.forward("/sanctions", req, res, "POST", body); }
 
-		if (!body.userId || !body.guildId || !body.type) {
-			throw new BadRequest("userId, guildId et type sont requis");
-		}
-
-		if (!Object.values(SanctionType).includes(body.type)) {
-			throw new BadRequest(`Type de sanction invalide : ${body.type}`);
-		}
-
-		const sanction = await this.sanctionService.issue({
-			userId: body.userId,
-			guildId: body.guildId,
-			type: body.type,
-			reason: body.reason ?? null,
-			durationSec: body.durationSec ?? null,
-			issuedBy: issuer.id,
-			issuerType: SanctionIssuerType.Staff,
-			evidence: body.evidence ?? null,
-		});
-
-		return res.status(201).json(sanction);
-	}
-
-	/**
-	 * POST /sanctions/:id/revoke — révoquer une sanction existante
-	 */
 	@Post("/:id/revoke")
-	@UseBefore(CookieAuthorize)
-	async revoke(
-		@PathParams("id") id: string,
-		@BodyParams() body: RevokeSanctionBody,
-		@Context() ctx: Context,
-		@Res() res: Response
-	) {
-		const issuer = ctx.get("user");
-		if (!issuer) throw new Unauthorized("Non authentifié");
+	async revoke(@PathParams("id") id: string, @BodyParams() body: unknown, @Req() req: Request, @Res() res: Response) { return this.forward(`/sanctions/${encodeURIComponent(id)}/revoke`, req, res, "POST", body); }
 
-		const em = this.db.em.fork();
-		const existing = await em.findOne(Sanction, { id });
-		if (!existing) throw new NotFound(`Sanction ${id} introuvable`);
-		if (existing.revokedAt) {
-			throw new BadRequest(`La sanction ${id} est déjà révoquée`);
-		}
-
-		const sanction = await this.sanctionService.revoke(id, issuer.id, body.reason);
-
-		return res.status(200).json(sanction);
-	}
-
-	/**
-	 * POST /sanctions/:id/appeal — ajouter un appel (journal uniquement, sans révocation)
-	 */
 	@Post("/:id/appeal")
-	@UseBefore(CookieAuthorize)
-	async appeal(
-		@PathParams("id") id: string,
-		@BodyParams() body: AppealSanctionBody,
-		@Context() ctx: Context,
-		@Res() res: Response
-	) {
-		const issuer = ctx.get("user");
-		if (!issuer) throw new Unauthorized("Non authentifié");
+	async appeal(@PathParams("id") id: string, @BodyParams() body: unknown, @Req() req: Request, @Res() res: Response) { return this.forward(`/sanctions/${encodeURIComponent(id)}/appeal`, req, res, "POST", body); }
 
-		if (!body.message || body.message.trim().length < 3) {
-			throw new BadRequest("Le message d'appel doit faire au moins 3 caractères");
-		}
-
-		const em = this.db.em.fork();
-		const sanction = await em.findOne(Sanction, { id });
-		if (!sanction) throw new NotFound(`Sanction ${id} introuvable`);
-
-		const appealEntry: Record<string, unknown> = {
-			type: "appeal",
-			message: body.message.trim(),
-			by: issuer.id,
-			at: new Date().toISOString(),
-		};
-
-		sanction.evidence = [...(sanction.evidence ?? []), appealEntry];
-		await em.flush();
-
-		return res.status(200).json(sanction);
+	private async forward(path: string, req: Request, res: Response, method = "GET", body?: unknown) {
+		const headers: Record<string, string> = { accept: "application/json" };
+		if (req.headers.cookie) headers.cookie = req.headers.cookie;
+		if (req.headers.authorization) headers.authorization = req.headers.authorization;
+		if (body !== undefined) headers["content-type"] = "application/json";
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+		const text = await upstream.text();
+		res.status(upstream.status).setHeader("Cache-Control", method === "GET" ? "no-store" : "no-store");
+		res.type("application/json");
+		return res.send(text);
 	}
 }

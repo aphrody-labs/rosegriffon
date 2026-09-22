@@ -39,7 +39,6 @@ const COMPLETION_COMMANDS = [
 	"sync",
 	"repair",
 	"redis",
-	"glossary-rebuild",
 	"exit",
 	"quit",
 ];

@@ -1,22 +1,43 @@
-import type { FilterQuery } from "@mikro-orm/core";
-import { rel } from "@mikro-orm/core";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { BadRequest, NotFound, Unauthorized } from "@tsed/exceptions";
+import type { Generated } from "kysely";
 
 import { Service } from "@/decorators";
-import { PlayerNote, Tournament, User } from "@/entities";
 import { PlayerNoteCategory, PlayerNoteSeverity, UserRole } from "@/utils/enums";
 
-import { Database } from "./Database";
 import { PlayerNoteDocsSync } from "./PlayerNoteDocsSync";
+
+interface PlayerNoteDatabase {
+	player_note: PlayerNoteTable;
+	user: UserTable;
+	event: EventTable;
+}
+interface PlayerNoteTable {
+	id: Generated<string>; target_id: string; author_id: string | null; tournament_id: number | null;
+	category: PlayerNoteCategory; severity: PlayerNoteSeverity; content: string; resolved: Generated<boolean>;
+	resolved_at: Date | null; resolved_by: string | null; created_at: Generated<Date>; updated_at: Generated<Date>;
+}
+interface UserTable {
+	id: string; role: number; username: string | null; display_name: string; avatar: string | null;
+}
+interface EventTable { id: Generated<number>; name: string; }
+type NoteRow = Omit<PlayerNoteTable, "id" | "created_at" | "updated_at"> & { id: string; created_at: Date; updated_at: Date };
+type UserRow = { id: string; username: string | null; displayName: string; avatar: string | null };
+
+export interface PlayerNoteRecord extends NoteRow {
+	target: UserRow | null;
+	author: UserRow | null;
+	tournament: { id: number; name: string } | null;
+	resolvedBy: UserRow | null;
+	docsUrl?: string | null;
+}
 
 export interface PlayerNoteFilters {
 	targetId?: string;
 	tournamentId?: number;
 	category?: PlayerNoteCategory;
 	severity?: PlayerNoteSeverity;
-	/** `true` = seulement les traitées, `false` = seulement les ouvertes. */
 	resolved?: boolean;
-	/** Recherche plein texte simple sur le contenu. */
 	search?: string;
 	page: number;
 	pageSize: number;
@@ -32,224 +53,158 @@ export interface CreatePlayerNoteInput {
 }
 
 const MAX_CONTENT = 2000;
+const db = createAchilleaSql<PlayerNoteDatabase>();
 
-/**
- * Notes du staff sur les joueurs.
- *
- * Deux publics, une seule table : les organisateurs écrivent pendant leur tournoi, le
- * staff relit tout. Les règles d'accès vivent ici plutôt que dans le contrôleur, pour
- * qu'une future commande Discord ou un job ne puisse pas les contourner.
- */
+/** Métier des notes staff, indépendant de Discord et de l'ORM historique. */
 @Service()
 export class PlayerNoteService {
-	constructor(
-		private db: Database,
-		private docsSync: PlayerNoteDocsSync
-	) {}
+	constructor(private docsSync: PlayerNoteDocsSync) {}
 
-	/** Staff = modérateur ou au-dessus. */
 	private async isStaff(userId: string): Promise<boolean> {
-		const actor = await this.db.em.findOne(User, { id: userId });
+		const actor = await db.selectFrom("user").select(["role"]).where("id", "=", userId).executeTakeFirst();
 		return (actor?.role ?? 0) >= UserRole.Moderator;
 	}
 
-	/**
-	 * Autorise l'accès aux notes, et dit à quel titre.
-	 *
-	 * Le staff voit tout. Un organisateur n'accède qu'au périmètre d'un tournoi qu'il
-	 * organise : sans tournoi de rattachement, la demande relève du staff seul, sinon
-	 * n'importe quel TO se constituerait l'historique complet d'un joueur.
-	 *
-	 * Lève un 401 si ni l'un ni l'autre.
-	 */
-	async assertCanAccess(
-		userId: string,
-		tournamentId?: number | null
-	): Promise<{ isStaff: boolean }> {
+	async assertCanAccess(userId: string, tournamentId?: number | null): Promise<{ isStaff: boolean }> {
 		if (await this.isStaff(userId)) return { isStaff: true };
-
 		if (tournamentId) {
-			// Import différé : `TournamentsService` est chargé par `services/index.ts`,
-			// qui repasse par `@/utils/functions` — l'injecter ici casserait le boot.
 			const { TournamentsService } = await import("./TournamentsService");
 			const { resolveDependency } = await import("@/utils/functions");
 			const tournaments = await resolveDependency(TournamentsService);
-			// Lève un 401 si l'utilisateur n'organise pas ce tournoi.
 			await tournaments.isTournamentOrganizer(userId, tournamentId);
 			return { isStaff: false };
 		}
-
 		throw new Unauthorized("Réservé au staff et aux organisateurs du tournoi concerné.");
 	}
 
-	async create(input: CreatePlayerNoteInput): Promise<PlayerNote> {
+	async create(input: CreatePlayerNoteInput): Promise<PlayerNoteRecord> {
 		const content = (input.content ?? "").trim();
 		if (content.length < 3) throw new BadRequest("La note doit contenir au moins 3 caractères.");
-
-		const target = await this.db.em.findOne(User, { id: input.targetId });
+		const target = await db.selectFrom("user").selectAll().where("id", "=", input.targetId).executeTakeFirst();
 		if (!target) throw new NotFound("Joueur introuvable.");
-
 		if (input.tournamentId) {
-			const tournament = await this.db.em.findOne(Tournament, { id: input.tournamentId });
+			const tournament = await db.selectFrom("event").select("id").where("id", "=", input.tournamentId).executeTakeFirst();
 			if (!tournament) throw new NotFound("Tournoi introuvable.");
 		}
-
-		const note = new PlayerNote();
-		note.target = rel(User, input.targetId);
-		note.author = rel(User, input.authorId);
-		note.tournament = input.tournamentId ? rel(Tournament, input.tournamentId) : null;
-		note.category = input.category ?? PlayerNoteCategory.OTHER;
-		note.severity = input.severity ?? PlayerNoteSeverity.INFO;
-		note.content = content.slice(0, MAX_CONTENT);
-
-		await this.db.em.persist(note).flush();
-
-		// Miroir Drive : le staff qui travaille dans le dossier Achilléa voit passer le
-		// signalement sans ouvrir le dashboard. Jamais bloquant.
-		await this.db.em.populate(note, ["target", "author", "tournament"]);
+		const inserted = await db.insertInto("player_note").values({
+			target_id: input.targetId,
+			author_id: input.authorId,
+			tournament_id: input.tournamentId ?? null,
+			category: input.category ?? PlayerNoteCategory.OTHER,
+			severity: input.severity ?? PlayerNoteSeverity.INFO,
+			content: content.slice(0, MAX_CONTENT),
+			resolved: false,
+			resolved_at: null,
+			resolved_by: null,
+		}).returningAll().executeTakeFirstOrThrow();
+		const note = await this.findOrFail(inserted.id);
 		note.docsUrl = await this.docsSync.appendNote(note);
-
 		return note;
 	}
 
-	async list(filters: PlayerNoteFilters): Promise<{ items: PlayerNote[]; total: number }> {
-		const where: FilterQuery<PlayerNote> = {};
-
-		if (filters.targetId) where.target = filters.targetId;
-		if (filters.tournamentId) where.tournament = filters.tournamentId;
-		if (filters.category) where.category = filters.category;
-		if (filters.severity) where.severity = filters.severity;
-		if (filters.resolved !== undefined) where.resolved = filters.resolved;
-		if (filters.search?.trim()) {
-			where.content = { $ilike: `%${filters.search.trim()}%` };
-		}
-
-		const [items, total] = await this.db.em.findAndCount(PlayerNote, where, {
-			populate: ["target", "author", "tournament", "resolvedBy"],
-			orderBy: { createdAt: "DESC" },
-			limit: filters.pageSize,
-			offset: (filters.page - 1) * filters.pageSize,
-		});
-
-		return { items, total };
+	async list(filters: PlayerNoteFilters): Promise<{ items: PlayerNoteRecord[]; total: number }> {
+		let query = this.baseQuery();
+		query = this.applyFilters(query, filters);
+		const countQuery = this.applyFilters(db.selectFrom("player_note as note"), filters);
+		const [rows, count] = await Promise.all([
+			query.orderBy("note.created_at", "desc").limit(filters.pageSize).offset((filters.page - 1) * filters.pageSize).execute(),
+			(countQuery as any).select(({ fn }: any) => fn.countAll().as("count")).executeTakeFirst(),
+		]);
+		return { items: rows.map(toRecord), total: Number(count?.count ?? 0) };
 	}
 
-	async update(
-		noteId: string,
-		actorId: string,
-		patch: { content?: string; category?: PlayerNoteCategory; severity?: PlayerNoteSeverity }
-	): Promise<PlayerNote> {
+	async update(noteId: string, actorId: string, patch: { content?: string; category?: PlayerNoteCategory; severity?: PlayerNoteSeverity }): Promise<PlayerNoteRecord> {
 		const note = await this.findOrFail(noteId);
-
-		// Modifier le texte d'autrui réécrirait son témoignage : réservé à l'auteur et
-		// aux administrateurs (qui, eux, doivent pouvoir corriger un dérapage).
-		const actor = await this.db.em.findOne(User, { id: actorId });
-		const isAdmin = (actor?.role ?? 0) >= UserRole.Administrator;
-		if (note.author?.id !== actorId && !isAdmin) {
+		const actor = await db.selectFrom("user").select(["role"]).where("id", "=", actorId).executeTakeFirst();
+		if (note.author_id !== actorId && (actor?.role ?? 0) < UserRole.Administrator)
 			throw new Unauthorized("Seul l'auteur de la note ou un administrateur peut la modifier.");
-		}
-
+		const values: { content?: string; category?: PlayerNoteCategory; severity?: PlayerNoteSeverity; updated_at?: Date } = {};
 		if (patch.content !== undefined) {
 			const content = patch.content.trim();
 			if (content.length < 3) throw new BadRequest("La note doit contenir au moins 3 caractères.");
-			note.content = content.slice(0, MAX_CONTENT);
+			values.content = content.slice(0, MAX_CONTENT);
 		}
-		if (patch.category) note.category = patch.category;
-		if (patch.severity) note.severity = patch.severity;
-
-		await this.db.em.flush();
-
-		return note;
+		if (patch.category) values.category = patch.category;
+		if (patch.severity) values.severity = patch.severity;
+		if (Object.keys(values).length) values.updated_at = new Date();
+		await db.updateTable("player_note").set(values).where("id", "=", noteId).execute();
+		return this.findOrFail(noteId);
 	}
 
-	/** Marque traitée / rouvre. Ouvert à tout le staff : c'est un état d'équipe. */
-	async setResolved(noteId: string, actorId: string, resolved: boolean): Promise<PlayerNote> {
+	async setResolved(noteId: string, actorId: string, resolved: boolean): Promise<PlayerNoteRecord> {
+		await this.findOrFail(noteId);
+		await db.updateTable("player_note").set({
+			resolved, resolved_at: resolved ? new Date() : null, resolved_by: resolved ? actorId : null, updated_at: new Date(),
+		}).where("id", "=", noteId).execute();
 		const note = await this.findOrFail(noteId);
-
-		note.resolved = resolved;
-		note.resolvedAt = resolved ? new Date() : null;
-		note.resolvedBy = resolved ? rel(User, actorId) : null;
-
-		await this.db.em.flush();
-
-		await this.db.em.populate(note, ["target", "resolvedBy"]);
 		await this.docsSync.appendResolution(note, resolved);
-
 		return note;
 	}
 
 	async remove(noteId: string, actorId: string): Promise<void> {
 		const note = await this.findOrFail(noteId);
-
-		const actor = await this.db.em.findOne(User, { id: actorId });
-		const isAdmin = (actor?.role ?? 0) >= UserRole.Administrator;
-		if (note.author?.id !== actorId && !isAdmin) {
+		const actor = await db.selectFrom("user").select(["role"]).where("id", "=", actorId).executeTakeFirst();
+		if (note.author_id !== actorId && (actor?.role ?? 0) < UserRole.Administrator)
 			throw new Unauthorized("Seul l'auteur de la note ou un administrateur peut la supprimer.");
-		}
-
-		await this.db.em.remove(note).flush();
+		await db.deleteFrom("player_note").where("id", "=", noteId).execute();
 	}
 
-	/** Compteurs par joueur — pastille « 3 notes dont 1 grave » sur une fiche. */
-	async summaryForUser(userId: string): Promise<{
-		total: number;
-		open: number;
-		bySeverity: Record<PlayerNoteSeverity, number>;
-	}> {
-		const notes = await this.db.em.find(PlayerNote, { target: userId });
-
-		const bySeverity = {
-			[PlayerNoteSeverity.INFO]: 0,
-			[PlayerNoteSeverity.WARNING]: 0,
-			[PlayerNoteSeverity.SERIOUS]: 0,
-		};
-		let open = 0;
-
-		for (const note of notes) {
-			bySeverity[note.severity] = (bySeverity[note.severity] ?? 0) + 1;
-			if (!note.resolved) open++;
-		}
-
-		return { total: notes.length, open, bySeverity };
+	async summaryForUser(userId: string) {
+		const rows = await db.selectFrom("player_note").select(["severity", "resolved"]).where("target_id", "=", userId).execute();
+		const bySeverity = { [PlayerNoteSeverity.INFO]: 0, [PlayerNoteSeverity.WARNING]: 0, [PlayerNoteSeverity.SERIOUS]: 0 };
+		for (const row of rows) bySeverity[row.severity as PlayerNoteSeverity] = (bySeverity[row.severity as PlayerNoteSeverity] ?? 0) + 1;
+		return { total: rows.length, open: rows.filter((row) => !row.resolved).length, bySeverity };
 	}
 
-	private async findOrFail(noteId: string): Promise<PlayerNote> {
-		const note = await this.db.em.findOne(
-			PlayerNote,
-			{ id: noteId },
-			{ populate: ["target", "author", "tournament", "resolvedBy"], refresh: true }
-		);
-		if (!note) throw new NotFound("Note introuvable.");
-
-		return note;
+	private baseQuery() {
+		return db.selectFrom("player_note as note")
+			.leftJoin("user as target", "target.id", "note.target_id")
+			.leftJoin("user as author", "author.id", "note.author_id")
+			.leftJoin("user as resolvedBy", "resolvedBy.id", "note.resolved_by")
+			.leftJoin("event as tournament", "tournament.id", "note.tournament_id")
+			.selectAll("note")
+			.select([
+				"target.id as target_id", "target.username as target_username", "target.display_name as target_display_name", "target.avatar as target_avatar",
+				"author.id as author_id_join", "author.username as author_username", "author.display_name as author_display_name", "author.avatar as author_avatar",
+				"resolvedBy.id as resolved_by_id_join", "resolvedBy.username as resolved_by_username", "resolvedBy.display_name as resolved_by_display_name", "resolvedBy.avatar as resolved_by_avatar",
+				"tournament.id as tournament_id_join", "tournament.name as tournament_name",
+			]);
 	}
 
-	/** Forme sérialisable pour l'API (aucune donnée technique inutile côté client). */
-	toDTO(note: PlayerNote) {
-		const person = (user: User | null | undefined) =>
-			user
-				? {
-						id: user.id,
-						username: user.username,
-						displayName: user.displayName,
-						avatar: user.avatar,
-					}
-				: null;
+	private applyFilters(query: any, filters: PlayerNoteFilters): any {
+		if (filters.targetId) query = query.where("note.target_id", "=", filters.targetId);
+		if (filters.tournamentId) query = query.where("note.tournament_id", "=", filters.tournamentId);
+		if (filters.category) query = query.where("note.category", "=", filters.category);
+		if (filters.severity) query = query.where("note.severity", "=", filters.severity);
+		if (filters.resolved !== undefined) query = query.where("note.resolved", "=", filters.resolved);
+		if (filters.search?.trim()) query = query.where("note.content", "ilike", `%${filters.search.trim()}%`);
+		return query;
+	}
 
+	private async findOrFail(noteId: string): Promise<PlayerNoteRecord> {
+		const rows = await this.baseQuery().where("note.id", "=", noteId).execute();
+		if (!rows[0]) throw new NotFound("Note introuvable.");
+		return toRecord(rows[0]);
+	}
+
+	toDTO(note: PlayerNoteRecord) {
+		const person = (user: UserRow | null) => user ? { id: user.id, username: user.username, displayName: user.displayName, avatar: user.avatar } : null;
 		return {
-			id: note.id,
-			target: person(note.target),
-			author: person(note.author),
-			tournament: note.tournament ? { id: note.tournament.id, name: note.tournament.name } : null,
-			category: note.category,
-			severity: note.severity,
-			content: note.content,
-			resolved: note.resolved,
-			resolvedAt: note.resolvedAt ?? null,
-			resolvedBy: person(note.resolvedBy),
-			createdAt: note.createdAt,
-			updatedAt: note.updatedAt,
+			id: note.id, target: person(note.target), author: person(note.author),
+			tournament: note.tournament, category: note.category, severity: note.severity,
+			content: note.content, resolved: note.resolved, resolvedAt: note.resolved_at,
+			resolvedBy: person(note.resolvedBy), createdAt: note.created_at, updatedAt: note.updated_at,
 			docsUrl: note.docsUrl ?? null,
 		};
 	}
+}
+
+function toRecord(row: any): PlayerNoteRecord {
+	return {
+		...row,
+		target: row.target_id ? { id: row.target_id, username: row.target_username, displayName: row.target_display_name, avatar: row.target_avatar } : null,
+		author: row.author_id_join ? { id: row.author_id_join, username: row.author_username, displayName: row.author_display_name, avatar: row.author_avatar } : null,
+		resolvedBy: row.resolved_by_id_join ? { id: row.resolved_by_id_join, username: row.resolved_by_username, displayName: row.resolved_by_display_name, avatar: row.resolved_by_avatar } : null,
+		tournament: row.tournament_id_join ? { id: row.tournament_id_join, name: row.tournament_name } : null,
+	};
 }

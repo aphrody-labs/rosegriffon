@@ -4,7 +4,7 @@
  * config `skill/team_build_config_*.cfg.bin.json` (octets réels du dump, DLC
  * Orion — système Team Build). La logique d'import vit dans
  * `src/push-categories.ts` (`importTeamBuild`) — source UNIQUE partagée avec le
- * flux principal cli-push.ts. Ce fichier ne fait que créer l'adaptateur Supabase
+ * flux principal cli-push.ts. Ce fichier ne fait que créer l'adaptateur PostgreSQL
  * et lancer l'importer. Upsert idempotent (ON CONFLICT id = "<section>:<index>").
  *
  * Lancement (depuis /home/ubuntu/rg) :
@@ -12,9 +12,9 @@
  */
 
 import { importTeamBuild } from "../src/push-categories.ts";
-import { createSupabaseAdapter } from "../src/push-adapter.ts";
+import { createPostgresAdapter } from "../src/push-adapter.ts";
 
-const db = createSupabaseAdapter();
+const db = createPostgresAdapter();
 await importTeamBuild(null, db)
 	.then(() => db.close())
 	.catch((e) => {

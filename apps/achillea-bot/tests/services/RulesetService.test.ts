@@ -18,6 +18,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { validateRulesetMetadata as validate } from "@rosegriffon/achillea-core";
 
 import { describeLive, hasLiveDb } from "../fixtures/live-db";
 
@@ -37,37 +38,6 @@ const LEGACY_ID = "aaaaaaaa-0000-0000-0000-000000000001";
 const ASTRAL_LEAGUE_ID = "bbbbbbbb-0000-0000-0000-000000000001";
 const ASTRAL_CUP_ID = "cccccccc-0000-0000-0000-000000000001";
 const TBC_ID = "dddddddd-0000-0000-0000-000000000001";
-
-// ---------------------------------------------------------------------------
-// Inline validate() — mirrors RulesetService.validate() without DI
-// ---------------------------------------------------------------------------
-
-const SEMVER_RE = /^\d+\.\d+\.\d+$/;
-
-function validate(ruleset: { name: string; version: string; defaultBo: number }): {
-	ok: boolean;
-	errors: string[];
-} {
-	const errors: string[] = [];
-
-	if (!ruleset.name || ruleset.name.trim().length === 0) {
-		errors.push("name must not be empty");
-	}
-
-	if (ruleset.version !== "legacy" && !SEMVER_RE.test(ruleset.version)) {
-		errors.push(`version "${ruleset.version}" is not a valid semver (X.Y.Z) or "legacy"`);
-	}
-
-	if (!Number.isInteger(ruleset.defaultBo) || ruleset.defaultBo <= 0) {
-		errors.push("defaultBo must be a positive integer");
-	}
-
-	if (Number.isInteger(ruleset.defaultBo) && ruleset.defaultBo % 2 === 0) {
-		errors.push("defaultBo must be an odd number (best-of-N: 1, 3, 5…)");
-	}
-
-	return { ok: errors.length === 0, errors };
-}
 
 // ---------------------------------------------------------------------------
 // SQL helpers

@@ -1,5 +1,5 @@
 import { rel } from "@mikro-orm/core";
-import transliterate from "@sindresorhus/transliterate";
+import { normalizeNames } from "@rosegriffon/achillea-core";
 import type {
 	BaseMessageOptions,
 	ButtonInteraction,
@@ -251,88 +251,7 @@ export async function editClanSocials(
 	followUpWithSuccessEmbed(modalInteraction, "Clan socials changed successfully !", true);
 }
 
-export function normalizeNames(name: string) {
-	name = name.normalize("NFKC");
-
-	// Uppercase styled alphabets
-	const alphaBlocks = [
-		[0x1d504, 26], // Mathematical Fraktur Capitals
-		[0x1d538, 26], // Mathematical Double-Struck Capitals
-		[0x1d49c, 26], // Mathematical Script Capitals
-		[0x1d4d0, 26], // Mathematical Bold Script Capitals
-		[0x1d56c, 26], // Mathematical Bold Fraktur Capitals
-		[0x1d5a0, 26], // Mathematical Sans-Serif Capitals
-		[0x1d5d4, 26], // Mathematical Sans-Serif Bold Capitals
-		[0x1d608, 26], // Mathematical Sans-Serif Italic Capitals
-		[0x1d63c, 26], // Mathematical Sans-Serif Bold Italic Capitals
-		[0x1d670, 26], // Mathematical Monospace Capitals
-		[0x24b6, 26], // Enclosed Alphanumerics (circled capitals)
-	];
-
-	// Styled digits
-	const digitBlocks = [
-		[0x1d7ce, 10], // Mathematical Bold Digits
-		[0x1d7d8, 10], // Mathematical Double-Struck Digits
-		[0x1d7e2, 10], // Mathematical Sans-Serif Digits
-		[0x1d7ec, 10], // Mathematical Sans-Serif Bold Digits
-		[0x1d7f6, 10], // Mathematical Monospace Digits
-	];
-
-	const A = "A".charCodeAt(0);
-	const Z = "Z".charCodeAt(0);
-	const a = "a".charCodeAt(0);
-	const z = "z".charCodeAt(0);
-	const zero = "0".charCodeAt(0);
-	const nine = "9".charCodeAt(0);
-
-	let normalized = "";
-
-	for (const char of Array.from(name)) {
-		const code = char.codePointAt(0);
-		if (!code) return "";
-
-		// ASCII fast-pass
-		let mappedChar: string = "";
-
-		if ((code >= A && code <= Z) || (code >= zero && code <= nine)) {
-			mappedChar = char;
-		} else if (code >= a && code <= z) {
-			mappedChar = String.fromCharCode(code - 32);
-		}
-
-		// Check uppercase letters
-		if (!mappedChar) {
-			for (const [start, len] of alphaBlocks) {
-				if (code >= start && code < start + len) {
-					mappedChar = String.fromCharCode(A + (code - start));
-					break;
-				}
-			}
-		}
-
-		// Check digits (only if not already mapped)
-		if (!mappedChar) {
-			for (const [start, len] of digitBlocks) {
-				if (code >= start && code < start + len) {
-					mappedChar = String.fromCharCode(zero + (code - start));
-					break;
-				}
-			}
-		}
-
-		if (!mappedChar) {
-			mappedChar = transliterate(char);
-		}
-
-		// If still no mapping, reject entire string
-		if (mappedChar === "") return "";
-
-		normalized += mappedChar;
-	}
-
-	return normalized;
-}
-
+export { normalizeNames };
 export async function checkClanShortNameValidity(
 	clanShortName: string,
 	interaction: ModalSubmitInteraction,

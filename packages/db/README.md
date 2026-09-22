@@ -8,6 +8,16 @@ Package database partagé pour l'écosystème Rose Griffon.
 - **Clients Clients/Serveur :** Helpers pour instancier le client Supabase selon l'environnement (Next.js SSR, Browser, Service Role).
 - **Storage :** Utilitaires pour la gestion des assets sur Supabase Storage.
 - **Services :** Logique métier transverse (ex: agrégation de statistiques dashboard).
+- **Accès SQL Achilléa :** `@rosegriffon/db/achillea-sql` expose Kysely + `pg`,
+  avec `search_path=achillea,public` et l’URL PostgreSQL unifiée `rg`.
+  Chaque service migré fournit une interface Kysely exacte pour ses tables ;
+  le helper ne force volontairement aucune index signature qui neutraliserait
+  la vérification compile-time des tables et colonnes. Les appels partagent le
+  même pool par URL/options ; `destroyAchilleaSql()` ferme proprement les pools
+  lors de l’arrêt d’un worker ou d’un test.
+- **Types Kysely Supabase :** `@rosegriffon/db/kysely-types` expose
+  `SupabaseKyselyDatabase`, traduit depuis les types générés Supabase avec
+  `kysely-supabase` pour les requêtes publiques/RLS.
 
 ## Utilisation
 
@@ -27,3 +37,7 @@ const { data } = await supabase.from("profiles").select("*");
   passage, donc une correction de type se fait en base puis par régénération.
 - `type-check` : Vérifie la validité des types du package.
 - `test` : Lance les tests unitaires (`bun test`).
+
+La migration SQL est la source de vérité pour les changements PostgreSQL. Les
+anciens fichiers MikroORM d’Achilléa sont gelés pendant la transition ; ne pas
+utiliser `schema:update` en production.

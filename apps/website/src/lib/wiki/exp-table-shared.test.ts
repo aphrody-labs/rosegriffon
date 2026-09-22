@@ -4,7 +4,7 @@
  * Tests des calculs PURS de la table d'expérience (`exp-table-shared.ts`).
  *
  * Le jeu d'essai reprend les VRAIES valeurs des cinq premiers niveaux de
- * `inagle_exp_table` (miroir SQLite) — 124, 130, 146, 165, 196 — plutôt qu'une
+ * `inagle_exp_table` (PostgreSQL) — 124, 130, 146, 165, 196 — plutôt qu'une
  * suite inventée : les cumuls attendus sont donc vérifiables contre la base.
  * (Repères réels de la table complète, mesurés en base : 100 lignes, niveaux
  * 1→100, cumul Lv1→Lv50 = 182 067, Lv1→Lv100 = 2 878 742.)

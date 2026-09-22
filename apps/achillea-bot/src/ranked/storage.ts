@@ -2,7 +2,7 @@
 
 import crypto from "node:crypto";
 
-import { createClient } from "@supabase/supabase-js";
+import { createPostgresClient } from "@rosegriffon/db/postgres-client";
 
 const PRIVATE_REFERENCE_PREFIX = "supabase-private:";
 const DEFAULT_BUCKET = "ranked-proofs";
@@ -85,16 +85,8 @@ export class RankedProofStorage {
 		client?: RankedStorageClientLike
 	) {
 		validateConfig(config);
-		const supabase =
-			client ??
-			createClient(config.url.replace(/\/+$/, ""), config.secretKey, {
-				auth: {
-					autoRefreshToken: false,
-					detectSessionInUrl: false,
-					persistSession: false,
-				},
-			});
-		this.bucket = supabase.storage.from(config.bucket);
+		const storageClient = client ?? createPostgresClient();
+		this.bucket = storageClient.storage.from(config.bucket);
 	}
 
 	async upload(input: ProofUploadInput): Promise<StoredRankedProof> {

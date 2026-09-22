@@ -168,7 +168,8 @@ binaire quand l'appelant veut les octets.
 ```ts
 achillea.users.cardUrl("123456789012345678"); // <img src=…>
 achillea.licenses.pdfUrl("…"); // <a href=…>
-achillea.auth.discordLoginUrl("/ranked"); // redirect(…)
+// Compatibilité seulement : redirige vers le login Rose Griffon unifié.
+achillea.auth.discordLoginUrl("/achillea/ranked");
 await achillea.users.card("123456789012345678"); // ArrayBuffer
 ```
 

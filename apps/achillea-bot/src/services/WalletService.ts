@@ -1,9 +1,46 @@
-import { LockMode } from "@mikro-orm/core";
+import { canAfford } from "@rosegriffon/achillea-core";
+import { sql as sqlTag, type Generated, type Kysely } from "kysely";
+// The workspace package is runtime-resolved by Bun; the bot's legacy Node10
+// resolver cannot follow its export map, so keep the boundary typed locally.
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { singleton } from "tsyringe";
 
-import { Transaction, User, Wallet } from "@/entities";
 import { TransactionType } from "@/utils/enums";
-import { Database } from "./Database";
+
+type WalletTable = {
+	id: Generated<string>;
+	user_id: string;
+	balance: string;
+	currency: string;
+	created_at: Generated<Date>;
+	updated_at: Generated<Date>;
+};
+type TransactionRow = {
+	tid: string;
+	type: TransactionType;
+	amount: string;
+	reason: string | null;
+	from_user_id: string | null;
+	to_user_id: string | null;
+	metadata: Record<string, unknown> | null;
+	created_at: Date;
+};
+type WalletDatabase = {
+	wallet: WalletTable;
+	transaction: {
+		id: Generated<string>;
+		type: TransactionType;
+		amount: string;
+		reason: string | null;
+		from_user_id: string | null;
+		to_user_id: string | null;
+		metadata: Record<string, unknown> | null;
+		created_at: Generated<Date>;
+	};
+	user: { id: string };
+};
+
+const sql = createAchilleaSql() as Kysely<WalletDatabase>;
 
 export class InsufficientBalanceError extends Error {
 	constructor(userId: string, required: number, available: number) {
@@ -12,148 +49,113 @@ export class InsufficientBalanceError extends Error {
 	}
 }
 
+export type WalletRecord = {
+	id: string;
+	user_id: string;
+	balance: string;
+	currency: string;
+	created_at: Date;
+	updated_at: Date;
+};
+export type WalletTransactionRecord = {
+	id: string;
+	type: TransactionType;
+	amount: string;
+	reason: string | null;
+	fromUser: { id: string } | null;
+	toUser: { id: string } | null;
+	metadata: Record<string, unknown> | null;
+	createdAt: Date;
+};
+
+function asTransaction(row: TransactionRow): WalletTransactionRecord {
+	return {
+		id: row.tid,
+		type: row.type,
+		amount: row.amount,
+		reason: row.reason,
+		fromUser: row.from_user_id ? { id: row.from_user_id } : null,
+		toUser: row.to_user_id ? { id: row.to_user_id } : null,
+		metadata: row.metadata,
+		createdAt: row.created_at,
+	};
+}
+
 @singleton()
 export class WalletService {
-	constructor(private db: Database) {}
-
-	async getOrCreate(userId: string): Promise<Wallet> {
-		const em = this.db.em.fork();
-
-		let wallet = await em.findOne(Wallet, { user: { id: userId } });
-
-		if (!wallet) {
-			const user = await em.findOneOrFail(User, { id: userId });
-			wallet = em.create(Wallet, { user, balance: "0.00", currency: "ACH" });
-			await em.persist(wallet).flush();
-		}
-
-		return wallet;
+	async getOrCreate(userId: string): Promise<WalletRecord> {
+		const inserted = await sql
+			.insertInto("wallet")
+			.values({ user_id: userId, balance: "0.00", currency: "ACH" })
+			.onConflict((oc) => oc.column("user_id").doNothing())
+			.returningAll()
+			.executeTakeFirst();
+		if (inserted) return inserted;
+		return sql
+			.selectFrom("wallet")
+			.selectAll()
+			.where("user_id", "=", userId)
+			.executeTakeFirstOrThrow();
 	}
 
 	async getBalance(userId: string): Promise<number> {
-		const wallet = await this.getOrCreate(userId);
-		return parseFloat(wallet.balance);
+		return Number((await this.getOrCreate(userId)).balance);
 	}
 
-	// Crédit/débit/transfert : transaction + verrou PESSIMISTIC_WRITE sur la ligne
-	// wallet (SELECT … FOR UPDATE) pour sérialiser les opérations concurrentes sur
-	// le même solde — évite le read-modify-write race (double-dépense, solde négatif,
-	// crédit perdu).
-
-	async credit(
-		userId: string,
-		amount: number,
-		reason: string,
-		metadata?: Record<string, unknown>
-	): Promise<Transaction> {
-		return this.db.em.transactional(async (em) => {
-			const wallet = await em.findOneOrFail(
-				Wallet,
-				{ user: { id: userId } },
-				{ lockMode: LockMode.PESSIMISTIC_WRITE }
-			);
-
-			wallet.balance = (parseFloat(wallet.balance) + amount).toFixed(2);
-
-			const tx = em.create(Transaction, {
-				type: TransactionType.Credit,
-				amount: amount.toFixed(2),
-				reason,
-				toUser: em.getReference(User, userId),
-				fromUser: null,
-				metadata: metadata ?? null,
-			});
-			em.persist(tx);
-			return tx;
+	async credit(userId: string, amount: number, reason: string, metadata?: Record<string, unknown>) {
+		if (!Number.isFinite(amount) || amount <= 0) throw new RangeError("amount must be positive");
+		return sql.transaction().execute(async (trx) => {
+			await trx
+				.updateTable("wallet")
+				.set({ balance: sqlTag<string>`round(balance + ${amount}, 2)`, updated_at: new Date() })
+				.where("user_id", "=", userId)
+				.executeTakeFirstOrThrow();
+			const row = await trx
+				.insertInto("transaction")
+				.values({ type: TransactionType.Credit, amount: amount.toFixed(2), reason, to_user_id: userId, from_user_id: null, metadata: metadata ?? null })
+				.returning(["id as tid", "type", "amount", "reason", "from_user_id", "to_user_id", "metadata", "created_at"])
+				.executeTakeFirstOrThrow();
+			return asTransaction(row);
 		});
 	}
 
-	async debit(
-		userId: string,
-		amount: number,
-		reason: string,
-		metadata?: Record<string, unknown>
-	): Promise<Transaction> {
-		return this.db.em.transactional(async (em) => {
-			const wallet = await em.findOneOrFail(
-				Wallet,
-				{ user: { id: userId } },
-				{ lockMode: LockMode.PESSIMISTIC_WRITE }
-			);
-
-			const current = parseFloat(wallet.balance);
-			if (current < amount) {
-				throw new InsufficientBalanceError(userId, amount, current);
-			}
-
-			wallet.balance = (current - amount).toFixed(2);
-
-			const tx = em.create(Transaction, {
-				type: TransactionType.Debit,
-				amount: amount.toFixed(2),
-				reason,
-				fromUser: em.getReference(User, userId),
-				toUser: null,
-				metadata: metadata ?? null,
-			});
-			em.persist(tx);
-			return tx;
+	async debit(userId: string, amount: number, reason: string, metadata?: Record<string, unknown>) {
+		if (!Number.isFinite(amount) || amount <= 0) throw new RangeError("amount must be positive");
+		return sql.transaction().execute(async (trx) => {
+			const wallet = await trx.selectFrom("wallet").select(["balance"]).where("user_id", "=", userId).forUpdate().executeTakeFirstOrThrow();
+			const balance = Number(wallet.balance);
+			if (!canAfford({ balance, currency: "ACH" }, amount)) throw new InsufficientBalanceError(userId, amount, balance);
+			await trx.updateTable("wallet").set({ balance: sqlTag<string>`round(balance - ${amount}, 2)`, updated_at: new Date() }).where("user_id", "=", userId).executeTakeFirstOrThrow();
+			const row = await trx
+				.insertInto("transaction")
+				.values({ type: TransactionType.Debit, amount: amount.toFixed(2), reason, from_user_id: userId, to_user_id: null, metadata: metadata ?? null })
+				.returning(["id as tid", "type", "amount", "reason", "from_user_id", "to_user_id", "metadata", "created_at"])
+				.executeTakeFirstOrThrow();
+			return asTransaction(row);
 		});
 	}
 
-	async transfer(
-		fromUserId: string,
-		toUserId: string,
-		amount: number,
-		reason: string
-	): Promise<{ from: Transaction; to: Transaction }> {
-		return this.db.em.transactional(async (em) => {
-			// Verrouille les deux wallets dans un ordre déterministe (tri des userId)
-			// pour éviter un deadlock quand A→B et B→A s'exécutent en même temps.
-			const wallets = new Map<string, Wallet>();
-			for (const id of [fromUserId, toUserId].sort()) {
-				if (wallets.has(id)) continue;
-				wallets.set(
-					id,
-					await em.findOneOrFail(Wallet, { user: { id } }, { lockMode: LockMode.PESSIMISTIC_WRITE })
-				);
-			}
-
-			const fromWallet = wallets.get(fromUserId)!;
-			const toWallet = wallets.get(toUserId)!;
-
-			const fromBalance = parseFloat(fromWallet.balance);
-			if (fromBalance < amount) {
-				throw new InsufficientBalanceError(fromUserId, amount, fromBalance);
-			}
-
-			fromWallet.balance = (fromBalance - amount).toFixed(2);
-			toWallet.balance = (parseFloat(toWallet.balance) + amount).toFixed(2);
-
-			const base = {
-				type: TransactionType.Transfer,
-				amount: amount.toFixed(2),
-				reason,
-				fromUser: em.getReference(User, fromUserId),
-				toUser: em.getReference(User, toUserId),
-				metadata: null,
-			} as const;
-
-			const fromTx = em.create(Transaction, { ...base });
-			const toTx = em.create(Transaction, { ...base });
-			em.persist([fromTx, toTx]);
-
-			return { from: fromTx, to: toTx };
+	async transfer(fromUserId: string, toUserId: string, amount: number, reason: string) {
+		if (fromUserId === toUserId) throw new Error("Cannot transfer to the same user");
+		if (!Number.isFinite(amount) || amount <= 0) throw new RangeError("amount must be positive");
+		return sql.transaction().execute(async (trx) => {
+			const wallets = await trx.selectFrom("wallet").select(["user_id", "balance"]).where("user_id", "in", [fromUserId, toUserId].sort()).orderBy("user_id").forUpdate().execute();
+			const from = wallets.find((wallet) => wallet.user_id === fromUserId);
+			const to = wallets.find((wallet) => wallet.user_id === toUserId);
+			if (!from || !to) throw new Error("Wallet not found");
+			const balance = Number(from.balance);
+			if (!canAfford({ balance, currency: "ACH" }, amount)) throw new InsufficientBalanceError(fromUserId, amount, balance);
+			await trx.updateTable("wallet").set({ balance: sqlTag<string>`round(balance - ${amount}, 2)`, updated_at: new Date() }).where("user_id", "=", fromUserId).execute();
+			await trx.updateTable("wallet").set({ balance: sqlTag<string>`round(balance + ${amount}, 2)`, updated_at: new Date() }).where("user_id", "=", toUserId).execute();
+			const base = { type: TransactionType.Transfer, amount: amount.toFixed(2), reason, from_user_id: fromUserId, to_user_id: toUserId, metadata: null } as const;
+			const rows = await trx.insertInto("transaction").values([base, base]).returning(["id as tid", "type", "amount", "reason", "from_user_id", "to_user_id", "metadata", "created_at"]).execute();
+			if (rows.length !== 2) throw new Error("Transfer transaction insert failed");
+			return { from: asTransaction(rows[0]), to: asTransaction(rows[1]) };
 		});
 	}
 
-	async getHistory(userId: string, limit = 20, offset = 0): Promise<Transaction[]> {
-		const em = this.db.em.fork();
-
-		return em.find(
-			Transaction,
-			{ $or: [{ fromUser: { id: userId } }, { toUser: { id: userId } }] },
-			{ orderBy: { createdAt: "DESC" }, limit, offset }
-		);
+	async getHistory(userId: string, limit = 20, offset = 0) {
+		const rows = await sql.selectFrom("transaction").select(["id as tid", "type", "amount", "reason", "from_user_id", "to_user_id", "metadata", "created_at"]).where((eb) => eb.or([eb("from_user_id", "=", userId), eb("to_user_id", "=", userId)])).orderBy("created_at", "desc").limit(limit).offset(offset).execute();
+		return rows.map(asTransaction);
 	}
 }

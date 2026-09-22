@@ -1,9 +1,8 @@
 import type { ButtonInteraction } from "discord.js";
 import { MessageFlags } from "discord.js";
 import type { Client } from "@aphrody/discordx";
-import { ButtonComponent } from "@aphrody/discordx";
 
-import { Discord, Injectable } from "@/decorators";
+import { ButtonComponent, Discord, Injectable } from "@/decorators";
 import { Matchmaker, RankedQueueService } from "@/services";
 import { followUpWithErrorEmbed, followUpWithSuccessEmbed } from "@/utils/functions";
 

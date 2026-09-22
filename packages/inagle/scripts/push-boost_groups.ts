@@ -4,7 +4,7 @@
  * vrai config `boost_grp/boost_player_group_config_*.cfg.bin.json` (octets réels
  * du dump). La logique d'import vit dans `src/push-categories.ts`
  * (`importBoostGroups`) — source UNIQUE partagée avec le flux principal
- * cli-push.ts. Ce fichier ne fait que créer l'adaptateur Supabase et lancer
+ * cli-push.ts. Ce fichier ne fait que créer l'adaptateur PostgreSQL et lancer
  * l'importer. Upsert idempotent (ON CONFLICT id = "boost_grp_<index>").
  *
  * Lancement (depuis /home/ubuntu/rg) :
@@ -12,9 +12,9 @@
  */
 
 import { importBoostGroups } from "../src/push-categories.ts";
-import { createSupabaseAdapter } from "../src/push-adapter.ts";
+import { createPostgresAdapter } from "../src/push-adapter.ts";
 
-const db = createSupabaseAdapter();
+const db = createPostgresAdapter();
 await importBoostGroups(null, db)
 	.then(() => db.close())
 	.catch((e) => {

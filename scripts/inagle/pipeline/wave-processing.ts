@@ -1,6 +1,5 @@
 import { spawn } from "bun";
 import { resolve } from "node:path";
-import { writeFileSync, existsSync } from "node:fs";
 
 async function runScript(path: string, args: string[] = []) {
 	console.log(`\n======================================================`);
@@ -34,10 +33,7 @@ async function main() {
 	// 3. Generate Multilingual Glossary
 	const glossaryOk = await runScript(resolve(root, "scripts/inagle/pipeline/generate-glossary.ts"));
 	
-	// 4. Build asset cross-reference definitions
-	const assetOk = await runScript(resolve(root, "scripts/inagle/pipeline/build-asset-cross-reference.ts"));
-	
-	// 5. Sync Patch Notes
+	// 4. Sync Patch Notes
 	const patchNotesOk = await runScript(resolve(root, "scripts/inagle/pipeline/sync-patch-notes.ts"));
 	
 	console.log("\n======================================================");
@@ -46,7 +42,6 @@ async function main() {
 	console.log(`  - Zukan Matches Audit: ${zukanOk ? "SUCCESS" : "FAILED"}`);
 	console.log(`  - Series DB Align & Audit: ${seriesOk ? "SUCCESS" : "FAILED"}`);
 	console.log(`  - Glossary Generation: ${glossaryOk ? "SUCCESS" : "FAILED"}`);
-	console.log(`  - Asset Cross-Reference: ${assetOk ? "SUCCESS" : "FAILED"}`);
 	console.log(`  - Patch Notes Sync: ${patchNotesOk ? "SUCCESS" : "FAILED"}`);
 	console.log("======================================================\n");
 }

@@ -6,7 +6,7 @@
  * (`importConstellations`) — source UNIQUE partagée avec le flux principal
  * cli-push.ts. Grain = la constellation (signe astral) elle-même (30 entités),
  * distinct de `inagle_star_signs` (pool de persos drop par signe). Ce fichier ne
- * fait que créer l'adaptateur Supabase et lancer l'importer. Upsert idempotent
+ * fait que créer l'adaptateur PostgreSQL et lancer l'importer. Upsert idempotent
  * (ON CONFLICT id = starNameHash hex).
  *
  * Lancement (depuis /home/ubuntu/rg) :
@@ -14,9 +14,9 @@
  */
 
 import { importConstellations } from "../src/push-categories.ts";
-import { createSupabaseAdapter } from "../src/push-adapter.ts";
+import { createPostgresAdapter } from "../src/push-adapter.ts";
 
-const db = createSupabaseAdapter();
+const db = createPostgresAdapter();
 await importConstellations(null, db)
 	.then(() => db.close())
 	.catch((e) => {

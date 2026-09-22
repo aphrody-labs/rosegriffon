@@ -2,7 +2,6 @@
 // GraphQL Yoga, pas un crochet React : la règle ne va que sur son préfixe `use`.
 import { useResponseCache } from "@graphql-yoga/plugin-response-cache";
 import { createSchema, createYoga } from "graphql-yoga";
-import { ragSearch, type RagSourceKind } from "@rosegriffon/db/rag";
 import { wikiService } from "@/lib/wiki-service";
 
 const typeDefs = `
@@ -89,20 +88,7 @@ const typeDefs = `
     sheetData: JSON
   }
 
-  type RagChunk {
-    id: ID!
-    sourceId: String
-    sourceKind: String
-    title: String
-    url: String
-    lang: String
-    content: String
-    score: Float
-    meta: JSON
-  }
-
   type Query {
-    ragSearch(query: String!, k: Int, kinds: [String!]): [RagChunk]
     characters(page: Int, limit: Int, q: String, element: String, position: String, rarity: String, team: String, series: String, ageGroup: String): [Character]
     character(id: ID!): Character
     items(page: Int, limit: Int, q: String, category: String): [Item]
@@ -133,23 +119,6 @@ const resolvers = {
 		},
 	},
 	Query: {
-		ragSearch: async (_: any, { query, k, kinds }: any) => {
-			const rows = await ragSearch(query, {
-				k: k ?? 10,
-				kinds: kinds as RagSourceKind[] | undefined,
-			});
-			return rows.map((r) => ({
-				id: r.id,
-				sourceId: r.source_id,
-				sourceKind: r.source_kind,
-				title: r.title,
-				url: r.url,
-				lang: r.lang,
-				content: r.content,
-				score: r.score,
-				meta: r.meta,
-			}));
-		},
 		auras: async (_: any, args: any) => {
 			const { data } = await wikiService.getAurasList(args);
 			return data.map((a: any) => ({

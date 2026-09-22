@@ -11,7 +11,8 @@ export interface WalletBalance {
 
 /** Une ligne du journal des transactions (`GET /wallet/me/history`). */
 export interface WalletTransaction {
-	id: number;
+	/** PostgreSQL UUID of the immutable transaction row. */
+	id: string;
 	type: WalletTransactionType;
 	amount: number;
 	reason: string | null;

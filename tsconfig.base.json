@@ -35,7 +35,13 @@
 			"@rosegriffon/achillea-client": ["./packages/achillea-client/src/index.ts"],
 			"@rosegriffon/achillea-client/*": ["./packages/achillea-client/src/*/index.ts"],
 			"@rosegriffon/achillea-contract": ["./packages/achillea-contract/src/index.ts"],
-			"@rosegriffon/achillea-contract/*": ["./packages/achillea-contract/src/*/index.ts"]
+			"@rosegriffon/achillea-contract/*": ["./packages/achillea-contract/src/*/index.ts"],
+			"@rosegriffon/auth": ["./packages/auth/src/index.ts"],
+			"@rosegriffon/auth/*": ["./packages/auth/src/*"],
+			"@rosegriffon/azalee": ["./packages/azalee/src/index.ts"],
+			"@rosegriffon/azalee/*": ["./packages/azalee/src/*"],
+			"@rosegriffon/inagle": ["./packages/inagle/src/index.ts"],
+			"@rosegriffon/inagle/*": ["./packages/inagle/src/*"]
 		}
 	},
 	"exclude": ["node_modules", ".next", "dist", "build", ".turbo", "coverage"]

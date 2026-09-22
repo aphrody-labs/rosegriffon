@@ -4,8 +4,7 @@
  * Contains low-level tools for working with IEVR game data:
  * - parser: CFG.BIN file parsing
  * - search: Full-text search utilities
- * - gamedata: Raw gamedata JSON loader (453 lists, 66k+ entries)
- * - entities: Curated entity data loader (pre-extracted)
+ * - SQL projections: durable game-data access through PostgreSQL
  * - hash: Hash computation and lookup utilities
  * - images: Image path resolution and indexing
  * - openapi: OpenAPI 3.1.0 spec generator from Zod schemas
@@ -40,6 +39,7 @@ export {
 export {
 	clearCache,
 	dataExists,
+	findConfigFileAsync,
 	fromHex,
 	type GrowthTableEntry,
 	getAvailableLocales,
@@ -59,7 +59,6 @@ export {
 	sanitizeText,
 	toHex,
 } from "./data-loader.js";
-export * from "./entities.js";
 // Error handling
 export {
 	InagleError,
@@ -70,7 +69,6 @@ export {
 	isInagleError,
 	wrapError,
 } from "./errors.js";
-export * from "./gamedata.js";
 export * from "./hash.js";
 
 export * from "./images.js";

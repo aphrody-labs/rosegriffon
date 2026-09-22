@@ -6,7 +6,7 @@ Level-5 / CPK). Sortie le 9/6/2026, APK récupéré et rétro-conçu statiquemen
 
 ## Contenu (Phase 0 — figé)
 
-- `data/masterdata-schema.json` — **153 tables** masterdata, **1215 colonnes typées**
+- `src/data/masterdata-schema.generated.ts` — **153 tables** masterdata, **1215 colonnes typées**
   (références FK + héritage résolus), extraites du dump IL2CPP (Unity 6000.0.62f1).
 - `data/enums.json` — **214 énumérations** du jeu avec leurs valeurs
   (`CharacterElement` = Wind/Forest/Fire/Mountain, `CharacterPosition` = FW/MF/DF/GK, …).

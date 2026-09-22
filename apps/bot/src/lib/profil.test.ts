@@ -485,7 +485,7 @@ describe("modules de commandes", () => {
 		// d'écriture (`/gestion article`) vivait déjà là. Séparer la lecture de
 		// l'écriture entre deux identités Discord n'avait aucun sens pour le staff,
 		// qui utilise les deux dans la même minute (cf. `docs/bot-commandes.md`).
-		for (const commande of ["azalee", "cpk", "rag", "cdn", "x"]) {
+		for (const commande of ["azalee", "cpk", "cdn", "x"]) {
 			expect(`${commande}:${azalee.has(commande)}`).toBe(`${commande}:true`);
 		}
 		expect(`article:${azalee.has("article")}`).toBe("article:false");

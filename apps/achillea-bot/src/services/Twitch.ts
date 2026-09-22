@@ -1,22 +1,38 @@
 import axios from "axios";
+import type { Kysely } from "kysely";
 
 import { Service } from "@/decorators";
-import { UserConnection } from "@/entities";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { env } from "@/env";
 
 import { Provider } from "../utils/enums";
-import { Database } from "./Database";
 import { Store } from "./Store";
+
+interface TwitchDatabase {
+	user_connection: {
+		id: string;
+		user_id: string;
+		provider: string;
+		external_id: string;
+		external_username: string | null;
+	};
+}
+
+const sql = createAchilleaSql<TwitchDatabase>() as Kysely<TwitchDatabase>;
 
 @Service()
 export class TwitchService {
 	constructor(
-		private db: Database,
 		private store: Store
 	) {}
 
 	async hasLinkedTwitch(userId: string) {
-		return await this.db.em.findOne(UserConnection, { user: userId, provider: Provider.TWITCH });
+		return await sql
+			.selectFrom("user_connection")
+			.selectAll()
+			.where("user_id", "=", userId)
+			.where("provider", "=", Provider.TWITCH)
+			.executeTakeFirst();
 	}
 
 	private async getValidAppToken() {
@@ -51,15 +67,17 @@ export class TwitchService {
 	}
 
 	async isUserStreaming(userId: string) {
-		const twitchDetails = await this.db.em.findOne(UserConnection, {
-			user: userId,
-			provider: Provider.TWITCH,
-		});
+		const twitchDetails = await sql
+			.selectFrom("user_connection")
+			.select(["external_id"])
+			.where("user_id", "=", userId)
+			.where("provider", "=", Provider.TWITCH)
+			.executeTakeFirst();
 
 		if (!twitchDetails) return false;
 
 		const res = await axios.get("https://api.twitch.tv/helix/streams", {
-			params: { user_id: twitchDetails.externalId },
+			params: { user_id: twitchDetails.external_id },
 			headers: {
 				"Client-ID": env.TWITCH_CLIENT_ID,
 				Authorization: `Bearer ${await this.getValidAppToken()}`, // This is your App Access Token, not the user's token

@@ -16,6 +16,7 @@ import { MatchFormat, ScoreReportPolicy, StageType } from "@/utils/enums";
 
 import type { OrganizationDTO } from "./organizationDTO";
 
+/** Ts.ED edge adapter; the serialized shape is mirrored by the shared contract. */
 export class NewTournamentDTO {
 	@Property()
 	@Required()

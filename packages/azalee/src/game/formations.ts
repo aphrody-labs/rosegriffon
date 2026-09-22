@@ -3,15 +3,13 @@
  *
  * `LEGACY_FORMATIONS` (8) : positions estimées à l'œil depuis le CSS de zukan.inazuma.jp
  * (conservées pour compat des `id` persistés — URLs partagées / équipes sauvegardées).
- * `GAME_FORMATIONS` (83) : **vraies formations du jeu**, coordonnées `f32` byte-exactes
- * décodées par niers (`nie-data/formation.rs` → `data/formations-full.json` via le binaire
- * `export_formations`). `FORMATIONS` expose les deux (legacy d'abord → index 0 inchangé).
+ * Les 83 formations réelles sont chargées depuis `inagle_formations` côté
+ * serveur. Seuls les 8 layouts historiques restent embarqués pour décoder les
+ * identifiants persistés en mode offline.
  *
  * Coordonnées : pourcentages sur un terrain portrait. `top` depuis le haut (but adverse en
  * haut, GK en bas ~44 %), `left` depuis la gauche (centre = 40 %). Slot ~19 % de large.
  */
-
-import formationsFull from "../data/formations-full.json";
 
 export interface PositionCoord {
 	/** Position index (0-9 field, 10 = GK) */
@@ -232,56 +230,10 @@ export const ROLE_LABELS: Record<string, string> = {
 	MF: "MIL",
 };
 
-// ── Vraies formations du jeu (data/formations-full.json, niers) ───────────────
-
-interface RawGamePosition {
-	position_no: number;
-	role: string;
-	start: { x: number; y: number };
-}
-interface RawGameFormation {
-	form_id: string;
-	label: string;
-	valid: boolean;
-	positions: RawGamePosition[];
-}
-
 /**
- * Mappe une coordonnée `y` du jeu (`start_pos`, ~[-0.55, 0.96] ; GK ≈ 0.96 côté but propre)
- * vers un pourcentage `top` du terrain portrait (GK en bas ≈ 44 %, attaque en haut ≈ 2 %).
+ * Formations legacy conservées uniquement pour les identifiants historiques
+ * des équipes sauvegardées et le CLI offline. Les formations du jeu sont une
+ * projection SQL chargée par `wikiService.getFormations()` ; aucune donnée
+ * canonique n'est embarquée dans le bundle client.
  */
-function gameTop(y: number): number {
-	return Math.max(1, Math.min(46, 43.75 * y + 2));
-}
-/** Mappe `x` du jeu (~[-0.825, 0.825], 0 = centre) vers un pourcentage `left` (centre = 40 %). */
-function gameLeft(x: number): number {
-	return Math.max(1, Math.min(80, 40 + x * 47));
-}
-
-const ROLE_SET = new Set(["FW", "MF", "DF", "GK"]);
-
-const gameLabelCount: Record<string, number> = {};
-
-/** Les 83 formations valides du jeu (11 joueurs, 1 GK), positions réelles f32 → top/left %. */
-export const GAME_FORMATIONS: Formation[] = (
-	(formationsFull as { formations: RawGameFormation[] }).formations ?? []
-)
-	.filter((f) => f.valid)
-	.map((f) => {
-		gameLabelCount[f.label] = (gameLabelCount[f.label] ?? 0) + 1;
-		const variant = gameLabelCount[f.label];
-		return {
-			id: `g_${f.form_id}`,
-			label: f.label,
-			name: `${f.label} (jeu) #${variant}`,
-			positions: f.positions.map((p) => ({
-				index: p.position_no,
-				top: gameTop(p.start.y),
-				left: gameLeft(p.start.x),
-				role: (ROLE_SET.has(p.role) ? p.role : "MF") as PositionCoord["role"],
-			})),
-		} satisfies Formation;
-	});
-
-/** Formations exposées au builder : legacy (compat des `id` persistés) puis vraies du jeu. */
-export const FORMATIONS: Formation[] = [...LEGACY_FORMATIONS, ...GAME_FORMATIONS];
+export const FORMATIONS: Formation[] = LEGACY_FORMATIONS;

@@ -1,7 +1,10 @@
 import { Client } from "@aphrody/discordx";
 import type { TextChannel } from "discord.js";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import type { Kysely } from "kysely";
+import { sql as sqlTag } from "kysely";
 
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { coreManagerConfig, urlsConfig } from "@/configs";
 import { Service } from "@/decorators";
 import { Data } from "@/entities";
@@ -14,6 +17,15 @@ interface ResultRow {
 	p2: string | null;
 	s2: number | null;
 }
+
+interface RankedQueueDatabase {
+	user_elo: { user_id: string; games_played: number };
+	lobby: { id: number; event_type: string; state: string; mode: number };
+	lobby_user: { lobby_id: number; user_id: string; team: number; score: number | null };
+	user: { id: string; display_name: string; username: string | null };
+}
+
+const sql = createAchilleaSql<RankedQueueDatabase>() as Kysely<RankedQueueDatabase>;
 
 /**
  * Salon 🎮・ranked-queue : panneau persistant servant de pont vers le ranked web.
@@ -40,16 +52,16 @@ export class RankedQueuePanelService {
 		if (!channelId) return;
 
 		try {
-			const em = this.db.em.fork();
-			const countRows = await em.execute<{ c: number }[]>(
-				`SELECT count(*)::int AS c FROM user_elo WHERE games_played > 0`,
-				[],
-				"all"
-			);
-			const activePlayers = Number(countRows[0]?.c ?? 0);
+			const countRow = await sql
+				.selectFrom("user_elo")
+				.select(({ fn }) => fn.countAll<number>().as("c"))
+				.where("games_played", ">", 0)
+				.executeTakeFirst();
+			const activePlayers = Number(countRow?.c ?? 0);
 
-			const results = await em.execute<ResultRow[]>(
-				`SELECT
+			const results = (
+				await sqlTag<ResultRow>`
+				SELECT
 					max(COALESCE(NULLIF(u.display_name, ''), u.username)) FILTER (WHERE lu.team = 1) AS p1,
 					max(lu.score) FILTER (WHERE lu.team = 1) AS s1,
 					max(COALESCE(NULLIF(u.display_name, ''), u.username)) FILTER (WHERE lu.team = 2) AS p2,
@@ -60,10 +72,9 @@ export class RankedQueuePanelService {
 				WHERE l.event_type = 'RANKED' AND l.state = 'Finished' AND l.mode = 2
 				GROUP BY l.id
 				ORDER BY l.id DESC
-				LIMIT 5`,
-				[],
-				"all"
-			);
+				LIMIT 5`
+				.execute(sql)
+			).rows;
 
 			const feed =
 				results.length > 0

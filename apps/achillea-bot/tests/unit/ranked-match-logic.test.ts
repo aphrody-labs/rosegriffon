@@ -1,5 +1,6 @@
 /**
- * Tests unitaires — logique PURE de résolution d'un match ranked (src/ranked/match-logic.ts).
+ * Tests unitaires — logique PURE de résolution d'un match ranked
+ * (`@rosegriffon/achillea-core/ranked`).
  *
  * Aucune DB / Colyseus / Discord : on couvre la machine de décision de la fin de match
  * ASYNCHRONE (chaque joueur saisit indépendamment), l'assignation domicile/extérieur,
@@ -20,8 +21,8 @@ import {
 	teamForIndex,
 	type QueueCandidate,
 	type ScoreInput,
-} from "../../src/ranked/match-logic";
-import { TeamSide } from "../../src/utils/enums";
+} from "@rosegriffon/achillea-core";
+import { TeamSide } from "@rosegriffon/achillea-core";
 
 // Fabrique une saisie joueur (du point de vue du joueur).
 function input(userId: string, myScore: number, oppScore: number, submitted = true): ScoreInput {

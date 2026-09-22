@@ -5,7 +5,7 @@ import "server-only";
  *
  * Deux sources, parce que les modèles ne se nomment pas de la même façon :
  *
- * - **Personnages** : le miroir SQLite. Eux seuls portent un nom affichable
+ * - **Personnages** : la projection PostgreSQL. Eux seuls portent un nom affichable
  *   (`inagle_characters`), et leur code d'assemblage est le préfixe de `internal_code`
  *   (`c01000010_5000` → `c01000010`).
  * - **Le reste** : le VFS **live**, un sous-dossier par code sous `data/common/chr/_<famille>`.
@@ -13,9 +13,9 @@ import "server-only";
  *   plafonnait à 509 modèles sur les 6 236 du jeu.
  */
 
-import { createSqliteClient } from "@rosegriffon/azalee/db";
 import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
 import { type ModelFamily, modelFamily } from "@rosegriffon/azalee/cpk/models";
+import { selectInagle } from "@/lib/db/inagle-sql";
 
 /** Un modèle du corpus. */
 export interface ModelEntry {
@@ -132,11 +132,8 @@ export function characters(): Promise<ModelEntry[]> {
 	_characters ??= (async () => {
 		const parCode = new Map<string, ModelEntry>();
 		try {
-			const client = createSqliteClient();
-			const { data } = (await client
-				.from("inagle_characters")
-				.select("internal_code,name_fr,name_en,name_ja,slug")) as { data: CharaRow[] | null };
-			for (const row of data ?? []) {
+			const rows = await selectInagle<CharaRow>("inagle_characters", "internal_code,name_fr,name_en,name_ja,slug");
+			for (const row of rows) {
 				const code = row.internal_code?.split("_")[0];
 				if (!code) continue;
 				if (parCode.has(code)) continue;

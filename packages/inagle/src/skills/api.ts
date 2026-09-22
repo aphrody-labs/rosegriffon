@@ -1,7 +1,7 @@
 /**
  * Skills API - Complete skill data with multilingual support
  *
- * Uses pre-extracted data from:
+ * Uses pre-extracted data from the configured external data root:
  * - entities/skills-all-types.json (unified: 2458 main + 58 aura + 402 passive)
  * - Fallback: all-gamedata/skillInfo.json
  * - Text data: common/text/{locale}/skill_text.cfg.bin.json for names/descriptions
@@ -9,8 +9,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
 const require = createRequire(import.meta.url);
 
@@ -38,8 +37,6 @@ export {
 	PASSIVE_SCOPE_NAMES,
 	type TeamPassive,
 };
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Data paths
 const GAMEDATA_PATH = PATHS.allGamedata;
@@ -198,11 +195,6 @@ export function buildSkillsDatabase(options?: {
 	const entitiesFile = join(entitiesPath, "skills.json");
 	const gamedataFile = join(gamedataPath, "skillInfo.json");
 
-	// Fallback to internal entries directory (packaged in monorepo)
-	const internalEntriesDir = join(__dirname, "../entries");
-	const fallbackAllTypesFile = join(internalEntriesDir, "skills-all-types.json");
-	const fallbackEntitiesFile = join(internalEntriesDir, "skills.json");
-
 	let rawSkills: SkillInfo[] = [];
 	let auraSkillsRaw: AuraSkill[] = [];
 	let passiveSkillsRaw: PassiveSkill[] = [];
@@ -217,28 +209,8 @@ export function buildSkillsDatabase(options?: {
 		rawSkills = allTypes.main || [];
 		auraSkillsRaw = allTypes.aura || [];
 		passiveSkillsRaw = allTypes.passive || [];
-	} else if (existsSync(fallbackAllTypesFile)) {
-		const allTypes = JSON.parse(readFileSync(fallbackAllTypesFile, "utf-8")) as {
-			main: SkillInfo[];
-			aura: AuraSkill[];
-			passive: PassiveSkill[];
-		};
-		rawSkills = allTypes.main || [];
-		auraSkillsRaw = allTypes.aura || [];
-		passiveSkillsRaw = allTypes.passive || [];
 	} else if (existsSync(entitiesFile)) {
 		const content = JSON.parse(readFileSync(entitiesFile, "utf-8"));
-		// Check if new format with metadata
-		if (content.skills && Array.isArray(content.skills)) {
-			rawSkills = content.skills;
-		} else if (content.data && Array.isArray(content.data)) {
-			// Support generic data wrapper
-			rawSkills = content.data;
-		} else {
-			rawSkills = content;
-		}
-	} else if (existsSync(fallbackEntitiesFile)) {
-		const content = JSON.parse(readFileSync(fallbackEntitiesFile, "utf-8"));
 		// Check if new format with metadata
 		if (content.skills && Array.isArray(content.skills)) {
 			rawSkills = content.skills;
@@ -302,18 +274,6 @@ export function buildSkillsDatabase(options?: {
 		}
 	}
 
-	// Fallback: Load Aura Skills from prepackaged fallback files if not present
-	if (auraSkillsRaw.length === 0) {
-		const fallbackAurasFile = join(internalEntriesDir, "auras.json");
-		if (existsSync(fallbackAurasFile)) {
-			try {
-				auraSkillsRaw = JSON.parse(readFileSync(fallbackAurasFile, "utf-8"));
-			} catch (e) {
-				console.error("Failed to load prepackaged aura skills", e);
-			}
-		}
-	}
-
 	if (auraSkillsRaw.length === 0) {
 		try {
 			const skillInfoPath = join(gamedataPath, "skillInfo.json");
@@ -328,18 +288,6 @@ export function buildSkillsDatabase(options?: {
 			);
 		} catch (e) {
 			console.error("Failed to load aura skills from mapper", e);
-		}
-	}
-
-	// Fallback: Load Passive Skills from prepackaged fallback files first
-	if (passiveSkillsRaw.length === 0) {
-		const fallbackPassivesFile = join(internalEntriesDir, "passives.json");
-		if (existsSync(fallbackPassivesFile)) {
-			try {
-				passiveSkillsRaw = JSON.parse(readFileSync(fallbackPassivesFile, "utf-8"));
-			} catch (e) {
-				console.error("Failed to load prepackaged passive skills", e);
-			}
 		}
 	}
 

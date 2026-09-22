@@ -33,7 +33,7 @@ export const walletBalanceSchema = z.object({
 }) satisfies z.ZodType<WalletBalance>;
 
 export const walletTransactionSchema = z.object({
-	id: z.number(),
+	id: z.string(),
 	type: walletTransactionTypeSchema,
 	amount: z.number(),
 	reason: z.string().nullable(),

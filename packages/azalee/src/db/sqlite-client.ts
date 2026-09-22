@@ -1,7 +1,33 @@
 import type { Database } from "bun:sqlite";
-import { sql, type SQL } from "drizzle-orm";
-import { drizzle as drizzleProxy } from "drizzle-orm/sqlite-proxy";
 import { resolveMirrorPath } from "../config";
+
+/** Minimal parameterised SQL fragment used by the offline SQLite adapter. */
+class SQL {
+	constructor(readonly text: string, readonly params: unknown[] = []) {}
+}
+
+function sql(strings: TemplateStringsArray, ...values: unknown[]): SQL {
+	let text = strings[0] ?? "";
+	const params: unknown[] = [];
+	for (let i = 0; i < values.length; i++) {
+		const value = values[i];
+		if (value instanceof SQL) {
+			text += value.text;
+			params.push(...value.params);
+		} else {
+			text += "?";
+			params.push(value);
+		}
+		text += strings[i + 1] ?? "";
+	}
+	return new SQL(text, params);
+}
+
+sql.raw = (text: string) => new SQL(text);
+sql.join = (fragments: SQL[], separator: SQL) => new SQL(
+	fragments.map((fragment) => fragment.text).join(separator.text),
+	fragments.flatMap((fragment) => fragment.params),
+);
 
 /**
  * Chemin du miroir SQLite. La résolution (option explicite → `SQLITE_DB_PATH` →
@@ -13,8 +39,8 @@ function getSqlitePath(): string | null {
 }
 
 // Surface minimale commune entre `bun:sqlite` (runtime Bun) et `node:sqlite`
-// (Node >= 22 — `DatabaseSync`). La façade Drizzle (`drizzle-orm/sqlite-proxy`)
-// délègue l'exécution à ce moteur : un seul schéma, un seul driver universel,
+// (Node >= 22 — `DatabaseSync`). La façade SQL locale délègue l'exécution à
+// ce moteur : un seul schéma, un seul driver universel,
 // swap derrière le garde `typeof Bun`. Les deux moteurs exposent `prepare(sql)`
 // avec `all`/`get` sur le statement → on les unifie derrière ce type.
 type SqliteLike = {
@@ -80,7 +106,6 @@ function invalidateIfMirrorChanged(): void {
 
 	const ancien = _sqliteDb as unknown as { close?: () => void };
 	_sqliteDb = null;
-	_drizzle = null;
 	// Les lectures sont synchrones : aucune requête n'est en vol ici. Fermer
 	// libère le descripteur ; un échec n'est pas bloquant (le GC s'en chargera).
 	try {
@@ -146,41 +171,6 @@ function getSqliteDb(): Database {
 	return _sqliteDb as unknown as Database;
 }
 
-// Instance Drizzle universelle (`sqlite-proxy`). L'exécution est déléguée au
-// `SqliteLike` actif (bun:sqlite au runtime, node:sqlite au build). Drizzle
-// compile la requête (placeholders `?`, NULLS FIRST/LAST, json_extract, GROUP BY)
-// puis nous remet `{ sql, params, method }` ; on prépare et on exécute sur le
-// moteur natif. Singleton process-local — pas de réouverture du fichier.
-type ProxyDb = ReturnType<typeof drizzleProxy>;
-let _drizzle: ProxyDb | null = null;
-function getDrizzle(): ProxyDb {
-	if (_drizzle) return _drizzle;
-	const engine = getSqliteDb() as unknown as SqliteLike;
-	// Le callback est typé `AsyncRemoteCallback` (doit renvoyer une Promise). Le
-	// moteur sous-jacent (bun:sqlite / node:sqlite) est SYNCHRONE — on enveloppe
-	// donc le résultat dans une promesse résolue (aucun I/O async réel).
-	_drizzle = drizzleProxy(async (queryString, params, method) => {
-		const stmt = engine.prepare(queryString);
-		if (method === "get") {
-			const row = stmt.get(...params);
-			// sqlite-proxy attend `{ rows: <ligne unique en tableau de valeurs OU
-			// objet> }`. On utilise UNIQUEMENT `db.all(sql)` côté façade (jamais
-			// `db.get`), donc cette branche n'est pas empruntée en pratique ; on la
-			// garde correcte par sûreté.
-			return { rows: row ? [row] : [] };
-		}
-		if (method === "values") {
-			const rows = stmt.all(...params) as Array<Record<string, unknown>>;
-			return { rows: rows.map((r) => Object.values(r)) };
-		}
-		// method "all" / "run" → on renvoie les lignes en objets. La façade lit
-		// `result.rows` comme un tableau d'objets (mode "all" de Drizzle).
-		const rows = stmt.all(...params) as unknown[];
-		return { rows };
-	});
-	return _drizzle;
-}
-
 /**
  * La valeur est-elle le marqueur de NULL laissé par le dump Postgres ?
  *
@@ -235,7 +225,7 @@ export class SqliteQueryBuilder {
 		return this;
 	}
 
-	// Expression de colonne SQL (fragment Drizzle), avec support `->>` → json_extract.
+	// Expression de colonne SQL, avec support `->>` → json_extract.
 	// IMPORTANT : émis via `sql.raw` car ce sont des identifiants de schéma, jamais
 	// des valeurs utilisateur (les colonnes viennent du code, pas d'input runtime).
 	private cleanCol(col: string): SQL {
@@ -550,8 +540,7 @@ export class SqliteQueryBuilder {
 
 	// Assemble la requête SELECT complète comme fragment Drizzle unique. La
 	// projection (`this.selects`) reste une liste de colonnes PostgREST brute
-	// (`*`, `id, name_fr`, …) émise via `sql.raw` — identique au SQL maison
-	// d'origine (`SELECT ${this.selects} FROM "table" …`).
+	// (`*`, `id, name_fr`, …) émise via `sql.raw`.
 	private compileSelect(): SQL {
 		const parts: SQL[] = [sql`SELECT ${sql.raw(this.selects)} FROM ${sql.raw(`"${this.table}"`)}`];
 		if (this.wheres.length > 0) {
@@ -575,8 +564,8 @@ export class SqliteQueryBuilder {
 	private async execute(): Promise<
 		Record<string, unknown> | Array<Record<string, unknown>> | null
 	> {
-		const drizzle = getDrizzle();
-		const rawRows = (await drizzle.all(this.compileSelect())) as Array<Record<string, unknown>>;
+		const query = this.compileSelect();
+		const rawRows = getSqliteDb().prepare(query.text).all(...(query.params as never[])) as Array<Record<string, unknown>>;
 
 		const parsedRows = rawRows.map((r) => this.parseRow(r));
 
@@ -595,7 +584,6 @@ export class SqliteQueryBuilder {
 	}
 
 	private async executeCount(): Promise<number> {
-		const drizzle = getDrizzle();
 		const projection = this.needsGrouping
 			? sql.raw(`COUNT(DISTINCT "name_fr") as count`)
 			: sql.raw(`COUNT(*) as count`);
@@ -603,7 +591,8 @@ export class SqliteQueryBuilder {
 		if (this.wheres.length > 0) {
 			parts.push(sql`WHERE ${sql.join(this.wheres, sql` AND `)}`);
 		}
-		const rows = (await drizzle.all(sql.join(parts, sql` `))) as Array<{ count: number }>;
+		const query = sql.join(parts, sql` `);
+		const rows = getSqliteDb().prepare(query.text).all(...(query.params as never[])) as Array<{ count: number }>;
 		return rows[0]?.count ?? 0;
 	}
 

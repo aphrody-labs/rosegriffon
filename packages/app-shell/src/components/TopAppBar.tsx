@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CircleUser, LayoutDashboard, Menu, Settings, User } from "lucide-react";
+import { ArrowLeft, CircleUser, Home, LayoutDashboard, Menu, Settings, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -21,6 +21,8 @@ export interface TopAppBarProps {
 	appName?: string;
 	logoSrc?: string;
 	homeHref?: string;
+	/** Retour au portail Rose Griffon, distinct de l'accueil de l'univers courant. */
+	portalHref?: string;
 	adminHref?: string;
 	settingsHref?: string;
 	isAdmin?: boolean;
@@ -89,6 +91,7 @@ export function MobileHeader({
 	appName = "Rose Griffon",
 	logoSrc = "/RG_Logo_V2.5.webp",
 	homeHref = "/",
+	portalHref = "/",
 	adminHref = BASE_ADMIN,
 	settingsHref = "/settings",
 	isAdmin = false,
@@ -116,7 +119,6 @@ export function MobileHeader({
 
 	const isHome = pathname === "/" || pathname === homeHref;
 	const title = resolvePageTitle(pathname, titleMap);
-	const goBack = () => (window.history.length > 1 ? router.back() : router.push(homeHref));
 
 	const publicProfileHref =
 		accountHref && accountHref !== "/settings"
@@ -131,17 +133,6 @@ export function MobileHeader({
 				isScrolled ? "bg-sidebar/95 backdrop-blur-xl elevation-1" : "bg-sidebar"
 			} ${className ?? ""}`}
 		>
-			{!isHome && (
-				<button
-					type="button"
-					onClick={goBack}
-					className="size-12 shrink-0 rounded-full text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-					aria-label="Revenir à la page précédente"
-					title="Retour"
-				>
-					<ArrowLeft size={24} aria-hidden="true" />
-				</button>
-			)}
 			<button
 				onClick={toggleSidebar}
 				className="size-12 flex items-center justify-center text-sidebar-foreground hover:bg-sidebar-accent rounded-full transition-colors -ml-1"
@@ -169,6 +160,14 @@ export function MobileHeader({
 				</div>
 			)}
 			<div className="flex items-center gap-0.5">
+				<Link
+					href={portalHref}
+					className="size-12 rounded-full flex items-center justify-center text-sidebar-foreground/85 hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors"
+					aria-label="Accueil Rose Griffon"
+					title="Accueil"
+				>
+					<Home size={22} aria-hidden="true" />
+				</Link>
 				{isAdmin && (
 					<Link
 						href={adminHref}
@@ -181,7 +180,9 @@ export function MobileHeader({
 
 				{notificationsSlot}
 
-				{themeToggleSlot ?? <ThemeToggle className="size-12 !text-sidebar-foreground hover:!bg-sidebar-accent" />}
+				{themeToggleSlot ?? (
+					<ThemeToggle className="size-12 !text-sidebar-foreground hover:!bg-sidebar-accent" />
+				)}
 
 				{showSettings && (
 					<Link
@@ -221,7 +222,7 @@ export function MobileHeader({
 						(loginSlot ?? (
 							<Link
 								href="/login"
-							className="size-12 rounded-full flex items-center justify-center text-sidebar-foreground/85 hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors"
+								className="size-12 rounded-full flex items-center justify-center text-sidebar-foreground/85 hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors"
 								aria-label="Se connecter"
 							>
 								<CircleUser size={24} aria-hidden="true" />
@@ -238,6 +239,7 @@ export function DesktopTopBar({
 	appName = "Rose Griffon",
 	logoSrc = "/RG_Logo_V2.5.webp",
 	homeHref = "/",
+	portalHref = "/",
 	adminHref = BASE_ADMIN,
 	settingsHref = "/settings",
 	isAdmin = false,
@@ -295,6 +297,15 @@ export function DesktopTopBar({
 				>
 					<Menu size={24} aria-hidden="true" />
 				</button>
+				<Link
+					href={portalHref}
+					className="inline-flex h-10 items-center gap-2 rounded-full px-3 text-sm font-semibold text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+					aria-label="Accueil Rose Griffon"
+					title="Accueil Rose Griffon"
+				>
+					<Home size={19} aria-hidden="true" />
+					<span className="hidden xl:inline">Accueil</span>
+				</Link>
 				<Link href={homeHref} className="flex items-center gap-2 group px-2">
 					<div className="relative size-7 shrink-0 transition-transform group-hover:scale-105">
 						<Image src={logoSrc} fill sizes="28px" alt={appName} className="object-contain" />
@@ -340,7 +351,9 @@ export function DesktopTopBar({
 
 				{notificationsSlot}
 
-				{themeToggleSlot ?? <ThemeToggle className="!text-sidebar-foreground hover:!bg-sidebar-accent" />}
+				{themeToggleSlot ?? (
+					<ThemeToggle className="!text-sidebar-foreground hover:!bg-sidebar-accent" />
+				)}
 
 				{showSettings && (
 					<Link

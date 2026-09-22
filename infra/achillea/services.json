@@ -18,15 +18,26 @@
 			"owns": ["api", "socket-io", "ranked"],
 			"health": "http://127.0.0.1:4000/health/check"
 		},
-		{
-			"id": "api",
+    {
+      "id": "api",
 			"kind": "http",
 			"parent": "backend",
 			"bind": "127.0.0.1",
 			"port": 4000,
 			"health": "http://127.0.0.1:4000/health/check",
-			"publicIngress": "ranked-proxy-only"
-		},
+      "publicIngress": "ranked-proxy-only"
+    },
+    {
+      "id": "unified-api",
+      "kind": "http",
+      "workingDirectory": "apps/api",
+      "bind": "127.0.0.1",
+      "port": 8800,
+      "health": "http://127.0.0.1:8800/health",
+      "developmentCommand": ["bun", "run", "dev"],
+      "productionCommand": ["bun", "src/index.ts"],
+      "publicIngress": "https://api.rosegriffon.fr/v1/"
+    },
 		{
 			"id": "ranked",
 			"kind": "http-websocket",
@@ -116,6 +127,7 @@
 			"REDIS_PORT",
 			"WEBSITE_URL",
 			"PUBLIC_API_URL",
+			"UNIFIED_API_URL",
 			"OAUTH_CALLBACK_BASE_URL",
 			"WEB_ALLOWED_ORIGINS",
 			"RANKED_ALLOWED_ORIGINS",

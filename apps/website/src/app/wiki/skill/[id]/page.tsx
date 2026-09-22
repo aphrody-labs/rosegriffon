@@ -1,16 +1,15 @@
 /**
  * Rendu incrémental plutôt que `force-dynamic`.
  *
- * La fiche ne lit ni cookie ni en-tête (le pont JWT Supabase est désactivé :
- * `createClient()` ne touche à `headers()` que si on le réactive) — elle
+ * La fiche ne lit ni cookie ni en-tête et utilise le client PostgreSQL partagé — elle
  * n'avait donc aucune raison d'être recalculée à chaque visite. En
- * `force-dynamic`, les 993 techniques repayaient trois requêtes SQLite par
+ * `force-dynamic`, les 993 techniques repayaient plusieurs requêtes SQL par
  * affichage, TTFB compris : c'est du budget d'exploration gaspillé pour un
  * robot d'indexation, et un Core Web Vital dégradé pour tout le monde.
  *
  * Une heure de fraîcheur couvre largement le rythme réel de la donnée : le
- * miroir SQLite n'est échangé qu'une fois par nuit (`nie-miroir.timer`), et
- * la republication qui suit repart de toute façon sur un cache vide.
+ * les projections SQL sont durables et la republication qui suit repart de toute
+ * façon sur un cache vide.
  */
 export const revalidate = 3600;
 export const dynamic = "force-static";
@@ -22,9 +21,8 @@ import type { OverrideSkillData } from "@/components/wiki/OverrideSkillSection";
 import { SkillCutinSection } from "@/components/wiki/SkillCutinSection";
 import { SkillDetail } from "@/components/wiki/SkillDetail";
 import type { SkillVideoVariant } from "@/components/wiki/SkillVideoPlayer";
-import { cutinHasAssets, getSkillCutin } from "@rosegriffon/azalee/game/skills-cutin";
 import { getSkillImageUrl } from "@rosegriffon/azalee/images";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/postgres-client";
 import { wikiService } from "@/lib/wiki-service";
 
 /**
@@ -41,8 +39,8 @@ async function enrichSkillFromDbColumns(skill: Record<string, unknown>): Promise
 		return;
 	}
 	try {
-		const supabase = await createClient();
-		const { data } = await supabase
+		const db = createPostgresClient();
+		const { data } = await db
 			.from("inagle_skills")
 			.select(
 				"evolution_type, growth_type, tp_cost, tension_cost, foul_rate, partner_count, recast_time, description_en, skill_effect_bit_flag, hash_id"
@@ -86,7 +84,7 @@ async function enrichSkillFromDbColumns(skill: Record<string, unknown>): Promise
  * 236 techniques sur les 895 publiées par zukan ont DEUX vidéos (réussite/échec,
  * défense/contre-tir) : `inagle_skills.video_url` ne peut en porter qu'une, la
  * table de liaison porte les autres. Lecture sur la même source que le reste de
- * la fiche (miroir SQLite en prod, Postgres sinon).
+ * la fiche (PostgreSQL partagé).
  */
 interface SkillVideos {
 	variants: SkillVideoVariant[];
@@ -101,13 +99,19 @@ interface SkillVideos {
 
 async function fetchSkillVideos(skillId: string): Promise<SkillVideos> {
 	try {
-		const supabase = await createClient();
-		const { data } = await supabase
+		const db = createPostgresClient();
+		const { data } = await db
 			.from("inagle_skill_videos")
 			.select("position, label, video_url, poster_url, created_at")
 			.eq("skill_id", skillId)
 			.order("position", { ascending: true });
-		const rows = data ?? [];
+		const rows = (data ?? []) as Array<{
+			created_at: string | null;
+			label: string;
+			position: number;
+			poster_url: string | null;
+			video_url: string;
+		}>;
 		const dates = rows.map((row) => row.created_at).filter(Boolean) as string[];
 		return {
 			publishedAt: dates.length > 0 ? dates.toSorted()[0]! : null,
@@ -264,7 +268,8 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 		await wikiService.getOverrideSkillsForSkill(skillHexId);
 
 	// Assets de cut-in (niers : modèle 3D, telop, son) — clé = code interne `skill_id_str`.
-	const cutinEntry = getSkillCutin((skill as any).internalCode || id);
+	const cutinEntry = await wikiService.getSkillCutin((skill as any).internalCode || id);
+	const cutinAssetsAvailable = await wikiService.hasSkillCutinAssets(cutinEntry?.cutin?.event_id_name);
 
 	// Vidéos officielles zukan (1 ou 2 variantes selon la technique).
 	const { variants: videos, publishedAt } = await fetchSkillVideos((skill as any).skillId || id);
@@ -340,7 +345,7 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
 					<SkillCutinSection
 						cutin={cutinEntry.cutin}
 						skillName={name}
-						assetsAvailable={cutinHasAssets(cutinEntry.cutin.event_id_name)}
+						assetsAvailable={cutinAssetsAvailable}
 					/>
 				</div>
 			)}

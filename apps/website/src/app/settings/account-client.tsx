@@ -18,6 +18,7 @@ import {
 	TwoFactorCard,
 } from "@rosegriffon/ui";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
@@ -205,8 +206,15 @@ export function AccountClient({
 										Le portefeuille et la compétition utilisent ce même compte Rose Griffon.
 									</p>
 									<div className="mt-3 flex flex-wrap gap-3 text-sm font-medium">
-										<a className="text-primary hover:underline" href="/achillea/wallet">Portefeuille ACH</a>
-										<a className="text-primary hover:underline" href="/achillea/ranked/leaderboard">Classement</a>
+										<Link className="text-primary hover:underline" href="/achillea/wallet">
+											Portefeuille ACH
+										</Link>
+										<Link
+											className="text-primary hover:underline"
+											href="/achillea/ranked/leaderboard"
+										>
+											Classement
+										</Link>
 									</div>
 								</section>
 							</div>

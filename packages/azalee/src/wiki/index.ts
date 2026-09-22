@@ -3,7 +3,7 @@
  * auras, équipes, boutiques, quêtes, coachs, stades, drops, gacha, trophées…).
  *
  * ⚠ Module **serveur** : chaque accès passe par le client injecté
- * (`setDatabaseProvider`) ou, par défaut, par le miroir SQLite.
+ * (`setDatabaseProvider`) ou, par défaut, par PostgreSQL.
  * Les types et helpers purs correspondants vivent dans les modules `*-shared`,
  * ré-exportés par la racine du package et utilisables côté navigateur.
  */

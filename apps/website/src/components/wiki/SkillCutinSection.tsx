@@ -4,7 +4,7 @@
  * Section "Cut-in" d'une fiche hissatsu : affiche les assets du cut-in servis live par
  * niers — le **telop** (nom rendu, g4tx→png), le **modèle 3D** du cut-in (`chr/_waza`, assemblé
  * serveur depuis g4pkm→g4md + g4mg + texture g4tx embarquée) et la **texture** (`dx11/chr/_waza`,
- * g4tx→png). Données : `skills-cutin.json`.
+ * g4tx→png). Données : projection SQL `inagle_skill_cutins`.
  */
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";

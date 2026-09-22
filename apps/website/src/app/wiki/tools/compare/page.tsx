@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { CharacterComparator } from "@/components/wiki/CharacterComparator";
 import type { CompareCharacter, SkillInfo } from "@/components/wiki/CharacterComparator";
-import { createClient } from "@/lib/supabase/server";
+import { createPostgresClient } from "@rosegriffon/db/postgres-client";
 import { wikiService } from "@/lib/wiki-service";
 
 export const dynamic = "force-dynamic";
@@ -48,8 +48,8 @@ async function resolveSkillNames(raw: string): Promise<SkillInfo[]> {
 
 /** Try to inherit skills from a sibling variant (same chara_id) that has skill data */
 async function inheritSkillsFromSibling(charaId: string, currentId: string): Promise<SkillInfo[]> {
-	const supabase = await createClient();
-	const { data: siblings } = await supabase
+	const db = createPostgresClient();
+	const { data: siblings } = await db
 		.from("inagle_characters")
 		.select("skills, sheet_data")
 		.eq("chara_id", charaId)
@@ -143,14 +143,14 @@ async function resolveCharacter(idOrSlug: string | undefined): Promise<CompareCh
 	// 1) Lookup EXACT par slug ou id (le comparateur cible toujours une version précise).
 	//    On évite de passer par base_slug en premier : getCharacterByBaseSlug + variants[0]
 	//    collapsait Byron IE / Ares / GO sur la même variante.
-	const supabase = await createClient();
-	let { data: exactRow } = await supabase
+	const db = createPostgresClient();
+	let { data: exactRow } = await db
 		.from("inagle_characters")
 		.select("*")
 		.eq("slug", idOrSlug)
 		.maybeSingle();
 	if (!exactRow) {
-		({ data: exactRow } = await supabase
+		({ data: exactRow } = await db
 			.from("inagle_characters")
 			.select("*")
 			.eq("id", idOrSlug)

@@ -6,14 +6,16 @@ import {
 	PathParams,
 	Post,
 	QueryParams,
+	Req,
 	Res,
 	UseBefore,
 } from "@tsed/common";
 import { BadRequest, Forbidden, Unauthorized } from "@tsed/exceptions";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import { Client, MetadataStorage } from "@aphrody/discordx";
 
 import { CookieAuthorize } from "@/api/middlewares";
+import { urlsConfig } from "@/configs";
 import type { UserDTO } from "@/services";
 import { Database, Logger, MetricsService, Stats, WalletService } from "@/services";
 import { User, Wallet, Transaction, Sanction, License } from "@/entities";
@@ -38,8 +40,9 @@ export class AdminOpsController extends BaseController {
 
 	constructor() {
 		super();
-		[this.db, this.wallet, this.stats, this.client, this.metrics, this.logger] =
-			resolveDependenciesSync([Database, WalletService, Stats, Client, MetricsService, Logger]);
+		[this.db, this.wallet, this.stats, this.metrics, this.logger] =
+			resolveDependenciesSync([Database, WalletService, Stats, MetricsService, Logger]);
+		this.client = (globalThis as typeof globalThis & { __roseGriffonDiscordClient?: Client }).__roseGriffonDiscordClient ?? resolveDependenciesSync([Client])[0];
 	}
 
 	private requireStaff(ctx: Context, minRole = UserRole.Moderator): UserDTO {
@@ -217,24 +220,11 @@ export class AdminOpsController extends BaseController {
 		@PathParams("id") id: string,
 		@BodyParams() body: { role: number },
 		@Context() ctx: Context,
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		const actor = this.requireStaff(ctx, UserRole.Administrator);
-		const role = Number(body?.role);
-		if (!Number.isFinite(role) || role < 0 || role > UserRole.SuperAdministrator) {
-			throw new BadRequest("role invalide");
-		}
-		// Ne pas s'auto-dégrader / ne pas monter au-dessus de soi
-		if (role > (actor.role ?? 0)) throw new Forbidden("Impossible d'assigner un rôle supérieur");
-		if (id === actor.id && role < (actor.role ?? 0)) {
-			throw new Forbidden("Impossible de se rétrograder soi-même");
-		}
-		const em = this.db.em.fork();
-		const user = await em.findOne(User, { id });
-		if (!user) throw new BadRequest("Utilisateur introuvable");
-		user.role = role as UserRole;
-		await em.flush();
-		return res.json({ success: true, id, role });
+		this.requireStaff(ctx, UserRole.Administrator);
+		return this.forwardAdmin(`/users/${encodeURIComponent(id)}/role`, req, res, body);
 	}
 
 	/** Top wallets + derniers mouvements. */
@@ -286,20 +276,21 @@ export class AdminOpsController extends BaseController {
 		@PathParams("userId") userId: string,
 		@BodyParams() body: { amount: number; reason?: string },
 		@Context() ctx: Context,
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		const actor = this.requireStaff(ctx, UserRole.Administrator);
-		const amount = Number(body?.amount);
-		if (!Number.isFinite(amount) || amount === 0) throw new BadRequest("amount requis ≠ 0");
-		const reason = (body?.reason || `Ajustement staff par ${actor.id}`).slice(0, 200);
-		await this.wallet.getOrCreate(userId);
-		if (amount > 0) {
-			await this.wallet.credit(userId, Math.abs(amount), reason, { actorId: actor.id });
-		} else {
-			await this.wallet.debit(userId, Math.abs(amount), reason, { actorId: actor.id });
-		}
-		const bal = await this.wallet.getBalance(userId);
-		return res.json({ success: true, userId, balance: bal });
+		this.requireStaff(ctx, UserRole.Administrator);
+		return this.forwardAdmin(`/wallets/${encodeURIComponent(userId)}/adjust`, req, res, body);
+	}
+
+	private async forwardAdmin(path: string, req: Request, res: Response, body: unknown) {
+		const headers: Record<string, string> = { accept: "application/json", "content-type": "application/json" };
+		if (req.headers.cookie) headers.cookie = req.headers.cookie;
+		if (req.headers.authorization) headers.authorization = req.headers.authorization;
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea/admin${path}`, { method: "POST", headers, body: JSON.stringify(body) });
+		const text = await upstream.text();
+		res.status(upstream.status).type("json");
+		return res.send(text);
 	}
 
 	/** Santé bot / host (cookie staff, pas Bearer dev). */

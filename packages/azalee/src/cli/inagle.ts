@@ -7,9 +7,6 @@
  * ici, mais toute la *présentation* est typée dans `render.ts`.
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import path from "node:path";
-
 import { createInagleService } from "@rosegriffon/inagle/service";
 
 import { getSqlitePath, openReadonlyDatabase } from "./context";
@@ -105,7 +102,7 @@ function tableToKind(table: string): string {
 
 /**
  * Auras d'un personnage : union de `inagle_characters.data->auras` (miroir) et
- * du mapping `change_aura_skills.json` d'inagle. Renvoie `[]` si le miroir est
+ * des projections SQL d'inagle. Renvoie `[]` si le miroir est
  * absent — une aura manquante ne doit jamais faire échouer une fiche.
  */
 export function getAurasForChara(charaId: string, charaParamId: string): ResolvedAura[] {
@@ -134,27 +131,21 @@ export function getAurasForChara(charaId: string, charaParamId: string): Resolve
 			}
 		}
 
-		// 2. Mapping change_aura_skills d'inagle (source hors miroir).
-		let changeAuraSkillsPath = path.resolve(process.cwd(), "packages/inagle/src/entries/change_aura_skills.json");
-		if (!existsSync(changeAuraSkillsPath)) {
-			changeAuraSkillsPath = "/home/ubuntu/rg/packages/inagle/src/entries/change_aura_skills.json";
-		}
-		if (existsSync(changeAuraSkillsPath)) {
-			try {
-				const changeAuraSkills = JSON.parse(readFileSync(changeAuraSkillsPath, "utf-8")) as Array<{
-					id?: string;
-					charaParamId?: string;
-				}>;
-				const jsonAuras = changeAuraSkills.filter(
-					(c) =>
-						c.charaParamId &&
-						(c.charaParamId.toLowerCase() === charaId.toLowerCase() ||
-							c.charaParamId.toLowerCase() === charaParamId.toLowerCase()),
-				);
-				for (const a of jsonAuras) {
-					if (a.id) hexIds.add(a.id.toLowerCase());
+		// 2. Projections SQL des auras : le payload JSONB/SQLite est interrogé,
+		// mais aucun fichier JSON n'est utilisé comme source runtime.
+		for (const table of ["inagle_auras", "inagle_keshins", "inagle_souls", "inagle_miximax"] as const) {
+			const auraRows = db
+				.query(`SELECT id, data FROM ${table} WHERE lower(json_extract(data, '$.ownerCharaParamId')) IN (?, ?)`)
+				.all(charaId.toLowerCase(), charaParamId.toLowerCase()) as Array<{ id: string; data?: string | null }>;
+			for (const row of auraRows) {
+				try {
+					const payload = row.data ? (JSON.parse(row.data) as Record<string, unknown>) : {};
+					const skillId = payload.skillId ?? payload.id ?? row.id;
+					if (skillId) hexIds.add(String(skillId).toLowerCase());
+				} catch {
+					hexIds.add(row.id.toLowerCase());
 				}
-			} catch {}
+			}
 		}
 
 		const results: ResolvedAura[] = [];

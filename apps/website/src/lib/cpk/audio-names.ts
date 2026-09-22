@@ -7,14 +7,14 @@ import "server-only";
  * `inagle_characters.internal_code` est de la forme `<code>_<variante>` (`c01000010_5000`) : la
  * jointure est donc un préfixe, pas une égalité.
  *
- * COUVERTURE MESURÉE (14 août 2026, VFS complet + miroir) : 1 923 des 4 539 banques japonaises
+ * COUVERTURE MESURÉE (14 août 2026, VFS complet + PostgreSQL) : 1 923 des 4 539 banques japonaises
  * s'apparient à un personnage, soit 42 %. Les 2 616 restantes portent des codes absents du miroir
  * (PNJ, variantes non fichées). Elles restent listées et jouables, simplement sans nom — on
  * n'invente pas un porteur qu'on ne sait pas nommer.
  */
 
-import { createSqliteClient } from "@rosegriffon/azalee/db";
 import { voiceBankCharacterCode } from "@rosegriffon/azalee/cpk/audio";
+import { selectInagle } from "@/lib/db/inagle-sql";
 
 /** Ce qu'une banque sonorise, quand on sait le dire. */
 export interface BankOwner {
@@ -49,11 +49,8 @@ export function ownerIndex(): Promise<Map<string, BankOwner>> {
 	_index ??= (async () => {
 		const index = new Map<string, BankOwner>();
 		try {
-			const client = createSqliteClient();
-			const { data } = (await client
-				.from("inagle_characters")
-				.select("internal_code,name_fr,name_en,name_ja,slug")) as { data: CharaRow[] | null };
-			for (const row of data ?? []) {
+			const rows = await selectInagle<CharaRow>("inagle_characters", "internal_code,name_fr,name_en,name_ja,slug");
+			for (const row of rows) {
 				const code = row.internal_code?.split("_")[0]?.toLowerCase();
 				if (!code) continue;
 				const name = row.name_fr || row.name_en || row.name_ja;

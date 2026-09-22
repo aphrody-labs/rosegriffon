@@ -19,7 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { deleteTeam, saveTeam, updateTeam } from "@/app/actions/teams";
 import { Icon } from "@/components/ui/Icon";
-import { FORMATIONS, ROLE_COLORS } from "@rosegriffon/azalee/game/formations";
+import { ROLE_COLORS } from "@rosegriffon/azalee/game/formations";
 import type { Formation } from "@rosegriffon/azalee/game/formations";
 import type { SavedTeam, TeamData, TeamMember } from "@rosegriffon/azalee/game/team-types";
 import { cn } from "@/lib/utils";
@@ -96,13 +96,14 @@ function encodeTeamToURL(formationId: string, members: Record<string, TeamMember
 
 function decodeTeamFromURL(
 	encoded: string,
-	characters: PickerCharacter[]
+	characters: PickerCharacter[],
+	formations: Formation[],
 ): { formationIdx: number; members: Record<string, TeamMember> } | null {
 	try {
 		const decoded = atob(encoded);
 		const parts = decoded.split("|");
 		const formationId = parts[0];
-		const formationIdx = FORMATIONS.findIndex((f) => f.id === formationId);
+		const formationIdx = formations.findIndex((f) => f.id === formationId);
 		if (formationIdx === -1) {
 			return null;
 		}
@@ -227,39 +228,40 @@ function FormationMiniPreview({ formation }: { formation: Formation }) {
 
 interface TeamBuilderProps {
 	characters: PickerCharacter[];
+	formations: Formation[];
 	initialTeam?: SavedTeam | null;
 	isAuthenticated?: boolean;
 }
 
-export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBuilderProps) {
+export function TeamBuilder({ characters, formations, initialTeam, isAuthenticated }: TeamBuilderProps) {
 	// ── Init from URL > initialTeam > localStorage ─────
 	const [formationIdx, setFormationIdx] = useState(() => {
 		if (typeof window !== "undefined") {
 			const params = new URLSearchParams(window.location.search);
 			const t = params.get("t");
 			if (t) {
-				const decoded = decodeTeamFromURL(t, characters);
+				const decoded = decodeTeamFromURL(t, characters, formations);
 				if (decoded) {
 					return decoded.formationIdx;
 				}
 			}
 		}
 		if (initialTeam) {
-			const idx = FORMATIONS.findIndex((f) => f.id === initialTeam.formation_id);
+			const idx = formations.findIndex((f) => f.id === initialTeam.formation_id);
 			return Math.max(idx, 0);
 		}
 		const ls = loadFromLocalStorage();
 		return ls?.formationIdx ?? 0;
 	});
 
-	const formation = FORMATIONS[formationIdx];
+	const formation = formations[formationIdx] ?? formations[0];
 
 	const [members, setMembers] = useState<Record<string, TeamMember>>(() => {
 		if (typeof window !== "undefined") {
 			const params = new URLSearchParams(window.location.search);
 			const t = params.get("t");
 			if (t) {
-				const decoded = decodeTeamFromURL(t, characters);
+				const decoded = decodeTeamFromURL(t, characters, formations);
 				if (decoded) {
 					return decoded.members;
 				}
@@ -843,7 +845,7 @@ export function TeamBuilder({ characters, initialTeam, isAuthenticated }: TeamBu
 						Formation
 					</p>
 					<div className="flex gap-2 overflow-x-auto pb-1.5 -mx-4 px-4 sm:-mx-1 sm:px-1 scrollbar-hide scroll-smooth snap-x">
-						{FORMATIONS.map((f, i) => {
+						{formations.map((f, i) => {
 							const isActive = i === formationIdx;
 							return (
 								<button

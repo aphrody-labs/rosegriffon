@@ -1,67 +1,35 @@
-import { createSupabaseServiceClient } from "../../../../db/src/service.js";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import type { Database } from "@rosegriffon/db/schema";
 
-const supabase = createSupabaseServiceClient();
+const db = createAchilleaSql<Database>();
 
 async function main() {
-    try {
-        console.log("Fetching all skills from Supabase...");
-        const { data: skills, error } = await supabase.from("inagle_skills").select("*");
-        if (error) {
-            console.error("Error fetching skills:", error);
-            return;
-        }
-
-        console.log(`Total skills in DB: ${skills.length}`);
-
-        // 1. Check for duplicates by name
-        const seenNames = new Set<string>();
-        const nameDuplicates: any[] = [];
-        for (const s of skills) {
-            const name = s.name_fr || s.name_en || s.name_ja;
-            if (name) {
-                const key = name.toLowerCase().trim();
-                if (seenNames.has(key)) {
-                    nameDuplicates.push(s);
-                } else {
-                    seenNames.add(key);
-                }
-            }
-        }
-
-        console.log(`Duplicate skills by name: ${nameDuplicates.length}`);
-        for (const s of nameDuplicates.slice(0, 10)) {
-            console.log(`- ID: ${s.id}, Name: ${s.name_fr} (${s.name_en}), Category: ${s.category}`);
-        }
-
-        // 2. Check for passive skills (e.g. category = 'Passif' or 'Passive' or is_passive)
-        const passives = skills.filter(s => {
-            const cat = s.category?.toLowerCase() || "";
-            const isPassiveCat = cat.includes("passif") || cat.includes("passive");
-            // Check in data object if available
-            const dataPassive = s.data && (s.data.category === 6 || s.data.category === "Passive" || s.data.isPassive);
-            return isPassiveCat || dataPassive;
-        });
-
-        console.log(`Passive skills in DB: ${passives.length}`);
-        for (const s of passives.slice(0, 10)) {
-            console.log(`- ID: ${s.id}, Name: ${s.name_fr} (${s.name_en}), Category: ${s.category}`);
-        }
-
-        // 3. Check for duplicates by ID
-        const seenIds = new Set<string>();
-        const idDuplicates: any[] = [];
-        for (const s of skills) {
-            if (seenIds.has(s.id)) {
-                idDuplicates.push(s);
-            } else {
-                seenIds.add(s.id);
-            }
-        }
-        console.log(`Duplicate skills by ID: ${idDuplicates.length}`);
-
-    } catch (e) {
-        console.error("Error:", e);
-    }
+	try {
+		const skills = await db.selectFrom("inagle_skills").selectAll().orderBy("id", "asc").execute();
+		console.log(`Total skills in PostgreSQL: ${skills.length}`);
+		const seenNames = new Set<string>();
+		const nameDuplicates = skills.filter((skill) => {
+			const name = skill.name_fr ?? skill.name_en ?? skill.name_ja;
+			if (!name) return false;
+			const key = name.toLowerCase().trim();
+			if (seenNames.has(key)) return true;
+			seenNames.add(key);
+			return false;
+		});
+		console.log(`Duplicate skills by name: ${nameDuplicates.length}`);
+		for (const skill of nameDuplicates.slice(0, 10)) console.log(`- ID: ${skill.id}, Name: ${skill.name_fr} (${skill.name_en}), Category: ${skill.category}`);
+		const passives = skills.filter((skill) => {
+			const category = skill.category?.toLowerCase() ?? "";
+			const data = skill.data && typeof skill.data === "object" && !Array.isArray(skill.data) ? skill.data as Record<string, unknown> : {};
+			return category.includes("passif") || category.includes("passive") || data.category === 6 || data.category === "Passive" || data.isPassive === true;
+		});
+		console.log(`Passive skills in PostgreSQL: ${passives.length}`);
+		for (const skill of passives.slice(0, 10)) console.log(`- ID: ${skill.id}, Name: ${skill.name_fr} (${skill.name_en}), Category: ${skill.category}`);
+		console.log(`Duplicate skills by ID: ${skills.length - new Set(skills.map((skill) => skill.id)).size}`);
+	} catch (error) {
+		console.error("Error:", error);
+		process.exitCode = 1;
+	}
 }
 
-main();
+void main();

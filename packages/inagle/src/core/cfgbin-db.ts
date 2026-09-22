@@ -1,7 +1,7 @@
 /**
  * @file cfgbin-db.ts
- * @description Loader cfg.bin natif via la DB SQLite produite par
- * `iecode cfgbin-db build` (~/data/cache/cfgbin.sqlite).
+ * @description Accès cfg.bin unifié : PostgreSQL JSONB en durable, SQLite
+ * produit par `iecode cfgbin-db build` uniquement pour extraction/dev.
  *
  * Remplace les centaines de milliers de loose `.cfg.bin.json` du
  * filesystem par une seule DB ~2.3 GB lue en O(1) via index PK.
@@ -24,15 +24,17 @@
  *
  * Trouvable via `IEVR_CFGBIN_DB` env var, fallback ~/data/cache/cfgbin.sqlite.
  *
- * Si la DB n'existe pas, `cfgbinDbAvailable()` retourne false et tous les
- * appelants doivent fallback sur le filesystem (`.cfg.bin.json` loose).
- * C'est le mode par defaut dans azalee — la DB est opt-in via iecode.
+ * PostgreSQL est activé automatiquement dès qu'une URL durable est présente;
+ * `IEVR_CFGBIN_POSTGRES=0` reste le seul opt-out explicite pour l'extraction
+ * offline.
  */
 
 import { homedir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import type { Database } from "bun:sqlite";
 import { createRequire } from "node:module";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import type { Database as SqlDatabase } from "@rosegriffon/db/schema";
 
 const require = createRequire(import.meta.url);
 const DB = typeof Bun !== "undefined" ? (require("bun:sqlite").Database as typeof Database) : null;
@@ -50,6 +52,58 @@ let _listStmt: ReturnType<Database["prepare"]> | null = null;
  */
 export function cfgbinDbPath(): string {
 	return process.env.IEVR_CFGBIN_DB ?? DEFAULT_DB_PATH;
+}
+
+/** PostgreSQL is the durable runtime source. SQLite is intentionally limited
+ * to extraction/dev and is never treated as the system of record. */
+export function cfgbinPostgresEnabled(): boolean {
+	if (process.env.IEVR_CFGBIN_POSTGRES === "0") return false;
+	return process.env.IEVR_CFGBIN_POSTGRES === "1" || Boolean(
+		process.env.DATABASE_URL || process.env.ROSE_GRIFFON_DATABASE_URL ||
+		process.env.RG_DATABASE_URL || process.env.ACHILLEA_DATABASE_URL,
+	);
+}
+
+function postgresDb() {
+	return createAchilleaSql<SqlDatabase>();
+}
+
+export async function cfgbinPostgresFindLatest(category: string, prefix: string): Promise<string | null> {
+	if (!cfgbinPostgresEnabled()) return null;
+	try {
+		const row = await postgresDb()
+			.selectFrom("inagle_cfgbin")
+			.select("path")
+			.where("path", "like", `data/common/gamedata/${category}/${prefix}%cfg.bin`)
+			.where("parsed", "=", 1)
+			.orderBy("path", "desc")
+			.limit(1)
+			.executeTakeFirst();
+		const base = row?.path.split("/").pop();
+		return base ? `${base}.json` : null;
+	} catch {
+		return null;
+	}
+}
+
+async function cfgbinPostgresLoadByPath(path: string): Promise<unknown> {
+	if (!cfgbinPostgresEnabled()) throw new Error("cfgbin-postgres: disabled");
+	const row = await postgresDb()
+		.selectFrom("inagle_cfgbin")
+		.select(["data", "error"])
+		.where("path", "=", path)
+		.executeTakeFirst();
+	if (!row) throw new Error(`cfgbin-postgres: row not found '${path}'`);
+	if (row.data == null) throw new Error(`cfgbin-postgres: parse failed '${path}': ${row.error ?? "?"}`);
+	return row.data;
+}
+
+export function cfgbinPostgresLoad(category: string, filename: string): Promise<unknown> {
+	return cfgbinPostgresLoadByPath(cfgbinDbPathFor(category, filename));
+}
+
+export function cfgbinPostgresLoadText(locale: string, filename: string): Promise<unknown> {
+	return cfgbinPostgresLoadByPath(cfgbinDbTextPathFor(locale, filename));
 }
 
 /**

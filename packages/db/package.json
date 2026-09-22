@@ -1,39 +1,45 @@
 {
-  "name": "@rosegriffon/db",
-  "version": "1.0.0",
-  "description": "Client Supabase partagé + Database types générés (site + bot)",
-  "type": "module",
-  "exports": {
-    ".": "./src/index.ts",
-    "./browser": "./src/browser.ts",
-    "./server": "./src/server.ts",
-    "./service": "./src/service.ts",
-    "./redis": "./src/redis.ts",
-    "./rag": "./src/rag.ts",
-    "./storage": "./src/storage.ts",
-    "./stats": "./src/services/stats.ts",
-    "./types": "./src/types.ts",
-    "./platform": "./src/platform.ts",
-    "./achillea": "./src/achillea.ts"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org"
-  },
-  "scripts": {
-    "types:gen": "bun scripts/types-gen.ts",
-    "type-check": "bun --bun tsc --noEmit",
-    "test": "bun test",
-    "lint": "bunx oxlint -c ../../.oxlintrc.json src"
-  },
-  "dependencies": {
-    "@rosegriffon/types": "workspace:*",
-    "@supabase/ssr": "catalog:",
-    "@supabase/supabase-js": "catalog:"
-  },
-  "devDependencies": {
-    "@types/bun": "catalog:",
-    "typescript": "catalog:",
-    "vitest": "catalog:"
-  }
+	"name": "@rosegriffon/db",
+	"version": "1.0.0",
+	"description": "Client Supabase partagé + Database types générés (site + bot)",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./browser": "./src/browser.ts",
+		"./server": "./src/server.ts",
+		"./service": "./src/service.ts",
+		"./redis": "./src/redis.ts",
+		"./storage": "./src/storage.ts",
+		"./stats": "./src/services/stats.ts",
+		"./types": "./src/types.ts",
+		"./platform": "./src/platform.ts",
+		"./achillea": "./src/achillea.ts",
+		"./achillea-sql": "./src/achillea-sql.ts",
+		"./postgres-client": "./src/postgres-client.ts",
+		"./kysely-types": "./src/kysely-types.ts",
+		"./schema": "./src/schema/index.ts"
+	},
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org"
+	},
+	"scripts": {
+		"types:gen": "bun scripts/types-gen.ts",
+		"type-check": "bun --bun ../../node_modules/typescript/bin/tsc --noEmit",
+		"test": "bun test",
+		"lint": "bunx oxlint -c ../../.oxlintrc.json src"
+	},
+	"dependencies": {
+		"@rosegriffon/types": "workspace:*",
+		"@supabase/ssr": "catalog:",
+		"kysely": "catalog:",
+		"pg": "catalog:"
+	},
+	"devDependencies": {
+		"@types/bun": "catalog:",
+		"@types/pg": "catalog:",
+		"kysely-supabase": "^0.2.1",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	}
 }

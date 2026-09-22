@@ -1,7 +1,8 @@
 import { singleton } from "tsyringe";
+import { phaseLobbiesAreFinished, shouldFinishTournament } from "@rosegriffon/achillea-core";
 
 import { Lobby, Tournament, TournamentPhase } from "@/entities";
-import { LobbyState, PhaseStatus, TournamentState } from "@/utils/enums";
+import { PhaseStatus, TournamentState } from "@/utils/enums";
 
 import { Database } from "./Database";
 import { SwissStageService } from "./SwissStageService";
@@ -29,9 +30,7 @@ export class PhaseTransitionService {
 
 		const lobbies = await em.find(Lobby, { phase: activePhase.id });
 
-		const allDone =
-			lobbies.length > 0 &&
-			lobbies.every((l) => l.state === LobbyState.FINISHED || l.state === LobbyState.FORFEITED);
+		const allDone = phaseLobbiesAreFinished(lobbies.map((l) => l.state));
 
 		if (!allDone) return;
 
@@ -40,15 +39,7 @@ export class PhaseTransitionService {
 
 		await this.swissStageService.advanceToNextPhase(activePhase);
 
-		const allCompleted = phases.every(
-			(p) => p.status === PhaseStatus.Completed || p.id === activePhase.id
-		);
-
-		const nextActive = phases.find(
-			(p) => p.status === PhaseStatus.Active && p.id !== activePhase.id
-		);
-
-		if (allCompleted && !nextActive) {
+		if (shouldFinishTournament(phases, activePhase.id)) {
 			const t = await em.findOne(Tournament, { id: tournament.id });
 			if (t && t.internalState === TournamentState.ONGOING) {
 				t.internalState = TournamentState.FINISHED;

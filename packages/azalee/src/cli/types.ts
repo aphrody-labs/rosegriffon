@@ -33,17 +33,8 @@ export type RedisOptions = JsonOption;
 /** Sous-commandes acceptées par `azalee redis`. */
 export type RedisSubcommand = "get" | "set" | "del";
 
-/** `azalee glossary-rebuild [-j]` */
-export type GlossaryRebuildOptions = JsonOption;
-
 /** `azalee audit [-j]` */
 export type AuditOptions = JsonOption;
-
-/** `azalee rag [query] [-j] [-l <limit>]` */
-export interface RagOptions extends JsonOption {
-	/** Nombre maximum de passages renvoyés (chaîne : valeur brute commander). */
-	limit: string;
-}
 
 /** `azalee status [-j]` */
 export type StatusOptions = JsonOption;
@@ -56,12 +47,10 @@ export interface WaveOptions {
 	loop?: boolean;
 }
 
-/** `azalee sync [-p] [-j]` */
+/** `azalee sync [-p]` */
 export interface SyncOptions {
 	/** Pousse les données inagle locales vers PostgreSQL. */
 	push?: boolean;
-	/** Rapatrie les corrections SQL vers `characters.json`. */
-	json?: boolean;
 }
 
 /** `azalee compare <chara1> <chara2> [-l <level>] [-j]` */

@@ -1,70 +1,44 @@
-import { Context, Controller, Get, QueryParams, Res, UseBefore } from "@tsed/common";
-import { Unauthorized } from "@tsed/exceptions";
-import type { Response } from "express";
+import { Controller, Get, QueryParams, Req, Res } from "@tsed/common";
+import type { Request, Response } from "express";
 
-import { CookieAuthorize } from "@/api/middlewares";
-import { WalletService } from "@/services";
+import { urlsConfig } from "@/configs";
 import { BaseController } from "@/utils/classes";
-import { resolveDependenciesSync } from "@/utils/functions";
 
 /**
- * /wallet — portefeuille virtuel du joueur connecté (lecture seule).
- *
- *   GET /wallet/me            -> { balance: number, currency: string }
- *   GET /wallet/me/history    -> { transactions: WalletTxDTO[] }  (?limit= ?offset=)
- *
- * Crédit / débit / transfert restent pilotés côté système (ranked, tournois, sanctions…),
- * pas exposés au joueur depuis le web.
+ * Compatibility transport: wallet state and transactions are API-owned.
  */
 @Controller("/wallet")
 export class WalletController extends BaseController {
-	private walletService: WalletService;
-
-	constructor() {
-		super();
-		[this.walletService] = resolveDependenciesSync([WalletService]);
-	}
+	constructor() { super(); }
 
 	/** Solde courant du joueur (crée le wallet à la volée si absent). */
 	@Get("/me")
-	@UseBefore(CookieAuthorize)
-	async me(@Context() ctx: Context, @Res() res: Response) {
-		const user = ctx.get("user");
-		if (!user) throw new Unauthorized("Non authentifié");
-
-		const wallet = await this.walletService.getOrCreate(user.id);
-		return res.status(200).json({
-			balance: parseFloat(wallet.balance),
-			currency: wallet.currency,
-		});
+	async me(@Req() req: Request, @Res() res: Response) {
+		return this.forward("/wallet/me", req, res);
 	}
 
 	/** Historique des transactions (du plus récent au plus ancien), avec sens (in/out). */
 	@Get("/me/history")
-	@UseBefore(CookieAuthorize)
 	async history(
 		@QueryParams("limit") limit: string,
 		@QueryParams("offset") offset: string,
-		@Context() ctx: Context,
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		const user = ctx.get("user");
-		if (!user) throw new Unauthorized("Non authentifié");
+		const query = new URLSearchParams();
+		if (limit) query.set("limit", String(limit));
+		if (offset) query.set("offset", String(offset));
+		return this.forward(`/wallet/me/history${query.size ? `?${query}` : ""}`, req, res);
+	}
 
-		const lim = Math.min(100, Math.max(1, Math.floor(Number(limit ?? 20)) || 20));
-		const off = Math.max(0, Math.floor(Number(offset ?? 0)) || 0);
-		const txs = await this.walletService.getHistory(user.id, lim, off);
-
-		return res.status(200).json({
-			transactions: txs.map((t) => ({
-				id: t.id,
-				type: t.type,
-				amount: parseFloat(t.amount),
-				reason: t.reason ?? null,
-				// Sens relatif au joueur : sortie si lui est l'émetteur, entrée sinon.
-				direction: t.fromUser?.id === user.id ? "out" : "in",
-				createdAt: t.createdAt,
-			})),
-		});
+	private async forward(path: string, req: Request, res: Response) {
+		const headers: Record<string, string> = { accept: "application/json" };
+		if (req.headers.cookie) headers.cookie = req.headers.cookie;
+		if (req.headers.authorization) headers.authorization = req.headers.authorization;
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea${path}`, { headers });
+		const text = await upstream.text();
+		res.status(upstream.status).setHeader("Cache-Control", "no-store");
+		res.type("application/json");
+		return res.send(text);
 	}
 }

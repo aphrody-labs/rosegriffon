@@ -1,9 +1,8 @@
 import type { ButtonInteraction, ModalSubmitInteraction } from "discord.js";
 import { ChannelType } from "discord.js";
 import type { Client } from "@aphrody/discordx";
-import { ButtonComponent, Guard, ModalComponent } from "@aphrody/discordx";
 
-import { Discord, Injectable } from "@/decorators";
+import { ButtonComponent, Discord, Guard, Injectable, ModalComponent } from "@/decorators";
 import { Clan, Guild } from "@/entities";
 import { ClanEnabled, GuildAdminOnly } from "@/guards";
 import { Database } from "@/services";

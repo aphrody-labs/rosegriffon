@@ -7,7 +7,6 @@
 import "reflect-metadata";
 
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import jwt from "jsonwebtoken";
 import { container } from "tsyringe";
 
 class MockUserServiceClass {}
@@ -66,7 +65,6 @@ const entityNames = [
 	"Lobby",
 	"LobbyUser",
 	"LobbyMatch",
-	"OauthCsrf",
 	"UserConnection",
 	"Rank",
 	"UserElo",
@@ -204,26 +202,21 @@ describe("AuthController", () => {
 		container.clearInstances();
 	});
 
-	test("discordLogin redirects to Discord OAuth page", async () => {
+	test("discordLogin redirects to the unified Rose Griffon login", async () => {
 		// Wait a brief moment to ensure dependency resolution in controller constructor completes
 		await new Promise((resolve) => setTimeout(resolve, 10));
 
 		const redirectMock = mock(() => {});
-		const cookieMock = mock(() => {});
 		const mockRes = {
-			cookie: cookieMock,
 			redirect: redirectMock,
 		} as any;
 
 		authController.discordLogin("/profile", mockRes);
 
 		expect(redirectMock.mock.calls.length).toBe(1);
-		expect(cookieMock.mock.calls.length).toBe(1);
 		const redirectUrl = new URL(redirectMock.mock.calls[0][0]);
-		expect(redirectUrl.origin).toBe("https://discord.com");
-		expect(redirectUrl.searchParams.get("client_id")).toBeTruthy();
-		expect(redirectUrl.searchParams.get("redirect_uri")).not.toContain("evil.example");
-		expect(redirectUrl.searchParams.get("state")).not.toBe("/profile");
+		expect(redirectUrl.pathname).toBe("/login");
+		expect(redirectUrl.searchParams.get("redirect")).toBe("/profile");
 	});
 
 	test("logout clears cookie and returns ok", () => {
@@ -243,138 +236,25 @@ describe("AuthController", () => {
 		expect(jsonMock.mock.calls[0][0]).toEqual({ ok: true });
 	});
 
-	test("token returns a short-lived realtime token instead of the session cookie", () => {
-		const jsonMock = mock(() => {});
-		const mockRes = { setHeader: mock(() => {}), json: jsonMock } as any;
-		const ctx = {
-			get: mock(() => ({ id: "42", username: "realtime-user", avatar: "hash" })),
-		} as any;
-
-		authController.token(ctx, mockRes);
-
-		expect(jsonMock).toHaveBeenCalledTimes(1);
-		const body = jsonMock.mock.calls[0][0] as { token: string; expiresIn: number; userId: string };
-		expect(body.expiresIn).toBe(300);
-		expect(body.userId).toBe("42");
-		const decoded = jwt.decode(body.token) as jwt.JwtPayload & { tokenUse: string };
-		expect(decoded.tokenUse).toBe("realtime");
-		expect(decoded.aud).toBe("achillea-realtime");
-	});
-
-	test("callback exchanges code, syncs user, sets session cookie and redirects", async () => {
-		// Wait for constructor dependency resolution
-		await new Promise((resolve) => setTimeout(resolve, 10));
-
-		// Mock Discord APIs fetch
-		globalThis.fetch = mock((url: string, init?: any) => {
-			if (url.includes("oauth2/token")) {
-				return Promise.resolve({
-					ok: true,
-					json: () => Promise.resolve({ access_token: "mock-access-token" }),
-				} as any);
-			}
-			if (url.includes("users/@me")) {
-				return Promise.resolve({
-					ok: true,
-					json: () =>
-						Promise.resolve({
-							id: "98765432109876543",
-							username: "discorduser",
-							avatar: "avatar_hash",
-						}),
-				} as any);
-			}
-			return Promise.reject(new Error(`Unknown fetch target: ${url}`));
-		}) as any;
-
-		const cookieMock = mock(() => {});
-		const redirectMock = mock(() => {});
-		const mockRes = {
-			cookie: cookieMock,
-			redirect: redirectMock,
-		} as any;
-		const { createOAuthState, OAUTH_STATE_COOKIE } =
-			await import("../../src/api/security/oauth-state");
-		const oauthState = createOAuthState("/clans");
-
-		await authController.callback(
-			"some-auth-code",
-			oauthState.state,
-			`${OAUTH_STATE_COOKIE}=${oauthState.nonce}`,
-			mockRes
-		);
-
-		// Verify fetch calls
-		expect(globalThis.fetch).toHaveBeenCalled();
-
-		// Verify syncWebUser was called with Discord ID
-		expect(mockUserService.syncWebUser).toHaveBeenCalledWith("98765432109876543");
-
-		// Verify session token cookie was set
-		expect(cookieMock.mock.calls.length).toBe(1);
-		expect(cookieMock.mock.calls[0][0]).toBe("token");
-		expect(cookieMock.mock.calls[0][1]).toBeDefined(); // JWT token
-		expect(cookieMock.mock.calls[0][2].httpOnly).toBe(true);
-		// Une seule mutation de cookie doit traverser le proxy Bun : le nonce CSRF
-		// court expire naturellement, la session ne doit jamais être le 2e Set-Cookie.
-		expect(cookieMock.mock.calls.length).toBe(1);
-
-		// Verify redirect to safe state
-		expect(redirectMock.mock.calls.length).toBe(1);
-		expect(redirectMock.mock.calls[0][0]).toBe("/clans");
-	});
-
-	test("callback redirects with a notice when the user denies the authorization", async () => {
-		globalThis.fetch = mock(() => Promise.reject(new Error("must not be called"))) as any;
-		const { createOAuthState, OAUTH_STATE_COOKIE } =
-			await import("../../src/api/security/oauth-state");
-		const oauthState = createOAuthState("/ranked");
-		const redirectMock = mock(() => {});
-		const statusMock = mock(() => ({ send: mock(() => {}) }));
-		const mockRes = { redirect: redirectMock, status: statusMock } as any;
-
-		await authController.callback(
-			"",
-			oauthState.state,
-			`${OAUTH_STATE_COOKIE}=${oauthState.nonce}`,
-			mockRes,
-			"access_denied",
-			"The resource owner or authorization server denied the request"
-		);
-
-		expect(statusMock).not.toHaveBeenCalled();
-		expect(redirectMock.mock.calls[0][0]).toBe("/ranked?auth=denied");
-		expect(globalThis.fetch).not.toHaveBeenCalled();
-	});
-
-	test("callback without code nor state falls back to the home page with a notice", async () => {
-		globalThis.fetch = mock(() => Promise.reject(new Error("must not be called"))) as any;
-		const redirectMock = mock(() => {});
-		const mockRes = { redirect: redirectMock } as any;
-
-		await authController.callback("", "", "", mockRes);
-
-		expect(redirectMock.mock.calls[0][0]).toBe("/?auth=error");
-	});
-
-	test("callback rejects a state that is not bound to the browser cookie", async () => {
-		globalThis.fetch = mock(() => Promise.reject(new Error("must not be called"))) as any;
-		const { createOAuthState, OAUTH_STATE_COOKIE } =
-			await import("../../src/api/security/oauth-state");
-		const oauthState = createOAuthState("/clans");
+	test("token relays the unified realtime-token endpoint", async () => {
+		const body = { token: "unified-realtime-token", expiresIn: 300, userId: "42" };
+		globalThis.fetch = mock(async () => new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } })) as unknown as typeof fetch;
 		const sendMock = mock(() => {});
-		const mockRes = { send: sendMock } as any;
-		const statusMock = mock(() => mockRes);
-		mockRes.status = statusMock;
+		const mockRes = { status: mock(() => mockRes), setHeader: mock(() => mockRes), type: mock(() => mockRes), send: sendMock } as any;
+		await authController.token({ headers: { cookie: "token=unified" } } as any, mockRes);
+		expect(sendMock).toHaveBeenCalledTimes(1);
+		expect(sendMock.mock.calls[0][0]).toContain("unified-realtime-token");
+	});
 
-		await authController.callback(
-			"some-auth-code",
-			oauthState.state,
-			`${OAUTH_STATE_COOKIE}=attacker-nonce`,
-			mockRes
-		);
+	test("legacy callback routes to unified RG login without exchanging a Discord code", async () => {
+		const redirectMock = mock(() => {});
 
-		expect(statusMock).toHaveBeenCalledWith(400);
-		expect(globalThis.fetch).not.toHaveBeenCalled();
+		await authController.callback({ redirect: redirectMock });
+
+		expect(redirectMock).toHaveBeenCalledTimes(1);
+		const redirectUrl = new URL(redirectMock.mock.calls[0][0]);
+		expect(redirectUrl.pathname).toBe("/login");
+		expect(redirectUrl.searchParams.get("redirect")).toBe("/achillea");
+		expect(mockUserService.syncWebUser).not.toHaveBeenCalled();
 	});
 });

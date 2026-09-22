@@ -1,22 +1,22 @@
 /**
  * Data layer SERVEUR du hub « Inazuma Eleven Cross » (`/cross/*`).
  *
- * Source = artefacts d'extraction statique trackés sous `data/cross/*` (dump
- * IL2CPP + catalogue Addressables). Petits JSON → import direct (tracé par le
- * build standalone, bundle serveur uniquement). Le gros catalogue (25 328
- * objets) vit en `catalog-index.ndjson.gz` et est matérialisé à part par
- * `lib/cross/catalog.ts` (pattern singleton, comme `lib/cpk`).
+ * Source = métadonnées d'extraction statique trackées sous `data/cross/*`.
+ * Le catalogue Addressables est matérialisé dans PostgreSQL et servi par
+ * l'API unifiée ; ce module conserve uniquement les métadonnées Cross.
  *
  * ⚠ module **serveur** — ne pas importer depuis un composant `"use client"`.
  * Les types + helpers purs sont dans `lib/cross/data-shared.ts`.
  */
 
-import schemaJson from "../data/cross/masterdata-schema.json";
-import enumsJson from "../data/cross/enums.json";
-import statusJson from "../data/cross/extraction-status.json";
-import audioJson from "../data/cross/audio-manifest.json";
-import statsJson from "../data/cross/catalog-stats.json";
-import typeSchemaJson from "../data/cross/type-schema.json";
+import {
+	crossAudioManifest as audioJson,
+	crossCatalogStats as statsJson,
+	crossEnums as enumsJson,
+	crossExtractionStatus as statusJson,
+	crossSchema as schemaJson,
+	crossTypeSchema as typeSchemaJson,
+} from "@rosegriffon/inagle-cross";
 import type {
 	CrossAudioManifest,
 	CrossEnums,
@@ -117,7 +117,7 @@ export function getCrossDataCounts(): {
 	return { tables: Object.keys(SCHEMA).length, columns, enums: Object.keys(ENUMS).length, refs };
 }
 
-/** Récupère la liste des champs d'une classe C# d'après le type-schema.json. */
+/** Récupère la liste des champs d'une classe C# d'après le schéma généré TypeScript. */
 export function getCrossTypeFields(fullName: string): string[] | null {
 	return (typeSchemaJson as Record<string, string[]>)[fullName] ?? null;
 }

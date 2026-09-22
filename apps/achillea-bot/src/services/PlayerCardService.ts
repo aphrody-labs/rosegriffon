@@ -2,15 +2,33 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 import { createCanvas, loadImage, type SKRSContext2D } from "@aphrody/canvas";
+import type { Kysely } from "kysely";
 import { NotFound } from "@tsed/exceptions";
 import { singleton } from "tsyringe";
 
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { urlsConfig } from "@/configs/urls";
-import { User } from "@/entities/User";
-import { UserElo } from "@/entities/UserElo";
-import { Database } from "@/services/Database";
 import { MatchMode } from "@/utils/enums/eventEnums";
 import { registerAchilleaFonts } from "@/utils/functions/registerFonts";
+
+interface PlayerCardDatabase {
+	user: {
+		id: string;
+		display_name: string;
+		normalized_display_name: string;
+		username: string | null;
+		avatar: string | null;
+	};
+	user_elo: {
+		user_id: string;
+		mode: number;
+		elo: number;
+		wins: number;
+		losses: number;
+	};
+}
+
+const sql = createAchilleaSql<PlayerCardDatabase>() as Kysely<PlayerCardDatabase>;
 
 const STORAGE_ROOT = join(process.cwd(), "storage", "cards");
 
@@ -67,7 +85,13 @@ export interface PlayerCardData {
 
 @singleton()
 export class PlayerCardService {
-	constructor(private db: Database) {}
+	private db: Kysely<PlayerCardDatabase> = sql;
+
+	/** Test-only dependency seam; production uses the shared Kysely pool. */
+	withDatabase(db: Kysely<PlayerCardDatabase>): this {
+		this.db = db;
+		return this;
+	}
 
 	async generateCard(userId: string): Promise<Buffer> {
 		const data = await this.loadCardData(userId);
@@ -83,27 +107,39 @@ export class PlayerCardService {
 	}
 
 	private async loadCardData(userId: string): Promise<PlayerCardData> {
-		const em = this.db.em.fork();
-		const user = await em.findOne(User, { id: userId });
+		const user = await this.db
+			.selectFrom("user")
+			.leftJoin("user_elo", (join) =>
+				join
+					.onRef("user_elo.user_id", "=", "user.id")
+					.on("user_elo.mode", "=", MatchMode.ONE_VS_ONE)
+			)
+			.select([
+				"user.id",
+				"user.display_name",
+				"user.normalized_display_name",
+				"user.username",
+				"user.avatar",
+				"user_elo.elo",
+				"user_elo.wins",
+				"user_elo.losses",
+			])
+			.where("user.id", "=", userId)
+			.executeTakeFirst();
 		if (!user) throw new NotFound(`User ${userId} introuvable`);
 
-		const elo = await em.findOne(UserElo, {
-			user: userId,
-			mode: MatchMode.ONE_VS_ONE,
-		});
-
-		const rating = elo?.elo ?? 0;
-		const wins = elo?.wins ?? 0;
-		const losses = elo?.losses ?? 0;
+		const rating = user.elo ?? 0;
+		const wins = user.wins ?? 0;
+		const losses = user.losses ?? 0;
 		const winrate = wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0;
 
-		const rawName = user.displayName || user.username || `User#${user.id}`;
+		const rawName = user.display_name || user.username || `User#${user.id}`;
 		const displayName = sanitizeName(rawName) || user.username || `User#${user.id}`;
 
 		return {
 			userId: user.id,
 			displayName,
-			normalizedDisplayName: sanitizeName(user.normalizedDisplayName || ""),
+			normalizedDisplayName: sanitizeName(user.normalized_display_name || ""),
 			avatarUrl: user.avatar ?? null,
 			elo: rating,
 			rankIndex: rankFromElo(rating),

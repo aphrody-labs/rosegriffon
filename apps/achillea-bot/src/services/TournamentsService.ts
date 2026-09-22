@@ -1,16 +1,21 @@
 import {
 	canReportTournamentScore,
+	checkOpenTournamentsLimit,
+	checkPublicationWindow,
 	circuitPointsForRank,
 	circuitPointsToTier,
+	computeWaitlistPositions,
 	denseRankToTier,
 	goalAverage,
+	userIsTournamentOrganizer,
 } from "@rosegriffon/achillea-core";
 import { rel } from "@mikro-orm/core";
 import { BadRequest, Conflict, NotFound, NotImplemented, Unauthorized } from "@tsed/exceptions";
 import type { DataTypes, ValueToArray } from "brackets-manager";
 
 import type { NewTournamentDTO } from "@/api/models/dtos";
-import { tournamentRulesConfig } from "@/configs";
+import { tournamentRulesConfig, urlsConfig } from "@/configs";
+import { env } from "@/env";
 import { Service } from "@/decorators";
 import {
 	Clan,
@@ -57,12 +62,6 @@ import { Logger } from "./Logger";
 import { NotificationService } from "./NotificationService";
 import { SwissStageService } from "./SwissStageService";
 import { TournamentEventService } from "./TournamentEventService";
-import {
-	checkOpenTournamentsLimit,
-	checkPublicationWindow,
-	computeWaitlistPositions,
-	userIsTournamentOrganizer,
-} from "./tournamentRules";
 import { TournamentRoleService } from "./TournamentRoleService";
 import type { UserDTO } from "./UserService";
 import { UserService } from "./UserService";
@@ -75,7 +74,7 @@ export const BRACKET_TOURNAMENT_TYPES: readonly StageType[] = [
 	StageType.round_robin,
 ];
 
-/** Championnat (calendrier + points) — hors brackets-manager, voir LeagueService. */
+/** Championnat (calendrier + points) — hors brackets-manager. */
 export const LEAGUE_TOURNAMENT_TYPES: readonly StageType[] = [StageType.league];
 
 /** true si le type de tournoi est géré par le moteur de bracket. */
@@ -236,7 +235,7 @@ export class TournamentsService {
 				}
 
 				// Championnat (league) : pas de bracket technique brackets-manager —
-				// calendrier + classement gérés par LeagueService / phases League.
+				// Le calendrier et le classement des ligues sont gérés par l'API unifiée.
 				if (!isLeagueTournamentType(tournament.tournamentType)) {
 					await this.bracketService.initTechnicalBracket(
 						tournament.id,
@@ -1677,9 +1676,12 @@ export class TournamentsService {
 		// résolvables) ne doit pas empêcher la clôture demandée.
 		let placementPrizes: unknown = null;
 		try {
-			placementPrizes = await this.bracketService.applyPlacementPrizesForTournament(tournamentId, {
-				requireFinished: true,
+			const response = await fetch(`${urlsConfig.unifiedApi}/v1/achillea/tournaments/internal/${tournamentId}/apply-placement-prizes`, {
+				method: "POST",
+				headers: env.API_ADMIN_TOKEN ? { Authorization: `Bearer ${env.API_ADMIN_TOKEN}` } : undefined,
 			});
+			if (!response.ok) throw new Error(`Unified placement API returned ${response.status}`);
+			placementPrizes = await response.json();
 		} catch (error) {
 			console.warn(`[closeTournament] bonus podium reporté :`, (error as Error)?.message);
 		}

@@ -1,18 +1,8 @@
 import type { BaseCharacter, Item, Skill, Team } from "@rosegriffon/inagle";
 import { ElementNames } from "@rosegriffon/inagle/core/types";
-import changeAuraSkills from "../data/change-aura-skills.json";
-import menuGalleryManifest from "../data/menu-gallery-manifest.json";
-import itemEnrichmentData from "../data/item-enrichment.json";
-import passivesFullData from "../data/passives-full.json";
-
-/** Enrichissement objet figé (bonus de stats / descriptions / maxStack), appliqué par id. */
-interface ItemEnrichment {
-	bonuses?: Record<string, number>;
-	descriptions?: { fr?: string; en?: string; ja?: string };
-	maxStack?: number;
-}
-const ITEM_ENRICHMENT = itemEnrichmentData as Record<string, ItemEnrichment>;
 import type { Database } from "@rosegriffon/db";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import type { Database as SqlDatabase } from "@rosegriffon/db/schema";
 import {
 	extractKeshinModelCode,
 	galleryVariantUrl,
@@ -29,6 +19,45 @@ import {
 } from "../images";
 import { createClient } from "../db/provider";
 import { SHOP_FR, TACTIC_FR, tacticSlug } from "../text/translations";
+import { LEGACY_FORMATIONS, type Formation, type PositionCoord } from "../game/formations";
+import type { SkillCutinEntry } from "../game/skills-cutin";
+
+type SqlFormationRow = SqlDatabase["inagle_formations"];
+
+interface SqlFormationData {
+	valid?: boolean;
+	label?: string;
+	positions?: Array<{
+		positionNo?: number;
+		position_no?: number;
+		role?: string;
+		start?: { x?: number; y?: number };
+	}>;
+}
+
+function sqlFormationToClient(row: SqlFormationRow): Formation | null {
+	const raw = row.data as unknown as SqlFormationData;
+	if (raw?.valid === false || !Array.isArray(raw?.positions)) return null;
+	const roleSet = new Set(["FW", "MF", "DF", "GK"]);
+	const positions = raw.positions.map((position, index) => {
+		const x = position.start?.x;
+		const y = position.start?.y;
+		if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+		return {
+			index: position.positionNo ?? position.position_no ?? index,
+			top: Math.max(1, Math.min(46, 43.75 * Number(y) + 2)),
+			left: Math.max(1, Math.min(80, 40 + Number(x) * 47)),
+			role: (roleSet.has(position.role ?? "") ? position.role : "MF") as PositionCoord["role"],
+		};
+	});
+	if (positions.some((position) => position === null)) return null;
+	return {
+		id: `g_${row.id}`,
+		label: row.name_fr ?? row.name_en ?? row.name_ja ?? "Formation",
+		name: `${row.name_fr ?? row.name_en ?? row.name_ja ?? "Formation"} (jeu)`,
+		positions: positions as PositionCoord[],
+	};
+}
 
 // Use generated types
 type DbItem = Database["public"]["Tables"]["inagle_items"]["Row"];
@@ -114,9 +143,8 @@ function galleryVariants(image: string | null): {
 
 /**
  * Catégories d'illustrations. Les 5 premières dérivent du préfixe `img_<category>_`
- * du `img_path` de la table DB `inagle_gallery`. Les suivantes (`menu_*`) viennent
- * du manifeste statique `data/menu-gallery-manifest.json` : le RESTE des illustrations
- * du dossier jeu `dx11/menu/220_img/<dir>/`, servies live par le CDN.
+ * du `img_path` de la table SQL `inagle_gallery`. Les chemins d'assets sont
+ * servis live par le CDN ; aucune liste JSON n'est une source runtime.
  */
 export const GALLERY_CATEGORIES: ReadonlyArray<{ value: string; label: string; icon: string }> = [
 	{ value: "story", label: "Histoire", icon: "menu_book" },
@@ -131,16 +159,6 @@ export const GALLERY_CATEGORIES: ReadonlyArray<{ value: string; label: string; i
 	{ value: "hlp", label: "Aide", icon: "lightbulb" },
 	{ value: "telop_waza", label: "Techniques", icon: "bolt" },
 ];
-
-/** Catégories alimentées par le manifeste menu (et non par la table DB `inagle_gallery`). */
-const MENU_GALLERY_CATEGORIES = new Set([
-	"gallery_img2",
-	"ev_pic",
-	"stadium",
-	"vsroute_map",
-	"hlp",
-	"telop_waza",
-]);
 
 const GALLERY_CATEGORY_VALUES = new Set(GALLERY_CATEGORIES.map((c) => c.value));
 
@@ -172,64 +190,6 @@ function galleryRowToItem(row: any): GalleryItem {
 		needTokenNum: row.need_token_num ?? 0,
 		flgNo: row.flg_no ?? 0,
 	};
-}
-
-/** Item du manifeste menu (`data/menu-gallery-manifest.json`). */
-interface MenuGalleryManifestItem {
-	id: string;
-	dir: string;
-	file: string;
-	title: string;
-	category: string;
-}
-
-const MENU_MANIFEST_ITEMS: ReadonlyArray<MenuGalleryManifestItem> =
-	(menuGalleryManifest as { items?: MenuGalleryManifestItem[] }).items ?? [];
-
-/** Base CDN du dossier menu jeu — assets servis live depuis les CPK (g4tx→png). */
-const MENU_CDN_BASE = "https://cdn.rosegriffon.fr/dx11/menu/220_img";
-
-/** URL CDN directe d'un item menu : `<base>/<dir>/<file>` (aucune transformation). */
-function menuItemImageUrl(it: MenuGalleryManifestItem): string {
-	return `${MENU_CDN_BASE}/${it.dir}/${it.file}`;
-}
-
-function menuManifestToItem(it: MenuGalleryManifestItem): GalleryItem {
-	return {
-		id: it.id,
-		imgPath: `${it.dir}/${it.file}`,
-		category: it.category,
-		title: it.title,
-		...galleryVariants(menuItemImageUrl(it)),
-		needTokenNum: 0,
-		flgNo: 0,
-	};
-}
-
-/**
- * Sélectionne les items menu pour une page : filtre par catégorie (`menu` = toutes
- * les catégories menu confondues) puis par recherche texte (titre/file insensible
- * à la casse). Renvoie le sous-ensemble paginé + le total filtré.
- */
-function getMenuGalleryPage(params: { category?: string; q?: string; from: number; to: number }): {
-	data: GalleryItem[];
-	total: number;
-} {
-	const q = params.q?.trim().toLowerCase();
-	let pool: ReadonlyArray<MenuGalleryManifestItem> = MENU_MANIFEST_ITEMS;
-
-	if (params.category && params.category !== "menu") {
-		pool = pool.filter((it) => it.category === params.category);
-	}
-	if (q) {
-		pool = pool.filter(
-			(it) => it.title.toLowerCase().includes(q) || it.file.toLowerCase().includes(q)
-		);
-	}
-
-	const total = pool.length;
-	const page = pool.slice(params.from, params.to + 1).map(menuManifestToItem);
-	return { data: page, total };
 }
 
 // Helpers — returns all matching element IDs (Void maps to both 0 and 5)
@@ -413,6 +373,74 @@ function specialTacticToListItem(s: any): any {
 }
 
 export const wikiService = {
+	/** Cut-in canonique, lu depuis la projection PostgreSQL importée. */
+	async getSkillCutin(codeOrId: string): Promise<SkillCutinEntry | null> {
+		try {
+			const db = createAchilleaSql<SqlDatabase>();
+			const row = await db.selectFrom("inagle_skill_cutins").select("data").where("skill_id", "=", codeOrId).executeTakeFirst();
+			return (row?.data as unknown as SkillCutinEntry) ?? null;
+		} catch {
+			return null;
+		}
+	},
+
+	/** Batch SQL lookup used by server components before crossing into client islands. */
+	async getSkillCutins(codes: string[]): Promise<SkillCutinEntry[]> {
+		if (codes.length === 0) return [];
+		try {
+			const db = createAchilleaSql<SqlDatabase>();
+			const rows = await db.selectFrom("inagle_skill_cutins").select("data").where("skill_id", "in", codes).execute();
+			return rows.map((row) => row.data as unknown as SkillCutinEntry);
+		} catch {
+			return [];
+		}
+	},
+
+	/** CDN gate for cut-in models, also sourced from PostgreSQL. */
+	async hasSkillCutinAssets(eventIdName: string | null | undefined): Promise<boolean> {
+		if (!eventIdName) return false;
+		try {
+			const db = createAchilleaSql<SqlDatabase>();
+			const row = await db.selectFrom("inagle_skill_cutin_assets").select("event_id_name").where("event_id_name", "=", eventIdName).executeTakeFirst();
+			return Boolean(row);
+		} catch {
+			return false;
+		}
+	},
+
+	async getSkillCutinAssets(eventIds: string[]): Promise<Set<string>> {
+		if (eventIds.length === 0) return new Set();
+		try {
+			const db = createAchilleaSql<SqlDatabase>();
+			const rows = await db.selectFrom("inagle_skill_cutin_assets").select("event_id_name").where("event_id_name", "in", eventIds).execute();
+			return new Set(rows.map((row) => row.event_id_name));
+		} catch {
+			return new Set();
+		}
+	},
+
+	/**
+	 * Formations canoniques : SQL/PostgreSQL est la seule source durable.
+	 * Les huit formations legacy restent dans le code uniquement pour décoder
+	 * les équipes historiques quand la base n'est pas disponible (CLI offline).
+	 */
+	async getFormations(): Promise<Formation[]> {
+		try {
+			const db = createAchilleaSql<SqlDatabase>();
+			const rows = await db
+				.selectFrom("inagle_formations")
+				.selectAll()
+				.orderBy("id", "asc")
+				.execute();
+			const game = rows
+				.map((row) => sqlFormationToClient(row as SqlFormationRow))
+				.filter((formation): formation is Formation => formation !== null);
+			return [...LEGACY_FORMATIONS, ...game];
+		} catch {
+			return [...LEGACY_FORMATIONS];
+		}
+	},
+
 	/** Get all distinct constellations for a character (by name — heroes appear in multiple constellations via different chara_ids) */
 	async _getHeroConstellations(row: any): Promise<Array<{ name: string; index: number }>> {
 		const name = row?.name_en;
@@ -595,19 +623,16 @@ export const wikiService = {
 			}
 		}
 
-		// 2. Get from change_aura_skills mapping JSON
-		try {
-			const jsonAuras = changeAuraSkills.filter(
-				(c: any) =>
-					c.charaParamId &&
-					(c.charaParamId.toLowerCase() === charaId.toLowerCase() ||
-						c.charaParamId.toLowerCase() === charaParamId.toLowerCase())
-			);
-			for (const a of jsonAuras) {
-				if (a.id) supabaseHexIds.add(a.id.toLowerCase());
+		// 2. SQL projection: imported aura rows carry their owner and skill ids in data.
+		for (const table of ["inagle_auras", "inagle_keshins", "inagle_souls", "inagle_miximax"] as const) {
+			const { data: auraRows } = await supabase.from(table).select("id, data");
+			for (const row of (auraRows ?? []) as any[]) {
+				const payload = row.data && typeof row.data === "object" ? row.data : {};
+				const owner = String(payload.ownerCharaParamId ?? payload.charaParamId ?? "").toLowerCase();
+				if (owner === charaId.toLowerCase() || owner === charaParamId.toLowerCase()) {
+					supabaseHexIds.add(String(payload.skillId ?? payload.id ?? row.id).toLowerCase());
+				}
 			}
-		} catch (e) {
-			console.error("Error reading changeAuraSkills JSON:", e);
 		}
 
 		const results: any[] = [];
@@ -739,7 +764,7 @@ export const wikiService = {
 					.select("video_url, internal_code, name_fr, name_en")
 					.eq("id", a.skill_id)
 					.maybeSingle()
-					.then(({ data }) => ({ type: "skill", data }))
+				.then(({ data }: any) => ({ type: "skill", data }))
 			);
 		}
 		for (const sid of possibleSkillIds) {
@@ -750,27 +775,12 @@ export const wikiService = {
 					.or(`data->>skillID.eq.${sid},sheet_data->>skillID.eq.${sid}`)
 					.limit(1)
 					.maybeSingle()
-					.then(({ data }) => ({ type: "skill", data }))
+				.then(({ data }: any) => ({ type: "skill", data }))
 			);
 		}
 
 		// Push owner query
 		let ownerCharaId = a.owner_chara_id || (a.data as any)?.ownerCharaParamId;
-		if (!ownerCharaId) {
-			const cleanAuraId = (a.id || "")
-				.replace(/^(keshin|soul|miximax|awakening|mode_change)_/i, "")
-				.toLowerCase();
-			const mapping = changeAuraSkills.find(
-				(m: any) =>
-					m.id &&
-					(m.id.toLowerCase() === id.toLowerCase() ||
-						m.id.toLowerCase() === a.id?.toLowerCase() ||
-						m.id.toLowerCase() === cleanAuraId)
-			);
-			if (mapping && mapping.charaParamId && mapping.charaParamId !== "0x00000000") {
-				ownerCharaId = mapping.charaParamId;
-			}
-		}
 		if (ownerCharaId) {
 			parallelPromises.push(
 				supabase
@@ -778,7 +788,7 @@ export const wikiService = {
 					.select("name_fr, name_en, slug, base_slug")
 					.eq("id", ownerCharaId)
 					.maybeSingle()
-					.then(({ data }) => ({ type: "owner", data }))
+				.then(({ data }: any) => ({ type: "owner", data }))
 			);
 		}
 
@@ -786,7 +796,7 @@ export const wikiService = {
 			const results = await Promise.all(parallelPromises);
 
 			// Process skill results
-			const skillResults = results.filter((r) => r.type === "skill" && r.data).map((r) => r.data);
+			const skillResults = results.filter((r: any) => r.type === "skill" && r.data).map((r: any) => r.data);
 			const foundSkill = skillResults.find((s) => s && (s.name_fr || s.name_en));
 			const fallbackSkill = skillResults.find((s) => s);
 			const targetSkill = foundSkill || fallbackSkill;
@@ -867,7 +877,7 @@ export const wikiService = {
 
 	/**
 	 * Galerie des modèles 3D COMPLETS keshin + armures réellement servis live
-	 * (`/model-full/<code>.glb`). Source codes = manifeste `keshin-model-manifest.json`
+	 * (`/model-full/<code>.glb`). Source codes = manifeste CPK agrégé TypeScript
 	 * (gate anti-404). Les noms viennent de `inagle_keshins` (par code `k<NNNNNN>` extrait
 	 * de l'icône) ; l'armure `ka<NNNNNN>NN` mappe sur le même groupe keshin (forme blindée).
 	 */
@@ -1076,7 +1086,7 @@ export const wikiService = {
 			.order("id", { ascending: true });
 
 		const allRows = rows && rows.length > 0 ? rows : [row];
-		const mapped = allRows.map((r) => this.mapDbCharacterToBase(r)!).filter(Boolean);
+		const mapped = allRows.map((r: any) => this.mapDbCharacterToBase(r)!).filter(Boolean);
 		const base = this.groupVariants(mapped)[0];
 
 		if (base) {
@@ -1100,7 +1110,7 @@ export const wikiService = {
 			.order("id", { ascending: true });
 		if (!rows || rows.length === 0) return undefined;
 
-		const mapped = rows.map((r) => this.mapDbCharacterToBase(r)!).filter(Boolean);
+		const mapped = rows.map((r: any) => this.mapDbCharacterToBase(r)!).filter(Boolean);
 		const base = this.groupVariants(mapped)[0];
 
 		if (base) {
@@ -1134,7 +1144,7 @@ export const wikiService = {
 			.order("id", { ascending: true });
 
 		const allRows = rows && rows.length > 0 ? rows : [row];
-		const mapped = allRows.map((r) => this.mapDbCharacterToBase(r)!).filter(Boolean);
+		const mapped = allRows.map((r: any) => this.mapDbCharacterToBase(r)!).filter(Boolean);
 		const base = this.groupVariants(mapped)[0];
 
 		if (base) {
@@ -1603,27 +1613,20 @@ export const wikiService = {
 			// natifs même si sheet_data est un snapshot communautaire plus ancien.
 			const parsed = ((row as any).data || {}) as any;
 			const community = sd.sheetData || {};
-			// Repli DURABLE : enrichissement figé (item-enrichment.json) appliqué au runtime
-			// par id. Le mirror re-dumpé depuis Supabase perd bonuses/descriptions natifs du
-			// parser (non poussés) → ce repli garantit qu'ils survivent à chaque sync.
-			const enrich = (ITEM_ENRICHMENT as Record<string, ItemEnrichment>)[item.id] || {};
 			const descFr =
 				item.description_fr ||
 				sd.descriptions?.fr ||
 				parsed.descriptions?.fr ||
-				enrich.descriptions?.fr ||
 				null;
 			const descEn =
 				item.description_en ||
 				sd.descriptions?.en ||
 				parsed.descriptions?.en ||
-				enrich.descriptions?.en ||
 				null;
 			const descJa =
 				item.description_ja ||
 				sd.descriptions?.ja ||
 				parsed.descriptions?.ja ||
-				enrich.descriptions?.ja ||
 				null;
 			// Bonus de stats RÉELS (kick +6, …) — natifs parser, jamais les codes bruts stat1/stat2.
 			const bonuses =
@@ -1631,10 +1634,8 @@ export const wikiService = {
 					? sd.bonuses
 					: parsed.bonuses && Object.keys(parsed.bonuses).length
 						? parsed.bonuses
-						: enrich.bonuses && Object.keys(enrich.bonuses).length
-							? enrich.bonuses
-							: null;
-			const maxStack = sd.maxStack ?? parsed.maxStack ?? enrich.maxStack ?? null;
+						: null;
+			const maxStack = sd.maxStack ?? parsed.maxStack ?? null;
 			return {
 				itemId: item.id,
 				internalCode: item.internal_code || sd.internalCode || parsed.internalCode,
@@ -1701,16 +1702,13 @@ export const wikiService = {
 			const sd = (item.sheet_data || {}) as any;
 			const parsed = ((item as any).data || {}) as any;
 			const community = sd.sheetData || {};
-			const enrich = (ITEM_ENRICHMENT as Record<string, ItemEnrichment>)[item.id] || {};
-			// Bonus de stats réels (kick +6, …) pour l'aperçu carte. Repli durable item-enrichment.json.
+			// Bonus de stats réels (kick +6, …) provenant de la ligne SQL canonique.
 			const bonuses =
 				sd.bonuses && Object.keys(sd.bonuses).length
 					? sd.bonuses
 					: parsed.bonuses && Object.keys(parsed.bonuses).length
 						? parsed.bonuses
-						: enrich.bonuses && Object.keys(enrich.bonuses).length
-							? enrich.bonuses
-							: null;
+						: null;
 			return {
 				itemId: item.id,
 				internalCode: item.internal_code,
@@ -2468,21 +2466,6 @@ export const wikiService = {
 		const from = (page - 1) * limit;
 		const to = from + limit - 1;
 
-		// Catégories menu (`gallery_img2`, `ev_pic`, `stadium`, …) ou `menu` (toutes) →
-		// servies depuis le manifeste statique, pas la table DB `inagle_gallery`.
-		if (
-			params.category &&
-			(params.category === "menu" || MENU_GALLERY_CATEGORIES.has(params.category))
-		) {
-			const { data, total } = getMenuGalleryPage({
-				category: params.category,
-				q: params.q,
-				from,
-				to,
-			});
-			return { data, total, page, limit };
-		}
-
 		const supabase = await createClient();
 
 		let query = supabase.from("inagle_gallery").select("*", { count: "exact" });
@@ -2519,11 +2502,6 @@ export const wikiService = {
 			const cat = galleryCategoryOf(row.img_path);
 			counts[cat] = (counts[cat] || 0) + 1;
 		}
-		// Catégories menu = manifeste statique (servi live par le CDN).
-		for (const it of MENU_MANIFEST_ITEMS) {
-			counts.all += 1;
-			counts[it.category] = (counts[it.category] || 0) + 1;
-		}
 		return counts;
 	},
 
@@ -2550,17 +2528,17 @@ export const wikiService = {
 		return data;
 	},
 
-	// ── Passifs (passives-full.json — données gamedata IEVR résolues) ──
+	// ── Passifs (projection SQL `inagle_passives`) ──
 
 	/**
 	 * Liste paginée+filtrée des passifs joueur (1716 instances, textes FR/EN/JA résolus).
-	 * Données figées dans `data/passives-full.json` (nie-data) car non poussées dans le
-	 * miroir Supabase — elles survivent ainsi à chaque re-sync (pattern item-enrichment).
+	 * Les données sont lues depuis la projection SQL `inagle_passives`, alimentée par
+	 * l'import Inagle ; aucune sortie JSON n'est utilisée comme repli runtime.
 	 */
-	getPassivesList(params: PassiveListParams = {}): ListResult<PassiveListItem> {
+	async getPassivesList(params: PassiveListParams = {}): Promise<ListResult<PassiveListItem>> {
 		const page = params.page || 1;
 		const limit = params.limit || 60;
-		const all = PASSIVE_INSTANCES;
+		const all = await loadPassiveRows();
 
 		const qNorm = params.q ? normalizePassiveText(params.q) : "";
 		let filtered = all.filter((p) => {
@@ -2605,11 +2583,12 @@ export const wikiService = {
 	 * la courbe d'effets par valeur. Repli `inagle_passives` (miroir) pour `image_url`.
 	 */
 	async getPassive(id: string): Promise<PassiveDetail | undefined> {
-		const inst = PASSIVE_INSTANCES.find((p) => p.passive_id === id || p.string_id === id);
+		const instances = await loadPassiveRows();
+		const inst = instances.find((p) => p.passive_id === id || p.string_id === id);
 		if (!inst) return undefined;
 
 		// Toutes les instances partageant le même effet (courbe de valeurs).
-		const family = PASSIVE_INSTANCES.filter((p) => p.effect_id === inst.effect_id).sort(
+		const family = instances.filter((p) => p.effect_id === inst.effect_id).sort(
 			(a, b) => (a.main_value ?? 0) - (b.main_value ?? 0)
 		);
 
@@ -2637,19 +2616,55 @@ export const wikiService = {
 	},
 
 	/** Les 21 passifs d'équipe (soccer_team_passive_config). */
-	getTeamPassives(): PassiveTeamItem[] {
-		return PASSIVE_TEAM;
+	async getTeamPassives(): Promise<PassiveTeamItem[]> {
+		try {
+			const supabase = await createClient();
+			const { data } = await supabase.from("inagle_manager_passives").select("*");
+			return ((data ?? []) as any[]).map((row) => {
+				const raw = row.data && typeof row.data === "object" ? row.data : row;
+				return {
+					team_passive_id: String(raw.team_passive_id ?? raw.id ?? row.id),
+					effect_id: String(raw.effect_id ?? raw.effectId ?? ""),
+					value_min: Number(raw.value_min ?? raw.valueMin ?? 0),
+					value_max: Number(raw.value_max ?? raw.valueMax ?? 0),
+					text_id: String(raw.text_id ?? raw.textId ?? ""),
+					text: raw.text ?? { fr: row.text_fr ?? null, en: row.text_en ?? null, ja: row.text_ja ?? null },
+				};
+			});
+		} catch {
+			return [];
+		}
+	},
+
+	/** Passive sheets historiques normalisées dans la projection SQL canonique. */
+	async getPassiveSheets(): Promise<PassiveSheets> {
+		try {
+			const supabase = await createClient();
+			const { data } = await supabase
+				.from("inagle_passive_sheets")
+				.select("kind, data")
+				.order("kind", { ascending: true });
+			const result: PassiveSheets = { playerPassives: [], customPassives: [], coordinatorPassives: [] };
+			for (const row of (data ?? []) as Array<{ kind?: string; data?: unknown }>) {
+				if (row.kind === "player") result.playerPassives.push(row.data as PlayerPassiveSheet);
+				if (row.kind === "custom") result.customPassives.push(row.data as CustomPassiveSheet);
+				if (row.kind === "coordinator") result.coordinatorPassives.push(row.data as CoordinatorPassiveSheet);
+			}
+			return result;
+		} catch {
+			return { playerPassives: [], customPassives: [], coordinatorPassives: [] };
+		}
 	},
 
 	/** Une famille de passifs par effect_id (toutes les valeurs partageant l'effet). */
-	getPassiveFamily(effectId: string): PassiveListItem[] {
-		return PASSIVE_INSTANCES.filter((p) => p.effect_id === effectId).sort(
+	async getPassiveFamily(effectId: string): Promise<PassiveListItem[]> {
+		return (await loadPassiveRows()).filter((p) => p.effect_id === effectId).sort(
 			(a, b) => (a.main_value ?? 0) - (b.main_value ?? 0)
 		);
 	},
 };
 
-// ── Passifs : types + données figées (passives-full.json) ──
+// ── Passifs : projection SQL `inagle_passives` ──
 
 export interface PassiveListItem {
 	passive_id: string;
@@ -2675,6 +2690,42 @@ export interface PassiveTeamItem {
 	text: { fr: string | null; en: string | null; ja: string | null };
 }
 
+export interface PlayerPassiveSheet {
+	no: number;
+	playstyle: string;
+	requirement: string;
+	stat: string;
+	legendary: { low: string; high: string };
+	top: { low: string; high: string };
+	advanced: { low: string; high: string };
+	growing: { low: string; high: string };
+	common: { low: string; high: string };
+}
+
+export interface CustomPassiveSheet {
+	no: number;
+	requirement: string;
+	stat: string;
+	buff: string;
+}
+
+export interface CoordinatorPassiveSheet {
+	no: number;
+	playstyle: string;
+	requirement: string;
+	stat: string;
+	coordinatorCommon: string;
+	coordinatorLegendary: string;
+	managerCommon: string;
+	managerLegendary: string;
+}
+
+export interface PassiveSheets {
+	playerPassives: PlayerPassiveSheet[];
+	customPassives: CustomPassiveSheet[];
+	coordinatorPassives: CoordinatorPassiveSheet[];
+}
+
 export interface PassiveDetail extends PassiveListItem {
 	category: string;
 	family: PassiveListItem[];
@@ -2691,8 +2742,47 @@ export interface PassiveListParams {
 	sort?: string;
 }
 
-const PASSIVE_INSTANCES = passivesFullData.player as PassiveListItem[];
-const PASSIVE_TEAM = passivesFullData.team as PassiveTeamItem[];
+let passiveCache: Promise<PassiveListItem[]> | null = null;
+
+function passiveRowToItem(row: any): PassiveListItem {
+	const raw = row.data && typeof row.data === "object" ? row.data : {};
+	const names = raw.name ?? { fr: row.name_fr ?? null, en: row.name_en ?? null, ja: row.name_ja ?? null };
+	const descriptions = raw.description ?? {
+		fr: row.description_fr ?? null,
+		en: row.description_en ?? null,
+		ja: row.description_ja ?? null,
+	};
+	return {
+		passive_id: String(raw.passiveIdStr ?? raw.passive_id ?? row.id),
+		string_id: String(raw.stringId ?? raw.string_id ?? raw.passiveIdStr ?? row.id),
+		effect_id: String(raw.effectId ?? raw.effect_id ?? row.effect_id ?? ""),
+		rarity: Number(raw.rarity ?? row.rarity ?? 0),
+		element: Number(raw.element ?? row.element ?? 0),
+		element_name: String(raw.element_name ?? raw.elementName ?? ""),
+		buff_icon_type: raw.buff_icon_type ?? raw.buffIconType ?? null,
+		effect_params: Array.isArray(raw.effect_params) ? raw.effect_params : Array.isArray(raw.effectParams) ? raw.effectParams : [],
+		main_value: raw.main_value ?? raw.mainValue ?? null,
+		name: names,
+		description: descriptions,
+		text_raw: raw.text_raw ?? raw.textRaw ?? descriptions,
+	};
+}
+
+async function loadPassiveRows(): Promise<PassiveListItem[]> {
+	if (!passiveCache) {
+		passiveCache = (async () => {
+			try {
+				const supabase = await createClient();
+				const { data, error } = await supabase.from("inagle_passives").select("*");
+				if (error) throw error;
+				return ((data ?? []) as any[]).map(passiveRowToItem);
+			} catch {
+				return [];
+			}
+		})();
+	}
+	return passiveCache;
+}
 
 /** Catégorie d'un passif déduite du préfixe de son string_id (ps/mps/cps/hps/ss/…). */
 export function passiveCategory(stringId: string): string {

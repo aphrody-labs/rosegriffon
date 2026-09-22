@@ -115,9 +115,10 @@ les rewrites de son nginx). `api.rosegriffon.fr` n'est qu'un **stub** (`/health`
 
 ### Points d'attention
 - **CORS** : ajouter `https://api.rosegriffon.fr` aux `WEB_ALLOWED_ORIGINS` du bot (`apps/bot/.env`).
-- **OAuth Discord** : `redirect_uri` dérivé de `x-forwarded-host` → si l'auth passe par `api.rosegriffon.fr`,
-  déclarer aussi `https://api.rosegriffon.fr/achillea/auth/callback` dans le Discord Developer Portal.
-  Sinon réserver `api.rosegriffon.fr/achillea` aux endpoints **lecture** et garder l'auth sur le domaine front.
+- **OAuth Discord** : l'authentification est possédée exclusivement par Better Auth sur
+  `https://rosegriffon.fr/api/auth/callback/discord`. L'API Achillea ne fait plus d'échange de code Discord ;
+  `/auth/discord` et les anciens callbacks ne sont que des redirections de compatibilité vers la page de connexion.
+  Ne déclarer aucun callback OAuth Discord sur `api.rosegriffon.fr`.
 - **Endpoints vérifiés** : `/tournaments`, `/clans` → 200 ; `/auth/me`, `/ranked/me` → 401 (auth). Autres servis
   par le bot : `/users/*`, `/notifications/*`, `/casts/*`, `/sanctions/*`, `/organizations/*`, `/admin/lobbies/*`
   (toutes les routes ne sont pas publiques ; certaines `/misc/*` renvoient 404 selon le sous-chemin).

@@ -4,6 +4,7 @@ import { Migrator } from "@mikro-orm/migrations";
 import type { Options } from "@mikro-orm/postgresql";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { SqlHighlighter } from "@mikro-orm/sql-highlighter";
+import { ACHILLEA_SCHEMA, getAchilleaDatabaseUrl } from "@rosegriffon/db/achillea";
 
 // eslint-disable-next-line unused-imports/no-unused-imports
 import { env } from "@/env";
@@ -46,11 +47,16 @@ function connectionOptions(
 		password: connection.password,
 		// Les certificats Supabase sont publics et vérifiables : ne jamais désactiver
 		// rejectUnauthorized, qui masquerait une interception TLS.
-		driverOptions: connection.tls ? { ssl: { rejectUnauthorized: true } } : {},
+		driverOptions: {
+			...(connection.tls ? { ssl: { rejectUnauthorized: true } } : {}),
+			options: `-c search_path=${ACHILLEA_SCHEMA},public`,
+		},
 	};
 }
 
-const productionConnection = connectionOptions(env.DATABASE_URL ?? env.DATABASE_URL_DEV, {
+const unifiedDatabaseUrl = env.DATABASE_URL ?? env.DATABASE_URL_DEV ?? getAchilleaDatabaseUrl();
+
+const productionConnection = connectionOptions(unifiedDatabaseUrl, {
 	host: env.DATABASE_HOST ?? env.DATABASE_HOST_DEV,
 	port: env.DATABASE_PORT ?? env.DATABASE_PORT_DEV,
 	database: env.DATABASE_NAME ?? env.DATABASE_NAME_DEV,
@@ -58,7 +64,7 @@ const productionConnection = connectionOptions(env.DATABASE_URL ?? env.DATABASE_
 	password: env.DATABASE_PASSWORD ?? env.DATABASE_PASSWORD_DEV,
 });
 
-const developmentConnection = connectionOptions(env.DATABASE_URL_DEV ?? env.DATABASE_URL, {
+const developmentConnection = connectionOptions(env.DATABASE_URL_DEV ?? unifiedDatabaseUrl, {
 	host: env.DATABASE_HOST_DEV ?? env.DATABASE_HOST,
 	port: env.DATABASE_PORT_DEV ?? env.DATABASE_PORT,
 	database: env.DATABASE_NAME_DEV ?? env.DATABASE_NAME,
@@ -67,7 +73,7 @@ const developmentConnection = connectionOptions(env.DATABASE_URL_DEV ?? env.DATA
 });
 
 const testConnection = connectionOptions(
-	env.TEST_DATABASE_URL ?? env.DATABASE_URL_DEV ?? env.DATABASE_URL,
+	env.TEST_DATABASE_URL ?? env.DATABASE_URL_DEV ?? unifiedDatabaseUrl,
 	{
 		host: env.DATABASE_HOST_DEV ?? env.DATABASE_HOST,
 		port: env.DATABASE_PORT_DEV ?? env.DATABASE_PORT,

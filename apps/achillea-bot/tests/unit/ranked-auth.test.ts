@@ -13,7 +13,12 @@ import { beforeAll, describe, expect, test } from "bun:test";
 import jwt from "jsonwebtoken";
 
 import { authFromColyseus, getCookie, verifyToken } from "../../src/ranked/auth";
-import { signRealtimeToken, signSessionToken } from "../../src/auth/session";
+import {
+	AUTH_ISSUER,
+	REALTIME_AUDIENCE,
+	signRealtimeToken,
+	signSessionToken,
+} from "../../src/auth/session";
 
 const TEST_SECRET = "secret-de-test-unitaire-ranked-auth";
 
@@ -24,7 +29,17 @@ beforeAll(() => {
 
 // Fabrique un JWT HS256 valide signé avec le secret de test.
 function signValid(payload: Record<string, unknown>, secret = TEST_SECRET): string {
-	return jwt.sign(payload, secret, { algorithm: "HS256" });
+	const identity = payload.id ?? payload.sub;
+	return jwt.sign(
+		{ ...payload, tokenUse: "realtime" },
+		secret,
+		{
+			algorithm: "HS256",
+			issuer: AUTH_ISSUER,
+			audience: REALTIME_AUDIENCE,
+			...(typeof payload.id === "string" ? { subject: identity } : {}),
+		}
+	);
 }
 
 describe("getCookie", () => {
@@ -103,6 +118,7 @@ describe("verifyToken", () => {
 
 describe("authFromColyseus", () => {
 	const validToken = () => signValid({ id: "100", username: "Endou" });
+	const validCookie = () => signSessionToken({ id: "100", username: "Endou" });
 
 	test("authentifie via context.token (source prioritaire)", () => {
 		const user = authFromColyseus({}, { token: validToken() });
@@ -111,13 +127,13 @@ describe("authFromColyseus", () => {
 
 	test("authentifie via cookie sur un objet Headers (transport Bun WS)", () => {
 		const headers = new Headers();
-		headers.set("cookie", `token=${validToken()}`);
+		headers.set("cookie", `token=${validCookie()}`);
 		const user = authFromColyseus({}, { headers });
 		expect(user?.id).toBe("100");
 	});
 
 	test("authentifie via cookie sur un objet plain { cookie }", () => {
-		const user = authFromColyseus({}, { headers: { cookie: `token=${validToken()}` } });
+		const user = authFromColyseus({}, { headers: { cookie: `token=${validCookie()}` } });
 		expect(user?.id).toBe("100");
 	});
 
@@ -135,7 +151,7 @@ describe("authFromColyseus", () => {
 
 	test("ignore un context.token invalide et bascule sur le cookie valide", () => {
 		const headers = new Headers();
-		headers.set("cookie", `token=${validToken()}`);
+		headers.set("cookie", `token=${validCookie()}`);
 		const user = authFromColyseus({}, { token: "jeton-pourri", headers });
 		expect(user?.id).toBe("100");
 	});

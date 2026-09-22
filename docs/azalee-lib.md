@@ -61,12 +61,9 @@ Modules **créés** par l'extraction, sans équivalent antérieur :
 | `src/db/provider.ts` | Point d'injection unique (`setDatabaseProvider`) — remplace l'import direct du client Supabase de l'app |
 | `src/db/index.ts` | Surface données agrégée |
 | `src/net.ts` | `fetchJson` avec cache TTL de processus — remplace `fetch(url, { next: { revalidate } })` |
-| `src/rag.ts` | Recherche sémantique (embeddings self-host + vector store Redis), extraite du CLI |
 | `src/server/index.ts` | Surface serveur agrégée |
 | `src/server/serve.ts` | API HTTP headless (41 routes JSON, `Bun.serve`) |
-| `scripts/copy-data.ts` | Recopie `src/data/**` → `dist/data/**` après émission TS |
 | `scripts/build-standalone.ts` | Compile le CLI en binaire autonome (`bun build --compile`) |
-| `scripts/sync-inagle-entries.ts` | Resynchronise les entrées inagle embarquées |
 | `types/workspace-shims.d.ts` | Shims de types `@rosegriffon/db` pour le build de publication (TS6059) |
 | `test/config.test.ts` | Couverture de la résolution d'artefacts sur les vrais artefacts machine |
 

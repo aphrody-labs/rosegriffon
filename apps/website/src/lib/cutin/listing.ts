@@ -5,7 +5,7 @@
  *  - listing du dossier d'effets via `GET /api/cpk?path=<effectsDir>` ;
  *  - filtrage des `.g4pk` → `CutinLayerDescriptor` (le nom encode subject/phase/plan) ;
  *  - repérage du `*_camera.g4cm` → URL `/raw` du fichier ;
- *  - mapping modelGlbUrl/telops/soundRawUrl depuis l'entrée `skills-cutin`.
+ *  - mapping modelGlbUrl/telops/soundRawUrl depuis l'entrée SQL cut-in.
  *
  * Module pur / client-safe : aucun import server-only ; tout passe par `fetch` et les
  * helpers d'URL purs de `lib/cpk/shared`.
@@ -66,7 +66,7 @@ interface CpkListingResponse {
 }
 
 /**
- * Construit le manifeste de l'event depuis l'entrée `skills-cutin`.
+ * Construit le manifeste de l'event depuis l'entrée SQL cut-in.
  *
  * @throws si l'API `/api/cpk` répond non-OK.
  */

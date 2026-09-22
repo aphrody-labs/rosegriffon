@@ -11,8 +11,8 @@
 //
 // La SDK fournit `ZukanScraper` (getCharacterList / getCharacterDetail) et les
 // types `ZukanCharacterRef` / `ZukanCharacterDetail`. Les parsers locaux
-// (`parser.ts`) et la `ZukanLibrary` restent disponibles pour les données déjà
-// mirrorées ; ce module est la porte d'entrée pour le scraping en direct.
+// (`parser.ts`) restent disponibles pour les données déjà mirrorées ; ce
+// module est la porte d'entrée pour le scraping en direct.
 
 export { ZukanScraper } from "@aphrody-code/zukan";
 export type { ZukanCharacterDetail, ZukanCharacterRef } from "@aphrody-code/zukan";

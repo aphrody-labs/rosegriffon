@@ -129,6 +129,7 @@ function RoutedHeader({
 			appName={appName}
 			logoSrc={logoSrc}
 			homeHref={homeHref}
+			portalHref="/"
 			accountHref={accountHref}
 			themeToggleSlot={
 				<div className="flex items-center gap-1">

@@ -1,17 +1,15 @@
 /**
  * @file push-adapter.ts
  * @description Couche d'accès données partagée pour le flux de push Inagle →
- * Supabase. Extraite de cli-push.ts pour que les pushers de catégories
- * (scripts/push-*.ts) puissent réutiliser le MÊME adaptateur (Supabase API ou
- * Direct DB) sans dupliquer le câblage, et sans import circulaire avec
+ * PostgreSQL. Extraite de cli-push.ts pour que les pushers de catégories
+ * (scripts/push-*.ts) puissent réutiliser le MÊME adaptateur direct sans
+ * dupliquer le câblage, et sans import circulaire avec
  * cli-push.ts (qui importe ces pushers).
  *
  * Tout upsert est idempotent (ON CONFLICT). Aucune valeur fabriquée ici : ce
  * module ne fait QUE persister des lignes déjà construites depuis le dump réel.
  */
 
-import { createClient } from "@supabase/supabase-js";
-import jwt from "jsonwebtoken";
 import pg from "pg";
 
 // === Interface ===
@@ -37,46 +35,7 @@ export function dedup(records: any[], key = "id") {
 	return Array.from(map.values());
 }
 
-const isValidKey = (val: string | undefined | null): val is string =>
-	typeof val === "string" &&
-	val.length > 0 &&
-	!val.startsWith("eyJ2Ijo") &&
-	val !== "undefined" &&
-	val !== "null";
-
-const isValidUrl = (val: string | undefined | null): val is string =>
-	typeof val === "string" && val.length > 0 && val.startsWith("http") && !val.startsWith("eyJ2Ijo");
-
 // === Adapters ===
-
-export class SupabaseAdapter implements DataAdapter {
-	constructor(private client: any) {}
-	async upsert(table: string, records: any[], onConflict = "id") {
-		if (records.length === 0) return { error: null };
-		return this.client.from(table).upsert(records, { onConflict });
-	}
-	async insert(table: string, records: any[]) {
-		if (records.length === 0) return { error: null };
-		return this.client.from(table).insert(records);
-	}
-	async deleteAllExcept(table: string, column: string, value: any) {
-		return this.client.from(table).delete().neq(column, value);
-	}
-	async fetchAll(table: string, columns: string) {
-		const out: any[] = [];
-		for (let from = 0; ; from += 1000) {
-			const { data, error } = await this.client
-				.from(table)
-				.select(columns)
-				.range(from, from + 999);
-			if (error || !data || data.length === 0) break;
-			out.push(...data);
-			if (data.length < 1000) break;
-		}
-		return out;
-	}
-	async close() {}
-}
 
 export class PostgresAdapter implements DataAdapter {
 	private pool: pg.Pool;
@@ -169,58 +128,9 @@ export class PostgresAdapter implements DataAdapter {
 	}
 }
 
-// === Fabrique de client Supabase (motif partagé cli-push / pushers) ===
-
-/**
- * Construit un client Supabase service-role à partir de l'environnement, selon
- * le même motif que cli-push.ts : URL + service-role key directe, sinon un token
- * service_role signé à partir de SUPABASE_JWT_SECRET / JWT_SECRET. Garde-fou sur
- * les blobs scellés `eyJ2Ijo…`. .env est chargé par Bun (cwd /home/ubuntu/rg).
- */
-export function resolveSupabaseClient() {
-	// Repli sur la passerelle interne de la pile self-host. Ce paquet tourne côté
-	// Bun/Node sans lib DOM : on interroge `globalThis` plutôt que `window`.
-	const origineDefaut =
-		"location" in globalThis
-			? (globalThis as unknown as { location: { origin: string } }).location.origin
-			: "http://127.0.0.1:8811";
-	let url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || origineDefaut;
-	if (!isValidUrl(url)) url = origineDefaut;
-
-	let key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-	const jwtSecret = process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET;
-
-	if (!isValidKey(key)) {
-		if (isValidKey(jwtSecret)) {
-			key = jwt.sign(
-				{
-					role: "service_role",
-					iss: "supabase",
-					iat: Math.floor(Date.now() / 1000),
-					exp: Math.floor(Date.now() / 1000) + 3600,
-				},
-				jwtSecret
-			);
-		} else {
-			throw new Error(
-				"Aucune clé Supabase exploitable (SUPABASE_SERVICE_ROLE_KEY ou SUPABASE_JWT_SECRET requis dans .env)."
-			);
-		}
-	}
-
-	return createClient(url, key, { auth: { persistSession: false } });
+export function createPostgresAdapter(): DataAdapter {
+	const connectionString = process.env.DATABASE_URL ?? process.env.ROSE_GRIFFON_DATABASE_URL ?? process.env.RG_DATABASE_URL;
+	if (!connectionString) throw new Error("DATABASE_URL requis : les pushers Inagle sont PostgreSQL-only.");
+	console.log("🔌 Using direct PostgreSQL Adapter");
+	return new PostgresAdapter(connectionString);
 }
-
-/**
- * Adaptateur Supabase ou Postgres direct prêt à l'emploi, basé sur l'environnement.
- * Pratique pour les pushers exécutés en standalone (scripts/push-*.ts) qui veulent
- * le même adaptateur que le flux principal sans réimplémenter la résolution des creds.
- */
-export function createSupabaseAdapter(): DataAdapter {
-	if (process.env.DATABASE_URL) {
-		console.log("🔌 Using direct PostgreSQL Adapter (DATABASE_URL provided)");
-		return new PostgresAdapter(process.env.DATABASE_URL);
-	}
-	return new SupabaseAdapter(resolveSupabaseClient());
-}
-

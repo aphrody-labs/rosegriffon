@@ -9,7 +9,7 @@
  */
 
 import { afterEach, describe, expect, test } from "bun:test";
-import type { SupabaseClient } from "@supabase/supabase-js";
+type InjectedClient = any;
 
 import { resolveMirrorPath } from "../src/config";
 import { createSqliteClient } from "../src/db/sqlite-client";
@@ -218,21 +218,21 @@ describe("provider — injection et retour au défaut", () => {
 		const sentinelle = { marqueur: "client-injecte" };
 		setDatabaseProvider(() => {
 			appels++;
-			return sentinelle as unknown as SupabaseClient;
+			return sentinelle as unknown as InjectedClient;
 		});
 		expect(hasDatabaseProvider()).toBe(true);
-		expect(await createClient()).toBe(sentinelle as unknown as SupabaseClient);
+		expect(await createClient()).toBe(sentinelle as unknown as InjectedClient);
 		expect(appels).toBe(1);
 	});
 
 	test("une fabrique asynchrone est attendue (await)", async () => {
 		const sentinelle = { marqueur: "async" };
-		setDatabaseProvider(async () => sentinelle as unknown as SupabaseClient);
-		expect(await createClient()).toBe(sentinelle as unknown as SupabaseClient);
+		setDatabaseProvider(async () => sentinelle as unknown as InjectedClient);
+		expect(await createClient()).toBe(sentinelle as unknown as InjectedClient);
 	});
 
 	test("setDatabaseProvider(null) restaure le miroir SQLite par défaut", async () => {
-		setDatabaseProvider(() => ({}) as unknown as SupabaseClient);
+		setDatabaseProvider(() => ({}) as unknown as InjectedClient);
 		setDatabaseProvider(null);
 		expect(hasDatabaseProvider()).toBe(false);
 		const client = await createClient();

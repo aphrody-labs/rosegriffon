@@ -2,16 +2,39 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 import { createCanvas, loadImage, type SKRSContext2D } from "@aphrody/canvas";
+import type { Kysely } from "kysely";
 import { NotFound } from "@tsed/exceptions";
 import { singleton } from "tsyringe";
 
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { urlsConfig } from "@/configs/urls";
-import { Clan } from "@/entities/Clan";
-import { ClanMember } from "@/entities/ClanMember";
-import { UserElo } from "@/entities/UserElo";
-import { Database } from "@/services/Database";
 import { MatchMode } from "@/utils/enums/eventEnums";
 import { registerAchilleaFonts } from "@/utils/functions/registerFonts";
+
+interface ClanPosterDatabase {
+	clan: {
+		id: number;
+		name: string;
+		shortened_name: string;
+		clan_avatar_url: string;
+		normalized_short_name: string;
+		normalized_name: string;
+	};
+	clan_member: { clan_id: number; user_id: string };
+	user: { id: string; display_name: string; username: string | null; avatar: string | null };
+	user_elo: { user_id: string; mode: number; elo: number };
+}
+
+interface PosterClan {
+	id: number;
+	name: string;
+	shortenedName: string;
+	clanAvatarUrl: string;
+	normalizedShortName: string;
+	normalizedName: string;
+}
+
+const sql = createAchilleaSql<ClanPosterDatabase>() as Kysely<ClanPosterDatabase>;
 
 const STORAGE_ROOT = join(process.cwd(), "storage", "clans");
 
@@ -62,7 +85,7 @@ export interface PosterMember {
 }
 
 export interface PosterData {
-	clan: Clan;
+	clan: PosterClan;
 	members: PosterMember[];
 	averageElo: number;
 	membersCount: number;
@@ -70,7 +93,13 @@ export interface PosterData {
 
 @singleton()
 export class ClanPosterService {
-	constructor(private db: Database) {}
+	private db: Kysely<ClanPosterDatabase> = sql;
+
+	/** Test-only dependency seam; production uses the shared Kysely pool. */
+	withDatabase(db: Kysely<ClanPosterDatabase>): this {
+		this.db = db;
+		return this;
+	}
 
 	async generatePoster(clanId: number): Promise<Buffer> {
 		const data = await this.loadPosterData(clanId);
@@ -86,28 +115,44 @@ export class ClanPosterService {
 	}
 
 	private async loadPosterData(clanId: number): Promise<PosterData> {
-		const em = this.db.em.fork();
-		const clan = await em.findOne(Clan, { id: clanId });
+		const clan = await this.db
+			.selectFrom("clan")
+			.select([
+				"id",
+				"name",
+				"shortened_name as shortenedName",
+				"clan_avatar_url as clanAvatarUrl",
+				"normalized_short_name as normalizedShortName",
+				"normalized_name as normalizedName",
+			])
+			.where("id", "=", clanId)
+			.executeTakeFirst();
 		if (!clan) throw new NotFound(`Clan ${clanId} introuvable`);
 
-		const allMembers = await em.find(ClanMember, { clan: clanId }, { populate: ["user"] });
+		const members = await this.db
+			.selectFrom("clan_member")
+			.innerJoin("user", "user.id", "clan_member.user_id")
+			.leftJoin("user_elo", (join) =>
+				join
+					.onRef("user_elo.user_id", "=", "user.id")
+					.on("user_elo.mode", "=", MatchMode.ONE_VS_ONE)
+			)
+			.select([
+				"user.id as userId",
+				"user.display_name as displayName",
+				"user.username",
+				"user.avatar as avatarUrl",
+				"user_elo.elo",
+			])
+			.where("clan_member.clan_id", "=", clanId)
+			.execute();
 
-		const userIds = allMembers.map((m) => m.user.id);
-		const elos = userIds.length
-			? await em.find(UserElo, {
-					user: { $in: userIds },
-					mode: MatchMode.ONE_VS_ONE,
-				})
-			: [];
-		const eloByUser = new Map<string, number>();
-		for (const e of elos) eloByUser.set(e.user.id, e.elo);
-
-		const enriched: PosterMember[] = allMembers.map((m) => {
-			const elo = eloByUser.get(m.user.id) ?? 0;
+		const enriched: PosterMember[] = members.map((member) => {
+			const elo = member.elo ?? 0;
 			return {
-				userId: m.user.id,
-				displayName: m.user.displayName || m.user.username || `User#${m.user.id}`,
-				avatarUrl: m.user.avatar ?? null,
+				userId: member.userId,
+				displayName: member.displayName || member.username || `User#${member.userId}`,
+				avatarUrl: member.avatarUrl ?? null,
 				elo,
 				rankIndex: rankFromElo(elo),
 			};
@@ -166,7 +211,7 @@ function rankFromElo(elo: number): number {
 	return Math.min(Math.max(idx, 1), 11);
 }
 
-function pickClanPrimaryColor(clan: Clan): string {
+function pickClanPrimaryColor(clan: PosterClan): string {
 	const seed = clan.normalizedShortName || clan.normalizedName || clan.name;
 	let hash = 0;
 	for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
@@ -174,7 +219,7 @@ function pickClanPrimaryColor(clan: Clan): string {
 	return RANK_COLORS[idx];
 }
 
-function pickClanSecondaryColor(clan: Clan): string {
+function pickClanSecondaryColor(clan: PosterClan): string {
 	const primary = pickClanPrimaryColor(clan);
 	const idx = RANK_COLORS.indexOf(primary);
 	const next = idx === 11 ? 1 : idx + 1;
@@ -199,7 +244,7 @@ function drawBackground(ctx: SKRSContext2D, primary: string, secondary: string) 
 	ctx.strokeRect(20, 20, CANVAS_WIDTH - 40, CANVAS_HEIGHT - 40);
 }
 
-function drawHeader(ctx: SKRSContext2D, clan: Clan) {
+function drawHeader(ctx: SKRSContext2D, clan: PosterClan) {
 	ctx.fillStyle = "rgba(0,0,0,0.55)";
 	ctx.fillRect(40, 40, CANVAS_WIDTH - 80, 140);
 
@@ -260,7 +305,7 @@ async function drawClanLogo(
 	ctx.stroke();
 }
 
-function drawNameAndTag(ctx: SKRSContext2D, clan: Clan, y: number) {
+function drawNameAndTag(ctx: SKRSContext2D, clan: PosterClan, y: number) {
 	ctx.fillStyle = "#ffffff";
 	ctx.font = "bold 88px 'Achillea Sans', 'Achillea Body'";
 	ctx.textAlign = "center";

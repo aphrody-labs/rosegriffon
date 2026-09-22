@@ -1,8 +1,35 @@
 import { singleton } from "tsyringe";
+import type { Kysely } from "kysely";
+import { sql as sqlTag } from "kysely";
 
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { MatchMode } from "@/utils/enums";
 
-import { Database } from "./Database";
+interface LeaderboardDatabase {
+	user_elo: {
+		user_id: string;
+		season_id: string | null;
+		mode: number;
+		elo: number;
+		peak_rating: number;
+		games_played: number;
+	};
+}
+
+const sql = createAchilleaSql<LeaderboardDatabase>() as Kysely<LeaderboardDatabase>;
+
+type LeaderboardRow = {
+	user_id: string;
+	elo: number;
+	peak_rating: number;
+	games_played: number;
+	rank: string | number;
+};
+
+async function executeRows<T>(query: ReturnType<typeof sqlTag>): Promise<T[]> {
+	const result = await query.execute(sql);
+	return result.rows as T[];
+}
 
 export interface LeaderboardEntry {
 	userId: string;
@@ -19,22 +46,16 @@ export interface LeaderboardPage {
 
 @singleton()
 export class LeaderboardService {
-	constructor(private db: Database) {}
-
 	async getTop(
 		seasonId: string | null,
 		mode: MatchMode,
 		limit: number = 10,
 		offset: number = 0
 	): Promise<LeaderboardPage> {
-		const em = this.db.em.fork();
-
-		// MikroORM v7 : Knex remplacé par Kysely — on passe par em.execute() (SQL brut)
-		// pour conserver les window functions PostgreSQL (DENSE_RANK).
-		const seasonClause = seasonId !== null ? "ue.season_id = ?" : "ue.season_id IS NULL";
-		const baseParams: unknown[] = seasonId !== null ? [seasonId, mode] : [mode];
-
-		const rankedSql = `
+		const seasonPredicate = seasonId !== null
+			? sqlTag`ue.season_id = ${seasonId}`
+			: sqlTag`ue.season_id IS NULL`;
+		const rankedSql = sqlTag`
 			SELECT
 				ue.user_id,
 				ue.elo,
@@ -42,35 +63,24 @@ export class LeaderboardService {
 				ue.games_played,
 				DENSE_RANK() OVER (ORDER BY ue.elo DESC) AS rank
 			FROM user_elo AS ue
-			WHERE ${seasonClause}
-			  AND ue.mode = ?
+			WHERE ${seasonPredicate}
+			  AND ue.mode = ${mode}
 		`;
-
-		// Comptage total
-		const countSql = `
+		const countSql = sqlTag`
 			SELECT COUNT(*) AS total
 			FROM user_elo AS ue
-			WHERE ${seasonClause}
-			  AND ue.mode = ?
+			WHERE ${seasonPredicate}
+			  AND ue.mode = ${mode}
 		`;
-
-		const paginatedSql = `
+		const paginatedSql = sqlTag`
 			SELECT * FROM (${rankedSql}) AS ranked
 			ORDER BY rank ASC
-			LIMIT ? OFFSET ?
+			LIMIT ${limit} OFFSET ${offset}
 		`;
 
 		const [countRows, rows] = await Promise.all([
-			em.execute<{ total: string | number }[]>(countSql, baseParams, "all"),
-			em.execute<
-				{
-					user_id: string;
-					elo: number;
-					peak_rating: number;
-					games_played: number;
-					rank: string | number;
-				}[]
-			>(paginatedSql, [...baseParams, limit, offset], "all"),
+			executeRows<{ total: string | number }>(countSql),
+			executeRows<LeaderboardRow>(paginatedSql),
 		]);
 
 		const total = Number(countRows[0]?.total ?? 0);
@@ -91,13 +101,10 @@ export class LeaderboardService {
 		userId: string,
 		mode: MatchMode
 	): Promise<LeaderboardEntry | null> {
-		const em = this.db.em.fork();
-
-		// MikroORM v7 : SQL brut via em.execute()
-		const seasonClause = seasonId !== null ? "ue.season_id = ?" : "ue.season_id IS NULL";
-		const baseParams: unknown[] = seasonId !== null ? [seasonId, mode] : [mode];
-
-		const rankedSql = `
+		const seasonPredicate = seasonId !== null
+			? sqlTag`ue.season_id = ${seasonId}`
+			: sqlTag`ue.season_id IS NULL`;
+		const rankedSql = sqlTag`
 			SELECT
 				ue.user_id,
 				ue.elo,
@@ -105,19 +112,13 @@ export class LeaderboardService {
 				ue.games_played,
 				DENSE_RANK() OVER (ORDER BY ue.elo DESC) AS rank
 			FROM user_elo AS ue
-			WHERE ${seasonClause}
-			  AND ue.mode = ?
+			WHERE ${seasonPredicate}
+			  AND ue.mode = ${mode}
 		`;
 
-		const rows = await em.execute<
-			{
-				user_id: string;
-				elo: number;
-				peak_rating: number;
-				games_played: number;
-				rank: string | number;
-			}[]
-		>(`SELECT * FROM (${rankedSql}) AS ranked WHERE user_id = ?`, [...baseParams, userId], "all");
+		const rows = await executeRows<LeaderboardRow>(
+			sqlTag`SELECT * FROM (${rankedSql}) AS ranked WHERE user_id = ${userId}`
+		);
 
 		const row = rows[0];
 		if (!row) return null;

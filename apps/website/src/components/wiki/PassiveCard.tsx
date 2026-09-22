@@ -5,9 +5,9 @@ import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { cn } from "@/lib/utils";
 
-// ── Types nie-data (passives-full.json) ──
+// ── Types de projection SQL `inagle_passives` ──
 
-/** Une instance de passif joueur issue de passives-full.json (nie-data). */
+/** Une instance de passif joueur issue de la projection SQL canonique. */
 export interface NierPassiveInstance {
 	passive_id: string;
 	string_id: string;

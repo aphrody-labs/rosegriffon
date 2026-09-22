@@ -2,7 +2,7 @@
  * Génère un glossaire Inazuma Eleven depuis les données inagle.
  *
  * Parse tous les textes FR du jeu via les APIs existantes et produit :
- * - Un fichier glossaire structuré pour injection dans CLAUDE.md / agent
+ * - Un fichier Markdown condensé pour injection dans CLAUDE.md / agent
  * - Noms de personnages, techniques, items, équipes, lieux, descriptions
  *
  * Usage: npx tsx src/scripts/generate-glossary.ts
@@ -164,11 +164,6 @@ async function main() {
 	const outDir = join(DATA_ROOT, "glossary");
 	const { mkdirSync } = await import("node:fs");
 	mkdirSync(outDir, { recursive: true });
-
-	// JSON complet
-	const jsonPath = join(outDir, "inazuma-glossary.json");
-	writeFileSync(jsonPath, JSON.stringify(glossary, null, 2));
-	console.log(`Glossaire JSON : ${jsonPath} (${glossary._meta.totalEntries} entr��es)`);
 
 	// Markdown condensé pour CLAUDE.md / agent system prompt
 	const md = [

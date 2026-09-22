@@ -1,8 +1,6 @@
 import * as path from "node:path";
-import { createClient } from "@supabase/supabase-js";
 import type { Command } from "commander";
 import * as dotenv from "dotenv";
-import jwt from "jsonwebtoken";
 import {
 	CATEGORY_NAMES,
 	RARITY_NAMES as CHAR_RARITY_NAMES,
@@ -49,15 +47,9 @@ import {
 	importUniforms,
 	importVideoWaza,
 } from "./push-categories.js";
-import { type DataAdapter, dedup, PostgresAdapter, SupabaseAdapter } from "./push-adapter.js";
+import { type DataAdapter, dedup, PostgresAdapter } from "./push-adapter.js";
 import { type AuraHissatsu, buildAuraHashSet, loadAuraSkills } from "./skills/mapper-aura.js";
 import { importLuaScripts } from "./lua/pusher.js";
-
-// Même racine que `push-categories.ts` (DATA_PATH). `exp_table.json`/`growth_tables.json`
-// vivaient sous un chemin relatif au SOURCE de ce module (`../data/all-gamedata/`, jamais
-// peuplé) au lieu du dump niers — les deux imports échouaient `ENOENT` à chaque `push` et
-// arrêtaient le reste des catégories (exception non rattrapée), silencieusement chaque nuit.
-const DATA_ROOT = process.env.DATA_PATH || "/home/ubuntu/niers/data";
 
 // === Helpers ===
 
@@ -86,12 +78,9 @@ const getPositionFr = (posRaw: number) => {
 export function registerPushCommand(program: Command) {
 	program
 		.command("push")
-		.description("Push Inagle data to Supabase (via API or Direct DB)")
+		.description("Push Inagle data to PostgreSQL")
 		.option("--env <path>", "Path to .env file", ".env")
-		.option("--url <url>", "Supabase URL (for API mode)")
-		.option("--jwt-secret <secret>", "Supabase JWT Secret (to generate service token)")
-		.option("--key <key>", "Direct Service Role Key")
-		.option("--db-url <url>", "Postgres Connection URL (Direct DB mode)")
+		.option("--db-url <url>", "Postgres Connection URL")
 		.action(async (options) => {
 			if (options.env) {
 				dotenv.config({ path: path.resolve(process.cwd(), options.env) });
@@ -99,56 +88,9 @@ export function registerPushCommand(program: Command) {
 
 			let adapter: DataAdapter;
 
-			if (options.dbUrl) {
-				console.log(`[Push] Using Direct DB connection: ${options.dbUrl}`);
-				adapter = new PostgresAdapter(options.dbUrl);
-			} else {
-				let SUPABASE_URL =
-					options.url || process.env.SUPABASE_URL || "http://127.0.0.1:8811";
-				let SUPABASE_KEY = options.key || process.env.SUPABASE_SERVICE_ROLE_KEY;
-				const JWT_SECRET =
-					options.jwtSecret || process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET;
-
-				const isValidKey = (val: string | undefined | null) =>
-					typeof val === "string" &&
-					val.length > 0 &&
-					!val.startsWith("eyJ2Ijo") &&
-					val !== "undefined" &&
-					val !== "null";
-
-				const isValidUrl = (val: string | undefined | null) =>
-					typeof val === "string" &&
-					val.length > 0 &&
-					val.startsWith("http") &&
-					!val.startsWith("eyJ2Ijo");
-
-				if (!isValidUrl(SUPABASE_URL)) {
-					SUPABASE_URL = "http://127.0.0.1:8811";
-				}
-
-				if (!isValidKey(SUPABASE_KEY)) {
-					if (isValidKey(JWT_SECRET)) {
-						console.log("[Push] Generating Service Role Token from Secret...");
-						const payload = {
-							role: "service_role",
-							iss: "supabase",
-							iat: Math.floor(Date.now() / 1000),
-							exp: Math.floor(Date.now() / 1000) + 3600,
-						};
-						SUPABASE_KEY = jwt.sign(payload, JWT_SECRET!);
-					} else {
-						console.log("[Push] Using local dev Supabase fallback service role key");
-						SUPABASE_KEY =
-							"***REDACTED-SERVICE-ROLE***";
-					}
-				}
-
-				console.log(`[Push] Connecting to Supabase API at: ${SUPABASE_URL}`);
-				const supabase = createClient(SUPABASE_URL, SUPABASE_KEY!, {
-					auth: { persistSession: false },
-				});
-				adapter = new SupabaseAdapter(supabase);
-			}
+			const connectionString = options.dbUrl ?? process.env.DATABASE_URL ?? process.env.ROSE_GRIFFON_DATABASE_URL ?? process.env.RG_DATABASE_URL;
+			if (!connectionString) throw new Error("DATABASE_URL requis : le push Inagle est PostgreSQL-only.");
+			adapter = new PostgresAdapter(connectionString);
 
 			try {
 				console.log("🚀 Starting Inagle Data Push...");
@@ -187,14 +129,6 @@ export function registerPushCommand(program: Command) {
 				await importTrophies(service, adapter);
 				await importMissions(service, adapter);
 				await importLuaScripts(service, adapter);
-
-
-				// Static reference tables
-				await importExpTable(adapter);
-				await importGrowthTables(adapter);
-
-				// Story text static export
-				await exportStoryTextDatabase();
 
 				console.log("🎉 Data push completed successfully!");
 			} catch (error) {
@@ -667,10 +601,9 @@ async function importAuras(service: any, db: DataAdapter) {
 	const serviceAuras = service.skills.auraAll();
 
 	// HISSATSU NATIF : on résout les auras + leur hissatsu directement depuis le dump
-	// (loadAuraSkills → config.skillId1 → skill_config). Le service peut renvoyer un
-	// snapshot prépackagé (entries/auras.json) incomplet et sans hissatsu ; si le parse
-	// natif est plus riche (dump présent), il devient la source de vérité. Sinon on
-	// retombe sur le service et on fusionne le hissatsu natif par auraId / assetCode.
+	// (loadAuraSkills → config.skillId1 → skill_config). Le service SQL peut fournir
+	// une projection incomplète ; si le parse natif est plus riche (dump présent),
+	// il devient la source de vérité, puis fusionne par auraId / assetCode.
 	const nativeHissatsu = new Map<string, AuraHissatsu>();
 	let nativeAuras: any[] = [];
 	try {
@@ -956,84 +889,6 @@ async function importOpponentTeams(_service: any, db: DataAdapter) {
 	console.log(`✅ Opponent Teams imported (${records.length}).`);
 }
 
-async function importExpTable(db: DataAdapter) {
-	console.log("🔄 Importing Exp Table...");
-	const dataPath = path.join(DATA_ROOT, "all-gamedata/exp_table.json");
-	const rows: { level: number; need_exp: number }[] = await Bun.file(dataPath).json();
-	const records = rows.map((r: any) => ({ level: r.level, need_exp: r.needExp ?? r.need_exp }));
-	const { error } = await db.upsert("inagle_exp_table", records, "level");
-	if (error) console.error("❌ Error exp_table:", error.message || error);
-	else console.log(`✅ Exp Table imported (${records.length} levels).`);
-}
-
-async function importGrowthTables(db: DataAdapter) {
-	console.log("🔄 Importing Growth Tables...");
-	const dataPath = path.join(DATA_ROOT, "all-gamedata/growth_tables.json");
-	const raw: Record<string, any[]> = await Bun.file(dataPath).json();
-
-	const records: any[] = [];
-
-	// lv1 : mainPosition, subPosition, playStyle
-	for (const row of raw.lv1 ?? []) {
-		records.push({
-			section: "lv1",
-			main_position: row.mainPosition ?? null,
-			sub_position: row.subPosition ?? null,
-			play_style: row.playStyle ?? null,
-			growth_pattern: null,
-			chara_rank: null,
-			data: row,
-		});
-	}
-
-	// lv30 : mainPosition, subPosition, growthPattern, charaRank
-	for (const row of raw.lv30 ?? []) {
-		records.push({
-			section: "lv30",
-			main_position: row.mainPosition ?? null,
-			sub_position: row.subPosition ?? null,
-			play_style: null,
-			growth_pattern: row.growthPattern ?? null,
-			chara_rank: row.charaRank ?? null,
-			data: row,
-		});
-	}
-
-	// main : mainPosition (pas de subPosition)
-	for (const row of Object.values(raw.main ?? {})) {
-		records.push({
-			section: "main",
-			main_position: row.mainPosition ?? null,
-			sub_position: null,
-			play_style: null,
-			growth_pattern: row.growthPattern ?? null,
-			chara_rank: row.charaRank ?? null,
-			data: row,
-		});
-	}
-
-	// sub : subPosition (pas de mainPosition)
-	for (const row of Object.values(raw.sub ?? {})) {
-		records.push({
-			section: "sub",
-			main_position: null,
-			sub_position: row.subPosition ?? null,
-			play_style: null,
-			growth_pattern: row.growthPattern ?? null,
-			chara_rank: row.charaRank ?? null,
-			data: row,
-		});
-	}
-
-	const { error } = await db.upsert(
-		"inagle_growth_tables",
-		records,
-		"section,main_position,sub_position,play_style,growth_pattern,chara_rank"
-	);
-	if (error) console.error("❌ Error growth_tables:", error.message || error);
-	else console.log(`✅ Growth Tables imported (${records.length} rows).`);
-}
-
 async function importCapsules(_service: any, db: DataAdapter) {
 	console.log("🔄 Importing Capsules...");
 	const { buildCapsuleDatabase } = await import("./parsers/capsule-config.js");
@@ -1055,31 +910,4 @@ async function importCapsules(_service: any, db: DataAdapter) {
 		else successCount += batch.length;
 	}
 	console.log(`✅ Capsules imported (${successCount}).`);
-}
-
-async function exportStoryTextDatabase() {
-	console.log("🔄 Exporting Story Text Database...");
-	const { buildStoryTextDatabase } = await import("./parsers/story-text-parser.js");
-	const db = buildStoryTextDatabase();
-
-	const { PATHS } = await import("./core/paths.js");
-	const { writeFileSync } = await import("node:fs");
-
-	const storyTextPath = path.join(PATHS.allGamedata, "story_text_database.json");
-	try {
-		writeFileSync(storyTextPath, JSON.stringify(db, null, 2), "utf-8");
-		console.log(`✅ Story Text Database written to ${storyTextPath}`);
-	} catch (error: any) {
-		// Le dump du jeu est monté en lecture seule sur le VPS : cette écriture y échoue
-		// en EROFS chaque nuit. C'est un export de confort (fichier statique dérivé), pas
-		// une écriture en base — le faire remonter en « Fatal error during push » masquait
-		// les vraies pannes du push dans le journal, et le shell rendait quand même 0.
-		if (error?.code === "EROFS" || error?.code === "EACCES") {
-			console.warn(
-				`⚠️  Story Text Database non écrite (${error.code} sur ${storyTextPath}) — dump monté en lecture seule, export ignoré.`
-			);
-			return;
-		}
-		throw error;
-	}
 }

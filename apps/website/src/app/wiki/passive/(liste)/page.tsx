@@ -25,11 +25,9 @@ import type {
 } from "@/components/wiki/PassiveCard";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import passiveData from "@/data/passive-sheets.json";
-import passivesFullData from "@rosegriffon/azalee/data/passives-full.json";
 import { normalizeText } from "@rosegriffon/azalee/search/utils";
 import { parseSearchParams } from "@/lib/validations";
-import { passiveCategory } from "@/lib/wiki-service";
+import { passiveCategory, wikiService } from "@/lib/wiki-service";
 
 export const metadata: Metadata = {
 	alternates: { canonical: "/passive" },
@@ -38,9 +36,9 @@ export const metadata: Metadata = {
 	title: "Talents & Passifs | Codex Stratégique - Azalée",
 };
 
-// ── Groupement nie-data ──
+// ── Groupement des lignes SQL de passifs ──
 
-/** Regroupe les instances de passives joueur par effect_id (128 familles). */
+/** Regroupe les instances de passifs joueur par effect_id. */
 function buildNierFamilies(player: NierPassiveInstance[]): NierPassiveFamily[] {
 	const map = new Map<string, NierPassiveInstance[]>();
 	for (const inst of player) {
@@ -189,13 +187,16 @@ export default async function PassivesPage({
 	const pCatFilter = passiveCatFilter?.toString() || "";
 
 	// ── Load passive-sheets data (custom + coordinator) ──
-	const allPlayerPassivesSheets = passiveData.playerPassives as PlayerPassiveData[];
-	const allCustomPassives = passiveData.customPassives as CustomPassiveData[];
-	const allCoordinatorPassives = passiveData.coordinatorPassives as CoordinatorPassiveData[];
+	const passiveSheets = await wikiService.getPassiveSheets();
+	const allPlayerPassivesSheets = passiveSheets.playerPassives as PlayerPassiveData[];
+	const allCustomPassives = passiveSheets.customPassives as CustomPassiveData[];
+	const allCoordinatorPassives = passiveSheets.coordinatorPassives as CoordinatorPassiveData[];
 
-	// ── Load nie-data passives (passives-full.json) ──
-	const nierAllPlayer = passivesFullData.player as NierPassiveInstance[];
-	const nierTeamPassives = passivesFullData.team as NierTeamPassive[];
+	// ── Load player/team passives from the canonical SQL projection ──
+	const [{ data: nierAllPlayer }, nierTeamPassives] = await Promise.all([
+		wikiService.getPassivesList({ limit: 5000 }),
+		wikiService.getTeamPassives(),
+	]);
 	const nierFamiliesAll = buildNierFamilies(nierAllPlayer);
 
 	// ── Filter nie-data families (recherche + élément + rareté + catégorie) ──

@@ -6,7 +6,7 @@
  *
  * ## Sémantique de `need_exp` (vérité terrain, pas une hypothèse)
  *
- * Source : table `inagle_exp_table` du miroir SQLite (100 lignes, niveaux 1→100),
+ * Source : table PostgreSQL `public.inagle_exp_table` (100 lignes, niveaux 1→100),
  * poussée par `packages/inagle/src/cli-push.ts:917` depuis le parseur
  * `packages/inagle/src/parsers/chara-exp-table.ts` (fichier de jeu
  * `character/chara_exp_table_config_*.cfg.bin.json`, liste `m_charaExpTableList`).

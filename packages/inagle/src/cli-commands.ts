@@ -260,8 +260,9 @@ export function registerTeamsCommand(program: Command) {
 
 			const name = team.name || team.displayName || "???";
 			console.log(pc.bold(`\n${name} (${team.teamIdStr})`));
-			if (team.emblemId) {
-				const img = service.images.emblem(team.emblemId.toString());
+			const emblemId = "emblemId" in team ? team.emblemId : undefined;
+			if (emblemId) {
+				const img = service.images.emblem(emblemId.toString());
 				if (img) console.log(`Emblem: ${pc.dim(img)}`);
 			}
 		});

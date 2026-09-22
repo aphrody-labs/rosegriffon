@@ -4,9 +4,6 @@
  * @module @/lib/inagle
  */
 
-// Re-export types
-export { createInagleAppAsync, type InagleApp } from "./adapters/hono.js";
-
 // Domain APIs
 export {
 	type BasaraAPI,
@@ -16,8 +13,6 @@ export {
 	type BasaraIcons,
 	type BasaraIndexes,
 	type BasaraStats,
-	buildBasaraDatabase,
-	createBasaraAPI,
 	type Element,
 	type EnrichedBasara,
 	type HeroVariants,
@@ -27,14 +22,12 @@ export {
 
 // Characters API
 export {
-	buildCharactersDatabase,
 	type CharacterDetail,
 	type CharacterIdMapping,
 	type CharacterNametag,
 	type CharacterStarSign as CharacterStarSignRarity,
 	type CharactersAPI,
 	type CharactersDatabase,
-	createCharactersAPI,
 	type EnrichedCharacter,
 	PERSONALITY_NAMES,
 	RARITY_NAMES,
@@ -42,7 +35,7 @@ export {
 export * from "./characters/comparison-engine.js";
 
 // Constellation
-export { type ConstellationAPI, createConstellationAPI } from "./constellation/index.js";
+export type { ConstellationAPI } from "./constellation/index.js";
 // Exporters
 export * from "./core/exporters.js";
 
@@ -75,15 +68,8 @@ export * from "./drops/index.js";
 // New entity builders
 export {
 	type BaseCharacterStats,
-	buildCharacter,
 	type CharacterFilter,
 	type CharacterStatsSummary,
-	getCharacterByParamId,
-	getCharacterStats,
-	loadAllCharacters,
-	loadBaseCharacters,
-	loadFilteredCharacters,
-	preloadCharacterEnrichment,
 } from "./entities/character.js";
 export * from "./menu/index.js";
 // APIs
@@ -97,12 +83,10 @@ export * from "./zukan/index.js";
 // === AZALEE COMPATIBILITY LAYER ===
 
 export type { ItemsAPI, ItemsDatabase } from "./items/api.js";
-export { buildItemsDatabaseAsync, createItemsAPIAsync } from "./items/api.js";
 // Items
 export type { ItemCategory, ParsedItem as Item } from "./parsers/item-config.js";
 // Global Search
 export {
-	createGlobalSearch,
 	type GlobalSearchAPI,
 	type GlobalSearchResult,
 	type SearchableType,
@@ -119,9 +103,7 @@ export type {
 	TeamPassive,
 } from "./skills/api.js";
 export {
-	buildSkillsDatabase,
 	CATEGORY_NAMES,
-	createSkillsAPI,
 	ELEMENT_NAMES,
 	PASSIVE_BOOST_NAMES,
 	PASSIVE_SCOPE_NAMES,
@@ -133,7 +115,6 @@ export type {
 	TeamsAPI,
 	TeamsDatabase,
 } from "./teams/api.js";
-export { buildTeamsDatabase, createTeamsAPI } from "./teams/api.js";
 
 // Romaji & Transliteration
 export { initRomaji, toRomaji, toRomajiTitleCase, toKana } from "./utils/romaji.js";

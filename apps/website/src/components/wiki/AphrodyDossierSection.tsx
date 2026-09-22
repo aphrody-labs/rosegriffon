@@ -6,11 +6,11 @@
  *
  * Croise chara_param + skill_config + aura_skill_config : 3 séries (IE1/GO/Ares),
  * stats golden (Lv1/50/99), techniques de la variante primaire (telop + noms joints via
- * `skills-cutin.json`), auras. Ne s'affiche que pour Aphrody (code interne ∈ 3 séries).
+ * la projection SQL des cut-ins), auras. Ne s'affiche que pour Aphrody (code interne ∈ 3 séries).
  */
 import dossier from "@/data/aphrody-dossier.json";
 import { cpkAssetUrl } from "@rosegriffon/azalee/cpk/shared";
-import { getSkillCutin } from "@rosegriffon/azalee/game/skills-cutin";
+import type { SkillCutinEntry } from "@rosegriffon/azalee/game/skills-cutin";
 import { Icon } from "@/components/ui/Icon";
 
 const ELEMENT: Record<number, string> = {
@@ -29,7 +29,13 @@ type Variant = Dossier["variants"][number];
 /** Codes internes des 3 séries d'Aphrody. */
 const SERIES_CODES = new Set(dossier.series.map((s) => s.code.toLowerCase()));
 
-export function AphrodyDossierSection({ internalCode }: { internalCode?: string }) {
+export function AphrodyDossierSection({
+	internalCode,
+	cutins,
+}: {
+	internalCode?: string;
+	cutins: Record<string, SkillCutinEntry>;
+}) {
 	if (!internalCode || !SERIES_CODES.has(internalCode.toLowerCase())) return null;
 
 	const id = dossier.identity;
@@ -125,7 +131,7 @@ export function AphrodyDossierSection({ internalCode }: { internalCode?: string 
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 					{primary.techniques.map((t) => {
 						const code = t.info.skill_id_str;
-						const meta = getSkillCutin(code);
+						const meta = cutins[code];
 						const telopPath =
 							t.cutin?.telop_by_lang.find(([l]) => l === "fr")?.[1] ??
 							t.cutin?.telop_by_lang.find(([l]) => l === "en")?.[1] ??

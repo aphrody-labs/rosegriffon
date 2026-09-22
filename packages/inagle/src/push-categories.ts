@@ -5,7 +5,7 @@
  *
  * Source de vérité UNIQUE : ces fonctions sont appelées par le flux principal
  * `cli-push.ts` (séquence de push) ET par les scripts standalone
- * `scripts/push-<cat>.ts` (qui ne font que créer l'adaptateur Supabase et lancer
+ * `scripts/push-<cat>.ts` (qui ne font que créer l'adaptateur PostgreSQL et lancer
  * l'importer). Vivent sous `src/` pour rester dans le `rootDir` du build TS.
  *
  * 100% dérivé des octets RÉELS du dump (/home/ubuntu/niers/data) via les parseurs
@@ -57,8 +57,8 @@ const DATA_PATH = process.env.DATA_PATH || "/home/ubuntu/niers/data";
 type LignePoussee = Record<string, unknown>;
 
 /**
- * Upsert par lots — factorise le découpage répété par chaque importer (Supabase
- * REST plafonne la taille des payloads, Postgres le nombre de paramètres).
+ * Upsert par lots — factorise le découpage répété par chaque importer et borne
+ * le nombre de paramètres PostgreSQL.
  * Renvoie le nombre de lignes réellement écrites.
  */
 async function pousserParLots(

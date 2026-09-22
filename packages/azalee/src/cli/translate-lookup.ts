@@ -2,15 +2,14 @@
  * Recherche d'entités et traduction assistée par glossaire, pour la commande
  * `azalee translate`.
  *
- * Trois sources concourent, dans cet ordre : PostgreSQL (`inagle_*`), le
- * miroir SQLite en repli, puis le glossaire consolidé `data/glossary.json`.
+ * Une seule source de vérité est interrogée : les projections SQL `inagle_*`,
+ * PostgreSQL en priorité et le miroir SQLite en repli hors ligne.
  * La traduction elle-même protège les noms propres du jeu derrière des
  * marqueurs avant de passer par le service de traduction, puis les restaure :
  * « Fire Tornado » reste « Tornade de feu », pas « Tornade d'incendie ».
  */
 
 import { Database } from "bun:sqlite";
-import path from "node:path";
 import { isKana, toHiragana, toKatakana } from "wanakana";
 
 import { containsJapanese, escapeRegExp, stripRubyAnnotations } from "../text/japanese-detect";
@@ -240,100 +239,103 @@ function toMatch(row: SqliteNameRow): TranslateMatch {
 	};
 }
 
-/** Entrée du glossaire consolidé (`data/glossary.json`). */
-interface GlossaryEntry {
-	code?: string;
-	fr?: string;
-	en?: string;
-	ja?: string;
-	name_FR?: string;
-	subType?: string;
+interface GlossaryRow {
+	id: string;
+	type: string;
+	typeLabel: string;
+	name_fr: string | null;
+	name_en: string | null;
+	name_ja: string | null;
+	url: string;
+	sub_type: string | null;
 }
 
-type Glossary = Record<string, GlossaryEntry[] | undefined>;
+let glossaryRowsPromise: Promise<GlossaryRow[]> | null = null;
 
-/** Cherche la requête dans le glossaire consolidé (toutes catégories). */
-export async function searchGlossaryTranslate(query: string): Promise<TranslateMatch[]> {
-	const glossaryPath = path.join(process.cwd(), "data", "glossary.json");
-	const glossaryFile = Bun.file(glossaryPath);
-	if (!(await glossaryFile.exists())) return [];
-
-	try {
-		const glossary = (await glossaryFile.json()) as Glossary;
-		const sanitized = query.replaceAll(/[%_,().*\\]/g, "").trim().toLowerCase();
-		if (!sanitized) return [];
-
-		const hiraCandidate = toHiragana(sanitized).toLowerCase();
-		const kataCandidate = toKatakana(sanitized).toLowerCase();
-
-		const isValidHira =
-			hiraCandidate.length > 0 && [...hiraCandidate].every((c) => isKana(c) || c === "ー");
-		const isValidKata =
-			kataCandidate.length > 0 && [...kataCandidate].every((c) => isKana(c) || c === "ー");
-
-		const results: TranslateMatch[] = [];
-
-		const searchCategory = (catName: string, type: string, typeLabel: string, urlPrefix: string) => {
-			const list = glossary[catName] || [];
-			for (const entry of list) {
-				let matched = false;
-				const enLower = (entry.en || "").toLowerCase();
-				const frLower = (entry.fr || "").toLowerCase();
-				const jaLower = (entry.ja || "").toLowerCase();
-
-				if (enLower.includes(sanitized) || frLower.includes(sanitized) || jaLower.includes(sanitized)) {
-					matched = true;
-				} else if (isValidHira && jaLower.includes(hiraCandidate)) {
-					matched = true;
-				} else if (isValidKata && jaLower.includes(kataCandidate)) {
-					matched = true;
-				} else if (entry.ja) {
-					const roma = japaneseToRomaji(entry.ja);
-					if (roma && roma.toLowerCase().includes(sanitized)) {
-						matched = true;
-					}
-				}
-
-				if (matched) {
-					const id = entry.code || entry.en || entry.ja || Math.random().toString();
-					let finalType = type;
-					let finalTypeLabel = typeLabel;
-					let finalUrl = `${urlPrefix}/${id}`;
-
-					if (type === "aura") {
-						const isSoul =
-							entry.subType === "soul" || (entry.subType && entry.subType.toLowerCase().includes("soul"));
-						finalType = isSoul ? "soul" : "keshin";
-						finalTypeLabel = isSoul ? "Totem" : "Esprit Guerrier";
-						finalUrl = isSoul ? `/aura/totems/${id}` : `/aura/esprits-guerriers/${id}`;
-					}
-
-					results.push({
-						id,
-						type: finalType,
-						typeLabel: finalTypeLabel,
-						name_fr: entry.fr || entry.en || null,
-						name_en: entry.en || null,
-						name_ja: entry.ja || null,
-						name_roma: entry.ja ? japaneseToRomaji(entry.ja) : null,
-						url: finalUrl,
-					});
-				}
+/** Charge toutes les variantes nommables depuis les projections SQL canoniques. */
+async function loadGlossaryRows(): Promise<GlossaryRow[]> {
+	if (glossaryRowsPromise) return glossaryRowsPromise;
+	glossaryRowsPromise = (async () => {
+		const sql = `
+			SELECT slug::text AS id, 'character' AS type, 'Personnage' AS "typeLabel",
+			       name_fr, name_en, name_ja, ('/chara/' || slug) AS url, NULL::text AS sub_type
+			FROM inagle_characters
+			WHERE internal_code NOT LIKE '%_5000' AND slug IS NOT NULL
+			UNION ALL
+			SELECT id::text, 'skill', 'Technique', name_fr, name_en, name_ja,
+			       ('/skill/' || id), NULL::text
+			FROM inagle_skills
+			UNION ALL
+			SELECT id::text, 'aura', 'Aura', name_fr, name_en, name_ja,
+			       ('/aura/' || id), sub_type
+			FROM inagle_souls
+			UNION ALL
+			SELECT id::text, 'passive', 'Passif', name_fr, name_en, name_ja,
+			       ('/skill/' || id), NULL::text
+			FROM inagle_passives
+			UNION ALL
+			SELECT id::text, 'team', 'Équipe', name_fr, name_en, name_ja,
+			       ('/team/' || id), NULL::text
+			FROM inagle_teams
+			UNION ALL
+			SELECT id::text, 'item', 'Objet', name_fr, name_en, name_ja,
+			       ('/item/' || id), NULL::text
+			FROM inagle_items
+			WHERE category <> 'special_tactics'
+		`;
+		const dbUrl = process.env.DATABASE_URL;
+		if (dbUrl) {
+			try {
+				const client = createPgClient(dbUrl);
+				await client.connect();
+				const result = await client.query<GlossaryRow>(sql);
+				await client.end();
+				return result.rows;
+			} catch {
+				// Le miroir local prend le relais hors ligne.
 			}
-		};
+		}
+		const dbPath = getSqlitePath();
+		if (!dbPath) return [];
+		try {
+			const db = new Database(dbPath, { readonly: true });
+			const rows = db.prepare(sql.replaceAll(/::text/g, "")).all() as GlossaryRow[];
+			db.close();
+			return rows;
+		} catch {
+			return [];
+		}
+	})();
+	return glossaryRowsPromise;
+}
 
-		searchCategory("characters", "character", "Personnage", "/chara");
-		searchCategory("techniques", "skill", "Technique", "/skill");
-		searchCategory("auras", "aura", "Aura", "/aura");
-		searchCategory("passives", "skill", "Technique", "/skill");
-		searchCategory("teams", "team", "Équipe", "/team");
-		searchCategory("items", "item", "Objet", "/item");
-		searchCategory("terms", "term", "Terme", "#");
-
-		return results;
-	} catch {
-		return [];
-	}
+/** Cherche la requête dans toutes les projections SQL nommables. */
+export async function searchGlossaryTranslate(query: string): Promise<TranslateMatch[]> {
+	const sanitized = query.replaceAll(/[%_,().*\\]/g, "").trim().toLowerCase();
+	if (!sanitized) return [];
+	const hiraCandidate = toHiragana(sanitized).toLowerCase();
+	const kataCandidate = toKatakana(sanitized).toLowerCase();
+	const isValidHira = [...hiraCandidate].every((c) => isKana(c) || c === "ー");
+	const isValidKata = [...kataCandidate].every((c) => isKana(c) || c === "ー");
+	const rows = await loadGlossaryRows();
+	return rows.filter((row) => {
+		const names = [row.name_fr, row.name_en, row.name_ja].filter(Boolean).map((name) => name!.toLowerCase());
+		return names.some((name) =>
+			name.includes(sanitized) ||
+			(isValidHira && name.includes(hiraCandidate)) ||
+			(isValidKata && name.includes(kataCandidate)) ||
+			(row.name_ja ? japaneseToRomaji(row.name_ja)?.toLowerCase().includes(sanitized) : false)
+		);
+	}).map((row) => ({
+		id: row.id,
+		type: row.sub_type?.toLowerCase().includes("soul") ? "soul" : row.type,
+		typeLabel: row.sub_type?.toLowerCase().includes("soul") ? "Totem" : row.typeLabel,
+		name_fr: row.name_fr,
+		name_en: row.name_en,
+		name_ja: row.name_ja,
+		name_roma: row.name_ja ? japaneseToRomaji(row.name_ja) : null,
+		url: row.sub_type?.toLowerCase().includes("soul") ? `/aura/totems/${row.id}` : row.url,
+	}));
 }
 
 /**
@@ -348,34 +350,18 @@ export async function translateTextHelper(inputText: string): Promise<string> {
 	const isJa = containsJapanese(inputText);
 	const from = isJa ? "ja" : "en";
 
-	const glossaryPath = path.join(process.cwd(), "data", "glossary.json");
 	const jpToFrMap = new Map<string, string>();
 	const enToFrMap = new Map<string, string>();
-
-	const glossaryFile = Bun.file(glossaryPath);
-	if (await glossaryFile.exists()) {
-		try {
-			const glossary = (await glossaryFile.json()) as Glossary;
-			const categories = ["characters", "techniques", "auras", "passives", "teams", "items", "terms"];
-			for (const cat of categories) {
-				const list = glossary[cat] || [];
-				for (const entry of list) {
-					const frVal = entry.fr || entry.name_FR;
-					if (!frVal) continue;
-
-					if (entry.ja && entry.ja.trim()) {
-						const cleanJa = stripRubyAnnotations(entry.ja);
-						if (cleanJa.length > 1) {
-							jpToFrMap.set(cleanJa, frVal);
-						}
-					}
-					if (entry.en && entry.en.trim() && entry.en.toLowerCase() !== frVal.toLowerCase()) {
-						enToFrMap.set(entry.en.trim(), frVal);
-					}
-				}
-			}
-		} catch {
-			// Glossaire illisible : on traduit sans protection terminologique.
+	const glossaryRows = await loadGlossaryRows();
+	for (const row of glossaryRows) {
+		const frVal = row.name_fr;
+		if (!frVal) continue;
+		if (row.name_ja?.trim()) {
+			const cleanJa = stripRubyAnnotations(row.name_ja);
+			if (cleanJa.length > 1) jpToFrMap.set(cleanJa, frVal);
+		}
+		if (row.name_en?.trim() && row.name_en.toLowerCase() !== frVal.toLowerCase()) {
+			enToFrMap.set(row.name_en.trim(), frVal);
 		}
 	}
 

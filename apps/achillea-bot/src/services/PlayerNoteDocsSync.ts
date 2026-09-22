@@ -1,6 +1,7 @@
 import { Service } from "@/decorators";
-import { Data, type PlayerNote } from "@/entities";
+import { Data } from "@/entities";
 import { PlayerNoteCategory, PlayerNoteSeverity } from "@/utils/enums";
+import type { PlayerNoteRecord } from "./PlayerNoteService";
 
 import { Database } from "./Database";
 import { GoogleWorkspaceService } from "./GoogleWorkspaceService";
@@ -80,7 +81,7 @@ export class PlayerNoteDocsSync {
 	}
 
 	/** Consigne un signalement. Renvoie l'URL du document, ou null si indisponible. */
-	async appendNote(note: PlayerNote): Promise<string | null> {
+	async appendNote(note: PlayerNoteRecord): Promise<string | null> {
 		try {
 			const documentId = await this.ensureDocument();
 			if (!documentId) return null;
@@ -106,7 +107,7 @@ export class PlayerNoteDocsSync {
 	}
 
 	/** Consigne le traitement d'un signalement (ligne de suivi, pas de réécriture). */
-	async appendResolution(note: PlayerNote, resolved: boolean): Promise<void> {
+	async appendResolution(note: PlayerNoteRecord, resolved: boolean): Promise<void> {
 		try {
 			const documentId = await this.ensureDocument();
 			if (!documentId) return;

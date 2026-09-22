@@ -113,7 +113,7 @@ function seg(value: string | number): string {
  * Crée un client de l'API Azalée.
  *
  * Sans `baseUrl`, l'ordre de résolution est : `AZALEE_API_URL` puis
- * `https://api.rosegriffon.fr/azalee`.
+ * l'API unifiée `https://api.rosegriffon.fr/v1/azalee`.
  */
 export function createAzaleeClient(options: AzaleeClientOptions = {}): AzaleeClient {
 	const context: AzaleeTransportContext = createTransportContext(options);

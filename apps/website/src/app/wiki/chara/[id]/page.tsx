@@ -17,6 +17,7 @@ import { compareVariants } from "@rosegriffon/inagle";
 import { CharaAssetsSection } from "@/components/wiki/CharaAssetsSection";
 import { AphrodyDossierSection } from "@/components/wiki/AphrodyDossierSection";
 import { CharaVariantsComparison } from "@/components/wiki/CharaVariantsComparison";
+import type { SkillCutinEntry } from "@rosegriffon/azalee/game/skills-cutin";
 
 /**
  * Variante représentative d'un personnage (accès par slug de base) : celle dont la
@@ -196,6 +197,17 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 		wikiSections: (baseChar as any).wikiSections,
 	};
 	const playerSeries = (variant as any).series || (baseChar as any).series;
+	const aphrodyCodes = new Set(["c01001900", "c05026590", "c07080010"]);
+	let aphrodyCutins: Record<string, SkillCutinEntry> = {};
+	if (player.internalCode && aphrodyCodes.has(player.internalCode)) {
+		const codes = baseChar.variants.flatMap((v: any) =>
+			(v.skills ?? [])
+				.map((skill: any) => skill.skillIdStr ?? skill.skill_id_str ?? skill.internalCode)
+				.filter((code: unknown): code is string => typeof code === "string"),
+		);
+		const entries = await wikiService.getSkillCutins([...new Set(codes)]);
+		aphrodyCutins = Object.fromEntries(entries.map((entry) => [entry.skill_id_str, entry]));
+	}
 
 	// Fetch all distinct forms of this character (same baseSlug/chara_id, different pos/elem/rarity)
 	const sheetId = (player as any).sheetData?.sheetId;
@@ -690,7 +702,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
 			{player.internalCode && (
 				<div className="mt-6">
-					<AphrodyDossierSection internalCode={player.internalCode} />
+					<AphrodyDossierSection internalCode={player.internalCode} cutins={aphrodyCutins} />
 				</div>
 			)}
 

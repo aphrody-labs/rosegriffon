@@ -1,63 +1,43 @@
-import { wrap } from "@mikro-orm/core";
 import {
 	BodyParams,
-	Context,
 	Controller,
 	Get,
 	PathParams,
 	Post,
 	Put,
 	QueryParams,
+	Req,
 	Res,
 	UseBefore,
 } from "@tsed/common";
-import { Unauthorized } from "@tsed/exceptions";
-import { deserialize } from "@tsed/json-mapper";
 import { Default, Groups, Maximum, Minimum } from "@tsed/schema";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
-import { CookieAuthorize, OptionalAuthMiddleware } from "@/api/middlewares";
-import type { NewTournamentDTO } from "@/api/models/dtos";
-import { LobbyDTO } from "@/api/models/dtos";
-import type { Paginated } from "@/api/models/interfaces";
+import { CookieAuthorize } from "@/api/middlewares";
+import { urlsConfig } from "@/configs";
 import { paginate } from "@/api/models/interfaces";
-import { Tournament } from "@/entities";
-import type { UserDTO } from "@/services";
-import {
-	BracketService,
-	TournamentEventService,
-	TournamentsService,
-	UserService,
-} from "@/services";
+import { TournamentsService, UserService } from "@/services";
 import { BaseController } from "@/utils/classes";
-import { ScoreReportPolicy, TournamentState, UserRole } from "@/utils/enums";
+import { TournamentState } from "@/utils/enums";
 import { resolveDependenciesSync } from "@/utils/functions";
 
 import { BlacklistedAuthorize } from "../middlewares/blacklistedAuthorize";
-import type { GameScoreDTO, GameValidatorDTO } from "../models/dtos/gameScoreDTO";
-import type { ParticipantDTO } from "../models/dtos/participantDTO";
 
 @Controller("/tournaments")
 export class TournamentsController extends BaseController {
 	private userService: UserService;
 	private tournamentsService: TournamentsService;
-	private bracketService: BracketService;
-	private tournamentEvents: TournamentEventService;
 
 	constructor() {
 		super();
 
-		[this.userService, this.tournamentsService, this.bracketService, this.tournamentEvents] =
-			resolveDependenciesSync([
-				UserService,
-				TournamentsService,
-				BracketService,
-				TournamentEventService,
-			]);
+		[this.userService, this.tournamentsService] = resolveDependenciesSync([
+			UserService,
+			TournamentsService,
+		]);
 	}
 
 	@Get("/")
-	@UseBefore(OptionalAuthMiddleware)
 	async getTournaments(
 		@Res() res: Response,
 		@QueryParams("page")
@@ -76,41 +56,24 @@ export class TournamentsController extends BaseController {
 
 		@QueryParams("states")
 		@Default(undefined)
-		states: TournamentState[],
-
-		@Context("user") user?: UserDTO | undefined
+		states: TournamentState[]
 	): Promise<any> {
-		if (
-			organizationId &&
-			(states?.includes(TournamentState.PENDING) || states?.includes(TournamentState.CANCELED))
-		) {
-			if (!user) throw new Unauthorized("Vous n'êtes pas autorisé à effectuer cette action.");
-			// SuperAdmin : vue ops dashboard (tous états y compris Pending)
-			if ((user.role ?? 0) < UserRole.SuperAdministrator) {
-				await this.tournamentsService.isOrganizationManager(user.id, organizationId);
-			}
-		}
-
-		try {
-			const [items, total] = await this.tournamentsService.getTournaments(
-				page,
-				pagination,
-				organizationId,
-				states
-			);
-
-			// Liste publique de tournois : peu changeante (registrations bougent surtout
-			// pendant les fenetres ouvertes). 30s + SWR 60s.
+		// Public reads are owned by the unified Kysely API. The bot remains only
+		// the compatibility transport for old ranked/site URLs.
+		const upstreamUrl = new URL("/v1/achillea/tournaments", urlsConfig.unifiedApi);
+		upstreamUrl.searchParams.set("page", String(page ?? 1));
+		upstreamUrl.searchParams.set("pageSize", String(pagination ?? 25));
+		if (organizationId !== undefined)
+			upstreamUrl.searchParams.set("organization", String(organizationId));
+		if (states?.length) upstreamUrl.searchParams.set("states", states.join(","));
+		const upstream = await fetch(upstreamUrl);
+		if (upstream.ok) {
+			const payload = (await upstream.json()) as { data?: unknown[]; count?: number };
+			const total = payload.count ?? payload.data?.length ?? 0;
 			res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=60");
-
-			const pojoItems = items.map((item) => wrap(item).toPOJO());
-			const safePojoItems = JSON.parse(JSON.stringify(pojoItems));
-
-			return res.json(paginate(safePojoItems, total, pagination, page));
-		} catch (error) {
-			console.error("ERROR IN getTournaments:", error);
-			throw error;
+			return res.json(paginate(payload.data ?? [], total, pagination ?? 25, page ?? 1));
 		}
+		return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
 	}
 
 	/**
@@ -120,12 +83,9 @@ export class TournamentsController extends BaseController {
 	 */
 	@Get("/circuit/ranking")
 	async getCircuitRanking(@Res() res: Response) {
-		const ranking = await this.tournamentsService.getCircuitRanking();
-
-		// Ne change qu'à la fin d'un tournoi (rare) : cache généreux + SWR.
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea/tournaments/circuit/ranking`);
 		res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
-
-		return res.json(ranking);
+		return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
 	}
 
 	/**
@@ -134,11 +94,9 @@ export class TournamentsController extends BaseController {
 	 */
 	@Get("/circuit/stats")
 	async getStatsHub(@Res() res: Response) {
-		const hub = await this.tournamentsService.getStatsHub();
-
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea/tournaments/circuit/stats`);
 		res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
-
-		return res.json(hub);
+		return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
 	}
 
 	/**
@@ -147,11 +105,9 @@ export class TournamentsController extends BaseController {
 	 */
 	@Get("/circuit/players/:userId")
 	async getPlayerCircuitProfile(@PathParams("userId") userId: string, @Res() res: Response) {
-		const profile = await this.tournamentsService.getPlayerCircuitProfile(userId);
-
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea/tournaments/circuit/players/${encodeURIComponent(userId)}`);
 		res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
-
-		return res.json(profile);
+		return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
 	}
 
 	/**
@@ -160,99 +116,40 @@ export class TournamentsController extends BaseController {
 	 */
 	@Get("/:id/summary")
 	async getTournamentSummary(@PathParams("id") id: number, @Res() res: Response) {
-		const summary = await this.tournamentsService.getTournamentSummary(id);
-
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea/tournaments/${id}/summary`);
 		res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=120");
-
-		return res.json(summary);
+		return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
 	}
 
 	@Get("/:id")
-	@UseBefore(OptionalAuthMiddleware)
 	async getTournament(
 		@PathParams("id") id: number,
-		@Res() res: Response,
-		@Context("user") user?: UserDTO | undefined
+		@Res() res: Response
 	) {
-		const [tournament, participantsDTO, tournamentData] =
-			await this.tournamentsService.getSingleTournament(id);
-
-		if (
-			tournament.internalState === TournamentState.PENDING ||
-			tournament.internalState === TournamentState.CANCELED
-		) {
-			// Public : pas de détail tant que non publié. Staff SuperAdmin / org managers OK.
-			// Un tournoi annulé reste consultable par son organisation (item « annuler
-			// sans supprimer » : les données doivent rester atteignables).
-			if (!user) throw new Unauthorized("Vous n'êtes pas autorisé à effectuer cette action.");
-			if ((user.role ?? 0) < UserRole.SuperAdministrator) {
-				await this.tournamentsService.isTournamentOrganizationManager(user.id, id);
-			}
+		const headers: Record<string, string> = { accept: "application/json" };
+		const requestHeaders = (res.req?.headers ?? {}) as Record<
+			string,
+			string | string[] | undefined
+		>;
+		for (const name of ["cookie", "authorization"] as const) {
+			const value = requestHeaders[name];
+			if (typeof value === "string") headers[name] = value;
+			else if (Array.isArray(value) && value[0]) headers[name] = value[0];
 		}
-
-		// Motifs de disqualification : réservés aux organisateurs. Le calcul se fait ici
-		// (et pas dans le service) pour que la donnée ne dépende que de l'appelant.
-		const isOrganizer = user
-			? await this.tournamentsService
-					.isTournamentOrganizer(user.id, id)
-					.then(() => true)
-					.catch(() => false)
-			: false;
-
-		const safeParticipants = isOrganizer
-			? participantsDTO
-			: participantsDTO.map((p) => ({ ...p, statusReason: null }));
-
-		// Single tournament page : structure stable, registrations bougent.
-		// La réponse d'un organisateur porte les motifs de DQ : elle ne doit jamais
-		// atterrir dans un cache partagé où un anonyme la récupérerait.
-		res.setHeader(
-			"Cache-Control",
-			isOrganizer ? "private, no-store" : "public, s-maxage=20, stale-while-revalidate=60"
-		);
-
-		const safeTournament = JSON.parse(JSON.stringify(wrap(tournament).toPOJO()));
-
-		return res.json([safeTournament, safeParticipants, tournamentData]);
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea/tournaments/${id}`, {
+			headers,
+		});
+		if (upstream.ok) {
+			res.setHeader("Cache-Control", "public, s-maxage=20, stale-while-revalidate=60");
+			return res.status(upstream.status).json(await upstream.json());
+		}
+		return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
 	}
 
 	@Post("/create/achillea")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async create(
-		@BodyParams() dto: NewTournamentDTO, // <--- La validation et la conversion se font ici
-		@Context("user") user: UserDTO
-	) {
-		const isSuperAdmin = (user.role ?? 0) >= UserRole.SuperAdministrator;
-
-		// Une organisation ouvre ses propres tournois : c'est sa raison d'être. Le
-		// propriétaire et les managers de l'organisation ciblée peuvent créer, personne
-		// d'autre — `isOrganizationManager` lève un 401 sinon.
-		if (!isSuperAdmin) {
-			const organizationId =
-				typeof dto.organization === "number"
-					? dto.organization
-					: Number((dto.organization as { id?: number })?.id);
-
-			if (!organizationId || Number.isNaN(organizationId))
-				throw new Unauthorized("Organisation cible manquante.");
-
-			await this.tournamentsService.isOrganizationManager(user.id, organizationId);
-			await this.tournamentsService.assertOrganizationCanHostTournaments(organizationId);
-		}
-
-		// Le créateur est toujours TO (sinon SuperAdmin crée le tournoi mais ne peut
-		// pas ouvrir les inscriptions : isTournamentOrganizer ne regarde que owner/managers).
-		if (!dto.managers?.some((m) => m.id === user.id)) {
-			dto.managers = [...(dto.managers ?? []), user];
-		}
-
-		// La dérogation aux règles de publication est un acte volontaire — et réservée
-		// aux SuperAdmin : une organisation qui pourrait la cocher elle-même viderait
-		// les règles de leur sens.
-		return this.tournamentsService.createTournament(dto, {
-			actorId: user.id,
-			bypassRules: isSuperAdmin && dto.bypassRules === true,
-		});
+	async create(@Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation("/tournaments/create/achillea", req, res, req.body ?? {});
 	}
 
 	/**
@@ -262,37 +159,51 @@ export class TournamentsController extends BaseController {
 	 */
 	@Put("/:id/edit")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async update(
-		@PathParams("id") id: number,
-		@BodyParams() dto: NewTournamentDTO,
-		@Context("user") user: UserDTO,
-		@Res() res: Response
-	) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-		const updated = await this.tournamentsService.updateTournament(id, dto);
-		const safe = JSON.parse(JSON.stringify(wrap(updated).toPOJO()));
-		return res.status(200).json(safe);
+	async update(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/${id}/edit`, req, res, req.body ?? {}, "PUT");
 	}
 
 	@Post("/open-registrations/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async openRegistrations(@PathParams("id") id: number, @Context("user") user: UserDTO) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-		await this.tournamentsService.openRegistrations(id, user.id);
-		// Réponse stable pour le front (évite de parser void / 204)
-		return { success: true, id, internalState: TournamentState.PREREGISTERING };
+	async openRegistrations(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/open-registrations/${id}`, req, res);
 	}
 
 	@Post("/participate/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async participate(@PathParams("id") id: number, @Context("user") user: UserDTO) {
-		return await this.tournamentsService.register(id, user.id);
+	async participate(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/participate/${id}`, req, res);
 	}
 
 	@Post("/unregister/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async unregister(@PathParams("id") id: number, @Context("user") user: UserDTO) {
-		return await this.tournamentsService.unregister(id, user.id);
+	async unregister(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/unregister/${id}`, req, res);
+	}
+
+	private async forwardMutation(
+		path: string,
+		req: Request,
+		res: Response,
+		body: unknown = {},
+		method: "POST" | "PUT" = "POST"
+	) {
+		const headers: Record<string, string> = {
+			accept: "application/json",
+			"content-type": "application/json",
+		};
+		if (req.headers.cookie) headers.cookie = req.headers.cookie;
+		if (req.headers.authorization) headers.authorization = req.headers.authorization;
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea${path}`, {
+			method,
+			headers,
+			body: JSON.stringify(body),
+		});
+		const text = await upstream.text();
+		res
+			.status(upstream.status)
+			.type(upstream.headers.get("content-type")?.includes("json") ? "json" : "text");
+		return res.send(text);
 	}
 
 	/**
@@ -304,75 +215,40 @@ export class TournamentsController extends BaseController {
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
 	async setScorePolicy(
 		@PathParams("id") id: number,
-		@BodyParams("policy") policy: string,
-		@Context("user") user: UserDTO,
+		@BodyParams() body: { policy: string },
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		const parsed =
-			policy === ScoreReportPolicy.STAFF_ONLY
-				? ScoreReportPolicy.STAFF_ONLY
-				: policy === ScoreReportPolicy.PLAYERS
-					? ScoreReportPolicy.PLAYERS
-					: null;
-
-		if (!parsed)
-			return res.status(400).json({ success: false, error: "Politique de scores inconnue." });
-
-		const tournament = await this.tournamentsService.setScoreReportPolicy(id, parsed, user.id);
-
-		return res.status(200).json({ success: true, scoreReportPolicy: tournament.scoreReportPolicy });
+		return this.forwardMutation(`/tournaments/${id}/score-policy`, req, res, body);
 	}
 
 	@Post("/report-score")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async reportGameScore(
-		@BodyParams("score") gameScoreDTO: GameScoreDTO,
-		@Context("user") user: UserDTO
-	) {
-		return await this.tournamentsService.reportGameScore(
-			gameScoreDTO.lobbyId,
-			gameScoreDTO.gameNumber,
-			gameScoreDTO.score1,
-			gameScoreDTO.score2,
-			user.id
-		);
+	async reportGameScore(@Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation("/tournaments/report-score", req, res, req.body ?? {});
 	}
 
 	@Post("/validate-score")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async validateScore(
-		@BodyParams("gameValidation") gameValidatorDTO: GameValidatorDTO,
-		@Context("user") user: UserDTO
-	) {
-		const side = await this.tournamentsService.getUserSide(user.id, gameValidatorDTO.lobbyId);
-
-		return await this.tournamentsService.validateGame(gameValidatorDTO.lobbyMatchId, side);
+	async validateScore(@Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation("/tournaments/validate-score", req, res, req.body ?? {});
 	}
 
 	@Post("/unvalidate-score")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async unvalidateScore(
-		@BodyParams("gameValidation") gameValidatorDTO: GameValidatorDTO,
-		@Context("user") user: UserDTO
-	) {
-		const side = await this.tournamentsService.getUserSide(user.id, gameValidatorDTO.lobbyId);
-
-		return await this.tournamentsService.unvalidateGame(gameValidatorDTO.lobbyMatchId, side);
+	async unvalidateScore(@Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation("/tournaments/unvalidate-score", req, res, req.body ?? {});
 	}
 
 	@Post("/remove-participant/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
 	async removeParticipant(
-		@BodyParams("userId") userId: string,
-		@BodyParams("reason") reason: string | undefined,
+		@BodyParams() body: { userId: string; reason?: string },
 		@PathParams("id") id: number,
-		@Context("user") user: UserDTO
+		@Req() req: Request,
+		@Res() res: Response
 	) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		return await this.tournamentsService.removeUser(id, userId, user.id, reason);
+		return this.forwardMutation(`/tournaments/remove-participant/${id}`, req, res, body);
 	}
 
 	/**
@@ -383,27 +259,11 @@ export class TournamentsController extends BaseController {
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
 	async disqualifyParticipant(
 		@PathParams("id") id: number,
-		@BodyParams("userId") userId: string,
-		@BodyParams("reason") reason: string,
-		@Context("user") user: UserDTO,
+		@BodyParams() body: { userId: string; reason: string },
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		try {
-			const result = await this.tournamentsService.disqualifyParticipant(
-				id,
-				userId,
-				reason,
-				user.id
-			);
-			return res.status(200).json({ success: true, ...result });
-		} catch (error: any) {
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible de disqualifier ce participant.",
-			});
-		}
+		return this.forwardMutation(`/tournaments/${id}/disqualify`, req, res, body);
 	}
 
 	/** Annule une disqualification (avant le démarrage du tournoi uniquement). */
@@ -411,21 +271,11 @@ export class TournamentsController extends BaseController {
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
 	async reinstateParticipant(
 		@PathParams("id") id: number,
-		@BodyParams("userId") userId: string,
-		@Context("user") user: UserDTO,
+		@BodyParams() body: { userId: string },
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		try {
-			const participant = await this.tournamentsService.reinstateParticipant(id, userId, user.id);
-			return res.status(200).json({ success: true, participant });
-		} catch (error: any) {
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible de réintégrer ce participant.",
-			});
-		}
+		return this.forwardMutation(`/tournaments/${id}/reinstate`, req, res, body);
 	}
 
 	/** Promotion manuelle d'un joueur depuis la liste d'attente. */
@@ -433,21 +283,11 @@ export class TournamentsController extends BaseController {
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
 	async promoteParticipant(
 		@PathParams("id") id: number,
-		@BodyParams("userId") userId: string,
-		@Context("user") user: UserDTO,
+		@BodyParams() body: { userId: string },
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		try {
-			const participant = await this.tournamentsService.promoteFromWaitlist(id, userId, user.id);
-			return res.status(200).json({ success: true, participant });
-		} catch (error: any) {
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible de promouvoir ce participant.",
-			});
-		}
+		return this.forwardMutation(`/tournaments/${id}/promote-participant`, req, res, body);
 	}
 
 	/**
@@ -458,21 +298,11 @@ export class TournamentsController extends BaseController {
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
 	async closeTournament(
 		@PathParams("id") id: number,
-		@BodyParams("force") force: boolean | undefined,
-		@Context("user") user: UserDTO,
+		@BodyParams() body: { force?: boolean },
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		try {
-			const result = await this.tournamentsService.closeTournament(id, user.id, force === true);
-			return res.status(200).json(result);
-		} catch (error: any) {
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible de clôturer ce tournoi.",
-			});
-		}
+		return this.forwardMutation(`/tournaments/${id}/close`, req, res, body);
 	}
 
 	/** Annulation d'un tournoi — l'état passe à `Canceled`, rien n'est supprimé. */
@@ -480,42 +310,18 @@ export class TournamentsController extends BaseController {
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
 	async cancelTournament(
 		@PathParams("id") id: number,
-		@BodyParams("reason") reason: string,
-		@Context("user") user: UserDTO,
+		@BodyParams() body: { reason: string },
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		try {
-			const result = await this.tournamentsService.cancelTournament(id, reason, user.id);
-			return res.status(200).json(result);
-		} catch (error: any) {
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible d'annuler ce tournoi.",
-			});
-		}
+		return this.forwardMutation(`/tournaments/${id}/cancel`, req, res, body);
 	}
 
 	/** Restauration d'un tournoi annulé dans son état précédent. */
 	@Post("/:id/restore")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async restoreTournament(
-		@PathParams("id") id: number,
-		@Context("user") user: UserDTO,
-		@Res() res: Response
-	) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		try {
-			const result = await this.tournamentsService.restoreTournament(id, user.id);
-			return res.status(200).json(result);
-		} catch (error: any) {
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible de restaurer ce tournoi.",
-			});
-		}
+	async restoreTournament(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/${id}/restore`, req, res);
 	}
 
 	/**
@@ -523,39 +329,37 @@ export class TournamentsController extends BaseController {
 	 * Public ; les motifs (DQ, annulation) ne sont renvoyés qu'aux organisateurs.
 	 */
 	@Get("/:id/events")
-	@UseBefore(OptionalAuthMiddleware)
-	async getTournamentEvents(
-		@PathParams("id") id: number,
-		@Res() res: Response,
-		@Context("user") user?: UserDTO | undefined
-	) {
-		let isOrganizer = false;
-		if (user) {
-			isOrganizer = await this.tournamentsService
-				.isTournamentOrganizer(user.id, id)
-				.then(() => true)
-				.catch(() => false);
+	async getTournamentEvents(@PathParams("id") id: number, @Res() res: Response) {
+		const headers: Record<string, string> = { accept: "application/json" };
+		const requestHeaders = (res.req?.headers ?? {}) as Record<
+			string,
+			string | string[] | undefined
+		>;
+		for (const name of ["cookie", "authorization"] as const) {
+			const value = requestHeaders[name];
+			if (typeof value === "string") headers[name] = value;
+			else if (Array.isArray(value) && value[0]) headers[name] = value[0];
 		}
-
-		const events = await this.tournamentEvents.list(id, isOrganizer);
-
-		// Journal append-only : un court cache suffit à absorber les rafraîchissements
-		// de page sans masquer une action qui vient d'être faite.
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea/tournaments/${id}/events`, {
+			headers,
+		});
 		res.setHeader("Cache-Control", "public, s-maxage=10, stale-while-revalidate=30");
-
-		return res.json(events);
+		return res.status(upstream.status).json(await upstream.json());
 	}
 
 	@Post("/set-participant-seeding/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
 	async setParticipantSeeding(
-		@BodyParams("participant") participantDTO: ParticipantDTO,
 		@PathParams("id") id: number,
-		@Context("user") user: UserDTO
+		@Req() req: Request,
+		@Res() res: Response
 	) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		return await this.tournamentsService.setParticipantSeeding(id, participantDTO);
+		return this.forwardMutation(
+			`/tournaments/set-participant-seeding/${id}`,
+			req,
+			res,
+			req.body ?? {}
+		);
 	}
 
 	/**
@@ -566,181 +370,87 @@ export class TournamentsController extends BaseController {
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
 	async applyPlacementPrizes(
 		@PathParams("id") id: number,
-		@Context("user") user: UserDTO,
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		try {
-			const result = await this.bracketService.applyPlacementPrizesForTournament(id, {
-				requireFinished: true,
-			});
-			return res.status(200).json({ success: result.applied, ...result });
-		} catch (error: any) {
-			console.error("Erreur apply-placement-prizes:", error);
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible d'appliquer le bonus podium",
-			});
-		}
+		return this.forwardMutation(`/tournaments/${id}/apply-placement-prizes`, req, res, {}, "POST");
 	}
 
 	/** Seed 1..N selon le classement ranked solo (ELO décroissant). Écrase le seeding actuel. */
 	@Post("/seed-by-ranked/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async seedByRanked(@PathParams("id") id: number, @Context("user") user: UserDTO) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		return await this.tournamentsService.seedByRanked(id);
+	async seedByRanked(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/seed-by-ranked/${id}`, req, res);
 	}
 
 	/** Mélange aléatoire des seeds 1..N. */
 	@Post("/seed-random/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async seedRandom(@PathParams("id") id: number, @Context("user") user: UserDTO) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		return await this.tournamentsService.seedRandom(id);
+	async seedRandom(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/seed-random/${id}`, req, res);
 	}
 
 	/** Retire toutes les seeds. */
 	@Post("/clear-seeds/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async clearSeeds(@PathParams("id") id: number, @Context("user") user: UserDTO) {
-		await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-		return await this.tournamentsService.clearSeeds(id);
+	async clearSeeds(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/clear-seeds/${id}`, req, res);
 	}
 
 	@Post("/generate-bracket/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async generateBracket(
-		@PathParams("id") id: number,
-		@Context("user") user: UserDTO,
-		@Res() res: Response
-	) {
-		try {
-			await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-			await this.tournamentsService.generateBracket(id);
-
-			return res.status(200).json({ success: true });
-		} catch (error: any) {
-			console.error("Erreur lors de la génération du bracket Challonge :", error);
-
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible de générer le bracket Challonge",
-			});
-		}
+	async generateBracket(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/generate-bracket/${id}`, req, res);
 	}
 
 	@Post("/add-managers/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async addManagers(
-		@PathParams("id") id: number,
-		@BodyParams() newManagers: UserDTO[],
-		@Context("user") user: UserDTO,
-		@Res() res: Response
-	) {
-		try {
-			await this.tournamentsService.isTournamentOrganizationManager(user.id, id);
-
-			await this.tournamentsService.addManagers(id, newManagers, user.id);
-
-			return res.status(200).json({ success: true });
-		} catch (error: any) {
-			console.error("Erreur lors de la génération du bracket Challonge :", error);
-
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible de générer le bracket Challonge",
-			});
-		}
+	async addManagers(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/add-managers/${id}`, req, res, req.body ?? {});
 	}
 
 	@Post("/remove-manager/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async removeManager(
-		@PathParams("id") id: number,
-		@BodyParams() toRemove: UserDTO,
-		@Context("user") user: UserDTO,
-		@Res() res: Response
-	) {
-		try {
-			await this.tournamentsService.isTournamentOrganizationManager(user.id, id);
-
-			await this.tournamentsService.removeManager(id, toRemove.id, user.id);
-
-			return res.status(200).json({ success: true });
-		} catch (error: any) {
-			console.error("Erreur lors de la génération du bracket Challonge :", error);
-
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible de générer le bracket Challonge",
-			});
-		}
+	async removeManager(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/remove-manager/${id}`, req, res, req.body ?? {});
 	}
 
 	@Put("/start/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
-	async startTournament(
-		@PathParams("id") id: number,
-		@Context("user") user: UserDTO,
-		@Res() res: Response
-	) {
-		try {
-			await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-			await this.tournamentsService.startTournament(id);
-
-			return res.status(200).json({ success: true });
-		} catch (error: any) {
-			console.error("Erreur lors du démarrage du tournoi :", error);
-
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible de démarrer le tournoi",
-			});
-		}
+	async startTournament(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardMutation(`/tournaments/start/${id}`, req, res, {}, "PUT");
 	}
 
 	@Put("/next-phase/:id")
 	@UseBefore(CookieAuthorize, BlacklistedAuthorize)
 	async nextPhase(
 		@PathParams("id") id: number,
-		@Context("user") user: UserDTO,
+		@Req() req: Request,
 		@Res() res: Response
 	) {
-		try {
-			await this.tournamentsService.isTournamentOrganizer(user.id, id);
-
-			// await this.tournamentsService.syncLobbiesFromChallonge(id)
-
-			return res.status(200).json({ success: true });
-		} catch (error: any) {
-			console.error("Erreur lors du démarrage du tournoi :", error);
-
-			return res.status(error.status || 400).json({
-				success: false,
-				error: error.message || "Impossible de démarrer le tournoi",
-			});
-		}
+		return this.forwardMutation(`/tournaments/next-phase/${id}`, req, res, {}, "PUT");
 	}
 
 	@Get("/lobbies/:id")
-	async getLobbies(@PathParams("id") id: number) {
-		return await this.tournamentsService.getTournamentLobbies(id);
+	async getLobbies(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardRead(`/tournaments/lobbies/${id}`, req, res);
 	}
 
 	@Get("/lobby/:id")
 	@Groups("details")
-	async getLobby(@PathParams("id") id: number) {
-		const lobby = await this.tournamentsService.getTournamentLobby(id);
+	async getLobby(@PathParams("id") id: number, @Req() req: Request, @Res() res: Response) {
+		return this.forwardRead(`/tournaments/lobby/${id}`, req, res);
+	}
 
-		const plainLobby = wrap(lobby).toPOJO();
-
-		return deserialize(plainLobby, { type: LobbyDTO, groups: ["details"] });
+	private async forwardRead(path: string, req: Request, res: Response) {
+		const headers: Record<string, string> = { accept: "application/json" };
+		if (req.headers.cookie) headers.cookie = req.headers.cookie;
+		if (req.headers.authorization) headers.authorization = req.headers.authorization;
+		const upstream = await fetch(`${urlsConfig.unifiedApi}/v1/achillea${path}`, { headers });
+		const text = await upstream.text();
+		res
+			.status(upstream.status)
+			.type(upstream.headers.get("content-type")?.includes("json") ? "json" : "text");
+		return res.send(text);
 	}
 }

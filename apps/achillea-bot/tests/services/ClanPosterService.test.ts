@@ -101,24 +101,32 @@ const FAKE_ELOS = [
 // ---------------------------------------------------------------------------
 
 function buildMockDb(opts: { clanExists: boolean }) {
-	const em = {
-		fork() {
-			return {
-				async findOne(entity: any, where: any) {
-					if (where?.id === FAKE_CLAN_ID && opts.clanExists) return FAKE_CLAN;
-					return null;
-				},
-				async find(entity: any, where: any) {
-					// ClanMember query
-					if (where?.clan === FAKE_CLAN_ID) return FAKE_MEMBERS;
-					// UserElo query
-					if (where?.user?.$in) return FAKE_ELOS;
-					return [];
-				},
-			};
-		},
+	const clanQuery = {
+		select: () => clanQuery,
+		where: () => clanQuery,
+		executeTakeFirst: async () => opts.clanExists ? {
+			id: FAKE_CLAN.id,
+			name: FAKE_CLAN.name,
+			shortenedName: FAKE_CLAN.shortenedName,
+			clanAvatarUrl: FAKE_CLAN.clanAvatarUrl,
+			normalizedShortName: FAKE_CLAN.normalizedShortName,
+			normalizedName: FAKE_CLAN.normalizedName,
+		} : undefined,
 	};
-	return { em } as any;
+	const membersQuery = {
+		innerJoin: () => membersQuery,
+		leftJoin: () => membersQuery,
+		select: () => membersQuery,
+		where: () => membersQuery,
+		execute: async () => FAKE_MEMBERS.map((member) => ({
+			userId: member.user.id,
+			displayName: member.user.displayName,
+			username: member.user.username,
+			avatarUrl: member.user.avatar,
+			elo: FAKE_ELOS.find((elo) => elo.user.id === member.user.id)?.elo ?? null,
+		})),
+	};
+	return { selectFrom: (table: string) => table === "clan" ? clanQuery : membersQuery } as any;
 }
 
 // ---------------------------------------------------------------------------
@@ -142,14 +150,14 @@ afterAll(() => {
 
 describe("ClanPosterService — generatePoster()", () => {
 	test("retourne un Buffer non vide", async () => {
-		const svc = new ClanPosterService(buildMockDb({ clanExists: true }));
+		const svc = new ClanPosterService().withDatabase(buildMockDb({ clanExists: true }));
 		const buf = await svc.generatePoster(FAKE_CLAN_ID);
 		expect(Buffer.isBuffer(buf)).toBe(true);
 		expect(buf.length).toBeGreaterThan(1024);
 	});
 
 	test("premier byte vaut 0x89 (signature PNG)", async () => {
-		const svc = new ClanPosterService(buildMockDb({ clanExists: true }));
+		const svc = new ClanPosterService().withDatabase(buildMockDb({ clanExists: true }));
 		const buf = await svc.generatePoster(FAKE_CLAN_ID);
 		expect(buf[0]).toBe(0x89);
 		expect(buf[1]).toBe(0x50); // P
@@ -158,7 +166,7 @@ describe("ClanPosterService — generatePoster()", () => {
 	});
 
 	test("throw NotFound si clanId inexistant", async () => {
-		const svc = new ClanPosterService(buildMockDb({ clanExists: false }));
+		const svc = new ClanPosterService().withDatabase(buildMockDb({ clanExists: false }));
 		let caught: unknown = null;
 		try {
 			await svc.generatePoster(FAKE_CLAN_ID);
@@ -172,7 +180,7 @@ describe("ClanPosterService — generatePoster()", () => {
 
 describe("ClanPosterService — generateAndSave()", () => {
 	test("ecrit bien un PNG sur disque dans storage/clans/", async () => {
-		const svc = new ClanPosterService(buildMockDb({ clanExists: true }));
+		const svc = new ClanPosterService().withDatabase(buildMockDb({ clanExists: true }));
 		const path = await svc.generateAndSave(FAKE_CLAN_ID);
 		writtenFiles.push(path);
 

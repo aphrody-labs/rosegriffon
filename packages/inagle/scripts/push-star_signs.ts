@@ -5,7 +5,7 @@
  * `m_starSignCharaInfoList`, octets réels du dump) + injection BASARA (rarity 20)
  * depuis `basara_chara_config`. La logique d'import vit dans
  * `src/push-categories.ts` (`importStarSigns`) — source UNIQUE partagée avec le
- * flux principal cli-push.ts. Ce fichier ne fait que créer l'adaptateur Supabase
+ * flux principal cli-push.ts. Ce fichier ne fait que créer l'adaptateur PostgreSQL
  * et lancer l'importer. Upsert idempotent (ON CONFLICT chara_param_id).
  *
  * Lancement (depuis /home/ubuntu/rg) :
@@ -13,9 +13,9 @@
  */
 
 import { importStarSigns } from "../src/push-categories.ts";
-import { createSupabaseAdapter } from "../src/push-adapter.ts";
+import { createPostgresAdapter } from "../src/push-adapter.ts";
 
-const db = createSupabaseAdapter();
+const db = createPostgresAdapter();
 await importStarSigns(null, db)
 	.then(() => db.close())
 	.catch((e) => {

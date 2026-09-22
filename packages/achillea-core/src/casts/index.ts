@@ -98,6 +98,36 @@ export function availabilityWeight(status: CastAvailabilityStatus): number {
 	}
 }
 
+export interface CastCandidateScoreInput {
+	userId: string;
+	status: CastAvailabilityStatus;
+	preferredRoles: readonly CastSlotRole[] | null | undefined;
+	recentAssignments: number;
+	binomeBonus: number;
+}
+
+/** Deterministic score used by automatic cast assignment. */
+export function scoreCastCandidate(
+	candidate: CastCandidateScoreInput,
+	slotRole: CastSlotRole,
+): number {
+	const preferred = candidate.preferredRoles?.includes(slotRole) ? 10 : 0;
+	const availability = candidate.status === CastAvailabilityStatus.Available ? 5 : 0;
+	return preferred + availability - candidate.recentAssignments * 3 + candidate.binomeBonus;
+}
+
+/** Stable ordering for equally eligible caster candidates. */
+export function compareCastCandidates(
+	a: CastCandidateScoreInput,
+	b: CastCandidateScoreInput,
+	slotRole: CastSlotRole,
+): number {
+	return (
+		scoreCastCandidate(b, slotRole) - scoreCastCandidate(a, slotRole) ||
+		a.userId.localeCompare(b.userId)
+	);
+}
+
 /**
  * Candidats à un poste, du plus disponible au moins disponible.
  * Un caster qui a explicitement exclu le rôle n'est jamais proposé.

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { createAdminClient } from "@/lib/supabase/server";
 import { assertBotAuth } from "../_lib";
 import { getDashboardStats } from "@rosegriffon/db/stats";
 
@@ -18,13 +17,8 @@ export async function GET(request: NextRequest) {
 		return denied;
 	}
 
-	const supabase = createAdminClient();
-	if (!supabase) {
-		return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
-	}
-
 	try {
-		const stats = await getDashboardStats(supabase);
+		const stats = await getDashboardStats();
 		return NextResponse.json(stats, {
 			headers: {
 				"cache-control": "private, max-age=30, s-maxage=30",

@@ -12,7 +12,6 @@ export const env = cleanEnv(process.env, {
 		choices: ["legacy", "current"],
 		default: "current",
 	}),
-	DISCORD_OAUTH_PROFILE: str({ choices: ["legacy", "current"], default: "current" }),
 	BOT_COMMAND_GUILDS: str({ default: undefined }),
 	BOT_TOKEN: str({ default: undefined }),
 	DEV_BOT_TOKEN: str({ default: undefined }),
@@ -78,6 +77,12 @@ export const env = cleanEnv(process.env, {
 	// (monorepo autonome) ; fournir les domaines publics par env au déploiement.
 	WEBSITE_URL: url({ default: "http://localhost:4200" }),
 	PUBLIC_API_URL: url({ default: "http://localhost:4010" }),
+	UNIFIED_API_URL: url({
+		default:
+			process.env.NODE_ENV === "production"
+				? "https://api.rosegriffon.fr"
+				: "http://127.0.0.1:8800",
+	}),
 	OAUTH_CALLBACK_BASE_URL: url({ default: "http://localhost:4010" }),
 	WEB_ALLOWED_ORIGINS: str({ default: undefined }), // CSV d'origines CORS (sinon localhost + WEBSITE_URL)
 
@@ -118,6 +123,7 @@ if (env.isProduction) {
 	assertStrongSecret("SUPABASE_SECRET_KEY", env.SUPABASE_SECRET_KEY ?? env.SUPABASE_SERVICE_KEY);
 	assertPublicHttpsUrl("WEBSITE_URL", env.WEBSITE_URL);
 	assertPublicHttpsUrl("PUBLIC_API_URL", env.PUBLIC_API_URL);
+	assertPublicHttpsUrl("UNIFIED_API_URL", env.UNIFIED_API_URL);
 	assertPublicHttpsUrl("OAUTH_CALLBACK_BASE_URL", env.OAUTH_CALLBACK_BASE_URL);
 	for (const [name, port] of [
 		["API_PORT", env.API_PORT],

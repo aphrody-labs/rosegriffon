@@ -56,7 +56,7 @@ import {
   getCharacterModelFullGlbUrl,
 } from "@rosegriffon/azalee";
 
-FORMATIONS.length;                            // 91 (83 formations du jeu + 8 legacy)
+FORMATIONS.length;                            // 8 layouts legacy (les formations du jeu viennent de PostgreSQL)
 translateEffect("Shot AT +10%");              // "Tir ATT +10%"
 getCharacterFaceUrl("c01000010");
 // https://cdn.rosegriffon.fr/dx11/menu/icon_chr/face/c01000010_l_c01000010_1_l00.png
@@ -113,7 +113,7 @@ Table exacte du champ `exports` de `package.json`.
 | `@rosegriffon/azalee/text/*` | `src/text/*.ts` | client-safe — `translations`, `format-description`, `japanese-romaji`, `download-filename`, `aura-translations`, `gaiji` |
 | `@rosegriffon/azalee/game` | `src/game/index.ts` | client-safe — formations, genre, règles d'équipe, cut-ins, emblèmes |
 | `@rosegriffon/azalee/game/*` | `src/game/*.ts` | client-safe — `formations`, `team-rules`, `team-types`, `skills-cutin`, … |
-| `@rosegriffon/azalee/data/*` | `src/data/*` | client-safe — JSON figés (`passives-full.json`, manifestes…) |
+| `@rosegriffon/azalee/data/*` | `src/data/*` | artefacts d’extraction/build uniquement — aucune donnée métier runtime |
 | `@rosegriffon/azalee/remote` | `src/remote/index.ts` | **client-safe** — client HTTP typé de l'API (41 routes), erreurs typées, sonde `/health` |
 | `@rosegriffon/azalee/remote/*` | `src/remote/*.ts` | client-safe — `client`, `transport`, `errors`, `types` |
 | `@rosegriffon/azalee/config` | `src/config.ts` | serveur — résolution des artefacts runtime |
@@ -127,7 +127,6 @@ Table exacte du champ `exports` de `package.json`.
 | `@rosegriffon/azalee/game-text/*` | `src/game-text/*.ts` | serveur / client (`shared`, `format`) |
 | `@rosegriffon/azalee/cross` | `src/cross/index.ts` | serveur — Inazuma Eleven Cross (Unity/Addressables) |
 | `@rosegriffon/azalee/cross/*` | `src/cross/*.ts` | serveur / client (`data-shared`, `assets-shared`) |
-| `@rosegriffon/azalee/rag` | `src/rag.ts` | serveur — recherche sémantique (embeddings self-host + Redis) |
 | `@rosegriffon/azalee/server` | `src/server/index.ts` | serveur — surface agrégée + API HTTP + résolution de source |
 | `@rosegriffon/azalee/server/*` | `src/server/*.ts` | serveur — `serve`, `source` |
 | `@rosegriffon/azalee/package.json` | `package.json` | métadonnées |
@@ -142,9 +141,10 @@ pas exporté, seulement consommé par `wiki/chara-stats` et `wiki/invocation`.
 
 La lib distingue deux familles de données.
 
-1. **Données figées** — `src/data/*.json`, importées statiquement par les modules.
-   Elles suivent le package, y compris dans un bundle navigateur ou un binaire compilé.
-2. **Artefacts volumineux** — miroir SQLite du wiki, index CPK et index de texte
+1. **Projections SQL** — PostgreSQL porte les formations, cut-ins, passifs,
+   manifestes d'assets et données métier. Les clients qui en ont besoin utilisent
+   uniquement les projections typées du package Inagle.
+2. **Artefacts volumineux** — miroir SQLite de compatibilité, index CPK et index de texte
    (NDJSON gz). Ils restent hors du package et sont localisés au runtime.
 
 Sur cette machine, les artefacts web vivent dans `apps/website/data/` :
@@ -401,10 +401,8 @@ Le champ `bin` déclare `azalee` → `src/cli.ts` ; `publishConfig` le bascule s
 | `search [requête]` | Fuzzy search sur toutes les entités du jeu |
 | `db [sql]` | Requête SQL (PostgreSQL par défaut, `--sqlite` pour le miroir) |
 | `redis <cmd> <key> [val]` | Cache Redis (`get`, `set`, `del`) |
-| `glossary-rebuild` | Reconstruit et renforce le glossaire |
 | `audit` | Diagnostics d'intégrité (traductions, base) |
 | `test-variants` | Cohérence des personnages et de leurs variantes |
-| `rag [question]` | Recherche sémantique sur la base de connaissances |
 | `status` | Santé des services locaux (SQLite, Redis, système) |
 | `wave` | Vague d'enrichissement/analyse (zukan, glossaire, xref assets) |
 | `repair` | Diagnostique et répare la base locale (RLS, privilèges) |
@@ -435,25 +433,24 @@ bun packages/azalee/src/cli.ts search "tornade" --json
 
 ## Données embarquées et régénération
 
-`src/data/` (~6,7 Mo) suit le package. Chaque fichier a une provenance connue :
+Les projections durables suivent PostgreSQL. Les artefacts d'extraction ne sont
+plus des sources runtime :
 
 | Fichier | Régénération |
 |---------|--------------|
-| `character-face-manifest.json` | `bun scripts/build-character-face-manifest.ts` |
-| `character-model-manifest.json` | `bun scripts/build-character-model-manifest.ts` |
-| `chr-model-manifest.json` | `bun scripts/build-chr-model-manifest.ts` |
-| `item-image-manifest.json` | `bun scripts/build-item-image-manifest.ts` |
-| `keshin-model-manifest.json` | `bun scripts/build-keshin-model-manifest.ts` |
-| `menu-gallery-manifest.json` | `bun scripts/build-menu-gallery-manifest.ts` |
-| `miximax-icon-manifest.json` | `bun scripts/build-miximax-icon-manifest.ts` |
-| `skills-cutin-served.json` | `bun scripts/build-skills-cutin-served.ts` |
-| `change-aura-skills.json` | `bun scripts/sync-inagle-entries.ts` (copie depuis `packages/inagle/src/entries`) |
-| `passives-full.json`, `formations-full.json`, `skills-cutin.json`, `item-enrichment.json`, `emblem-crc-map.json`, `chr-model-names.json`, `cross/*.json` | produits hors package (exports niers / inagle) — pas de générateur embarqué |
+| `inagle_asset_manifests` | import SQL des extractions CPK |
+| `@rosegriffon/inagle/asset-manifest` | projection TypeScript générée depuis `inagle_asset_manifests` |
+| `cross` | paquet partagé de types et règles d'extraction, sans données wiki runtime |
 
-Tous les scripts écrivent dans `packages/azalee/src/data` et se lancent depuis la
-racine du dépôt (`bun packages/azalee/scripts/<script>.ts`) ou depuis le package.
+Les scripts de projection se lancent depuis la racine du dépôt
+(`bun packages/azalee/scripts/<script>.ts`) ou depuis le package.
 Les manifestes sont des **gates anti-404** : un code absent du manifeste fait
 renvoyer `null` ou un placeholder au lieu d'une URL CDN morte.
+
+En production, définir `AZALEE_UNIFIED_API_URL` (par exemple
+`http://127.0.0.1:8800/v1/azalee`) force `createAzaleeData()` à utiliser l'API
+Elysia unifiée, même si un miroir SQLite est présent. Le miroir reste réservé
+au mode extraction/offline explicite.
 
 ## Tests, build, publication
 

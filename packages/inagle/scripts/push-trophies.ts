@@ -5,7 +5,7 @@
  * dump) + les textes localisés `common/text/<loc>/trophy_text.cfg.bin.json`. La
  * logique d'import vit dans `src/push-categories.ts` (`importTrophies`) — source
  * UNIQUE partagée avec le flux principal cli-push.ts. Ce fichier ne fait que
- * créer l'adaptateur Supabase et lancer l'importer. Upsert idempotent
+ * créer l'adaptateur PostgreSQL et lancer l'importer. Upsert idempotent
  * (ON CONFLICT trophy_id).
  *
  * Lancement (depuis /home/ubuntu/rg) :
@@ -13,9 +13,9 @@
  */
 
 import { importTrophies } from "../src/push-categories.ts";
-import { createSupabaseAdapter } from "../src/push-adapter.ts";
+import { createPostgresAdapter } from "../src/push-adapter.ts";
 
-const db = createSupabaseAdapter();
+const db = createPostgresAdapter();
 await importTrophies(null, db)
 	.then(() => db.close())
 	.catch((e) => {

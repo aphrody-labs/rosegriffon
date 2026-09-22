@@ -7,6 +7,7 @@ import {
 	Post,
 	Put,
 	QueryParams,
+	Req,
 	Res,
 	UseBefore,
 } from "@tsed/common";
@@ -15,9 +16,7 @@ import type { Response } from "express";
 
 import { CookieAuthorize } from "@/api/middlewares";
 import {
-	Database,
 	CustomImagesUpload,
-	LeaderboardService,
 	PlayerCardService,
 	UserService,
 } from "@/services";
@@ -31,20 +30,26 @@ export class UsersController extends BaseController {
 	private userService: UserService;
 	private imageService: CustomImagesUpload;
 	private cardService: PlayerCardService;
-	private leaderboardService: LeaderboardService;
-	private db: Database;
 
 	constructor() {
 		super();
 
-		[this.userService, this.imageService, this.cardService, this.leaderboardService, this.db] =
+		[this.userService, this.imageService, this.cardService] =
 			resolveDependenciesSync([
 				UserService,
 				CustomImagesUpload,
 				PlayerCardService,
-				LeaderboardService,
-				Database,
 			]);
+	}
+
+	@Put("/me/profile")
+	@UseBefore(CookieAuthorize)
+	async updateMyProfile(@BodyParams() body: { bio?: string | null; twitchUrl?: string | null }, @Req() req: any, @Res() res: Response) {
+		const headers: Record<string, string> = { accept: "application/json", "content-type": "application/json" };
+		if (req.headers.cookie) headers.cookie = req.headers.cookie;
+		if (req.headers.authorization) headers.authorization = req.headers.authorization;
+		const upstream = await fetch(`${process.env.UNIFIED_API_URL ?? "http://127.0.0.1:8800"}/v1/achillea/users/me/profile`, { method: "PUT", headers, body: JSON.stringify(body) });
+		return res.status(upstream.status).json(await upstream.json());
 	}
 
 	// IMPORTANT : routes statiques AVANT @Get('/:id') sinon Express matche le wildcard.
@@ -75,66 +80,10 @@ export class UsersController extends BaseController {
 		const safeOffset = Math.max(0, Number(offset) || 0);
 		const safeMode: MatchMode = Number(mode) === 4 ? MatchMode.TWO_VS_TWO : MatchMode.ONE_VS_ONE;
 
-		const page = await this.leaderboardService.getTop(
-			seasonId || null,
-			safeMode,
-			safeLimit,
-			safeOffset
-		);
-
-		// Enrichissement batch : 1 query IN au lieu de N+1 getUserDTO.
-		// Avant : ~500ms pour 50 users (50 round-trips Mikro-ORM/Discord cache).
-		// Apres : <50ms avec un seul SELECT IN sur la table user.
-		const userIds = page.entries.map((e) => e.userId);
-		const userMap = new Map<
-			string,
-			{ display_name: string | null; username: string | null; avatar: string | null }
-		>();
-		if (userIds.length > 0) {
-			const conn = this.db.em.getConnection();
-			const placeholders = userIds.map(() => "?").join(",");
-			const userRows = await conn.execute(
-				`SELECT id, display_name, username, avatar FROM "user" WHERE id IN (${placeholders})`,
-				userIds
-			);
-			for (const u of userRows as Array<{
-				id: string;
-				display_name: string | null;
-				username: string | null;
-				avatar: string | null;
-			}>) {
-				userMap.set(u.id, { display_name: u.display_name, username: u.username, avatar: u.avatar });
-			}
-		}
-
-		const enriched = page.entries.map((e) => {
-			const u = userMap.get(e.userId);
-			const display = u?.display_name ?? u?.username ?? e.userId;
-			let avatar = "";
-			if (u?.avatar) {
-				avatar = u.avatar.startsWith("http")
-					? u.avatar
-					: `https://cdn.discordapp.com/avatars/${e.userId}/${u.avatar}.png`;
-			} else {
-				avatar = `https://cdn.discordapp.com/embed/avatars/${(BigInt(e.userId) >> 22n) % 6n}.png`;
-			}
-			return {
-				rank: e.rank,
-				userId: e.userId,
-				displayName: display,
-				avatar,
-				elo: e.elo,
-				peakRating: e.peakRating,
-				gamesPlayed: e.gamesPlayed,
-			};
-		});
-
-		// Cache CDN 30s + stale-while-revalidate 60s. Les ranks bougent peu
-		// dans cette fenetre, et un SWR garantit que la donnee fraiche est servie
-		// en arriere-plan apres expiration sans trou de service.
-		res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=60");
-
-		return { entries: enriched, total: page.total, mode: safeMode };
+		const season = seasonId ? `&season=${encodeURIComponent(seasonId)}` : "";
+		const response = await fetch(`${process.env.UNIFIED_API_URL ?? "http://127.0.0.1:8800"}/v1/achillea/users/leaderboard?mode=${safeMode}${season}&limit=${safeLimit}&offset=${safeOffset}`);
+		res.status(response.status).setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=60");
+		return res.json(await response.json());
 	}
 
 	@Get("/me/ranked-history")
@@ -167,19 +116,6 @@ export class UsersController extends BaseController {
 		return this.userService.getRankedTrend(user.id, safeMode, safeDays, safeLast);
 	}
 
-	/**
-	 * Édite bio / lien Twitch — réservé au titulaire (userId vient de l'auth, jamais
-	 * d'un path param, donc impossible d'éditer le profil de quelqu'un d'autre).
-	 */
-	@Put("/me/profile")
-	@UseBefore(CookieAuthorize)
-	async updateMyProfile(
-		@Context("user") user: UserDTO,
-		@BodyParams("bio") bio: string | undefined,
-		@BodyParams("twitchUrl") twitchUrl: string | undefined
-	) {
-		return this.userService.updateOwnProfile(user.id, { bio, twitchUrl });
-	}
 
 	@Get("/:id")
 	async getUser(@PathParams("id") id: string, @Res() res: Response) {

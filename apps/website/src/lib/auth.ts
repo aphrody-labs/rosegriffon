@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { bearer, genericOAuth } from "better-auth/plugins";
@@ -10,39 +9,21 @@ import {
 	ensureUserProfile,
 	googleProvider,
 } from "@rosegriffon/auth";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { sendEmail } from "@/lib/email";
 import { getPgPool } from "@/lib/db/pg";
 import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
 import { encryptToken } from "@/lib/patreon/encryption";
 import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
-import type { Database } from "@rosegriffon/db";
 
 const pool = getPgPool();
 
-// Lazy getter for Supabase admin to prevent top-level execution during build
-let _supabaseAdmin: ReturnType<typeof createSupabaseAdmin<Database>> | null = null;
-function getSupabaseAdmin() {
-	if (_supabaseAdmin) {
-		return _supabaseAdmin;
-	}
-
-	const url =
-		process.env.NEXT_PUBLIC_SUPABASE_URL &&
-		process.env.NEXT_PUBLIC_SUPABASE_URL !== "undefined" &&
-		process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http") &&
-		!process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("eyJ2Ijo")
-			? process.env.NEXT_PUBLIC_SUPABASE_URL
-			: (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
-
-	const key =
-		process.env.SUPABASE_SERVICE_ROLE_KEY &&
-		!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith("{") &&
-		!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith("eyJ2Ijo")
-			? process.env.SUPABASE_SERVICE_ROLE_KEY
-			: "***REDACTED-SERVICE-ROLE***";
-
-	_supabaseAdmin = createSupabaseAdmin<Database>(url, key);
-	return _supabaseAdmin;
+// Client de données serveur centralisé : les profils et tables Patreon sont
+// lus/écrits par PostgreSQL, sans détour par PostgREST.
+let _postgresAdmin: ReturnType<typeof createPostgresClient> | null = null;
+function getPostgresAdmin() {
+	if (!_postgresAdmin) _postgresAdmin = createPostgresClient();
+	return _postgresAdmin;
 }
 
 /**
@@ -271,12 +252,12 @@ export const auth = betterAuth({
 					// Set-Cookie → session non persistée. Le sync profil est best-effort,
 					// il ne doit jamais casser la connexion.
 					try {
-						const { data: user } = await getSupabaseAdmin()
+						const { data: user } = await getPostgresAdmin()
 							.from("user")
 							.select("id, name, image, email")
 							.eq("id", session.userId)
 							.maybeSingle();
-						if (user) await ensureUserProfile(user, getSupabaseAdmin());
+						if (user) await ensureUserProfile(user, getPostgresAdmin());
 					} catch (e) {
 						console.error("[auth] session.create.after profile sync failed", e);
 					}
@@ -286,7 +267,7 @@ export const auth = betterAuth({
 		user: {
 			create: {
 				after: async (user) => {
-					await ensureUserProfile(user, getSupabaseAdmin());
+					await ensureUserProfile(user, getPostgresAdmin());
 				},
 			},
 		},
@@ -369,7 +350,7 @@ async function syncPatreonAccount(
 			: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
 
 		await Promise.all([
-			getSupabaseAdmin()
+			getPostgresAdmin()
 				.from("patreon_oauth_tokens")
 				.upsert(
 					{
@@ -383,7 +364,7 @@ async function syncPatreonAccount(
 					},
 					{ onConflict: "user_id,patreon_user_id" }
 				),
-			getSupabaseAdmin()
+			getPostgresAdmin()
 				.from("patreon_memberships")
 				.upsert(
 					{
@@ -424,7 +405,7 @@ async function syncPatreonAccount(
 					},
 					{ onConflict: "user_id,patreon_user_id" }
 				),
-			getSupabaseAdmin()
+			getPostgresAdmin()
 				.from("profiles")
 				.update({
 					patreon_id: identity.patreonUserId,

@@ -3,15 +3,14 @@
  * @description Central data loader for all game data sources
  *
  * This module provides unified access to:
- * - Raw config files (cfg.bin.json)
- * - Pre-processed JSON files (all-gamedata/)
+ * - Raw config rows (PostgreSQL JSONB; SQLite extraction cache for dev)
+ * - Pre-processed SQL projections
  * - Text localization files
  * - Lua script data
  *
- * I/O 100% Bun-native depuis 1.2.0 (Bun.file, Bun.Glob.scanSync, bun:sqlite).
- * `findConfigFile` / `loadConfig*` essaient d'abord la DB cfgbin.sqlite (opt-in
- * via iecode toolkit), avec fallback complet sur les `.cfg.bin.json` du
- * filesystem si la DB n'est pas presente. Comportement inchange pour azalee.
+ * PostgreSQL est la source durable. SQLite et les fichiers `.cfg.bin.json`
+ * servent uniquement à l'extraction/dev ou à une migration de secours ; ils ne
+ * sont jamais la source canonique de l'API de production.
  */
 
 import { basename, dirname, join } from "node:path";
@@ -20,6 +19,9 @@ import {
 	cfgbinDbFindLatest,
 	cfgbinDbLoad,
 	cfgbinDbLoadText,
+	cfgbinPostgresFindLatest,
+	cfgbinPostgresLoad,
+	cfgbinPostgresLoadText,
 } from "./cfgbin-db.js";
 import type { ConfigDocument, ConfigFile, ConfigNode, RawConfigFile } from "./config-parser.js";
 import { DATA_ROOT, FILES, PATHS } from "./paths.js";
@@ -99,8 +101,8 @@ export async function loadJSONAsync<T>(filePath: string): Promise<T> {
 
 /**
  * Find a config file in a category directory matching a prefix.
- * Tries SQLite cfgbin DB first (~/data/cache/cfgbin.sqlite), falls back to
- * scanning the filesystem at {DATA_ROOT}/common/gamedata/{category}/.
+ * Tries the durable PostgreSQL cfgbin projection first in async callers;
+ * synchronous callers retain the explicit offline SQLite/filesystem path.
  */
 export function findConfigFile(category: string, prefix: string): string | null {
 	// 1. cfgbin SQLite DB (opt-in)
@@ -127,10 +129,15 @@ export function findConfigFile(category: string, prefix: string): string | null 
 }
 
 /**
- * Load a raw config file from common/gamedata (Async).
- * Tries cfgbin SQLite DB first, falls back to filesystem.
+ * Load a raw config file from common/gamedata (Async), PostgreSQL-first.
  */
 export async function loadConfigAsync(category: string, filename: string): Promise<ConfigFile> {
+	try {
+		const raw = (await cfgbinPostgresLoad(category, filename)) as Partial<RawConfigFile>;
+		return { name: filename, variables: [], children: raw.entries || [] };
+	} catch {
+		// PostgreSQL absent/not imported: use the local extraction cache.
+	}
 	if (cfgbinDbAvailable()) {
 		try {
 			const raw = cfgbinDbLoad(category, filename) as Partial<RawConfigFile>;
@@ -152,6 +159,22 @@ export async function loadConfigAsync(category: string, filename: string): Promi
 		variables: [],
 		children: raw.entries || [],
 	};
+}
+
+/** Async discovery counterpart: durable PostgreSQL, then explicit offline caches. */
+export async function findConfigFileAsync(category: string, prefix: string): Promise<string | null> {
+	const fromPostgres = await cfgbinPostgresFindLatest(category, prefix);
+	if (fromPostgres) return fromPostgres;
+	if (cfgbinDbAvailable()) {
+		const fromDb = cfgbinDbFindLatest(category, prefix);
+		if (fromDb) return fromDb;
+	}
+	const dir = join(PATHS.gamedata, category);
+	try {
+		return [...new Bun.Glob(`${prefix}*.cfg.bin.json`).scanSync({ cwd: dir, onlyFiles: true })].sort().pop() ?? null;
+	} catch {
+		return null;
+	}
 }
 
 /**

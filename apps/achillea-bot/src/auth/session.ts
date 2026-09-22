@@ -1,18 +1,24 @@
-import jwt, { type JwtPayload, type SignOptions } from "jsonwebtoken";
+import jwt, { type JwtPayload } from "jsonwebtoken";
+import {
+	ACHILLEA_AUTH_ISSUER,
+	ACHILLEA_REALTIME_AUDIENCE,
+	ACHILLEA_REALTIME_TTL_SECONDS,
+	ACHILLEA_SESSION_AUDIENCE,
+	ACHILLEA_SESSION_COOKIE_NAME,
+	ACHILLEA_SESSION_TTL_SECONDS,
+	type AchilleaSessionIdentity,
+} from "@rosegriffon/achillea-core";
 
-export const SESSION_COOKIE_NAME = "token";
-export const AUTH_ISSUER = "achillea";
-export const SESSION_AUDIENCE = "achillea-web";
-export const REALTIME_AUDIENCE = "achillea-realtime";
-export const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
-export const REALTIME_TTL_SECONDS = 5 * 60;
+export const SESSION_COOKIE_NAME = ACHILLEA_SESSION_COOKIE_NAME;
+export const AUTH_ISSUER = ACHILLEA_AUTH_ISSUER;
+export const SESSION_AUDIENCE = ACHILLEA_SESSION_AUDIENCE;
+export const REALTIME_AUDIENCE = ACHILLEA_REALTIME_AUDIENCE;
+export const SESSION_TTL_SECONDS = ACHILLEA_SESSION_TTL_SECONDS;
+export const REALTIME_TTL_SECONDS = ACHILLEA_REALTIME_TTL_SECONDS;
 
 export type AuthTokenUse = "session" | "realtime";
 
-export interface SessionIdentity {
-	id: string;
-	username?: string;
-	avatar?: string;
+export interface SessionIdentity extends AchilleaSessionIdentity {
 	sim?: number;
 }
 
@@ -29,43 +35,6 @@ function secret(): string {
 
 function audienceFor(use: AuthTokenUse): string {
 	return use === "session" ? SESSION_AUDIENCE : REALTIME_AUDIENCE;
-}
-
-function signToken(
-	identity: SessionIdentity,
-	use: AuthTokenUse,
-	expiresIn: SignOptions["expiresIn"]
-): string {
-	if (!identity.id) throw new Error("Cannot sign an auth token without a user id");
-
-	return jwt.sign(
-		{
-			id: identity.id,
-			...(identity.username ? { username: identity.username } : {}),
-			...(identity.avatar !== undefined ? { avatar: identity.avatar } : {}),
-			...(identity.sim !== undefined ? { sim: identity.sim } : {}),
-			tokenUse: use,
-		},
-		secret(),
-		{
-			algorithm: "HS256",
-			subject: identity.id,
-			issuer: AUTH_ISSUER,
-			audience: audienceFor(use),
-			expiresIn,
-		}
-	);
-}
-
-export function signSessionToken(
-	identity: SessionIdentity,
-	expiresIn: SignOptions["expiresIn"] = SESSION_TTL_SECONDS
-): string {
-	return signToken(identity, "session", expiresIn);
-}
-
-export function signRealtimeToken(identity: SessionIdentity): string {
-	return signToken(identity, "realtime", REALTIME_TTL_SECONDS);
 }
 
 function normalizeIdentity(payload: AuthPayload): SessionIdentity {
@@ -86,9 +55,9 @@ function normalizeIdentity(payload: AuthPayload): SessionIdentity {
 /**
  * Verifies a signed Achillea token and enforces its intended use.
  *
- * Tokens issued before the centralized contract had no issuer/audience/tokenUse.
- * They remain accepted during the natural 30-day cookie rollover, but every new
- * token is purpose-bound and cannot be reused between the web and realtime tiers.
+ * Tokens issued before the centralized contract had no issuer/audience/tokenUse
+ * and are rejected by default. A caller may opt into a bounded compatibility
+ * window explicitly, but no runtime adapter does so.
  */
 export function verifyAuthToken(
 	token: string,
@@ -112,11 +81,11 @@ export function verifyAuthToken(
 	return normalizeIdentity(payload);
 }
 
-export function verifySessionToken(token: string, allowLegacy = true): SessionIdentity {
+export function verifySessionToken(token: string, allowLegacy = false): SessionIdentity {
 	return verifyAuthToken(token, "session", allowLegacy);
 }
 
-export function verifyRealtimeToken(token: string, allowLegacy = true): SessionIdentity {
+export function verifyRealtimeToken(token: string, allowLegacy = false): SessionIdentity {
 	return verifyAuthToken(token, "realtime", allowLegacy);
 }
 

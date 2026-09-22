@@ -3,27 +3,13 @@ import dynamicImport from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 
-import { AchilleaBanner } from "@/components/home/AchilleaBanner";
-import { AzaleeLiveHub, type ArticlePreview, type WikiSectionStats } from "@/components/home/AzaleeLiveHub";
-import type {
-	AzaleePreviewData,
-	PreviewCharacter,
-	PreviewItem,
-	PreviewSkill,
-	PreviewTeam,
-} from "@/app/api/public/azalee/preview/route";
-import type {
-	AchilleaPreviewData,
-	PreviewClan,
-	PreviewTournament,
-} from "@/app/api/public/achillea/preview/route";
 import { NextEventBanner } from "@/components/home/NextEventBanner";
 import { RechercheUnifiee } from "@/components/home/recherche-unifiee";
 import FusionBlock from "@/components/shared/FusionBlock";
 import { MotionSection } from "@/components/shared/MotionSection";
 import { RealtimeSettingsListener } from "@/components/shared/RealtimeSettingsListener";
 import { OrganizationSchema, WebsiteSchema } from "@/components/shared/StructuredData";
-import { lireChiffresEsport, lireClassement } from "@/lib/achillea/classement";
+import { lireChiffresEsport } from "@/lib/achillea/classement";
 import { getCalendarEvents } from "@/lib/api/events";
 import { getPublicSetting } from "@/lib/api/settings";
 import { getPgPoolOrNull } from "@/lib/db/pg";
@@ -122,8 +108,6 @@ async function chargerDonneesAccueil() {
 		introText,
 		introImage,
 		events,
-		{ rows: articles },
-		classement,
 		chiffresEsport,
 		{ rows: effectifs },
 		{ rows: persosJouablesRows },
@@ -132,12 +116,6 @@ async function chargerDonneesAccueil() {
 		{ count: nbKeshins },
 		{ count: nbAmes },
 		{ count: nbPassifs },
-		{ rows: previewChars },
-		{ rows: previewSkills },
-		{ rows: previewItems },
-		{ rows: previewTeams },
-		{ rows: previewClans },
-		{ rows: previewTournaments },
 	] = await Promise.all([
 		getPublicSetting("home_intro_title", "Qu'est-ce que Rose Griffon ?"),
 		getPublicSetting(
@@ -146,15 +124,6 @@ async function chargerDonneesAccueil() {
 		),
 		getPublicSetting("home_intro_image", "/RG_screens_twitch_ethan.webp"),
 		getCalendarEvents(),
-		safePoolQuery<ArticlePreview>(
-			`SELECT id, slug, title, featured_image_url, published_at
-			 FROM articles
-			 WHERE status = 'published' AND app = ANY($1::text[])
-			 ORDER BY published_at DESC NULLS LAST
-			 LIMIT 2`,
-			[["azalee", "website"]]
-		),
-		lireClassement(2, 5),
 		lireChiffresEsport(),
 		safePoolQuery<{ membres: string }>(
 			"SELECT count(*) AS membres FROM discord_appartenances WHERE left_at IS NULL AND is_bot = false",
@@ -180,65 +149,6 @@ async function chargerDonneesAccueil() {
 		supabase.from("inagle_keshins_clean").select("id", { count: "exact", head: true }),
 		supabase.from("inagle_souls_clean").select("id", { count: "exact", head: true }),
 		supabase.from("inagle_passives").select("id", { count: "exact", head: true }),
-		safePoolQuery<PreviewCharacter>(
-			`SELECT id, slug, base_slug, name_fr, name_en, name_ja, element, position, rarity, internal_code 
-			 FROM inagle_characters 
-			 WHERE is_primary = true 
-			   AND internal_code IN ('c01000010', 'c05024710', 'c01010970', 'c01000020')
-			 ORDER BY CASE internal_code 
-			   WHEN 'c01000010' THEN 1
-			   WHEN 'c05024710' THEN 2
-			   WHEN 'c01010970' THEN 3
-			   WHEN 'c01000020' THEN 4
-			   ELSE 5 END`
-		),
-		safePoolQuery<PreviewSkill>(
-			`SELECT id, name_fr, name_en, name_ja, category, element, power_max, tension_cost, image_url
-			 FROM inagle_skills 
-			 WHERE id IN ('whs02160_or', 'whk00010', 'whd01400', 'who01352')
-			 ORDER BY CASE id 
-			   WHEN 'whs02160_or' THEN 1
-			   WHEN 'whk00010' THEN 2
-			   WHEN 'who01352' THEN 3
-			   WHEN 'whd01400' THEN 4
-			   ELSE 5 END`
-		),
-		safePoolQuery<PreviewItem>(
-			`SELECT id, name_fr, name_en, category, rarity, internal_code, stat_boost_1, stat_boost_2
-			 FROM inagle_items 
-			 WHERE internal_code IN ('eq_sh010101', 'eq_sh010201', 'eq_sh021201', 'eq_sh080101')
-			 ORDER BY CASE internal_code 
-			   WHEN 'eq_sh010101' THEN 1
-			   WHEN 'eq_sh010201' THEN 2
-			   WHEN 'eq_sh021201' THEN 3
-			   WHEN 'eq_sh080101' THEN 4
-			   ELSE 5 END`
-		),
-		safePoolQuery<PreviewTeam>(
-			`SELECT id, name_fr, name_en, name_ja, emblem_url
-			 FROM inagle_teams 
-			 WHERE name_fr IN ('Raimon', 'Royal Academy', 'Nouvelle Royal Ac.', 'Inazuma KFT')
-			 ORDER BY CASE name_fr 
-			   WHEN 'Raimon' THEN 1
-			   WHEN 'Royal Academy' THEN 2
-			   WHEN 'Nouvelle Royal Ac.' THEN 3
-			   WHEN 'Inazuma KFT' THEN 4
-			   ELSE 5 END`
-		),
-		safePoolQuery<PreviewClan>(
-			`SELECT id, name, "shortenedName", "clanAvatarUrl", "clanBiography", "membersCount", "isRecruiting"
-			 FROM achillea.clan_list_view 
-			 WHERE "isDisbanded" = false AND "isHidden" = false
-			 ORDER BY "membersCount" DESC, id ASC 
-			 LIMIT 4`
-		),
-		safePoolQuery<PreviewTournament>(
-			`SELECT id, name, starts_at, tournament_type, status, internal_state, participants_number, logo
-			 FROM achillea.event 
-			 WHERE status != 'Canceled' AND internal_state != 'Pending'
-			 ORDER BY created_at DESC 
-			 LIMIT 4`
-		),
 	]);
 
 	const maintenant = Date.now();
@@ -256,7 +166,7 @@ async function chargerDonneesAccueil() {
 			.toSorted((a, b) => new Date(a.debut || 0).getTime() - new Date(b.debut || 0).getTime())[0] ??
 		null;
 
-	const wikiStats: WikiSectionStats = {
+	const wikiStats = {
 		characters: Number(persosJouablesRows[0]?.count ?? 0),
 		items: nbObjets ?? 0,
 		keshins: nbKeshins ?? 0,
@@ -265,28 +175,10 @@ async function chargerDonneesAccueil() {
 		souls: nbAmes ?? 0,
 	};
 
-	const azaleePreview: AzaleePreviewData = {
-		characters: previewChars ?? [],
-		items: previewItems ?? [],
-		skills: previewSkills ?? [],
-		teams: previewTeams ?? [],
-	};
-
-	const achilleaPreview: AchilleaPreviewData = {
-		clans: previewClans ?? [],
-		leaderboard: classement ?? [],
-		stats: chiffresEsport,
-		tournaments: previewTournaments ?? [],
-	};
-
 	return {
 		chiffresEsport,
-		classement,
 		prochain,
 		wikiStats,
-		azaleePreview,
-		achilleaPreview,
-		articles: articles ?? [],
 		introImage,
 		introText,
 		introTitle,
@@ -313,19 +205,56 @@ export default async function Home() {
 					)}
 
 					{/* Présentation de l'association + recherche fédérée. */}
-					<MotionSection className="mx-auto w-full max-w-7xl px-4 min-[600px]:px-0" aria-labelledby="about-heading">
+					<MotionSection
+						className="mx-auto w-full max-w-7xl px-4 min-[600px]:px-0"
+						aria-labelledby="about-heading"
+					>
 						<FusionBlock isImageLeft image={data.introImage} isPriority>
 							<div className="flex h-full flex-col justify-center space-y-4 py-1">
 								<div className="flex items-center gap-2">
-									<div className="relative size-8 shrink-0"><Image src="/RG_Logo_V2.5.webp" alt="Rose Griffon" fill sizes="32px" className="object-contain" /></div>
-									<span className="text-xs font-black uppercase tracking-wider text-primary">Association Inazuma Eleven France</span>
+									<div className="relative size-8 shrink-0">
+										<Image
+											src="/RG_Logo_V2.5.webp"
+											alt="Rose Griffon"
+											fill
+											sizes="32px"
+											className="object-contain"
+										/>
+									</div>
+									<span className="text-xs font-black uppercase tracking-wider text-primary">
+										Association Inazuma Eleven France
+									</span>
 								</div>
-								<h1 id="about-heading" className="font-expressive-title text-2xl font-black leading-tight text-foreground sm:text-3xl md:text-4xl">{data.introTitle}</h1>
-								<p className="text-sm font-medium leading-relaxed text-muted-foreground sm:text-base">{data.introText}</p>
+								<h1
+									id="about-heading"
+									className="font-expressive-title text-2xl font-black leading-tight text-foreground sm:text-3xl md:text-4xl"
+								>
+									{data.introTitle}
+								</h1>
+								<p className="text-sm font-medium leading-relaxed text-muted-foreground sm:text-base">
+									{data.introText}
+								</p>
 								<div className="flex flex-wrap gap-2 pt-1">
-									<a href={INVITATION_DISCORD} target="_blank" rel="noopener noreferrer" className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-on-primary transition-colors hover:bg-primary/90">Discord</a>
-									<Link href="/wiki" className="rounded-full border border-outline px-4 py-2 text-sm font-bold text-on-surface hover:bg-surface-container">Wiki Azalée</Link>
-									<Link href="/achillea" className="rounded-full border border-outline px-4 py-2 text-sm font-bold text-on-surface hover:bg-surface-container">E-Sport</Link>
+									<a
+										href={INVITATION_DISCORD}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-on-primary transition-colors hover:bg-primary/90"
+									>
+										Discord
+									</a>
+									<Link
+										href="/wiki"
+										className="rounded-full border border-outline px-4 py-2 text-sm font-bold text-on-surface hover:bg-surface-container"
+									>
+										Wiki Azalée
+									</Link>
+									<Link
+										href="/achillea"
+										className="rounded-full border border-outline px-4 py-2 text-sm font-bold text-on-surface hover:bg-surface-container"
+									>
+										E-Sport
+									</Link>
 								</div>
 								<RechercheUnifiee />
 							</div>
@@ -342,41 +271,86 @@ export default async function Home() {
 							["/achillea/clans", data.chiffresEsport.clans, "Clans actifs"],
 							["/community", data.membres, "Membres Discord"],
 						].map(([href, count, label]) => (
-							<Link key={String(href)} href={String(href)} className="rounded-2xl border border-outline-variant/15 bg-surface-container-low p-3 text-center transition-colors hover:border-primary/40 hover:bg-surface-container">
-								<span className="block text-xl font-black text-foreground">{Number(count).toLocaleString("fr-FR")}</span>
+							<Link
+								key={String(href)}
+								href={String(href)}
+								className="rounded-2xl border border-outline-variant/15 bg-surface-container-low p-3 text-center transition-colors hover:border-primary/40 hover:bg-surface-container"
+							>
+								<span className="block text-xl font-black text-foreground">
+									{Number(count).toLocaleString("fr-FR")}
+								</span>
 								<span className="text-xs font-medium text-muted-foreground">{label}</span>
 							</Link>
 						))}
 					</MotionSection>
 
 					{/* Les deux pôles principaux sont présentés comme les projets RG qu'ils sont. */}
-					<MotionSection id="projets-section" className="w-full content-deferred" aria-labelledby="projects-heading">
+					<MotionSection
+						id="projets-section"
+						className="w-full content-deferred"
+						aria-labelledby="projects-heading"
+					>
 						<div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 min-[600px]:px-0">
-							<p className="text-xs font-black uppercase tracking-wider text-primary">Rose Griffon</p>
-							<h2 id="projects-heading" className="font-expressive-title text-2xl font-black text-foreground sm:text-3xl">Nos projets</h2>
-							<p className="text-sm text-muted-foreground">Azalée pour le wiki et l&apos;actualité, Achilléa pour la compétition.</p>
+							<p className="text-xs font-black uppercase tracking-wider text-primary">
+								Rose Griffon
+							</p>
+							<h2
+								id="projects-heading"
+								className="font-expressive-title text-2xl font-black text-foreground sm:text-3xl"
+							>
+								Nos projets
+							</h2>
+							<p className="text-sm text-muted-foreground">
+								Azalée pour le wiki et l&apos;actualité, Achilléa pour la compétition.
+							</p>
 						</div>
 					</MotionSection>
 
-					<MotionSection className="w-full content-deferred" aria-labelledby="azalee-hub-title">
-						<AzaleeLiveHub stats={data.wikiStats} articles={data.articles} previewData={data.azaleePreview} />
-					</MotionSection>
-
-					{/* Achilléa — compétition */}
-					<MotionSection className="w-full content-deferred" aria-labelledby="achillea-hub-title">
-						<AchilleaBanner
-							classement={data.classement}
-							chiffresEsport={data.chiffresEsport}
-							previewData={data.achilleaPreview}
-						/>
+					{/* Chaque pôle conserve son accueil complet : ici, seulement les portes d'entrée. */}
+					<MotionSection className="mx-auto grid w-full max-w-7xl gap-4 px-4 min-[600px]:grid-cols-2 min-[600px]:px-0">
+						<Link
+							href="/wiki"
+							className="group rounded-3xl border border-azalee-yellow/30 bg-surface-container-low p-6 transition-colors hover:border-azalee-yellow/70 hover:bg-surface-container"
+						>
+							<p className="text-xs font-black uppercase tracking-wider text-azalee-yellow">
+								Wiki & actualités
+							</p>
+							<h3 className="mt-2 text-3xl font-black text-foreground">Azalée</h3>
+							<p className="mt-2 text-sm text-muted-foreground">
+								L&apos;encyclopédie, les fiches et toute l&apos;actualité de Victory Road.
+							</p>
+							<span className="mt-5 inline-flex rounded-full bg-azalee-yellow px-4 py-2 text-sm font-bold text-black">
+								Explorer le wiki
+							</span>
+						</Link>
+						<Link
+							href="/achillea"
+							className="group rounded-3xl border border-achillea-purple/40 bg-achillea-purple-dark p-6 transition-colors hover:border-achillea-lime/70 hover:bg-achillea-purple-hover"
+						>
+							<p className="text-xs font-black uppercase tracking-wider text-achillea-lime">
+								E-sport & compétition
+							</p>
+							<h3 className="mt-2 text-3xl font-black text-white">Achilléa</h3>
+							<p className="mt-2 text-sm text-white/70">
+								Classement, clans, tournois et diffusions de la scène compétitive.
+							</p>
+							<span className="mt-5 inline-flex rounded-full bg-achillea-lime px-4 py-2 text-sm font-bold text-black">
+								Accéder à l&apos;esport
+							</span>
+						</Link>
 					</MotionSection>
 
 					<MotionSection className="content-deferred" aria-labelledby="other-projects-heading">
 						<ProjectsSection />
 					</MotionSection>
 
-					<MotionSection className="mx-auto grid w-full max-w-7xl gap-4 px-4 min-[600px]:px-0 lg:grid-cols-2" aria-label="Serveurs Discord">
-						{SERVEURS_DISCORD.map((serveur) => <DiscordSection key={serveur.cle} serveur={serveur} compact />)}
+					<MotionSection
+						className="mx-auto grid w-full max-w-7xl gap-4 px-4 min-[600px]:px-0 lg:grid-cols-2"
+						aria-label="Serveurs Discord"
+					>
+						{SERVEURS_DISCORD.map((serveur) => (
+							<DiscordSection key={serveur.cle} serveur={serveur} compact />
+						))}
 					</MotionSection>
 				</div>
 			</div>

@@ -13,7 +13,7 @@ import "server-only";
  * titre — mieux vaut un code affiché qu'un libellé inventé.
  */
 
-import { createSqliteClient } from "@rosegriffon/azalee/db";
+import { selectInagle } from "@/lib/db/inagle-sql";
 
 /** Un libellé résolu : ce qu'on affiche, et dans quel ordre. */
 export interface MediaLabel {
@@ -50,11 +50,8 @@ function episodes(): Promise<Map<string, string>> {
 	_episodes ??= (async () => {
 		const index = new Map<string, string>();
 		try {
-			const client = createSqliteClient();
-			const { data } = (await client.from("inagle_events").select("event_id,episode")) as {
-				data: { event_id: string | null; episode: string | null }[] | null;
-			};
-			for (const row of data ?? []) {
+			const rows = await selectInagle<{ event_id: string | null; episode: string | null }>("inagle_events", "event_id,episode");
+			for (const row of rows) {
 				if (row.event_id && row.episode) index.set(row.event_id, row.episode);
 			}
 		} catch {
@@ -110,20 +107,8 @@ export function itemNames(): Promise<Map<string, string>> {
 	_itemsParTexture ??= (async () => {
 		const index = new Map<string, string>();
 		try {
-			const client = createSqliteClient();
-			const { data } = (await client
-				.from("inagle_items")
-				.select("internal_code,name_fr,name_en,name_ja")) as {
-				data:
-					| {
-							internal_code: string | null;
-							name_fr: string | null;
-							name_en: string | null;
-							name_ja: string | null;
-					  }[]
-					| null;
-			};
-			for (const row of data ?? []) {
+			const rows = await selectInagle<{ internal_code: string | null; name_fr: string | null; name_en: string | null; name_ja: string | null }>("inagle_items", "internal_code,name_fr,name_en,name_ja");
+			for (const row of rows) {
 				const nom = row.name_fr || row.name_en || row.name_ja;
 				if (row.internal_code && nom) index.set(row.internal_code.toLowerCase(), nom);
 			}

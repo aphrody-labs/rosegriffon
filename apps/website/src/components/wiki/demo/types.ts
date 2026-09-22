@@ -4,7 +4,7 @@
  * Zéro dépendance three/@theatre/wasm/Node : toutes les structures sont sérialisables et
  * traversent la frontière RSC → îlots `"use client"`. La page serveur (`app/demo/page.tsx`)
  * construit un {@link DemoData} depuis `data/aphrody-dossier.json` (via les helpers PURS
- * `cpkAssetUrl`/`cpkAudioUrl`/`cpkThumbUrl` + `getSkillCutin`/`cutinHasAssets`), puis les
+ * `cpkAssetUrl`/`cpkAudioUrl`/`cpkThumbUrl` + `wikiService` SQL), puis les
  * îlots consomment ces types sans jamais retoucher l'index CPK ni le SQLite.
  */
 
@@ -29,6 +29,8 @@ export interface DemoFormData {
 	/** Paramètres de croissance pour le moteur de stats (positions + pattern). */
 	growth: { mainPosition: number; subPosition: number; growthPattern: number };
 }
+
+import type { SkillCutin } from "@rosegriffon/azalee/game/skills-cutin";
 
 /** Une TECHNIQUE (hissatsu) du personnage, avec ses assets de cut-in. */
 export interface DemoSkill {
@@ -55,6 +57,8 @@ export interface DemoSkill {
 	wazaGlbUrl: string;
 	/** `true` si le modèle 3D du cut-in est réellement servi (gate anti-404). */
 	has3d: boolean;
+	/** Métadonnées cut-in SQL sérialisées avant le passage dans l’îlot client. */
+	cutin: SkillCutin | null;
 }
 
 /** Une texture téléchargeable de la galerie. */

@@ -4,38 +4,48 @@
  * @description Parser for item_config files to extract items and link Uniforms
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { loadJsonAsync } from "../core/async-loader.js";
 import type { ConfigNode } from "../core/config-parser.js";
-import { findConfigFile, toHex } from "../core/data-loader.js";
+import { findConfigFile, findConfigFileAsync, toHex } from "../core/data-loader.js";
 import { EntityExporters, type ExportableEntity } from "../core/exporters.js";
 import { loadTextFileAsync } from "./text-parser.js";
+import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import type { Database } from "@rosegriffon/db/schema";
 
 /**
- * Charge la base communautaire des bonus d'équipement (item-bonus-db.json).
+ * Charge les bonus d'équipement depuis la projection SQL `inagle_items.data`.
  * Relevé in-game : chaque entrée mappe un nameId (var[2] du leaf) vers ses
  * bonus de stats réels (kick/control/…). Couvre chaussures/bracelets/accessoires.
  * Clé de retour : nameId hex MAJUSCULE sans préfixe `0x`.
  */
-function loadItemBonusDb(): Map<string, ItemStatBonuses> {
+async function loadItemBonusDb(): Promise<Map<string, ItemStatBonuses>> {
 	const map = new Map<string, ItemStatBonuses>();
+
+	// PostgreSQL est la source canonique du serveur unifié. Les lignes importées
+	// par inagle portent déjà les bonus décodés dans `data.bonuses`; on indexe
+	// l'id de l'objet et son itemId pour couvrir les deux jointures historiques.
 	try {
-		const here = dirname(fileURLToPath(import.meta.url));
-		const dbPath = join(here, "../data/item-bonus-db.json");
-		if (!existsSync(dbPath)) return map;
-		const entries = JSON.parse(readFileSync(dbPath, "utf-8")) as Array<{
-			id: string;
-			bonuses?: ItemStatBonuses;
-		}>;
-		for (const e of entries) {
-			if (!e.id || !e.bonuses) continue;
-			const key = e.id.toUpperCase().replace(/^0X/, "");
-			map.set(key, e.bonuses);
+		const db = createAchilleaSql<Database>();
+		const rows = await db
+			.selectFrom("inagle_items")
+			.select(["id", "data"])
+			.where("category", "in", ["shoes", "misanga", "accessory"])
+			.execute();
+		for (const row of rows) {
+			const payload = row.data;
+			if (typeof payload !== "object" || payload === null || Array.isArray(payload)) continue;
+			const bonuses = (payload as { bonuses?: unknown }).bonuses;
+			if (typeof bonuses !== "object" || bonuses === null || Array.isArray(bonuses)) continue;
+			const normalized = Object.fromEntries(
+				Object.entries(bonuses).filter(([, value]) => typeof value === "number"),
+			) as ItemStatBonuses;
+			if (Object.keys(normalized).length === 0) continue;
+			const key = row.id.toUpperCase().replace(/^0X/, "");
+			map.set(key, normalized);
 		}
 	} catch {
-		// best-effort : pas de bonus décodés si le fichier est absent/illisible
+		// Extraction/dev sans PostgreSQL : aucun enrichissement synthétique n'est injecté.
 	}
 	return map;
 }
@@ -63,7 +73,7 @@ export type ItemCategory =
 	| "important";
 
 /**
- * Bonus de statistique décodé (issu de la base communautaire item-bonus-db).
+ * Bonus de statistique décodé depuis la projection SQL.
  * Clés possibles : kick, control, technique, intelligence, pressure, agility, physical.
  */
 export type ItemStatBonuses = Partial<Record<StatBonusKey, number>>;
@@ -91,7 +101,7 @@ export interface ParsedItem extends ExportableEntity {
 	/**
 	 * Bonus de stats RÉELS décodés (kick +6, control +5, …) pour l'équipement
 	 * (chaussures/bracelets/accessoires). Joint sur le nameId (var[2]) via
-	 * item-bonus-db.json (relevé in-game communautaire). Absent si non décodé.
+	 * `inagle_items.data` en PostgreSQL. Absent si non décodé.
 	 */
 	bonuses?: ItemStatBonuses;
 	/** Quantité max empilable en inventaire (consommables : var[7]). */
@@ -135,7 +145,7 @@ const CATEGORY_MAP: Record<string, ItemCategory> = {
 };
 
 export async function loadFashionItemMappingAsync(dataPath: string): Promise<Map<number, number>> {
-	const filename = findConfigFile("item", "item_config_");
+	const filename = await findConfigFileAsync("item", "item_config_");
 	const mapping = new Map<number, number>();
 
 	if (!filename) return mapping;
@@ -193,7 +203,7 @@ export async function buildItemDatabaseAsync(
 	const configPath = join(dataPath, "common", "gamedata", "item", filename);
 
 	// Charge la base de bonus décodés (synchrone, fichier statique bundlé).
-	const bonusDb = loadItemBonusDb();
+	const bonusDb = await loadItemBonusDb();
 
 	// Load Texts (Parallel).
 	// NOTE: il n'existe PAS de fichier `item_explain_text` dans le jeu — les
@@ -293,7 +303,7 @@ export async function buildItemDatabaseAsync(
 
 						// Bonus de stats RÉELS (relevé communautaire) — joint sur le nameId.
 						// Couvre chaussures/bracelets/accessoires : kick +6, control +5, …
-						const bonuses = bonusDb.get(bonusKey);
+						const bonuses = bonusDb.get(bonusKey) ?? bonusDb.get(itemIdHex.toUpperCase().replace(/^0X/, ""));
 						if (bonuses && Object.keys(bonuses).length > 0) {
 							item.bonuses = bonuses;
 							for (const [stat, val] of Object.entries(bonuses)) {

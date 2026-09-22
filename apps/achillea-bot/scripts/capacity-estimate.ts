@@ -7,7 +7,7 @@
  *   2. Config code — maxClients lobby/queue, pool Bun.SQL, modes (regex sur la source).
  *   3. Tests       — inventorie TOUS les *.test.ts / *.spec.ts (bot + web), en dérive
  *                    le profil d'opérations d'un cycle de match (patches d'état, messages).
- *   4. Micro-bench — vraies fonctions du repo (match-logic), Elo (K=32), encodage d'état,
+ *   4. Micro-bench — vraies fonctions du repo (core/ranked), Elo (K=32), encodage d'état,
  *                    mémoire réelle par room (heapUsed delta).
  *   5. SUPABASE    — sonde l'instance réelle : max_connections, connexions en cours, débit
  *                    de requêtes concurrentes mesuré. Applique le profil du PLAN (free/pro) :
@@ -54,6 +54,7 @@ const P = {
 };
 
 const BOT_ROOT = join(import.meta.dir, "..");
+const CORE_ROOT = join(BOT_ROOT, "..", "..", "packages", "achillea-core");
 const WEB_ROOT = join(BOT_ROOT, "..", "web");
 const SECONDS_PER_MONTH = 30 * 86400;
 const fmt = (n: number) =>
@@ -65,6 +66,13 @@ const fmt = (n: number) =>
 const readSrc = (rel: string) => {
 	try {
 		return readFileSync(join(BOT_ROOT, rel), "utf8");
+	} catch {
+		return "";
+	}
+};
+const readCoreSrc = (rel: string) => {
+	try {
+		return readFileSync(join(CORE_ROOT, rel), "utf8");
 	} catch {
 		return "";
 	}
@@ -110,7 +118,7 @@ const cfg = {
 	queueMax: grabInt(readSrc("src/ranked/rooms/QueueRoom.ts"), /maxClients\s*=\s*(\d+)/, 200),
 	sqlMax: grabInt(readSrc("src/ranked/db.ts"), /BUN_SQL_MAX",\s*"(\d+)"/, 10),
 	modes:
-		readSrc("src/ranked/match-logic.ts").match(/SUPPORTED_MODES\s*=\s*\[([\d,\s]+)\]/)?.[1] ??
+		readCoreSrc("src/ranked/index.ts").match(/SUPPORTED_MODES\s*=\s*\[([\d,\s]+)\]/)?.[1] ??
 		"2, 4",
 };
 
@@ -160,9 +168,9 @@ const N_DB_QUERIES = 6; // fin de match : update elo×2 + insert history + ladde
 let realFnNs = 0;
 let realFnName = "(repli)";
 try {
-	const ml: any = await import("../src/ranked/match-logic.ts");
+	const ml: any = await import("@rosegriffon/achillea-core");
 	if (typeof ml.resolveScores === "function") {
-		realFnName = "match-logic.resolveScores";
+		realFnName = "achillea-core.ranked.resolveScores";
 		realFnNs = bench(
 			() => ml.resolveScores({ myScore: 3, oppScore: 1 }, { myScore: 1, oppScore: 3 }, false),
 			200_000

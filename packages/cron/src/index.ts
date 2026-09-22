@@ -13,7 +13,12 @@ import { crawlHashtagCampaigns } from "./tasks/ie-crawl/hashtag-harvest";
 import { recolterCreationsDiscord } from "./tasks/campagnes-discord";
 import { revaliderCreationsInstagram } from "./tasks/campagnes-instagram";
 import { relayerCampagnesDiscord } from "./tasks/campagnes-relais-discord";
-import { runRagSync, queryRag, ragGroundedQuery, ingestWikiCorpus } from "./tasks/ie-crawl/rag-index";
+import {
+	runRagSync,
+	queryRag,
+	ragGroundedQuery,
+	ingestWikiCorpus,
+} from "./tasks/ie-crawl/rag-index";
 import {
 	triggerPublishScheduled,
 	triggerPatreonRefresh,
@@ -25,7 +30,13 @@ import { runSeoIndexNow } from "./tasks/seo/indexnow";
 import { runSeoLlmsTxt } from "./tasks/seo/llms-txt";
 import { collecterAudienceAchillea } from "./tasks/stats/achillea";
 import { rafraichirVideosTechniques } from "./tasks/zukan-videos";
-import { initDiscord, getDiscordTelemetry, onTelemetryUpdate, getDiscordClient, GUILD_ID } from "./lib/discord";
+import {
+	initDiscord,
+	getDiscordTelemetry,
+	onTelemetryUpdate,
+	getDiscordClient,
+	GUILD_ID,
+} from "./lib/discord";
 import { runAchilleaSync } from "./tasks/achillea-sync";
 import { runAchilleaSeasonRollover } from "./tasks/achillea-seasons";
 import { runAchilleaWeeklyPayout } from "./tasks/achillea-weekly-payout";
@@ -137,7 +148,9 @@ function exigeLaPasserelleDiscord(tache: string | undefined): boolean {
 // Initialisation du client Discord
 const clientDiscord = exigeLaPasserelleDiscord(tacheCli) ? await initDiscord() : null;
 if (!clientDiscord && tacheCli) {
-	console.log(`[Cron Runner] Passerelle Discord non requise pour « ${tacheCli} » : démarrage direct.`);
+	console.log(
+		`[Cron Runner] Passerelle Discord non requise pour « ${tacheCli} » : démarrage direct.`
+	);
 }
 
 // Veille des salons Discord suivis : les événements de la passerelle écrivent
@@ -758,10 +771,13 @@ const server = Bun.serve({
 		if (url.pathname === "/discord-telemetry") {
 			const telemetry = getDiscordTelemetry();
 			if (!telemetry) {
-				return new Response(JSON.stringify({ error: "Télémétrie Discord indisponible (non connecté ou désactivé)" }), {
-					status: 503,
-					headers: { "Content-Type": "application/json" }
-				});
+				return new Response(
+					JSON.stringify({ error: "Télémétrie Discord indisponible (non connecté ou désactivé)" }),
+					{
+						status: 503,
+						headers: { "Content-Type": "application/json" },
+					}
+				);
 			}
 			return Response.json(telemetry);
 		}
@@ -801,7 +817,7 @@ const server = Bun.serve({
 						.maybeSingle();
 
 					if (session && new Date(session.expires_at) > new Date()) {
-						const profile = await resolveProfile(supabase, { id: session.user_id });
+						const profile = await resolveProfile(supabase as never, { id: session.user_id });
 						if (profile && isAdmin(profile.role)) {
 							isAuthorized = true;
 							console.log(`[Cron Auth] Accès autorisé pour l'administrateur : ${profile.username}`);
@@ -1073,9 +1089,10 @@ Bun.serve({
 			}
 
 			// Resolve Channel ID
-			const channelId = type === "wiki"
-				? (Bun.env.DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID || Bun.env.DISCORD_NEWS_CHANNEL_ID)
-				: (Bun.env.DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID || Bun.env.DISCORD_NEWS_CHANNEL_ID);
+			const channelId =
+				type === "wiki"
+					? Bun.env.DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID || Bun.env.DISCORD_NEWS_CHANNEL_ID
+					: Bun.env.DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID || Bun.env.DISCORD_NEWS_CHANNEL_ID;
 
 			// Le salon est DÉSIGNÉ, jamais deviné. La version précédente cherchait
 			// un salon nommé `annonces`, `news` ou `general` quand la variable
@@ -1098,9 +1115,10 @@ Bun.serve({
 			}
 
 			// Build Embed
-			const articleUrl = type === "wiki"
-				? `https://azalee.rosegriffon.fr/news/${slug}`
-				: `https://rosegriffon.fr/chroniques/${slug}`;
+			const articleUrl =
+				type === "wiki"
+					? `https://azalee.rosegriffon.fr/news/${slug}`
+					: `https://rosegriffon.fr/chroniques/${slug}`;
 
 			const embedColor = type === "wiki" ? 0xf2a93b : 0xa14b3f; // Azalée orange vs Rose Griffon red
 
@@ -1111,22 +1129,27 @@ Bun.serve({
 				color: embedColor,
 				image: featured_image_url ? { url: featured_image_url } : undefined,
 				footer: { text: type === "wiki" ? "Azalée — Rose Griffon" : "Rose Griffon" },
-				timestamp: new Date().toISOString()
+				timestamp: new Date().toISOString(),
 			};
 
 			await channel.send({ embeds: [embed] });
-			console.log(`[announce-server] Annonce envoyée pour : "${title}" dans le salon #${channel.name}`);
+			console.log(
+				`[announce-server] Annonce envoyée pour : "${title}" dans le salon #${channel.name}`
+			);
 			return new Response(JSON.stringify({ success: true }), {
-				headers: { "Content-Type": "application/json" }
+				headers: { "Content-Type": "application/json" },
 			});
 		} catch (err) {
 			console.error("[announce-server] Erreur lors de l'annonce:", err);
-			return new Response(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }), {
-				status: 500,
-				headers: { "Content-Type": "application/json" }
-			});
+			return new Response(
+				JSON.stringify({ error: err instanceof Error ? err.message : String(err) }),
+				{
+					status: 500,
+					headers: { "Content-Type": "application/json" },
+				}
+			);
 		}
-	}
+	},
 });
 
 // Pont natif vers rg-bot : socket UNIX (`/var/lib/rg/cron.sock`), verbes de

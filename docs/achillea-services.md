@@ -18,11 +18,14 @@ bun test scripts/achillea/check-services-config.test.ts
 | Surface                  | Écoute locale      | Exposition                                                      | Propriétaire                   |
 | ------------------------ | ------------------ | --------------------------------------------------------------- | ------------------------------ |
 | API REST Ts.ED           | `127.0.0.1:4000`   | via le proxy ranked ; upload `/api/proxy/*` en direct par Nginx | processus backend              |
+| API unifiée Elysia/Kysely | `127.0.0.1:8800` | `https://api.rosegriffon.fr/v1/` et `/health` | `rg-api.service`               |
 | Ranked REST + Colyseus   | `127.0.0.1:4002`   | `https://ranked.rosegriffon.fr`                                 | enfant du backend              |
 | Socket.IO                | `127.0.0.1:4005`   | `https://ranked.rosegriffon.fr/socket.io/`                      | processus backend              |
 | Front Achilléa            | route Next         | `https://rosegriffon.fr/achillea`                               | `apps/website`                |
 
-Une seule unité systemd supervise le backend, l'API, Socket.IO et le sous-processus ranked.
+`achillea-bot.service` supervise le backend, l'API historique, Socket.IO et le sous-processus
+ranked. `rg-api.service` porte l'API unifiée Elysia/Kysely sur le même schéma PostgreSQL
+`achillea`; les nouvelles surfaces migrées passent par `api.rosegriffon.fr/v1/`.
 `KillMode=control-group` garantit que ranked s'arrête avec son parent. Le front de production
 est rendu par `apps/website`; `achillea.rosegriffon.fr` redirige vers cette route.
 
@@ -47,14 +50,15 @@ hors Git :
 
 | Classe              | Variables                                                                                                                                       |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Discord             | `BOT_PROFILE=legacy|current`, `DISCORD_OAUTH_PROFILE=legacy|current` et `BOT_COMMAND_GUILDS` (liste CSV pour éviter les commandes globales dupliquées) ; profil `current` = application `1427690638576582697` (gateway, panneaux, ~59 guildes) : `BOT_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_PUBLIC_KEY`; profil `legacy` = application `1256600975464992818` (OAuth du site uniquement) : `DEV_BOT_TOKEN`, `DISCORD_CLIENT_ID_DEV`, `DISCORD_CLIENT_SECRET_DEV`, `DISCORD_PUBLIC_KEY_DEV`. En production : `BOT_PROFILE=current`, `DISCORD_OAUTH_PROFILE=legacy`; `TEST_GUILD_ID`, `BOT_OWNER_ID` |
+| Discord             | `BOT_PROFILE=current` et `BOT_COMMAND_GUILDS` (liste CSV pour éviter les commandes globales dupliquées) ; profil `current` = application `1427690638576582697` (gateway, panneaux, ~59 guildes) : `BOT_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_PUBLIC_KEY`. L'OAuth du site est exclusivement Better Auth/Rose Griffon : dans cette application Discord, déclarer `https://rosegriffon.fr/api/auth/callback/discord`. Le profil `legacy` et `DISCORD_OAUTH_PROFILE` ne servent plus à connecter Achilléa ; `TEST_GUILD_ID`, `BOT_OWNER_ID` |
 | PostgreSQL Supabase | `DATABASE_URL` (recommandé) ; les cinq variables `DATABASE_*` historiques restent un repli                                                      |
-| API et sessions     | `API_ADMIN_TOKEN`, `JWT_SECRET_KEY`, `RANKED_INTERNAL_SECRET`                                                                                   |
+| API et sessions     | `API_ADMIN_TOKEN`, `JWT_SECRET_KEY`, `RANKED_INTERNAL_SECRET` ; les sondes admin utilisent uniquement `API_ADMIN_TOKEN` (aucun bearer Discord) |
 | Redis               | `REDIS_HOST`, `REDIS_PORT`                                                                                                                      |
-| Origins             | `WEBSITE_URL`, `PUBLIC_API_URL`, `OAUTH_CALLBACK_BASE_URL`, `WEB_ALLOWED_ORIGINS`, `RANKED_ALLOWED_ORIGINS`, `RANKED_PUBLIC_URL`                |
+| Origins             | `WEBSITE_URL`, `PUBLIC_API_URL`, `UNIFIED_API_URL`, `OAUTH_CALLBACK_BASE_URL`, `WEB_ALLOWED_ORIGINS`, `RANKED_ALLOWED_ORIGINS`, `RANKED_PUBLIC_URL` |
 | Storage Supabase    | `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_STORAGE_BUCKET`, `SUPABASE_PRIVATE_STORAGE_BUCKET`, `SUPABASE_SIGNED_URL_TTL`                  |
 
-`API_HOST=127.0.0.1`, `API_PORT=4000`, `RANKED_HOST=127.0.0.1`, `RANKED_PORT=4002`,
+`API_HOST=127.0.0.1`, `API_PORT=4000`, `UNIFIED_API_HOST=127.0.0.1`, `UNIFIED_API_PORT=8800`,
+`RANKED_HOST=127.0.0.1`, `RANKED_PORT=4002`,
 `SOCKET_HOST=127.0.0.1`, `SOCKET_PORT=4005`, `NODE_ENV=production` et `RANKED_ENTRY` sont
 fixés par l'unité versionnée, pas par le fichier secret. Cela empêche les trois ports amont
 de contourner Nginx en écoutant sur l'interface publique. En production, `RANKED_ENTRY`
@@ -101,8 +105,10 @@ service suffit à revenir en arrière.
 
 `achillea-auth` (GoTrue dédié, port 8824) est arrêté et désactivé : son schéma
 `auth` ne contenait qu'un utilisateur et aucun appel `/auth/v1/` n'est jamais
-arrivé. L'authentification d'Achilléa est un JWT maison signé par l'API, pas
-GoTrue.
+arrivé. Better Auth/Rose Griffon est l'unique propriétaire de la connexion et
+du callback Discord. Après cette session, la passerelle du site émet seulement
+un JWT Achilléa borné à l'API/ranked ; le contrat (émetteur, audience, durée,
+cookie) est partagé entre `@rosegriffon/achillea-core` et `@rosegriffon/auth`.
 
 
 ## Configuration publique du navigateur

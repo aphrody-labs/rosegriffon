@@ -1,9 +1,8 @@
 import type { ButtonBuilder, ButtonInteraction } from "discord.js";
 import { ActionRowBuilder, MessageFlags } from "discord.js";
 import type { Client } from "@aphrody/discordx";
-import { ButtonComponent } from "@aphrody/discordx";
 
-import { Discord, Injectable } from "@/decorators";
+import { ButtonComponent, Discord, Injectable } from "@/decorators";
 import { User } from "@/entities";
 import { Database } from "@/services";
 import { createMemberHistoryEmbed } from "@/utils/functions";

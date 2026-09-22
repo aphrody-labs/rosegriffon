@@ -13,8 +13,10 @@ export const ACHILLEA_SCHEMA = "achillea" as const;
 
 export function getAchilleaDatabaseUrl(): string {
 	return (
-		process.env["ACHILLEA_DATABASE_URL"] ||
 		process.env["DATABASE_URL"] ||
+		process.env["ROSE_GRIFFON_DATABASE_URL"] ||
+		process.env["RG_DATABASE_URL"] ||
+		process.env["ACHILLEA_DATABASE_URL"] ||
 		// Une seule base : le schéma `achillea` vit dans `rg`.
 		"postgresql://postgres:postgres@localhost:5432/rg"
 	);

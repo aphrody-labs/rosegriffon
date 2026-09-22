@@ -19,7 +19,7 @@ import {
 	DEFAULT_K_FACTOR,
 	progressiveEloDelta,
 } from "@rosegriffon/achillea-core";
-import { computeSeriesOutcome } from "../src/services/tournamentRules";
+import { computeSeriesOutcome } from "@rosegriffon/achillea-core";
 import { MatchFormat } from "../src/utils/enums";
 
 type CliOpts = { apply: boolean; limit: number | null; verbose: boolean };

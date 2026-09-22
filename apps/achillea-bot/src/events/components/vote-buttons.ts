@@ -1,10 +1,9 @@
 import { RequestContext } from "@mikro-orm/core";
 import type { ButtonInteraction } from "discord.js";
 import type { Client } from "@aphrody/discordx";
-import { ButtonComponent } from "@aphrody/discordx";
 
 import { generalConfig } from "@/configs";
-import { Discord, Injectable } from "@/decorators";
+import { ButtonComponent, Discord, Injectable } from "@/decorators";
 import { User, VoteProposal } from "@/entities";
 import { Database, VotingService } from "@/services";
 import { followUpWithErrorEmbed, resolveDependency } from "@/utils/functions";

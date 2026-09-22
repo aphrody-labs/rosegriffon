@@ -1,25 +1,20 @@
 import { Context, Middleware } from "@tsed/common";
 import { Unauthorized } from "@tsed/exceptions";
+import type { Request } from "express";
 
-import { SESSION_COOKIE_NAME, verifySessionToken } from "@/auth";
-import { UserService } from "@/services";
-import { resolveDependency } from "@/utils/functions";
+import { urlsConfig } from "@/configs";
 
 @Middleware()
 export class CookieAuthorize {
-	private readonly userServicePromise = resolveDependency(UserService);
-
 	async use(@Context() ctx: Context) {
-		const userService = await this.userServicePromise;
-		const token = ctx.request.cookies?.[SESSION_COOKIE_NAME];
-		if (!token) throw new Unauthorized("Not authenticated");
-		try {
-			const user = verifySessionToken(token);
-			const userData = await userService.syncWebUser(user.id);
-			if (!userData) throw new Unauthorized("Missing user");
-			ctx.set("user", await userService.toDTO(userData, user.avatar ?? "", user.sim ?? 0));
-		} catch (err: any) {
-			throw new Unauthorized(`${err.message === "Missing user" ? err.message : "Invalid Token"}`);
-		}
+		const request = ctx.request as unknown as Request;
+		const headers: Record<string, string> = { accept: "application/json" };
+		if (request.headers.cookie) headers.cookie = request.headers.cookie;
+		if (request.headers.authorization) headers.authorization = request.headers.authorization;
+		const response = await fetch(`${urlsConfig.unifiedApi}/v1/auth/me`, { headers });
+		if (!response.ok) throw new Unauthorized("Not authenticated");
+		const body = await response.json() as { user?: unknown };
+		if (!body.user) throw new Unauthorized("Not authenticated");
+		ctx.set("user", body.user);
 	}
 }

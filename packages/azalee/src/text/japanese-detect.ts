@@ -2,7 +2,7 @@
  * Détection et nettoyage de texte japonais brut issu du jeu.
  *
  * Helpers purs (aucun I/O, aucune dépendance) partagés par le glossaire du
- * wiki et par le CLI (`translate`, `glossary-rebuild`).
+ * wiki et par le CLI (`translate`).
  */
 
 /**

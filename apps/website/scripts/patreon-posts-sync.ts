@@ -9,7 +9,7 @@
  * Usage : bun scripts/patreon-posts-sync.ts [--limit N] [--dry-run]
  */
 
-import { createClient } from "@supabase/supabase-js";
+import { createPostgresClient } from "@rosegriffon/db/service";
 
 const PATREON_API = "https://www.patreon.com/api/oauth2/v2";
 
@@ -45,18 +45,11 @@ const limit = limitArg ? Number.parseInt(limitArg.split("=")[1] || "0", 10) : nu
 
 const TOKEN = process.env.PATREON_CREATOR_ACCESS_TOKEN ?? process.env.PATREON_ACCESS_TOKEN;
 const CAMPAIGN_ID = process.env.PATREON_CAMPAIGN_ID;
-const SUPABASE_URL = String(process.env.SUPABASE_URL);
-const SERVICE_ROLE = String(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 if (!TOKEN) throw new Error("PATREON_CREATOR_ACCESS_TOKEN manquant");
 if (!CAMPAIGN_ID) throw new Error("PATREON_CAMPAIGN_ID manquant");
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-	throw new Error("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY manquants");
-}
-
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
-	auth: { persistSession: false },
-});
+if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL manquante");
+const db = createPostgresClient();
 
 function stripHtml(html: string | null, max = 500): string | null {
 	if (!html) return null;
@@ -119,7 +112,7 @@ async function upsertBatch(posts: PatreonPost[]): Promise<void> {
 		return;
 	}
 
-	const { error } = await supabase
+	const { error } = await db
 		.from("patreon_post_events")
 		.upsert(rows, { onConflict: "patreon_post_id", ignoreDuplicates: false });
 	if (error) throw error;

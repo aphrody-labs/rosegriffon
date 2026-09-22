@@ -1,6 +1,6 @@
 /**
  * Types du schéma masterdata d'Inazuma Eleven Cross (extrait du dump IL2CPP).
- * Source de vérité : `data/masterdata-schema.json` (153 tables, 1215 colonnes typées,
+ * Source de vérité : `src/data/masterdata-schema.generated.ts` (153 tables, 1215 colonnes typées,
  * références FK + héritage résolus) et `data/enums.json` (214 enums).
  *
  * Le jeu sert ses VALEURS via un serveur protégé par anti-triche (récupération

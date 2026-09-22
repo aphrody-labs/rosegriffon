@@ -86,6 +86,7 @@ export const manifestPath = resolve(repositoryRoot, "infra/achillea/services.jso
 
 const expectedPorts = new Map([
 	["api", 4000],
+	["unified-api", 8800],
 	["ranked", 4002],
 	["socket-io", 4005],
 ]);

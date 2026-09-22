@@ -16,7 +16,7 @@
  */
 
 import { loadAllDropRates } from "../src/parsers/drop-rates.ts";
-import { createSupabaseAdapter } from "../src/push-adapter.ts";
+import { createPostgresAdapter } from "../src/push-adapter.ts";
 
 const rows = loadAllDropRates();
 
@@ -44,7 +44,7 @@ if (records.length === 0) {
 	process.exit(1);
 }
 
-const db = createSupabaseAdapter();
+const db = createPostgresAdapter();
 const { error } = await db.upsert("inagle_drop_rates", records, "id");
 await db.close();
 
