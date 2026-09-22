@@ -74,7 +74,9 @@ export const authController = new Elysia({ prefix: "/auth" })
 		body: t.Object({ id: t.Optional(t.String({ minLength: 1 })), betterAuthUserId: t.Optional(t.String({ minLength: 1 })), username: t.Optional(t.Nullable(t.String())), avatar: t.Optional(t.Nullable(t.String())) }),
 		response: {
 			200: t.Object({ token: t.String(), expiresIn: t.Number(), user: t.Object({ id: t.String(), username: t.Nullable(t.String()), avatar: t.Nullable(t.String()) }) }),
+			400: t.Object({ message: t.Literal("Identity is required") }),
 			401: t.Object({ message: t.Literal("Internal authentication required") }),
+			409: t.Object({ message: t.Literal("Discord account is not linked") }),
 			503: t.Object({ message: t.Literal("Session authentication unavailable") }),
 		},
 	})
