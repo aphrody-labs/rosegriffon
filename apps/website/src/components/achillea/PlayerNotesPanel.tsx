@@ -89,7 +89,11 @@ export function PlayerNotesPanel({
 	const [content, setContent] = useState<string>("");
 	const [submitting, setSubmitting] = useState<boolean>(false);
 
-	const client = useMemo(() => createAchilleaClient({ credentials: "include" }), []);
+	// Staff notes live on the unified RG API; the ranked bot API has no such route.
+	const client = useMemo(() => createAchilleaClient({
+		baseUrl: "https://api.rosegriffon.fr/v1/achillea",
+		credentials: "include",
+	}), []);
 
 	const loadNotes = async () => {
 		setLoading(true);

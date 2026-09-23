@@ -47,6 +47,7 @@ export const adminController = new Elysia({ prefix: "/admin" })
 			community: { tournamentsOngoing, clansPending, orgsPending, castEventsOpen: 0 },
 			ranked: { activeMatches: Number(matches?.active ?? 0), contestedMatches: Number(matches?.contested ?? 0), finishedToday: Number(matches?.finishedToday ?? 0), matchesToday: Number(matches?.today ?? 0), totalPlayers },
 			audit24h: 0,
+			generatedAt: new Date().toISOString(),
 		};
 	}, {
 		response: { 200: t.Any() },

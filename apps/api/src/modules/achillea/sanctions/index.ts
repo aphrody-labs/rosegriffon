@@ -29,12 +29,20 @@ export const sanctionController = new Elysia({ prefix: "/sanctions" })
 	.post("/:id/revoke", async ({ db, headers, params: { id }, body }) => {
 		const actor = await session(headers);
 		if (!actor) return status(401, { message: "Authentication required" as const });
+		const user = await db.selectFrom("user").select("role").where("id", "=", actor.id).executeTakeFirst();
+		if (!user || user.role < 2) return status(403, { message: "Administrator role required" as const });
 		const row = await SanctionService.revoke(db, id, actor.id, body.reason);
 		return row ? row : status(404, { message: "Sanction not found" as const });
-	}, { params: t.Object({ id: t.String() }), body: t.Object({ reason: t.Optional(t.String()) }), response: { 200: SanctionModel.sanction, 401: SanctionModel.unauthorized, 404: t.Object({ message: t.Literal("Sanction not found") }) } })
+	}, { params: t.Object({ id: t.String() }), body: t.Object({ reason: t.Optional(t.String()) }), response: { 200: SanctionModel.sanction, 401: SanctionModel.unauthorized, 403: t.Object({ message: t.Literal("Administrator role required") }), 404: t.Object({ message: t.Literal("Sanction not found") }) } })
 	.post("/:id/appeal", async ({ db, headers, params: { id }, body }) => {
 		const actor = await session(headers);
 		if (!actor) return status(401, { message: "Authentication required" as const });
+		const [sanction, user] = await Promise.all([
+			db.selectFrom("sanction").select("user_id").where("id", "=", id).executeTakeFirst(),
+			db.selectFrom("user").select("role").where("id", "=", actor.id).executeTakeFirst(),
+		]);
+		if (!sanction) return status(404, { message: "Sanction not found" as const });
+		if (sanction.user_id !== actor.id && (user?.role ?? 0) < 2) return status(403, { message: "Sanction ownership required" as const });
 		const row = await SanctionService.appeal(db, id, actor.id, body.message.trim());
 		return row ? row : status(404, { message: "Sanction not found" as const });
-	}, { params: t.Object({ id: t.String() }), body: t.Object({ message: t.String({ minLength: 3 }) }), response: { 200: SanctionModel.sanction, 401: SanctionModel.unauthorized, 404: t.Object({ message: t.Literal("Sanction not found") }) } });
+	}, { params: t.Object({ id: t.String() }), body: t.Object({ message: t.String({ minLength: 3 }) }), response: { 200: SanctionModel.sanction, 401: SanctionModel.unauthorized, 403: t.Object({ message: t.Literal("Sanction ownership required") }), 404: t.Object({ message: t.Literal("Sanction not found") }) } });
