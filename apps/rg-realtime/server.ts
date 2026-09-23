@@ -42,9 +42,6 @@ function matches(sub: Subscriber, event: RealtimeEvent): boolean {
 	if (sub.table !== event.table || sub.schema !== event.schema) return false;
 	if (!sub.filter) return true;
 	const row = event.new ?? event.old;
-	// Un événement tronqué ne porte que les identifiants : on le laisse passer,
-	// le client rechargera de toute façon.
-	if (event.truncated) return true;
 	return String(row?.[sub.filter.column] ?? "") === sub.filter.value;
 }
 
@@ -67,7 +64,7 @@ async function listen(): Promise<void> {
 				const safeEvent = publicEvent(event);
 				if (!safeEvent) return;
 				for (const sub of subscribers) {
-					if (matches(sub, event)) sub.send(safeEvent);
+					if (matches(sub, safeEvent)) sub.send(safeEvent);
 				}
 			});
 			await client.query(`LISTEN ${CHANNEL}`);
@@ -111,6 +108,13 @@ const server = Bun.serve({
 		if (!table) return new Response("parametre `table` requis", { status: 400, headers: cors });
 		const schema = url.searchParams.get("schema") ?? "public";
 		if (!isPublicSubscription(schema, table)) return new Response("table non publique", { status: 403, headers: cors });
+		const rawFilter = url.searchParams.get("filter");
+		const filter = parseFilter(rawFilter);
+		if (rawFilter && !filter) return new Response("filtre invalide", { status: 400, headers: cors });
+		if ((table === "profiles" && filter && filter.column !== "id") ||
+			(table === "settings" && filter)) {
+			return new Response("filtre non public", { status: 403, headers: cors });
+		}
 
 		let sub: Subscriber;
 		let cleanup = () => {};
@@ -127,7 +131,7 @@ const server = Bun.serve({
 				sub = {
 					table,
 					schema,
-					filter: parseFilter(url.searchParams.get("filter")),
+					filter,
 					send: (event) => write(`data: ${JSON.stringify(event)}\n\n`),
 					close: () => {
 						try {
