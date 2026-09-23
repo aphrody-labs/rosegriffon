@@ -269,7 +269,7 @@ export async function runDiscordChannelScan(): Promise<{ success: boolean; error
 		};
 
 		// Écriture du rapport sur le disque en utilisant Bun.write (API native rapide)
-		const reportPath = "/home/ubuntu/niers/data/discord-channels-scan.json";
+		const reportPath = "/home/ubuntu/nie/data/discord-channels-scan.json";
 		const reportContent = JSON.stringify({ stats, channels: results }, null, 2);
 		
 		await Bun.write(reportPath, reportContent);

@@ -75,8 +75,6 @@ export interface DependancesIpc {
 	catalogue: () => { taches: string[]; schedules: Record<string, string> };
 	/** Lance une tâche. Renvoie `null` si le nom est inconnu du démon. */
 	lancerTache: (nom: string) => Promise<{ success: boolean; error?: string }> | null;
-	/** Recherche sémantique — repris du TCP IPC existant, à l'identique. */
-	queryRag?: (question: string) => Promise<unknown>;
 	/** Publication d'une annonce Discord (l'équivalent local de `POST :3006/announce`). */
 	annoncer?: (charge: Record<string, unknown>) => Promise<{ ok: boolean; detail?: string }>;
 }
@@ -179,13 +177,6 @@ export function demarrerIpcUnix(deps: DependancesIpc): PontIpc {
 				}
 				const resultat = await deps.annoncer(requete);
 				return { success: resultat.ok, error: resultat.ok ? undefined : resultat.detail };
-			}
-
-			case "query_rag": {
-				if (!deps.queryRag || typeof requete.question !== "string") {
-					return { success: false, error: "Question manquante.", code: "requete_invalide" };
-				}
-				return { success: true, results: await deps.queryRag(requete.question) };
 			}
 
 			default: {

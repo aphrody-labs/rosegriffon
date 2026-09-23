@@ -104,7 +104,7 @@ export async function crawlXRadar(
 		const html = await page.content();
 		const { mkdir, writeFile } = await import("node:fs/promises");
 		const { join } = await import("node:path");
-		const snapDir = join("/home/ubuntu/niers/data/radar", radarId);
+		const snapDir = join("/home/ubuntu/nie/data/radar", radarId);
 		await mkdir(snapDir, { recursive: true });
 		await writeFile(join(snapDir, "page.html"), html);
 		console.log(`[Crawl X Radar] Snapshot saved: ${snapDir}/page.html`);

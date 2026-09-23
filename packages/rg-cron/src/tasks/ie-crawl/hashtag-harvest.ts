@@ -30,12 +30,10 @@
 import { XClient, XSession, type Tweet } from "@aphrody-code/x";
 import { createBunSql } from "@rosegriffon/db/bun-sql";
 import type { SQL } from "bun";
-import { ingestSources, type RagSource } from "./rag-store-local";
 import {
 	compterImages,
 	porteUneImage,
 	tweetToRow,
-	urlTweet,
 	type DBTweetRow,
 	type MediaItem,
 } from "./tweet-row";
@@ -70,9 +68,6 @@ const DELAI_ENTRE_REQUETES_MS = 1500;
  * main, ce qui ferait passer le run pour un blocage.
  */
 const TIMEOUT_RECHERCHE_MS = 25_000;
-
-/** Timeout de l'ingestion RAG (facultative, ne doit jamais retenir le run). */
-const TIMEOUT_RAG_MS = 120_000;
 
 /**
  * Les deux produits de recherche X sont balayés puis DÉDOUBLONNÉS par id :
@@ -131,8 +126,6 @@ export interface OptionsRecolte {
 	limite?: number;
 	/** Simulation : interroge X, n'écrit rien (ni base, ni disque). */
 	dry?: boolean;
-	/** Désactive l'ingestion RAG (activée par défaut). */
-	sansRag?: boolean;
 }
 
 interface LigneCampagne {
@@ -272,35 +265,6 @@ function cleCurseur(requete: string, produit: Produit): string {
 	return `${requete} [${produit}]`;
 }
 
-function rowToRagSource(row: DBTweetRow, slug: string): RagSource {
-	const username = row.author_username || "unknown";
-	const displayName = row.author_name || username;
-	const url = urlTweet(username, row.id);
-	return {
-		sourceId: `tweet-${row.id}`,
-		kind: "tweet",
-		raw: JSON.stringify({
-			id: row.id,
-			text: row.text,
-			author_username: username,
-			author_name: displayName,
-			created_at: row.created_at,
-			metrics: row.metrics,
-			media: row.media,
-			url,
-		}),
-		title: `Tweet de ${displayName} (@${username})`,
-		url,
-		meta: {
-			author_username: username,
-			author_name: displayName,
-			date: row.created_at,
-			source: "x-campagne",
-			campagne: slug,
-		},
-	};
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Récolte
 // ─────────────────────────────────────────────────────────────────────────────
@@ -312,7 +276,7 @@ function rowToRagSource(row: DBTweetRow, slug: string): RagSource {
  *                pour ne rien écrire.
  */
 export async function crawlHashtagCampaigns(options: OptionsRecolte = {}): Promise<StatsRecolte> {
-	const { slug, limite = MAX_TWEETS_PAR_CAMPAGNE, dry = false, sansRag = false } = options;
+	const { slug, limite = MAX_TWEETS_PAR_CAMPAGNE, dry = false } = options;
 	const sql = createBunSql();
 	const details: StatsCampagne[] = [];
 
@@ -348,7 +312,7 @@ export async function crawlHashtagCampaigns(options: OptionsRecolte = {}): Promi
 		const client = new XClient(session);
 
 		for (const campagne of campagnes) {
-			details.push(await recolterCampagne(sql, client, campagne, limite, dry, sansRag));
+			details.push(await recolterCampagne(sql, client, campagne, limite, dry));
 		}
 
 		const totalRattachements = details.reduce((n, d) => n + d.rattachements, 0);
@@ -384,8 +348,7 @@ async function recolterCampagne(
 	client: XClient,
 	campagne: LigneCampagne,
 	limite: number,
-	dry: boolean,
-	sansRag: boolean
+	dry: boolean
 ): Promise<StatsCampagne> {
 	const stats: StatsCampagne = {
 		slug: campagne.slug,
@@ -604,20 +567,6 @@ async function recolterCampagne(
 		`[Campagnes X] ${campagne.slug} : ${stats.tweetsUpsert} tweet(s) upsert, ${stats.rattachements} rattachement(s), ${stats.imagesRehebergees} image(s) ré-hébergée(s) dont ${stats.imagesTelechargees} nouvelle(s)${ignoresMasques > 0 ? `, ${ignoresMasques} post(s) masqué(s) laissé(s) intact(s)` : ""}.`
 	);
 
-	// 4) Ingestion RAG — EN DERNIER et sous son propre try/catch : le RAG est un
-	// confort, il ne doit jamais faire échouer une récolte réussie.
-	if (!sansRag && lignesTweets.length > 0) {
-		try {
-			const sources = lignesTweets.map((r) => rowToRagSource(r, campagne.slug));
-			const ing = await avecDelaiMax(ingestSources(sources), TIMEOUT_RAG_MS, "ingestion RAG");
-			console.log(
-				`[Campagnes X] ${campagne.slug} : RAG ${ing.chunks} chunk(s) (backend=${ing.backend}).`
-			);
-		} catch (err) {
-			console.warn(`[Campagnes X] ${campagne.slug} : ingestion RAG ignorée —`, message(err));
-		}
-	}
-
 	return stats;
 }
 
@@ -779,7 +728,6 @@ function lireOptions(argv: readonly string[]): OptionsRecolte {
 		slug: valeur("--campagne"),
 		limite: Number.isFinite(limiteBrute) && limiteBrute > 0 ? limiteBrute : undefined,
 		dry: argv.includes("--dry"),
-		sansRag: argv.includes("--sans-rag"),
 	};
 }
 
@@ -795,7 +743,6 @@ if (import.meta.main) {
 				"  --campagne <slug>  ne traite que cette campagne (défaut : toutes les actives)",
 				"  --limite <n>       plafond de posts retenus par campagne (défaut : 600)",
 				"  --dry              simulation : interroge X, n'écrit ni en base ni sur disque",
-				"  --sans-rag         n'ingère pas les posts dans le RAG",
 			].join("\n")
 		);
 		process.exit(0);

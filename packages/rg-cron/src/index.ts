@@ -15,12 +15,6 @@ import { recolterCreationsDiscord } from "./tasks/campagnes-discord";
 import { revaliderCreationsInstagram } from "./tasks/campagnes-instagram";
 import { relayerCampagnesDiscord } from "./tasks/campagnes-relais-discord";
 import {
-	runRagSync,
-	queryRag,
-	ragGroundedQuery,
-	ingestWikiCorpus,
-} from "./tasks/ie-crawl/rag-index";
-import {
 	triggerPublishScheduled,
 	triggerPatreonRefresh,
 	triggerPatreonReminders,
@@ -207,8 +201,6 @@ const DELAI_TACHE_DEFAUT_MS = 30 * 60_000;
 const DELAIS_TACHES_MS: Record<string, number> = {
 	"website:qa": 2 * 3600_000,
 	crawl: 4 * 3600_000,
-	rag: 2 * 3600_000,
-	"rag:wiki": 2 * 3600_000,
 	"db:sync": 2 * 3600_000,
 	"discord:backfill": 4 * 3600_000,
 	"discord:scan": 3600_000,
@@ -392,31 +384,12 @@ if (indexRun >= 0) {
 		await executeTask("crawl", runIeCrawl);
 	} else if (task === "website:qa" || task === "web:qa") {
 		await executeTask("website:qa", runWebsiteQa);
-	} else if (task === "rag") {
-		await executeTask("rag", runRagSync);
 	} else if (task === "x" || task === "twitter" || task === "x:timelines") {
 		// UNIQUEMENT le dernier post d'`@Azalee_IE`. C'est la seule veille qui doit
 		// être fraîche : c'est elle qui alimente l'annonce Discord du bot Azalée.
 		await executeTask("x", () => crawlTwitter({ comptes: ["Azalee_IE"], parCompte: 1 }));
 	} else if (task === "x-search" || task === "x:search") {
 		await executeTask("x-search", crawlTwitterSearch);
-	} else if (task === "rag:wiki" || task === "rag-wiki") {
-		await executeTask("rag:wiki", () => ingestWikiCorpus());
-	} else if (task === "query") {
-		const question = args.slice(taskIdx + 1).join(" ");
-		if (!question) {
-			console.error("❌ Veuillez spécifier une question sémantique.");
-		} else {
-			const results = await queryRag(question);
-			console.log(`\n🔍 Résultats RAG pour : "${question}"\n`);
-			for (const res of results) {
-				console.log(`[Score: ${res.score.toFixed(4)}] ${res.title} (${res.type})`);
-				console.log(`URL: ${res.url}`);
-				console.log(`Date: ${res.date}`);
-				console.log(`Extrait: ${res.text.slice(0, 300)}...\n`);
-				console.log("------------------------------------------------------------------");
-			}
-		}
 	} else if (task === "publish") {
 		await executeTask("publish", triggerPublishScheduled);
 	} else if (task === "github-publish" || task === "gh-publish") {
@@ -534,7 +507,7 @@ if (indexRun >= 0) {
 		await executeTask("achillea:weekly-payout", runAchilleaWeeklyPayout);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, website:qa, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, sync:achillea, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, website:qa, x, x-search, x:campagnes, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, sync:achillea, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, all.`
 		);
 	}
 	process.exit(0);
@@ -840,7 +813,6 @@ const server = Bun.serve({
 				cdn: syncCdnAssets,
 				crawl: runIeCrawl,
 				"website:qa": runWebsiteQa,
-				rag: runRagSync,
 				publish: triggerPublishScheduled,
 				"github-publish": triggerGithubPublishWorkflow,
 				patreon: triggerPatreonRefresh,
@@ -944,21 +916,7 @@ Bun.listen({
 		async data(socket, data) {
 			try {
 				const payload = JSON.parse(data.toString());
-				if (payload.cmd === "query_rag" && payload.question) {
-					if (payload.web) {
-						// Réponse unifiée : vectoriel local + grounding web live (bxc).
-						const grounded = await ragGroundedQuery(payload.question, {
-							web: true,
-							webMaxResults: payload.webMaxResults ?? 3,
-						});
-						socket.write(
-							JSON.stringify({ success: true, results: grounded.sources, grounded }) + "\n"
-						);
-					} else {
-						const results = await queryRag(payload.question);
-						socket.write(JSON.stringify({ success: true, results }) + "\n");
-					}
-				} else if (payload.cmd === "health") {
+				if (payload.cmd === "health") {
 					socket.write(JSON.stringify({ success: true, uptime: process.uptime(), metrics }) + "\n");
 				} else {
 					socket.write(JSON.stringify({ success: false, error: "Commande inconnue" }) + "\n");
@@ -1138,7 +1096,6 @@ demarrerPontBot({
 	metriques: () => metrics,
 	telemetrie: getDiscordTelemetry,
 	executer: executeTask,
-	queryRag,
 });
 
 console.log(`📣 Serveur HTTP d'annonces Discord à l'écoute sur le port ${ANNOUNCE_PORT}`);

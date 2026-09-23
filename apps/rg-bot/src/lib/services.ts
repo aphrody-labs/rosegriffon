@@ -3,8 +3,8 @@
  * joindre.
  *
  * ── POURQUOI CE FICHIER ────────────────────────────────────────────────────
- * Le bot était la seule surface Discord d'un monorepo qui expose DIX services
- * en boucle locale. Chaque commande qui voulait en joindre un refaisait le même
+ * Le bot était la seule surface Discord d'un monorepo qui expose plusieurs
+ * services en boucle locale. Chaque commande qui voulait en joindre un refaisait le même
  * travail dans son coin : un `fetch` sans délai d'expiration, une URL en dur, un
  * message d'erreur différent pour la même panne. Résultat, une commande pouvait
  * rester bloquée jusqu'à ce que Discord invalide son jeton (3 s pour la
@@ -14,28 +14,20 @@
  * systemd et sous quelle URL publique ; et une seule fonction sait appeler,
  * réessayer, abandonner et expliquer.
  *
- * ── PORTS : MESURÉS, PAS DEVINÉS ───────────────────────────────────────────
- * Les dix ports ci-dessous ont été sondés sur le VPS le 13/8/2026 et répondent
- * tous 200. Ils sont surchargeables par variable d'environnement, parce qu'un
- * poste de développement n'a pas la même topologie que le VPS.
+ * ── PORTS : ALIGNÉS SUR LE CATALOGUE D'INFRASTRUCTURE ──────────────────────
+ * Les ports et unités reprennent `aphrody-infra/config/service-catalog.json`,
+ * seule source de vérité de la topologie du VPS. Ils sont surchargeables par
+ * variable d'environnement, parce qu'un poste de développement n'a pas la même
+ * topologie que le VPS.
  *
  * L'API de données Azalée est un montage de `rg-api` : il n'y a plus de daemon
  * headless ni de port dédié à superviser.
- *
- * ⚠ Le serveur MCP (:8808) figure dans le registre pour la SUPERVISION
- * uniquement. Le bot ne l'appelle pas : sa portée d'écriture s'ouvre avec
- * `RG_MCP_ADMIN_TOKEN`, qui équivaut à un accès SSH — le relayer derrière une
- * commande Discord reviendrait à ouvrir un shell à qui sait taper `/`. Le bot
- * parle donc directement aux services que le MCP enveloppe.
  */
 
 /** Identifiants stables des services. Sert de clé partout ailleurs. */
 export type NomService =
 	| "rg-api"
-	| "rag"
-	| "mcp"
 	| "cdn"
-	| "cdn-variantes"
 	| "storage"
 	| "realtime"
 	| "wiki"
@@ -78,41 +70,14 @@ export const SERVICES: Readonly<Record<NomService, DescriptionService>> = {
 		unite: "rg-api.service",
 		role: "API Elysia + Kysely et montage /v1/azalee",
 	},
-	rag: {
-		nom: "rag",
-		titre: "RAG unifié",
-		base: local(8806, "RAG_URL"),
-		sante: "/health",
-		publique: publique("RAG_PUBLIC_URL", "https://rag.rosegriffon.fr"),
-		unite: "rg-rag-embed.service",
-		role: "recherche sémantique et index vectoriel unifiés",
-	},
-	mcp: {
-		nom: "mcp",
-		titre: "MCP",
-		base: local(8808, "MCP_URL"),
-		sante: "/health",
-		publique: publique("MCP_PUBLIC_URL", "https://mcp.rosegriffon.fr"),
-		unite: "rg-mcp.service",
-		role: "supervision et outils d'administration bornés",
-	},
 	cdn: {
 		nom: "cdn",
 		titre: "CDN",
-		base: local(8804, "CDN_API_URL"),
+		base: local(8801, "CDN_API_URL"),
 		sante: "/health",
 		publique: publique("CDN_URL", "https://cdn.rosegriffon.fr"),
 		unite: "rg-cdn.service",
 		role: "images servies et téléversées",
-	},
-	"cdn-variantes": {
-		nom: "cdn-variantes",
-		titre: "Variantes CDN",
-		base: local(8805, "CDN_VARIANTS_URL"),
-		sante: "/health",
-		publique: publique("CDN_URL", "https://cdn.rosegriffon.fr"),
-		unite: "cdn-variants.service",
-		role: "redimensionnement et conversion webp en cache disque",
 	},
 	storage: {
 		nom: "storage",
@@ -138,7 +103,7 @@ export const SERVICES: Readonly<Record<NomService, DescriptionService>> = {
 		base: local(3004, "WEBSITE_INTERNAL_URL"),
 		sante: "/api/health",
 		publique: publique("AZALEE_URL", "https://azalee.rosegriffon.fr"),
-		unite: "website-web.service",
+		unite: "rg-website.service",
 		role: "le wiki `/wiki` de l'application Website unifiée",
 	},
 	site: {
@@ -147,7 +112,7 @@ export const SERVICES: Readonly<Record<NomService, DescriptionService>> = {
 		base: local(3004, "WEBSITE_INTERNAL_URL"),
 		sante: "/api/health",
 		publique: publique("WEBSITE_URL", "https://rosegriffon.fr"),
-		unite: "website-web.service",
+		unite: "rg-website.service",
 		role: "l'application Next du site principal",
 	},
 } as const;
@@ -378,8 +343,7 @@ export async function sonderServices(
 
 /**
  * Réduit la charge d'une sonde à une ligne. Les sondes ne renvoient pas la même
- * chose (`{ok, chunks}`, `{ok, cpkFiles}`, une spécification OpenAPI entière
- * pour PostgREST) : on ne garde que les scalaires courts, et jamais plus de
+ * chose (`{ok, cpkFiles}`, `{ok, uptime}`, une page HTML) : on ne garde que les scalaires courts, et jamais plus de
  * trois, sinon l'embed devient illisible.
  */
 function resumerSonde(texte: string): string | null {

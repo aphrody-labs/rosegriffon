@@ -10,7 +10,7 @@ import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-const DATA_ROOT = "/home/ubuntu/niers/data/level5.co.jp/inazuma";
+const DATA_ROOT = "/home/ubuntu/nie/data/level5.co.jp/inazuma";
 
 interface NewsItem {
 	id: string;

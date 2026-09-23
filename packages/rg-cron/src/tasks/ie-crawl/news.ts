@@ -10,7 +10,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
 
-const DATA_ROOT = "/home/ubuntu/niers/data/inazuma.jp/victory-road";
+const DATA_ROOT = "/home/ubuntu/nie/data/inazuma.jp/victory-road";
 
 async function safeGoto(page: Page, url: string, timeout = 30000): Promise<unknown> {
 	return Promise.race([

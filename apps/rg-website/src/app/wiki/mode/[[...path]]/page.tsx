@@ -58,10 +58,10 @@ type Mode = {
  * Racine des données du jeu — même convention que le reste de l'app (`DATA_PATH`), pour qu'un
  * déplacement du dump ne demande pas de toucher au code.
  */
-const CATALOGUE = path.join(process.env.DATA_PATH ?? "/home/ubuntu/niers/data", "modes.json");
+const CATALOGUE = path.join(process.env.DATA_PATH ?? "/home/ubuntu/nie/data", "modes.json");
 
 /** Dossier des exports de contenu, un fichier par mode (`<slug>.json`). */
-const CONTENUS = path.join(process.env.DATA_PATH ?? "/home/ubuntu/niers/data", "mode-contenu");
+const CONTENUS = path.join(process.env.DATA_PATH ?? "/home/ubuntu/nie/data", "mode-contenu");
 
 /** Le contenu des fichiers d'un mode, tel que l'exporte `niers mode contenu <slug>`. */
 type Contenu = {
@@ -186,7 +186,7 @@ type EcranRendu = {
 async function lireEcransRendus(slug: string): Promise<EcranRendu[]> {
 	if (!/^[a-z0-9-]+$/.test(slug)) return [];
 	const dossier = path.join(
-		process.env.DATA_PATH ?? "/home/ubuntu/niers/data",
+		process.env.DATA_PATH ?? "/home/ubuntu/nie/data",
 		"mode-tex",
 		slug,
 		"screens",

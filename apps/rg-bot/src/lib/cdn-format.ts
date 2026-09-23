@@ -12,7 +12,9 @@
  * et rien n'est deviné dans les commandes.
  *
  * ── CE QUI A ÉTÉ MESURÉ LE 13/8/2026 (et fonde chaque constante) ────────────
- * Largeurs servies — `GET http://127.0.0.1:8805/health` :
+ * Largeurs servies — `GET http://127.0.0.1:8805/health` (service `cdn-variants`,
+ * depuis retiré de la pile RG ; la topologie courante est dans
+ * `aphrody-infra/config/service-catalog.json`) :
  *   {"ok":true,"cacheRoot":"/var/cache/cdn-variants","widths":[200,400,800,1600],"quality":78}
  * Surfaces acceptées par le service de variantes — `apps/cdn-variants/server.ts`
  * refuse tout ce qui ne commence pas par `dx11/` ou `g4tx/` (404), et nginx ne
@@ -524,14 +526,6 @@ export interface SanteCdn {
 	assetsManifest?: { bytes?: number; etag?: string } | null;
 }
 
-/** Santé de `cdn-variants.service` telle qu'il la renvoie sur `/health`. */
-export interface SanteVariantes {
-	ok?: boolean;
-	cacheRoot?: string;
-	widths?: number[];
-	quality?: number;
-}
-
 /**
  * Lignes décrivant le CDN d'origine, à partir de SA charge de santé réelle
  * (`{"ok":true,"storage":"/var/www/cdn/images","assetsManifest":null}`).
@@ -547,22 +541,6 @@ export function decrireSanteCdn(charge: SanteCdn | null | undefined): string[] {
 			: "Manifeste d'assets : aucun (les assets du jeu passent par les CPK, pas par un manifeste)"
 	);
 	return lignes;
-}
-
-/**
- * Lignes décrivant le service de variantes, à partir de SA charge de santé réelle
- * (`{"ok":true,"cacheRoot":"/var/cache/cdn-variants","widths":[200,400,800,1600],"quality":78}`).
- */
-export function decrireSanteVariantes(charge: SanteVariantes | null | undefined): string[] {
-	if (!charge) {
-		return ["Sonde muette."];
-	}
-	const largeurs = Array.isArray(charge.widths) && charge.widths.length > 0 ? charge.widths : null;
-	return [
-		`Largeurs servies : ${largeurs ? largeurs.map((l) => `\`${l}\``).join(" · ") : "non annoncées"}`,
-		`Qualité WebP : ${typeof charge.quality === "number" ? charge.quality : "inconnue"}`,
-		`Cache disque : \`${charge.cacheRoot ?? "inconnu"}\``,
-	];
 }
 
 /**

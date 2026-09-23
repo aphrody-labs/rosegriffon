@@ -9,7 +9,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
 
-const DATA_ROOT = "/home/ubuntu/niers/data/discord";
+const DATA_ROOT = "/home/ubuntu/nie/data/discord";
 
 interface DiscordMessage {
 	id: string;

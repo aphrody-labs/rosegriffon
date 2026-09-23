@@ -24,7 +24,7 @@ Le flux part des binaires bruts du jeu (extraits de Steam via iecode) et finit d
 │  IECODE.Core/Formats (CRILAYLA, @UTF, G4MD/G4MG/G4TX, cfg.bin/RDBN, HCA/ADX)   │
 │  FormatCatalog.cs (31 formats, magics + offsets) ──export-knowledge──▶ niers   │
 └───────────────────────────────┬──────────────────────────────────────────────┘
-                                 │ corpus parsé → /home/ubuntu/niers/data (DATA_PATH)
+                                 │ corpus parsé → /home/ubuntu/nie/data (DATA_PATH)
                                  │ (cfg.bin.json + JSON pré-traités, PAS un dump brut)
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -44,7 +44,7 @@ Le flux part des binaires bruts du jeu (extraits de Steam via iecode) et finit d
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ azalee (Next 16, apps/website, self-host VPS :3004) — wiki + cron              │
-│  /home/ubuntu/niers/var/mirror.sqlite  (miroir canonique, chemin épinglé)      │
+│  /home/ubuntu/nie/var/mirror.sqlite  (miroir canonique, chemin épinglé)      │
 │  packages/azalee/src/db/sqlite-client.ts + apps/website/src/lib/wiki-service.ts ──▶ SSR wiki │
 │  cron rg-cron : inagle push → publisher miroir → RAG (ie-crawl/zukan remap)   │
 └──────────────────────────────────────────────────────────────────────────────┘
@@ -116,7 +116,7 @@ Arborescence clé (`iecode/src/IECODE.Core/`) :
 
 ### 1.5 Flow data headless (`@rosegriffon/iecode-pipeline`)
 
-Unifie **acquire** (steam-sync : download depots + dump CPK) + **parse/serve** (délégué à `@rosegriffon/inagle`, ~50 cfg.bin, 12 domaines, 6000+ persos / 2900+ skills — **non dupliqué en C#**), gardé par le **buildid Steam** (idempotence via `.build-snapshot.json`). API : `accumulate()` (check build → download+dump si update → corpus), `exportCorpus()` (chaque domaine → `<domaine>.json` + `corpus.json`), `serve()` (HTTP inagle headless), `getRemoteBuildId()`. CLI `iecode-data accumulate|export|serve|version`. Données de dev : `/home/ubuntu/niers/data` (corpus parsé, **PAS** un dump Steam brut). `@rosegriffon/iecode-steam-sync` pilote le CLI natif (`syncApp`/`listDepots`) + scrape store via `@aphrody-code/bxc`. Packages annexes : `iecode-cdn` (résolveur G4TX→PNG lossless pour `cdn.rosegriffon.fr/dx11/menu/**`), `iecode-runtime-harness` (exécution live headless — RE mémoire uniquement, **pas requis** par le pipeline data), `menu-render` (renderer React pixel-perfect des écrans menu depuis menu-layout.json), `iecode-inagle`, `iecode-config`.
+Unifie **acquire** (steam-sync : download depots + dump CPK) + **parse/serve** (délégué à `@rosegriffon/inagle`, ~50 cfg.bin, 12 domaines, 6000+ persos / 2900+ skills — **non dupliqué en C#**), gardé par le **buildid Steam** (idempotence via `.build-snapshot.json`). API : `accumulate()` (check build → download+dump si update → corpus), `exportCorpus()` (chaque domaine → `<domaine>.json` + `corpus.json`), `serve()` (HTTP inagle headless), `getRemoteBuildId()`. CLI `iecode-data accumulate|export|serve|version`. Données de dev : `/home/ubuntu/nie/data` (corpus parsé, **PAS** un dump Steam brut). `@rosegriffon/iecode-steam-sync` pilote le CLI natif (`syncApp`/`listDepots`) + scrape store via `@aphrody-code/bxc`. Packages annexes : `iecode-cdn` (résolveur G4TX→PNG lossless pour `cdn.rosegriffon.fr/dx11/menu/**`), `iecode-runtime-harness` (exécution live headless — RE mémoire uniquement, **pas requis** par le pipeline data), `menu-render` (renderer React pixel-perfect des écrans menu depuis menu-layout.json), `iecode-inagle`, `iecode-config`.
 
 ### 1.6 Capacités réelles vs gaps, et exploitable par niers
 
@@ -130,24 +130,24 @@ Unifie **acquire** (steam-sync : download depots + dump CPK) + **parse/serve** (
 - **G4MG sans `.g4md`** : impossible par construction (headerless) ; `ParseMeshes` lève `NotSupportedException` explicite.
 - **G4SK** : offsets « unknown/confusing », parse heuristique (hiérarchie d'os partielle).
 - **`dump-gamedata`** ne couvre que ~7 types (inagle couvre tout le reste).
-- Les binaires bruts (`.cpk`/`.g4mg`) sont **ABSENTS du VPS** (`/home/ubuntu/niers/data` = corpus parsé) → tout RE additionnel sur G4MG/Player champs interdit de stub spéculatif à l'aveugle.
+- Les binaires bruts (`.cpk`/`.g4mg`) sont **ABSENTS du VPS** (`/home/ubuntu/nie/data` = corpus parsé) → tout RE additionnel sur G4MG/Player champs interdit de stub spéculatif à l'aveugle.
 
 **Incertitudes signalées** : G4MG n'expose que le 1er layout vertex quand `VLayoutCount` > attributs de la 1re table (limite assumée dans le code) ; plusieurs champs de headers G4TX/G4SK restent `Unknown*`.
 
-**Déjà exploité côté niers** (`/home/ubuntu/niers/crates/nie-formats/`) : crates Rust pour `crilayla, cpk, cfgbin, g4md, g4mg, g4pk, g4sk, g4tx, nxtch` ; `nie-seed/src/formats.rs` réimplémente le catalogue iecode en table `FormatDef` (magic + doc path) sourcée sur `FormatDetector.cs` et les parsers Level-5/Criware. La boucle RE est donc déjà câblée — le décodeur CRILAYLA (bitstream fibonacci LZSS, copie depuis la fin), les offsets G4MD/G4TX/NXTCH et la clé `0x1717E18E` sont directement portables (cf. §4 Recoupements).
+**Déjà exploité côté niers** (`/home/ubuntu/nie/crates/nie-formats/`) : crates Rust pour `crilayla, cpk, cfgbin, g4md, g4mg, g4pk, g4sk, g4tx, nxtch` ; `nie-seed/src/formats.rs` réimplémente le catalogue iecode en table `FormatDef` (magic + doc path) sourcée sur `FormatDetector.cs` et les parsers Level-5/Criware. La boucle RE est donc déjà câblée — le décodeur CRILAYLA (bitstream fibonacci LZSS, copie depuis la fin), les offsets G4MD/G4TX/NXTCH et la clé `0x1717E18E` sont directement portables (cf. §4 Recoupements).
 
-Fichiers de référence (absolus) : `/home/ubuntu/rg/iecode/src/IECODE.Core/Formats/FormatCatalog.cs`, `.../Formats/Criware/CriFs/Compression/CriLayla.cs`, `.../Formats/Level5/G4mgParser.cs`, `.../Formats/Level5/G4mdParser.cs`, `.../Native/NativeCrypto.cs` (clé `0x1717E18E`), `.../Steam/Content/SteamDepotDownloader.cs`, `/home/ubuntu/rg/iecode/packages/core/src/index.ts` (pont Bun), `/home/ubuntu/rg/iecode/src/IECODE.CLI/Program.cs` (CLI), `/home/ubuntu/rg/iecode/packages/pipeline/src/index.ts`, et côté niers `/home/ubuntu/niers/crates/nie-formats/` + `/home/ubuntu/niers/crates/nie-seed/src/formats.rs`.
+Fichiers de référence (absolus) : `/home/ubuntu/rg/iecode/src/IECODE.Core/Formats/FormatCatalog.cs`, `.../Formats/Criware/CriFs/Compression/CriLayla.cs`, `.../Formats/Level5/G4mgParser.cs`, `.../Formats/Level5/G4mdParser.cs`, `.../Native/NativeCrypto.cs` (clé `0x1717E18E`), `.../Steam/Content/SteamDepotDownloader.cs`, `/home/ubuntu/rg/iecode/packages/core/src/index.ts` (pont Bun), `/home/ubuntu/rg/iecode/src/IECODE.CLI/Program.cs` (CLI), `/home/ubuntu/rg/iecode/packages/pipeline/src/index.ts`, et côté niers `/home/ubuntu/nie/crates/nie-formats/` + `/home/ubuntu/nie/crates/nie-seed/src/formats.rs`.
 
 ---
 
 ## 2. inagle — parse / calcul des données
 
-API universelle de données de jeu pour IEVR. Package `@rosegriffon/inagle` v1.2.0 (`packages/inagle`), **package émetteur** (`tsc` → `dist/` + subpath exports `./*`, son `dist/` doit exister sinon `rg-cron` et `azalee-web` cassent). Bun-natif (`Bun.file`, `Bun.Glob.scanSync`, `bun:sqlite`). Rôle : transformer le dump cfg.bin du jeu (`/home/ubuntu/niers/data`) en entités typées, puis pousser vers Supabase d'où azalee lit via un miroir SQLite embarqué.
+API universelle de données de jeu pour IEVR. Package `@rosegriffon/inagle` v1.2.0 (`packages/inagle`), **package émetteur** (`tsc` → `dist/` + subpath exports `./*`, son `dist/` doit exister sinon `rg-cron` et `azalee-web` cassent). Bun-natif (`Bun.file`, `Bun.Glob.scanSync`, `bun:sqlite`). Rôle : transformer le dump cfg.bin du jeu (`/home/ubuntu/nie/data`) en entités typées, puis pousser vers Supabase d'où azalee lit via un miroir SQLite embarqué.
 
 ### 2.1 Flux de données global
 
 ```
-/home/ubuntu/niers/data (DATA_PATH)              cfg.bin.json + JSON pré-traités
+/home/ubuntu/nie/data (DATA_PATH)              cfg.bin.json + JSON pré-traités
    └─ common/gamedata/<cat>/*.cfg.bin.json    (sources brutes du dump)
    └─ common/text/<locale>/*.cfg.bin.json     (localisation)
    └─ all-gamedata/*.json                      (JSON pré-extraits : growth_tables, exp_table, starSignCharaInfo…)
@@ -160,13 +160,13 @@ API universelle de données de jeu pour IEVR. Package `@rosegriffon/inagle` v1.2
    Supabase Postgres  (tables inagle_*)
         │
         ▼   `nie-miroir.timer` / `miroir-inagle.sh`
-   /home/ubuntu/niers/var/mirror.sqlite  (MIROIR SQLite canonique, publié atomiquement)
+   /home/ubuntu/nie/var/mirror.sqlite  (MIROIR SQLite canonique, publié atomiquement)
         │
         ▼   packages/azalee/src/db/sqlite-client.ts + apps/website/src/lib/wiki-service.ts
    Wiki azalee (SSR Next 16, apps/website, :3004)
 ```
 
-`DATA_ROOT` est résolu dans `src/core/paths.ts` : `DATA_PATH` env (azalee `.env` = `/home/ubuntu/niers/data`) → sinon `packages/inagle/data` → sinon `cwd/data`. Les chemins par catégorie sont dans `PATHS` ; les fichiers connus (versionnés) dans `FILES`. `resolveGameDataFile(relDir, baseName)` choisit la **version la plus haute** par tri numérique segment-par-segment (regex `^<base>_\d[\d.]*\.cfg\.bin\.json$`, qui empêche les collisions de préfixe comme `chara_param` captant `chara_param_table_config`).
+`DATA_ROOT` est résolu dans `src/core/paths.ts` : `DATA_PATH` env (azalee `.env` = `/home/ubuntu/nie/data`) → sinon `packages/inagle/data` → sinon `cwd/data`. Les chemins par catégorie sont dans `PATHS` ; les fichiers connus (versionnés) dans `FILES`. `resolveGameDataFile(relDir, baseName)` choisit la **version la plus haute** par tri numérique segment-par-segment (regex `^<base>_\d[\d.]*\.cfg\.bin\.json$`, qui empêche les collisions de préfixe comme `chara_param` captant `chara_param_table_config`).
 
 Option `cfgbin-db` (`src/core/cfgbin-db.ts`) : une DB SQLite `~/data/cache/cfgbin.sqlite` (~2.3 Go, produite par le toolkit iecode) remplace les loose `.cfg.bin.json` pour l’extraction/dev. Le runtime tente PostgreSQL puis SQLite ; la lecture de fichiers JSON libres est désactivée par défaut et ne s’active qu’avec `IEVR_ALLOW_LOOSE_JSON=1`. Les fichiers texte restent soumis au garde-fou `IEVR_CFGBIN_DB_TEXT=1` tant que le parseur SQLite local n’est pas corrigé.
 
@@ -236,7 +236,7 @@ Déclenché par cron : `packages/cron/src/tasks/db.ts` → `runInaglePush()` = `
 
 ### 2.8 Consommation par azalee + cron
 
-- **azalee n'importe PAS le runtime de parsing** (`createInagleService`) — il importe seulement les **types** et constantes (`apps/website/src/lib/wiki-service.ts` : `import type { BaseCharacter, Item, Skill, Team }`, `ElementNames`, `CATEGORY_NAMES`, et le JSON `change_aura_skills.json`). La donnée vient des **tables `inagle_*`** lues via `packages/azalee/src/db/sqlite-client.ts` (miroir canonique `/home/ubuntu/niers/var/mirror.sqlite`, override `SQLITE_DB_PATH`) ou Supabase. `wiki-service.ts` est la couche d'accès (listes/filtres/getAura/getSkill…).
+- **azalee n'importe PAS le runtime de parsing** (`createInagleService`) — il importe seulement les **types** et constantes (`apps/website/src/lib/wiki-service.ts` : `import type { BaseCharacter, Item, Skill, Team }`, `ElementNames`, `CATEGORY_NAMES`, et le JSON `change_aura_skills.json`). La donnée vient des **tables `inagle_*`** lues via `packages/azalee/src/db/sqlite-client.ts` (miroir canonique `/home/ubuntu/nie/var/mirror.sqlite`, override `SQLITE_DB_PATH`) ou Supabase. `wiki-service.ts` est la couche d'accès (listes/filtres/getAura/getSkill…).
 - **cron** consomme inagle de deux façons : (a) exécute le push (`db.ts`) ; (b) importe des subpaths leaf (`@rosegriffon/inagle/zukan/order` pour `buildOrderMap`/`crawlZukanOrderPages`) et lit/écrit les tables `inagle_characters/inagle_skills/inagle_rag_chunks` pour le RAG et le remap zukan. Le `dist/` d'inagle doit exister (subpath exports) sinon `rg-cron` crash-loop.
 
 **Piège NULL `category_id`/`element_id`** : sur `inagle_skills`, `category_id` et `element_id` sont à **NULL** en base. La résolution se fait via les **colonnes texte FR** : `wiki-service.ts` filtre `query.eq("category", searchCat)` (ligne ~1497) après mapping `shoot/block/dribble/catch` → nom FR via `CATEGORY_NAMES`. À noter : pour les **auras** (`inagle_auras` etc.), `element_id` **est** peuplé et filtré via `.eq/.in("element_id", …)` avec `getElementIds()` (Néant mappe 0 ET 5) — spécifique aux auras, pas aux skills. Voir `docs/wiki-filters.md`.
@@ -390,11 +390,11 @@ Nombreuses tables `inagle_*` vides **volontairement** (features non livrées / s
 Liens inter-étages vérifiés entre les trois audits :
 
 - **iecode `FormatCatalog.cs` → niers `nie-seed/src/formats.rs`** : niers re-porte le catalogue iecode (magics + chemins de parser de référence) en table Rust `FormatDef`, sourcée sur `FormatDetector.cs` et les parsers Level-5/Criware. La clé XOR `0x1717E18E`, le décodeur CRILAYLA et les offsets G4MD/G4TX/NXTCH sont directement portables. `iecode export-knowledge` est le canal d'interop (JSON régénérable, non commité). La boucle RE niers est donc câblée sur les ancres de vérité iecode.
-- **iecode (extraction) → inagle (`/home/ubuntu/niers/data`)** : ce que iecode dump (cfg.bin clair issu des CPK) est exactement ce qu'inagle attend dans `DATA_PATH`. `/home/ubuntu/niers/data` est un **corpus parsé**, pas un dump Steam brut — cohérent des deux côtés (iecode §1.5 le dit, inagle §2.1 le confirme). L'option `cfgbin-db` d'inagle (`~/data/cache/cfgbin.sqlite`, ~2.3 Go) est **produite par le toolkit iecode** : pont concret entre les deux étages.
+- **iecode (extraction) → inagle (`/home/ubuntu/nie/data`)** : ce que iecode dump (cfg.bin clair issu des CPK) est exactement ce qu'inagle attend dans `DATA_PATH`. `/home/ubuntu/nie/data` est un **corpus parsé**, pas un dump Steam brut — cohérent des deux côtés (iecode §1.5 le dit, inagle §2.1 le confirme). L'option `cfgbin-db` d'inagle (`~/data/cache/cfgbin.sqlite`, ~2.3 Go) est **produite par le toolkit iecode** : pont concret entre les deux étages.
 - **inagle (cli-push) → Supabase (tables `inagle_*`)** : les tables `inagle_*` sont des projections écrasées par `cli-push.ts` (delete+reinsert) ; cohérent avec l'absence totale de FK Postgres entre elles (audit Supabase §3.4) et avec leur corrélation par champs métier (`internal_code`, `team_id`, `partner_ids`). Le piège `category_id`/`element_id = NULL` est constaté des deux côtés : décrit dans inagle (`wiki-service.ts` filtre via texte FR) et **mesuré** dans Supabase (`skills_null_catid=1002` sur 1 002 lignes). Triple confirmation avec CLAUDE.md.
 - **inagle (auras SQL) → PostgreSQL répartition** : `sheet_data.hissatsu` et les colonnes normalisées alimentent la répartition par sous-type (`inagle_keshins`, `inagle_souls`, `inagle_miximax`, `inagle_awakenings`, `inagle_mode_changes`, `inagle_auras`).
 - **cron ie-crawl → `inagle_rag_chunks`** : le RAG est alimenté par le cron, pas par cli-push. La répartition `source_kind` le prouve : `sqlite` 6 962 (miroir inagle embarqué côté azalee re-chunké), `tweet` 1 328, `json/doc/lua/ts/cfg` (sources iecode/docs). La dédup `(source_id, content_hash)` rend le crawl idempotent. La RPC `rag_hybrid_search` (HNSW + GIN fusionnés par RRF) est consommée par azalee.
-- **Supabase → azalee (miroir SQLite)** : `nie-miroir.timer` publie atomiquement `/home/ubuntu/niers/var/mirror.sqlite` depuis les tables `inagle_*`; azalee le lit via `lib/supabase/sqlite-client.ts` avec détection d'inode. Le test d'intégration inagle §2.9 vérifie l'alignement `COUNT(*) inagle_characters` (SQLite) ≥ parsé : cohérence bout-en-bout testée.
+- **Supabase → azalee (miroir SQLite)** : `nie-miroir.timer` publie atomiquement `/home/ubuntu/nie/var/mirror.sqlite` depuis les tables `inagle_*`; azalee le lit via `lib/supabase/sqlite-client.ts` avec détection d'inode. Le test d'intégration inagle §2.9 vérifie l'alignement `COUNT(*) inagle_characters` (SQLite) ≥ parsé : cohérence bout-en-bout testée.
 - **Idempotence par buildid** : iecode garde le pipeline par buildid Steam (`.build-snapshot.json`). Réserve cohérente des deux côtés : ce buildid **n'est pas propagé** jusqu'au RAG (`inagle_rag_chunks.buildid = NULL` partout, `rag_distinct_builds=0`).
 
 ## 5. Gaps / NON_FAIT agrégés
@@ -405,7 +405,7 @@ iecode :
 - G4MG sans `.g4md` compagnon : impossible par construction (headerless), `NotSupportedException` explicite.
 - G4SK : parse heuristique, hiérarchie d'os partielle (offsets `unknown/confusing`).
 - `dump-gamedata` ne couvre que ~7 types ; le reste est délégué à inagle.
-- Binaires bruts (`.cpk`/`.g4mg`) **absents du VPS** (`/home/ubuntu/niers/data` = corpus parsé) → pas de RE additionnel possible à l'aveugle.
+- Binaires bruts (`.cpk`/`.g4mg`) **absents du VPS** (`/home/ubuntu/nie/data` = corpus parsé) → pas de RE additionnel possible à l'aveugle.
 - G4MG n'expose que le 1er layout vertex si `VLayoutCount` > attributs de la 1re table (limite assumée) ; champs `Unknown*` résiduels dans G4TX/G4SK.
 
 inagle :

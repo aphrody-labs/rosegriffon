@@ -1,25 +1,21 @@
 /**
- * `/staff services` — l'état réel des dix services internes et des deux
- * applications Next servies par nginx.
+ * `/staff services` — l'état réel des services internes et des applications
+ * Next servies par nginx.
  *
  * ── CE QUE CETTE COMMANDE REMPLACE ─────────────────────────────────────────
- * Rien : il n'existait aucun moyen de savoir depuis Discord si `rag-api`, le
+ * Rien : il n'existait aucun moyen de savoir depuis Discord si l'API, le
  * CDN ou le stockage répondaient. La seule façon de le voir était d'ouvrir une
  * session SSH. Une panne d'un service se manifestait donc par une commande qui
- * « ne marche pas », sans jamais dire laquelle des dix pièces était tombée.
+ * « ne marche pas », sans jamais dire quelle pièce était tombée.
  *
  * ── TROIS SOUS-COMMANDES, TROIS QUESTIONS ──────────────────────────────────
- *   `etat`        — les dix, sondés EN PARALLÈLE (`sonderServices()`), avec la
+ *   `etat`        — tous, sondés EN PARALLÈLE (`sonderServices()`), avec la
  *                   latence, le détail rendu par la sonde et l'unité systemd à
  *                   regarder quand c'est rouge.
  *   `detail`      — un seul, en profondeur : rôle, base en boucle locale, URL
  *                   publique, sonde brute.
  *   `deploiement` — la version RÉELLEMENT servie par chaque application Next,
  *                   lue à la source (`state.json`, `live.env`, `RELEASE.json`).
- *
- * ⚠ Le serveur MCP figure dans le registre pour la SUPERVISION seule. Il est
- * sondé comme les autres, mais le bot ne lui envoie jamais de verbe : sa portée
- * d'écriture équivaut à un accès SSH.
  */
 import { Discord, Slash, SlashGroup, SlashOption } from "@rpbey/discordx";
 import {
@@ -185,11 +181,6 @@ export class StaffServicesCommand {
 							: `⚠ ${sonde!.erreur ?? "injoignable"}`,
 					}
 				);
-			if (nom === "mcp") {
-				pied(embed, {
-					note: "Supervision seule : le bot n'envoie jamais de verbe au MCP (portée d'écriture = accès SSH)",
-				});
-			}
 			await interaction.editReply({ embeds: [embed] });
 		} catch (err) {
 			await repondre(interaction, echec("Le service n'a pas répondu", messagePanne(err)));

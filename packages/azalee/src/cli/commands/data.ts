@@ -21,8 +21,8 @@ const REPO_ROOT = "/home/ubuntu/rg";
 const AZALEE_ENV = `${REPO_ROOT}/apps/website/.env`;
 /** Racine des dumps de jeu. */
 const DATA_ROOT_DEFAULT =
-	process.env.DATA_ROOT || process.env.DATA_PATH || "/home/ubuntu/niers/data";
-const NIERS_ROOT = process.env.NIERS_ROOT || "/home/ubuntu/niers";
+	process.env.DATA_ROOT || process.env.DATA_PATH || "/home/ubuntu/nie/data";
+const NIERS_ROOT = process.env.NIERS_ROOT || "/home/ubuntu/nie";
 const NIERS_MIRROR_PUBLISHER = `${NIERS_ROOT}/scripts/donnees/miroir-inagle.sh`;
 /** Âge maximal toléré pour le miroir SQLite, en heures. */
 const MIRROR_MAX_AGE_H = 48;

@@ -2,7 +2,8 @@
  * Noyau pur du CDN : chemins d'asset, variantes, modèles 3D, galerie.
  *
  * Toutes les valeurs de ce fichier viennent d'un relevé RÉEL du 13/8/2026 sur
- * `cdn.rosegriffon.fr`, `127.0.0.1:8804`, `127.0.0.1:8805` et
+ * `cdn.rosegriffon.fr`, `rg-cdn` (aujourd'hui `127.0.0.1:8801`), l'ancien service de
+ * variantes `127.0.0.1:8805` et
  * `127.0.0.1:8807/api/…` — aucune n'est inventée pour faire passer un test.
  * Aucun accès réseau n'est fait ici : les charges sont figées.
  */
@@ -24,7 +25,6 @@ import {
 	choisirTextureModele,
 	decoderEtatGalerie,
 	decrireSanteCdn,
-	decrireSanteVariantes,
 	encoderEtatGalerie,
 	estTypeImage,
 	estTypeModele,
@@ -493,22 +493,7 @@ describe("description des sondes de santé", () => {
 		expect(lignes[1]).toContain("2,0 Ko");
 	});
 
-	test("charge réelle de cdn-variants.service", () => {
-		// {"ok":true,"cacheRoot":"/var/cache/cdn-variants","widths":[200,400,800,1600],"quality":78}
-		const lignes = decrireSanteVariantes({
-			ok: true,
-			cacheRoot: "/var/cache/cdn-variants",
-			widths: [200, 400, 800, 1600],
-			quality: 78,
-		});
-		expect(lignes[0]).toContain("`1600`");
-		expect(lignes[1]).toContain("78");
-		expect(lignes[2]).toContain("/var/cache/cdn-variants");
-	});
-
 	test("une sonde muette ne fabrique aucune valeur", () => {
 		expect(decrireSanteCdn(null)).toEqual(["Sonde muette."]);
-		expect(decrireSanteVariantes(null)).toEqual(["Sonde muette."]);
-		expect(decrireSanteVariantes({ ok: true })[0]).toContain("non annoncées");
 	});
 });
