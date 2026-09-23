@@ -1,11 +1,24 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { SessionUserDTO } from "@rosegriffon/achillea-types/domain/user";
+import {
+	createContext,
+	type ReactNode,
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+} from "react";
+import { useAuth } from "@/contexts/auth-context";
 import { safeReturnUrl } from "./auth-session";
 import { createAchilleaClient } from "./client";
 
-export type AchilleaAuthStatus = "unknown" | "loading" | "authenticated" | "anonymous" | "error";
+export type AchilleaAuthStatus =
+	| "unknown"
+	| "loading"
+	| "authenticated"
+	| "anonymous"
+	| "error";
 
 export interface AchilleaAuthContextType {
 	user: SessionUserDTO | null;
@@ -18,7 +31,9 @@ export interface AchilleaAuthContextType {
 	refreshUser: () => Promise<void>;
 }
 
-const AchilleaAuthContext = createContext<AchilleaAuthContextType | undefined>(undefined);
+const AchilleaAuthContext = createContext<AchilleaAuthContextType | undefined>(
+	undefined,
+);
 
 /**
  * Session Achilléa DÉRIVÉE de la session Rose Griffon.
@@ -44,23 +59,37 @@ const AchilleaAuthContext = createContext<AchilleaAuthContextType | undefined>(u
  * `lib/achillea` — y compris des tests purs qui n'ont ni fenêtre ni URL de base.
  */
 export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
+	const {
+		user: account,
+		isLoading: accountLoading,
+		logout: logoutAccount,
+	} = useAuth();
 	const [user, setUser] = useState<SessionUserDTO | null>(null);
 	const [status, setStatus] = useState<AchilleaAuthStatus>("unknown");
 
-	const lireSession = useCallback(async (): Promise<boolean> => {
-		const client = createAchilleaClient({ credentials: "include" });
-		const res = await client.auth.me();
-		if (res.ok && res.value?.id) {
-			setUser(res.value);
-			setStatus("authenticated");
-			return true;
-		}
-		setUser(null);
-		setStatus("anonymous");
-		return false;
-	}, []);
+	const lireSession = useCallback(
+		async (isCurrent: () => boolean = () => true): Promise<boolean> => {
+			const client = createAchilleaClient({ credentials: "include" });
+			const res = await client.auth.me();
+			if (!isCurrent()) return false;
+			if (res.ok && res.value?.id) {
+				setUser(res.value);
+				setStatus("authenticated");
+				return true;
+			}
+			setUser(null);
+			setStatus("anonymous");
+			return false;
+		},
+		[],
+	);
 
 	const refreshUser = useCallback(async () => {
+		if (!account) {
+			setUser(null);
+			setStatus("anonymous");
+			return;
+		}
 		setStatus("loading");
 		try {
 			await lireSession();
@@ -68,15 +97,21 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 			setUser(null);
 			setStatus("error");
 		}
-	}, [lireSession]);
+	}, [account, lireSession]);
 
 	useEffect(() => {
 		let annule = false;
+		if (accountLoading) return;
+		if (!account) {
+			setUser(null);
+			setStatus("anonymous");
+			return;
+		}
 
 		const synchroniser = async () => {
 			setStatus("loading");
 			try {
-				if (await lireSession()) return;
+				if (await lireSession(() => !annule)) return;
 				if (annule) return;
 
 				// Pas de jeton e-sport : on le réclame. La passerelle répond `401`
@@ -92,7 +127,7 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 					cache: "no-store",
 				});
 				if (!reponse.ok || annule) return;
-				await lireSession();
+				await lireSession(() => !annule);
 			} catch {
 				if (!annule) {
 					setUser(null);
@@ -105,14 +140,23 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 		return () => {
 			annule = true;
 		};
-	}, [lireSession]);
+	}, [account?.id, accountLoading, lireSession]);
 
-	const login = useCallback((returnUrl = "/achillea") => {
-		// Une seule porte d'entrée. `safeReturnUrl` reste indispensable : un
-		// chemin non validé (`//ailleurs.test`, `/\\ailleurs.test`) transforme le
-		// formulaire de connexion en redirection ouverte.
-		window.location.assign(`/login?redirect=${encodeURIComponent(safeReturnUrl(returnUrl))}`);
-	}, []);
+	const login = useCallback(
+		(returnUrl = "/achillea") => {
+			if (account) {
+				window.location.assign("/settings?tab=connections");
+				return;
+			}
+			// Une seule porte d'entrée. `safeReturnUrl` reste indispensable : un
+			// chemin non validé (`//ailleurs.test`, `/\\ailleurs.test`) transforme le
+			// formulaire de connexion en redirection ouverte.
+			window.location.assign(
+				`/login?redirect=${encodeURIComponent(safeReturnUrl(returnUrl))}`,
+			);
+		},
+		[account],
+	);
 
 	const logout = useCallback(async () => {
 		try {
@@ -124,34 +168,34 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 		} finally {
 			setUser(null);
 			setStatus("anonymous");
-			// Un seul compte, une seule déconnexion : fermer la seule session
-			// e-sport laisserait le membre connecté partout ailleurs, ce qui est
-			// exactement le double état qu'on vient de supprimer. On appelle le
-			// point d'entrée HTTP de Better Auth plutôt que sa server action :
-			// celle-ci tire `next/headers`, donc tout le baril `lib/achillea`
-			// avec elle, jusque dans des tests purs.
-			await fetch("/api/auth/sign-out", { method: "POST" });
+			await logoutAccount();
 			window.location.assign("/");
 		}
-	}, []);
+	}, [logoutAccount]);
 
 	const value: AchilleaAuthContextType = {
 		user,
 		status,
-		isLoading: status === "loading" || status === "unknown",
+		isLoading: accountLoading || status === "loading" || status === "unknown",
 		isAuthenticated: status === "authenticated" && user !== null,
 		login,
 		logout,
 		refreshUser,
 	};
 
-	return <AchilleaAuthContext.Provider value={value}>{children}</AchilleaAuthContext.Provider>;
+	return (
+		<AchilleaAuthContext.Provider value={value}>
+			{children}
+		</AchilleaAuthContext.Provider>
+	);
 }
 
 export function useAchilleaAuth(): AchilleaAuthContextType {
 	const context = useContext(AchilleaAuthContext);
 	if (!context) {
-		throw new Error("useAchilleaAuth doit être utilisé dans un AchilleaAuthProvider");
+		throw new Error(
+			"useAchilleaAuth doit être utilisé dans un AchilleaAuthProvider",
+		);
 	}
 	return context;
 }

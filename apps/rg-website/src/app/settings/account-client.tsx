@@ -2,23 +2,23 @@
 
 import {
 	AccountAddressForm,
+	type AccountAddressValues,
 	AccountAvatarCard,
 	AccountConnections,
 	AccountDangerZone,
 	AccountEmailCard,
+	type AccountLinkedAccount,
 	AccountProfileForm,
+	type AccountProfileValues,
 	type AccountProviderConfig,
+	type AccountSession,
 	AccountSessions,
 	AccountShell,
-	type AccountAddressValues,
-	type AccountLinkedAccount,
-	type AccountProfileValues,
-	type AccountSession,
 	type AccountTabId,
 	TwoFactorCard,
 } from "@rosegriffon/ui";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
@@ -148,11 +148,15 @@ export function AccountClient({
 				});
 				const error = (res as { error?: { message?: string } | null })?.error;
 				if (error) {
-					throw new Error(error.message ?? "Erreur lors de la liaison Patreon.");
+					throw new Error(
+						error.message ?? "Erreur lors de la liaison Patreon.",
+					);
 				}
 			},
 			onRefresh: async () => {
-				const res = await fetch("/api/auth/patreon/refresh", { method: "POST" });
+				const res = await fetch("/api/auth/patreon/refresh", {
+					method: "POST",
+				});
 				if (!res.ok) {
 					// Le message de la route, pas son code : « HTTP 409 » ne dit pas à
 					// quelqu'un ce qu'il doit faire, « lie d'abord Discord » si.
@@ -162,7 +166,9 @@ export function AccountClient({
 				reload();
 			},
 			onUnlink: async () => {
-				const res = await fetch("/api/auth/patreon/disconnect", { method: "POST" });
+				const res = await fetch("/api/auth/patreon/disconnect", {
+					method: "POST",
+				});
 				if (!res.ok) {
 					throw new Error(await raisonHttp(res, "Dissociation impossible."));
 				}
@@ -189,7 +195,9 @@ export function AccountClient({
 									role={role}
 									// Sans pseudo, la page publique n'existe pas encore : le
 									// bouton ne s'affiche pas plutôt que de mener à un 404.
-									profileHref={username ? `/profil/${username}` : null}
+									profileHref={
+										username ? `/profil/${encodeURIComponent(username)}` : null
+									}
 									onUpload={uploadAvatar}
 								/>
 							</div>
@@ -203,10 +211,14 @@ export function AccountClient({
 								<section className="mt-6 rounded-xl border border-border bg-muted/20 p-4">
 									<h2 className="text-sm font-semibold">Espace Achilléa</h2>
 									<p className="mt-1 text-sm text-muted-foreground">
-										Le portefeuille et la compétition utilisent ce même compte Rose Griffon.
+										Le portefeuille et la compétition utilisent ce même compte
+										Rose Griffon.
 									</p>
 									<div className="mt-3 flex flex-wrap gap-3 text-sm font-medium">
-										<Link className="text-primary hover:underline" href="/achillea/wallet">
+										<Link
+											className="text-primary hover:underline"
+											href="/achillea/wallet"
+										>
 											Portefeuille ACH
 										</Link>
 										<Link
@@ -223,11 +235,15 @@ export function AccountClient({
 					id: "profile",
 				},
 				{
-					content: <AccountAddressForm values={address} onSubmit={updateAddress} />,
+					content: (
+						<AccountAddressForm values={address} onSubmit={updateAddress} />
+					),
 					id: "address",
 				},
 				{
-					content: <AccountConnections providers={providers} accounts={accounts} />,
+					content: (
+						<AccountConnections providers={providers} accounts={accounts} />
+					),
 					id: "connections",
 				},
 				{
@@ -254,14 +270,23 @@ export function AccountClient({
 									onChangement={reload}
 									actions={{
 										demarrer: async () => {
-											const { data, error } = await authClient.twoFactor.enable({});
+											const { data, error } = await authClient.twoFactor.enable(
+												{},
+											);
 											if (error || !data) {
-												throw new Error(error?.message ?? "Activation impossible.");
+												throw new Error(
+													error?.message ?? "Activation impossible.",
+												);
 											}
-											return { backupCodes: data.backupCodes, totpURI: data.totpURI };
+											return {
+												backupCodes: data.backupCodes,
+												totpURI: data.totpURI,
+											};
 										},
 										confirmer: async (code) => {
-											const { error } = await authClient.twoFactor.verifyTotp({ code });
+											const { error } = await authClient.twoFactor.verifyTotp({
+												code,
+											});
 											if (error) {
 												throw new Error(error.message ?? "Code refusé.");
 											}
@@ -269,13 +294,19 @@ export function AccountClient({
 										desactiver: async () => {
 											const { error } = await authClient.twoFactor.disable({});
 											if (error) {
-												throw new Error(error.message ?? "Désactivation impossible.");
+												throw new Error(
+													error.message ?? "Désactivation impossible.",
+												);
 											}
 										},
 										regenererCodes: async () => {
-											const { data, error } = await authClient.twoFactor.generateBackupCodes({});
+											const { data, error } =
+												await authClient.twoFactor.generateBackupCodes({});
 											if (error || !data) {
-												throw new Error(error?.message ?? "Impossible de régénérer les codes.");
+												throw new Error(
+													error?.message ??
+														"Impossible de régénérer les codes.",
+												);
 											}
 											return data.backupCodes;
 										},
@@ -323,7 +354,9 @@ export function AccountClient({
 									"Tes commandes en boutique restent, détachées de ton compte — une facture doit pouvoir être retrouvée.",
 								]}
 								onDelete={async () => {
-									const { error } = await authClient.deleteUser({ callbackURL: "/" });
+									const { error } = await authClient.deleteUser({
+										callbackURL: "/",
+									});
 									return { error: error?.message ?? null };
 								}}
 							/>

@@ -1,15 +1,12 @@
+import { createPostgresClient } from "@rosegriffon/db/service";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getServerUser } from "@/lib/auth-helpers";
-
-import { createPostgresClient } from "@rosegriffon/db/service";
-
-import type { Metadata } from "next";
 
 // Simple redirection vers l'espace du membre connecté : rien à indexer.
 export const metadata: Metadata = {
 	robots: { follow: false, index: false },
 };
-
 
 export default async function ProfilPage() {
 	const supabase = createPostgresClient();
@@ -26,7 +23,7 @@ export default async function ProfilPage() {
 		.single();
 
 	if (profile?.username) {
-		redirect(`/profil/${profile.username}`);
+		redirect(`/profil/${encodeURIComponent(profile.username)}`);
 	} else {
 		redirect("/settings");
 	}

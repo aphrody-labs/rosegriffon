@@ -1,14 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
 import { rankImagePath } from "@rosegriffon/achillea-core";
-import type { EnrichedUserDTO } from "@rosegriffon/achillea-types/domain/user";
 import type { PlayerCircuitProfile } from "@rosegriffon/achillea-types/domain/tournament";
+import type { EnrichedUserDTO } from "@rosegriffon/achillea-types/domain/user";
 import { ClanMemberRole } from "@rosegriffon/achillea-types/enums/clanMemberRole";
-import { UserAvatar } from "@/components/achillea/UserAvatar";
 import {
 	Badge,
 	Button,
@@ -23,20 +18,23 @@ import {
 	Skeleton,
 } from "@rosegriffon/ui";
 import {
-	Crown,
-	Star,
-	Trophy,
-	TrendingUp,
-	TrendingDown,
-	Pencil,
-	ExternalLink,
 	ArrowLeft,
 	ArrowRight,
-	ShieldAlert,
-	Loader2,
 	Check,
+	Crown,
+	ExternalLink,
+	Loader2,
+	Pencil,
+	ShieldAlert,
+	Star,
+	Trophy,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { FaTwitch, FaYoutube } from "react-icons/fa6";
+import { UserAvatar } from "@/components/achillea/UserAvatar";
+import { createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
 
 function winrate(wins?: number, losses?: number): string {
 	const total = (wins ?? 0) + (losses ?? 0);
@@ -71,6 +69,9 @@ export default function UserProfilePage({ id }: { id: string }) {
 	const [saveSuccess, setSaveSuccess] = useState(false);
 
 	const isOwnProfile = isAuthenticated && currentUser?.id === id;
+	const rgProfileUsername = (
+		profile as (EnrichedUserDTO & { rgProfileUsername?: string }) | null
+	)?.rgProfileUsername;
 
 	useEffect(() => {
 		let isMounted = true;
@@ -98,7 +99,7 @@ export default function UserProfilePage({ id }: { id: string }) {
 				if (circuitRes.ok && circuitRes.value) {
 					setCircuit(circuitRes.value);
 				}
-			} catch (err: unknown) {
+			} catch {
 				if (isMounted) {
 					setError("Erreur lors de la récupération du profil");
 				}
@@ -132,8 +133,8 @@ export default function UserProfilePage({ id }: { id: string }) {
 								...prev,
 								bio: bioInput.trim() || null,
 								twitchUrl: twitchInput.trim() || null,
-						  }
-						: null
+							}
+						: null,
 				);
 				setSaveSuccess(true);
 				setTimeout(() => {
@@ -209,6 +210,14 @@ export default function UserProfilePage({ id }: { id: string }) {
 								)}
 								{profile.username}
 							</h1>
+							{rgProfileUsername && (
+								<Link
+									href={`/profil/${encodeURIComponent(rgProfileUsername)}`}
+									className="text-sm font-medium text-primary hover:underline"
+								>
+									Voir le profil public Rose Griffon
+								</Link>
+							)}
 
 							{profile.clan && (
 								<Link
@@ -240,7 +249,10 @@ export default function UserProfilePage({ id }: { id: string }) {
 							</span>
 
 							{profile.hasYoutube && (
-								<span className="inline-flex items-center gap-1 text-red-500" title="YouTube lié">
+								<span
+									className="inline-flex items-center gap-1 text-red-500"
+									title="YouTube lié"
+								>
 									<FaYoutube className="size-4" />
 								</span>
 							)}
@@ -266,7 +278,18 @@ export default function UserProfilePage({ id }: { id: string }) {
 						)}
 
 						{isOwnProfile && (
-							<div className="pt-2">
+							<div className="flex flex-wrap gap-2 pt-2">
+								<Button
+									asChild
+									variant="outline"
+									size="sm"
+									className="gap-2 text-xs"
+								>
+									<Link href="/settings">
+										<Pencil className="size-3.5" />
+										Modifier mon compte
+									</Link>
+								</Button>
 								<Button
 									variant="outline"
 									size="sm"
@@ -274,7 +297,7 @@ export default function UserProfilePage({ id }: { id: string }) {
 									className="gap-2 text-xs"
 								>
 									<Pencil className="size-3.5" />
-									Modifier mon profil
+									Modifier mes infos e-sport
 								</Button>
 							</div>
 						)}
@@ -320,7 +343,7 @@ export default function UserProfilePage({ id }: { id: string }) {
 										{profile.ranked?.solo?.losses ?? 0} (
 										{winrate(
 											profile.ranked?.solo?.wins,
-											profile.ranked?.solo?.losses
+											profile.ranked?.solo?.losses,
 										)}
 										)
 									</div>
@@ -359,7 +382,7 @@ export default function UserProfilePage({ id }: { id: string }) {
 										{profile.ranked?.duo?.losses ?? 0} (
 										{winrate(
 											profile.ranked?.duo?.wins,
-											profile.ranked?.duo?.losses
+											profile.ranked?.duo?.losses,
 										)}
 										)
 									</div>
@@ -421,15 +444,23 @@ export default function UserProfilePage({ id }: { id: string }) {
 							{/* Grille stats circuit */}
 							<div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
 								<div className="p-3 rounded-lg bg-muted/30">
-									<div className="text-xl font-bold">{circuit.tournamentsPlayed}</div>
-									<div className="text-xs text-muted-foreground">Tournois joués</div>
+									<div className="text-xl font-bold">
+										{circuit.tournamentsPlayed}
+									</div>
+									<div className="text-xs text-muted-foreground">
+										Tournois joués
+									</div>
 								</div>
 								<div className="p-3 rounded-lg bg-muted/30">
-									<div className="text-xl font-bold text-amber-500">{circuit.wins}</div>
+									<div className="text-xl font-bold text-amber-500">
+										{circuit.wins}
+									</div>
 									<div className="text-xs text-muted-foreground">Titres</div>
 								</div>
 								<div className="p-3 rounded-lg bg-muted/30">
-									<div className="text-xl font-bold text-emerald-500">{circuit.podiums}</div>
+									<div className="text-xl font-bold text-emerald-500">
+										{circuit.podiums}
+									</div>
 									<div className="text-xs text-muted-foreground">Podiums</div>
 								</div>
 								<div className="p-3 rounded-lg bg-muted/30">
@@ -440,23 +471,33 @@ export default function UserProfilePage({ id }: { id: string }) {
 									<div className="text-xl font-bold font-mono">
 										{circuit.goalsScored}-{circuit.goalsConceded}
 									</div>
-									<div className="text-xs text-muted-foreground">Buts M - E</div>
+									<div className="text-xs text-muted-foreground">
+										Buts M - E
+									</div>
 								</div>
 								<div className="p-3 rounded-lg bg-muted/30">
 									<div className="text-xl font-bold font-mono">
 										{formatGoalAverage(circuit.goalAverage)}
 									</div>
-									<div className="text-xs text-muted-foreground">Moyenne de buts</div>
+									<div className="text-xs text-muted-foreground">
+										Moyenne de buts
+									</div>
 								</div>
 								<div className="p-3 rounded-lg bg-muted/30">
 									<div className="text-xl font-bold font-mono">
 										{circuit.bestStreak || "—"}
 									</div>
-									<div className="text-xs text-muted-foreground">Meilleure série</div>
+									<div className="text-xs text-muted-foreground">
+										Meilleure série
+									</div>
 								</div>
 								<div className="p-3 rounded-lg bg-muted/30">
-									<div className="text-xl font-bold">{circuit.bestRankLabel}</div>
-									<div className="text-xs text-muted-foreground">Record rang</div>
+									<div className="text-xl font-bold">
+										{circuit.bestRankLabel}
+									</div>
+									<div className="text-xs text-muted-foreground">
+										Record rang
+									</div>
 								</div>
 							</div>
 
@@ -479,7 +520,10 @@ export default function UserProfilePage({ id }: { id: string }) {
 											</thead>
 											<tbody className="divide-y divide-border/40">
 												{circuit.history.map((h) => (
-													<tr key={h.tournamentId} className="hover:bg-muted/20">
+													<tr
+														key={h.tournamentId}
+														className="hover:bg-muted/20"
+													>
 														<td className="px-4 py-3 font-medium">
 															<Link
 																href={`/achillea/tournaments/${h.tournamentId}`}
@@ -490,11 +534,14 @@ export default function UserProfilePage({ id }: { id: string }) {
 														</td>
 														<td className="px-4 py-3 text-muted-foreground text-xs">
 															{h.grandFinalAt
-																? new Date(h.grandFinalAt).toLocaleDateString("fr-FR", {
-																		day: "numeric",
-																		month: "short",
-																		year: "numeric",
-																  })
+																? new Date(h.grandFinalAt).toLocaleDateString(
+																		"fr-FR",
+																		{
+																			day: "numeric",
+																			month: "short",
+																			year: "numeric",
+																		},
+																	)
 																: "—"}
 														</td>
 														<td className="px-4 py-3 text-right font-semibold">
@@ -568,11 +615,12 @@ export default function UserProfilePage({ id }: { id: string }) {
 									Winrate :{" "}
 									{winrate(
 										profile.tournaments?.personalWins,
-										profile.tournaments?.personalLosses
+										profile.tournaments?.personalLosses,
 									)}
 								</span>
 								<span>
-									Moy. buts : {profile.tournaments?.goalsScoredAvg?.toFixed(1) ?? 0} M /{" "}
+									Moy. buts :{" "}
+									{profile.tournaments?.goalsScoredAvg?.toFixed(1) ?? 0} M /{" "}
 									{profile.tournaments?.goalsReceivedAvg?.toFixed(1) ?? 0} E
 								</span>
 							</div>
@@ -597,7 +645,9 @@ export default function UserProfilePage({ id }: { id: string }) {
 									<div className="text-lg font-bold">
 										{profile.interclans?.wins ?? 0}
 									</div>
-									<div className="text-xs text-muted-foreground">Victoires clan</div>
+									<div className="text-xs text-muted-foreground">
+										Victoires clan
+									</div>
 								</div>
 								<div className="p-2.5 rounded-lg bg-muted/20">
 									<div className="text-lg font-bold text-emerald-500">
@@ -618,11 +668,12 @@ export default function UserProfilePage({ id }: { id: string }) {
 									Winrate :{" "}
 									{winrate(
 										profile.interclans?.personalWins,
-										profile.interclans?.personalLosses
+										profile.interclans?.personalLosses,
 									)}
 								</span>
 								<span>
-									Moy. buts : {profile.interclans?.goalsScoredAvg?.toFixed(1) ?? 0} M /{" "}
+									Moy. buts :{" "}
+									{profile.interclans?.goalsScoredAvg?.toFixed(1) ?? 0} M /{" "}
 									{profile.interclans?.goalsReceivedAvg?.toFixed(1) ?? 0} E
 								</span>
 							</div>
@@ -637,7 +688,8 @@ export default function UserProfilePage({ id }: { id: string }) {
 					<DialogHeader>
 						<DialogTitle>Modifier mon profil</DialogTitle>
 						<DialogDescription>
-							Personnalise ta biographie et renseigne ta chaîne Twitch pour tes matchs castés.
+							Personnalise ta biographie et renseigne ta chaîne Twitch pour tes
+							matchs castés.
 						</DialogDescription>
 					</DialogHeader>
 
@@ -683,10 +735,18 @@ export default function UserProfilePage({ id }: { id: string }) {
 						>
 							Annuler
 						</Button>
-						<Button onClick={handleSaveProfile} disabled={saving} className="gap-2">
+						<Button
+							onClick={handleSaveProfile}
+							disabled={saving}
+							className="gap-2"
+						>
 							{saving && <Loader2 className="size-4 animate-spin" />}
 							{saveSuccess && <Check className="size-4 text-emerald-400" />}
-							{saving ? "Enregistrement..." : saveSuccess ? "Enregistré !" : "Enregistrer"}
+							{saving
+								? "Enregistrement..."
+								: saveSuccess
+									? "Enregistré !"
+									: "Enregistrer"}
 						</Button>
 					</DialogFooter>
 				</DialogContent>
