@@ -65,7 +65,7 @@ async function fetchOrders(userId: string): Promise<OrderRow[]> {
 export default async function OrdersPage() {
 	const user = await getServerUser();
 	if (!user) {
-		redirect("/login?next=/shop/commandes");
+		redirect("/login?redirect=/shop/commandes");
 	}
 
 	const orders = await fetchOrders(user.id);
