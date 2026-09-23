@@ -608,7 +608,7 @@ export async function crawlWebRecon(opts: WebReconOptions): Promise<WebReconResu
  * (renvoie {success} comme les autres crawlers, n'émet pas d'exception).
  */
 export async function crawlWebReconTask(
-	outDir = "/home/ubuntu/niers/data/inazuma.jp/victory-road/_recon/fr"
+	outDir = "/home/ubuntu/nie/data/inazuma.jp/victory-road/_recon/fr"
 ): Promise<{ success: boolean; pages?: number; endpoints?: number; error?: string }> {
 	try {
 		const res = await crawlWebRecon({ outDir });

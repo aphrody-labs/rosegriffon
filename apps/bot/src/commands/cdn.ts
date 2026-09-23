@@ -20,8 +20,8 @@
  * Un embed Discord fait chercher l'image par Discord ET par chaque client qui
  * ouvre le salon : servir l'original, c'est mettre 11 Mo sur le dos de tout le
  * monde pour une vignette. Toute image affichée ici passe donc par
- * `cdn-variants.service` (`?w=` parmi 200/400/800/1600, seules largeurs
- * annoncées par `GET :8805/health`).
+ * une variante `?w=` parmi 200/400/800/1600 (largeurs mesurées sur l'ancien
+ * service `cdn-variants`, retiré de la pile RG).
  *
  * ── DEUX PIÈGES VÉRIFIÉS, PAS SUPPOSÉS ─────────────────────────────────────
  *  1. `HEAD` est REFUSÉ par le décodeur live (405 sur `/dx11/…png` sans `?w=`)
@@ -71,13 +71,11 @@ import {
 	type EtatGalerie,
 	type LargeurVariante,
 	type SanteCdn,
-	type SanteVariantes,
 	bornerPage,
 	cheminCdnDepuisCpk,
 	choisirTextureModele,
 	decoderEtatGalerie,
 	decrireSanteCdn,
-	decrireSanteVariantes,
 	encoderEtatGalerie,
 	estTypeImage,
 	estTypeModele,
@@ -470,7 +468,7 @@ export class CdnCommand {
 				repondreSuggestions(interaction, () => suggererTextures(saisie(interaction))),
 		})
 		chemin: string,
-		// Les quatre seules largeurs déclinées par `cdn-variants.service` : toute
+		// Les quatre seules largeurs de variante acceptées : toute
 		// autre valeur serait de toute façon ramenée à la plus proche par le service.
 		@SlashChoice(...CHOIX_LARGEUR)
 		@SlashOption({
@@ -735,7 +733,7 @@ export class CdnCommand {
 
 	@Slash({
 		name: "etat",
-		description: "Santé du CDN et du service de variantes : largeurs servies, cache, latence",
+		description: "Santé du CDN : stockage, manifeste d'assets, latence",
 	})
 	async etat(interaction: ChatInputCommandInteraction) {
 		await interaction.deferReply();
@@ -751,7 +749,7 @@ export class CdnCommand {
 	/** Construit l'embed d'état, sondes comprises. */
 	private async rendreEtat(): Promise<{ embeds: EmbedBuilder[] }> {
 		const [sondes, sante, sonde] = await Promise.all([
-			sonderServices([SERVICES.cdn, SERVICES["cdn-variantes"]]),
+			sonderServices([SERVICES.cdn]),
 			this.santeCdn(),
 			this.sondeBoutEnBout(),
 		]);
@@ -769,10 +767,7 @@ export class CdnCommand {
 			const detail = resultat.ok
 				? `${etat} · ${resultat.latenceMs} ms`
 				: `${etat} · ${resultat.erreur ?? "cause inconnue"}`;
-			const lignes =
-				resultat.service.nom === "cdn"
-					? decrireSanteCdn(sante.cdn)
-					: decrireSanteVariantes(sante.variantes);
+			const lignes = decrireSanteCdn(sante);
 			embed.addFields({
 				name: `${resultat.service.titre} — ${resultat.service.unite ?? "sans unité"}`,
 				value: truncate([detail, ...lignes].join("\n"), 1000),
@@ -787,23 +782,13 @@ export class CdnCommand {
 		return { embeds: [embed] };
 	}
 
-	/** Charges de santé des deux services, telles qu'ils les renvoient. */
-	private async santeCdn(): Promise<{
-		cdn: SanteCdn | null;
-		variantes: SanteVariantes | null;
-	}> {
-		const lire = async <T>(nom: "cdn" | "cdn-variantes"): Promise<T | null> => {
-			try {
-				return await appelService<T>(nom, "/health", { tentatives: 1, delaiMs: 3_000 });
-			} catch {
-				return null;
-			}
-		};
-		const [cdn, variantes] = await Promise.all([
-			lire<SanteCdn>("cdn"),
-			lire<SanteVariantes>("cdn-variantes"),
-		]);
-		return { cdn, variantes };
+	/** Charge de santé de `rg-cdn`, telle qu'il la renvoie. */
+	private async santeCdn(): Promise<SanteCdn | null> {
+		try {
+			return await appelService<SanteCdn>("cdn", "/health", { tentatives: 1, delaiMs: 3_000 });
+		} catch {
+			return null;
+		}
 	}
 
 	/**

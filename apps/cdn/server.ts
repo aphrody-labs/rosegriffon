@@ -6,7 +6,7 @@ import { DEFAULT_CDN_ORIGIN } from "@rosegriffon/assets";
 // Serverless (Cloud Run) : binder 0.0.0.0 + lire $PORT (injecté par la plateforme).
 // `CDN_PORT` reste honoré pour le legacy/tests (CDN_PORT=0 → port éphémère) ;
 // `PORT` (convention Cloud Run) prime quand il est défini.
-const PORT = Number(process.env.PORT ?? process.env.CDN_PORT ?? 8804);
+const PORT = Number(process.env.PORT ?? process.env.CDN_PORT ?? 8801);
 const HOST = process.env.CDN_HOST ?? "0.0.0.0";
 // FS éphémère uniquement : tout write va sous os.tmpdir() (seul writable en lambda
 // / Cloud Run). Aucune persistance garantie — c'est best-effort par instance.

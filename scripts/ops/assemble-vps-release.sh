@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# Build exactly one immutable RG artifact. Activation is owned by aphrody-infra.
+# Build exactly one immutable RG artifact. Activation is owned by aphrody-infra
+# (scripts/atomic-deploy-rg.sh), which also owns the systemd units and the nginx
+# gateway packaged here: rg only contributes application code.
 commit_arg="${1:?usage: assemble-vps-release.sh FULL_GIT_SHA}"
 source_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+infra_root="$(realpath -m -- "${APHRODY_INFRA_ROOT:-$source_root/../aphrody-infra}")"
 releases_root="${RG_RELEASES_ROOT:-/srv/rg/releases}"
 catalog="${RG_CATALOG_PATH:-/usr/local/share/aphrody-infra/service-catalog.json}"
 website_env="${RG_WEBSITE_ENV_PATH:-/etc/rose-griffon/website.env}"
@@ -13,15 +16,48 @@ umask 027
 
 [[ "$commit_arg" =~ ^[0-9a-f]{40}$ ]] || { echo 'full Git SHA required' >&2; exit 2; }
 [[ -r "$catalog" ]] || { echo 'installed infra service catalog missing' >&2; exit 2; }
+[[ -d "$infra_root/systemd" && -f "$infra_root/nginx/rg/rg-production.conf" ]] || {
+  echo 'aphrody-infra checkout with systemd/ and nginx/rg/rg-production.conf required' >&2; exit 2;
+}
+# Units and routes are release content: they must be committed in aphrody-infra
+# so the artifact records exactly which infra revision it carries.
+infra_commit="$(git -C "$infra_root" rev-parse --verify HEAD^{commit})"
+git -C "$infra_root" diff --quiet HEAD -- systemd nginx/rg &&
+  [[ -z "$(git -C "$infra_root" ls-files --others --exclude-standard -- systemd nginx/rg)" ]] || {
+  echo 'aphrody-infra systemd/ or nginx/rg/ has uncommitted changes' >&2; exit 2;
+}
 [[ -f "$website_env" && "$(stat -c %a "$website_env")" = 600 ]] || {
   echo 'website build environment must exist with mode 0600' >&2; exit 2;
 }
 [[ -f "$build_env" && "$(stat -c %a "$build_env")" = 600 ]] || {
   echo 'private Bun install environment must exist with mode 0600' >&2; exit 2;
 }
-for env_file in \
-  /etc/rose-griffon/{website,rg-api,rg-cdn,rg-bot,rg-achillea-bot,rg-cron}.env \
-  /etc/rg-storage.env /etc/rg-realtime.env; do
+# Every EnvironmentFile= declared by a cataloged RG unit must already exist, 0600.
+env_list="$(python3 - "$catalog" "$infra_root/systemd" <<'PY'
+import json
+import pathlib
+import sys
+
+catalog = json.loads(pathlib.Path(sys.argv[1]).read_text())
+units = pathlib.Path(sys.argv[2])
+seen = set()
+for service in catalog['services']:
+    if not service['id'].startswith('rg-') or not service['unit'].endswith('.service'):
+        continue
+    path = units / service['unit']
+    if not path.is_file():
+        raise SystemExit(f"aphrody-infra unit missing: {service['unit']}")
+    for line in path.read_text().splitlines():
+        if line.startswith('EnvironmentFile='):
+            for env in line.split('=', 1)[1].split():
+                env = env.removeprefix('-')
+                if env not in seen:
+                    seen.add(env)
+                    print(env)
+PY
+)" || exit 2
+mapfile -t env_files <<< "$env_list"
+for env_file in "${env_files[@]}"; do
   [[ -f "$env_file" && "$(stat -c %a "$env_file")" = 600 ]] || {
     echo "required 0600 runtime environment missing: $env_file" >&2; exit 2;
   }
@@ -33,15 +69,12 @@ cd "$source_root"
 commit="$(git rev-parse --verify HEAD^{commit})"
 [[ "$commit" = "$commit_arg" ]] || { echo 'checkout HEAD differs from requested commit' >&2; exit 2; }
 git diff --quiet && git diff --cached --quiet || { echo 'tracked checkout changes must be committed first' >&2; exit 2; }
-git cat-file -e "$commit:infra/nginx/rg-production.conf" || {
-  echo 'rg-production.conf absent from requested commit' >&2; exit 2;
-}
 git cat-file -e "$commit:bun.lock" || { echo 'bun.lock absent from requested commit' >&2; exit 2; }
 [[ "$(realpath -m -- "$releases_root")" = /srv/rg/releases ]] || {
   echo 'release root must be /srv/rg/releases' >&2; exit 2;
 }
 install -d -m 0755 "$releases_root"
-install -d -m 0750 /srv/rg/shared/{website/cache,bot,cron}
+install -d -m 0750 /srv/rg/shared/{website/cache,bot,cron,achillea/logs,achillea/storage}
 destination="$releases_root/$commit"
 [[ ! -e "$destination" ]] || { echo 'release already exists; refusing to overwrite' >&2; exit 2; }
 stage="$(mktemp -d "$releases_root/.assembling-$commit.XXXXXX")"
@@ -152,6 +185,8 @@ server="$stage/apps/website/.next/standalone/apps/website/server.js"
 }
 install -m 0644 "$server" "$stage/apps/website/server.js"
 rm -rf -- "$stage/apps/website/.next/standalone" "$stage/.build-tmp" "$stage/.build-home"
+# Mount point for the shared Next cache (BindPaths= in rg-website.service).
+mkdir -p "$stage/apps/website/.next/cache"
 
 (cd "$stage/apps/achillea-bot" && bun run build)
 [[ -s "$stage/apps/achillea-bot/build/main.js" && -s "$stage/apps/achillea-bot/build/ranked/main.js" ]] || {
@@ -160,8 +195,8 @@ rm -rf -- "$stage/apps/website/.next/standalone" "$stage/.build-tmp" "$stage/.bu
 mkdir -p "$stage/apps/achillea-bot/logs" "$stage/apps/achillea-bot/storage"
 
 mkdir -p "$stage/systemd" "$stage/nginx"
-install -m 0644 "$stage/infra/nginx/rg-production.conf" "$stage/nginx/rg.conf"
-python3 - "$stage" "$catalog" "$commit" <<'PY'
+install -m 0644 "$infra_root/nginx/rg/rg-production.conf" "$stage/nginx/rg.conf"
+python3 - "$stage" "$catalog" "$commit" "$infra_root" "$infra_commit" <<'PY'
 import datetime
 import hashlib
 import json
@@ -172,63 +207,22 @@ import sys
 root = pathlib.Path(sys.argv[1]).resolve()
 catalog = json.loads(pathlib.Path(sys.argv[2]).read_text())
 commit = sys.argv[3]
-templates = {
-    'rg-website': 'website-web.service',
-    'rg-api': 'rg-api.service',
-    'rg-cdn': 'rg-cdn.service',
-    'rg-realtime': 'rg-realtime.service',
-    'rg-storage': 'rg-storage.service',
-    'rg-bot': 'rg-bot.service',
-    'rg-achillea-bot': 'achillea-bot.service',
-    'rg-cron': 'rg-cron.service',
-}
+infra_units = pathlib.Path(sys.argv[4]) / 'systemd'
+infra_commit = sys.argv[5]
 services = [service for service in catalog['services'] if service['id'].startswith('rg-')]
 for service in services:
     name = service['id']
-    if name not in templates or service['unit'] != f'{name}.service':
-        raise SystemExit(f'no audited release unit mapping for {name}')
-    source = root / 'infra' / 'systemd' / templates[name]
-    text = source.read_text()
-    if name == 'rg-website':
-        text = text.replace('/home/ubuntu/rg-releases/website/slot-a', '/srv/rg/current')
-        text = text.replace('/home/ubuntu/rg-releases/website', '/srv/rg/shared/website')
-        text = text.replace('/home/ubuntu/rg/apps/website/.env', '/etc/rose-griffon/website.env')
-        text = text.replace('[Install]',
-            'BindPaths=/srv/rg/shared/website/cache:/srv/rg/current/apps/website/.next/cache\n\n[Install]')
-    elif name == 'rg-achillea-bot':
-        text = text.replace('/etc/rose-griffon/achillea.env', '/etc/rose-griffon/rg-achillea-bot.env')
-        text = text.replace('ProtectSystem=full', 'ProtectSystem=strict')
-        text = text.replace('[Install]',
-            'ReadWritePaths=/srv/rg/shared/achillea\n'
-            'BindPaths=/srv/rg/shared/achillea/logs:/srv/rg/current/apps/achillea-bot/logs\n'
-            'BindPaths=/srv/rg/shared/achillea/storage:/srv/rg/current/apps/achillea-bot/storage\n\n[Install]')
-    else:
-        text = text.replace('/home/ubuntu/rg/apps/cdn/.env', '/etc/rose-griffon/rg-cdn.env')
-        text = text.replace('/home/ubuntu/rg/apps/bot/.env', '/etc/rose-griffon/rg-bot.env')
-        text = text.replace('/home/ubuntu/rg/.env.local', f'/etc/rose-griffon/{name}.env')
-    if name == 'rg-bot':
-        text = text.replace('ReadWritePaths=/home/ubuntu/rg/apps/bot /tmp',
-                            'ReadWritePaths=/srv/rg/shared/bot /tmp')
-    if name == 'rg-cron':
-        text = text.replace('ReadWritePaths=/home/ubuntu/rg /home/ubuntu/niers/var ',
-                            'ReadWritePaths=/srv/rg/shared/cron ')
-        text = re.sub(r'(?m)^# `/home/ubuntu/niers/var`[^\n]*\n(?:^#[^\n]*\n)*', '', text)
-    text = text.replace('/home/ubuntu/rg', '/srv/rg/current')
-    seen_env = set()
-    lines = []
-    for line in text.splitlines(keepends=True):
-        if line.startswith('EnvironmentFile='):
-            line = line.replace('EnvironmentFile=-', 'EnvironmentFile=', 1)
-            key = line.split('=', 1)[1]
-            if key in seen_env:
-                continue
-            seen_env.add(key)
-        lines.append(line)
-    text = ''.join(lines)
-    if '/home/ubuntu/rg' in text:
-        raise SystemExit(f'legacy checkout path remains in {name}')
-    output = root / 'systemd' / service['unit']
-    output.write_text(text)
+    unit = service['unit']
+    if unit != f'{name}.service':
+        raise SystemExit(f'catalog unit for {name} must be {name}.service')
+    text = (infra_units / unit).read_text()
+    # Same invariants as the activation adapter, checked before the build is sealed.
+    if '/home/ubuntu/rg' in text or not re.search(
+            r'^WorkingDirectory=/srv/rg/current(?:/[^\s]*)?$', text, re.MULTILINE):
+        raise SystemExit(f'aphrody-infra unit is not release-based: {unit}')
+    if not re.search(r'^EnvironmentFile=/etc/', text, re.MULTILINE):
+        raise SystemExit(f'aphrody-infra unit has no /etc EnvironmentFile: {unit}')
+    (root / 'systemd' / unit).write_text(text)
 
 manifest = {
     'schemaVersion': 1,
@@ -236,6 +230,7 @@ manifest = {
     'commit': commit,
     'builtAt': datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00', 'Z'),
     'services': [service['id'] for service in services],
+    'infraCommit': infra_commit,
 }
 (root / 'release.json').write_text(json.dumps(manifest, indent=2) + '\n')
 (root / 'RELEASE_SHA').write_text(commit + '\n')

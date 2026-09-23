@@ -1,7 +1,7 @@
 /** Generated SQL-independent Cross metadata. */
 export default {
   "generated": "2026-06-09T23:51:00Z",
-  "source": "/home/ubuntu/niers/data/cross-apk/work/laneB-catalog/locations.ndjson",
+  "source": "/home/ubuntu/nie/data/cross-apk/work/laneB-catalog/locations.ndjson",
   "totals": {
     "catalog_rows": 85267,
     "loadable_objects": 23247,

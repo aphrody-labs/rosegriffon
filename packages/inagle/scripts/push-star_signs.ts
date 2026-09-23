@@ -9,7 +9,7 @@
  * et lancer l'importer. Upsert idempotent (ON CONFLICT chara_param_id).
  *
  * Lancement (depuis /home/ubuntu/rg) :
- *   DATA_PATH=/home/ubuntu/niers/data bun packages/inagle/scripts/push-star_signs.ts
+ *   DATA_PATH=/home/ubuntu/nie/data bun packages/inagle/scripts/push-star_signs.ts
  */
 
 import { importStarSigns } from "../src/push-categories.ts";

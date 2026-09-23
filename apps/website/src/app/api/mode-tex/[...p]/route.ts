@@ -15,7 +15,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const RACINE = path.resolve(
-	path.join(process.env.DATA_PATH ?? "/home/ubuntu/niers/data", "mode-tex"),
+	path.join(process.env.DATA_PATH ?? "/home/ubuntu/nie/data", "mode-tex"),
 );
 
 export async function GET(

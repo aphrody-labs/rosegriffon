@@ -41,7 +41,7 @@ débit RX/TX par interface (échantillon d’une seconde), processus CPU/mémoir
 sockets via l’état systemd, et ressources des services actifs. Aucun argument de
 ligne de commande de processus n’est journalisé afin de ne pas exposer de secrets.
 Le mode `--deep` lance `du -x` uniquement à la demande sur les arbres `/`,
-`/home/ubuntu`, `/home/ubuntu/rg`, `/home/ubuntu/niers`, `/var` et `/tmp`.
+`/home/ubuntu`, `/home/ubuntu/rg`, `/home/ubuntu/nie`, `/var` et `/tmp`.
 
 ## Règles de déduplication
 

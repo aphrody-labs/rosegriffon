@@ -36,9 +36,7 @@ jobs:
       - name: Vérifier les imports et la topologie
         run: |
           bun run check:imports
-          bun run check:achillea-services
           bun test scripts/achillea/*.test.ts
-          systemd-analyze verify infra/systemd/achillea-*.service
 
       - name: Vérifier les packages partagés
         run: |

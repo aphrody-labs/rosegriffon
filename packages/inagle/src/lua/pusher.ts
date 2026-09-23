@@ -15,7 +15,7 @@ export async function importLuaScripts(_service: any, db: DataAdapter) {
 
 	if (parsedScripts.length === 0) {
 		console.error(
-			"❌ 0 script Lua résolu — vérifier /home/ubuntu/niers/data/lua_scripts/analysis/lua-global-index.json"
+			"❌ 0 script Lua résolu — vérifier /home/ubuntu/nie/data/lua_scripts/analysis/lua-global-index.json"
 		);
 		return;
 	}

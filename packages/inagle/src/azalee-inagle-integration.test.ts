@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
  *
  * `AZALEE_MIRROR_PATH` permet de le déplacer à nouveau sans toucher au code.
  */
-const MIROIR_REPLI = process.env["AZALEE_MIRROR_PATH"] ?? "/home/ubuntu/niers/var/mirror.sqlite";
+const MIROIR_REPLI = process.env["AZALEE_MIRROR_PATH"] ?? "/home/ubuntu/nie/var/mirror.sqlite";
 
 /** Dossier historique des sauvegardes, conservé s'il redevient alimenté. */
 const DOSSIER_SAUVEGARDES = join(import.meta.dir, "../../../apps/website/data/backups");
@@ -46,7 +46,7 @@ async function trouverMiroir(): Promise<string | null> {
  * `.cfg.bin` et 6 000 personnages) : ils ne testent rien d'autre que le fait de le lire.
  *
  * Ce corpus est un dérivé du jeu, gitignoré : il vit sur cette machine
- * (`/home/ubuntu/niers/data`, résolu par `paths.ts`) mais n'existe ni dans une CI ni
+ * (`/home/ubuntu/nie/data`, résolu par `paths.ts`) mais n'existe ni dans une CI ni
  * sur un poste neuf, où ces tests échouaient sans autre cause que son absence. Un test
  * rouge en permanence ne signale plus rien.
  *

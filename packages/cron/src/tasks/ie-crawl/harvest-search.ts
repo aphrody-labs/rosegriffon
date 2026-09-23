@@ -9,19 +9,17 @@
 // communauté qui ne viennent pas des comptes officiels suivis ; la recherche
 // "Latest" remonte tout le contenu Inazuma Eleven (Victory Road surtout), multi-
 // langue (JA/EN/FR/ES). On filtre le bruit (RT purs, trop court), on dédoublonne
-// par id, on upsert dans la table `tweets` (réutilisée par le RAG sync) ET on
-// ingère directement dans `inagle_rag_chunks` (kind=tweet, idempotent par id).
+// par id et on upsert dans la table `tweets` (idempotent par id).
 //
 // Requêtes validées via bxc x search (2026-06, compte yoyo) — voir x-accounts.ts.
 // Lecture/recherche seule : on ne publie RIEN.
 
 import { XClient, XSession, type Tweet } from "@aphrody-code/x";
 import { createPostgresClient } from "@rosegriffon/db/service";
-import { ingestSources, type RagSource } from "./rag-store-local";
 // Conversion tweet → ligne de `public.tweets` : mutualisée dans `tweet-row.ts`
 // (le code y est repris à l'identique) pour que la récolte de campagnes à hashtag
 // produise exactement le même jsonb `media` que cette veille-ci.
-import { tweetToRow, type DBTweetRow } from "./tweet-row";
+import { tweetToRow } from "./tweet-row";
 import { loadBxcXCookieHeader } from "./x-accounts";
 
 // Requêtes "Latest" couvrant officiel + news + communauté, multi-langue.
@@ -97,48 +95,17 @@ function isInformativeIeTweet(t: Tweet): boolean {
 	return true;
 }
 
-function rowToRagSource(row: DBTweetRow): RagSource {
-	const username = row.author_username || "unknown";
-	const displayName = row.author_name || username;
-	const url = `https://x.com/${username}/status/${row.id}`;
-	const rawForChunk = JSON.stringify({
-		id: row.id,
-		text: row.text,
-		author_username: username,
-		author_name: displayName,
-		created_at: row.created_at,
-		metrics: row.metrics,
-		media: row.media,
-		url,
-	});
-	return {
-		sourceId: `tweet-${row.id}`,
-		kind: "tweet",
-		raw: rawForChunk,
-		title: `Tweet de ${displayName} (@${username})`,
-		url,
-		meta: {
-			author_username: username,
-			author_name: displayName,
-			date: row.created_at,
-			source: "x-search",
-		},
-	};
-}
-
 export interface HarvestStats {
 	success: boolean;
 	queries: number;
 	fetched: number;
 	kept: number;
 	upserted: number;
-	ragChunks: number;
-	ragBackend: string;
 	error?: string;
 }
 
 /**
- * Harvest par requêtes de recherche, puis upsert `tweets` + ingestion pgvector.
+ * Harvest par requêtes de recherche, puis upsert `tweets`.
  * @param queries  liste de requêtes (défaut: IE_SEARCH_QUERIES)
  * @param perQuery nb de tweets par requête (max 100)
  */
@@ -205,12 +172,10 @@ export async function crawlTwitterSearch(
 			fetched,
 			kept: 0,
 			upserted: 0,
-			ragChunks: 0,
-			ragBackend: "hash",
 		};
 	}
 
-	// 1) Upsert dans `tweets` (réutilisé par le RAG sync timeline). Idempotent par id.
+	// Upsert dans `tweets`. Idempotent par id.
 	let upserted = 0;
 	const { error: upErr } = await db.from("tweets").upsert(rows, { onConflict: "id" });
 	if (upErr) {
@@ -219,21 +184,12 @@ export async function crawlTwitterSearch(
 		upserted = rows.length;
 	}
 
-	// 2) Ingestion directe pgvector (kind=tweet, idempotent par tweet id).
-	const sources = rows.map(rowToRagSource);
-	const stats = await ingestSources(sources);
-	console.log(
-		`[X Search] RAG pgvector : ${stats.chunks} chunks (${stats.sources} sources, backend=${stats.backend}, skipped=${stats.skipped}).`
-	);
-
 	return {
 		success: true,
 		queries: queries.length,
 		fetched,
 		kept: rows.length,
 		upserted,
-		ragChunks: stats.chunks,
-		ragBackend: stats.backend,
 	};
 }
 

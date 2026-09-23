@@ -8,7 +8,7 @@
  * l'importer. Upsert idempotent (ON CONFLICT id = "boost_grp_<index>").
  *
  * Lancement (depuis /home/ubuntu/rg) :
- *   DATA_PATH=/home/ubuntu/niers/data bun packages/inagle/scripts/push-boost_groups.ts
+ *   DATA_PATH=/home/ubuntu/nie/data bun packages/inagle/scripts/push-boost_groups.ts
  */
 
 import { importBoostGroups } from "../src/push-categories.ts";

@@ -9,7 +9,7 @@
  * (ON CONFLICT trophy_id).
  *
  * Lancement (depuis /home/ubuntu/rg) :
- *   DATA_PATH=/home/ubuntu/niers/data bun packages/inagle/scripts/push-trophies.ts
+ *   DATA_PATH=/home/ubuntu/nie/data bun packages/inagle/scripts/push-trophies.ts
  */
 
 import { importTrophies } from "../src/push-categories.ts";

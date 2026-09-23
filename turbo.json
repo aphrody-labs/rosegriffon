@@ -97,10 +97,6 @@
 		"clean": {
 			"cache": false,
 			"outputs": []
-		},
-		"deploy": {
-			"cache": false,
-			"dependsOn": ["build"]
 		}
 	}
 }

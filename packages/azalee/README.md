@@ -78,7 +78,7 @@ texte, et expose l'API HTTP headless. Runtime Bun (ou Node ≥ 22).
 ```ts
 import { wikiService, resolveMirrorPath, resolveDataDir } from "@rosegriffon/azalee/server";
 
-resolveMirrorPath(); // /home/ubuntu/niers/var/mirror.sqlite
+resolveMirrorPath(); // /home/ubuntu/nie/var/mirror.sqlite
 resolveDataDir();    // /home/ubuntu/rg/apps/website/data
 
 const { data, total } = await wikiService.getCharactersList({ q: "Mark", page: 1, limit: 2 });
@@ -165,7 +165,7 @@ apps/website/data/
 | `AZALEE_DATA_DIR` | `src/config.ts` | Dossier des artefacts runtime, testé avant les chemins conventionnels (`<cwd>/data`, `<cwd>/apps/website/data`, `<pkg>/../../apps/website/data`). |
 | `AZALEE_PORT` / `AZALEE_HOST` | `src/server/serve.ts` | Défauts de l'API headless (`3010` / `127.0.0.1`). |
 | `DATABASE_URL` | `src/cli.ts` | PostgreSQL pour les commandes CLI qui ne passent pas par le miroir (`db`, `data push`…). |
-| `DATA_ROOT` / `DATA_PATH` | `src/cli.ts` | Racine du dump de jeu pour `azalee data` (défaut `/home/ubuntu/niers/data`). |
+| `DATA_ROOT` / `DATA_PATH` | `src/cli.ts` | Racine du dump de jeu pour `azalee data` (défaut `/home/ubuntu/nie/data`). |
 
 Note : `AZALEE_DATA_DIR` couvre uniquement la découverte du miroir local de développement ;
 les modules `cpk` et `game-text` interrogent directement les projections PostgreSQL.

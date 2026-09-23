@@ -249,3 +249,30 @@ release repasse par `scripts/ops/assemble-vps-release.sh`.
 - Sous-domaines conservés, car utilisés : `api.` (callback OAuth, API unifiée),
   `cdn.`, `achillea.` (API bot et redirection), `ranked.` (WebSocket Colyseus codé
   dans le bundle du site).
+
+## Infrastructure RG entièrement portée par `aphrody-infra` — 23/09/2026
+
+`rg` ne garde que le code applicatif et le script de construction de release
+(`scripts/ops/assemble-vps-release.sh`). Ports, unités, hôtes et routes :
+`../aphrody-infra/config/service-catalog.json` et `config/nginx-routes.json`,
+seules sources de vérité ; ce dépôt ne publie plus de table de ports.
+
+| Ancien emplacement (`rg`) | Nouvel emplacement (`aphrody-infra`) |
+| --- | --- |
+| `infra/systemd/*` | `systemd/rg-*.service` (units finales `/srv/rg/current`, env `/etc`) |
+| `infra/nginx/*` | `nginx/rg/` (`rg-production.conf` → release `nginx/rg.conf`) |
+| `infra/docker/vps-replica`, `infra/cloud` | `docker/rg-vps-replica/`, `cloud/rg-website/` |
+| `scripts/ops/{sauvegarde,infra,invalidate-cdn,vercel-failover}.ts`, `provision-vps-env.py` | `scripts/rg/` |
+
+- Le build lit `systemd/rg-*.service` et `nginx/rg/rg-production.conf` depuis
+  `${APHRODY_INFRA_ROOT:-../aphrody-infra}` (révision propre exigée, consignée
+  dans `release.json` sous `infraCommit`) ; plus de renommage `website-web`.
+- `rg-cdn` écoute sur **8801** (défaut de `apps/cdn/server.ts`).
+- Retirés : déploiement bleu/vert (`scripts/ops/deploy.ts`, `website-web-b`),
+  `release-stack.ts`, `prune-runtime.ts`, `deploy-bot.sh`, `ship-website.sh`,
+  workflow `deploy.yml`, tâche turbo `deploy`, shims RAG du cron (tâches `rag`,
+  `rag:wiki`, `query`, verbe IPC `query_rag`), unités `achillea-postgrest`,
+  `achillea-storage`, `achillea-realtime` (8820-8822, la façade publique sert
+  `/storage/v1` et `/realtime/v1` depuis `rg-storage`/`rg-realtime`), et le
+  contrôle `check:achillea-services` qui validait ces fichiers.
+- Chemin du dépôt de données du jeu : `/home/ubuntu/nie` (et non plus `niers`).

@@ -10,7 +10,7 @@
  * (ON CONFLICT id = starNameHash hex).
  *
  * Lancement (depuis /home/ubuntu/rg) :
- *   DATA_PATH=/home/ubuntu/niers/data bun packages/inagle/scripts/push-constellations.ts
+ *   DATA_PATH=/home/ubuntu/nie/data bun packages/inagle/scripts/push-constellations.ts
  */
 
 import { importConstellations } from "../src/push-categories.ts";

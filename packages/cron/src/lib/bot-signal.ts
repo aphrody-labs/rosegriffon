@@ -21,7 +21,6 @@
 import { syncCdnAssets } from "../tasks/cdn";
 import { runIeCrawl } from "../tasks/ie-crawl";
 import { crawlHashtagCampaigns } from "../tasks/ie-crawl/hashtag-harvest";
-import { runRagSync } from "../tasks/ie-crawl/rag-index";
 import { runInaglePush } from "../tasks/db";
 import { runDiscordSync, runDiscordChannelScan } from "../tasks/discord";
 import { runDiscordMessagesSync, runDiscordMessagesBackfill } from "../tasks/discord-messages";
@@ -57,7 +56,6 @@ function catalogueTaches(): Record<string, () => Promise<unknown>> {
 		db: runInaglePush,
 		cdn: syncCdnAssets,
 		crawl: runIeCrawl,
-		rag: runRagSync,
 		publish: triggerPublishScheduled,
 		"github-publish": triggerGithubPublishWorkflow,
 		patreon: triggerPatreonRefresh,
@@ -94,7 +92,6 @@ const PLANIFICATIONS: Record<string, string> = {
 	"discord:backfill": "manuel",
 	"discord:polls": "10 * * * *",
 	"x:campagnes": "20 * * * *",
-	rag: "manuel",
 };
 
 export interface OptionsPontBot {
@@ -107,8 +104,6 @@ export interface OptionsPontBot {
 	 * Passer par une autre voie rendrait `/cron statut` faux.
 	 */
 	executer: (nom: string, fn: () => Promise<unknown>) => Promise<{ success: boolean; error?: string }>;
-	/** Recherche sémantique, reprise du TCP IPC `:4001` existant. */
-	queryRag?: (question: string) => Promise<unknown>;
 }
 
 /**
@@ -142,7 +137,6 @@ function monterPontBot(options: OptionsPontBot): PontIpc {
 			const fn = taches[nom] ?? taches[nom.replace(/-/g, ":")];
 			return fn ? options.executer(nom, fn) : null;
 		},
-		queryRag: options.queryRag,
 	});
 
 	demarrerVeilleTweets(pont);

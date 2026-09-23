@@ -40,7 +40,7 @@ Le pipeline unifié est une chaîne unique. Pour chaque étape, l'implémentatio
 
 ### Étape 3 — Parsing des données (cfg.bin → entités typées → Supabase)
 
-- **Entrée** : `cfg.bin.json` (nœuds `ConfigNode {name, variables[{type, value}], children[]}`) sous `DATA_PATH=/home/ubuntu/niers/data` — corpus de dump réel partagé.
+- **Entrée** : `cfg.bin.json` (nœuds `ConfigNode {name, variables[{type, value}], children[]}`) sous `DATA_PATH=/home/ubuntu/nie/data` — corpus de dump réel partagé.
 - **Actuel (inagle, TS)** : les parseurs servent l’extraction/import initial, puis le runtime lit les projections PostgreSQL. `service.ts` expose les DTO unifiés et `cli-push.ts` conserve les colonnes curatées `sheet_data`/`zukan_order`; Azalée et le CLI partagent les identifiants d’auras issus de `service.skills.auraAll()`.
 - **Cible Rust (niers, partiel)** : `crate nie-data` (2250 LOC, no_std+alloc, wasm-compatible) — port 1:1 explicite d'inagle (chaque module cite son fichier-source TS + lignes). skill/item/growth/exp/passive (5/7 FAIT, validés byte) ; chara_param et aura **INCOMPLET** (hallucinations documentées : pairing off-by-one, aura-cmd 61/1548). `nie-data/cfgbin.rs` lit le JSON déjà parsé (contrat ConfigNode), tandis que `nie-formats/cfgbin.rs` reparse le binaire RDBN brut.
 - **Sortie** : tables `inagle_*` Supabase (source de vérité données) ; côté Rust, structs no_std (SkillInfo, CharaParam, AuraCmd…).
@@ -114,7 +114,7 @@ Le pipeline unifié est une chaîne unique. Pour chaque étape, l'implémentatio
 - **Acquisition Steam** → **nie-steam** (Rust, FAIT), iecode `Steam/Content/` devenant l'implémentation de référence/secours.
 - **Carte RE de `nie.exe`** → **niers** : `.pdata` + table `coverage` de `var/niers.sqlite` (92,4464 % en DB). Le `.pdata` réfute l'index Ghidra brut.
 - **Clé/crypto** → distinction unique à graver : `0x1717E18E` = clé fixe Viola des `cfg.bin` ; clé des packs `.cpk` = CRC32 dérivée du nom de fichier. niers `cpk.rs` et iecode `CLAUDE.md` la documentent en double ; corriger l'amont iecode (`NativeCrypto`/`CriCryptoService` laissent l'ambiguïté).
-- **Corpus de dump réel** → `/home/ubuntu/niers/data` (`DATA_PATH` inagle), partagé par les trois (inagle = corpus parsé, niers = golden fixtures, iecode-pipeline = corpus de dev). Combiné au binaire `nie.exe` et au `FormatCatalog`, c'est la vérité terrain commune.
+- **Corpus de dump réel** → `/home/ubuntu/nie/data` (`DATA_PATH` inagle), partagé par les trois (inagle = corpus parsé, niers = golden fixtures, iecode-pipeline = corpus de dev). Combiné au binaire `nie.exe` et au `FormatCatalog`, c'est la vérité terrain commune.
 
 ## 5. Plan de convergence vers Rust
 

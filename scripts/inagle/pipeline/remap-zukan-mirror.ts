@@ -8,8 +8,8 @@
  * auth-broken) local pg `rose_griffon`. Only zukan_hash and zukan_order are touched.
  *
  * Sources of truth:
- *   - /home/ubuntu/niers/data/zukan/param_en.json  (5407 EN zukan entries)
- *   - /home/ubuntu/niers/data/zukan/param_ja.json  (5407 JA zukan entries, merged by hash)
+ *   - /home/ubuntu/nie/data/zukan/param_en.json  (5407 EN zukan entries)
+ *   - /home/ubuntu/nie/data/zukan/param_ja.json  (5407 JA zukan entries, merged by hash)
  *   - /tmp/zukan_official_order.json         (order_map: zukanHash -> index)
  *
  * Run:
@@ -30,7 +30,7 @@ import {
 	normPos,
 	zukanGameToSeries,
 } from "../../../packages/inagle/src/zukan/matcher.ts";
-const requireNiers = createRequire("/home/ubuntu/niers/package.json");
+const requireNiers = createRequire("/home/ubuntu/nie/package.json");
 let Kuroshiro: any = null;
 let KuromojiAnalyzer: any = null;
 try {
@@ -47,20 +47,20 @@ const MIRROR_ARG = process.argv
 	.find((arg) => arg.startsWith("--mirror="))
 	?.slice("--mirror=".length);
 
-const PARAM_EN = "/home/ubuntu/niers/data/zukan/param_en.json";
-const PARAM_JA = "/home/ubuntu/niers/data/zukan/param_ja.json";
+const PARAM_EN = "/home/ubuntu/nie/data/zukan/param_en.json";
+const PARAM_JA = "/home/ubuntu/nie/data/zukan/param_ja.json";
 const ORDER_PATH = Bun.file("/tmp/zukan_official_order.json").size
 	? "/tmp/zukan_official_order.json"
-	: "/home/ubuntu/niers/data/zukan/zukan_order_en.json";
+	: "/home/ubuntu/nie/data/zukan/zukan_order_en.json";
 const SUPABASE_SQL_OUT = "/tmp/zukan_remap_supabase.sql";
-const AUDIT_OUT = "/home/ubuntu/niers/data/zukan-audit-mirror.json";
+const AUDIT_OUT = "/home/ubuntu/nie/data/zukan-audit-mirror.json";
 
 function mirrorPath(): string {
 	if (MIRROR_ARG) return MIRROR_ARG;
 	const fs = require("node:fs");
 	const candidates = [
 		["/home/ubuntu/rg/apps/website/data/backups", /^supabase-.*\.sqlite$/],
-		["/home/ubuntu/niers/var/miroir", /^inagle-.*\.sqlite$/],
+		["/home/ubuntu/nie/var/miroir", /^inagle-.*\.sqlite$/],
 	] as const;
 	for (const [dir, pattern] of candidates) {
 		if (!fs.existsSync(dir)) continue;

@@ -9,7 +9,7 @@ d'exploitation ni les documents de conception détaillés.
 | Surface                                                            | Dépôt canonique      | Règle                                                                     |
 | ------------------------------------------------------------------ | -------------------- | ------------------------------------------------------------------------- |
 | Applications Rose Griffon, Azalée, bot, nginx et orchestration VPS | `/home/ubuntu/rg`    | Le code de production web et l'infrastructure restent ici.                |
-| `nie.exe`, formats IEVR, VFS, données de jeu, RE, forge et WASM    | `/home/ubuntu/niers` | Les capacités du jeu et leurs outils vivent ici.                          |
+| `nie.exe`, formats IEVR, VFS, données de jeu, RE, forge et WASM    | `/home/ubuntu/nie` | Les capacités du jeu et leurs outils vivent ici.                          |
 | Miroirs SQLite, caches, assets et builds                           | machine d'exécution  | Artefacts régénérables, hors Git sauf exception explicitement documentée. |
 
 Les deux dépôts gardent leurs remotes, historiques et branches séparés. Une évolution qui
@@ -65,10 +65,10 @@ bun ../aphrody-infra/scripts/ops/repo-sync.ts --repo all --commit --dry-run --js
 Puis lire dans `niers` :
 
 ```bash
-git -C /home/ubuntu/niers status --short --branch
+git -C /home/ubuntu/nie status --short --branch
 sed -n '1,220p' /home/ubuntu/aphrody-infra/docs/ops/OVH.md
-sed -n '1,180p' /home/ubuntu/niers/docs/TARGET-ARCHITECTURE.md
-just -f /home/ubuntu/niers/justfile build-wasm
+sed -n '1,180p' /home/ubuntu/nie/docs/TARGET-ARCHITECTURE.md
+just -f /home/ubuntu/nie/justfile build-wasm
 ```
 
 Avant toute modification de production, `../aphrody-infra/docs/ops/OVH.md` fait autorité pour les comptes, zones,
@@ -89,6 +89,6 @@ fait autorité pour la cible `nie.exe → nie-web`.
 
 - `../aphrody-infra/docs/ops/REPO-SYNC.md` — orchestration et frontière `rg ↔ niers` ;
 - `/home/ubuntu/aphrody-infra/docs/ops/OVH.md` — comptes, DNS, certificats et procédures OVH ;
-- `/home/ubuntu/niers/docs/TARGET-ARCHITECTURE.md` — cible WASM et suite Inacord ;
-- `/home/ubuntu/niers/docs/ARCHITECTURE.md` — état mesuré de l'architecture niers ;
-- `/home/ubuntu/niers/docs/FORGE.md` — preuve de reconstruction de `nie.exe`.
+- `/home/ubuntu/nie/docs/TARGET-ARCHITECTURE.md` — cible WASM et suite Inacord ;
+- `/home/ubuntu/nie/docs/ARCHITECTURE.md` — état mesuré de l'architecture niers ;
+- `/home/ubuntu/nie/docs/FORGE.md` — preuve de reconstruction de `nie.exe`.

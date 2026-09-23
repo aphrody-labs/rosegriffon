@@ -8,7 +8,7 @@
  * (ON CONFLICT mission_id).
  *
  * Lancement (depuis /home/ubuntu/rg) :
- *   DATA_PATH=/home/ubuntu/niers/data bun packages/inagle/scripts/push-missions.ts
+ *   DATA_PATH=/home/ubuntu/nie/data bun packages/inagle/scripts/push-missions.ts
  */
 
 import { importMissions } from "../src/push-categories.ts";

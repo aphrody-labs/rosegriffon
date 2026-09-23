@@ -8,7 +8,7 @@
  * `scripts/push-<cat>.ts` (qui ne font que créer l'adaptateur PostgreSQL et lancer
  * l'importer). Vivent sous `src/` pour rester dans le `rootDir` du build TS.
  *
- * 100% dérivé des octets RÉELS du dump (/home/ubuntu/niers/data) via les parseurs
+ * 100% dérivé des octets RÉELS du dump (/home/ubuntu/nie/data) via les parseurs
  * `src/parsers/*`. Aucune valeur fabriquée. Tous les upserts sont idempotents
  * (ON CONFLICT sur la clé primaire de chaque table).
  */
@@ -51,7 +51,7 @@ import { buildUniformDatabase, resolveUniformRows } from "./parsers/uniform-conf
 import { buildVideoWazaDatabase } from "./parsers/video-waza.js";
 import { dedup, type DataAdapter } from "./push-adapter.js";
 
-const DATA_PATH = process.env.DATA_PATH || "/home/ubuntu/niers/data";
+const DATA_PATH = process.env.DATA_PATH || "/home/ubuntu/nie/data";
 
 /** Ligne prête à être poussée (colonnes SQL → valeurs sérialisables). */
 type LignePoussee = Record<string, unknown>;
@@ -227,7 +227,7 @@ export async function importTricks(_service: any, db: DataAdapter) {
 
 	if (trickDb.tricks.length === 0) {
 		console.error(
-			"❌ 0 trick parsé — dump introuvable ? (DATA_PATH/DATA_ROOT doit pointer sur /home/ubuntu/niers/data)"
+			"❌ 0 trick parsé — dump introuvable ? (DATA_PATH/DATA_ROOT doit pointer sur /home/ubuntu/nie/data)"
 		);
 		return;
 	}
@@ -261,7 +261,7 @@ export async function importTricks(_service: any, db: DataAdapter) {
 
 export async function importSpecialTactics(_service: any, db: DataAdapter) {
 	console.log("🔄 Importing Special Tactics...");
-	const dataPath = process.env.DATA_PATH ? resolve(process.env.DATA_PATH) : "/home/ubuntu/niers/data";
+	const dataPath = process.env.DATA_PATH ? resolve(process.env.DATA_PATH) : "/home/ubuntu/nie/data";
 
 	const tacticsDb = await buildSpecialTacticsDatabase(dataPath);
 	if (tacticsDb.tactics.length === 0) {

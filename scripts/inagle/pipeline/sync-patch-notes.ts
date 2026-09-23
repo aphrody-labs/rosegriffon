@@ -31,7 +31,7 @@ async function syncPatchNotes() {
 	}
 
 	const pool = createPgPool(dbUrl, { applicationName: "inagle-patch-notes" });
-	const jsonPath = "/home/ubuntu/niers/data/translations/patch-notes-fr.json";
+	const jsonPath = "/home/ubuntu/nie/data/translations/patch-notes-fr.json";
 	
 	console.log(`📖 Reading patch notes from: ${jsonPath}`);
 	try {

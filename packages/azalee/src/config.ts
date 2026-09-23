@@ -115,7 +115,7 @@ export function resolveMirrorPath(): string | null {
 
 	// Le miroir est publié dans `niers` par `nie-miroir.timer`. Sans miroir canonique,
 	// signaler l'absence plutôt que de servir un snapshot local figé.
-	const miroirDuJeu = process.env.NIERS_MIRROR ?? "/home/ubuntu/niers/var/mirror.sqlite";
+	const miroirDuJeu = process.env.NIERS_MIRROR ?? "/home/ubuntu/nie/var/mirror.sqlite";
 	if (existsSync(miroirDuJeu)) return miroirDuJeu;
 	return null;
 }
