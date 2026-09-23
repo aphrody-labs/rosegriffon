@@ -178,7 +178,6 @@ templates = {
     'rg-cdn': 'rg-cdn.service',
     'rg-realtime': 'rg-realtime.service',
     'rg-storage': 'rg-storage.service',
-    'rg-postgrest': 'rg-postgrest.service',
     'rg-bot': 'rg-bot.service',
     'rg-achillea-bot': 'achillea-bot.service',
     'rg-cron': 'rg-cron.service',

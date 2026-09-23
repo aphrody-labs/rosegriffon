@@ -38,17 +38,12 @@ export interface ServiceHealth {
 }
 
 /**
- * Les trois services HTTP qui remplacent Supabase Cloud depuis le 11/8/2026.
+ * Les services HTTP qui remplacent Supabase Cloud depuis le 11/8/2026.
  *
  * Sondés sur leur boucle locale : c'est l'état du service lui-même qui
  * intéresse ici, pas celui de nginx ni du DNS.
  */
 const SERVICES: { name: string; url: string; role: string; expect?: number[] }[] = [
-	{
-		name: "PostgREST",
-		role: "API REST (/rest/v1) — remplace le Data API",
-		url: "http://127.0.0.1:8809/",
-	},
 	{
 		expect: [200, 404],
 		name: "Storage",

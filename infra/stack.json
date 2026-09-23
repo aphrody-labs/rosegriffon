@@ -88,15 +88,6 @@
       "timer": "rg-infra-monitor.timer"
     },
     {
-      "id": "postgrest",
-      "kind": "data-api",
-      "owner": "rg",
-      "unit": "rg-postgrest.service",
-      "source": "rg",
-      "required": true,
-      "ports": [3001]
-    },
-    {
       "id": "model",
       "kind": "asset-decoder",
       "owner": "niers",
