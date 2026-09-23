@@ -6,10 +6,10 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { cronSharedPath } from "../../lib/shared-path";
 
-const DOCS_DIR = "/home/ubuntu/rg/docs";
-// Les docs de référence externes (crawlées) sont isolées dans docs/reference/
-// pour ne pas polluer la racine des docs-projet écrits à la main.
+const DOCS_DIR = cronSharedPath("docs");
+// Les docs collectées restent hors du checkout et des releases immuables.
 const REFERENCE_DIR = join(DOCS_DIR, "reference");
 
 /**

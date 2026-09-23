@@ -83,7 +83,7 @@ const PLANIFICATIONS: Record<string, string> = {
 	patreon: "0 3 * * *",
 	cdn: "0 4 * * *",
 	"github-publish": "30 4 * * *",
-	crawl: "0 5 * * *",
+	crawl: "manuel",
 	"seo:llms-txt": "45 5 * * *",
 	"stats:achillea": "8,23,38,53 * * * *",
 	"seo:indexnow": "0 6 * * *",

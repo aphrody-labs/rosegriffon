@@ -114,12 +114,12 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
 	{
 		nom: "db",
 		titre: "Poussée des données de jeu",
-		role: "réécrit les tables `inagle_*` de production puis échange le miroir SQLite servi par le wiki",
+		role: "réécrit les tables `inagle_*` de production",
 		planification: "0 2 * * *",
 		famille: "donnees",
 		niveau: "interdit",
 		motifInterdiction:
-			"réécrit la production ET échange le miroir servi par Website — une bévue de frappe ne doit pas pouvoir la lancer",
+			"réécrit les données de jeu en production — une bévue de frappe ne doit pas pouvoir la lancer",
 		dureeIndicative: "plusieurs minutes",
 	},
 	{
@@ -146,7 +146,7 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
 		nom: "crawl",
 		titre: "Veille officielle Inazuma",
 		role: "parcourt les sources officielles et les comptes X suivis",
-		planification: "0 5 * * *",
+		planification: "manuel",
 		famille: "campagnes",
 		niveau: "interdit",
 		motifInterdiction:

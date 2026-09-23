@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { runInaglePush, runSQLiteBackup } from "./tasks/db";
+import { runInaglePush } from "./tasks/db";
 import { syncCdnAssets } from "./tasks/cdn";
 import { runIeCrawl } from "./tasks/ie-crawl";
 import { runWebsiteQa } from "./tasks/ie-crawl/website-qa";
@@ -210,7 +210,6 @@ const DELAIS_TACHES_MS: Record<string, number> = {
 	rag: 2 * 3600_000,
 	"rag:wiki": 2 * 3600_000,
 	"db:sync": 2 * 3600_000,
-	"db:sqlite-backup": 2 * 3600_000,
 	"discord:backfill": 4 * 3600_000,
 	"discord:scan": 3600_000,
 	cdn: 3600_000,
@@ -387,7 +386,6 @@ if (indexRun >= 0) {
 
 	if (task === "db") {
 		await executeTask("db:sync", runInaglePush);
-		await executeTask("db:sqlite-backup", runSQLiteBackup);
 	} else if (task === "cdn") {
 		await executeTask("cdn", syncCdnAssets);
 	} else if (task === "crawl") {
@@ -516,7 +514,6 @@ if (indexRun >= 0) {
 		await executeTask("publish", triggerPublishScheduled);
 		await executeTask("warm", warmCaches);
 		await executeTask("db:sync", runInaglePush);
-		await executeTask("db:sqlite-backup", runSQLiteBackup);
 		await executeTask("patreon", triggerPatreonRefresh);
 		await executeTask("cdn", syncCdnAssets);
 		await executeTask("crawl", runIeCrawl);
@@ -537,7 +534,7 @@ if (indexRun >= 0) {
 		await executeTask("achillea:weekly-payout", runAchilleaWeeklyPayout);
 	} else {
 		console.error(
-			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, website:qa, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, sync:achillea, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, backup:postgres, backup:pg, all.`
+			`❌ Tâche inconnue : ${task}. Choisissez parmi : db, cdn, crawl, website:qa, rag, x, x-search, x:campagnes, query, publish, github-publish, patreon, reminders, warm, discord, discord:scan, discord:archives, discord:messages, discord:backfill, discord:polls, sync:achillea, noctaly:import, campagnes:discord, campagnes:instagram, campagnes:relais, seo, seo:indexnow, seo:llms-txt, stats:achillea, all.`
 		);
 	}
 	process.exit(0);
@@ -632,35 +629,19 @@ Bun.cron("10,25,40,55 * * * *", async () => {
 	await executeTask("campagnes:relais", () => relayerCampagnesDiscord());
 });
 
-// 3. Synchronisation Inagle DB & SQLite Backup : tous les jours à 2h00 UTC
+// 3. Synchronisation des données de jeu : tous les jours à 2h00 UTC
 //
-// L'ORDRE DES TROIS TÂCHES EST LE CORRECTIF, PAS UN DÉTAIL. `db:sync` vide puis
+// L'ordre est important : `db:sync` vide puis
 // réécrit `inagle_skills` : le push préserve désormais les vidéos et vignettes
 // zukan, mais c'est `zukan:videos` qui va les rechercher à la source. Il doit
 // donc tourner APRÈS le push (sinon il écrit dans une table qui sera vidée dans
-// la foulée) et AVANT `db:sqlite-backup` (sinon le miroir servi par azalée
-// embarque un instantané sans vidéos). Le 17/8/2026, `zukan:videos` n'était
+// la foulée). Le 17/8/2026, `zukan:videos` n'était
 // planifiée nulle part : le push a effacé les 1211 variantes de la nuit, et
 // plus rien ne les remettait — /skill a perdu vidéos et aperçus d'un coup.
 Bun.cron("0 2 * * *", async () => {
 	await executeTask("db:sync", runInaglePush);
 	await executeTask("zukan:videos", rafraichirVideosTechniques);
-	await executeTask("db:sqlite-backup", runSQLiteBackup);
 });
-
-// 3b. Sauvegarde logique PostgreSQL : elle N'EST PLUS ICI.
-//
-// `db:postgres-backup` appelait `scripts/ops/backup-postgres.sh`, hérité de
-// l'époque Supabase Cloud. Depuis la bascule en auto-hébergement du 11/8/2026,
-// son `pg_dumpall --globals-only` tourne sous le rôle `rg`, qui n'est pas
-// superutilisateur : « permission denied for table pg_authid ». Le `set -e` du
-// script coupait alors avant le dump du schéma et des données, en laissant un
-// dossier ne contenant qu'un `roles.sql` vide — seize jours d'échec quotidien
-// pour une sauvegarde qui n'en était plus une.
-// `rg-sauvegarde.timer` (`scripts/ops/sauvegarde.ts`) fait déjà le même travail
-// en mieux : dump de CHAQUE base sous le rôle `postgres`, restauration de
-// contrôle, rotation à 7 copies, dans `/var/backups/postgres`. Deux
-// sauvegardes dont une muette valent moins qu'une seule qui se vérifie.
 
 // 4. Rafraîchissement Patreon Website : tous les jours à 3h00 UTC
 Bun.cron("0 3 * * *", async () => {
@@ -677,20 +658,12 @@ Bun.cron("30 4 * * *", async () => {
 	await executeTask("github-publish", triggerGithubPublishWorkflow);
 });
 
-// 5c. Crawl officiel Inazuma Eleven & RAG Sync : tous les jours à 5h00 UTC
-Bun.cron("0 5 * * *", async () => {
-	await executeTask("crawl", runIeCrawl);
-});
-
 // 6. Rappels Patreon Website : tous les jours à 8h00 UTC
 Bun.cron("0 8 * * *", async () => {
 	await executeTask("reminders", () => triggerPatreonReminders("announce"));
 });
 
-// 7. SEO — Régénération des fichiers llms.txt/llm.txt (fraîcheur) : tous les jours à 5h45 UTC.
-// NB : régénère les fichiers publics dans le checkout local (canonique). La mise en
-// ligne effective dépend d'un redéploiement (commit du repo) ; sur le VPS, cela
-// rafraîchit la copie servie localement si applicable.
+// 7. SEO — Régénération des fichiers llms.txt/llm.txt dans le répertoire partagé.
 Bun.cron("45 5 * * *", async () => {
 	await executeTask("seo:llms-txt", runSeoLlmsTxt);
 });

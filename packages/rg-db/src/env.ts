@@ -33,9 +33,6 @@ function origineDeRepli(): string {
 		? (globalThis as unknown as { location: { origin: string } }).location.origin
 		: INTERNAL_URL;
 }
-const PLACEHOLDER_ANON_JWT =
-	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYmthZWx0dWJxaXR0eXdpYmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NDYyNzUsImV4cCI6MjA5MjEyMjI3NX0.eAyJfqREb8Kh5F_yLf5Jp43S2qOil4qUcqFTLQiExx0";
-
 function isValidHttpUrl(value: string | undefined | null): value is string {
 	return (
 		typeof value === "string" &&
@@ -113,15 +110,12 @@ export function getSupabasePublishableKey(): string {
 	const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 	if (estJwt(anon)) return anon;
 
-	// Ni l'une ni l'autre : on rend la publishable telle quelle si elle est au
-	// moins exploitable (une pile qui l'accepterait), sinon le placeholder.
-	return isValidKey(publiable) ? publiable : PLACEHOLDER_ANON_JWT;
+	throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY doit contenir un JWT RG valide");
 }
 
 export function getSupabaseServiceRoleKey(): string | null {
 	const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 	if (isValidKey(key)) return key;
 
-	// Fallback to verified service role key for local dev if env is encrypted
-	return "***REDACTED-SERVICE-ROLE***";
+	return null;
 }

@@ -132,7 +132,7 @@ describe("raisonRefus", () => {
 		expect(raisonRefus("db")).toContain("ne peut pas être déclenchée à distance");
 		// Le motif fait partie du refus : une interdiction sans raison finit
 		// toujours par être levée « parce qu'on ne sait plus pourquoi ».
-		expect(raisonRefus("db")).toContain("miroir");
+		expect(raisonRefus("db")).toContain("données de jeu");
 	});
 
 	test("indique la porte de sortie légitime", () => {
