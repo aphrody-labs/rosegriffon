@@ -17,7 +17,6 @@ const PRIVE = [
 	"/admin/",
 	"/dashboard/",
 	"/login",
-	"/complete-profile",
 	"/forgot-password",
 	"/reset-password",
 	"/auth/",
