@@ -1,25 +1,14 @@
 import { passkeyClient } from "@better-auth/passkey/client";
 import { twoFactorClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
+import { resolveAuthBaseURL } from "./auth-base-url";
 
 const getBaseURL = () => {
-	if (typeof window !== "undefined") {
-		const origin = window.location.origin;
-		if (origin?.startsWith("http") && origin.includes("rosegriffon.fr")) {
-			return "https://rosegriffon.fr";
-		}
-		if (origin && /^https?:\/\//.test(origin)) return origin;
-	}
-	const url = process.env.BETTER_AUTH_URL;
-	if (
-		!url ||
-		url === "undefined" ||
-		url === "null" ||
-		!url.startsWith("http")
-	) {
-		return "https://rosegriffon.fr";
-	}
-	return url;
+	return resolveAuthBaseURL({
+		origin: typeof window !== "undefined" ? window.location.origin : null,
+		configured: process.env.BETTER_AUTH_URL,
+		production: process.env.NODE_ENV === "production",
+	});
 };
 
 export const authClient = createAuthClient({

@@ -260,6 +260,7 @@ export default async function AchilleaHomePage() {
 		{ featured, featuredParticipants, otherActive },
 		classement,
 		chiffresEsport,
+		classementPaliers,
 		clans,
 		tournaments,
 		playlists,
@@ -267,6 +268,7 @@ export default async function AchilleaHomePage() {
 		loadTournamentData(),
 		lireClassement(2, 5),
 		lireChiffresEsport(),
+		createAchilleaClient().ranked.tiers(2),
 		lireClansActifs(4),
 		lireTournoisActifs(4),
 		chargerPlaylists(),
@@ -296,7 +298,7 @@ export default async function AchilleaHomePage() {
 			/>
 
 			{/* 3. L'Échelle des 11 Paliers ELO (Fer à Légendaire) */}
-			<RankedTiersGrid />
+			<RankedTiersGrid tiers={classementPaliers.ok ? classementPaliers.value : []} />
 
 			{/* 4. Playlists YouTube & Replays de Matchs */}
 			{playlists.length > 0 && (

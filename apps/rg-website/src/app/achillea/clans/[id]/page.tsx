@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { metadonneesAchillea, resume } from "@/app/achillea/metadonnees";
 import { getPublicClan } from "@/lib/achillea/unified-clans";
+import { createAchilleaClient } from "@/lib/achillea";
+import type { ClanMemberDTO } from "@rosegriffon/achillea-types";
 import ClanProfileClient from "./clan-profile-client";
 
 /*
@@ -56,5 +58,15 @@ export default async function ClanProfilePage({
 	params: Promise<{ id: string }>;
 }) {
 	const { id } = await params;
-	return <ClanProfileClient id={id} />;
+	const clanId = Number(id);
+	if (!Number.isSafeInteger(clanId) || clanId <= 0) return <ClanProfileClient id={id} />;
+	const [clanResult, membersResult] = await Promise.allSettled([
+		getPublicClan(clanId),
+		createAchilleaClient().clans.members(clanId),
+	]);
+	const initialClan = clanResult.status === "fulfilled" ? clanResult.value : null;
+	const initialMembers: ClanMemberDTO[] | null = membersResult.status === "fulfilled" && membersResult.value.ok
+		? membersResult.value.value
+		: null;
+	return <ClanProfileClient id={id} initialClan={initialClan} initialMembers={initialMembers} />;
 }
