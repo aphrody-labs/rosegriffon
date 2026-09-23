@@ -276,3 +276,18 @@ seules sources de vérité ; ce dépôt ne publie plus de table de ports.
   `/storage/v1` et `/realtime/v1` depuis `rg-storage`/`rg-realtime`), et le
   contrôle `check:achillea-services` qui validait ces fichiers.
 - Chemin du dépôt de données du jeu : `/home/ubuntu/nie` (et non plus `niers`).
+
+## Correctifs production post-migration — 23/09/2026
+
+- ISR : `experimental.isrFlushToDisk: false` (Next 16.3). La release est immuable
+  (`ProtectSystem=strict`) : les pages régénérées restent en cache mémoire au lieu
+  d'échouer en `EROFS` dans `.next/server/app`.
+- Auras : `getAurasList` lit les tables de base avec `DISTINCT ON (name_fr)` (même
+  sémantique que les vues `*_clean`, dont la liste de colonnes figée n'a pas
+  `asset_code`/`element_id`/`sub_type` pour souls, awakenings et mode_changes).
+- Emblèmes d'équipe : `TEAM_EMBLEM_MAP` → `emNNNNNN` → CDN ; les `emblem_url`
+  legacy `0x<CRC>.webp` du bucket `menu` disparu donnent `null` (repli UI, plus de 404).
+- `assemble-vps-release.sh` n'embarque que les unités `.service` du catalogue ; les
+  timers `rg-sauvegarde`/`rg-infra-monitor` appartiennent à `aphrody-infra`.
+- Stockage : les 381 objets du bucket `images` (fusion Achilléa) ont été copiés de
+  `/var/www/achillea-storage/images` vers `/var/www/rg-storage/images` (copie, source conservée).

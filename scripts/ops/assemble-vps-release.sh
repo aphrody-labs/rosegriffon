@@ -209,7 +209,10 @@ catalog = json.loads(pathlib.Path(sys.argv[2]).read_text())
 commit = sys.argv[3]
 infra_units = pathlib.Path(sys.argv[4]) / 'systemd'
 infra_commit = sys.argv[5]
-services = [service for service in catalog['services'] if service['id'].startswith('rg-')]
+# Timers (backups, monitor) are host-owned by aphrody-infra and never shipped in
+# the release; the activation adapter applies the same filter to its roster.
+services = [service for service in catalog['services']
+            if service['id'].startswith('rg-') and service['unit'].endswith('.service')]
 for service in services:
     name = service['id']
     unit = service['unit']

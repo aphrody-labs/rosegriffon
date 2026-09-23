@@ -80,6 +80,14 @@ const nextConfig: NextConfig = {
 		 * n'existe pas, la navigation reste exactement ce qu'elle était.
 		 */
 		viewTransition: true,
+		/**
+		 * Production runs from an immutable release (/srv/rg/releases/<id>,
+		 * ProtectSystem=strict): regenerated ISR pages must not be written back
+		 * into `.next/server/app`, which is read-only and produced thousands of
+		 * EROFS "Failed to update prerender cache" errors. Regenerated entries
+		 * stay in the in-memory cache; build-time prerenders are still read.
+		 */
+		isrFlushToDisk: false,
 		optimizePackageImports: [
 			"lucide-react",
 			"date-fns",
