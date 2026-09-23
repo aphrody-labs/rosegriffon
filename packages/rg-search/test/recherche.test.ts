@@ -5,6 +5,7 @@ import {
 	construireRequete,
 	formaterLigne,
 	grouperParDomaine,
+	LIBELLES_TYPES_RECHERCHE,
 	LONGUEUR_MINIMALE,
 	motifIlike,
 	rechercherPartout,
@@ -38,13 +39,35 @@ describe("requête d'union", () => {
 		expect(sql).toContain('achillea."user"');
 	});
 
+	test("couvre les types Wiki réellement affichés par la recherche globale", () => {
+		for (const table of [
+			"inagle_keshins_clean",
+			"inagle_souls_clean",
+			"inagle_miximax_clean",
+			"inagle_awakenings_clean",
+			"inagle_mode_changes_clean",
+			"inagle_auras",
+			"inagle_teams",
+			"patch_notes",
+		]) {
+			expect(sql).toContain(`FROM public.${table}`);
+		}
+		// Les tactiques sont classées depuis inagle_items, sans seconde lecture.
+		expect(sql.match(/FROM public\.inagle_items\b/g)).toHaveLength(1);
+		expect(sql.match(/FROM public\.articles\b/g)).toHaveLength(1);
+		expect(sql).toContain("CASE WHEN category = 'special_tactics'");
+		expect(sql).toContain("name_en ILIKE $1");
+		expect(sql).toContain("name_ja ILIKE $1");
+		expect(sql).toContain("title_fr ILIKE $1");
+	});
+
 	test("n'interpole jamais de valeur : seuls $1 et $2 varient", () => {
 		expect(sql).toContain("$1");
 		expect(sql).toContain("$2");
-		// Aucune valeur littérale entre guillemets simples hormis les filtres
-		// constants déclarés dans les sources.
+		// Aucune valeur saisie par l'utilisateur n'est interpolée : les seules
+		// chaînes SQL sont les catégories et filtres constants du paquet.
 		const litteraux = sql.match(/'[^']*'/g) ?? [];
-		expect(litteraux).toEqual(["'published'"]);
+		expect(litteraux).toEqual(["'published'", "'special_tactics'"]);
 	});
 
 	test("chaque branche porte son index de source", () => {
@@ -54,7 +77,8 @@ describe("requête d'union", () => {
 	});
 
 	test("le nombre de branches suit le nombre de sources", () => {
-		expect(sql.split("UNION ALL").length).toBe(7);
+		expect(sql.split("UNION ALL").length).toBe(15);
+		expect((sql.match(/FROM /g) ?? []).length).toBe(15);
 	});
 });
 
@@ -90,6 +114,60 @@ describe("mise en forme", () => {
 		const b = formaterLigne(ligne("4", "42"), BASES_PAR_DEFAUT);
 		expect(a?.id).not.toBe(b?.id);
 	});
+
+	test("distingue BASARA et tactique avec des liens Wiki réels", () => {
+		expect(
+			formaterLigne({ ...ligne("1", "mark"), detail: "BASARA" }, BASES_PAR_DEFAUT)
+		).toMatchObject({
+			href: "/wiki/chara/mark",
+			type: "basara",
+		});
+		expect(
+			formaterLigne({ ...ligne("3", "wht0001"), detail: "special_tactics" }, BASES_PAR_DEFAUT)
+		).toMatchObject({
+			href: "/wiki/tactic/wht0001",
+			type: "tactique",
+		});
+		expect(
+			formaterLigne({ ...ligne("3", "item01"), detail: "consume" }, BASES_PAR_DEFAUT)
+		).toMatchObject({
+			href: "/wiki/item/item01",
+			type: "objet",
+		});
+	});
+
+	test("classe les actualités Azalée dans Wiki sans relire articles", () => {
+		expect(
+			formaterLigne({ ...ligne("0", "azalee-news"), detail: "azalee" }, BASES_PAR_DEFAUT)
+		).toMatchObject({
+			domaine: "wiki",
+			href: "/news/azalee-news",
+			type: "article",
+		});
+		expect(
+			formaterLigne({ ...ligne("0", "rg-news"), detail: "website" }, BASES_PAR_DEFAUT)
+		).toMatchObject({
+			domaine: "association",
+			href: "/news/rg-news",
+		});
+	});
+
+	test("adresse toutes les auras, équipes et notes de mise à jour", () => {
+		const chemins = [
+			["7", "keshin", "/wiki/aura/esprits-guerriers/42"],
+			["8", "totem", "/wiki/aura/totems/42"],
+			["9", "miximax", "/wiki/aura/miximax/42"],
+			["10", "eveil", "/wiki/aura/eveil/42"],
+			["11", "changement-mode", "/wiki/aura/changement-mode/42"],
+			["12", "aura", "/wiki/aura/autres/42"],
+			["13", "equipe", "/wiki/equipe/42"],
+			["14", "patchnote", "/wiki/patch-notes/42"],
+		] as const;
+		for (const [source, type, href] of chemins) {
+			expect(formaterLigne(ligne(source), BASES_PAR_DEFAUT)).toMatchObject({ type, href });
+			expect(LIBELLES_TYPES_RECHERCHE[type].length).toBeGreaterThan(0);
+		}
+	});
 });
 
 describe("recherche complète", () => {
@@ -123,15 +201,13 @@ describe("recherche complète", () => {
 		expect(resultats[1]?.titre).toBe("Axel");
 	});
 
-	/**
-	 * Le miroir Achilléa peut être absent (machine de développement, schéma
-	 * retiré). La recherche doit alors dégrader, pas casser la page.
-	 */
-	test("ne lève jamais quand une source est indisponible", async () => {
+	test("remonte une panne SQL au lieu de la confondre avec zéro résultat", async () => {
 		const casse = async () => {
 			throw new Error('relation "achillea.clan" does not exist');
 		};
-		expect(await rechercherPartout(casse, "axel")).toEqual([]);
+		expect(rechercherPartout(casse, "axel")).rejects.toThrow(
+			'relation "achillea.clan" does not exist'
+		);
 	});
 
 	test("respecte la limite totale", async () => {
