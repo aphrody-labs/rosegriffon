@@ -26,6 +26,24 @@ describe("public realtime events", () => {
 		});
 	});
 
+	test("only broadcasts profile ids, never account details", () => {
+		const event = {
+			schema: "public",
+			table: "profiles",
+			eventType: "UPDATE" as const,
+			new: { id: "user-1", email: "private@example.test", address: "secret", full_name: "Private" },
+			old: { id: "user-1", email: "old@example.test", role: "admin" },
+		};
+		expect(publicEvent(event)).toEqual({
+			schema: "public",
+			table: "profiles",
+			eventType: "UPDATE",
+			new: { id: "user-1" },
+			old: { id: "user-1" },
+			truncated: true,
+		});
+	});
+
 	test("passes public content events through and blocks unknown tables", () => {
 		const comment = { schema: "public", table: "comments", eventType: "INSERT" as const, new: { id: 1 } };
 		expect(publicEvent(comment)).toBe(comment);
