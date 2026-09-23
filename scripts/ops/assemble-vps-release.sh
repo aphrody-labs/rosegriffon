@@ -118,7 +118,13 @@ for raw in source.read_text().splitlines():
     if not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', key) or key in seen:
         raise SystemExit('invalid or duplicate website environment key')
     seen.add(key)
-    parts = [''] if value == '' else shlex.split(value, comments=False, posix=True)
+    # JSON credentials can be unquoted and contain spaces; Docker accepts the
+    # entire text after '=' as one value. Decode only quoted dotenv values.
+    if value.startswith(('"{', "'{")) and value.endswith(value[0]):
+        # Legacy service-account JSON contains unescaped interior quotes.
+        parts = [value[1:-1]]
+    else:
+        parts = shlex.split(value, comments=False, posix=True) if value.startswith(('"', "'")) else [value]
     if len(parts) != 1 or '\n' in parts[0] or '\r' in parts[0]:
         raise SystemExit('invalid website environment value')
     lines.append(f'{key}={parts[0]}\n')
