@@ -12,10 +12,11 @@
  * renvoie `#000000` sans prévenir.
  */
 
-/** Les 4 thèmes unifiés, tels que posés en classe sur `<html>`. */
+/** Les 5 thèmes unifiés, tels que posés en classe sur `<html>`. */
 export const NOMS_THEMES = [
 	"theme-roy",
 	"theme-gaelle",
+	"theme-azalee-light",
 	"theme-azalee-dark",
 	"theme-achillea",
 ] as const;
@@ -28,7 +29,7 @@ export type RolesMd3 = Readonly<Record<keyof (typeof THEMES)["theme-roy"]["md3"]
 /** Rôles shadcn (pont MD3 → shadcn) résolus pour un thème donné. */
 export type RolesShadcn = Readonly<Record<keyof (typeof THEMES)["theme-roy"]["shadcn"], string>>;
 
-/** Couleurs de marque Rose Griffon — identiques dans les 4 thèmes. */
+/** Couleurs de marque Rose Griffon — identiques dans les 5 thèmes. */
 export const MARQUE = {
 	marine: "#0a152c",
 	rose: "#f13f8a",
@@ -63,7 +64,7 @@ export const FORMES = {
 	full: 9999,
 } as const;
 
-/** Tokens résolus des 4 thèmes. */
+/** Tokens résolus des 5 thèmes. */
 export const THEMES = {
 	"theme-roy": {
 		md3: {
@@ -201,6 +202,75 @@ export const THEMES = {
 			sidebarAccentForeground: "#ffffff",
 			sidebarBorder: "rgba(255, 196, 110, 0.3)",
 			sidebarRing: "rgba(255, 196, 110, 0.4)",
+		},
+	},
+	"theme-azalee-light": {
+		md3: {
+			primary: "#f2a93b",
+			onPrimary: "#2d1600",
+			primaryContainer: "#ffddb2",
+			onPrimaryContainer: "#2d1600",
+			secondary: "#a92335",
+			onSecondary: "#ffffff",
+			secondaryContainer: "#ffd9df",
+			onSecondaryContainer: "#3b0718",
+			tertiary: "#765b28",
+			onTertiary: "#ffffff",
+			tertiaryContainer: "#ffdea6",
+			onTertiaryContainer: "#281900",
+			error: "#ba1a1a",
+			onError: "#ffffff",
+			errorContainer: "#ffdad6",
+			onErrorContainer: "#410002",
+			background: "#fff8f5",
+			onBackground: "#241a15",
+			surface: "#fff8f5",
+			onSurface: "#241a15",
+			surfaceVariant: "#f4ded2",
+			onSurfaceVariant: "#52443c",
+			outline: "#84746a",
+			outlineVariant: "#d7c3b7",
+			scrim: "#000000",
+			shadow: "#000000",
+			inverseSurface: "#3d2e27",
+			inverseOnSurface: "#ffede6",
+			inversePrimary: "#ffc66c",
+			surfaceDim: "#ead8d0",
+			surfaceBright: "#fff8f5",
+			surfaceContainerLowest: "#ffffff",
+			surfaceContainerLow: "#fff2ed",
+			surfaceContainer: "#f9ece6",
+			surfaceContainerHigh: "#f3e6df",
+			surfaceContainerHighest: "#ede0d9",
+		},
+		shadcn: {
+			background: "#fff8f5",
+			foreground: "#241a15",
+			card: "#fff2ed",
+			cardForeground: "#241a15",
+			popover: "#f3e6df",
+			popoverForeground: "#241a15",
+			primary: "#f2a93b",
+			primaryForeground: "#2d1600",
+			secondary: "#ffd9df",
+			secondaryForeground: "#3b0718",
+			muted: "#f9ece6",
+			mutedForeground: "#52443c",
+			accent: "#ffdea6",
+			accentForeground: "#281900",
+			destructive: "#ba1a1a",
+			destructiveForeground: "#ffffff",
+			border: "#d7c3b7",
+			input: "#84746a",
+			ring: "#f2a93b",
+			sidebar: "#fff8f5",
+			sidebarForeground: "#241a15",
+			sidebarPrimary: "#f2a93b",
+			sidebarPrimaryForeground: "#2d1600",
+			sidebarAccent: "#ffdea6",
+			sidebarAccentForeground: "#281900",
+			sidebarBorder: "#d7c3b7",
+			sidebarRing: "#f2a93b",
 		},
 	},
 	"theme-azalee-dark": {

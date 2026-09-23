@@ -12,12 +12,18 @@ export interface RGThemeProviderProps extends ThemeProviderProps {
 	children: React.ReactNode;
 }
 
-export const CHROME_THEMES: ThemeType[] = ["roy", "gaelle"];
+export const CHROME_THEMES: ThemeType[] = [
+	"roy",
+	"gaelle",
+	"azalee-light",
+	"azalee-dark",
+	"achillea",
+];
 
 /**
  * Provider thèmes Rose Griffon — wrap next-themes avec la liste explicite
- * des thèmes supportés sur le chrome applicatif (Roy et Gaëlle). La classe est appliquée sur
- * `<html>` (`class="roy"`, etc.) et `styles.css` aligne sur ces noms.
+ * des cinq thèmes supportés. La classe est appliquée sur `<html>`
+ * (`class="roy"`, etc.) et `styles.css` aligne sur ces noms.
  */
 export function ThemeProvider({
 	children,
@@ -54,16 +60,14 @@ export function useTheme() {
 	}, []);
 
 	const toggleTheme = React.useCallback(() => {
-		const ordered: ThemeType[] = ["roy", "gaelle"];
-		const idx = ordered.indexOf(ctx.theme as ThemeType);
-		const next = ordered[(idx + 1) % ordered.length] ?? "roy";
+		const idx = CHROME_THEMES.indexOf(ctx.theme as ThemeType);
+		const next = CHROME_THEMES[(idx + 1) % CHROME_THEMES.length] ?? "roy";
 		ctx.setTheme(next);
 	}, [ctx]);
 
 	const cycleTheme = React.useCallback(() => {
-		const ordered: ThemeType[] = ["roy", "gaelle"];
-		const idx = ordered.indexOf(ctx.theme as ThemeType);
-		const next = ordered[(idx + 1) % ordered.length] ?? "roy";
+		const idx = CHROME_THEMES.indexOf(ctx.theme as ThemeType);
+		const next = CHROME_THEMES[(idx + 1) % CHROME_THEMES.length] ?? "roy";
 		ctx.setTheme(next);
 	}, [ctx]);
 
