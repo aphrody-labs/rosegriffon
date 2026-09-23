@@ -30,11 +30,13 @@ import { getPersonalityName, PERSONALITY_NAMES } from "../src/game/personality";
 import { interpolateVariantStats } from "../src/game/stats-interpolation";
 import { base64ToUtf8, decodeTeamCode, encodeTeamCode, utf8ToBase64 } from "../src/game/team-code";
 import { containsJapanese, escapeRegExp, stripRubyAnnotations } from "../src/text/japanese-detect";
+import { resolveMirrorPath } from "../src/config";
 
 /** Chemin du binaire CLI (exécuté tel quel par Bun). */
 const CLI_ENTRY = path.resolve(import.meta.dir, "../src/cli.ts");
 /** Racine du monorepo : cwd attendu par les commandes qui lisent des données. */
 const REPO_ROOT = path.resolve(import.meta.dir, "../../..");
+const hasMirror = resolveMirrorPath() !== null;
 
 /**
  * Ordre d'enregistrement attendu. C'est un test de contrat : réordonner une
@@ -195,7 +197,12 @@ describe("options déclarées", () => {
 		skill: ["-j, --json"],
 		item: ["-j, --json"],
 		team: ["-j, --json"],
-		"random-team": ["-f, --formation <formation>", "-e, --element <element>", "-p, --playstyle <playstyle>", "-j, --json"],
+		"random-team": [
+			"-f, --formation <formation>",
+			"-e, --element <element>",
+			"-p, --playstyle <playstyle>",
+			"-j, --json",
+		],
 		"team-builder": ["-j, --json", "-f, --formation <formation>"],
 		test: ["-p, --playwright"],
 		shell: [],
@@ -208,7 +215,10 @@ describe("options déclarées", () => {
 		for (const [name, flags] of Object.entries(EXPECTED_FLAGS)) {
 			const cmd = program.commands.find((c) => c.name() === name);
 			expect(cmd, `commande ${name} absente`).toBeDefined();
-			expect(cmd!.options.map((o) => o.flags), `drapeaux de ${name}`).toEqual(flags);
+			expect(
+				cmd!.options.map((o) => o.flags),
+				`drapeaux de ${name}`
+			).toEqual(flags);
 		}
 	});
 
@@ -253,18 +263,21 @@ describe("--help", () => {
 		}
 	});
 
-	test.each([...EXPECTED_COMMANDS])("`azalee %s --help` s'affiche sans exécuter la commande", (name) => {
-		const help = captureHelp([name, "--help"]);
-		expect(help).toContain(`Usage: azalee ${name}`);
-		expect(help).toContain("display help for command");
-	});
+	test.each([...EXPECTED_COMMANDS])(
+		"`azalee %s --help` s'affiche sans exécuter la commande",
+		(name) => {
+			const help = captureHelp([name, "--help"]);
+			expect(help).toContain(`Usage: azalee ${name}`);
+			expect(help).toContain("display help for command");
+		}
+	);
 
 	test.each(["push", "migrate", "load", "sync", "typecheck", "verify", "all"])(
 		"`azalee data %s --help` s'affiche",
 		(name) => {
 			const help = captureHelp(["data", name, "--help"]);
 			expect(help).toContain(`Usage: azalee data ${name}`);
-		},
+		}
 	);
 
 	test("une option inconnue est refusée avec un code d'erreur commander", () => {
@@ -280,21 +293,38 @@ describe("--help", () => {
 });
 
 describe("exécution réelle", () => {
-	test("`db --sqlite --json` renvoie un tableau JSON depuis le miroir", async () => {
-		const { code, stdout } = await runCli(["db", "select count(*) as n from inagle_teams", "--sqlite", "--json"]);
-		expect(code).toBe(0);
-		const rows = JSON.parse(stdout) as Array<{ n: number }>;
-		expect(Array.isArray(rows)).toBe(true);
-		expect(rows[0].n).toBeGreaterThan(0);
-	}, 30_000);
+	test.skipIf(!hasMirror)(
+		"`db --sqlite --json` renvoie un tableau JSON depuis le miroir",
+		async () => {
+			const { code, stdout } = await runCli([
+				"db",
+				"select count(*) as n from inagle_teams",
+				"--sqlite",
+				"--json",
+			]);
+			expect(code).toBe(0);
+			const rows = JSON.parse(stdout) as Array<{ n: number }>;
+			expect(Array.isArray(rows)).toBe(true);
+			expect(rows[0].n).toBeGreaterThan(0);
+		},
+		30_000
+	);
 
-	test("`db --sqlite` sans --json rend une table ASCII", async () => {
-		const { code, stdout } = await runCli(["db", "select count(*) as n from inagle_teams", "--sqlite"]);
-		expect(code).toBe(0);
-		expect(stdout).toContain("SQLite DB utilisé :");
-		expect(stdout).toContain("┌");
-		expect(stdout).toContain("│ n ");
-	}, 30_000);
+	test.skipIf(!hasMirror)(
+		"`db --sqlite` sans --json rend une table ASCII",
+		async () => {
+			const { code, stdout } = await runCli([
+				"db",
+				"select count(*) as n from inagle_teams",
+				"--sqlite",
+			]);
+			expect(code).toBe(0);
+			expect(stdout).toContain("SQLite DB utilisé :");
+			expect(stdout).toContain("┌");
+			expect(stdout).toContain("│ n ");
+		},
+		30_000
+	);
 
 	test("`serve --json` liste les routes de l'API headless et quitte", async () => {
 		const { code, stdout } = await runCli(["serve", "--json"]);
@@ -304,14 +334,18 @@ describe("exécution réelle", () => {
 		expect(payload.routes).toContain("/api/characters");
 	}, 30_000);
 
-	test("`search --json` renvoie des entités du jeu", async () => {
-		const { code, stdout } = await runCli(["search", "mark", "--json"]);
-		expect(code).toBe(0);
-		const results = JSON.parse(stdout) as Array<{ id: string; name: string; type: string }>;
-		expect(results.length).toBeGreaterThan(0);
-		expect(results[0]).toHaveProperty("name");
-		expect(results[0]).toHaveProperty("type");
-	}, 120_000);
+	test.skipIf(!hasMirror)(
+		"`search --json` renvoie des entités du jeu",
+		async () => {
+			const { code, stdout } = await runCli(["search", "mark", "--json"]);
+			expect(code).toBe(0);
+			const results = JSON.parse(stdout) as Array<{ id: string; name: string; type: string }>;
+			expect(results.length).toBeGreaterThan(0);
+			expect(results[0]).toHaveProperty("name");
+			expect(results[0]).toHaveProperty("type");
+		},
+		120_000
+	);
 
 	test("une entrée vide produit un objet d'erreur JSON, pas une trace", async () => {
 		const { stdout } = await runCli(["search", "", "--json"]);
@@ -356,10 +390,42 @@ describe("découpage des lignes du shell", () => {
 describe("règles de jeu remontées dans la lib", () => {
 	const variant = {
 		stats: {
-			lv1: { kick: 10, control: 10, technique: 10, pressure: 10, physical: 10, agility: 10, intelligence: 10 },
-			lv30: { kick: 40, control: 40, technique: 40, pressure: 40, physical: 40, agility: 40, intelligence: 40 },
-			lv50: { kick: 60, control: 60, technique: 60, pressure: 60, physical: 60, agility: 60, intelligence: 60 },
-			lv99: { kick: 100, control: 100, technique: 100, pressure: 100, physical: 100, agility: 100, intelligence: 100 },
+			lv1: {
+				kick: 10,
+				control: 10,
+				technique: 10,
+				pressure: 10,
+				physical: 10,
+				agility: 10,
+				intelligence: 10,
+			},
+			lv30: {
+				kick: 40,
+				control: 40,
+				technique: 40,
+				pressure: 40,
+				physical: 40,
+				agility: 40,
+				intelligence: 40,
+			},
+			lv50: {
+				kick: 60,
+				control: 60,
+				technique: 60,
+				pressure: 60,
+				physical: 60,
+				agility: 60,
+				intelligence: 60,
+			},
+			lv99: {
+				kick: 100,
+				control: 100,
+				technique: 100,
+				pressure: 100,
+				physical: 100,
+				agility: 100,
+				intelligence: 100,
+			},
 		},
 	};
 
@@ -477,8 +543,14 @@ describe("formations partagées avec l'éditeur web", () => {
 	test("chacune décrit 11 emplacements dont un gardien", () => {
 		for (const f of LEGACY_FORMATIONS) {
 			expect(f.positions, f.id).toHaveLength(11);
-			expect(f.positions.filter((p) => p.role === "GK"), f.id).toHaveLength(1);
-			expect(f.positions.map((p) => p.index), f.id).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+			expect(
+				f.positions.filter((p) => p.role === "GK"),
+				f.id
+			).toHaveLength(1);
+			expect(
+				f.positions.map((p) => p.index),
+				f.id
+			).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 		}
 	});
 });

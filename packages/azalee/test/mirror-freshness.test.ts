@@ -34,7 +34,9 @@ async function lireNom(): Promise<string | undefined> {
 	return data?.[0]?.name;
 }
 
-describe("réouverture du miroir après un swap", () => {
+// Le publisher remplace un symlink puis supprime un snapshot encore ouvert.
+// Windows verrouille ce fichier SQLite ; ce scénario est propre au système POSIX du service.
+describe.skipIf(process.platform === "win32")("réouverture du miroir après un swap", () => {
 	beforeEach(async () => {
 		await Bun.spawn(["rm", "-rf", BAC]).exited;
 		await Bun.spawn(["mkdir", "-p", BAC]).exited;
