@@ -41,22 +41,7 @@ export async function getCurrentPublicProfile(): Promise<PublicProfile | null> {
 		.select(PUBLIC_PROFILE_COLUMNS)
 		.eq("id", user.id)
 		.maybeSingle();
-	if (direct) return direct as PublicProfile;
-
-	const { data: account } = await db
-		.from("account")
-		.select("account_id")
-		.eq("user_id", user.id)
-		.eq("provider_id", "discord")
-		.maybeSingle();
-	const discordId = (account as { account_id?: string } | null)?.account_id;
-	if (!discordId) return null;
-	const { data: viaDiscord } = await db
-		.from("profiles")
-		.select(PUBLIC_PROFILE_COLUMNS)
-		.eq("discord_id", discordId)
-		.maybeSingle();
-	return (viaDiscord as PublicProfile | null) ?? null;
+	return (direct as PublicProfile | null) ?? null;
 }
 
 function firstIssue(error: z.ZodError): string {
