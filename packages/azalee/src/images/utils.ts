@@ -103,8 +103,12 @@ const CHARACTER_MODEL_CODES = new Set(ASSET_MANIFEST.characterModel as readonly 
  * sont qu'en `.g4mg` — pas encore assemblables côté serving → exclus du gate (pas de
  * bouton 3D mort). Régénérer le manifeste quand la couche serving gagne le support g4mg.
  */
-const KESHIN_MODEL_CODES = new Set((ASSET_MANIFEST.keshinModel as { keshin: readonly string[] }).keshin);
-const ARMURE_MODEL_CODES = new Set((ASSET_MANIFEST.keshinModel as { armures: readonly string[] }).armures);
+const KESHIN_MODEL_CODES = new Set(
+	(ASSET_MANIFEST.keshinModel as { keshin: readonly string[] }).keshin
+);
+const ARMURE_MODEL_CODES = new Set(
+	(ASSET_MANIFEST.keshinModel as { armures: readonly string[] }).armures
+);
 
 /**
  * Set EXHAUSTIF des codes uniforme PERSONNELS `u<NNNNNNNN>` (8 chiffres) qui possèdent
@@ -123,7 +127,6 @@ const CHARACTER_UNIFORM_CODES = new Set<string>(MENU_ASSETS.uniformsPersonal);
 
 // Constantes globales
 export const CDN_URL = process.env.NEXT_PUBLIC_ASSET_URL || "https://azalee.rosegriffon.fr";
-export const CDN_ASSETS = CDN_URL; // Alias pour compatibilité
 
 /** Racine CDN du namespace menu — décodage live des CPK par `nie-model-serve`. */
 const MENU_CDN_BASE = "https://cdn.rosegriffon.fr/dx11/menu";
@@ -1037,21 +1040,24 @@ const MODEL_CHR_GLB_BASE = "https://cdn.rosegriffon.fr/model-chr";
 export type ChrModelSub = "waza" | "item" | "animal";
 
 const CHR_MODEL_CODES: Record<ChrModelSub, Set<string>> = {
-	 animal: new Set((ASSET_MANIFEST.chrModel as { animal: readonly string[] }).animal),
-	 item: new Set((ASSET_MANIFEST.chrModel as { item: readonly string[] }).item),
-	 waza: new Set((ASSET_MANIFEST.chrModel as { waza: readonly string[] }).waza),
+	animal: new Set((ASSET_MANIFEST.chrModel as { animal: readonly string[] }).animal),
+	item: new Set((ASSET_MANIFEST.chrModel as { item: readonly string[] }).item),
+	waza: new Set((ASSET_MANIFEST.chrModel as { waza: readonly string[] }).waza),
 };
 
 /** Basename RÉEL du `.g4tx` de texture par code (relevé sur l'index CPK, cf. `getChrModelTextureUrl`). */
-const CHR_MODEL_TEXTURES = (ASSET_MANIFEST.chrModel as { textures?: Record<string, Record<string, string>> })
-	.textures ?? {};
+const CHR_MODEL_TEXTURES =
+	(ASSET_MANIFEST.chrModel as { textures?: Record<string, Record<string, string>> }).textures ?? {};
 
 /**
  * Résout l'URL du modèle 3D générique d'un sous-domaine chr (`/model-chr/<sub>/<code>.glb`),
  * gardé sur le manifeste des codes réellement servis (gate anti-404). Renvoie `null` si le
  * code n'a pas de paire g4md+g4mg assemblable.
  */
-export function getChrModelGlbUrl(sub: ChrModelSub, code: string | undefined | null): string | null {
+export function getChrModelGlbUrl(
+	sub: ChrModelSub,
+	code: string | undefined | null
+): string | null {
 	if (!code) return null;
 	if (!CHR_MODEL_CODES[sub]?.has(code)) return null;
 	return `${MODEL_CHR_GLB_BASE}/${sub}/${code}.glb?v=${MODEL_FULL_VERSION}`;
@@ -1074,7 +1080,10 @@ export function listServedChrModelCodes(sub: ChrModelSub): string[] {
  *
  * Variantes redimensionnées via `?w=&format=webp` (cdn-variants).
  */
-export function getChrModelTextureUrl(sub: ChrModelSub, code: string | undefined | null): string | null {
+export function getChrModelTextureUrl(
+	sub: ChrModelSub,
+	code: string | undefined | null
+): string | null {
 	if (!code || !CHR_MODEL_CODES[sub]?.has(code)) return null;
 	const base = CHR_MODEL_TEXTURES[sub]?.[code];
 	if (!base) return null;

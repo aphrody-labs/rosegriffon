@@ -171,7 +171,7 @@ export const createPgClient = createBunPgClient;
 
 /**
  * Miroir SQLite des tables `inagle_*`. Résolution déléguée à la lib
- * (`SQLITE_DB_PATH` épinglé → miroir canonique niers → snapshot local de secours) :
+ * (`SQLITE_DB_PATH` épinglé → miroir canonique niers) :
  * une seule implémentation partagée par le CLI, l'API et le wiki web.
  */
 export function getSqlitePath(): string | null {

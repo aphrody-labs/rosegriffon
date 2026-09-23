@@ -8,7 +8,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -21,7 +21,7 @@ import {
 } from "../src/config";
 
 /** Sauvegarde/restauration des variables d'environnement lues par le module. */
-const ENV_KEYS = ["AZALEE_DATA_DIR", "SQLITE_DB_PATH"] as const;
+const ENV_KEYS = ["AZALEE_DATA_DIR", "SQLITE_DB_PATH", "NIERS_MIRROR"] as const;
 let savedEnv: Record<string, string | undefined> = {};
 
 beforeEach(() => {
@@ -40,6 +40,8 @@ afterEach(() => {
 
 const dataDir = resolveDataDir();
 const hasData = dataDir !== null;
+const mirrorPath = resolveMirrorPath();
+const hasMirror = mirrorPath !== null && existsSync(mirrorPath);
 
 describe("resolveDataDir — découverte du dossier d'artefacts", () => {
 	test.skipIf(!hasData)("trouve un dossier réel porteur d'au moins un marqueur", () => {
@@ -70,7 +72,7 @@ describe("configureAzalee / getAzaleeConfig / resetAzaleeConfig", () => {
 		expect(getAzaleeConfig().dataDir).toBe(path.resolve("."));
 	});
 
-	test("resetAzaleeConfig remet les trois clés à zéro", () => {
+	test("resetAzaleeConfig remet les deux clés à zéro", () => {
 		configureAzalee({ dataDir: "/a", mirrorPath: "/b" });
 		expect(Object.keys(getAzaleeConfig())).toHaveLength(2);
 		resetAzaleeConfig();
@@ -91,7 +93,28 @@ describe("configureAzalee / getAzaleeConfig / resetAzaleeConfig", () => {
 });
 
 describe("resolveMirrorPath — miroir SQLite des tables inagle_*", () => {
-	test.skipIf(!hasData)("résout un fichier SQLite réel", () => {
+	test("ignore les sauvegardes locales périmées quand le miroir canonique manque", () => {
+		const root = mkdtempSync(path.join(tmpdir(), "azalee-old-mirror-"));
+		try {
+			const backups = path.join(root, "backups");
+			mkdirSync(backups);
+			writeFileSync(path.join(backups, "mirror.sqlite"), "stale");
+			writeFileSync(path.join(backups, "supabase-2099-01-01.sqlite"), "stale");
+			configureAzalee({ dataDir: root });
+			delete process.env.SQLITE_DB_PATH;
+			process.env.NIERS_MIRROR = path.join(root, "missing-canonical.sqlite");
+
+			expect(resolveDataDir()).toBe(root);
+			expect(resolveMirrorPath()).toBeNull();
+		} finally {
+			if (path.dirname(root) !== path.resolve(tmpdir())) {
+				throw new Error("Refus de supprimer un dossier temporaire hors du répertoire prévu");
+			}
+			rmSync(root, { recursive: true, force: true });
+		}
+	});
+
+	test.skipIf(!hasMirror)("résout un fichier SQLite réel", () => {
 		const mirror = resolveMirrorPath();
 		expect(mirror).toBeString();
 		expect(existsSync(mirror as string)).toBe(true);
@@ -101,7 +124,7 @@ describe("resolveMirrorPath — miroir SQLite des tables inagle_*", () => {
 	test("mirrorPath explicite l'emporte sur tout le reste", () => {
 		process.env.SQLITE_DB_PATH = "/tmp/depuis-env.sqlite";
 		configureAzalee({ mirrorPath: "/tmp/explicite.sqlite" });
-		expect(resolveMirrorPath()).toBe("/tmp/explicite.sqlite");
+		expect(resolveMirrorPath()).toBe(path.resolve("/tmp/explicite.sqlite"));
 	});
 
 	test("SQLITE_DB_PATH l'emporte sur la découverte conventionnelle", () => {
