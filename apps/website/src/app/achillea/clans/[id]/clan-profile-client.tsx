@@ -30,14 +30,22 @@ import {
 	Network,
 } from "lucide-react";
 
-export default function ClanProfilePage({ id }: { id: string }) {
+export default function ClanProfilePage({
+	id,
+	initialClan = null,
+	initialMembers = null,
+}: {
+	id: string;
+	initialClan?: PublicClan | null;
+	initialMembers?: ClanMemberDTO[] | null;
+}) {
 	const clanId = Number(id);
 	const { isAuthenticated } = useAchilleaAuth();
 
-	const [clan, setClan] = useState<PublicClan | null>(null);
-	const [members, setMembers] = useState<ClanMemberDTO[]>([]);
+	const [clan, setClan] = useState<PublicClan | null>(initialClan);
+	const [members, setMembers] = useState<ClanMemberDTO[]>(initialMembers ?? []);
 	const [membersError, setMembersError] = useState<string | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(initialClan == null || initialMembers == null);
 	const [error, setError] = useState<string | null>(null);
 	const [activeTab, setActiveTab] = useState<"members" | "orgchart">("members");
 
@@ -54,6 +62,10 @@ export default function ClanProfilePage({ id }: { id: string }) {
 		async function loadClan() {
 			if (!Number.isSafeInteger(clanId) || clanId <= 0) {
 				setError("Identifiant de clan invalide");
+				setLoading(false);
+				return;
+			}
+			if (initialClan && initialMembers) {
 				setLoading(false);
 				return;
 			}
@@ -82,7 +94,7 @@ export default function ClanProfilePage({ id }: { id: string }) {
 		return () => {
 			isMounted = false;
 		};
-	}, [clanId]);
+	}, [clanId, initialClan, initialMembers]);
 
 	const handleApply = async () => {
 		if (!isAuthenticated) {

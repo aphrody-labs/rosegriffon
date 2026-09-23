@@ -17,10 +17,10 @@ import {
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
-export default function RankedTiersPage() {
+export default function RankedTiersPage({ initialTiers }: { initialTiers?: RankedTierInfo[] | null }) {
 	const [mode, setMode] = useState<2 | 4>(2);
-	const [tiers, setTiers] = useState<RankedTierInfo[]>([]);
-	const [loading, setLoading] = useState<boolean>(true);
+	const [tiers, setTiers] = useState<RankedTierInfo[]>(initialTiers ?? []);
+	const [loading, setLoading] = useState<boolean>(initialTiers == null);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -112,11 +112,12 @@ export default function RankedTiersPage() {
 						{totalPlayers > 0 ? `${totalPlayers} compétiteurs actifs` : "Saison active"}
 					</span>
 				</div>
-				{loading ? <p className="text-sm text-muted-foreground">Chargement des paliers…</p> : error ? <p role="alert" className="text-sm text-rose-400">{error}</p> : <TierDistribution tiers={tiers} />}
+				{loading && tiers.length === 0 ? <p className="text-sm text-muted-foreground">Chargement des paliers…</p> : error && tiers.length === 0 ? <p role="alert" className="text-sm text-rose-400">{error}</p> : <TierDistribution tiers={tiers} />}
+				{error && tiers.length > 0 && <p role="status" className="text-xs text-amber-400">{error} Les dernières données chargées restent affichées.</p>}
 			</div>
 
 			{/* Tiers Grid */}
-			{!loading && !error && <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+			{tiers.length > 0 && <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 				{tiers.map((tier, idx) => {
 					const badgePath = rankImagePath(tier.key, "/ranks");
 					const gradient =

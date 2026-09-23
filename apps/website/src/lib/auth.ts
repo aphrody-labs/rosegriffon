@@ -1,5 +1,6 @@
 import { createRoseGriffonAuth } from "@rosegriffon/auth";
 import { createPostgresClient } from "@rosegriffon/db/service";
+import { resolveAuthBaseURL } from "./auth-base-url";
 import { nextCookies } from "better-auth/next-js";
 import { getPgPool } from "@/lib/db/pg";
 import { sendEmail } from "@/lib/email";
@@ -71,27 +72,8 @@ export const auth = createRoseGriffonAuth({
 
 function getBetterAuthURL(): string {
 	const configured = process.env.BETTER_AUTH_URL?.trim();
-	if (
-		!configured ||
-		configured === "undefined" ||
-		configured === "null" ||
-		configured.startsWith("eyJ2Ijo")
-	) {
-		return "https://rosegriffon.fr";
-	}
-
-	try {
-		const parsed = new URL(configured);
-		const isLocalDevelopment =
-			parsed.protocol === "http:" &&
-			process.env.NODE_ENV !== "production" &&
-			(parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1");
-		return parsed.protocol === "https:" || isLocalDevelopment
-			? parsed.toString().replace(/\/+$/, "")
-			: "https://rosegriffon.fr";
-	} catch {
-		return "https://rosegriffon.fr";
-	}
+	if (configured?.startsWith("eyJ2Ijo")) return "https://rosegriffon.fr";
+	return resolveAuthBaseURL({ configured, production: process.env.NODE_ENV === "production" });
 }
 
 async function syncPatreonAccount(account: {

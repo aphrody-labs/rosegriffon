@@ -128,7 +128,8 @@ export async function lireChiffresEsport(): Promise<ChiffresEsport> {
 			parties_classees: string;
 		}>(
 			`SELECT (SELECT count(*) FROM achillea."user")                          AS joueurs,
-			        (SELECT count(*) FROM achillea.clan)                            AS clans,
+			        (SELECT count(*) FROM achillea.clan
+			          WHERE is_disbanded = false AND is_hidden = false)               AS clans,
 			        (SELECT COALESCE(sum(games_played), 0) / 2 FROM achillea.user_elo) AS parties_classees`
 		);
 

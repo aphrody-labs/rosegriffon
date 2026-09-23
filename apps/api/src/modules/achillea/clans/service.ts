@@ -216,10 +216,12 @@ export abstract class ClanService {
 		const base = db
 			.selectFrom("clan")
 			.selectAll()
-			.where("is_disbanded", "=", false);
+			.where("is_disbanded", "=", false)
+			.where("is_hidden", "=", false);
 		const [rows, countRow] = await Promise.all([
 			base.orderBy("clan_fame", "desc").limit(pageSize).offset((page - 1) * pageSize).execute(),
-			db.selectFrom("clan").select(({ fn }) => fn.countAll<number>().as("count")).where("is_disbanded", "=", false).executeTakeFirst(),
+			db.selectFrom("clan").select(({ fn }) => fn.countAll<number>().as("count"))
+				.where("is_disbanded", "=", false).where("is_hidden", "=", false).executeTakeFirst(),
 		]);
 
 		const data: ClanDTO[] = rows.map((r) => ({
@@ -241,6 +243,8 @@ export abstract class ClanService {
 			.selectFrom("clan")
 			.selectAll()
 			.where("id", "=", id)
+			.where("is_disbanded", "=", false)
+			.where("is_hidden", "=", false)
 			.executeTakeFirst();
 
 		if (!r) return null;

@@ -2,31 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { rankImagePath } from "@/lib/achillea";
 import { ArrowRight, Crown, Sparkles } from "lucide-react";
+import type { RankedTierInfo } from "@rosegriffon/achillea-types";
 
-export interface TierItem {
-	key: string;
-	minElo: number;
-	maxElo: number;
-	level: number;
-	color: string;
-	description: string;
-}
+const TIER_COLORS: Record<string, string> = {
+	Fer: "#959595", Bronze: "#b17253", Argent: "#7facb8", Or: "#c2ad88",
+	Platine: "#897e8b", Diamant: "#88f6ff", Émeraude: "#2d925c", Rubis: "#ff5648",
+	Divin: "#7edcb5", Supernova: "#f010ff", Légendaire: "#ffa910",
+};
 
-export const CANONICAL_TIERS: TierItem[] = [
-	{ key: "Fer", minElo: 0, maxElo: 149, level: 1, color: "#959595", description: "Débutants & premiers pas compétitifs" },
-	{ key: "Bronze", minElo: 150, maxElo: 299, level: 2, color: "#b17253", description: "Apprentissage des mécaniques et du rythme" },
-	{ key: "Argent", minElo: 300, maxElo: 449, level: 3, color: "#7facb8", description: "Maîtrise des bases et des duels individuels" },
-	{ key: "Or", minElo: 450, maxElo: 599, level: 4, color: "#c2ad88", description: "Tactique d'équipe et circulation de balle" },
-	{ key: "Platine", minElo: 600, maxElo: 749, level: 5, color: "#897e8b", description: "Niveau intermédiaire solide et vision du jeu" },
-	{ key: "Diamant", minElo: 750, maxElo: 899, level: 6, color: "#88f6ff", description: "Joueurs confirmés et tacticiens aguerris" },
-	{ key: "Émeraude", minElo: 900, maxElo: 1049, level: 7, color: "#2d925c", description: "Haut niveau compétitif et constance" },
-	{ key: "Rubis", minElo: 1050, maxElo: 1199, level: 8, color: "#ff5648", description: "Élite régionale et compétiteurs de tournois" },
-	{ key: "Divin", minElo: 1200, maxElo: 1349, level: 9, color: "#7edcb5", description: "Maîtres de la méta et leaders d'équipes" },
-	{ key: "Supernova", minElo: 1350, maxElo: 1499, level: 10, color: "#f010ff", description: "L'antichambre des champions suprêmes" },
-	{ key: "Légendaire", minElo: 1500, maxElo: 9999, level: 11, color: "#ffa910", description: "Le sommet absolu de la scène Inazuma Eleven" },
-];
-
-export function RankedTiersGrid({ className = "" }: { className?: string }) {
+export function RankedTiersGrid({ tiers, className = "" }: { tiers: RankedTierInfo[]; className?: string }) {
 	return (
 		<section
 			aria-labelledby="ranked-tiers-title"
@@ -58,9 +42,13 @@ export function RankedTiersGrid({ className = "" }: { className?: string }) {
 				</Link>
 			</div>
 
-			<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-2.5 sm:gap-3">
-				{CANONICAL_TIERS.map((tier) => {
+			{tiers.length === 0 ? (
+				<p role="status" className="text-sm text-on-surface-variant">Les seuils Achilléa sont temporairement indisponibles.</p>
+			) : <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-2.5 sm:gap-3">
+				{tiers.map((tier, index) => {
 					const badgeUrl = rankImagePath(tier.key, "/achillea/ranks");
+					const level = index + 1;
+					const color = TIER_COLORS[tier.key] ?? "#959595";
 					const pointsLabel =
 						tier.maxElo >= 9000
 							? `${tier.minElo}+ AP`
@@ -75,7 +63,7 @@ export function RankedTiersGrid({ className = "" }: { className?: string }) {
 							{/* Subtle top indicator with tier gradient */}
 							<div
 								className="absolute top-0 inset-x-0 h-1"
-								style={{ backgroundColor: tier.color }}
+								style={{ backgroundColor: color }}
 							/>
 
 							{/* Rank Badge Image */}
@@ -101,12 +89,12 @@ export function RankedTiersGrid({ className = "" }: { className?: string }) {
 
 							{/* Micro level indicator */}
 							<span className="text-[9px] uppercase tracking-wider text-muted-foreground/70 mt-1">
-								Rang #{tier.level}
+								Rang #{level}
 							</span>
 						</Link>
 					);
 				})}
-			</div>
+			</div>}
 		</section>
 	);
 }

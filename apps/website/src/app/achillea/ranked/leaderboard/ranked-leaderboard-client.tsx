@@ -146,7 +146,7 @@ export default function RankedLeaderboardPage({
 						<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
 						<p className="text-sm text-muted-foreground">Chargement du classement...</p>
 					</div>
-				) : error ? (
+				) : error && !data ? (
 					<div role="alert" className="py-16 text-center text-rose-400 text-sm">{error}</div>
 				) : filteredEntries.length === 0 ? (
 					<div className="py-16 text-center text-muted-foreground text-sm">
@@ -224,6 +224,7 @@ export default function RankedLeaderboardPage({
 						</table>
 					</div>
 				)}
+				{error && data && <p role="status" className="px-4 py-2 border-t border-border text-center text-xs text-amber-400">{error} Les dernières données chargées restent affichées.</p>}
 
 				{/* Pagination */}
 				{totalPages > 1 && (
