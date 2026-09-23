@@ -982,15 +982,37 @@
 	}
 
 	/* ─── Achilléa Ranking Gradients ──────────────────────────────────── */
-	.rank-gradient-1 { background: linear-gradient(135deg, var(--achillea-rank-1-stops)); }
-	.rank-gradient-2 { background: linear-gradient(135deg, var(--achillea-rank-2-stops)); }
-	.rank-gradient-3 { background: linear-gradient(135deg, var(--achillea-rank-3-stops)); }
-	.rank-gradient-4 { background: linear-gradient(135deg, var(--achillea-rank-4-stops)); }
-	.rank-gradient-5 { background: linear-gradient(135deg, var(--achillea-rank-5-stops)); }
-	.rank-gradient-6 { background: linear-gradient(135deg, var(--achillea-rank-6-stops)); }
-	.rank-gradient-7 { background: linear-gradient(135deg, var(--achillea-rank-7-stops)); }
-	.rank-gradient-8 { background: linear-gradient(135deg, var(--achillea-rank-8-stops)); }
-	.rank-gradient-9 { background: linear-gradient(135deg, var(--achillea-rank-9-stops)); }
-	.rank-gradient-10 { background: linear-gradient(135deg, var(--achillea-rank-10-stops)); }
-	.rank-gradient-11 { background: linear-gradient(135deg, var(--achillea-rank-11-stops)); }
+	.rank-gradient-1 {
+		background: linear-gradient(135deg, var(--achillea-rank-1-stops));
+	}
+	.rank-gradient-2 {
+		background: linear-gradient(135deg, var(--achillea-rank-2-stops));
+	}
+	.rank-gradient-3 {
+		background: linear-gradient(135deg, var(--achillea-rank-3-stops));
+	}
+	.rank-gradient-4 {
+		background: linear-gradient(135deg, var(--achillea-rank-4-stops));
+	}
+	.rank-gradient-5 {
+		background: linear-gradient(135deg, var(--achillea-rank-5-stops));
+	}
+	.rank-gradient-6 {
+		background: linear-gradient(135deg, var(--achillea-rank-6-stops));
+	}
+	.rank-gradient-7 {
+		background: linear-gradient(135deg, var(--achillea-rank-7-stops));
+	}
+	.rank-gradient-8 {
+		background: linear-gradient(135deg, var(--achillea-rank-8-stops));
+	}
+	.rank-gradient-9 {
+		background: linear-gradient(135deg, var(--achillea-rank-9-stops));
+	}
+	.rank-gradient-10 {
+		background: linear-gradient(135deg, var(--achillea-rank-10-stops));
+	}
+	.rank-gradient-11 {
+		background: linear-gradient(135deg, var(--achillea-rank-11-stops));
+	}
 }
