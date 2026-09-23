@@ -21,10 +21,11 @@ import {
 } from "./cron-taches";
 
 describe("catalogue", () => {
-	test("les 26 tâches servies par GET :3005/tasks", () => {
-		expect(TACHES_CRON).toHaveLength(26);
+	test("les 27 tâches servies par GET :3005/tasks", () => {
+		expect(TACHES_CRON).toHaveLength(27);
 		expect(TACHES_CRON).toContain("db");
 		expect(TACHES_CRON).toContain("stats:achillea");
+		expect(TACHES_CRON).toContain("achillea:weekly-payout");
 		expect(TACHES_CRON).toContain("github-publish");
 		// Publiée le 17/8/2026 en même temps qu'elle a été planifiée : elle répare
 		// ce que `db` efface (vidéos et vignettes des techniques).
