@@ -1,19 +1,9 @@
 import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 
 import { Service } from "@/decorators";
+import { defaultData } from "./data-defaults";
 
-export const defaultData = {
-	maintenance: false,
-	lastMaintenance: Date.now(),
-	lastStartup: Date.now(),
-	rankedEnabled: false,
-	leaderboardMessageId: "",
-	rankedQueueMessageId: "",
-	rankedTierSnapshot: {} as Record<string, number>,
-	clanPlayerLimit: 30,
-	clanStaffLimit: 7,
-	playerNotesDocId: "",
-};
+export { defaultData } from "./data-defaults";
 
 type DataKey = keyof typeof defaultData;
 type DataValue<Key extends DataKey> = (typeof defaultData)[Key];

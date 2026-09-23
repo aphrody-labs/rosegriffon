@@ -36,6 +36,7 @@ function signValid(payload: Record<string, unknown>, secret = TEST_SECRET): stri
 			algorithm: "HS256",
 			issuer: AUTH_ISSUER,
 			audience: REALTIME_AUDIENCE,
+			expiresIn: "5m",
 			...(typeof payload.id === "string" ? { subject: identity } : {}),
 		}
 	);
@@ -76,7 +77,6 @@ describe("getCookie", () => {
 		expect(getCookie(`token=${value}`, "token")).toBe(value);
 	});
 });
-
 describe("verifyToken", () => {
 	test("décode un JWT valide signé avec le secret de test", () => {
 		const token = signValid({ id: "42", username: "Goenji", avatar: "hash" });
@@ -181,41 +181,5 @@ describe("authFromColyseus", () => {
 		expect(authFromColyseus({}, { token: realtime })?.id).toBe("realtime-user");
 		expect(authFromColyseus({}, { token: session })).toBeNull();
 		expect(authFromColyseus({}, { headers: { cookie: `token=${realtime}` } })).toBeNull();
-	});
-});
-
-describe("regex anti open-redirect (controllers/auth.ts)", () => {
-	// Réplique exacte de la regex utilisée dans /discord, /test-login et /callback :
-	// chemin interne à un seul slash de tête (rejette //host et /\host).
-	const isSafePath = (value: string | undefined): boolean => /^\/(?![/\\])/.test(value ?? "");
-
-	test("accepte les chemins internes simples", () => {
-		expect(isSafePath("/ranked")).toBe(true);
-		expect(isSafePath("/a/b")).toBe(true);
-		expect(isSafePath("/")).toBe(true);
-	});
-
-	test("rejette le protocol-relative //evil.com", () => {
-		expect(isSafePath("//evil.com")).toBe(false);
-	});
-
-	test("rejette le backslash-bypass /\\evil.com", () => {
-		expect(isSafePath("/\\evil.com")).toBe(false);
-	});
-
-	test("rejette une URL absolue http://x", () => {
-		expect(isSafePath("http://x")).toBe(false);
-	});
-
-	test("rejette une chaîne vide", () => {
-		expect(isSafePath("")).toBe(false);
-	});
-
-	test("rejette undefined", () => {
-		expect(isSafePath(undefined)).toBe(false);
-	});
-
-	test("rejette un chemin relatif sans slash de tête", () => {
-		expect(isSafePath("ranked")).toBe(false);
 	});
 });

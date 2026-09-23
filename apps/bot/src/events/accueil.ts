@@ -27,26 +27,10 @@ import { type ArgsOf, Discord, On } from "@rpbey/discordx";
 import { AttachmentBuilder, type GuildMember, type TextBasedChannel } from "discord.js";
 
 import { renderCarteAccueil } from "../lib/canvas/communaute";
+import { remplirGabarit } from "../lib/accueil-gabarit";
 import { verifierAttributionAutomatique } from "../lib/hierarchie";
 import { reglagesDe } from "../services/communaute";
 import { creerEmbed, pied } from "../lib/ui";
-
-/**
- * Remplace les jetons du texte configurable.
- *
- * Volontairement minimal : trois jetons, aucun langage d'expression. Un moteur
- * de gabarit dans un champ réglable par le staff, c'est une surface d'injection
- * pour rien — le texte n'a besoin que de nommer la personne et le serveur.
- */
-export function remplirGabarit(
-	gabarit: string,
-	valeurs: { membre: string; serveur: string; compte: number }
-): string {
-	return gabarit
-		.replaceAll("{membre}", valeurs.membre)
-		.replaceAll("{serveur}", valeurs.serveur)
-		.replaceAll("{compte}", String(valeurs.compte));
-}
 
 /** Pose le rôle d'arrivée, si et seulement si il est sûr. */
 async function poserRoleArrivee(membre: GuildMember, roleId: string): Promise<void> {

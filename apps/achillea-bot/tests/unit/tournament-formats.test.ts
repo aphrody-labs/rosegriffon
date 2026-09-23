@@ -13,7 +13,7 @@ import type { CrudInterface } from "brackets-manager";
 import {
 	BRACKET_TOURNAMENT_TYPES,
 	isSupportedTournamentType,
-} from "../../src/services/TournamentsService";
+} from "../../src/services/tournament-policies";
 import { StageType } from "../../src/utils/enums";
 
 // Adaptateur CRUD in-memory minimal : ids auto-incrémentés par table.

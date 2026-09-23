@@ -9,7 +9,7 @@
 import { canReportTournamentScore } from "@rosegriffon/achillea-core";
 import { describe, expect, test } from "bun:test";
 
-import { parseScoreReportPolicy } from "../../src/services/TournamentsService";
+import { parseScoreReportPolicy } from "../../src/services/tournament-policies";
 import { ScoreReportPolicy } from "../../src/utils/enums";
 
 describe("canReportTournamentScore", () => {

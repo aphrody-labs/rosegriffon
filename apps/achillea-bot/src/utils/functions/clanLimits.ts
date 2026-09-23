@@ -1,4 +1,5 @@
-import { DataStore, defaultData } from "@/services/DataStore";
+import type { DataStore } from "@/services/DataStore";
+import { defaultData } from "@/services/data-defaults";
 import { ClanMemberDistinction } from "@/utils/enums";
 
 export type ClanMemberLimits = {
@@ -66,10 +67,11 @@ export function checkClanMemberLimitExceeded(
 	return null;
 }
 
-export async function getClanMemberLimits(store = new DataStore()): Promise<ClanMemberLimits> {
+export async function getClanMemberLimits(store?: DataStore): Promise<ClanMemberLimits> {
+	const source = store ?? new (await import("@/services/DataStore")).DataStore();
 	const [playerLimit, staffLimit] = await Promise.all([
-		store.getOrDefault("clanPlayerLimit", defaultData.clanPlayerLimit),
-		store.getOrDefault("clanStaffLimit", defaultData.clanStaffLimit),
+		source.getOrDefault("clanPlayerLimit", defaultData.clanPlayerLimit),
+		source.getOrDefault("clanStaffLimit", defaultData.clanStaffLimit),
 	]);
 
 	return normalizeClanMemberLimits({ playerLimit, staffLimit });
@@ -77,10 +79,11 @@ export async function getClanMemberLimits(store = new DataStore()): Promise<Clan
 
 export async function setClanMemberLimits(
 	limits: ClanMemberLimits,
-	store = new DataStore()
+	store?: DataStore
 ): Promise<ClanMemberLimits> {
+	const source = store ?? new (await import("@/services/DataStore")).DataStore();
 	const normalized = normalizeClanMemberLimits(limits);
-	await store.set("clanPlayerLimit", normalized.playerLimit);
-	await store.set("clanStaffLimit", normalized.staffLimit);
+	await source.set("clanPlayerLimit", normalized.playerLimit);
+	await source.set("clanStaffLimit", normalized.staffLimit);
 	return normalized;
 }

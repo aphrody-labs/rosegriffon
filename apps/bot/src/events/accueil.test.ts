@@ -9,7 +9,7 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { remplirGabarit } from "./accueil";
+import { remplirGabarit } from "../lib/accueil-gabarit";
 
 const VALEURS = { compte: 1_903, membre: "<@42>", serveur: "Rose Griffon" };
 

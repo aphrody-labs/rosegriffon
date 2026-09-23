@@ -51,6 +51,7 @@ mock.module("@/entities/UserElo", () => ({
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 type ClanPosterServiceCtor = typeof import("@/services/ClanPosterService").ClanPosterService;
 let ClanPosterService: ClanPosterServiceCtor;
+const canvasAvailable = await import("@aphrody/canvas").then(() => true).catch(() => false);
 
 const STORAGE_ROOT = join(process.cwd(), "storage", "clans");
 
@@ -136,6 +137,7 @@ function buildMockDb(opts: { clanExists: boolean }) {
 const writtenFiles: string[] = [];
 
 beforeAll(async () => {
+	if (!canvasAvailable) return;
 	const mod = await import("@/services/ClanPosterService");
 	ClanPosterService = mod.ClanPosterService;
 });
@@ -148,7 +150,7 @@ afterAll(() => {
 	}
 });
 
-describe("ClanPosterService — generatePoster()", () => {
+describe.skipIf(!canvasAvailable)("ClanPosterService — generatePoster()", () => {
 	test("retourne un Buffer non vide", async () => {
 		const svc = new ClanPosterService().withDatabase(buildMockDb({ clanExists: true }));
 		const buf = await svc.generatePoster(FAKE_CLAN_ID);
@@ -178,7 +180,7 @@ describe("ClanPosterService — generatePoster()", () => {
 	});
 });
 
-describe("ClanPosterService — generateAndSave()", () => {
+describe.skipIf(!canvasAvailable)("ClanPosterService — generateAndSave()", () => {
 	test("ecrit bien un PNG sur disque dans storage/clans/", async () => {
 		const svc = new ClanPosterService().withDatabase(buildMockDb({ clanExists: true }));
 		const path = await svc.generateAndSave(FAKE_CLAN_ID);
