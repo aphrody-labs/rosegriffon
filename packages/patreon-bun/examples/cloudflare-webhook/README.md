@@ -1,8 +1,6 @@
-> ⚠️ **INFRASTRUCTURE GÉRÉE PAR ANTIGRAVITY (GOD MODE)**
-> Ce projet opère sous la **Directive Omega**. L'architecture, les dépendances, et le code sont gérés et refactorisés de manière 100% autonome. Aucune sécurité conservative n'est appliquée. La performance brute est l'unique métrique.
-> \n# Patreon posts to Discord
+# Patreon posts to Discord
 
-This is an example project for how to connect `patreon-api.ts` with Cloudflare Workers to send Discord messages on a new post.
+This is an example project for how to connect `@rosegriffon/patreon-bun` with Cloudflare Workers to send Discord messages on a new post.
 
 <details>
 <summary>Screenshots</summary>
@@ -23,14 +21,14 @@ Patreon post:
 2. Install dependencies: `bun install`
 3. Get the webhook secret from Patreon by [registering a new webhook](#webhook-registration) using the Patreon API.
 4. Update [the secrets](#secrets) on Cloudlfare to use your webhook
-5. Deploy the worker with `npm run deploy` to your Cloudflare account
+5. Deploy the worker with `bun run deploy` to your Cloudflare account
 6. Create a post on Patreon and view the Discord message!
 
 ### Webhook registration
 
-1. Create a new file `secrets.json` in `./src/` and define `CLIENT_ID`, `CLIENT_SECRET`, `CAMPAIGN_ID`, `WEBHOOK_URI`, `ACCESS_TOKEN`, `REFRESH_TOKEN`.
-2. Run `src/generate.ts` (may need to run with `ts-node` or `tsc`)
-3. Copy the secret
+Register a webhook in your Patreon creator settings. Set its target URL to the
+deployed worker endpoint, then save the webhook secret in your local secret
+manager and configure the worker with Wrangler. Never commit the secret.
 
 ### Secrets
 

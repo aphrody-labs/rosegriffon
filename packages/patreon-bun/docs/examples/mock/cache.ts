@@ -1,4 +1,4 @@
-import { PatreonMock, RouteBases, Routes, Type } from "patreon-api.ts";
+import { PatreonMock, RouteBases, Routes, Type } from "@rosegriffon/patreon-bun";
 
 const mock = new PatreonMock({
 	cache: {

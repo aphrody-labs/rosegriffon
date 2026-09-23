@@ -1,27 +1,19 @@
 import { DefaultTheme, defineConfig } from "vitepress";
 
-import { transformerTwoslash } from "@shikijs/vitepress-twoslash";
-
-import type { GitHubStatsComponentProps } from "../components/GitHubStat.vue";
-
 import * as shared from "./shared";
 
-import {
-	author,
-	bugs,
-	description,
-	funding,
-	license,
-	name,
-	repository,
-	version,
-} from "../../../package.json";
-
-import { homepage } from "../../package.json";
+import { author, bugs, description, license, name, version } from "../../../package.json";
 
 import typedocSidebar from "../../api/typedoc-sidebar.json";
 
-const repoUrl = repository.url.slice(4, -4),
+interface GitHubStatsComponentProps {
+	repo: string;
+	keyName: string;
+	iconClass: string;
+	label: string;
+}
+
+const repoUrl = "https://github.com/rose-griffon/rg",
 	branch = "main";
 
 const createSidebarItems = () =>
@@ -30,7 +22,6 @@ const createSidebarItems = () =>
 		shared.createLinksItem({
 			branch,
 			bugsUrl: bugs.url,
-			fundingUrl: funding,
 			repoUrl,
 			version,
 		}),
@@ -43,21 +34,6 @@ export default defineConfig({
 	cleanUrls: true,
 	lastUpdated: true,
 
-	markdown: {
-		codeTransformers: [
-			transformerTwoslash({
-				twoslashOptions: {
-					compilerOptions: {
-						paths: {
-							"patreon-api.ts": ["../"],
-						},
-					},
-				},
-			}),
-		],
-		languages: ["js", "ts"],
-	},
-
 	vite: {
 		ssr: {
 			noExternal: [/\.css$/, /^vuetify/],
@@ -65,10 +41,6 @@ export default defineConfig({
 		build: {
 			chunkSizeWarningLimit: 800,
 		},
-	},
-
-	sitemap: {
-		hostname: homepage,
 	},
 
 	themeConfig: {
@@ -79,7 +51,6 @@ export default defineConfig({
 			shared.createLinksItem({
 				branch,
 				bugsUrl: bugs.url,
-				fundingUrl: funding,
 				repoUrl,
 				version,
 			}),
@@ -88,7 +59,7 @@ export default defineConfig({
 				props: {
 					label: "GitHub stars",
 					iconClass: "vpi-social-github",
-					repo: "ghostrider-05/patreon-api.ts",
+					repo: "rose-griffon/rg",
 					keyName: "stargazers_count",
 				} satisfies GitHubStatsComponentProps,
 			},
@@ -102,7 +73,7 @@ export default defineConfig({
 		externalLinkIcon: true,
 		editLink: {
 			text: "Edit this page on GitHub",
-			pattern: `${repoUrl}/edit/${branch}/docs/:path`,
+			pattern: `${repoUrl}/edit/${branch}/packages/patreon-bun/docs/:path`,
 		},
 		socialLinks: [
 			{
@@ -120,8 +91,8 @@ export default defineConfig({
 		},
 
 		footer: {
-			message: `Released under <a href="${repoUrl}/blob/${branch}/LICENSE">the ${license} License</a>.`,
-			copyright: `Copyright © 2023 - present | ${author.name}`,
+			message: `Released under <a href="${repoUrl}/blob/${branch}/packages/patreon-bun/LICENSE">the ${license} License</a>.`,
+			copyright: `Copyright © 2023 - present | ${author}`,
 		},
 	},
 });

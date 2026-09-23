@@ -7,7 +7,7 @@ import {
 	SchemaResourcesData,
 	type ItemType,
 	PatreonOauthScope,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 interface LibraryData {
 	version: number;
@@ -47,7 +47,7 @@ export default <ExportedHandler>{
 				version: APIVersion,
 				base: RouteBases.oauth2,
 				headers: {
-					userAgent: `PatreonBot patreon-api.ts (https://github.com/ghostrider-05/patreon-api.ts, ${version})`,
+					userAgent: `PatreonBot @rosegriffon/patreon-bun (https://github.com/rose-griffon/rg/tree/main/packages/patreon-bun, ${version})`,
 					response: {
 						id: ResponseHeaders.UUID,
 						sha: ResponseHeaders.Sha,
@@ -70,11 +70,10 @@ export default <ExportedHandler>{
 			return new Response(
 				JSON.stringify({
 					version,
-					name: "patreon-api.ts",
+					name: "@rosegriffon/patreon-bun",
 					links: {
-						donate: "https://paypal.me/05ghostrider",
-						github: "https://github.com/ghostrider-05/patreon-api.ts",
-						documentation: "https://patreon-api.pages.dev",
+						github: "https://github.com/rose-griffon/rg/tree/main/packages/patreon-bun",
+						documentation: "https://github.com/rose-griffon/rg/tree/main/packages/patreon-bun/docs",
 					},
 				}),
 				{

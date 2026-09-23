@@ -1,4 +1,4 @@
-import { type Member, type User } from "patreon-api.ts";
+import { type Member, type User } from "@rosegriffon/patreon-bun";
 
 import { defaultLinkedRolesData } from "./default";
 

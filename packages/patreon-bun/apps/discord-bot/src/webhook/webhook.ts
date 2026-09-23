@@ -13,7 +13,7 @@ import {
 	PatreonWebhookTrigger,
 	WebhookClient,
 	WebhookPayloadClient,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 import { makeDiscordRequest } from "../interactions/";
 import { getConfig, getPossibleWebhookConfigs } from "./config";

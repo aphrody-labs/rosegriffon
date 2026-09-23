@@ -1,4 +1,8 @@
-import { PatreonWebhookTrigger, parseWebhookRequest, WebhookPayloadClient } from "patreon-api.ts";
+import {
+	PatreonWebhookTrigger,
+	parseWebhookRequest,
+	WebhookPayloadClient,
+} from "@rosegriffon/patreon-bun";
 
 import { renderPost } from "./md";
 
@@ -8,11 +12,7 @@ interface EnvWithSecrets {
 	HTML_MD_KEY: string;
 }
 
-interface Embed extends Record<string, string | number> {
-	title?: string;
-	color?: number;
-	description?: string;
-}
+type Embed = Record<string, string | number | boolean>;
 
 export default <ExportedHandler<EnvWithSecrets>>{
 	async fetch(request, env) {

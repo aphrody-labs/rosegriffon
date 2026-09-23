@@ -7,7 +7,7 @@ import {
 	PatreonUserClient,
 	// WebhookMemberPayload,
 	// type StoredToken,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 import { makeDiscordRequest } from "../interactions";
 import { fetchOauthMemberships } from "../patreon/member";

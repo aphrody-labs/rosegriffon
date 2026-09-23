@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 // #region token-options
-import { PatreonCreatorClient } from "patreon-api.ts";
+import { PatreonCreatorClient } from "@rosegriffon/patreon-bun";
 
 declare const env: {
 	CLIENT_ID: string;
@@ -21,7 +21,7 @@ const client = new PatreonCreatorClient({
 });
 // #endregion token-options
 // #region token-store
-import { PatreonCreatorClient, CacheTokenStore, type RestEventMap } from "patreon-api.ts";
+import { PatreonCreatorClient, CacheTokenStore, type RestEventMap } from "@rosegriffon/patreon-bun";
 import { EventEmitter } from "node:stream";
 
 declare const env: {

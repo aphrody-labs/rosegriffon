@@ -32,39 +32,25 @@ export function createLinksItem(options: {
 	repoUrl: string;
 	bugsUrl: string;
 	branch: string;
-	fundingUrl: string;
 }): SharedItem {
 	return {
 		text: "v" + options.version,
 		items: [
 			{
 				text: "Changelog",
-				link: `${options.repoUrl}/blob/${options.branch}/CHANGELOG.md`,
+				link: `${options.repoUrl}/blob/${options.branch}/packages/patreon-bun/CHANGELOG.md`,
 			},
 			{
 				text: "Repository",
 				link: options.repoUrl,
 			},
 			{
-				text: "Roadmap",
-				link: "https://github.com/users/ghostrider-05/projects/5",
-			},
-			{
 				text: "Report a bug",
 				link: options.bugsUrl,
 			},
 			{
-				text: "Contribute",
-				items: [
-					{
-						text: "Donate",
-						link: options.fundingUrl,
-					},
-					{
-						text: "Contributing guide",
-						link: `${options.repoUrl}/blob/${options.branch}/CONTRIBUTING.md`,
-					},
-				],
+				text: "Contributing guide",
+				link: `${options.repoUrl}/blob/${options.branch}/packages/patreon-bun/CONTRIBUTING.md`,
 			},
 		],
 	};

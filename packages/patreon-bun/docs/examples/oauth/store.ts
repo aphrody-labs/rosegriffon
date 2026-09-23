@@ -1,5 +1,5 @@
 // #region fetch-store
-import { PatreonCreatorClient, PatreonStore } from "patreon-api.ts";
+import { PatreonCreatorClient, PatreonStore } from "@rosegriffon/patreon-bun";
 
 declare const env: {
 	CLIENT_ID: string;
@@ -23,7 +23,11 @@ const fetchStoreClient = new PatreonCreatorClient({
 });
 // #endregion fetch-store
 // #region kv-store
-import { PatreonCreatorClient, PatreonStore, type PatreonStoreKVStorage } from "patreon-api.ts";
+import {
+	PatreonCreatorClient,
+	PatreonStore,
+	type PatreonStoreKVStorage,
+} from "@rosegriffon/patreon-bun";
 
 declare const env: {
 	CLIENT_ID: string;
@@ -41,7 +45,7 @@ const kvStoreClient = new PatreonCreatorClient({
 });
 // #endregion kv-store
 // #region custom-store
-import { PatreonCreatorClient } from "patreon-api.ts";
+import { PatreonCreatorClient } from "@rosegriffon/patreon-bun";
 
 declare const env: {
 	CLIENT_ID: string;
@@ -73,7 +77,7 @@ const customStoreClient = new PatreonCreatorClient({
 });
 // #endregion custom-store
 // #region store-initialize
-import { PatreonCreatorClient } from "patreon-api.ts";
+import { PatreonCreatorClient } from "@rosegriffon/patreon-bun";
 
 declare const client: PatreonCreatorClient;
 

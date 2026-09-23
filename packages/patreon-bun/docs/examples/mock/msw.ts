@@ -1,6 +1,6 @@
 // #region handler
 import { http } from "msw";
-import { PatreonMock } from "patreon-api.ts";
+import { PatreonMock } from "@rosegriffon/patreon-bun";
 
 const mockAPI = new PatreonMock();
 
@@ -19,7 +19,7 @@ export const handlers = [
 // #endregion handler
 // #region all-handlers
 import { http } from "msw";
-import { PatreonMock } from "patreon-api.ts";
+import { PatreonMock } from "@rosegriffon/patreon-bun";
 
 const mockAPI = new PatreonMock();
 
@@ -35,7 +35,7 @@ export const allHandlers = Object.values(mockHandlers).map((handler) => {
 // #endregion all-handlers
 // #region error-handler
 import { http } from "msw";
-import { PatreonMock } from "patreon-api.ts";
+import { PatreonMock } from "@rosegriffon/patreon-bun";
 
 const mockAPI = new PatreonMock();
 const mockHandlers = mockAPI.getMockHandlers();

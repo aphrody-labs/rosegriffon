@@ -1,5 +1,5 @@
 // #region custom
-import { PatreonClient } from "patreon-api.ts";
+import { PatreonClient } from "@rosegriffon/patreon-bun";
 
 // Can also extend a creator or user client
 export class MyCampaignClient extends PatreonClient {
@@ -12,7 +12,7 @@ export class MyCampaignClient extends PatreonClient {
 // #endregion custom
 
 // #region wrapper
-import { PatreonCreatorClient } from "patreon-api.ts";
+import { PatreonCreatorClient } from "@rosegriffon/patreon-bun";
 
 declare const env: {
 	CLIENT_ID: string;

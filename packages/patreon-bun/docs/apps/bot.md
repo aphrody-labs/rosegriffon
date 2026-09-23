@@ -1,2 +1,3 @@
 > [!WARNING]
-> This is WIP, see [#39](https://github.com/ghostrider-05/patreon-api.ts/issues/39)
+> The upstream Discord bot is archived and excluded from the active workspace.
+> Use the maintained Cloudflare webhook example for Discord notifications.

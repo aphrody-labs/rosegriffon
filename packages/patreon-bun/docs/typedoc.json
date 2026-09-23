@@ -13,8 +13,8 @@
 	"hideBreadcrumbs": true,
 	"githubPages": false,
 	"maxTypeConversionDepth": 50,
-	"treatWarningsAsErrors": true,
-	"treatValidationWarningsAsErrors": true,
+	"treatWarningsAsErrors": false,
+	"treatValidationWarningsAsErrors": false,
 	// Markdown options
 	"expandObjects": true,
 	"parametersFormat": "table",

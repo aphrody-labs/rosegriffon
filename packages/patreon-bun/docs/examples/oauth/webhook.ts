@@ -1,5 +1,5 @@
 // #region api-client
-import { PatreonCreatorClient, WebhookClient } from "patreon-api.ts";
+import { PatreonCreatorClient, WebhookClient } from "@rosegriffon/patreon-bun";
 
 // Replace with your client
 declare const patreon: PatreonCreatorClient;
@@ -9,7 +9,7 @@ const client = new WebhookClient(patreon.oauth);
 const { webhooks } = patreon;
 // #endregion api-client
 // #region api-fetch
-import { QueryBuilder, WebhookClient } from "patreon-api.ts";
+import { QueryBuilder, WebhookClient } from "@rosegriffon/patreon-bun";
 
 declare const client: WebhookClient;
 
@@ -24,7 +24,7 @@ for (const webhook of response.data) {
 }
 // #endregion api-fetch
 // #region api-create
-import { PatreonWebhookTrigger, WebhookClient } from "patreon-api.ts";
+import { PatreonWebhookTrigger, WebhookClient } from "@rosegriffon/patreon-bun";
 
 declare const client: WebhookClient;
 
@@ -35,7 +35,7 @@ const createdWebhook = await client.createWebhook({
 });
 // #endregion api-create
 // #region api-update
-import { WebhookClient } from "patreon-api.ts";
+import { WebhookClient } from "@rosegriffon/patreon-bun";
 
 declare const client: WebhookClient;
 
@@ -45,7 +45,7 @@ const updatedWebhook = await client.editWebhook({
 });
 // #endregion api-update
 // #region api-update-pause
-import { WebhookClient } from "patreon-api.ts";
+import { WebhookClient } from "@rosegriffon/patreon-bun";
 
 declare const client: WebhookClient;
 
@@ -57,14 +57,14 @@ const updatedWebhook = await client.editWebhook({
 await client.unpauseWebhook("my-webhook-id");
 // #endregion api-update-pause
 // #region api-delete
-import { WebhookClient } from "patreon-api.ts";
+import { WebhookClient } from "@rosegriffon/patreon-bun";
 
 declare const client: WebhookClient;
 
 await client.deleteWebhook("my-webhook-id");
 // #endregion api-delete
 // #region verify
-import { verify, type WebhookPayload } from "patreon-api.ts";
+import { verify, type WebhookPayload } from "@rosegriffon/patreon-bun";
 
 async function handleRequest(request: Request, env: { WEBHOOK_SECRET: string }) {
 	const signature = request.headers.get("X-Patreon-Signature");
@@ -79,7 +79,7 @@ async function handleRequest(request: Request, env: { WEBHOOK_SECRET: string }) 
 }
 // #endregion verify
 // #region parse
-import { parseWebhookRequest } from "patreon-api.ts";
+import { parseWebhookRequest } from "@rosegriffon/patreon-bun";
 
 async function handleRequest(request: Request, env: { WEBHOOK_SECRET: string }) {
 	const parsed = await parseWebhookRequest(request, env.WEBHOOK_SECRET);
@@ -99,7 +99,7 @@ import {
 	parseWebhookRequest,
 	PatreonWebhookTrigger,
 	type PatreonWebhookPostTrigger,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 declare const request: Request;
 declare const env: {
@@ -118,7 +118,7 @@ const anyPostResult = await parseWebhookRequest<PatreonWebhookPostTrigger>(
 );
 // #endregion parse-type
 // #region payload-client
-import { parseWebhookRequest, WebhookPayloadClient } from "patreon-api.ts";
+import { parseWebhookRequest, WebhookPayloadClient } from "@rosegriffon/patreon-bun";
 
 declare const env: {
 	PATREON_WEBHOOK_SECRET: string;
@@ -136,7 +136,7 @@ async function handleRequest(request: Request) {
 
 // #endregion payload-client
 // #region payload-convert-discord-posts
-import { parseWebhookRequest, WebhookPayloadClient } from "patreon-api.ts";
+import { parseWebhookRequest, WebhookPayloadClient } from "@rosegriffon/patreon-bun";
 
 declare const env: {
 	PATREON_WEBHOOK_SECRET: string;

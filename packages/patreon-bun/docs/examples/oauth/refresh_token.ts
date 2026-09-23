@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 // #region cache-token
-import { PatreonCreatorClient } from "patreon-api.ts";
+import { PatreonCreatorClient } from "@rosegriffon/patreon-bun";
 
 declare const env: {
 	CLIENT_ID: string;

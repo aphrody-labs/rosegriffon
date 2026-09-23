@@ -8,7 +8,7 @@ targets:
   - website
   - tools
 hero:
-  name: patreon-api.ts
+  name: @rosegriffon/patreon-bun
   text: Monetize your <span class="hero-target">bots</span> with Patreon
   tagline: A TypeScript wrapper for the Patreon V2 API
   image: https://c14.patreon.com/wxgaplus_Patreon_Symbol_6fff9723d3.png
@@ -18,7 +18,7 @@ hero:
       link: /guide/introduction
     - theme: alt
       text: View on GitHub
-      link: https://github.com/ghostrider-05/patreon-api.ts
+      link: https://github.com/rose-griffon/rg/tree/main/packages/patreon-bun
 
 features:
   - title: JSON:API typed
@@ -33,8 +33,8 @@ features:
     details: Use the Patreon API with popular OpenAPI tools
     link: https://patreon.apidocumentation.com/v2-stable/reference
     linkText: Explore the API
-  - title: ESM & CJS
-    details: Works with ESM and CJS projects on Node.js and edge platforms, like Cloudflare, and no dependencies!
+  - title: Bun and ESM
+    details: ESM-only package built and tested with Bun. Web standards based APIs also run on supported edge platforms.
     link: /guide/installation#platform
     linkText: See runtime requirements
   - title: Simplified payloads

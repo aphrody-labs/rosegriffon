@@ -5,7 +5,7 @@ import {
 	ChannelType,
 	type RESTPostAPIGuildRoleJSONBody,
 } from "discord-api-types/v10";
-import { PatreonWebhookTrigger } from "patreon-api.ts";
+import { PatreonWebhookTrigger } from "@rosegriffon/patreon-bun";
 import { makeDiscordRequest } from "../interactions";
 
 import { createLinkedRoleRedirect } from "../linked-roles/oauth";

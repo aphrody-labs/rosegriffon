@@ -1,4 +1,4 @@
-import type { Member, PatreonWebhookTrigger, User } from "patreon-api.ts";
+import type { Member, PatreonWebhookTrigger, User } from "@rosegriffon/patreon-bun";
 
 import type {
 	APIApplicationRoleConnectionMetadata,

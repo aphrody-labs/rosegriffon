@@ -2,20 +2,16 @@
 webhook-examples:
   - title: Cloudflare webhook
     details: Worker to forward Patreon posts to Discord
-    link: https://github.com/ghostrider-05/patreon-api.ts/tree/main/examples/cloudflare-webhook/
+    link: https://github.com/rose-griffon/rg/tree/main/packages/patreon-bun/examples/cloudflare-webhook/
     linkText: See on GitHub
-  - title: Express.js webhook
+  - title: Bun webhook
     details: Server to forward Patreon posts to Discord
-    link: https://github.com/ghostrider-05/patreon-api.ts/tree/main/examples/express-webhook/
+    link: https://github.com/rose-griffon/rg/tree/main/packages/patreon-bun/examples/bun-webhook/
     linkText: See on GitHub
 api-examples:
-  - title: Node.js - ESM
+  - title: Bun - ESM
     details: Fetch creator campaigns and update or create webhooks
-    link: https://github.com/ghostrider-05/patreon-api.ts/tree/main/examples/nodejs-esm/
-    linkText: See on GitHub
-  - title: Node.js - CJS
-    details: Fetch creator campaigns and module augmentation
-    link: https://github.com/ghostrider-05/patreon-api.ts/tree/main/examples/nodejs-cjs/
+    link: https://github.com/rose-griffon/rg/tree/main/packages/patreon-bun/examples/bun-esm/
     linkText: See on GitHub
 ---
 
@@ -23,29 +19,16 @@ api-examples:
 
 ## Platform
 
-<!-- @include: ../../README.md#compatibility -->
+This fork requires Bun 1.4.2 or newer and exports ESM only.
 
 ## Set up
 
-This package exports both CJS and ESM code. However, the guide will only have ESM examples.
+Install the package with Bun:
 
-::: code-group
-
-```sh [npm]
-bun install patreon-api.ts
+```sh
+bun add @rosegriffon/patreon-bun
 ```
 
-```sh [pnpm]
-pnpm add patreon-api.ts
-```
-
-```sh [yarn]
-yarn add patreon-api.ts
-```
-
-:::
-
-<!-- @include: ../../README.md#api-versions -->
 
 ## Examples
 

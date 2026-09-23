@@ -1,4 +1,4 @@
-import { PatreonWebhookTrigger } from "patreon-api.ts";
+import { PatreonWebhookTrigger } from "@rosegriffon/patreon-bun";
 
 /**
  *

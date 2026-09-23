@@ -1,5 +1,5 @@
 // Can be in a seperate d.ts file
-module "patreon-api.ts" {
+module "@rosegriffon/patreon-bun" {
 	interface ResponseTransformMap<Query extends BasePatreonQuery> {
 		custom: (response: GetResponsePayload<Query>) => {
 			response: GetResponsePayload<Query>;
@@ -13,7 +13,7 @@ import {
 	type GetResponsePayload,
 	PatreonCreatorClient,
 	QueryBuilder,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 // Replace this with your client
 declare const client: PatreonCreatorClient;

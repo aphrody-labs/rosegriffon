@@ -2,7 +2,7 @@
 // @ts-expect-error duplicate-imports
 // #region fetch
 // @errors: 2339
-import { type PatreonClient, QueryBuilder } from "patreon-api.ts";
+import { type PatreonClient, QueryBuilder } from "@rosegriffon/patreon-bun";
 
 export async function fetchPatreon(client: PatreonClient) {
 	// Get the full name of the creator of the campaign
@@ -27,7 +27,13 @@ export async function fetchPatreon(client: PatreonClient) {
 // #endregion fetch
 // @ts-expect-error duplicate-imports
 // #region fetch-raw
-import { type PatreonClient, QueryBuilder, Routes, Type, type PatreonQuery } from "patreon-api.ts";
+import {
+	type PatreonClient,
+	QueryBuilder,
+	Routes,
+	Type,
+	type PatreonQuery,
+} from "@rosegriffon/patreon-bun";
 
 export async function fetchPatreonRaw(client: PatreonClient) {
 	type Query = PatreonQuery<
@@ -67,7 +73,7 @@ import {
 	Type,
 	type PatreonQuery,
 	type GetResponsePayload,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 export async function fetchPatreonRest(client: PatreonClient) {
 	type Query = PatreonQuery<

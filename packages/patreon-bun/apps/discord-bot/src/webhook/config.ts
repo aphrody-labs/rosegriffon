@@ -1,4 +1,4 @@
-import { type WebhookPayload, WebhookPayloadClient } from "patreon-api.ts";
+import { type WebhookPayload, WebhookPayloadClient } from "@rosegriffon/patreon-bun";
 
 /**
  *

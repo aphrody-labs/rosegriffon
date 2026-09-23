@@ -6,7 +6,8 @@
 		"moduleResolution": "Bundler",
 		"module": "ES2020",
 		"strictNullChecks": true,
-		"types": ["@cloudflare/workers-types/2023-07-01", "./src/types.d.ts"]
+		"types": ["@cloudflare/workers-types/2023-07-01", "./src/types.d.ts"],
+		"paths": { "@rosegriffon/patreon-bun": ["../../dist/index.d.ts"] }
 	},
 	"include": ["src"]
 }

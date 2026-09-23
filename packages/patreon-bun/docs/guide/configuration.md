@@ -67,13 +67,13 @@ For more options, such as `api`, `headers` and more, see [the `RestClientOptions
 
 Since the Patreon API documentation is _somewhat_ vague for defining resources and issues are open for a few years, you can patch some resources yourself. This library will always follow the documentation, undocumented features will always be opt-in since they are not supported by Patreon.
 
-The patching is supported by using [TypeScript module augmentation](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation) for overriding fields. [Please open an issue](https://github.com/ghostrider-05/patreon-api.ts/issues) if you are using this feature for something that is not covered on this page!
+The patching is supported by using [TypeScript module augmentation](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation) for overriding fields. [Please open an issue](https://github.com/rose-griffon/rg/tree/main/packages/patreon-bun/issues) if you are using this feature for something that is not covered on this page!
 
 ```ts
 // ./@types/patreon-api.d.ts
-import "patreon-api.ts";
+import "@rosegriffon/patreon-bun";
 
-declare module "patreon-api.ts" {
+declare module "@rosegriffon/patreon-bun" {
 	interface CustomTypeOptions {
 		social_connections: Record<string, { url: string; user_id: string } | null>;
 	}
@@ -86,7 +86,7 @@ The following keys can be used in `CustomTypeOptions`:
 | -------------------- | -------- | -------- | ---------------------------------------------------------- |
 | `social_connections` | `User`   | `object` | `Record<string, { url: string, user_id: string } \| null>` |
 
-An example for the configuration can be found in the [CJS example](https://github.com/ghostrider-05/patreon-api.ts/tree/main/examples/node-cjs/).
+An example for the configuration can be found in the [Bun ESM example](https://github.com/rose-griffon/rg/tree/main/packages/patreon-bun/examples/bun-esm/).
 
 ### Customization
 

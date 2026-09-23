@@ -4,7 +4,7 @@ import {
 	type PatreonWebhookMemberTrigger,
 	type PatreonWebhookPostTrigger,
 	type WebhookPayload,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 // TODO
 /**

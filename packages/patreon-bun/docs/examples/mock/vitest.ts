@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable jsdoc/require-jsdoc */
 // #region mock-fn
-import { type CacheStoreItem, PatreonCreatorClient, PatreonMock, Routes } from "patreon-api.ts";
+import {
+	type CacheStoreItem,
+	PatreonCreatorClient,
+	PatreonMock,
+	Routes,
+} from "@rosegriffon/patreon-bun";
 import { describe, expect, test, vi } from "bun:test";
 
 // TODO: add members

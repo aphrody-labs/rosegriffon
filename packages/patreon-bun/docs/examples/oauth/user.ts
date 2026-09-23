@@ -5,7 +5,7 @@ import {
 	PatreonOauthScope,
 	PatreonUserClient,
 	QueryBuilder,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 // Required env variables
 declare const env: {
@@ -53,7 +53,7 @@ import {
 	PatreonOauthScope,
 	PatreonUserClient,
 	QueryBuilder,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 // Required env variables
 declare const env: {
@@ -102,7 +102,7 @@ export const fetch = async (request: Request) => {
 };
 // #endregion code
 // #region login-client
-import { PatreonOauthScope, PatreonUserClient } from "patreon-api.ts";
+import { PatreonOauthScope, PatreonUserClient } from "@rosegriffon/patreon-bun";
 
 // Required env variables
 declare const env: {
@@ -125,7 +125,7 @@ export function createLoginRedirect() {
 }
 // #endregion login-client
 // #region login-custom
-import { PatreonOauthScope, PatreonUserClient } from "patreon-api.ts";
+import { PatreonOauthScope, PatreonUserClient } from "@rosegriffon/patreon-bun";
 
 // Required env variables
 declare const env: {

@@ -1,6 +1,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
 // #region method-simplify
-import { simplify, PatreonCreatorClient, QueryBuilder } from "patreon-api.ts";
+import { simplify, PatreonCreatorClient, QueryBuilder } from "@rosegriffon/patreon-bun";
 
 declare const client: PatreonCreatorClient;
 
@@ -25,7 +25,7 @@ for (const post of posts.data) {
 }
 // #endregion method-simplify
 // #region method-normalize
-import { normalize, PatreonCreatorClient, QueryBuilder } from "patreon-api.ts";
+import { normalize, PatreonCreatorClient, QueryBuilder } from "@rosegriffon/patreon-bun";
 
 declare const client: PatreonCreatorClient;
 
@@ -57,7 +57,7 @@ import {
 	Type,
 	type PatreonQuery,
 	simplifyFromQuery,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 export async function fetchPatreonRaw(client: PatreonClient) {
 	type Query = PatreonQuery<

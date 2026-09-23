@@ -1,6 +1,6 @@
 // @ts-expect-error duplicate-imports
 //#region campaign
-import { PatreonCreatorClient, QueryBuilder } from "patreon-api.ts";
+import { PatreonCreatorClient, QueryBuilder } from "@rosegriffon/patreon-bun";
 
 declare const client: PatreonCreatorClient;
 
@@ -14,7 +14,7 @@ const tiers = campaign.included.map((item) => item.attributes);
 //#endregion campaign
 // @ts-expect-error duplicate-imports
 //#region campaigns
-import { PatreonCreatorClient, QueryBuilder } from "patreon-api.ts";
+import { PatreonCreatorClient, QueryBuilder } from "@rosegriffon/patreon-bun";
 
 declare const client: PatreonCreatorClient;
 
@@ -28,7 +28,7 @@ for (const campaign of campaigns.data) {
 //#endregion campaigns
 // @ts-expect-error duplicate-imports
 //#region campaigns-paginate
-import { PatreonCreatorClient, QueryBuilder } from "patreon-api.ts";
+import { PatreonCreatorClient, QueryBuilder } from "@rosegriffon/patreon-bun";
 
 declare const client: PatreonCreatorClient;
 
@@ -42,7 +42,7 @@ for await (const page of client.paginateCampaigns(campaignsQuery)) {
 //#endregion campaigns-paginate
 // @ts-expect-error duplicate-imports
 //#region members
-import { PatreonCreatorClient, QueryBuilder } from "patreon-api.ts";
+import { PatreonCreatorClient, QueryBuilder } from "@rosegriffon/patreon-bun";
 
 declare const client: PatreonCreatorClient;
 
@@ -58,7 +58,7 @@ for (const member of members.data) {
 //#endregion members
 // @ts-expect-error duplicate-imports
 //#region members-paginate
-import { PatreonCreatorClient, QueryBuilder } from "patreon-api.ts";
+import { PatreonCreatorClient, QueryBuilder } from "@rosegriffon/patreon-bun";
 
 declare const client: PatreonCreatorClient;
 

@@ -1,6 +1,6 @@
 // @ts-expect-error duplicate-imports
 // #region config
-import { PatreonCreatorClient } from "patreon-api.ts";
+import { PatreonCreatorClient } from "@rosegriffon/patreon-bun";
 
 const client = new PatreonCreatorClient({
 	oauth: {
@@ -15,7 +15,7 @@ const client = new PatreonCreatorClient({
 // #endregion config
 // @ts-expect-error duplicate-imports
 // #region difference
-import { PatreonCreatorClient } from "patreon-api.ts";
+import { PatreonCreatorClient } from "@rosegriffon/patreon-bun";
 
 declare const enabledClient: PatreonCreatorClient<true>;
 declare const disabledClient: PatreonCreatorClient;

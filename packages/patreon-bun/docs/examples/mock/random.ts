@@ -1,6 +1,6 @@
 // @ts-expect-error duplicate-imports
 // #region resource
-import { PatreonMockData, Type } from "patreon-api.ts";
+import { PatreonMockData, Type } from "@rosegriffon/patreon-bun";
 
 const data = new PatreonMockData({
 	// Overwrite attributes to be fixed values
@@ -33,7 +33,7 @@ export const randomCampaignPayload = data.getSingleResponsePayload(
 // #endregion resource
 // @ts-expect-error duplicate-imports
 // #region resource-relationships
-import { PatreonMockData, Type } from "patreon-api.ts";
+import { PatreonMockData, Type } from "@rosegriffon/patreon-bun";
 
 const data = new PatreonMockData();
 

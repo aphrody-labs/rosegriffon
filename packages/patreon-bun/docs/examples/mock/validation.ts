@@ -1,4 +1,4 @@
-import { PatreonMock } from "patreon-api.ts";
+import { PatreonMock } from "@rosegriffon/patreon-bun";
 
 const mock = new PatreonMock({
 	validation: {

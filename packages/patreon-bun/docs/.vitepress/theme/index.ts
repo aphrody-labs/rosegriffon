@@ -1,10 +1,6 @@
 import { type Theme } from "vitepress";
 import DefaultTheme from "vitepress/theme";
 
-import TwoslashFloatingVue from "@shikijs/vitepress-twoslash/client";
-// @ts-expect-error style import
-import "@shikijs/vitepress-twoslash/style.css";
-
 import { createVuetify } from "vuetify";
 
 import Layout from "./Layout.vue";
@@ -24,7 +20,6 @@ export default {
 		DefaultTheme.enhanceApp(ctx);
 
 		ctx.app.use(createVuetify());
-		ctx.app.use(TwoslashFloatingVue);
 
 		ctx.app.component("AutoComplete", AutoComplete);
 		ctx.app.component("Chip", Chip);

@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 import {
 	normalize,
 	PatreonCreatorClient,
@@ -7,15 +5,22 @@ import {
 	simplify,
 	QueryBuilder,
 	Routes,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
+
+/** @param {string} name */
+function requiredEnv(name) {
+	const value = Bun.env[name];
+	if (!value) throw new Error(`Missing ${name}`);
+	return value;
+}
 
 const client = new PatreonCreatorClient({
 	oauth: {
-		clientId: process.env.CLIENT_ID,
-		clientSecret: process.env.CLIENT_SECRET,
+		clientId: requiredEnv("CLIENT_ID"),
+		clientSecret: requiredEnv("CLIENT_SECRET"),
 		token: {
-			access_token: process.env.ACCESS_TOKEN,
-			refresh_token: process.env.REFRESH_TOKEN,
+			access_token: requiredEnv("ACCESS_TOKEN"),
+			refresh_token: requiredEnv("REFRESH_TOKEN"),
 		},
 	},
 	rest: {
@@ -44,9 +49,9 @@ const listWebhooks = true;
 
 if (createWebhook) {
 	const test = await client.webhooks.createWebhook({
-		campaignId: process.env.CAMPAIGN_ID,
+		campaignId: requiredEnv("CAMPAIGN_ID"),
 		triggers: [PatreonWebhookTrigger.PostPublished],
-		uri: process.env.WEBHOOK_URI,
+		uri: requiredEnv("WEBHOOK_URI"),
 	});
 
 	console.log(JSON.stringify(test, null, 4));

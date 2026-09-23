@@ -6,7 +6,7 @@ import {
 	type PatreonQuery,
 	type QueryRequestOptions,
 	type RelationshipMap,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 /**
  *

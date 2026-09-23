@@ -3,7 +3,7 @@ import {
 	type PatreonWebhookMemberTrigger,
 	PatreonWebhookTrigger,
 	type WebhookPayload,
-} from "patreon-api.ts";
+} from "@rosegriffon/patreon-bun";
 
 import { makeDiscordRequest } from "../interactions/";
 import { getMemberStorage } from "./storage";

@@ -1,6 +1,6 @@
 // @ts-expect-error duplicate-imports
 // #region mock-agent
-import { PatreonMock, Routes } from "patreon-api.ts";
+import { PatreonMock, Routes } from "@rosegriffon/patreon-bun";
 
 declare const agent: import("undici-types").MockAgent;
 
@@ -23,7 +23,7 @@ agent
 
 // @ts-expect-error duplicate-imports
 // #region mock-agent-response
-import { PatreonMock, PatreonMockData, Routes, Type } from "patreon-api.ts";
+import { PatreonMock, PatreonMockData, Routes, Type } from "@rosegriffon/patreon-bun";
 
 declare const mockAgent: import("undici-types").MockAgent;
 const data = new PatreonMockData();

@@ -1,4 +1,4 @@
-import { PatreonCreatorClient, PatreonStore } from "patreon-api.ts";
+import { PatreonCreatorClient, PatreonStore } from "@rosegriffon/patreon-bun";
 
 interface StoreOptions {
 	key: string;
