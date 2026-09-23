@@ -88,8 +88,8 @@ unset NODE_AUTH_TOKEN
 
 # These workspace packages export dist/ files, which are absent from git.
 # Build them before Next resolves their package exports.
-bun --cwd "$stage/packages/inagle" run build
-bun --cwd "$stage/packages/patreon-bun" run build
+(cd "$stage/packages/inagle" && bun run build)
+(cd "$stage/packages/patreon-bun" && bun run build)
 
 # Next 16 standalone must be built under Node 22; Bun is used for installs and
 # for the final runtime. Docker reads the protected env file on the host only.
@@ -153,7 +153,7 @@ server="$stage/apps/website/.next/standalone/apps/website/server.js"
 install -m 0644 "$server" "$stage/apps/website/server.js"
 rm -rf -- "$stage/apps/website/.next/standalone" "$stage/.build-tmp" "$stage/.build-home"
 
-bun --cwd "$stage/apps/achillea-bot" run build
+(cd "$stage/apps/achillea-bot" && bun run build)
 [[ -s "$stage/apps/achillea-bot/build/main.js" && -s "$stage/apps/achillea-bot/build/ranked/main.js" ]] || {
   echo 'Achillea bot build incomplete' >&2; exit 1;
 }
