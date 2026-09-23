@@ -46,6 +46,7 @@ const STATE_PRIORITY: Record<string, number> = {
 	[TournamentState.ONGOING]: 0,
 	[TournamentState.PREPARING]: 1,
 	[TournamentState.PREREGISTERING]: 2,
+	Open: 3,
 };
 
 interface PlaylistAchillea {
@@ -129,7 +130,8 @@ async function loadTournamentData(): Promise<{
 			}>(
 				`SELECT id, name, description, starts_at, tournament_type, status, internal_state, participants_number, logo, affiche
 					FROM achillea.event
-				 WHERE status != 'Canceled' AND internal_state != 'Pending'
+				 WHERE status != 'Canceled'
+				   AND internal_state IN ('Ongoing', 'Preparing', 'Preregistering', 'Open')
 				 ORDER BY CASE internal_state
 				   WHEN 'Ongoing' THEN 1
 				   WHEN 'Preparing' THEN 2
@@ -215,7 +217,12 @@ async function loadTournamentData(): Promise<{
 			return { featured: null, featuredParticipants: [], otherActive: [] };
 		}
 
-		const list = res.value.data;
+		const list = res.value.data.filter((tournament) =>
+			Object.prototype.hasOwnProperty.call(STATE_PRIORITY, tournament.internalState)
+		);
+		if (list.length === 0) {
+			return { featured: null, featuredParticipants: [], otherActive: [] };
+		}
 		const now = Date.now();
 		const sorted = [...list].sort((a, b) => {
 			const pa = STATE_PRIORITY[a.internalState] ?? 9;

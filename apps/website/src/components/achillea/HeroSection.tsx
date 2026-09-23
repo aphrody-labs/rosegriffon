@@ -65,7 +65,7 @@ export function HeroSection({
 	const [ripples, setRipples] = useState<RippleToken[]>([]);
 	const [bgPunch, setBgPunch] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
-	const [now, setNow] = useState(Date.now());
+	const [now, setNow] = useState<number | null>(null);
 
 	const particlesRef = useRef<HeroParticle[]>([]);
 	const lastFxAt = useRef(0);
@@ -74,6 +74,7 @@ export function HeroSection({
 
 	// Ticker pour le décompte
 	useEffect(() => {
+		setNow(Date.now());
 		const timer = setInterval(() => setNow(Date.now()), 1000);
 		return () => clearInterval(timer);
 	}, []);
@@ -186,7 +187,7 @@ export function HeroSection({
 
 	// Calculs décompte tournoi
 	const countdownLabel = (() => {
-		if (!featured) return null;
+		if (!featured || now === null) return null;
 		if (featured.internalState === TournamentState.ONGOING) return "En direct";
 		if (
 			featured.internalState !== TournamentState.PREREGISTERING &&
@@ -406,6 +407,7 @@ export function HeroSection({
 													month: "short",
 													hour: "2-digit",
 													minute: "2-digit",
+													timeZone: "Europe/Paris",
 												})}
 											</span>
 										</div>
