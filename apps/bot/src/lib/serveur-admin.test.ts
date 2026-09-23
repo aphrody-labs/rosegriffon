@@ -17,9 +17,10 @@
  * `services/communaute.ts` ouvre un pool Postgres.
  */
 import { describe, expect, test } from "bun:test";
+import { fileURLToPath } from "node:url";
 
-const SERVEUR = new URL("./serveur-admin.ts", import.meta.url).pathname;
-const SERVICE = new URL("../services/communaute.ts", import.meta.url).pathname;
+const SERVEUR = fileURLToPath(new URL("./serveur-admin.ts", import.meta.url));
+const SERVICE = fileURLToPath(new URL("../services/communaute.ts", import.meta.url));
 
 describe("clé de cache des réglages", () => {
 	test("le serveur d'administration vide EXACTEMENT la clé que le service écrit", async () => {

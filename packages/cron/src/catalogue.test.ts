@@ -18,10 +18,11 @@
  * passerelle Discord).
  */
 import { describe, expect, test } from "bun:test";
+import { fileURLToPath } from "node:url";
 
 import { CATALOGUE_TACHES, normaliserNomTache, TACHES_CRON } from "@rosegriffon/types/cron";
 
-const SOURCE = new URL("./index.ts", import.meta.url).pathname;
+const SOURCE = fileURLToPath(new URL("./index.ts", import.meta.url));
 
 /** Les clés de `runnerMap`, lues dans le source du démon. */
 async function clefsDuRunnerMap(): Promise<Set<string>> {

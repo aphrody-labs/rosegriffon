@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { readdir, exists } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { Database } from "bun:sqlite";
+import { fileURLToPath } from "node:url";
 
 // Helper to find latest SQLite database
 /**
@@ -102,7 +103,9 @@ describe.skipIf(!PRETS)("Azalée CLI & Inagle Real-World Integration Tests", () 
 		expect(charaBaseData.entries.length).toBeGreaterThan(0);
 
 		// The actual character info list items are children of the BEG node
-		const begEntry = charaBaseData.entries.find((e: any) => e.name?.startsWith("CHARA_BASE_INFO_LIST_BEG"));
+		const begEntry = charaBaseData.entries.find((e: any) =>
+			e.name?.startsWith("CHARA_BASE_INFO_LIST_BEG")
+		);
 		expect(begEntry).toBeDefined();
 		expect(Array.isArray(begEntry.children)).toBe(true);
 		expect(begEntry.children.length).toBeGreaterThan(1000); // Thousands of base character child nodes
@@ -123,17 +126,15 @@ describe.skipIf(!PRETS)("Azalée CLI & Inagle Real-World Integration Tests", () 
 
 		// Verify specific legendary character profiles exist in the parsed VFS/data
 		// Mark Evans (mamoru endo)
-		const markEvans = characters.find((c: any) => 
-			c.names?.fr === "Mark Evans" || 
-			c.names?.en === "Mark Evans"
+		const markEvans = characters.find(
+			(c: any) => c.names?.fr === "Mark Evans" || c.names?.en === "Mark Evans"
 		);
 		expect(markEvans).toBeDefined();
 		expect(markEvans.names?.fr).toBe("Mark Evans");
-		
+
 		// Axel Blaze (goenji shuya)
-		const axelBlaze = characters.find((c: any) => 
-			c.names?.fr === "Axel Blaze" || 
-			c.names?.en === "Axel Blaze"
+		const axelBlaze = characters.find(
+			(c: any) => c.names?.fr === "Axel Blaze" || c.names?.en === "Axel Blaze"
 		);
 		expect(axelBlaze).toBeDefined();
 		expect(axelBlaze.names?.fr).toBe("Axel Blaze");
@@ -144,7 +145,9 @@ describe.skipIf(!PRETS)("Azalée CLI & Inagle Real-World Integration Tests", () 
 
 		// Verify characters alignment
 		const charactersParsed = service.characters.all();
-		const charactersDbCountRow = db.query("SELECT COUNT(*) as count FROM inagle_characters").get() as any;
+		const charactersDbCountRow = db
+			.query("SELECT COUNT(*) as count FROM inagle_characters")
+			.get() as any;
 		const dbCount = charactersDbCountRow.count;
 
 		expect(dbCount).toBeGreaterThan(1000);
@@ -160,36 +163,40 @@ describe.skipIf(!PRETS)("Azalée CLI & Inagle Real-World Integration Tests", () 
 		db.close();
 	});
 
-	test("5. Bun Process API - Execute Azalée CLI test suite under real conditions", async () => {
-		// Run '/home/ubuntu/.local/bin/azalee test' natively using Bun.spawn
-		// `SQLITE_DB_PATH` est transmis comme la PRODUCTION le fait (unité systemd
-		// azalee-web.service). Sans lui, la CLI retombe sur la découverte implicite du
-		// miroir, qui part du répertoire courant : lancée depuis `packages/inagle`, elle
-		// ne trouvait rien et sortait en 1 sur « Base de données SQLite introuvable ».
-		// Ce test vérifie la CLI, pas la capacité de deviner un chemin depuis un dossier
-		// quelconque — et le faire échouer pour cette raison rendait `bun run test` rouge
-		// en permanence.
-		// La CLI est lancée DEPUIS LES SOURCES, pas depuis `/home/ubuntu/.local/bin/azalee` :
-		// ce binaire compilé date du 2026-08-10 et fige un code que le dépôt a corrigé depuis.
-		// Le test vérifiait donc un artefact périmé, et échouait sur des bogues déjà réparés.
-		const cliSource = new URL("../../azalee/src/cli.ts", import.meta.url).pathname;
-		const proc = Bun.spawn([process.execPath, cliSource, "test"], {
-			env: { ...process.env, SQLITE_DB_PATH: sqlitePath },
-			stdout: "pipe",
-			stderr: "pipe"
-		});
+	test(
+		"5. Bun Process API - Execute Azalée CLI test suite under real conditions",
+		async () => {
+			// Run '/home/ubuntu/.local/bin/azalee test' natively using Bun.spawn
+			// `SQLITE_DB_PATH` est transmis comme la PRODUCTION le fait (unité systemd
+			// azalee-web.service). Sans lui, la CLI retombe sur la découverte implicite du
+			// miroir, qui part du répertoire courant : lancée depuis `packages/inagle`, elle
+			// ne trouvait rien et sortait en 1 sur « Base de données SQLite introuvable ».
+			// Ce test vérifie la CLI, pas la capacité de deviner un chemin depuis un dossier
+			// quelconque — et le faire échouer pour cette raison rendait `bun run test` rouge
+			// en permanence.
+			// La CLI est lancée DEPUIS LES SOURCES, pas depuis `/home/ubuntu/.local/bin/azalee` :
+			// ce binaire compilé date du 2026-08-10 et fige un code que le dépôt a corrigé depuis.
+			// Le test vérifiait donc un artefact périmé, et échouait sur des bogues déjà réparés.
+			const cliSource = fileURLToPath(new URL("../../azalee/src/cli.ts", import.meta.url));
+			const proc = Bun.spawn([process.execPath, cliSource, "test"], {
+				env: { ...process.env, SQLITE_DB_PATH: sqlitePath },
+				stdout: "pipe",
+				stderr: "pipe",
+			});
 
-		const exitCode = await proc.exited;
-		const stdoutText = await new Response(proc.stdout).text();
-		const stderrText = await new Response(proc.stderr).text();
+			const exitCode = await proc.exited;
+			const stdoutText = await new Response(proc.stdout).text();
+			const stderrText = await new Response(proc.stderr).text();
 
-		if (exitCode !== 0) {
-			console.error("CLI test suite stderr:", stderrText);
-			console.log("CLI test suite stdout:", stdoutText);
-		}
+			if (exitCode !== 0) {
+				console.error("CLI test suite stderr:", stderrText);
+				console.log("CLI test suite stdout:", stdoutText);
+			}
 
-		// Verify CLI executed successfully and output contains success summary
-		expect(exitCode).toBe(0);
-		expect(stdoutText).toContain("TOUTES LES SUITES DE TESTS NATIVES ONT RÉUSSI");
-	}, { timeout: 150000 }); // Give Next.js server compile step plenty of time to stabilize
+			// Verify CLI executed successfully and output contains success summary
+			expect(exitCode).toBe(0);
+			expect(stdoutText).toContain("TOUTES LES SUITES DE TESTS NATIVES ONT RÉUSSI");
+		},
+		{ timeout: 150000 }
+	); // Give Next.js server compile step plenty of time to stabilize
 });
