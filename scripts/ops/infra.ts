@@ -37,7 +37,7 @@ const RACINE = "/home/ubuntu/rg";
 const INFRA_SYSTEMD = `${RACINE}/infra/systemd`;
 const INFRA_NGINX = `${RACINE}/infra/nginx`;
 // Réglages hôte et units transverses : propriété du dépôt aphrody-infra.
-const INFRA_HOTE = process.env.APHRODY_INFRA_ROOT ?? "/home/ubuntu/aphrody-infra";
+const INFRA_HOTE = Bun.env.APHRODY_INFRA_ROOT ?? "/home/ubuntu/aphrody-infra";
 const HOTE_SYSTEMD = `${INFRA_HOTE}/systemd`;
 const INFRA_SYSCTL = `${INFRA_HOTE}/host/sysctl`;
 const INFRA_LOGROTATE = `${INFRA_HOTE}/host/logrotate`;
@@ -95,6 +95,14 @@ const lire = async (chemin: string | null): Promise<string | null> => {
 	return (await fichier.exists()) ? await fichier.text() : null;
 };
 
+/** Dépôt source d'une unité : niers, rg, sinon aphrody-infra (units transverses). */
+const sourceUnité = (nom: string, dansNiers: string[], dansDépôt: string[]): string => {
+	if (dansNiers.includes(nom)) {
+		return `${NIERS_SYSTEMD}/${nom}`;
+	}
+	return dansDépôt.includes(nom) ? `${INFRA_SYSTEMD}/${nom}` : `${HOTE_SYSTEMD}/${nom}`;
+};
+
 /** Unités du périmètre connues de systemd, plus celles déjà présentes dans le dépôt. */
 async function unités(): Promise<Objet[]> {
 	const sortie =
@@ -115,7 +123,7 @@ async function unités(): Promise<Objet[]> {
 			...surMachine,
 			...dansDépôt.filter(suffixe),
 			...dansNiers.filter(suffixe),
-			...dansHôte.filter(suffixe),
+			...dansHôte.filter((nom) => suffixe(nom)),
 		]),
 	];
 
@@ -127,11 +135,7 @@ async function unités(): Promise<Objet[]> {
 			// Les unités livrées par un paquet (/usr/lib/systemd) ne sont pas les nôtres.
 			const nôtre = fragment.startsWith("/etc/systemd/system/");
 			return {
-				dépôt: dansNiers.includes(nom)
-					? `${NIERS_SYSTEMD}/${nom}`
-					: dansDépôt.includes(nom)
-						? `${INFRA_SYSTEMD}/${nom}`
-						: `${HOTE_SYSTEMD}/${nom}`,
+				dépôt: sourceUnité(nom, dansNiers, dansDépôt),
 				famille: "systemd" as const,
 				machine: nôtre ? fragment : null,
 				nom,
