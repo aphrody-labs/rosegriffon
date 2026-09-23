@@ -38,7 +38,6 @@ export type NomService =
 	| "cdn-variantes"
 	| "storage"
 	| "realtime"
-	| "postgrest"
 	| "wiki"
 	| "site";
 
@@ -120,7 +119,7 @@ export const SERVICES: Readonly<Record<NomService, DescriptionService>> = {
 		titre: "Stockage",
 		base: local(8810, "STORAGE_URL"),
 		sante: "/health",
-		publique: "https://storage.rosegriffon.fr",
+		publique: `${publique("WEBSITE_URL", "https://rosegriffon.fr")}/storage/v1`,
 		unite: "rg-storage.service",
 		role: "fichiers des seaux publics et privés",
 	},
@@ -129,18 +128,9 @@ export const SERVICES: Readonly<Record<NomService, DescriptionService>> = {
 		titre: "Temps réel",
 		base: local(8812, "REALTIME_URL"),
 		sante: "/health",
-		publique: "https://realtime.rosegriffon.fr",
+		publique: `${publique("WEBSITE_URL", "https://rosegriffon.fr")}/realtime/v1`,
 		unite: "rg-realtime.service",
 		role: "flux SSE adossé à LISTEN/NOTIFY",
-	},
-	postgrest: {
-		nom: "postgrest",
-		titre: "API REST Postgres",
-		base: local(8809, "POSTGREST_URL"),
-		sante: "/",
-		publique: "https://db.rosegriffon.fr",
-		unite: "rg-postgrest.service",
-		role: "lecture de la base vivante avec les policies RLS",
 	},
 	wiki: {
 		nom: "wiki",
