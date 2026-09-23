@@ -768,7 +768,9 @@ export const wikiService = {
 		}
 
 		// 2. SQL projection: imported aura rows carry their owner and skill ids in data.
-		for (const table of ["inagle_auras", "inagle_keshins", "inagle_souls", "inagle_miximax"] as const) {
+		// inagle_auras is a normalized catalog without a `data` column or an
+		// owner ID. Only the three owned aura tables carry this projection.
+		for (const table of ["inagle_keshins", "inagle_souls", "inagle_miximax"] as const) {
 			const auraRows = await db.selectFrom(table).select(["id", "data"]).execute();
 			for (const row of auraRows) {
 				const payload: any = row.data && typeof row.data === "object" ? row.data : {};
