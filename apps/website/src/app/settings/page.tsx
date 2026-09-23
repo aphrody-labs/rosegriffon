@@ -59,19 +59,17 @@ export default async function AccountPage({
 		.select("provider_id, created_at, scope")
 		.eq("user_id", user.id);
 
-	// `listSessions` renvoie le `token` de chaque session — la clé qu'attend
-	// `revokeSession`. La lecture directe de la table ne remontait que l'`id`,
-	// que l'endpoint ne trouve pas : la révocation ne faisait rien tout en
-	// répondant « succès ».
+	// N'envoyer que les identifiants au composant client. Les jetons de session
+	// servent à authentifier et restent exclusivement côté serveur.
 	let sessions: AccountSession[] = [];
 	try {
 		const list = await auth.api.listSessions({ headers: await headers() });
 		sessions = (list ?? []).map((s) => ({
 			createdAt: new Date(s.createdAt).toISOString(),
-			current: s.token === session.session.token,
+			current: s.id === session.session.id,
 			expiresAt: s.expiresAt ? new Date(s.expiresAt).toISOString() : null,
 			ipAddress: s.ipAddress ?? null,
-			token: s.token,
+			id: s.id,
 			userAgent: s.userAgent ?? null,
 		}));
 	} catch (error) {

@@ -62,13 +62,8 @@ export function describeUserAgent(ua?: string | null): {
 
 interface AccountSessionsProps {
 	sessions: AccountSession[];
-	/**
-	 * Révoque UNE session. Le paramètre est le `token`, pas l'identifiant de
-	 * ligne : `revokeSession` fait `findSession(token)` et répond `{status:true}`
-	 * même quand il ne trouve rien, donc un mauvais paramètre produit une
-	 * révocation qui se déclare réussie sans rien révoquer.
-	 */
-	onRevoke: (token: string) => Promise<void>;
+	/** Révoque une session par identifiant public via une action serveur. */
+	onRevoke: (id: string) => Promise<void>;
 	/**
 	 * Révoque toutes les AUTRES sessions. À câbler sur `revokeOtherSessions` et
 	 * surtout pas sur `revokeSessions`, qui supprime aussi la session courante et
@@ -138,7 +133,7 @@ export function AccountSessions({ sessions, onRevoke, onRevokeOthers }: AccountS
 
 					return (
 						<div
-							key={session.token}
+							key={session.id}
 							className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-4"
 						>
 							<div className="flex min-w-0 flex-1 items-start gap-3">
@@ -181,11 +176,11 @@ export function AccountSessions({ sessions, onRevoke, onRevokeOthers }: AccountS
 									size="sm"
 									disabled={busy !== null}
 									onClick={() =>
-										run(session.token, () => onRevoke(session.token), "Session révoquée.")
+										run(session.id, () => onRevoke(session.id), "Session révoquée.")
 									}
 									className="text-destructive hover:bg-destructive/10 hover:text-destructive"
 								>
-									{busy === session.token ? (
+									{busy === session.id ? (
 										<Loader2 className="size-4 animate-spin" aria-hidden />
 									) : (
 										<X className="size-4" aria-hidden />

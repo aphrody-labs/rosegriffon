@@ -25,6 +25,7 @@ import { authClient } from "@/lib/auth-client";
 import { getBrowserStorage } from "@/lib/storage/browser";
 
 import { updateAddress, updateAvatarUrl, updateProfile } from "./actions";
+import { revokeAccountSession } from "./session-actions";
 
 interface AccountClientProps {
 	userId: string;
@@ -316,13 +317,10 @@ export function AccountClient({
 
 							<AccountSessions
 								sessions={sessions}
-								onRevoke={async (token) => {
-									// `revokeSession` NE LÈVE PAS : il rend `{ data, error }`. Sans
-									// cette vérification, un refus du serveur ressortait en
-									// « Session révoquée » et la session restait ouverte.
-									const { error } = await authClient.revokeSession({ token });
+								onRevoke={async (id) => {
+									const { error } = await revokeAccountSession(id);
 									if (error) {
-										throw new Error(error.message ?? "Révocation refusée.");
+										throw new Error(error);
 									}
 									reload();
 								}}
