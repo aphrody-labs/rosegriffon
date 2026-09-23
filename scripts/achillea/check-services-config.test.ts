@@ -26,11 +26,29 @@ describe("Achillea service manifest", () => {
 		);
 	});
 
+	test("rejects drift from the production workspace", async () => {
+		const manifest = clone(await readManifest());
+		manifest.ownership.workspace = "/tmp/rg";
+		expect(validateManifest(manifest)).toContain("workspace must be /home/ubuntu/rg");
+	});
+
 	test("rejects a secrets file in the repository", async () => {
 		const manifest = clone(await readManifest());
 		manifest.ownership.productionSecretsFile = "/home/ubuntu/rg/.env";
 		expect(validateManifest(manifest)).toContain(
 			"production secrets file must stay outside the repository"
+		);
+		manifest.ownership.productionSecretsFile = "/etc/../home/ubuntu/rg/.env";
+		expect(validateManifest(manifest)).toContain(
+			"production secrets file must stay outside the repository"
+		);
+	});
+
+	test("rejects a local Supabase secrets file in the production workspace", async () => {
+		const manifest = clone(await readManifest());
+		manifest.localSupabaseTarget.secretsFiles.push("/home/ubuntu/rg/config/storage.env");
+		expect(validateManifest(manifest)).toContain(
+			"local Supabase secret file must stay outside the repository: /home/ubuntu/rg/config/storage.env"
 		);
 	});
 

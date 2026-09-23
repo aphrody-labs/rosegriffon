@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { isAbsolute, resolve } from "node:path";
+import { posix, resolve } from "node:path";
 
 export interface AchilleaServiceManifest {
 	schemaVersion: number;
@@ -83,6 +83,12 @@ export interface AchilleaServiceManifest {
 
 const repositoryRoot = resolve(import.meta.dir, "../..");
 export const manifestPath = resolve(repositoryRoot, "infra/achillea/services.json");
+const productionWorkspace = "/home/ubuntu/rg";
+
+function isInsideProductionWorkspace(path: string): boolean {
+	const normalized = posix.resolve(path);
+	return normalized === productionWorkspace || normalized.startsWith(`${productionWorkspace}/`);
+}
 
 const expectedPorts = new Map([
 	["api", 4000],
@@ -116,11 +122,11 @@ export function validateManifest(manifest: AchilleaServiceManifest): string[] {
 
 	if (manifest.schemaVersion !== 1) errors.push("schemaVersion must be 1");
 	if (manifest.application !== "achillea") errors.push("application must be achillea");
-	if (manifest.ownership.workspace !== repositoryRoot)
-		errors.push(`workspace must be ${repositoryRoot}`);
-	if (!isAbsolute(manifest.ownership.productionSecretsFile))
+	if (manifest.ownership.workspace !== productionWorkspace)
+		errors.push(`workspace must be ${productionWorkspace}`);
+	if (!posix.isAbsolute(manifest.ownership.productionSecretsFile))
 		errors.push("production secrets file must be absolute");
-	if (manifest.ownership.productionSecretsFile.startsWith(`${repositoryRoot}/`))
+	if (isInsideProductionWorkspace(manifest.ownership.productionSecretsFile))
 		errors.push("production secrets file must stay outside the repository");
 	if (manifest.ownership.localSecretsConvention !== "$HOME/.bash_secrets")
 		errors.push("local secrets convention must remain $HOME/.bash_secrets");
@@ -212,8 +218,7 @@ export function validateManifest(manifest: AchilleaServiceManifest): string[] {
 	// jointures directes avec les profils. Le garde-fou a donc changé d'objet —
 	// ce n'est plus « ne jamais écrire dans rg », c'est « ne jamais écrire hors
 	// du schéma achillea ».
-	if (localTarget.database !== "rg")
-		errors.push("local Supabase database must be exactly rg");
+	if (localTarget.database !== "rg") errors.push("local Supabase database must be exactly rg");
 	if (localTarget.schema !== "achillea")
 		errors.push("local Supabase schema must be exactly achillea");
 	for (const forbidden of ["public", "auth", "storage", "graphql", "extensions"]) {
@@ -244,7 +249,7 @@ export function validateManifest(manifest: AchilleaServiceManifest): string[] {
 		if (!localPorts.includes(expected)) errors.push(`local Supabase port ${expected} is missing`);
 	}
 	for (const secretFile of localTarget.secretsFiles) {
-		if (!isAbsolute(secretFile) || secretFile.startsWith(`${repositoryRoot}/`))
+		if (!posix.isAbsolute(secretFile) || isInsideProductionWorkspace(secretFile))
 			errors.push(`local Supabase secret file must stay outside the repository: ${secretFile}`);
 	}
 
