@@ -14,6 +14,7 @@ import { mkdir, rename, rm, stat } from "node:fs/promises";
 import { dirname, join as pathJoin, normalize as pathNormalize, resolve } from "node:path";
 import { createBunSql } from "@rosegriffon/db/bun-sql";
 import { boundaryOf, extractFilePart } from "./multipart";
+import { canTransferObject } from "./permissions";
 
 const PORT = Number(process.env.RG_STORAGE_PORT ?? 8810);
 const HOST = process.env.RG_STORAGE_HOST ?? "127.0.0.1";
@@ -102,7 +103,7 @@ async function isAdmin(claims: Claims | null): Promise<boolean> {
 	if (!claims) return false;
 	if (claims.role === "service_role") return true;
 	if (!claims.sub) return false;
-	const rows = await sql`select public.is_admin() as ok`.catch(() => []);
+	const rows = await sql`select exists(select 1 from public.profiles where id::text = ${claims.sub} and role = 'admin') as ok`.catch(() => []);
 	return rows[0]?.ok === true;
 }
 
@@ -350,7 +351,17 @@ async function handle(req: Request): Promise<Response> {
 		const src = diskPath(bucket, body.sourceKey ?? "");
 		const dst = diskPath(dstBucket, body.destinationKey ?? "");
 		if (!src || !dst) return fail(400, "InvalidRequest", "Invalid path");
-		if (!(await canWrite(dstBucket, body.destinationKey ?? "", claims))) {
+		if (!(await canTransferObject(
+			path === "/object/move" ? "move" : "copy",
+			bucket,
+			body.sourceKey ?? "",
+			dstBucket,
+			body.destinationKey ?? "",
+			{
+				canRead: (sourceBucket) => canRead(sourceBucket, claims),
+				canWrite: (targetBucket, name) => canWrite(targetBucket, name, claims),
+			}
+		))) {
 			return fail(401, "Unauthorized", "Invalid credentials");
 		}
 		await mkdir(dirname(dst), { recursive: true });
