@@ -57,6 +57,7 @@ async function chargerCatalogue(): Promise<Catalogue | null> {
 	try {
 		const reponse = await fetch(`${CDN}/avatar/catalog.json`, {
 			next: { revalidate: 86_400 },
+			signal: AbortSignal.timeout(8_000),
 		});
 		if (!reponse.ok) return null;
 		return (await reponse.json()) as Catalogue;

@@ -38,7 +38,11 @@ export async function fetchJson<T>(url: string, options: FetchJsonOptions = {}):
 	}
 
 	try {
-		const res = await fetch(url, signal ? { signal } : undefined);
+		// The decoder can remain connected while its CPK cache is under memory
+		// pressure. Bound every request so static generation and live pages finish.
+		const timeout = AbortSignal.timeout(8_000);
+		const requestSignal = signal ? AbortSignal.any([signal, timeout]) : timeout;
+		const res = await fetch(url, { signal: requestSignal });
 		if (!res.ok) return null;
 		const value = (await res.json()) as T;
 		if (revalidate > 0) memo.set(url, { at: now, value });
