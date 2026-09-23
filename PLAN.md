@@ -231,3 +231,21 @@ release repasse par `scripts/ops/assemble-vps-release.sh`.
   précédent dans `/var/backups/docker-enable-state-*.txt`.
 - Aucun autre service système n'est relancé. Pas de nouveau timer, ni de sauvegarde
   ni de nettoyage, ajouté sur l'hôte.
+
+## Sous-domaines et services doublons retirés — 23/09/2026
+
+- `supabase.`, `storage.` et `realtime.rosegriffon.fr` retirés (vhosts, certificat
+  `supabase.rosegriffon.fr` sorti du renouvellement, enregistrements DNS A supprimés).
+  Ils doublaient `/storage/v1/` et `/realtime/v1/` servis par `rosegriffon.fr`, que tous
+  les clients utilisent. Leur seul trafic était du scan WordPress. `studio.` (A
+  orphelin, sans vhost) supprimé aussi. Restauration : A → `51.77.147.152`.
+- `rg-postgrest` retiré (unité désactivée, sauvegardée dans
+  `/var/backups/rg-postgrest-retired-*`) : aucun consommateur, les seuls appels
+  `/rest/v1` venaient des sondes de déploiement.
+- Release `6494fd4` (dérivée de `939fc1a`, fichiers du commit copiés sans conversion
+  de fins de ligne) activée par `aphrody-infra deploy --stack rg --apply` ; catalogue
+  aphrody-infra `a412e14` installé sur le VPS. Les changements du site (`sites.ts`,
+  `platform.ts`) ne prennent effet qu'à la prochaine release construite.
+- Sous-domaines conservés, car utilisés : `api.` (callback OAuth, API unifiée),
+  `cdn.`, `achillea.` (API bot et redirection), `ranked.` (WebSocket Colyseus codé
+  dans le bundle du site).
