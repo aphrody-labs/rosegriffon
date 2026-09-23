@@ -19,16 +19,9 @@ export interface AccountLinkedAccount {
 	scope?: string | null;
 }
 
-/**
- * Une session Better Auth.
- *
- * `token` — et pas l'identifiant de la ligne — est la clé attendue par
- * `revokeSession` : l'endpoint fait `findSession(token)` et, s'il ne trouve
- * rien, ne révoque rien tout en répondant `{ status: true }`. Passer un `id`
- * produit donc une révocation qui se déclare réussie sans rien faire.
- */
+/** Session affichable sans exposer le jeton Better Auth au navigateur. */
 export interface AccountSession {
-	token: string;
+	id: string;
 	current: boolean;
 	createdAt: string;
 	expiresAt?: string | null;
