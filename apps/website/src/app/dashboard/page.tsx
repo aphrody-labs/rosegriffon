@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { createPostgresClient } from "@rosegriffon/db/service";
+import { redirect } from "next/navigation";
 
 import { getServerUser } from "@/lib/auth-helpers";
 
@@ -20,7 +20,7 @@ export default async function DashboardPage() {
 
 	const username = (profile as { username?: string } | null)?.username;
 	if (username) {
-		redirect(`/profil/${username}`);
+		redirect(`/profil/${encodeURIComponent(username)}`);
 	}
 	redirect("/settings");
 }

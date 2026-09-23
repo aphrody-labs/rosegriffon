@@ -1,24 +1,26 @@
-import { notFound } from "next/navigation";
-
-import { CarteJoueur } from "@rosegriffon/ui";
+import type { Tables } from "@rosegriffon/db";
+import { createPostgresClient } from "@rosegriffon/db/service";
 import { progression, rangDe } from "@rosegriffon/types/experience";
-
+import { CarteJoueur } from "@rosegriffon/ui";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { LegacyBanner } from "@/components/patreon/LegacyBanner";
 import { PatreonConnectionCard } from "@/components/patreon/PatreonConnectionCard";
 import { PatreonMembershipCard } from "@/components/patreon/PatreonMembershipCard";
-import { BreadcrumbSchema, ProfileSchema } from "@/components/shared/StructuredData";
+import {
+	BreadcrumbSchema,
+	ProfileSchema,
+} from "@/components/shared/StructuredData";
 import { getServerUser } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
-import { createPostgresClient } from "@rosegriffon/db/service";
-
 import { ProfileAbout } from "./_components/profile-about";
 import { ProfileActivity } from "./_components/profile-activity";
-import { ProfileStats, type StatistiquesProfil } from "./_components/profile-stats";
 import { ProfileIdentity } from "./_components/profile-identity";
 import { ProfileQuickLinks } from "./_components/profile-quick-links";
-
-import type { Tables } from "@rosegriffon/db";
-import type { Metadata } from "next";
+import {
+	ProfileStats,
+	type StatistiquesProfil,
+} from "./_components/profile-stats";
 
 export const dynamic = "force-dynamic";
 
@@ -44,9 +46,11 @@ export async function generateMetadata({
 	// fermeture PII du 11/8/2026. Cette page lit pourtant la base avec le rôle
 	// propriétaire (`getPgPool`), qui contourne à la fois la RLS et les droits
 	// par colonne : la restriction doit donc être appliquée ici, dans la requête.
-	const { rows } = await pool.query<Pick<Profile, "username" | "avatar_url" | "bio">>(
+	const { rows } = await pool.query<
+		Pick<Profile, "username" | "avatar_url" | "bio">
+	>(
 		"SELECT username, avatar_url, bio FROM profiles WHERE username = $1 AND claimed_at IS NOT NULL LIMIT 1",
-		[username]
+		[username],
 	);
 	const profile = rows[0];
 
@@ -55,22 +59,24 @@ export async function generateMetadata({
 	}
 
 	const displayName = profile.username || username;
+	const profilePath = `/profil/${encodeURIComponent(displayName)}`;
 	const title = `Profil de ${displayName} · Rose Griffon`;
 	// Sans bio, on annonce ce que la page EST — « Découvrez le profil de X »
 	// répétait le titre juste au-dessus, en aperçu de lien comme en résultat de
 	// recherche.
-	const description = profile.bio || `Profil de ${displayName} sur Rose Griffon.`;
+	const description =
+		profile.bio || `Profil de ${displayName} sur Rose Griffon.`;
 	const image = profile.avatar_url || "/opengraph-image.png";
 
 	return {
-		alternates: { canonical: `https://rosegriffon.fr/profil/${username}` },
+		alternates: { canonical: `https://rosegriffon.fr${profilePath}` },
 		description,
 		openGraph: {
 			description,
 			images: [{ url: image }],
 			title,
 			type: "profile",
-			url: `https://rosegriffon.fr/profil/${username}`,
+			url: `https://rosegriffon.fr${profilePath}`,
 		},
 		// Même politique que sur le wiki Azalée : la fiche publie la biographie
 		// d'un membre sans que son indexation ait jamais été demandée.
@@ -103,7 +109,7 @@ export default async function UserProfilePage({
 			`SELECT id, updated_at, username, avatar_url, role, website, discord_id,
 			        bio, banner_url, banner_position, poste, claimed_at, twitter_handle, badges
 			   FROM profiles WHERE username = $1 AND claimed_at IS NOT NULL LIMIT 1`,
-			[username]
+			[username],
 		);
 		profile = rows[0] ?? null;
 	} catch (error) {
@@ -120,7 +126,11 @@ export default async function UserProfilePage({
 	// lié. Un profil sans `discord_id` (inscription Google, compte non réclamé)
 	// n'a pas de niveau — la carte n'affiche alors pas le bloc plutôt que
 	// d'inventer un « niveau 1 » que personne n'a joué.
-	let niveauCommunaute: { valeur: number; restant: number; rang: string } | null = null;
+	let niveauCommunaute: {
+		valeur: number;
+		restant: number;
+		rang: string;
+	} | null = null;
 	let titreJoueur: string | null = null;
 	// Le rôle affiché est celui du DISCORD, pas `profiles.role` : « member » ou
 	// « admin » décrit un droit d'accès au site, quand « Joueur Route Victoire »
@@ -128,7 +138,9 @@ export default async function UserProfilePage({
 	// les salons. On prend le rôle de plus haute position, comme Discord.
 	let roleDiscord: { nom: string; couleur: number | null } | null = null;
 	let classementServeur: { place: number; total: number } | null = null;
-	let fiche: StatistiquesProfil = { inscriptionSite: profile.claimed_at ?? null };
+	let fiche: StatistiquesProfil = {
+		inscriptionSite: profile.claimed_at ?? null,
+	};
 	if (profile.discord_id) {
 		try {
 			const { rows } = await pool.query<{ name: string; color: number | null }>(
@@ -138,14 +150,19 @@ export default async function UserProfilePage({
 				  WHERE m.discord_id = $1
 				  ORDER BY r.position DESC
 				  LIMIT 12`,
-				[profile.discord_id]
+				[profile.discord_id],
 			);
 			// Tous les rôles, du plus haut au plus bas : le premier sert d'identité
 			// sur la carte, la liste complète nourrit la fiche du bas.
-			roleDiscord = rows[0] ? { couleur: rows[0].color || null, nom: rows[0].name } : null;
+			roleDiscord = rows[0]
+				? { couleur: rows[0].color || null, nom: rows[0].name }
+				: null;
 			fiche = {
 				...fiche,
-				roles: rows.map((ligne) => ({ couleur: ligne.color || null, nom: ligne.name })),
+				roles: rows.map((ligne) => ({
+					couleur: ligne.color || null,
+					nom: ligne.name,
+				})),
 			};
 		} catch (error) {
 			console.error("[profil] rôle Discord indisponible", error);
@@ -171,7 +188,7 @@ export default async function UserProfilePage({
 				   LEFT JOIN achillea.clan c ON c.id = cm.clan_id
 				  WHERE u.id = $1
 				  GROUP BY u.id`,
-				[profile.discord_id]
+				[profile.discord_id],
 			);
 			const achillea = rows[0];
 			if (achillea) {
@@ -188,9 +205,12 @@ export default async function UserProfilePage({
 	}
 	if (profile.discord_id) {
 		try {
-			const { rows } = await pool.query<{ joined_at: string | null; premium_since: string | null }>(
+			const { rows } = await pool.query<{
+				joined_at: string | null;
+				premium_since: string | null;
+			}>(
 				`SELECT joined_at, premium_since FROM discord_members WHERE discord_id = $1 LIMIT 1`,
-				[profile.discord_id]
+				[profile.discord_id],
 			);
 			if (rows[0]) {
 				fiche = {
@@ -214,7 +234,7 @@ export default async function UserProfilePage({
 			}>(
 				`SELECT xp, titre, jetons, messages_comptes, serie_quotidienne
 				   FROM bot_profils WHERE discord_id = $1 ORDER BY xp DESC LIMIT 1`,
-				[profile.discord_id]
+				[profile.discord_id],
 			);
 			const ligne = rows[0];
 			if (ligne) {
@@ -236,7 +256,10 @@ export default async function UserProfilePage({
 				// Le « Grade » de la fiche du jeu, en vrai : la place au classement du
 				// serveur. Une seconde requête plutôt qu'une jointure — le classement
 				// se calcule sur toute la table, pas sur une ligne.
-				const { rows: rang } = await pool.query<{ place: string; total: string }>(
+				const { rows: rang } = await pool.query<{
+					place: string;
+					total: string;
+				}>(
 					`SELECT place, total FROM (
 					   SELECT discord_id,
 					          rank() OVER (ORDER BY xp DESC) AS place,
@@ -244,7 +267,7 @@ export default async function UserProfilePage({
 					     FROM bot_profils
 					    WHERE xp > 0
 					 ) c WHERE discord_id = $1`,
-					[profile.discord_id]
+					[profile.discord_id],
 				);
 				const ligneRang = rang[0];
 				if (ligneRang) {
@@ -268,7 +291,7 @@ export default async function UserProfilePage({
 			 WHERE author_id = $1 AND published = true
 			 ORDER BY created_at DESC
 			 LIMIT 5`,
-			[profile.id]
+			[profile.id],
 		);
 		activities = rows;
 	} catch (error) {
@@ -282,7 +305,7 @@ export default async function UserProfilePage({
 				`SELECT role, team_name FROM team_members
 				 WHERE discord_user_id = $1 AND is_active = true
 				 LIMIT 1`,
-				[profile.discord_id]
+				[profile.discord_id],
 			);
 			const row = rows[0];
 			staffMember = row
@@ -299,21 +322,22 @@ export default async function UserProfilePage({
 		const db = createPostgresClient();
 		const [tokensCount, membershipsCount, legacyCount] = await Promise.all([
 			db
-					.from("patreon_oauth_tokens")
-					.select("id", { count: "exact", head: true })
-					.eq("user_id", profile.id)
-					.eq("is_creator", false),
+				.from("patreon_oauth_tokens")
+				.select("id", { count: "exact", head: true })
+				.eq("user_id", profile.id)
+				.eq("is_creator", false),
 			db
-					.from("patreon_memberships")
-					.select("id", { count: "exact", head: true })
-					.eq("user_id", profile.id),
+				.from("patreon_memberships")
+				.select("id", { count: "exact", head: true })
+				.eq("user_id", profile.id),
 			db
-					.from("patreon_legacy_members")
-					.select("id", { count: "exact", head: true })
-					.eq("resolved_user_id", profile.id),
+				.from("patreon_legacy_members")
+				.select("id", { count: "exact", head: true })
+				.eq("resolved_user_id", profile.id),
 		]);
 		patreonLinked = (tokensCount.count ?? 0) > 0;
-		hasPatreonHistory = (membershipsCount.count ?? 0) > 0 || (legacyCount.count ?? 0) > 0;
+		hasPatreonHistory =
+			(membershipsCount.count ?? 0) > 0 || (legacyCount.count ?? 0) > 0;
 	}
 
 	return (
@@ -322,7 +346,10 @@ export default async function UserProfilePage({
 				items={[
 					{ item: "/", name: "Accueil" },
 					{ item: "/profil", name: "Profils" },
-					{ item: `/profil/${username}`, name: profile.username ?? username },
+					{
+						item: `/profil/${encodeURIComponent(profile.username ?? username)}`,
+						name: profile.username ?? username,
+					},
 				]}
 			/>
 			<ProfileSchema
@@ -330,7 +357,7 @@ export default async function UserProfilePage({
 				username={profile.username ?? username}
 				image={profile.avatar_url || undefined}
 				description={profile.bio || undefined}
-				url={`https://rosegriffon.fr/profil/${username}`}
+				url={`https://rosegriffon.fr/profil/${encodeURIComponent(profile.username ?? username)}`}
 				sameAs={
 					profile.twitter_handle
 						? [`https://twitter.com/${profile.twitter_handle.replace("@", "")}`]
@@ -362,7 +389,10 @@ export default async function UserProfilePage({
 				/>
 
 				{isOwnProfile && (
-					<section aria-label="Mon espace personnel" className="mb-10 space-y-6">
+					<section
+						aria-label="Mon espace personnel"
+						className="mb-10 space-y-6"
+					>
 						<LegacyBanner userId={profile.id} />
 						{hasPatreonHistory ? (
 							<PatreonMembershipCard userId={profile.id} />

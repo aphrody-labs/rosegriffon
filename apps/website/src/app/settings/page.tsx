@@ -1,5 +1,9 @@
-import { resolveAccountTab, type AccountSession, type AccountTabId } from "@rosegriffon/ui";
 import { createPostgresClient } from "@rosegriffon/db/service";
+import {
+	type AccountSession,
+	type AccountTabId,
+	resolveAccountTab,
+} from "@rosegriffon/ui";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -10,7 +14,12 @@ import { AccountClient } from "./account-client";
 
 export const dynamic = "force-dynamic";
 
-const TABS: readonly AccountTabId[] = ["profile", "address", "connections", "security"];
+const TABS: readonly AccountTabId[] = [
+	"profile",
+	"address",
+	"connections",
+	"security",
+];
 
 export default async function AccountPage({
 	searchParams,
@@ -42,7 +51,8 @@ export default async function AccountPage({
 	}
 
 	const profile = (profileRow ?? {}) as Record<string, unknown>;
-	const str = (key: string) => (typeof profile[key] === "string" ? (profile[key] as string) : "");
+	const str = (key: string) =>
+		typeof profile[key] === "string" ? (profile[key] as string) : "";
 
 	const { data: accountRows } = await admin
 		.from("account")
@@ -75,13 +85,17 @@ export default async function AccountPage({
 			userId={user.id}
 			email={user.email}
 			initialTab={resolveAccountTab(tab, TABS)}
-			backHref={username ? `/profil/${username}` : "/"}
+			backHref={username ? `/profil/${encodeURIComponent(username)}` : "/"}
 			avatarUrl={str("avatar_url") || null}
 			username={username || null}
 			role={str("role") || null}
-			twoFactorEnabled={Boolean((user as { twoFactorEnabled?: boolean }).twoFactorEnabled)}
+			twoFactorEnabled={Boolean(
+				(user as { twoFactorEnabled?: boolean }).twoFactorEnabled,
+			)}
 			profile={{
-				badges: Array.isArray(profile.badges) ? (profile.badges as string[]) : [],
+				badges: Array.isArray(profile.badges)
+					? (profile.badges as string[])
+					: [],
 				banner_position: Number(profile.banner_position ?? 50) || 50,
 				poste: str("poste") || null,
 				banner_url: str("banner_url"),
@@ -99,8 +113,16 @@ export default async function AccountPage({
 				postal_code: str("postal_code"),
 			}}
 			accounts={(accountRows ?? []).map((row: unknown) => {
-				const r = row as { provider_id: string; created_at: string; scope: string | null };
-				return { createdAt: r.created_at, provider: r.provider_id, scope: r.scope };
+				const r = row as {
+					provider_id: string;
+					created_at: string;
+					scope: string | null;
+				};
+				return {
+					createdAt: r.created_at,
+					provider: r.provider_id,
+					scope: r.scope,
+				};
 			})}
 			sessions={sessions}
 		/>

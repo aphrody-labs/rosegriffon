@@ -1,5 +1,6 @@
 "use client";
 
+import type { Database } from "@rosegriffon/db";
 import {
 	Badge,
 	Button,
@@ -11,21 +12,18 @@ import {
 	TableHeader,
 	TableRow,
 } from "@rosegriffon/ui";
+import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import {
 	flexRender,
 	getCoreRowModel,
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import * as React from "react";
-import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-
+import * as React from "react";
+import { useState } from "react";
 import { useTableBroadcast } from "@/hooks";
 import { ArrowUpDown, Search } from "@/lib/icons-config";
-import type { Database } from "@rosegriffon/db";
 
 import { UserEditDialog } from "./user-edit-dialog";
 
@@ -34,9 +32,15 @@ type User = Database["public"]["Tables"]["profiles"]["Row"];
 const columns: ColumnDef<User>[] = [
 	{
 		accessorKey: "email",
-		cell: ({ row }) => row.getValue("email") || <span className="text-muted-foreground">N/A</span>,
+		cell: ({ row }) =>
+			row.getValue("email") || (
+				<span className="text-muted-foreground">N/A</span>
+			),
 		header: ({ column }) => (
-			<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+			<Button
+				variant="ghost"
+				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+			>
 				Email
 				<ArrowUpDown className="ml-2 size-4" />
 			</Button>
@@ -45,14 +49,20 @@ const columns: ColumnDef<User>[] = [
 	{
 		accessorKey: "full_name",
 		cell: ({ row }) =>
-			row.getValue("full_name") || <span className="text-muted-foreground">N/A</span>,
+			row.getValue("full_name") || (
+				<span className="text-muted-foreground">N/A</span>
+			),
 		header: "Nom Complet",
 	},
 	{
 		accessorKey: "role",
 		cell: ({ row }) => {
 			const role = row.getValue("role") as string;
-			return <Badge variant={role === "admin" ? "default" : "secondary"}>{role || "user"}</Badge>;
+			return (
+				<Badge variant={role === "admin" ? "default" : "secondary"}>
+					{role || "user"}
+				</Badge>
+			);
 		},
 		header: "Rôle",
 	},
@@ -69,7 +79,10 @@ const columns: ColumnDef<User>[] = [
 			});
 		},
 		header: ({ column }) => (
-			<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+			<Button
+				variant="ghost"
+				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+			>
 				Date
 				<ArrowUpDown className="ml-2 size-4" />
 			</Button>
@@ -86,45 +99,20 @@ interface UsersTableProps {
 }
 
 export function UsersTable({ users: initialUsers }: UsersTableProps) {
-	const [data, setData] = useState<User[]>(initialUsers);
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const searchParams = useSearchParams();
-	const { replace } = useRouter();
-
-	useEffect(() => {
-		setData(initialUsers);
-	}, [initialUsers]);
+	const router = useRouter();
 
 	useTableBroadcast({
-		onDelete: (deletedProfile) => {
-			const profile = deletedProfile as User;
-			setData((prevData) => prevData.filter((u) => u.id !== profile.id));
-			toast.info("Utilisateur supprimé");
-		},
-		onInsert: (newProfile) => {
-			const profile = newProfile as User;
-			setData((prevData) => [...prevData, profile]);
-			toast.success("Nouvel utilisateur ajouté");
-		},
-		onUpdate: (updatedProfile) => {
-			const profile = updatedProfile as User;
-			setData((prevData) => {
-				const existingIndex = prevData.findIndex((u) => u.id === profile.id);
-				if (existingIndex >= 0) {
-					const newData = [...prevData];
-					newData[existingIndex] = { ...newData[existingIndex], ...profile };
-					return newData;
-				}
-				return prevData;
-			});
-			toast.info("Utilisateur mis à jour en temps réel");
-		},
+		onDelete: () => router.refresh(),
+		onInsert: () => router.refresh(),
+		onUpdate: () => router.refresh(),
 		table: "profiles",
 	});
 
 	const table = useReactTable({
 		columns,
-		data,
+		data: initialUsers,
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		onSortingChange: setSorting,
@@ -141,7 +129,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
 			params.delete("query");
 		}
 		params.set("page", "1");
-		replace(`/admin/users?${params.toString()}`);
+		router.replace(`/admin/users?${params.toString()}`);
 	};
 
 	const searchTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -177,7 +165,10 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
 									<TableHead key={header.id}>
 										{header.isPlaceholder
 											? null
-											: flexRender(header.column.columnDef.header, header.getContext())}
+											: flexRender(
+													header.column.columnDef.header,
+													header.getContext(),
+												)}
 									</TableHead>
 								))}
 							</TableRow>
@@ -189,14 +180,20 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
 								<TableRow key={row.id}>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id}>
-											{flexRender(cell.column.columnDef.cell, cell.getContext())}
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext(),
+											)}
 										</TableCell>
 									))}
 								</TableRow>
 							))
 						) : (
 							<TableRow>
-								<TableCell colSpan={columns.length} className="h-24 text-center">
+								<TableCell
+									colSpan={columns.length}
+									className="h-24 text-center"
+								>
 									Aucun utilisateur trouvé.
 								</TableCell>
 							</TableRow>
