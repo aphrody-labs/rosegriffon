@@ -25,13 +25,12 @@
  * dépend entièrement de l'éditeur du modèle.
  */
 
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { cronSharedPath } from "../../lib/shared-path";
 
-// Racine du monorepo, déduite depuis l'emplacement de ce fichier
-// (packages/cron/src/tasks/seo/llms-txt.ts → remonter de 5 niveaux).
-const MONOREPO_ROOT = join(import.meta.dir, "..", "..", "..", "..", "..");
-const WEBSITE_PUBLIC = join(MONOREPO_ROOT, "apps", "website", "public");
+// nginx sert ces fichiers depuis le répertoire partagé, hors de la release Website.
+const WEBSITE_PUBLIC = cronSharedPath("seo");
 
 const DEV_CREDIT = "yoyo — https://x.com/yoyo__goat";
 
@@ -309,6 +308,7 @@ export async function runSeoLlmsTxt(): Promise<{ success: boolean; error?: strin
 		const azaleeFull = azaleeLlmsFull();
 		const unifiedIndex = `${websiteIndex}\n${azaleeIndex}`;
 		const unifiedFull = `${websiteFull}\n${azaleeFull}`;
+		await mkdir(WEBSITE_PUBLIC, { recursive: true });
 
 		const targets: Array<{ path: string; content: string }> = [
 			// Website : llm.txt est l'alias référencé par les métadonnées Next.

@@ -22,9 +22,9 @@ const BUN = process.execPath;
  * Racine du dépôt qui porte le pipeline de données du jeu.
  *
  * Depuis la fusion, tout ce qui touche aux fichiers d'Inazuma Eleven vit dans `niers` :
- * le parseur `inagle`, le dump du miroir SQLite, le décodage des CPK. Le wiki, les news
+ * le parseur `inagle` et le décodage des CPK. Le wiki, les news
  * et le site de l'association restent ici, mais **l'extraction, elle, est là-bas**. Ces
- * deux commandes doivent donc partir de `niers`, pas du dépôt qui les planifie.
+ * la commande doit donc partir de `niers`, pas du dépôt qui la planifie.
  *
  * `NIERS_ROOT` permet de le déplacer sans toucher au code ; le repli est le chemin de
  * la machine, seul endroit où il reste écrit.
@@ -33,7 +33,7 @@ const RACINE_JEU = process.env.NIERS_ROOT ?? "/home/ubuntu/niers";
 
 /**
  * Exécute la commande de push d'Inagle pour synchroniser la base de données
- * Supabase avec les fichiers de données du jeu les plus récents.
+ * PostgreSQL avec les fichiers de données du jeu les plus récents.
  */
 export async function runInaglePush(): Promise<{ success: boolean; error?: string }> {
 	console.log("[Cron DB] Démarrage de la synchronisation Inagle avec la base de données...");
@@ -43,26 +43,6 @@ export async function runInaglePush(): Promise<{ success: boolean; error?: strin
 		return { success: true };
 	} catch (err: unknown) {
 		console.error("[Cron DB] Erreur lors du push d'Inagle :", err);
-		return { success: false, error: describeShellError(err) };
-	}
-}
-
-/**
- * Republie le miroir SQLite des tables `inagle_*` — les données extraites du jeu.
- *
- * Le miroir a déménagé dans `niers/var/` : il n'est plus écrit sous
- * le répertoire canonique niers, et c'est `scripts/donnees/miroir-inagle.sh` qui le publie,
- * avec sa validation de dump et sa bascule atomique. Le démon d'ici ne fait plus que le
- * déclencher. (L'unité `nie-miroir.timer` le fait aussi, chaque nuit à 04:10 UTC.)
- */
-export async function runSQLiteBackup(): Promise<{ success: boolean; error?: string }> {
-	console.log("[Cron DB] Republication du miroir SQLite des données de jeu (niers)…");
-	try {
-		await $`${RACINE_JEU}/scripts/donnees/miroir-inagle.sh`.cwd(RACINE_JEU);
-		console.log("[Cron DB] Sauvegarde SQLite réussie.");
-		return { success: true };
-	} catch (err: unknown) {
-		console.error("[Cron DB] Erreur lors de la sauvegarde SQLite :", err);
 		return { success: false, error: describeShellError(err) };
 	}
 }
