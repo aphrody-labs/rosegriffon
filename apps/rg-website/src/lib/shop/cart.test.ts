@@ -1,37 +1,9 @@
 import { describe, expect, it, beforeAll, beforeEach, mock } from "bun:test";
 import type { Mock } from "bun:test";
 
-// --- Mocks de modules (top-level, AVANT tout import du SUT) ---
+// --- Mocks des services (top-level, AVANT tout import du SUT) ---
 // On garde des références aux mocks pour pouvoir les réinitialiser dans beforeEach
 // (bun:test n'a pas d'équivalent fiable à vi.clearAllMocks()).
-
-const mockProduct = {
-	category: "textile",
-	image: "/shop/tshirt.png",
-	name: "T-shirt Rose Griffon 2026",
-	priceCents: 2000,
-	slug: "tee-shirt-rose-griffon-2026",
-	tags: ["new"],
-};
-const mockPack = {
-	category: "pack-patreon",
-	image: "/patreon/destin.webp",
-	name: "Pack Personnage — Édition Destin Billows",
-	priceCents: 2490,
-	slug: "pack-personnage-destin-billows",
-	tags: ["limited"],
-	variants: [{ id: "solstice", label: "Illustration · Solstice" }],
-};
-
-const getProduct = mock((slug: string) => {
-	if (slug === "tee-shirt-rose-griffon-2026") return mockProduct;
-	if (slug === "pack-personnage-destin-billows") return mockPack;
-	return undefined;
-});
-const getVariantPrice = mock((product: { priceCents: number }, _variantId?: string) => product.priceCents);
-
-// Mock products
-mock.module("./products", () => ({ getProduct, getVariantPrice }));
 
 // Mock next/headers (store cookie synchrone — le SUT fait `await cookies()`,
 // await sur une valeur non-promesse renvoie la valeur telle quelle).
@@ -83,8 +55,6 @@ describe("Cart persistence & merging", () => {
 	beforeEach(() => {
 		// Réinitialise l'historique d'appels de tous les mocks (remplace vi.clearAllMocks()).
 		for (const m of [
-			getProduct,
-			getVariantPrice,
 			cookies,
 			cookieStore.get,
 			cookieStore.set,
@@ -117,34 +87,34 @@ describe("Cart persistence & merging", () => {
 
 		it("should retrieve items from cookie when cookie is present", async () => {
 			const initialItems = [
-				{ id: "tee-shirt-rose-griffon-2026::default", qty: 2, slug: "tee-shirt-rose-griffon-2026" }
+				{ id: "print-a5-roy-fonteneau::default", qty: 2, slug: "print-a5-roy-fonteneau" },
 			];
 			mockCookies.get.mockReturnValue({ value: encodeURIComponent(JSON.stringify(initialItems)) });
 
 			const cart = await getCart();
 			expect(cart.items.length).toBe(1);
 			const firstItem = cart.items[0]!;
-			expect(firstItem.slug).toBe("tee-shirt-rose-griffon-2026");
+			expect(firstItem.slug).toBe("print-a5-roy-fonteneau");
 			expect(firstItem.qty).toBe(2);
 			expect(cart.itemCount).toBe(2);
 		});
 
 		it("should add a product to cookie cart", async () => {
-			await addToCart("tee-shirt-rose-griffon-2026", undefined, 1);
+			await addToCart("print-a5-roy-fonteneau", undefined, 1);
 			expect(mockCookies.set).toHaveBeenCalled();
 			const [, value] = mockCookies.set.mock.calls[0] as [string, string];
 			const saved = JSON.parse(decodeURIComponent(value));
-			expect(saved[0].slug).toBe("tee-shirt-rose-griffon-2026");
+			expect(saved[0].slug).toBe("print-a5-roy-fonteneau");
 			expect(saved[0].qty).toBe(1);
 		});
 
 		it("should update product quantity in cookie cart", async () => {
 			const initialItems = [
-				{ id: "tee-shirt-rose-griffon-2026::default", qty: 2, slug: "tee-shirt-rose-griffon-2026" }
+				{ id: "print-a5-roy-fonteneau::default", qty: 2, slug: "print-a5-roy-fonteneau" },
 			];
 			mockCookies.get.mockReturnValue({ value: encodeURIComponent(JSON.stringify(initialItems)) });
 
-			await updateQty("tee-shirt-rose-griffon-2026::default", 5);
+			await updateQty("print-a5-roy-fonteneau::default", 5);
 			expect(mockCookies.set).toHaveBeenCalled();
 			const [, value] = mockCookies.set.mock.calls[0] as [string, string];
 			const saved = JSON.parse(decodeURIComponent(value));
@@ -153,11 +123,11 @@ describe("Cart persistence & merging", () => {
 
 		it("should remove product from cookie cart", async () => {
 			const initialItems = [
-				{ id: "tee-shirt-rose-griffon-2026::default", qty: 2, slug: "tee-shirt-rose-griffon-2026" }
+				{ id: "print-a5-roy-fonteneau::default", qty: 2, slug: "print-a5-roy-fonteneau" },
 			];
 			mockCookies.get.mockReturnValue({ value: encodeURIComponent(JSON.stringify(initialItems)) });
 
-			await removeFromCart("tee-shirt-rose-griffon-2026::default");
+			await removeFromCart("print-a5-roy-fonteneau::default");
 			expect(mockCookies.delete).toHaveBeenCalledWith("rg_cart");
 		});
 
@@ -168,7 +138,10 @@ describe("Cart persistence & merging", () => {
 	});
 
 	describe("Authenticated user (Redis-based cart & merging)", () => {
-		const mockUser = { id: "user_123", email: "test@rosegriffon.fr" } as { id: string; email: string };
+		const mockUser = { id: "user_123", email: "test@rosegriffon.fr" } as {
+			id: string;
+			email: string;
+		};
 
 		beforeEach(() => {
 			getServerUser.mockResolvedValue(mockUser);
@@ -182,7 +155,7 @@ describe("Cart persistence & merging", () => {
 
 		it("should retrieve items from Redis cache when authenticated", async () => {
 			const redisItems = [
-				{ id: "tee-shirt-rose-griffon-2026::default", qty: 3, slug: "tee-shirt-rose-griffon-2026" }
+				{ id: "print-a5-roy-fonteneau::default", qty: 3, slug: "print-a5-roy-fonteneau" },
 			];
 			redisCache.get.mockResolvedValue(redisItems);
 
@@ -194,14 +167,19 @@ describe("Cart persistence & merging", () => {
 		it("should merge cookie cart items into Redis cart when logging in", async () => {
 			// Simule des items existants dans le cache Redis
 			const redisItems = [
-				{ id: "tee-shirt-rose-griffon-2026::default", qty: 1, slug: "tee-shirt-rose-griffon-2026" }
+				{ id: "print-a5-roy-fonteneau::default", qty: 1, slug: "print-a5-roy-fonteneau" },
 			];
 			redisCache.get.mockResolvedValue(redisItems);
 
 			// Simule des items dans le cookie (avant authentification complète)
 			const cookieItems = [
-				{ id: "tee-shirt-rose-griffon-2026::default", qty: 2, slug: "tee-shirt-rose-griffon-2026" },
-				{ id: "pack-personnage-destin-billows::solstice", qty: 1, slug: "pack-personnage-destin-billows", variantId: "solstice" }
+				{ id: "print-a5-roy-fonteneau::default", qty: 2, slug: "print-a5-roy-fonteneau" },
+				{
+					id: "pack-personnage-destin-billows::solstice",
+					qty: 1,
+					slug: "pack-personnage-destin-billows",
+					variantId: "solstice",
+				},
 			];
 			mockCookies.get.mockReturnValue({ value: encodeURIComponent(JSON.stringify(cookieItems)) });
 
@@ -209,12 +187,12 @@ describe("Cart persistence & merging", () => {
 			const cart = await getCart();
 
 			// Vérifie que les paniers ont été fusionnés
-			// 1 tee-shirt (Redis) + 2 tee-shirts (Cookie) = 3 tee-shirts
-			const teeShirt = cart.items.find(i => i.slug === "tee-shirt-rose-griffon-2026");
-			expect(teeShirt?.qty).toBe(3);
+			// 1 print (Redis) + 2 prints (Cookie) = 3 prints
+			const print = cart.items.find((i) => i.slug === "print-a5-roy-fonteneau");
+			expect(print?.qty).toBe(3);
 
 			// Le pack personnage a également été ajouté
-			const pack = cart.items.find(i => i.slug === "pack-personnage-destin-billows");
+			const pack = cart.items.find((i) => i.slug === "pack-personnage-destin-billows");
 			expect(pack?.qty).toBe(1);
 
 			// Le cache Redis doit être mis à jour avec le panier fusionné
@@ -225,7 +203,7 @@ describe("Cart persistence & merging", () => {
 		});
 
 		it("should add a product directly to Redis when authenticated", async () => {
-			await addToCart("tee-shirt-rose-griffon-2026", undefined, 2);
+			await addToCart("print-a5-roy-fonteneau", undefined, 2);
 			expect(redisCache.set).toHaveBeenCalled();
 			const calls = redisCache.set.mock.calls;
 			expect(calls.length).toBeGreaterThan(0);
@@ -233,7 +211,9 @@ describe("Cart persistence & merging", () => {
 			const key = call[0];
 			const savedItems = call[1];
 			expect(key).toBe("cart:user_123");
-			expect((savedItems as { slug: string; qty: number }[])[0]!.slug).toBe("tee-shirt-rose-griffon-2026");
+			expect((savedItems as { slug: string; qty: number }[])[0]!.slug).toBe(
+				"print-a5-roy-fonteneau"
+			);
 			expect((savedItems as { slug: string; qty: number }[])[0]!.qty).toBe(2);
 		});
 
