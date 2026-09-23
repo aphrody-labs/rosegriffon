@@ -133,7 +133,9 @@ export function oklchVersHex(valeur: string): string | null {
 	if (!correspondance) return null;
 	const [, brutL, brutC, brutH] = correspondance;
 	const L = brutL!.endsWith("%") ? Number.parseFloat(brutL!) / 100 : Number.parseFloat(brutL!);
-	const C = brutC!.endsWith("%") ? (Number.parseFloat(brutC!) / 100) * 0.4 : Number.parseFloat(brutC!);
+	const C = brutC!.endsWith("%")
+		? (Number.parseFloat(brutC!) / 100) * 0.4
+		: Number.parseFloat(brutC!);
 	const H = Number.parseFloat(brutH!);
 	if (!Number.isFinite(L) || !Number.isFinite(C) || !Number.isFinite(H)) return null;
 
