@@ -11,6 +11,8 @@
  * nominatifs y apparaît, ne serait-ce qu'en commentaire.
  */
 import { describe, expect, test } from "bun:test";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
 	aDesResultats,
@@ -864,7 +866,7 @@ describe("vie privée — non-dérive", () => {
 	 * trois fichiers de cette unité le contient — en SQL, en identifiant ou en
 	 * commentaire.
 	 */
-	const RACINE = new URL("../..", import.meta.url).pathname;
+	const RACINE = fileURLToPath(new URL("../..", import.meta.url));
 	// Les quatre fichiers de l'unité sondage, pas seulement ceux qui touchent la base.
 	const FICHIERS = [
 		"src/lib/sondage-format.ts",
@@ -876,7 +878,7 @@ describe("vie privée — non-dérive", () => {
 
 	test("aucun fichier de l'unité ne nomme la table des votes nominatifs", async () => {
 		for (const chemin of FICHIERS) {
-			const contenu = await Bun.file(`${RACINE}${chemin}`).text();
+			const contenu = await Bun.file(join(RACINE, chemin)).text();
 			expect(contenu.toLowerCase()).not.toContain(INTERDIT);
 		}
 	});
@@ -888,7 +890,7 @@ describe("vie privée — non-dérive", () => {
 			["user", "id"].join("_") + " ", // `user_id` isolé, pas `guild_id`
 		];
 		for (const chemin of FICHIERS) {
-			const contenu = (await Bun.file(`${RACINE}${chemin}`).text()).toLowerCase();
+			const contenu = (await Bun.file(join(RACINE, chemin)).text()).toLowerCase();
 			for (const suspect of suspects) {
 				expect(contenu).not.toContain(suspect);
 			}
