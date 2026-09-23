@@ -256,6 +256,8 @@ export type RankedLeaderboardQuery = {
 	/** Pagination base 0, comme l'attend le serveur ranked. */
 	page?: number;
 	pageSize?: number;
+	/** Recherche globale par pseudo / nom affiché. */
+	search?: string;
 }
 
 export type RankedTelemetryQuery = {

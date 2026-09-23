@@ -30,6 +30,7 @@ export default function RankedHistoryPage() {
 	const [period, setPeriod] = useState<number>(0); // 0 = all, 7 = 7d, 30 = 30d
 	const [history, setHistory] = useState<RankedHistoryEntry[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (!isAuthenticated) {
@@ -39,6 +40,8 @@ export default function RankedHistoryPage() {
 
 		let cancelled = false;
 		setLoading(true);
+		setError(null);
+		setHistory([]);
 		const client = createAchilleaClient();
 
 		const modeQuery = mode === -1 ? undefined : mode;
@@ -49,10 +52,13 @@ export default function RankedHistoryPage() {
 				if (cancelled) return;
 				if (res.ok && res.value) {
 					setHistory(res.value);
+				} else {
+					setError("Impossible de charger votre historique de matchs.");
 				}
 			})
 			.catch((cause) => {
 				signalerException("ranked/history", cause);
+				if (!cancelled) setError("Impossible de charger votre historique de matchs.");
 			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
@@ -219,6 +225,8 @@ export default function RankedHistoryPage() {
 					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
 					<p className="text-sm text-muted-foreground">Chargement de votre historique...</p>
 				</div>
+			) : error ? (
+				<div role="alert" className="border border-rose-500/30 rounded-2xl p-8 text-center text-sm text-rose-400">{error}</div>
 			) : (
 				<>
 					{/* Performance summary card */}
