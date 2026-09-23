@@ -9,7 +9,17 @@ import { SHARED_ASSETS_PATH } from "@rosegriffon/assets";
 const SOURCE_DIR =
 	process.env.RG_ASSETS_SOURCE_DIR ?? fileURLToPath(new URL("../../../assets/public/", import.meta.url));
 const CDN_STATIC_ROOT = process.env.CDN_STATIC_ROOT ?? "/var/www/cdn/static";
-const DEST_DIR = join(CDN_STATIC_ROOT, SHARED_ASSETS_PATH);
+const DEST_DIR = sharedAssetsDestDir(CDN_STATIC_ROOT);
+
+/**
+ * `CDN_STATIC_ROOT` est déjà la racine servie sous l'URL `/static` : on n'y
+ * rajoute que la partie qui suit `/static` (`rg/public`). Joindre le chemin
+ * public complet produisait `.../static/static/rg/public`, hors du
+ * `ReadWritePaths` de rg-cron, et la publication échouait en EROFS.
+ */
+export function sharedAssetsDestDir(staticRoot: string): string {
+	return join(staticRoot, SHARED_ASSETS_PATH.replace(/^\/static(?=\/)/, ""));
+}
 
 /**
  * Synchronise les assets statiques partagés du monorepo vers le CDN.
