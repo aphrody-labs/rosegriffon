@@ -17,41 +17,28 @@ import {
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
-// The canonical 11 tiers metadata fallback
-const DEFAULT_TIERS: RankedTierInfo[] = [
-	{ key: "Fer", minElo: 0, maxElo: 149, gradient: ["#959595", "#494949"], playerCount: 0, emojiId: null, emojiKey: null },
-	{ key: "Bronze", minElo: 150, maxElo: 299, gradient: ["#b17253", "#6d483d"], playerCount: 0, emojiId: null, emojiKey: null },
-	{ key: "Argent", minElo: 300, maxElo: 449, gradient: ["#7facb8", "#546b71"], playerCount: 0, emojiId: null, emojiKey: null },
-	{ key: "Or", minElo: 450, maxElo: 599, gradient: ["#c2ad88", "#554f42"], playerCount: 0, emojiId: null, emojiKey: null },
-	{ key: "Platine", minElo: 600, maxElo: 749, gradient: ["#897e8b", "#5b5663"], playerCount: 0, emojiId: null, emojiKey: null },
-	{ key: "Diamant", minElo: 750, maxElo: 899, gradient: ["#88f6ff", "#547e8e"], playerCount: 0, emojiId: null, emojiKey: null },
-	{ key: "Émeraude", minElo: 900, maxElo: 1049, gradient: ["#2d925c", "#23574a"], playerCount: 0, emojiId: null, emojiKey: null },
-	{ key: "Rubis", minElo: 1050, maxElo: 1199, gradient: ["#ff5648", "#a6181e"], playerCount: 0, emojiId: null, emojiKey: null },
-	{ key: "Divin", minElo: 1200, maxElo: 1349, gradient: ["#7edcb5", "#368464"], playerCount: 0, emojiId: null, emojiKey: null },
-	{ key: "Supernova", minElo: 1350, maxElo: 1499, gradient: ["#f010ff", "#930e9c"], playerCount: 0, emojiId: null, emojiKey: null },
-	{ key: "Légendaire", minElo: 1500, maxElo: 9999, gradient: ["#ffa910", "#a15b0e"], playerCount: 0, emojiId: null, emojiKey: null },
-];
-
 export default function RankedTiersPage() {
 	const [mode, setMode] = useState<2 | 4>(2);
-	const [tiers, setTiers] = useState<RankedTierInfo[]>(DEFAULT_TIERS);
+	const [tiers, setTiers] = useState<RankedTierInfo[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		let cancelled = false;
 		setLoading(true);
+		setError(null);
 		const client = createAchilleaClient();
 
 		client.ranked
 			.tiers(mode)
 			.then((res) => {
 				if (cancelled) return;
-				if (res.ok && res.value && res.value.length > 0) {
-					setTiers(res.value);
-				}
+				if (res.ok) setTiers(res.value);
+				else setError("Les paliers sont momentanément indisponibles.");
 			})
 			.catch((cause) => {
 				signalerException("ranked/tiers", cause);
+				if (!cancelled) setError("Les paliers sont momentanément indisponibles.");
 			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
@@ -125,11 +112,11 @@ export default function RankedTiersPage() {
 						{totalPlayers > 0 ? `${totalPlayers} compétiteurs actifs` : "Saison active"}
 					</span>
 				</div>
-				<TierDistribution tiers={tiers} />
+				{loading ? <p className="text-sm text-muted-foreground">Chargement des paliers…</p> : error ? <p role="alert" className="text-sm text-rose-400">{error}</p> : <TierDistribution tiers={tiers} />}
 			</div>
 
 			{/* Tiers Grid */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+			{!loading && !error && <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 				{tiers.map((tier, idx) => {
 					const badgePath = rankImagePath(tier.key, "/ranks");
 					const gradient =
@@ -185,7 +172,7 @@ export default function RankedTiersPage() {
 						</div>
 					);
 				})}
-			</div>
+			</div>}
 
 			{/* Progression note */}
 			<div className="p-6 rounded-2xl bg-muted/30 border border-border space-y-2 text-xs text-muted-foreground">

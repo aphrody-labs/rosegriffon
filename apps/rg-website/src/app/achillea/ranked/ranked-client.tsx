@@ -36,6 +36,7 @@ export default function RankedHubPage() {
 	const [profile, setProfile] = useState<RankedProfile | null>(null);
 	const [trend, setTrend] = useState<RankedTrend | null>(null);
 	const [loadingProfile, setLoadingProfile] = useState<boolean>(true);
+	const [profileError, setProfileError] = useState<string | null>(null);
 
 	// Matchmaking search state
 	// File d'attente RÉELLE (Colyseus). L'état local qui vivait ici ne faisait
@@ -65,6 +66,8 @@ export default function RankedHubPage() {
 
 		let cancelled = false;
 		setLoadingProfile(true);
+		setProfileError(null);
+		setProfile(null);
 		const client = createAchilleaClient();
 
 		Promise.all([
@@ -75,6 +78,8 @@ export default function RankedHubPage() {
 				if (cancelled) return;
 				if (profRes.ok) {
 					setProfile(profRes.value);
+				} else {
+					setProfileError("Votre profil classé est momentanément indisponible.");
 				}
 				if (trendRes.ok) {
 					setTrend(trendRes.value);
@@ -122,7 +127,7 @@ export default function RankedHubPage() {
 		setTimeout(() => setCopied(false), 2000);
 	};
 
-	const tierKey = profile?.tier?.key ?? "Fer";
+	const tierKey = profile?.tier?.key ?? "Non classé";
 	const tierBadgePath = rankImagePath(tierKey, "/ranks");
 	const gradientStops = profile?.tier?.gradient?.length
 		? `linear-gradient(135deg, ${profile.tier.gradient.join(", ")})`
@@ -270,12 +275,14 @@ export default function RankedHubPage() {
 					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-3" />
 					<p className="text-sm text-muted-foreground">Chargement de votre profil classé...</p>
 				</div>
+			) : profileError || !profile ? (
+				<div role="alert" className="p-8 border border-rose-500/30 bg-card rounded-2xl text-center text-sm text-rose-400">{profileError ?? "Profil classé introuvable."}</div>
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 					{/* Profile card */}
 					<div className="md:col-span-2 border border-border bg-card rounded-2xl p-6 shadow-sm flex flex-col justify-between">
 						<div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-							<div
+							{profile.tier ? <div
 								className="w-28 h-28 rounded-2xl p-3 flex items-center justify-center shrink-0 shadow-lg relative overflow-hidden"
 								style={{ background: gradientStops }}
 							>
@@ -287,7 +294,7 @@ export default function RankedHubPage() {
 									className="object-contain drop-shadow-md"
 									priority
 								/>
-							</div>
+							</div> : <div className="w-28 h-28 rounded-2xl flex items-center justify-center shrink-0 border border-border bg-muted text-sm font-semibold text-muted-foreground">À jouer</div>}
 
 							<div className="space-y-3 text-center sm:text-left flex-1">
 								<div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
@@ -298,7 +305,7 @@ export default function RankedHubPage() {
 									<span className="px-2 py-0.5 rounded-md text-xs font-medium bg-muted text-muted-foreground">
 										{mode === 2 ? "1v1" : "2v2"}
 									</span>
-									{profile?.percentile && (
+									{profile.globalRank != null && (profile.totalPlayers ?? 0) > 0 && profile.percentile != null && (
 										<span className="px-2 py-0.5 rounded-md text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
 											Top {profile.percentile}%
 										</span>

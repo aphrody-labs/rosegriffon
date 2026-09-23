@@ -371,6 +371,13 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		expect(response.status).toBe(401);
 	});
 
+	it("ranked endpoints reject unsupported match modes", async () => {
+		for (const path of ["leaderboard", "tiers", "me"]) {
+			const response = await app.handle(new Request(`http://localhost/v1/achillea/ranked/${path}?mode=3`));
+			expect(response.status).toBe(400);
+		}
+	});
+
 	it("GET /v1/achillea/organizations returns a typed list", async () => {
 		const res = await api.v1.achillea.organizations.get({ query: { page: 1, pageSize: 5 } });
 		expect(res.status).toBe(200);
