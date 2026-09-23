@@ -93,8 +93,8 @@ describe("construction d'URL", () => {
 		const http = new AchilleaHttp({ baseUrl: "https://example.test/api" });
 
 		expect(http.url("/users/1/card.png")).toBe("https://example.test/api/users/1/card.png");
-		expect(http.url("/auth/discord", { state: "/ranked" })).toBe(
-			"https://example.test/api/auth/discord?state=%2Franked"
+		expect(http.url("/guilds", { page: 2 })).toBe(
+			"https://example.test/api/guilds?page=2"
 		);
 	});
 });

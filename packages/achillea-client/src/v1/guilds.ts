@@ -81,7 +81,7 @@ export const achilleaGuildStatsSchema = z.object({
 	total_guilds: z.number(),
 	total_members: z.union([z.number(), z.string()]).transform(Number),
 	last_scan: z.string().nullable(),
-	by_premium_tier: z.array(z.object({ premium_tier: z.number(), count: z.number() })).default([]),
+	by_premium_tier: z.array(z.object({ premium_tier: z.number().nullable(), count: z.number() })).default([]),
 	by_channel_type: z.array(z.object({ type: z.number(), count: z.number() })).default([]),
 });
 

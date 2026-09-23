@@ -12,6 +12,7 @@ import { adminController } from "./admin";
 import { playerNotesController } from "./player-notes";
 import { notificationsController } from "./notifications";
 import { rankedController } from "./ranked";
+import { guildsController } from "./guilds";
 
 export const achilleaModule = new Elysia({ prefix: "/achillea" })
 	.use(tournamentController)
@@ -19,6 +20,7 @@ export const achilleaModule = new Elysia({ prefix: "/achillea" })
 	.use(organizationController)
 	.use(leaderboardController)
 	.use(rankedController)
+	.use(guildsController)
 	.use(walletController)
 	.use(leagueController)
 	.use(usersController)

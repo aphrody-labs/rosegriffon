@@ -42,7 +42,9 @@ export type Resultat<T> =
 	| { ok: true; valeur: T }
 	| { ok: false; raison: "injoignable" | "http" | "forme"; detail: string };
 
-const client = createAchilleaClient({ baseUrl: Bun.env.ACHILLEA_API_URL });
+const client = createAchilleaClient({
+	baseUrl: Bun.env.ACHILLEA_UNIFIED_API_URL ?? "https://api.rosegriffon.fr/v1/achillea",
+});
 
 function adapterResultat<T>(resultat: AchilleaClientResult<T>): Resultat<T> {
 	if (resultat.ok) return { ok: true, valeur: resultat.value };

@@ -1,4 +1,4 @@
-import { Context, Controller, Get, Post, QueryParams, Req, Res, UseBefore } from "@tsed/common";
+import { Context, Controller, Get, Post, Req, Res, UseBefore } from "@tsed/common";
 import type { Request, Response } from "express";
 
 import {
@@ -6,27 +6,18 @@ import {
 	sessionClearCookieOptions,
 } from "@/auth";
 import { CookieAuthorize } from "@/api/middlewares";
-import { isSafeInternalPath } from "@rosegriffon/achillea-core";
 import { env } from "@/env";
 import { urlsConfig } from "@/configs";
 import type { UserDTO } from "@/services";
 import { BaseController } from "@/utils/classes";
-
-/** L'identité du site est désormais exclusivement gérée par Better Auth/RG. */
-function unifiedLoginUrl(returnUrl: string): string {
-	const url = new URL("/login", urlsConfig.website);
-	url.searchParams.set("redirect", isSafeInternalPath(returnUrl) ? returnUrl : "/achillea");
-	return url.toString();
-}
 
 function sessionIsSecure(): boolean {
 	return new URL(env.OAUTH_CALLBACK_BASE_URL).protocol === "https:";
 }
 
 /**
- * Provider OAuth belongs to the unified Elysia API.  This controller only
- * keeps the old browser URL alive long enough to forward an authenticated
- * user; it never creates state, exchanges a code, or stores a provider token.
+ * Provider OAuth belongs to the unified Elysia API. This controller forwards
+ * authenticated provider linking without creating its own OAuth state.
  */
 function unifiedProviderStart(provider: "twitch" | "challonge"): string {
 	return `${urlsConfig.unifiedApi.replace(/\/+$/u, "")}/v1/auth/oauth/${provider}/start`;
@@ -35,14 +26,6 @@ function unifiedProviderStart(provider: "twitch" | "challonge"): string {
 @Controller("/auth")
 export class AuthController extends BaseController {
 	constructor() { super(); }
-
-	@Get("/discord")
-	discordLogin(@QueryParams("state") state: string, @Res() res: Response) {
-		// Alias historique : aucun OAuth Discord n'est démarré par Achilléa.
-		// On passe par la page RG afin que Better Auth soit l'unique propriétaire
-		// de l'autorisation, de la session et du callback Discord.
-		return res.redirect(unifiedLoginUrl(state));
-	}
 
 	@Get("/challonge")
 	@UseBefore(CookieAuthorize)
@@ -88,12 +71,5 @@ export class AuthController extends BaseController {
 		res.status(upstream.status).setHeader("Cache-Control", "no-store");
 		res.type("application/json");
 		return res.send(text);
-	}
-
-	// Callback historique conservé pour les liens déjà distribués. Il n'échange
-	// plus jamais de code Discord : l'utilisateur repart vers l'OAuth unique RG.
-	@Get("/callback")
-	async callback(@Res() res: Response) {
-		return res.redirect(unifiedLoginUrl("/achillea"));
 	}
 }

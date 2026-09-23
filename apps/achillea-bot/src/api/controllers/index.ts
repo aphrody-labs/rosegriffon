@@ -11,7 +11,6 @@ export * from "./organizations";
 export * from "./notifications";
 export * from "./tournaments";
 export * from "./leagues";
-export * from "./guilds";
 export * from "./moderation-sync";
 export * from "./sanctions";
 export * from "./casts";
