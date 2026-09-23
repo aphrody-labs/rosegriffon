@@ -19,8 +19,8 @@ import {
 	DEFAULT_MAX_OPEN_TOURNAMENTS_PER_ORG,
 	DEFAULT_PUBLICATION_WINDOW,
 	leadTimeInDays,
+	ParticipantStatus,
 } from "@rosegriffon/achillea-core";
-import { ParticipantStatus } from "@rosegriffon/achillea-core";
 
 const NOW = new Date("2026-08-12T12:00:00.000Z");
 const inDays = (days: number) => new Date(NOW.getTime() + days * 86_400_000);

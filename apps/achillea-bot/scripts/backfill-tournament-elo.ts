@@ -18,8 +18,8 @@ import {
 	DEFAULT_BASE_RATING,
 	DEFAULT_K_FACTOR,
 	progressiveEloDelta,
+	computeSeriesOutcome,
 } from "@rosegriffon/achillea-core";
-import { computeSeriesOutcome } from "@rosegriffon/achillea-core";
 import { MatchFormat } from "../src/utils/enums";
 
 type CliOpts = { apply: boolean; limit: number | null; verbose: boolean };

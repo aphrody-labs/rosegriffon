@@ -15,8 +15,9 @@ import {
 	computeSeriesOutcome,
 	type SeriesMatch,
 	userIsTournamentOrganizer,
+	MatchFormat,
+	TeamSide,
 } from "@rosegriffon/achillea-core";
-import { MatchFormat, TeamSide } from "@rosegriffon/achillea-core";
 
 const m = (scoreTeam1: number, scoreTeam2: number, isValidated = true): SeriesMatch => ({
 	isValidated,

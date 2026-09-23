@@ -21,8 +21,8 @@ import {
 	teamForIndex,
 	type QueueCandidate,
 	type ScoreInput,
+	TeamSide,
 } from "@rosegriffon/achillea-core";
-import { TeamSide } from "@rosegriffon/achillea-core";
 
 // Fabrique une saisie joueur (du point de vue du joueur).
 function input(userId: string, myScore: number, oppScore: number, submitted = true): ScoreInput {
