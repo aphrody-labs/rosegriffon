@@ -59,7 +59,11 @@ beforeAll(async () => {
 	} catch {
 		// happy-dom n'était pas enregistré : les globals sont déjà ceux de Bun.
 	}
-	server = Bun.serve({ port: 0, hostname: "127.0.0.1", fetch: (request) => handleAzaleeRequest(request) });
+	server = Bun.serve({
+		port: 0,
+		hostname: "127.0.0.1",
+		fetch: (request) => handleAzaleeRequest(request),
+	});
 	client = createAzaleeClient({ baseUrl: `http://127.0.0.1:${server.port}`, attempts: 1 });
 });
 
@@ -96,7 +100,9 @@ describe("resolveAzaleeApiUrl — base d'URL", () => {
 	});
 
 	test("le / final est retiré — sinon les routes produiraient un double séparateur", () => {
-		expect(resolveAzaleeApiUrl("https://example.test/azalee///")).toBe("https://example.test/azalee");
+		expect(resolveAzaleeApiUrl("https://example.test/azalee///")).toBe(
+			"https://example.test/azalee"
+		);
 	});
 
 	test("les candidates par défaut placent le sidecar avant l'API publique", () => {
@@ -108,7 +114,7 @@ describe("resolveAzaleeApiUrl — base d'URL", () => {
 describe("buildQuery — sérialisation des filtres", () => {
 	test("omet undefined et null, sérialise nombres et booléens", () => {
 		expect(buildQuery({ q: "mark", limit: 10, page: undefined, sort: null, has_video: true })).toBe(
-			"?q=mark&limit=10&has_video=true",
+			"?q=mark&limit=10&has_video=true"
 		);
 	});
 
@@ -254,13 +260,16 @@ describe("bout en bout — Bun.serve + handleAzaleeRequest", () => {
 		expect(typeof list.data[0]?.charaId).toBe("string");
 	});
 
-	test.skipIf(!hasMirror)("fiche personnage résolue depuis le baseSlug publié par la liste", async () => {
-		const list = await client.characters({ q: "Mark", limit: 1 });
-		const slug = (list.data[0] as { baseSlug?: string; id?: string }).baseSlug;
-		expect(slug).toBeString();
-		const character = await client.character(slug as string);
-		expect(character.names).toBeDefined();
-	});
+	test.skipIf(!hasMirror)(
+		"fiche personnage résolue depuis le baseSlug publié par la liste",
+		async () => {
+			const list = await client.characters({ q: "Mark", limit: 1 });
+			const slug = (list.data[0] as { baseSlug?: string; id?: string }).baseSlug;
+			expect(slug).toBeString();
+			const character = await client.character(slug as string);
+			expect(character.names).toBeDefined();
+		}
+	);
 
 	test.skipIf(!hasMirror)("les 208 équipes remontent en un appel", async () => {
 		const teams = await client.teams();
@@ -276,12 +285,12 @@ describe("bout en bout — Bun.serve + handleAzaleeRequest", () => {
 		expect(Array.isArray(result.items)).toBe(true);
 	});
 
-	test("statistiques de l'index de texte", async () => {
+	test.skipIf(!hasMirror)("statistiques de l'index de texte", async () => {
 		const stats = await client.textStats();
 		expect(Array.isArray(stats)).toBe(true);
 	});
 
-	test("un identifiant inconnu remonte une erreur 404 typée", async () => {
+	test.skipIf(!hasMirror)("un identifiant inconnu remonte une erreur 404 typée", async () => {
 		expect.assertions(4);
 		try {
 			await client.character("ce-personnage-n-existe-pas");
@@ -310,9 +319,12 @@ describe("bout en bout — Bun.serve + handleAzaleeRequest", () => {
 	});
 
 	test("resolveAzaleeBaseUrl choisit la première base vivante", async () => {
-		const picked = await resolveAzaleeBaseUrl(["http://127.0.0.1:1", `http://127.0.0.1:${server.port}/`], {
-			timeoutMs: 500,
-		});
+		const picked = await resolveAzaleeBaseUrl(
+			["http://127.0.0.1:1", `http://127.0.0.1:${server.port}/`],
+			{
+				timeoutMs: 500,
+			}
+		);
 		expect(picked?.baseUrl).toBe(`http://127.0.0.1:${server.port}`);
 		expect(picked?.health.ok).toBe(true);
 		expect(await resolveAzaleeBaseUrl(["http://127.0.0.1:1"], { timeoutMs: 300 })).toBeNull();
@@ -330,7 +342,9 @@ describe("robustesse du transport", () => {
 			timeoutMs: 25,
 			transport: (request) =>
 				new Promise((_resolve, reject) => {
-					request.signal.addEventListener("abort", () => reject(request.signal.reason), { once: true });
+					request.signal.addEventListener("abort", () => reject(request.signal.reason), {
+						once: true,
+					});
 				}),
 		});
 		try {
@@ -348,7 +362,9 @@ describe("robustesse du transport", () => {
 			baseUrl: "http://hang.test",
 			transport: (request) =>
 				new Promise((_resolve, reject) => {
-					request.signal.addEventListener("abort", () => reject(request.signal.reason), { once: true });
+					request.signal.addEventListener("abort", () => reject(request.signal.reason), {
+						once: true,
+					});
 				}),
 		});
 		const promise = hanging.health({ signal: controller.signal });
@@ -386,7 +402,9 @@ describe("robustesse du transport", () => {
 			transport: () => {
 				calls++;
 				return Promise.resolve(
-					calls < 3 ? Response.json({ error: "indisponible" }, { status: 503 }) : Response.json({ ok: true }),
+					calls < 3
+						? Response.json({ error: "indisponible" }, { status: 503 })
+						: Response.json({ ok: true })
 				);
 			},
 		});
@@ -431,7 +449,11 @@ describe("robustesse du transport", () => {
 		};
 		await createAzaleeClient({ baseUrl: "http://ua.test", transport }).health();
 		await createAzaleeClient({ baseUrl: "http://ua.test", transport, userAgent: null }).health();
-		await createAzaleeClient({ baseUrl: "http://ua.test", transport, userAgent: "gui-azalee/1.0" }).health();
+		await createAzaleeClient({
+			baseUrl: "http://ua.test",
+			transport,
+			userAgent: "gui-azalee/1.0",
+		}).health();
 		expect(captured[0]).toContain("@rosegriffon/azalee");
 		expect(captured[1]).toBeNull();
 		expect(captured[2]).toBe("gui-azalee/1.0");

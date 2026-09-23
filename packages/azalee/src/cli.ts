@@ -15,4 +15,4 @@
 
 import { createAzaleeProgram } from "./cli/program";
 
-createAzaleeProgram().parse();
+await createAzaleeProgram().parseAsync();

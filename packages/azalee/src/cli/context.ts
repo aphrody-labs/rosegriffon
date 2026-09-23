@@ -104,7 +104,7 @@ export function reportError(json: boolean | undefined, message: string, humanLin
  * chaîne vide si aucune source n'est disponible.
  */
 export async function getOrReadInput(arg: string | undefined): Promise<string> {
-	if (arg !== undefined && arg !== null && arg.trim() !== "") {
+	if (arg !== undefined && arg !== null) {
 		return arg;
 	}
 	if (!process.stdin.isTTY) {
