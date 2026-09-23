@@ -54,6 +54,7 @@
 		"kysely": "catalog:",
     "@rosegriffon/achillea-core": "workspace:*",
     "@rosegriffon/achillea-types": "workspace:*",
+    "@rosegriffon/auth": "workspace:*",
     "@aphrody/canvas": "0.1.99",
     "@aphrody/discordx": "^0.1.0",
 		"@aphrody/importer": "^0.1.0",

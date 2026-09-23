@@ -21,7 +21,7 @@ describe("v1 HTTP client", () => {
 			fetch,
 		});
 
-		const result = await client.listGuilds(2, 10);
+		const result = await client.guilds.list(2, 10);
 
 		expect(requestedUrl).toBe("https://example.test/api/guilds?page=2&limit=10");
 		expect(result).toEqual({
@@ -35,7 +35,7 @@ describe("v1 HTTP client", () => {
 			fetch: async () => jsonResponse({ error: "maintenance" }, 503),
 		});
 
-		const result = await client.getGuildStats();
+		const result = await client.guilds.stats();
 
 		expect(result).toEqual({
 			ok: false,
@@ -54,8 +54,8 @@ describe("v1 HTTP client", () => {
 			fetch: async () => jsonResponse({ data: [], meta: { page: "one" } }),
 		});
 
-		const invalidJson = await invalidJsonClient.getGuildStats();
-		const drifted = await driftedClient.listGuilds();
+		const invalidJson = await invalidJsonClient.guilds.stats();
+		const drifted = await driftedClient.guilds.list();
 
 		expect(invalidJson.ok).toBe(false);
 		if (!invalidJson.ok) expect(invalidJson.kind).toBe("invalid_json");
@@ -74,7 +74,7 @@ describe("v1 HTTP client", () => {
 			},
 		});
 
-		const result = await client.getGuild("123/456");
+		const result = await client.guilds.get("123/456");
 
 		expect(result).toEqual({
 			ok: false,

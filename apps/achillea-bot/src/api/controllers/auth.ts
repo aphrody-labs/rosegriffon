@@ -4,7 +4,6 @@ import type { Request, Response } from "express";
 import {
 	SESSION_COOKIE_NAME,
 	sessionClearCookieOptions,
-	sessionCookieOptions,
 } from "@/auth";
 import { CookieAuthorize } from "@/api/middlewares";
 import { isSafeInternalPath } from "@rosegriffon/achillea-core";
@@ -70,17 +69,11 @@ export class AuthController extends BaseController {
 		return res.json(user);
 	}
 
-	// POST est la route canonique. Le GET reste disponible pendant la migration des anciens clients.
 	@Post("/logout")
 	logout(@Res() res: Response) {
 		res.clearCookie(SESSION_COOKIE_NAME, sessionClearCookieOptions(sessionIsSecure()));
 		res.setHeader("Cache-Control", "no-store");
 		res.json({ ok: true });
-	}
-
-	@Get("/logout")
-	logoutLegacy(@Res() res: Response) {
-		return this.logout(res);
 	}
 
 	// Token endpoint pour Colyseus client (cookie HttpOnly cross-domain WSS)

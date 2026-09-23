@@ -69,17 +69,17 @@ function adapterResultat<T>(resultat: AchilleaClientResult<T>): Resultat<T> {
 
 /** Serveurs scannés, du plus peuplé au moins peuplé. */
 export async function listerGuildes(page = 1, limite = 25): Promise<Resultat<PageGuildes>> {
-	return adapterResultat(await client.listGuilds(page, limite));
+	return adapterResultat(await client.guilds.list(page, limite));
 }
 
 /** Agrégats sur l'ensemble des serveurs scannés. */
 export async function statistiquesGuildes(): Promise<Resultat<StatsGuildes>> {
-	return adapterResultat(await client.getGuildStats());
+	return adapterResultat(await client.guilds.stats());
 }
 
 /** Fiche d'un serveur avec ses rôles et ses salons. */
 export async function detailGuilde(id: string): Promise<Resultat<GuildeDetaillee>> {
-	return adapterResultat(await client.getGuild(id));
+	return adapterResultat(await client.guilds.get(id));
 }
 
 /** Un serveur connu mais jamais scanné garde ses champs principaux à `null`. */

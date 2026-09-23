@@ -62,12 +62,12 @@ describe("agrégat de ressources", () => {
 		}
 	});
 
-	test("les méthodes guild historiques délèguent à `client.guilds`", async () => {
+	test("la ressource guilds construit ses routes", async () => {
 		const { client, calls } = tracingClient();
 
-		await client.listGuilds(3, 5);
-		await client.getGuildStats();
-		await client.getGuild("123/456");
+		await client.guilds.list(3, 5);
+		await client.guilds.stats();
+		await client.guilds.get("123/456");
 
 		expect(calls.map(path)).toEqual([
 			"/guilds?page=3&limit=5",

@@ -10,16 +10,10 @@ import { AdminResource } from "./admin";
 import { AuthResource } from "./auth";
 import { CastsResource } from "./casts";
 import { ClansResource } from "./clans";
-import {
-	GuildsResource,
-	type AchilleaGuildDetail,
-	type AchilleaGuildPage,
-	type AchilleaGuildStats,
-} from "./guilds";
+import { GuildsResource } from "./guilds";
 import {
 	AchilleaHttp,
 	type AchilleaClientOptions,
-	type AchilleaClientResult,
 	type AchilleaFetch,
 } from "./http";
 import { LeaguesResource } from "./leagues";
@@ -90,25 +84,6 @@ export class AchilleaClient {
 		return this.http.fetch;
 	}
 
-	// ── Compatibilité ─────────────────────────────────────────────────────────
-	// Les trois méthodes ci-dessous précèdent le découpage par ressource et sont
-	// consommées telles quelles par `apps/bot`. Elles délèguent à `guilds` et
-	// gardent leur signature publique.
-
-	/** `GET /guilds` — alias historique de `client.guilds.list`. */
-	listGuilds(page = 1, limit = 25): Promise<AchilleaClientResult<AchilleaGuildPage>> {
-		return this.guilds.list(page, limit);
-	}
-
-	/** `GET /guilds/stats` — alias historique de `client.guilds.stats`. */
-	getGuildStats(): Promise<AchilleaClientResult<AchilleaGuildStats>> {
-		return this.guilds.stats();
-	}
-
-	/** `GET /guilds/:id` — alias historique de `client.guilds.get`. */
-	getGuild(id: string): Promise<AchilleaClientResult<AchilleaGuildDetail>> {
-		return this.guilds.get(id);
-	}
 }
 
 export function createAchilleaClient(options: AchilleaClientOptions = {}): AchilleaClient {
