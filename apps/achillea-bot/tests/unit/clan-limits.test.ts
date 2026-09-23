@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { describe, expect, test } from "bun:test";
 
 import { ClanMemberDistinction } from "@/utils/enums";

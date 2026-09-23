@@ -1,228 +1,41 @@
-/**
- * Tests AuthController — T-1.1
- *
- * Run: bun test tests/controllers/AuthController.test.ts
- */
+import { describe, expect, mock, test } from "bun:test";
+import type { Request, Response } from "express";
+import { relayRealtimeToken, sendLogout } from "../../src/api/controllers/auth-handlers";
 
-import "reflect-metadata";
-
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import { container } from "tsyringe";
-
-class MockUserServiceClass {}
-class MockOAuthServiceClass {}
-class MockDatabaseClass {}
-class MockStoreClass {}
-class MockLoggerClass {}
-class MockStatsClass {}
-class MockCustomImagesUploadClass {}
-
-mock.module("../../src/services", () => ({
-	UserService: MockUserServiceClass,
-	OAuthService: MockOAuthServiceClass,
-	Database: MockDatabaseClass,
-	Store: MockStoreClass,
-	Logger: MockLoggerClass,
-	Stats: MockStatsClass,
-	CustomImagesUpload: MockCustomImagesUploadClass,
-}));
-
-mock.module("@/services", () => ({
-	UserService: MockUserServiceClass,
-	OAuthService: MockOAuthServiceClass,
-	Database: MockDatabaseClass,
-	Store: MockStoreClass,
-	Logger: MockLoggerClass,
-	Stats: MockStatsClass,
-	CustomImagesUpload: MockCustomImagesUploadClass,
-}));
-
-// Mock database entities to prevent circular dependency ReferenceErrors on module load
-const createMockEntity = (name: string) => {
-	const cls = class {};
-	Object.defineProperty(cls, "name", { value: name });
-	return cls;
-};
-
-const entityNames = [
-	"BaseEntity",
-	"User",
-	"Guild",
-	"Data",
-	"Stat",
-	"Image",
-	"Clan",
-	"ClanMember",
-	"ClanMemberHistory",
-	"ClanInvite",
-	"ClanApplication",
-	"Vote",
-	"VoteProposal",
-	"Event",
-	"Ranked",
-	"RankedQueueEntry",
-	"EventAnnouncement",
-	"Lobby",
-	"LobbyUser",
-	"LobbyMatch",
-	"UserConnection",
-	"Rank",
-	"UserElo",
-	"Experience",
-	"UserExperience",
-	"ClanExperience",
-	"ClanExperienceLog",
-	"UserExperienceLog",
-	"UserView",
-	"ClanTeamMember",
-	"ClanTeam",
-	"Interclan",
-	"InterclanLineup",
-	"InterclanLineupMember",
-	"Blacklist",
-	"Organization",
-	"OrganizationManager",
-	"Notification",
-	"UserNotification",
-	"OrganizationValidation",
-	"Tournament",
-	"TournamentParticipant",
-	"TournamentSeries",
-	"AuditLog",
-	"Sanction",
-	"CastEvent",
-	"CastSlot",
-	"CastAvailability",
-	"CastAttribution",
-	"Ruleset",
-	"License",
-	"TournamentPhase",
-	"Season",
-	"Wallet",
-	"Transaction",
-];
-
-const mockEntitiesTarget: Record<string, any> = {
-	__esModule: true,
-};
-
-for (const name of entityNames) {
-	mockEntitiesTarget[name] = createMockEntity(name);
-}
-
-const mockEntities = new Proxy(mockEntitiesTarget, {
-	get: (target, prop) => {
-		if (prop === "__esModule") return true;
-		if (prop in target) return target[prop as string];
-		return createMockEntity(String(prop));
-	},
-	ownKeys: (target) => {
-		return Reflect.ownKeys(target);
-	},
-	getOwnPropertyDescriptor: (target, prop) => {
-		return {
-			enumerable: true,
-			configurable: true,
-			value: target[prop as string] || createMockEntity(String(prop)),
-		};
-	},
-});
-
-mock.module(import.meta.resolve("@/entities"), () => mockEntities);
-mock.module(import.meta.resolve("../../src/entities/ClanTeam"), () => ({
-	ClanTeam: mockEntities.ClanTeam,
-}));
-
-// Mock to avoid heavy discord/dependency side effects
-mock.module("@aphrody/discordx", () => {
-	const dummyDecorator = () => (target: unknown, propertyKey?: string, descriptor?: any) => {};
-	return {
-		Client: class MockClient {},
-		singleton: () => (target: unknown) => target,
-		DOn: {
-			create: () => ({
-				decorate: () => ({}),
-			}),
-		},
-		MetadataStorage: {
-			instance: {
-				addOn: () => {},
-			},
-		},
-		SimpleCommandMessage: class MockSimpleCommandMessage {},
-		Bot: dummyDecorator,
-		ButtonComponent: dummyDecorator,
-		Discord: dummyDecorator,
-		Guard: dummyDecorator,
-		Guild: dummyDecorator,
-		ModalComponent: dummyDecorator,
-		SelectMenuComponent: dummyDecorator,
-		SimpleCommand: dummyDecorator,
-		SimpleCommandOption: dummyDecorator,
-	};
-});
-
-// original describe block begins here
-
-describe("AuthController", () => {
-	let authController: any;
-	let mockUserService: any;
-	let mockOAuthService: any;
-	let originalFetch: typeof globalThis.fetch;
-
-	beforeEach(async () => {
-		originalFetch = globalThis.fetch;
-
-		// Mock service implementations
-		mockUserService = {
-			syncWebUser: mock(() => Promise.resolve({ id: "123", username: "testuser" })),
-			toDTO: mock((user: any) => Promise.resolve(user)),
-		};
-
-		mockOAuthService = {
-			getChallongeOAuthUrl: mock(() => Promise.resolve("https://challonge.com/oauth")),
-			getTwitchOAuthUrl: mock(() => Promise.resolve("https://twitch.tv/oauth")),
-		};
-
-		// Register mocked instances in container
-		container.registerInstance(MockUserServiceClass as any, mockUserService);
-		container.registerInstance(MockOAuthServiceClass as any, mockOAuthService);
-
-		// Dynamically import AuthController so that it uses the mocked services
-		const authModule = await import("../../src/api/controllers/auth");
-		authController = new authModule.AuthController();
+describe("AuthController handlers", () => {
+	test("logout clears the session cookie and disables caching", () => {
+		const res = {
+			clearCookie: mock(() => res),
+			setHeader: mock(() => res),
+			json: mock(() => res),
+		} as unknown as Response;
+		sendLogout(res, true);
+		expect(res.clearCookie).toHaveBeenCalledTimes(1);
+		expect((res.clearCookie as ReturnType<typeof mock>).mock.calls[0]?.[0]).toBe("token");
+		expect(res.setHeader).toHaveBeenCalledWith("Cache-Control", "no-store");
+		expect(res.json).toHaveBeenCalledWith({ ok: true });
 	});
 
-	afterEach(() => {
-		globalThis.fetch = originalFetch;
-		container.clearInstances();
+	test("realtime token forwards only the session headers and upstream status", async () => {
+		const res = {
+			status: mock(() => res),
+			setHeader: mock(() => res),
+			type: mock(() => res),
+			send: mock(() => res),
+		} as unknown as Response;
+		const fetcher = mock(async () => Response.json({ token: "test-token" }, { status: 200 }));
+		await relayRealtimeToken(
+			{ headers: { cookie: "token=test", authorization: "Bearer test" } } as Request,
+			res,
+			"https://api.example.test/",
+			fetcher as typeof fetch
+		);
+		expect(fetcher.mock.calls[0]?.[0]).toBe("https://api.example.test/v1/auth/realtime-token");
+		expect(fetcher.mock.calls[0]?.[1]).toEqual({
+			headers: { accept: "application/json", cookie: "token=test", authorization: "Bearer test" },
+		});
+		expect(res.status).toHaveBeenCalledWith(200);
+		expect(res.setHeader).toHaveBeenCalledWith("Cache-Control", "no-store");
+		expect(res.send).toHaveBeenCalledWith('{"token":"test-token"}');
 	});
-
-	test("logout clears cookie and returns ok", () => {
-		const clearCookieMock = mock(() => {});
-		const jsonMock = mock(() => {});
-		const mockRes = {
-			clearCookie: clearCookieMock,
-			setHeader: mock(() => {}),
-			json: jsonMock,
-		} as any;
-
-		authController.logout(mockRes);
-
-		expect(clearCookieMock.mock.calls.length).toBe(1);
-		expect(clearCookieMock.mock.calls[0][0]).toBe("token");
-		expect(jsonMock.mock.calls.length).toBe(1);
-		expect(jsonMock.mock.calls[0][0]).toEqual({ ok: true });
-	});
-
-	test("token relays the unified realtime-token endpoint", async () => {
-		const body = { token: "unified-realtime-token", expiresIn: 300, userId: "42" };
-		globalThis.fetch = mock(async () => new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } })) as unknown as typeof fetch;
-		const sendMock = mock(() => {});
-		const mockRes = { status: mock(() => mockRes), setHeader: mock(() => mockRes), type: mock(() => mockRes), send: sendMock } as any;
-		await authController.token({ headers: { cookie: "token=unified" } } as any, mockRes);
-		expect(sendMock).toHaveBeenCalledTimes(1);
-		expect(sendMock.mock.calls[0][0]).toContain("unified-realtime-token");
-	});
-
 });

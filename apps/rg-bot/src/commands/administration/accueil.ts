@@ -23,7 +23,7 @@ import { renderCarteAccueil } from "../../lib/canvas/communaute";
 import { verifierAttributionAutomatique } from "../../lib/hierarchie";
 import { LIEUX_BIENVENUE, fusionnerReglages } from "../../lib/reglages-communaute";
 import { enregistrerReglages, reglagesDe } from "../../services/communaute";
-import { remplirGabarit } from "../../events/accueil";
+import { remplirGabarit } from "../../lib/accueil-gabarit";
 import {
 	attention,
 	creerEmbed,

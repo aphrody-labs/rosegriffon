@@ -14,6 +14,7 @@
  *     l'import, en production, au démarrage.
  */
 import { describe, expect, test } from "bun:test";
+import { fileURLToPath } from "node:url";
 import { GatewayIntentBits } from "discord.js";
 
 import { ACHILLEA_GUILD_ID, AZALEE_GUILD_ID, RG_GUILD_ID } from "@rosegriffon/types/discord";
@@ -43,7 +44,7 @@ import type { ProfilAnnonceur } from "../services/tweetsNotifier";
 const RACINE_SRC = new URL("../", import.meta.url);
 
 function fichierDuModule(chemin: string): string {
-	return new URL(chemin, RACINE_SRC).pathname;
+	return fileURLToPath(new URL(chemin, RACINE_SRC));
 }
 
 /**
@@ -465,13 +466,14 @@ describe("modules de commandes", () => {
 		const listes = new Set<string>(NOMS_PROFILS.flatMap((nom) => [...PROFILS[nom].modules]));
 		const glob = new Bun.Glob("commands/**/*.ts");
 		const orphelins: string[] = [];
-		for await (const relatif of glob.scan({ cwd: RACINE_SRC.pathname })) {
-			if (relatif.endsWith(".test.ts") || listes.has(relatif) || MODULES_OBSOLETES.has(relatif)) {
+		for await (const relatif of glob.scan({ cwd: fileURLToPath(RACINE_SRC) })) {
+			const chemin = relatif.replaceAll("\\", "/");
+			if (chemin.endsWith(".test.ts") || listes.has(chemin) || MODULES_OBSOLETES.has(chemin)) {
 				continue;
 			}
-			const source = await Bun.file(new URL(relatif, RACINE_SRC).pathname).text();
+			const source = await Bun.file(fichierDuModule(chemin)).text();
 			if (source.includes("@Discord()")) {
-				orphelins.push(relatif);
+				orphelins.push(chemin);
 			}
 		}
 		expect(orphelins.toSorted()).toEqual([]);
@@ -534,14 +536,15 @@ describe("le registre est la seule source des identifiants", () => {
 
 		const glob = new Bun.Glob("**/*.ts");
 		const fautifs: string[] = [];
-		for await (const relatif of glob.scan({ cwd: RACINE_SRC.pathname })) {
-			if (relatif === "lib/profil.ts" || relatif === "lib/profil.test.ts") {
+		for await (const relatif of glob.scan({ cwd: fileURLToPath(RACINE_SRC) })) {
+			const chemin = relatif.replaceAll("\\", "/");
+			if (chemin === "lib/profil.ts" || chemin === "lib/profil.test.ts") {
 				continue;
 			}
-			const source = await Bun.file(new URL(relatif, RACINE_SRC).pathname).text();
+			const source = await Bun.file(fichierDuModule(chemin)).text();
 			for (const identifiant of identifiants) {
 				if (source.includes(identifiant)) {
-					fautifs.push(`${relatif} → ${identifiant}`);
+					fautifs.push(`${chemin} → ${identifiant}`);
 				}
 			}
 		}

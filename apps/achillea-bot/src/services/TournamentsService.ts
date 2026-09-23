@@ -58,43 +58,19 @@ import { TournamentEventService } from "./TournamentEventService";
 import { TournamentRoleService } from "./TournamentRoleService";
 import type { UserDTO } from "./UserService";
 import { UserService } from "./UserService";
+import {
+	isLeagueTournamentType,
+	isSupportedTournamentType,
+	parseScoreReportPolicy,
+} from "./tournament-policies";
 
-/** Types de tournoi gérés par le moteur de bracket (brackets-manager). Le format suisse a
- *  son propre flux (SwissStageService) et n'est pas inclus ici. */
-export const BRACKET_TOURNAMENT_TYPES: readonly StageType[] = [
-	StageType.single_elimination,
-	StageType.double_elimination,
-	StageType.round_robin,
-];
-
-/** Championnat (calendrier + points) — hors brackets-manager. */
-export const LEAGUE_TOURNAMENT_TYPES: readonly StageType[] = [StageType.league];
-
-/** true si le type de tournoi est géré par le moteur de bracket. */
-export function isSupportedTournamentType(type: StageType): boolean {
-	return BRACKET_TOURNAMENT_TYPES.includes(type) || LEAGUE_TOURNAMENT_TYPES.includes(type);
-}
-
-export function isLeagueTournamentType(type: StageType): boolean {
-	return LEAGUE_TOURNAMENT_TYPES.includes(type);
-}
-
-/**
- * Politique de saisie des scores issue du formulaire.
- *
- * Une valeur inconnue (client tiers, ancienne version du front) retombe sur
- * `fallback` plutôt que d'écrire n'importe quoi : la colonne porte une contrainte
- * CHECK, une valeur hors énumération ferait échouer le flush entier.
- */
-export function parseScoreReportPolicy(
-	value: unknown,
-	fallback: ScoreReportPolicy = ScoreReportPolicy.PLAYERS
-): ScoreReportPolicy {
-	if (value === ScoreReportPolicy.STAFF_ONLY) return ScoreReportPolicy.STAFF_ONLY;
-	if (value === ScoreReportPolicy.PLAYERS) return ScoreReportPolicy.PLAYERS;
-
-	return fallback;
-}
+export {
+	BRACKET_TOURNAMENT_TYPES,
+	LEAGUE_TOURNAMENT_TYPES,
+	isLeagueTournamentType,
+	isSupportedTournamentType,
+	parseScoreReportPolicy,
+} from "./tournament-policies";
 
 @Service() // À adapter selon ton framework (NestJS: @Injectable())
 export class TournamentsService {

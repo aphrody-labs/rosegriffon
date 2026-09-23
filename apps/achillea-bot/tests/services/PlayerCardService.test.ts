@@ -44,6 +44,7 @@ mock.module("@/entities/UserElo", () => ({
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 type PlayerCardServiceCtor = typeof import("@/services/PlayerCardService").PlayerCardService;
 let PlayerCardService: PlayerCardServiceCtor;
+const canvasAvailable = await import("@aphrody/canvas").then(() => true).catch(() => false);
 
 const STORAGE_ROOT = join(process.cwd(), "storage", "cards");
 
@@ -98,6 +99,7 @@ function buildMockDb(opts: { userExists: boolean; withElo?: boolean }) {
 const writtenFiles: string[] = [];
 
 beforeAll(async () => {
+	if (!canvasAvailable) return;
 	const mod = await import("@/services/PlayerCardService");
 	PlayerCardService = mod.PlayerCardService;
 });
@@ -112,7 +114,7 @@ afterAll(() => {
 	}
 });
 
-describe("PlayerCardService — generateCard()", () => {
+describe.skipIf(!canvasAvailable)("PlayerCardService — generateCard()", () => {
 	test("retourne un Buffer non vide", async () => {
 		const svc = new PlayerCardService().withDatabase(buildMockDb({ userExists: true }));
 		const buf = await svc.generateCard(FAKE_USER_ID);
@@ -161,7 +163,7 @@ describe("PlayerCardService — generateCard()", () => {
 	});
 });
 
-describe("PlayerCardService — generateAndSave()", () => {
+describe.skipIf(!canvasAvailable)("PlayerCardService — generateAndSave()", () => {
 	test("ecrit bien storage/cards/<userId>.png sur disque", async () => {
 		const svc = new PlayerCardService().withDatabase(buildMockDb({ userExists: true }));
 		const path = await svc.generateAndSave(FAKE_USER_ID);
