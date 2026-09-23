@@ -81,7 +81,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 	const { id } = await params;
 	const user = await getServerUser();
 	if (!user) {
-		redirect(`/login?next=/shop/commandes/${id}`);
+		redirect(`/login?redirect=${encodeURIComponent(`/shop/commandes/${id}`)}`);
 	}
 
 	const order = await fetchOrder(id, user.id);

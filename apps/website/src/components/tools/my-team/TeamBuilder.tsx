@@ -828,7 +828,7 @@ export function TeamBuilder({ characters, formations, initialTeam, isAuthenticat
 						<span>
 							Sauvegarde locale —{" "}
 							<Link
-								href="/login?returnTo=/tools/my-team"
+								href="/login?redirect=/tools/my-team"
 								className="text-primary font-bold hover:underline"
 							>
 								connectez-vous

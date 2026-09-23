@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button, Input, PatreonIcon } from "@rosegriffon/ui";
 import { authClient } from "@/lib/auth-client";
+import { safeReturnUrl } from "@/lib/achillea/auth-session";
 
 type AuthMode = "login" | "signup" | "forgot-password";
 type OAuthProvider = "discord" | "google" | "patreon";
@@ -23,9 +24,10 @@ async function requeteEmailAuth(
 		headers: { Accept: "application/json", "Content-Type": "application/json" },
 		body: JSON.stringify(payload),
 	});
-	const resultat = (await reponse.json().catch(() => null)) as
-		| { message?: string; error?: { message?: string } }
-		| null;
+	const resultat = (await reponse.json().catch(() => null)) as {
+		message?: string;
+		error?: { message?: string };
+	} | null;
 	if (!reponse.ok) {
 		throw new Error(
 			resultat?.message ?? resultat?.error?.message ?? "L'authentification a échoué."
@@ -45,9 +47,10 @@ async function sessionEstDisponible(): Promise<boolean> {
 			continue;
 		}
 
-		const payload = (await reponse.json().catch(() => null)) as
-			| { user?: unknown; data?: { user?: unknown } }
-			| null;
+		const payload = (await reponse.json().catch(() => null)) as {
+			user?: unknown;
+			data?: { user?: unknown };
+		} | null;
 		if (payload?.user || payload?.data?.user) {
 			return true;
 		}
@@ -56,31 +59,14 @@ async function sessionEstDisponible(): Promise<boolean> {
 	return false;
 }
 
-/**
- * Validate that returnTo is a safe relative path (no external redirects).
- */
-function sanitizeReturnTo(returnTo?: string): string {
-	if (!returnTo) {
-		return "/";
-	}
-	// Must start with / and not be a protocol-relative URL
-	if (!returnTo.startsWith("/") || returnTo.startsWith("//")) {
-		return "/";
-	}
-	return returnTo;
-}
-
 interface LoginFormProps {
 	onSuccess?: () => void;
 	returnTo?: string;
 }
 
 export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
-	const safeReturnTo = sanitizeReturnTo(returnTo);
-	// Résolveur serveur : décide /dashboard (admin) vs returnTo selon le rôle réel.
-	const postLoginUrl = returnTo
-		? `/auth/post-login?returnTo=${encodeURIComponent(safeReturnTo)}`
-		: "/auth/post-login";
+	const safeReturnTo = safeReturnUrl(returnTo, "/profil");
+	const postLoginUrl = `/auth/post-login?returnTo=${encodeURIComponent(safeReturnTo)}`;
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [name, setName] = useState("");
@@ -171,8 +157,8 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 				if (onSuccess) {
 					onSuccess();
 				}
-				// Résolveur serveur : navigation complète (cookies envoyés) → /dashboard si
-				// admin, sinon returnTo. Évite la race du isAdmin client de la page /login.
+				// Navigation complète : la session est relue côté serveur puis l'utilisateur
+				// rejoint le profil public ou le chemin interne demandé.
 				window.location.href = postLoginUrl;
 			}
 		} catch (error: unknown) {
@@ -240,7 +226,6 @@ export function LoginForm({ onSuccess, returnTo }: LoginFormProps) {
 							</svg>
 							<span className="type-label-large flex-1 text-left">Continuer avec Google</span>
 						</Button>
-
 					</div>
 
 					{/* Separator */}
