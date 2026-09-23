@@ -7,16 +7,17 @@ import { useEffect, useMemo, useState } from "react";
 import { ClanCard } from "@/components/achillea/ClanCard";
 import { listPublicClans, type PublicClan } from "@/lib/achillea/unified-clans";
 
-export default function ClansPage() {
+export default function ClansPage({ initialQuery = "" }: { initialQuery?: string }) {
 	const [clans, setClans] = useState<PublicClan[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(false);
 
 	// Filtres
-	const [query, setQuery] = useState("");
+	const [query, setQuery] = useState(initialQuery);
 	const [onlyRecruiting, setOnlyRecruiting] = useState(false);
 	const [sortBy, setSortBy] = useState<"fame" | "name">("fame");
 	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+	useEffect(() => setQuery(initialQuery), [initialQuery]);
 
 	useEffect(() => {
 		let isMounted = true;

@@ -153,6 +153,7 @@ function TournamentMiniCard({ tournament }: { tournament: PreviewTournament }) {
 		? new Date(tournament.starts_at).toLocaleDateString("fr-FR", {
 				day: "numeric",
 				month: "short",
+				timeZone: "Europe/Paris",
 			})
 		: "À venir";
 

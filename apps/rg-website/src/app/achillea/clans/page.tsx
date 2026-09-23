@@ -1,10 +1,7 @@
 import { metadonneesAchillea } from "@/app/achillea/metadonnees";
 import ClansClient from "./clans-client";
 
-/*
- * Page serveur : elle n'existe que pour porter `metadata`, que `"use client"`
- * interdit. L'interface, inchangée, vit dans `clans-client.tsx`.
- */
+/* La page serveur porte les métadonnées et transmet la recherche initiale au client. */
 export const metadata = metadonneesAchillea({
 	titre: "Clans compétitifs",
 	description:
@@ -13,6 +10,12 @@ export const metadata = metadonneesAchillea({
 	indexable: true,
 });
 
-export default function ClansPage() {
-	return <ClansClient />;
+export default async function ClansPage({
+	searchParams,
+}: {
+	searchParams: Promise<{ q?: string | string[] }>;
+}) {
+	const { q } = await searchParams;
+	const initialQuery = typeof q === "string" ? q : (q?.[0] ?? "");
+	return <ClansClient initialQuery={initialQuery} />;
 }
