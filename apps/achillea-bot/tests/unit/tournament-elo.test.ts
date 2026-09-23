@@ -5,9 +5,13 @@
 
 import { describe, expect, test } from "bun:test";
 
-import { progressiveEloDelta, applyEloUpdate, DEFAULT_K_FACTOR } from "@rosegriffon/achillea-core";
+import {
+	progressiveEloDelta,
+	applyEloUpdate,
+	DEFAULT_K_FACTOR,
+	resolveTournamentSideOutcome,
+} from "@rosegriffon/achillea-core";
 
-import { resolveTournamentSideOutcome } from "@rosegriffon/achillea-core";
 import { LobbyState, TeamSide } from "../../src/utils/enums";
 
 describe("resolveTournamentSideOutcome", () => {
