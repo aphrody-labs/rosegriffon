@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { WebhookClient } from "./client";
 import type { PatreonWebhookTrigger } from "./triggers";
@@ -13,10 +13,11 @@ import type { WebhookPayload } from "../../../payloads/v2/webhook";
  * @returns whether the signature is valid for the associated body
  */
 export function verify(secret: string, signature: string | null, body: string) {
-	if (secret == undefined || typeof secret !== "string") throw new Error("No secret found");
+	if (typeof secret !== "string" || secret.length === 0) throw new Error("No secret found");
 
-	const hash = createHmac("md5", secret).update(body).digest("hex");
-	return hash === signature;
+	if (signature === null || !/^[a-f0-9]{32}$/.test(signature)) return false;
+	const expected = createHmac("md5", secret).update(body).digest();
+	return timingSafeEqual(expected, Buffer.from(signature, "hex"));
 }
 
 // eslint-disable-next-line jsdoc/require-jsdoc
