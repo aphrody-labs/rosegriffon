@@ -70,11 +70,29 @@ describe("extraction", () => {
 		expect(clan.fields.find((f) => f.name === "createdAt")?.type).toEqual({ kind: "date" });
 	});
 
-	test("`Exclude` sur union de littéraux est résolu, pas aplati", () => {
+	test("le résultat classé référence l'union complète, y compris draw", () => {
 		const entry = byName.get("RankedHistoryEntry");
 		if (entry?.kind !== "interface") throw new Error("RankedHistoryEntry manquant");
 		const result = entry.fields.find((f) => f.name === "result");
-		expect(result?.type).toEqual({
+		expect(result?.type).toEqual({ kind: "ref", name: "MatchResult", args: [] });
+		const matchResult = byName.get("MatchResult");
+		if (matchResult?.kind !== "alias") throw new Error("MatchResult manquant");
+		expect(matchResult.type).toEqual({
+			kind: "union",
+			of: [
+				{ kind: "literal", value: "win" },
+				{ kind: "literal", value: "loss" },
+				{ kind: "literal", value: "draw" },
+				{ kind: "literal", value: "forfeit" },
+			],
+		});
+	});
+
+	test("`Exclude` résout une union de littéraux", () => {
+		const fixture = extractContract({ root: join(PACKAGE_ROOT, "tests", "fixtures", "exclude") });
+		const result = indexDeclarations(fixture).get("RankedResult");
+		if (result?.kind !== "alias") throw new Error("RankedResult manquant");
+		expect(result.type).toEqual({
 			kind: "union",
 			of: [
 				{ kind: "literal", value: "win" },

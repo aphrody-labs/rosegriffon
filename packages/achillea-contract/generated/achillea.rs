@@ -1,5 +1,5 @@
 // Contrat Achilléa — FICHIER GÉNÉRÉ, ne pas éditer à la main.
-// Source : @rosegriffon/achillea-types@1.0.0
+// Source : @rosegriffon/achillea-types@1.0.1
 // Régénérer : bun --filter @rosegriffon/achillea-contract generate
 //
 // Dépendances attendues côté Cargo.toml :
@@ -1892,7 +1892,7 @@ pub struct RankedHistoryEntry {
 	pub opponent_score: f64,
 	#[serde(rename = "eloDelta")]
 	pub elo_delta: f64,
-	pub result: String,
+	pub result: MatchResult,
 	pub opponent: serde_json::Value,
 }
 
