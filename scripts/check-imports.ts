@@ -68,8 +68,17 @@ type Config = {
 type ImportReference = { line: number; specifier: string };
 type Miss = ImportReference & {
 	file: string;
-	kind: "alias" | "external" | "relative" | "workspace";
+	kind: "alias" | "external" | "manifest" | "relative" | "workspace";
 };
+
+function declaresDependency(manifest: JsonObject, name: string): boolean {
+	return ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"].some(
+		(field) => {
+			const dependencies = manifest[field];
+			return dependencies !== null && typeof dependencies === "object" && name in dependencies;
+		}
+	);
+}
 
 function runGit(args: string[]): string[] {
 	const result = Bun.spawnSync(["git", "-C", ROOT, ...args], { stdout: "pipe", stderr: "pipe" });
@@ -485,6 +494,7 @@ const workspaceByName = new Map(workspaces.map((workspace) => [workspace.name, w
 const configs = new Map<string, Config>();
 const errors: Miss[] = [];
 const warnings: Miss[] = [];
+const missingDeclarations = new Set<string>();
 let importCount = 0;
 
 const sourceFiles = allFiles.filter(isSourceFile);
@@ -506,6 +516,18 @@ for (const file of sourceFiles) {
 
 		const aliases = aliasTargets(specifier, config);
 		const internalWorkspace = workspaceByName.get(packageName(specifier));
+		if (
+			internalWorkspace &&
+			owningWorkspace &&
+			internalWorkspace.name !== owningWorkspace.name &&
+			!declaresDependency(owningWorkspace.manifest, internalWorkspace.name)
+		) {
+			const key = `${owningWorkspace.name}\0${internalWorkspace.name}`;
+			if (!missingDeclarations.has(key)) {
+				missingDeclarations.add(key);
+				errors.push({ file, kind: "manifest", ...imported });
+			}
+		}
 		let kind: Miss["kind"];
 		let valid: boolean;
 		if (specifier.startsWith(".")) {
@@ -567,7 +589,7 @@ if (warnings.length > 0) {
 }
 
 if (errors.length === 0) {
-	console.log("\nOK: every internal relative, tsconfig-alias and workspace import resolves.");
+	console.log("\nOK: every internal import resolves and workspace dependencies are declared.");
 	process.exit(0);
 }
 
