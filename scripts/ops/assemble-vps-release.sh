@@ -157,6 +157,7 @@ rm -rf -- "$stage/apps/website/.next/standalone" "$stage/.build-tmp" "$stage/.bu
 [[ -s "$stage/apps/achillea-bot/build/main.js" && -s "$stage/apps/achillea-bot/build/ranked/main.js" ]] || {
   echo 'Achillea bot build incomplete' >&2; exit 1;
 }
+mkdir -p "$stage/apps/achillea-bot/logs" "$stage/apps/achillea-bot/storage"
 
 mkdir -p "$stage/systemd" "$stage/nginx"
 install -m 0644 "$stage/infra/nginx/rg-production.conf" "$stage/nginx/rg.conf"
@@ -197,6 +198,11 @@ for service in services:
             'BindPaths=/srv/rg/shared/website/cache:/srv/rg/current/apps/website/.next/cache\n\n[Install]')
     elif name == 'rg-achillea-bot':
         text = text.replace('/etc/rose-griffon/achillea.env', '/etc/rose-griffon/rg-achillea-bot.env')
+        text = text.replace('ProtectSystem=full', 'ProtectSystem=strict')
+        text = text.replace('[Install]',
+            'ReadWritePaths=/srv/rg/shared/achillea\n'
+            'BindPaths=/srv/rg/shared/achillea/logs:/srv/rg/current/apps/achillea-bot/logs\n'
+            'BindPaths=/srv/rg/shared/achillea/storage:/srv/rg/current/apps/achillea-bot/storage\n\n[Install]')
     else:
         text = text.replace('/home/ubuntu/rg/apps/cdn/.env', '/etc/rose-griffon/rg-cdn.env')
         text = text.replace('/home/ubuntu/rg/apps/bot/.env', '/etc/rose-griffon/rg-bot.env')

@@ -95,7 +95,8 @@ ProtectProc=invisible
 RemoveIPC=true
 CapabilityBoundingSet=
 AmbientCapabilities=
-SystemCallFilter=@system-service ~@obsolete @privileged
+SystemCallFilter=@system-service
+SystemCallFilter=~@obsolete @privileged
 SystemCallErrorNumber=EPERM
 
 [Install]
