@@ -16,7 +16,7 @@
  * `.next/standalone/apps/website`), en CLI et en test (cwd = racine du dépôt).
  */
 
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync } from "node:fs";
 import path from "node:path";
 
 /** Options de configuration explicites (priorité maximale). */
@@ -84,10 +84,7 @@ function dataDirCandidates(): string[] {
  * dumps Postgres) serait retenu — c'est exactement le type de « source
  * silencieuse » qu'on veut éviter.
  */
-const DATA_DIR_MARKERS = [
-	"backups/mirror.sqlite",
-	"schema-snapshot",
-];
+const DATA_DIR_MARKERS = ["backups/mirror.sqlite", "schema-snapshot"];
 
 /**
  * Résout le dossier des artefacts runtime : premier candidat existant
@@ -109,34 +106,16 @@ export function resolveDataDir(): string | null {
  * Résout le miroir SQLite des tables `inagle_*`.
  *
  * `SQLITE_DB_PATH` est épinglé en production (drop-in systemd) sur le miroir
- * canonique publié par niers : sans épinglage, le repli local peut prendre un
- * snapshot au nom lexicographiquement le plus grand, ce qui est une source
- * silencieuse.
+ * canonique publié par niers. Les anciennes sauvegardes locales ne sont plus
+ * alimentées et ne doivent jamais être choisies silencieusement.
  */
 export function resolveMirrorPath(): string | null {
 	if (explicit.mirrorPath) return explicit.mirrorPath;
 	if (process.env.SQLITE_DB_PATH) return path.resolve(process.env.SQLITE_DB_PATH);
 
-	// Le miroir a suivi les données du jeu dans `niers` : c'est `nie-miroir.timer` qui le
-	// publie. L'ancien dossier `data/backups`
-	// existe encore mais ne se rafraîchit plus — le lire ferait servir des données figées
-	// sans qu'aucune erreur ne le dise. Les unités de production l'épinglent déjà par
-	// `SQLITE_DB_PATH` ; ce repli couvre la CLI, les tests et les scripts.
+	// Le miroir est publié dans `niers` par `nie-miroir.timer`. Sans miroir canonique,
+	// signaler l'absence plutôt que de servir un snapshot local figé.
 	const miroirDuJeu = process.env.NIERS_MIRROR ?? "/home/ubuntu/niers/var/mirror.sqlite";
 	if (existsSync(miroirDuJeu)) return miroirDuJeu;
-
-	for (const dir of dataDirCandidates()) {
-		const backups = path.join(dir, "backups");
-		const pinned = path.join(backups, "mirror.sqlite");
-		if (existsSync(pinned)) return pinned;
-		try {
-			const snapshots = readdirSync(backups)
-				.filter((f) => f.startsWith("supabase-") && f.endsWith(".sqlite"))
-				.sort((a, b) => b.localeCompare(a));
-			if (snapshots.length > 0) return path.join(backups, snapshots[0]);
-		} catch {
-			// dossier absent ou illisible — candidat suivant
-		}
-	}
 	return null;
 }

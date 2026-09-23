@@ -3,7 +3,10 @@ import { resolveMirrorPath } from "../config";
 
 /** Minimal parameterised SQL fragment used by the offline SQLite adapter. */
 class SQL {
-	constructor(readonly text: string, readonly params: unknown[] = []) {}
+	constructor(
+		readonly text: string,
+		readonly params: unknown[] = []
+	) {}
 }
 
 function sql(strings: TemplateStringsArray, ...values: unknown[]): SQL {
@@ -24,14 +27,15 @@ function sql(strings: TemplateStringsArray, ...values: unknown[]): SQL {
 }
 
 sql.raw = (text: string) => new SQL(text);
-sql.join = (fragments: SQL[], separator: SQL) => new SQL(
-	fragments.map((fragment) => fragment.text).join(separator.text),
-	fragments.flatMap((fragment) => fragment.params),
-);
+sql.join = (fragments: SQL[], separator: SQL) =>
+	new SQL(
+		fragments.map((fragment) => fragment.text).join(separator.text),
+		fragments.flatMap((fragment) => fragment.params)
+	);
 
 /**
  * Chemin du miroir SQLite. La résolution (option explicite → `SQLITE_DB_PATH` →
- * miroir canonique niers → snapshot local de secours) vit dans `config.ts`,
+ * miroir canonique niers) vit dans `config.ts`,
  * source unique pour toute la lib.
  */
 function getSqlitePath(): string | null {
@@ -475,9 +479,13 @@ export class SqliteQueryBuilder {
 		// >= 3.30) pour matcher la sémantique supabase-js, sinon les lignes à
 		// valeur NULL (ex. zukan_order) remontent en tête et cassent l'ordre.
 		if (options?.nullsFirst === true) {
-			this.orders.push(sql`CASE WHEN ${column} IS NULL OR ${column} = '\\\\N' THEN 0 ELSE 1 END, ${column} ${dir}`);
+			this.orders.push(
+				sql`CASE WHEN ${column} IS NULL OR ${column} = '\\\\N' THEN 0 ELSE 1 END, ${column} ${dir}`
+			);
 		} else if (options?.nullsFirst === false) {
-			this.orders.push(sql`CASE WHEN ${column} IS NULL OR ${column} = '\\\\N' THEN 1 ELSE 0 END, ${column} ${dir}`);
+			this.orders.push(
+				sql`CASE WHEN ${column} IS NULL OR ${column} = '\\\\N' THEN 1 ELSE 0 END, ${column} ${dir}`
+			);
 		} else {
 			this.orders.push(sql`${column} ${dir}`);
 		}
@@ -565,7 +573,9 @@ export class SqliteQueryBuilder {
 		Record<string, unknown> | Array<Record<string, unknown>> | null
 	> {
 		const query = this.compileSelect();
-		const rawRows = getSqliteDb().prepare(query.text).all(...(query.params as never[])) as Array<Record<string, unknown>>;
+		const rawRows = getSqliteDb()
+			.prepare(query.text)
+			.all(...(query.params as never[])) as Array<Record<string, unknown>>;
 
 		const parsedRows = rawRows.map((r) => this.parseRow(r));
 
@@ -592,7 +602,9 @@ export class SqliteQueryBuilder {
 			parts.push(sql`WHERE ${sql.join(this.wheres, sql` AND `)}`);
 		}
 		const query = sql.join(parts, sql` `);
-		const rows = getSqliteDb().prepare(query.text).all(...(query.params as never[])) as Array<{ count: number }>;
+		const rows = getSqliteDb()
+			.prepare(query.text)
+			.all(...(query.params as never[])) as Array<{ count: number }>;
 		return rows[0]?.count ?? 0;
 	}
 
