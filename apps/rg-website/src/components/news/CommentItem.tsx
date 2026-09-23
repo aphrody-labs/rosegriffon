@@ -8,7 +8,9 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { deleteComment, getReplies, updateComment } from "@/app/actions/comments";
 import { CommentForm } from "@/components/news/CommentForm";
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/contexts/auth-context";
+import { useProfile } from "@/contexts/profile-context";
+import { isAdminRole } from "@rosegriffon/types/roles";
 import { Badge, Button } from "@rosegriffon/ui";
 import { isRemoteAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
@@ -67,7 +69,9 @@ export function CommentItem({
 	onUpdate,
 	depth = 0,
 }: CommentItemProps) {
-	const { user, isAdmin } = useAuth();
+	const { user } = useAuth();
+	const { profile } = useProfile();
+	const isAdmin = isAdminRole(profile?.role ?? null);
 	const [isPending, startTransition] = useTransition();
 
 	// States

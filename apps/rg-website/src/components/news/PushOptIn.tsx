@@ -4,7 +4,7 @@ import { Bell, BellOff } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { subscribeToPush, unsubscribeFromPush } from "@/app/actions/notifications";
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/contexts/auth-context";
 
 export function PushOptIn() {
 	const { user } = useAuth();

@@ -4,7 +4,7 @@ import { Heart } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { toggleReaction } from "@/app/actions/reactions";
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/contexts/auth-context";
 import { cn } from "@/lib/utils";
 
 interface LikeButtonProps {
