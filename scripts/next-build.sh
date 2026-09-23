@@ -22,7 +22,7 @@ NODE_BIN="${NODE_BIN:-/usr/bin/node}"
 # Sur le VPS, /usr/bin/node (v22+) existe et est requis (azalee self-host).
 # Ailleurs, fallback sur le node du PATH (toujours du vrai Node ici, jamais Bun).
 if [ ! -x "$NODE_BIN" ]; then
-	NODE_BIN="$(command -v node || true)"
+	NODE_BIN="$(command -v node || command -v node.exe || true)"
 fi
 if [ -z "$NODE_BIN" ] || [ ! -x "$NODE_BIN" ]; then
 	echo "✗ node introuvable (NODE_BIN='$NODE_BIN') — build impossible" >&2

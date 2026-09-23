@@ -1,0 +1,3 @@
+# SPDX-License-Identifier: Apache-2.0
+# Keep the website build script executable by Bash on Windows checkouts.
+scripts/next-build.sh text eol=lf
