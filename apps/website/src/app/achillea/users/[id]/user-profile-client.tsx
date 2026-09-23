@@ -69,9 +69,7 @@ export default function UserProfilePage({ id }: { id: string }) {
 	const [saveSuccess, setSaveSuccess] = useState(false);
 
 	const isOwnProfile = isAuthenticated && currentUser?.id === id;
-	const rgProfileUsername = (
-		profile as (EnrichedUserDTO & { rgProfileUsername?: string }) | null
-	)?.rgProfileUsername;
+	const rgProfileUsername = profile?.rgProfileUsername;
 
 	useEffect(() => {
 		let isMounted = true;
