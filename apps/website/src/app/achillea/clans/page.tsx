@@ -8,7 +8,7 @@ import ClansClient from "./clans-client";
 export const metadata = metadonneesAchillea({
 	titre: "Clans compétitifs",
 	description:
-		"Les clans Achilléa d'Inazuma Eleven: Victory Road : recrutement ouvert, langues parlées, niveau et notoriété.",
+		"Les clans Achilléa d'Inazuma Eleven: Victory Road : recrutement et notoriété.",
 	chemin: "/achillea/clans",
 	indexable: true,
 });

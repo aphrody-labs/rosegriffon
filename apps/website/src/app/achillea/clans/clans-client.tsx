@@ -1,31 +1,21 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { Button, Skeleton } from "@rosegriffon/ui";
+import { ArrowUpDown, Plus, Search, Users } from "lucide-react";
 import Link from "next/link";
-import { achilleaApiUrl, createAchilleaClient } from "@/lib/achillea";
-import { ClanState, type ClanDTO } from "@rosegriffon/achillea-types";
+import { useEffect, useMemo, useState } from "react";
 import { ClanCard } from "@/components/achillea/ClanCard";
-import { Button, Input, Skeleton, Badge } from "@rosegriffon/ui";
-import {
-	Search,
-	Users,
-	Plus,
-	SlidersHorizontal,
-	ArrowUpDown,
-	Filter,
-	Sparkles,
-} from "lucide-react";
+import { listPublicClans, type PublicClan } from "@/lib/achillea/unified-clans";
 
 export default function ClansPage() {
-	const [clans, setClans] = useState<ClanDTO[]>([]);
+	const [clans, setClans] = useState<PublicClan[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(false);
 
 	// Filtres
 	const [query, setQuery] = useState("");
 	const [onlyRecruiting, setOnlyRecruiting] = useState(false);
-	const [onlyAutoAccept, setOnlyAutoAccept] = useState(false);
-	const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
-	const [sortBy, setSortBy] = useState<"level" | "fame" | "date">("level");
+	const [sortBy, setSortBy] = useState<"fame" | "name">("fame");
 	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
 	useEffect(() => {
@@ -33,53 +23,10 @@ export default function ClansPage() {
 		async function fetchClans() {
 			setLoading(true);
 			try {
-				const client = createAchilleaClient();
-				const res = await client.clans.list({ page: 1, pagination: 100 });
-				if (res.ok && isMounted) {
-					setClans(res.value.data);
-				} else if (!res.ok) {
-					// Keep the directory usable while an older API node is draining:
-					// the public endpoint's compact projection is intentionally
-					// normalised here as a last-mile compatibility fallback.
-					const response = await fetch(`${achilleaApiUrl()}/clans?page=1&pagination=100`);
-					if (response.ok && isMounted) {
-						const payload = (await response.json()) as {
-							data?: Array<{
-								id: number;
-								name: string;
-								shortName: string;
-								avatarUrl: string;
-								biography: string;
-								fame: number;
-								isRecruiting: boolean;
-							}>;
-						};
-						setClans(
-							(payload.data ?? []).map((clan) => ({
-								...clan,
-								founders: [],
-								shortenedName: clan.shortName,
-								normalizedShortName: clan.shortName.toLowerCase(),
-								clanAvatarUrl: clan.avatarUrl,
-								clanBiography: clan.biography,
-								xUrl: null,
-								instagramUrl: null,
-								tiktokUrl: null,
-								isInactive: false,
-								isHidden: false,
-								isDisbanded: false,
-								autoAcceptMembers: false,
-								state: ClanState.Approved,
-								createdAt: new Date(0),
-								languages: [],
-								origin: "legacy",
-								experience: { currentLevel: 1, totalXp: 0 },
-								membersCount: 0,
-								president: { id: "", username: clan.name },
-							})) as unknown as ClanDTO[]
-						);
-					}
-				}
+				const results = await listPublicClans();
+				if (isMounted) setClans(results);
+			} catch {
+				if (isMounted) setError(true);
 			} finally {
 				if (isMounted) setLoading(false);
 			}
@@ -97,33 +44,19 @@ export default function ClansPage() {
 				if (
 					q &&
 					!c.name.toLowerCase().includes(q) &&
-					!c.shortenedName.toLowerCase().includes(q)
+					!c.shortName.toLowerCase().includes(q)
 				) {
 					return false;
 				}
 				if (onlyRecruiting && !c.isRecruiting) return false;
-				if (onlyAutoAccept && !c.autoAcceptMembers) return false;
-				if (
-					selectedLanguage !== "all" &&
-					!c.languages?.map((l) => l.toLowerCase()).includes(selectedLanguage)
-				) {
-					return false;
-				}
 				return true;
 			})
 			.sort((a, b) => {
-				let diff = 0;
-				if (sortBy === "level") {
-					diff = (a.experience?.totalXp ?? 0) - (b.experience?.totalXp ?? 0);
-				} else if (sortBy === "fame") {
-					diff = (a.fame ?? 0) - (b.fame ?? 0);
-				} else if (sortBy === "date") {
-					diff =
-						new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-				}
+				const diff =
+					sortBy === "fame" ? a.fame - b.fame : a.name.localeCompare(b.name);
 				return sortOrder === "asc" ? diff : -diff;
 			});
-	}, [clans, query, onlyRecruiting, onlyAutoAccept, selectedLanguage, sortBy, sortOrder]);
+	}, [clans, query, onlyRecruiting, sortBy, sortOrder]);
 
 	return (
 		<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -137,11 +70,15 @@ export default function ClansPage() {
 						</h1>
 					</div>
 					<p className="text-sm text-on-surface-variant">
-						Rejoins une équipe compétitive, progresse ensemble et gagne des points de clan.
+						Rejoins une équipe compétitive, progresse ensemble et gagne des
+						points de clan.
 					</p>
 				</div>
 
-				<Button asChild className="rounded-xl font-bold text-xs gap-1.5 shadow-md self-start md:self-auto">
+				<Button
+					asChild
+					className="rounded-xl font-bold text-xs gap-1.5 shadow-md self-start md:self-auto"
+				>
 					<Link href="/achillea/clans/create">
 						<Plus className="size-4" />
 						Créer mon clan
@@ -151,7 +88,7 @@ export default function ClansPage() {
 
 			{/* Filters toolbar */}
 			<div className="p-4 rounded-2xl border border-outline/20 bg-surface/80 backdrop-blur-md space-y-4">
-				<div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+				<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
 					{/* Search input */}
 					<div className="relative sm:col-span-2">
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-on-surface-variant" />
@@ -164,33 +101,17 @@ export default function ClansPage() {
 						/>
 					</div>
 
-					{/* Langue */}
-					<div>
-						<select
-							value={selectedLanguage}
-							onChange={(e) => setSelectedLanguage(e.target.value)}
-							className="w-full px-3 py-2 text-sm rounded-xl border border-outline/25 bg-surface-variant/30 text-on-surface focus:outline-none focus:border-primary"
-						>
-							<option value="all">Toutes les langues</option>
-							<option value="fr">Français</option>
-							<option value="en">Anglais</option>
-							<option value="de">Allemand</option>
-							<option value="it">Italien</option>
-							<option value="es">Espagnol</option>
-							<option value="jp">Japonais</option>
-						</select>
-					</div>
-
 					{/* Tri */}
 					<div className="flex gap-2">
 						<select
 							value={sortBy}
-							onChange={(e) => setSortBy(e.target.value as any)}
+							onChange={(e) =>
+								setSortBy(e.target.value === "name" ? "name" : "fame")
+							}
 							className="flex-1 px-3 py-2 text-sm rounded-xl border border-outline/25 bg-surface-variant/30 text-on-surface focus:outline-none focus:border-primary"
 						>
-							<option value="level">Niveau & XP</option>
 							<option value="fame">Notoriété</option>
-							<option value="date">Date de création</option>
+							<option value="name">Nom</option>
 						</select>
 						<Button
 							variant="outline"
@@ -216,18 +137,9 @@ export default function ClansPage() {
 						<span>Recrutement ouvert uniquement</span>
 					</label>
 
-					<label className="flex items-center gap-2 cursor-pointer select-none">
-						<input
-							type="checkbox"
-							checked={onlyAutoAccept}
-							onChange={(e) => setOnlyAutoAccept(e.target.checked)}
-							className="rounded text-primary focus:ring-primary size-4"
-						/>
-						<span>Acceptation automatique</span>
-					</label>
-
 					<span className="ml-auto font-mono text-xs opacity-70">
-						{filteredClans.length} clan{filteredClans.length > 1 ? "s" : ""} trouvé
+						{filteredClans.length} clan{filteredClans.length > 1 ? "s" : ""}{" "}
+						trouvé
 						{filteredClans.length > 1 ? "s" : ""}
 					</span>
 				</div>
@@ -240,12 +152,27 @@ export default function ClansPage() {
 						<Skeleton key={i} className="h-36 rounded-2xl w-full" />
 					))}
 				</div>
+			) : error ? (
+				<div
+					role="alert"
+					className="text-center py-16 border border-outline/30 rounded-3xl p-8"
+				>
+					<p className="text-lg font-bold text-on-surface">
+						L’annuaire des clans est indisponible.
+					</p>
+					<p className="text-sm text-on-surface-variant">
+						Réessaie dans quelques instants.
+					</p>
+				</div>
 			) : filteredClans.length === 0 ? (
 				<div className="text-center py-16 border border-dashed border-outline/30 rounded-3xl p-8 space-y-3">
 					<Users className="size-12 mx-auto text-on-surface-variant opacity-40" />
-					<h3 className="text-lg font-bold text-on-surface">Aucun clan ne correspond</h3>
+					<h3 className="text-lg font-bold text-on-surface">
+						Aucun clan ne correspond
+					</h3>
 					<p className="text-sm text-on-surface-variant max-w-sm mx-auto">
-						Modifie tes critères de recherche ou sois le premier à fonder ton clan !
+						Modifie tes critères de recherche ou sois le premier à fonder ton
+						clan !
 					</p>
 					<Button
 						variant="outline"
@@ -253,8 +180,6 @@ export default function ClansPage() {
 						onClick={() => {
 							setQuery("");
 							setOnlyRecruiting(false);
-							setOnlyAutoAccept(false);
-							setSelectedLanguage("all");
 						}}
 					>
 						Réinitialiser les filtres
