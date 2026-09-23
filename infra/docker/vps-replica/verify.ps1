@@ -48,6 +48,11 @@ $rolesOk = [int]$roleReplica -eq [int]$roleSource
 if (-not $rolesOk) { $allOk = $false }
 [pscustomobject]@{sourceRoles=[int]$roleSource; replicaRoles=[int]$roleReplica; rolesOk=$rolesOk} | ConvertTo-Json -Compress
 
+& docker exec vps-replica-achillea-storage sh -c 'case "$DATABASE_URL" in */rg) exit 0;; *) exit 1;; esac'
+$achilleaUsesRg = $LASTEXITCODE -eq 0
+if (-not $achilleaUsesRg) { $allOk = $false }
+[pscustomobject]@{achilleaStorageDatabase='rg'; usesUnifiedDatabase=$achilleaUsesRg} | ConvertTo-Json -Compress
+
 $redisInfo = (& docker exec vps-replica-redis redis-cli --raw INFO keyspace | Out-String)
 $redisKeys = 0L
 $redisDbs = @()
@@ -77,14 +82,20 @@ foreach ($endpoint in @(
     @{port=8822; path='/health'; expected=200},
     @{port=8823; path='/health'; expected=200},
     @{port=8823; path='/rest/v1/'; expected=200},
+    @{port=8823; path='/rest/v1/user?select=id&limit=1'; expected=200},
     @{port=8811; path='/auth/v1/'; expected=410}
 )) {
     $url = "http://127.0.0.1:$($endpoint.port)$($endpoint.path)"
-    try {
-        $response = Invoke-WebRequest -Uri $url -SkipHttpErrorCheck -TimeoutSec 5
-        $code = [int]$response.StatusCode
+    $code = 0
+    for ($attempt = 0; $attempt -lt 3 -and $code -eq 0; $attempt++) {
+        try {
+            $response = Invoke-WebRequest -Uri $url -SkipHttpErrorCheck -TimeoutSec 5
+            $code = [int]$response.StatusCode
+        }
+        catch {
+            if ($attempt -lt 2) { Start-Sleep -Seconds 1 }
+        }
     }
-    catch { $code = 0 }
     $ok = $code -eq $endpoint.expected
     if (-not $ok) { $allOk = $false }
     [pscustomobject]@{port=$endpoint.port; path=$endpoint.path; status=$code; expected=$endpoint.expected; ok=$ok} | ConvertTo-Json -Compress

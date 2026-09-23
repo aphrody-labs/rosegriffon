@@ -24,11 +24,9 @@ if (-not $ready) { throw 'PostgreSQL Docker ne répond pas après 30 secondes.' 
 
 Start-Containers @(
     'vps-replica-postgrest',
-    'vps-replica-achillea-postgrest',
     'vps-replica-storage',
     'vps-replica-achillea-storage',
-    'vps-replica-realtime',
-    'vps-replica-achillea-realtime'
+    'vps-replica-realtime'
 )
 
 & docker restart vps-replica-nginx | Out-Null

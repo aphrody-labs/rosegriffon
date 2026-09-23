@@ -72,22 +72,6 @@ services:
       - "127.0.0.1:8809:3000"
     networks: [edge, backend]
 
-  achillea-postgrest:
-    image: postgrest/postgrest:v12.2.12
-    container_name: vps-replica-achillea-postgrest
-    restart: unless-stopped
-    environment:
-      PGRST_DB_URI: postgres://authenticator@postgres:5432/achillea
-      PGRST_DB_SCHEMAS: public,storage
-      PGRST_DB_ANON_ROLE: anon
-      PGRST_DB_EXTRA_SEARCH_PATH: public,extensions
-      PGRST_JWT_SECRET: ${SUPABASE_JWT_SECRET:?Provide SUPABASE_JWT_SECRET in the invoking process}
-      PGRST_SERVER_PORT: "3000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks: [backend]
-
   storage:
     build:
       context: ../../..
@@ -117,7 +101,7 @@ services:
     restart: unless-stopped
     entrypoint: ["bun", "run", "apps/storage/server.ts"]
     environment:
-      DATABASE_URL: postgres://rg@postgres:5432/achillea
+      DATABASE_URL: postgres://rg@postgres:5432/rg
       SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:?Provide SUPABASE_JWT_SECRET in the invoking process}
       RG_STORAGE_HOST: 0.0.0.0
       RG_STORAGE_PORT: "8810"
@@ -147,23 +131,6 @@ services:
         condition: service_healthy
     ports:
       - "127.0.0.1:8812:8812"
-    networks: [edge, backend]
-
-  achillea-realtime:
-    image: vps-replica-bun-services:local
-    container_name: vps-replica-achillea-realtime
-    restart: unless-stopped
-    entrypoint: ["bun", "run", "apps/realtime/server.ts"]
-    environment:
-      DATABASE_URL: postgres://rg@postgres:5432/achillea
-      RG_REALTIME_HOST: 0.0.0.0
-      RG_REALTIME_PORT: "8812"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      realtime:
-        condition: service_started
-    ports:
       - "127.0.0.1:8822:8812"
     networks: [edge, backend]
 
@@ -190,11 +157,9 @@ services:
     depends_on:
       - aphrody-site
       - postgrest
-      - achillea-postgrest
       - storage
       - achillea-storage
       - realtime
-      - achillea-realtime
     ports:
       - "127.0.0.1:8088:80"
       - "127.0.0.1:8811:82"
