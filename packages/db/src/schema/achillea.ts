@@ -460,7 +460,7 @@ export interface PlayerNoteTable {
 	content: string;
 	resolved: Generated<boolean>;
 	resolved_at: Date | null;
-	resolved_by: string | null;
+	resolved_by_id: string | null;
 	created_at: Generated<Date>;
 	updated_at: Generated<Date>;
 }

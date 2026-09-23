@@ -43,7 +43,7 @@ function query(db: Kysely<Database>) {
   return db.selectFrom("player_note as note")
     .leftJoin("user as target", "target.id", "note.target_id")
     .leftJoin("user as author", "author.id", "note.author_id")
-    .leftJoin("user as resolved_by", "resolved_by.id", "note.resolved_by")
+    .leftJoin("user as resolved_by", "resolved_by.id", "note.resolved_by_id")
     .leftJoin("event as tournament", "tournament.id", "note.tournament_id")
     .selectAll("note")
     .select([
@@ -91,7 +91,7 @@ export const playerNotesController = new Elysia({ prefix: "/player-notes" })
     if (content.length < 3) return status(400, { message: "Note content is too short" as const });
     const target = await db.selectFrom("user").select("id").where("id", "=", body.targetId).executeTakeFirst();
     if (!target) return status(404, { message: "Player not found" as const });
-    const row = await db.insertInto("player_note").values({ target_id: body.targetId, author_id: auth.session.id, tournament_id: body.tournamentId ?? null, category: body.category ?? "other", severity: body.severity ?? "info", content: content.slice(0, 2000), resolved: false, resolved_at: null, resolved_by: null }).returning("id").executeTakeFirstOrThrow();
+    const row = await db.insertInto("player_note").values({ target_id: body.targetId, author_id: auth.session.id, tournament_id: body.tournamentId ?? null, category: body.category ?? "other", severity: body.severity ?? "info", content: content.slice(0, 2000), resolved: false, resolved_at: null, resolved_by_id: null }).returning("id").executeTakeFirstOrThrow();
     return dto(await query(db).where("note.id", "=", row.id).executeTakeFirstOrThrow());
   }, { body: t.Object({ targetId: t.String(), tournamentId: t.Optional(t.Nullable(t.Numeric())), category: t.Optional(t.String()), severity: t.Optional(t.String()), content: t.String() }) })
   .put("/:id", async ({ db, headers, params: { id }, body }) => {
@@ -114,7 +114,7 @@ export const playerNotesController = new Elysia({ prefix: "/player-notes" })
     const exists = await db.selectFrom("player_note").select("id").where("id", "=", id).executeTakeFirst();
     if (!exists) return status(404, { message: "Note not found" as const });
     const resolved = action === "resolve";
-    await db.updateTable("player_note").set({ resolved, resolved_at: resolved ? new Date() : null, resolved_by: resolved ? auth.session.id : null, updated_at: new Date() }).where("id", "=", id).execute();
+    await db.updateTable("player_note").set({ resolved, resolved_at: resolved ? new Date() : null, resolved_by_id: resolved ? auth.session.id : null, updated_at: new Date() }).where("id", "=", id).execute();
     return dto(await query(db).where("note.id", "=", id).executeTakeFirstOrThrow());
   }, { params: t.Object({ id: t.String(), action: t.String() }) })
   .delete("/:id", async ({ db, headers, params: { id } }) => {
