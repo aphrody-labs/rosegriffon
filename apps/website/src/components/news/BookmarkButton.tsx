@@ -4,7 +4,7 @@ import { Bookmark } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { toggleBookmark } from "@/app/actions/bookmarks";
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/contexts/auth-context";
 import { cn } from "@/lib/utils";
 
 interface BookmarkButtonProps {

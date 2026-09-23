@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { toggleReaction } from "@/app/actions/reactions";
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/contexts/auth-context";
 import type { ReactionType } from "@/lib/reaction-types";
 import { cn } from "@/lib/utils";
 

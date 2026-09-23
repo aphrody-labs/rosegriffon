@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { trackReading } from "@/app/actions/reading-history";
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/contexts/auth-context";
 
 interface ReadingProgressTrackerProps {
 	articleId: string;

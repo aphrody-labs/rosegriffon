@@ -20,7 +20,6 @@ import SidebarNavigationHandler from "@/components/layout/SidebarNavigationHandl
 import EdgeSwipeDetector from "@/components/shared/EdgeSwipeDetector";
 import MobileWatermark from "@/components/shared/MobileWatermark";
 import { DynamicUniverseHead } from "@/components/layout/DynamicUniverseHead";
-import { AuthProvider as AuthProviderProfil } from "@/components/providers/AuthProvider";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import {
 	LanguageProvider,
@@ -186,108 +185,90 @@ export default function ClientLayout({
 		<ThemeProvider>
 			<Providers>
 				<AuthProvider>
-					{/*
-					 * DEUX contextes d'authentification coexistent, et un seul était
-					 * monté. `@/contexts/auth-context` porte la session minimale
-					 * (`user`, `isLoading`) ; `@/components/providers/AuthProvider`
-					 * porte en plus le profil, `isAdmin` et `refreshProfile`, et c'est
-					 * LUI que consomment les huit composants d'actualités
-					 * (commentaires, réactions, marque-pages, cloche, opt-in push).
-					 * Faute d'être monté, leur `useAuth()` levait
-					 * « useAuth must be used within an AuthProvider » et chaque article
-					 * portant ces blocs tombait dans la frontière d'erreur.
-					 *
-					 * Les fusionner est la vraie cible ; les monter tous les deux
-					 * rétablit le service sans toucher aux composants partagés avec
-					 * l'ancien frontend autonome, avant l'unification dans Website
-					 * identiques octet à octet.
-					 */}
-					<AuthProviderProfil>
-						<ProfileProvider>
-							<LanguageProvider initialLanguage={initialLanguage}>
-								<AchilleaAuthProvider>
-									<SidebarWrapper isMedium={isMedium}>
-										{/* Gestionnaire dynamique de Favicon, Titre et SEO selon l'univers */}
-										<DynamicUniverseHead />
+					<ProfileProvider>
+						<LanguageProvider initialLanguage={initialLanguage}>
+							<AchilleaAuthProvider>
+								<SidebarWrapper isMedium={isMedium}>
+									{/* Gestionnaire dynamique de Favicon, Titre et SEO selon l'univers */}
+									<DynamicUniverseHead />
 
-										{/* Accessibilité: lien pour sauter au contenu principal */}
-										<SkipToContent />
+									{/* Accessibilité: lien pour sauter au contenu principal */}
+									<SkipToContent />
 
-										{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
-										{showRail && <RoutedNavigationRail />}
+									{/* NAVIGATION RAIL (MEDIUM SCREENS) */}
+									{showRail && <RoutedNavigationRail />}
 
-										{/* SIDEBAR — tiroir en compact, tiroir à la demande en medium
+									{/* SIDEBAR — tiroir en compact, tiroir à la demande en medium
 								    (le bouton « Menu » du rail l'ouvre), panneau fixe en expanded.
 								    Elle doit être montée aussi en medium : sans elle, ce bouton
 								    basculait un état sans panneau et ne faisait rien. */}
-										{/* L'identité de l'univers est déjà portée par la topbar. Le header
+									{/* L'identité de l'univers est déjà portée par la topbar. Le header
 											    interne de la sidebar était un doublon masqué sous cette barre fixe. */}
-										{!shouldHideSidebar && <RoutedSidebar />}
+									{!shouldHideSidebar && <RoutedSidebar />}
 
-										<SidebarNavigationHandler />
-										<EdgeSwipeDetector />
+									<SidebarNavigationHandler />
+									<EdgeSwipeDetector />
 
-										{/* Pas de marge gauche manuelle en expanded : <Sidebar> pose déjà un
+									{/* Pas de marge gauche manuelle en expanded : <Sidebar> pose déjà un
 								    « gap » de --sidebar-width dans le flux, qui décale l'inset. En
 								    ajouter une seconde doublait le décalage et écrasait le contenu. */}
-										<SidebarInset
-											className={cn("transition-all duration-300 min-w-0", showRail && "ml-20")}
-										>
-											{/* La réserve en haut compense le Header fixe (4rem+safe-area en mobile, 14 (3.5rem) sur desktop/tablette).
+									<SidebarInset
+										className={cn("transition-all duration-300 min-w-0", showRail && "ml-20")}
+									>
+										{/* La réserve en haut compense le Header fixe (4rem+safe-area en mobile, 14 (3.5rem) sur desktop/tablette).
 									    La réserve en bas compense la barre de navigation basse (5rem+safe-area) uniquement montée en compact. */}
-											<div
-												className={cn(
-													"flex flex-col min-h-[100dvh] w-full",
-													!shouldHideSidebar && "pt-[calc(4rem+env(safe-area-inset-top))] md:pt-14",
-													isCompact &&
-														!shouldHideSidebar &&
-														"pb-[calc(5.5rem+env(safe-area-inset-bottom))]"
-												)}
-											>
-												{/* Le kit admin fournit son propre en-tête mobile : sans cette garde,
+										<div
+											className={cn(
+												"flex flex-col min-h-[100dvh] w-full",
+												!shouldHideSidebar && "pt-[calc(4rem+env(safe-area-inset-top))] md:pt-14",
+												isCompact &&
+													!shouldHideSidebar &&
+													"pb-[calc(5.5rem+env(safe-area-inset-bottom))]"
+											)}
+										>
+											{/* Le kit admin fournit son propre en-tête mobile : sans cette garde,
 										    les deux se superposaient sur /admin (z-40 contre z-30). */}
-												{/* Barre supérieure unifiée et routée selon le domaine actif */}
-												{!shouldHideSidebar &&
-													(isCompact ? (
-														<RoutedHeader isMobile showSidebarToggle={false} />
-													) : (
-														<RoutedHeader showSidebarToggle />
-													))}
-												<div className="flex-1 w-full">
-													{/* `SidebarInset` est déjà un <main> : ici un <div> (un <main>
+											{/* Barre supérieure unifiée et routée selon le domaine actif */}
+											{!shouldHideSidebar &&
+												(isCompact ? (
+													<RoutedHeader isMobile showSidebarToggle={false} />
+												) : (
+													<RoutedHeader showSidebarToggle />
+												))}
+											<div className="flex-1 w-full">
+												{/* `SidebarInset` est déjà un <main> : ici un <div> (un <main>
 											    imbriqué est invalide et casse la cible du lien d'évitement). */}
-													{/* La classe de thème du domaine est posée ICI, sur la zone
+												{/* La classe de thème du domaine est posée ICI, sur la zone
 											    de contenu : le chrome partagé (barre latérale, barres de
 											    navigation) garde le thème choisi par l'utilisateur, et
 											    seule la section prend l'identité de son domaine. */}
-													<div
-														id="main-content"
-														className={cn(
-															"min-h-full w-full flex-1 overflow-x-hidden",
-															classeThemeDuDomaine(pathname || "/")
-														)}
-													>
-														{children}
-													</div>
+												<div
+													id="main-content"
+													className={cn(
+														"min-h-full w-full flex-1 overflow-x-hidden",
+														classeThemeDuDomaine(pathname || "/")
+													)}
+												>
+													{children}
 												</div>
-												{/* /shop rend son propre pied de page (thémé DA boutique) dans
+											</div>
+											{/* /shop rend son propre pied de page (thémé DA boutique) dans
 										    son layout : sans cette garde, les six routes du tunnel
 										    d'achat empilaient deux `contentinfo` — rupture visuelle et
 										    liens légaux annoncés deux fois par les lecteurs d'écran. */}
-												{/* En compact, la barre basse porte déjà la navigation : le grand footer
+											{/* En compact, la barre basse porte déjà la navigation : le grand footer
 											    du site ferait doublon et ajouterait plusieurs écrans de défilement. */}
-												{!isShopPage && !isCompact && <Footer />}
-												<MobileWatermark />
-												{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
-												{isCompact && !shouldHideSidebar && <RoutedMobileNavigation />}
-											</div>
-										</SidebarInset>
-									</SidebarWrapper>
-								</AchilleaAuthProvider>
-							</LanguageProvider>
-							<Toaster richColors position="top-right" />
-						</ProfileProvider>
-					</AuthProviderProfil>
+											{!isShopPage && !isCompact && <Footer />}
+											<MobileWatermark />
+											{/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
+											{isCompact && !shouldHideSidebar && <RoutedMobileNavigation />}
+										</div>
+									</SidebarInset>
+								</SidebarWrapper>
+							</AchilleaAuthProvider>
+						</LanguageProvider>
+						<Toaster richColors position="top-right" />
+					</ProfileProvider>
 				</AuthProvider>
 			</Providers>
 		</ThemeProvider>

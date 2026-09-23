@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createComment } from "@/app/actions/comments";
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/contexts/auth-context";
+import { useProfile } from "@/contexts/profile-context";
 import { Button } from "@rosegriffon/ui";
 import { isRemoteAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,8 @@ export function CommentForm({
 	placeholder,
 	autoFocus: _autoFocus = false,
 }: CommentFormProps) {
-	const { user, profile } = useAuth();
+	const { user } = useAuth();
+	const { profile } = useProfile();
 	const [content, setContent] = useState("");
 	const [isPending, startTransition] = useTransition();
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
