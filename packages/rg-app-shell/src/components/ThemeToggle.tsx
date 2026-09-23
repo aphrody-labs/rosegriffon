@@ -10,30 +10,45 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
+	THEMES,
+	type ThemeType,
 } from "@rosegriffon/ui";
 
 export interface ThemeOption {
-	id: string;
+	id: ThemeType;
 	label: string;
 	icon?: typeof Moon;
 	image?: string;
 }
 
 /**
- * Thèmes proposés par le sélecteur d'association : Roy et Gaëlle exclusivement.
- * Les univers Azalée et Achilléa ont chacun leur thème de domaine dédié (Azalée sombre et Achilléa e-sport)
- * appliqué sur leur contenu, tandis que le chrome et l'association restent pilotés par Roy et Gaëlle.
+ * Les cinq thèmes officiels partagent le même sélecteur dans le chrome.
  */
 export const DEFAULT_THEMES: ThemeOption[] = [
 	{
 		id: "roy",
-		image: "/emote/RG_Roy_salut.webp",
+		image: THEMES.roy.icon,
 		label: "Roy",
 	},
 	{
 		id: "gaelle",
-		image: "/emote/RG_Gaelle_salut.webp",
+		image: THEMES.gaelle.icon,
 		label: "Gaëlle",
+	},
+	{
+		id: "azalee-light",
+		image: THEMES["azalee-light"].icon,
+		label: "Azalée clair",
+	},
+	{
+		id: "azalee-dark",
+		image: THEMES["azalee-dark"].icon,
+		label: "Azalée sombre",
+	},
+	{
+		id: "achillea",
+		image: THEMES.achillea.icon,
+		label: "Achilléa",
 	},
 ];
 

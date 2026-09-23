@@ -95,8 +95,8 @@ describe("navigation de la source unique Website", () => {
 		// Deux accordéons qui mènent au même endroit, c'est un choix à faire là
 		// où il n'y a rien à choisir — le défaut qui a fusionné « Vie de la
 		// communauté » et « L'association ».
-		const parCategorie = itemsDeNavigation().map((groupe) =>
-			new Set(cheminsCliquables(groupe.children ?? []))
+		const parCategorie = itemsDeNavigation().map(
+			(groupe) => new Set(cheminsCliquables(groupe.children ?? []))
 		);
 		const doublons = [...parCategorie[0]!].filter((chemin) =>
 			parCategorie.slice(1).some((autre) => autre.has(chemin))
@@ -149,13 +149,25 @@ describe("dictionnaire de navigation", () => {
  * dans `styles.css`. Ce test empêche la liste de redivergir.
  */
 describe("sélecteur de thème", () => {
-	test("propose exclusivement les thèmes d'association (Roy et Gaëlle)", () => {
-		expect(DEFAULT_THEMES.map((t) => t.id).sort()).toEqual(["gaelle", "roy"]);
+	test("propose les cinq thèmes officiels dans l'ordre du catalogue", () => {
+		expect(DEFAULT_THEMES.map((t) => t.id)).toEqual([
+			"roy",
+			"gaelle",
+			"azalee-light",
+			"azalee-dark",
+			"achillea",
+		]);
+		expect(
+			DEFAULT_THEMES.map((t) => t.id)
+				.sort()
+				.join(",")
+		).toBe(Object.keys(THEMES).sort().join(","));
 	});
 
-	test("aucun identifiant fantôme", () => {
+	test("chaque option utilise le visuel officiel et un libellé distinct", () => {
+		expect(new Set(DEFAULT_THEMES.map((t) => t.label)).size).toBe(DEFAULT_THEMES.length);
 		for (const theme of DEFAULT_THEMES) {
-			expect(Object.keys(THEMES)).toContain(theme.id);
+			expect(theme.image).toBe(THEMES[theme.id].icon);
 			expect(theme.label.length).toBeGreaterThan(0);
 		}
 	});
