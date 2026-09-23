@@ -11,8 +11,8 @@ import {
 } from "../scripts/generer-tokens";
 import { FORMES, MARQUE, MARQUES_TIERCES, THEMES } from "../src/tokens";
 
-const CHEMIN_CSS = new URL("../src/styles.css", import.meta.url).pathname;
-const CHEMIN_TOKENS = new URL("../src/tokens.ts", import.meta.url).pathname;
+const CHEMIN_CSS = new URL("../src/styles.css", import.meta.url);
+const CHEMIN_TOKENS = new URL("../src/tokens.ts", import.meta.url);
 const css = await Bun.file(CHEMIN_CSS).text();
 
 describe("conversion oklch → sRGB", () => {
@@ -91,6 +91,20 @@ describe("résolution des var()", () => {
 });
 
 describe("tokens exposés", () => {
+	test("les cinq thèmes officiels sont projetés depuis le CSS", () => {
+		expect(NOMS_THEMES).toEqual([
+			"theme-roy",
+			"theme-gaelle",
+			"theme-azalee-light",
+			"theme-azalee-dark",
+			"theme-achillea",
+		]);
+		expect(Object.keys(THEMES)).toEqual([...NOMS_THEMES]);
+		expect(THEMES["theme-azalee-light"].md3.primary).toBe("#f2a93b");
+		expect(THEMES["theme-azalee-light"].md3.secondary).toBe("#a92335");
+		expect(THEMES["theme-azalee-light"].md3.background).toBe("#fff8f5");
+	});
+
 	test("aucune couleur ne reste en oklch (Canvas 2D la rendrait noire)", () => {
 		const valeurs = [
 			...Object.values(MARQUE),
@@ -122,7 +136,7 @@ describe("tokens exposés", () => {
 			[...(blocs.find((b) => b.selecteurs.includes(`.${nom}`))?.declarations.keys() ?? [])].sort();
 
 		const reference = varsDuTheme(NOMS_THEMES[0]!);
-		expect(reference.length).toBeGreaterThan(60);
+		expect(reference.length).toBe(68);
 		for (const nom of NOMS_THEMES) {
 			expect(varsDuTheme(nom)).toEqual(reference);
 		}

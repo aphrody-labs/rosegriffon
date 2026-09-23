@@ -10,9 +10,10 @@
  *   - typescale (15 rôles officiels)
  *   - state-layer utility
  *
- * Thèmes unifiés (4) — appliqués via classe sur <html> ou ancêtre :
+ * Thèmes unifiés (5) — appliqués via classe sur <html> ou ancêtre :
  *   - .theme-roy           — Inazuma character, light, accent bleu/doré
  *   - .theme-gaelle        — Inazuma character, light, vermillon/orange
+ *   - .theme-azalee-light  — Wiki Azalée, light, ambre/vermillon
  *   - .theme-azalee-dark   — Wiki Azalée, dark, seed MD3 #F89C5A
  *   - .theme-achillea      — Compétitif Achilléa, dark cyber violet/néon lime
  *
@@ -373,7 +374,7 @@
 		--md-sys-color-outline-variant: oklch(0.85 0.02 250);
 		/* Roy et Gaëlle omettaient scrim/shadow : `bg-scrim` (overlays de
 		 * dialogue, tiroirs) n'y était donc pas surchargeable et restait figé sur
-		 * la valeur du :root. Les quatre thèmes couvrent maintenant les mêmes vars. */
+		 * la valeur du :root. Les cinq thèmes couvrent maintenant les mêmes vars. */
 		--md-sys-color-scrim: oklch(0 0 0);
 		--md-sys-color-shadow: oklch(0 0 0);
 		--md-sys-color-surface-dim: oklch(0.88 0.01 80);
@@ -453,7 +454,7 @@
 		--md-sys-color-outline-variant: oklch(0.85 0.04 30);
 		/* Roy et Gaëlle omettaient scrim/shadow : `bg-scrim` (overlays de
 		 * dialogue, tiroirs) n'y était donc pas surchargeable et restait figé sur
-		 * la valeur du :root. Les quatre thèmes couvrent maintenant les mêmes vars. */
+		 * la valeur du :root. Les cinq thèmes couvrent maintenant les mêmes vars. */
 		--md-sys-color-scrim: oklch(0 0 0);
 		--md-sys-color-shadow: oklch(0 0 0);
 		--md-sys-color-surface-dim: oklch(0.88 0.03 40);
@@ -501,6 +502,79 @@
 		--sidebar-accent-foreground: #ffffff;
 		--sidebar-border: rgba(255, 196, 110, 0.3);
 		--sidebar-ring: rgba(255, 196, 110, 0.4);
+	}
+	:root.theme-azalee-light,
+	.theme-azalee-light,
+	:root.azalee-light,
+	.azalee-light {
+		--md-sys-color-primary: #f2a93b;
+		--md-sys-color-on-primary: #2d1600;
+		--md-sys-color-primary-container: #ffddb2;
+		--md-sys-color-on-primary-container: #2d1600;
+		--md-sys-color-secondary: #a92335;
+		--md-sys-color-on-secondary: #ffffff;
+		--md-sys-color-secondary-container: #ffd9df;
+		--md-sys-color-on-secondary-container: #3b0718;
+		--md-sys-color-tertiary: #765b28;
+		--md-sys-color-on-tertiary: #ffffff;
+		--md-sys-color-tertiary-container: #ffdea6;
+		--md-sys-color-on-tertiary-container: #281900;
+		--md-sys-color-error: #ba1a1a;
+		--md-sys-color-on-error: #ffffff;
+		--md-sys-color-error-container: #ffdad6;
+		--md-sys-color-on-error-container: #410002;
+		--md-sys-color-background: #fff8f5;
+		--md-sys-color-on-background: #241a15;
+		--md-sys-color-surface: #fff8f5;
+		--md-sys-color-on-surface: #241a15;
+		--md-sys-color-surface-variant: #f4ded2;
+		--md-sys-color-on-surface-variant: #52443c;
+		--md-sys-color-outline: #84746a;
+		--md-sys-color-outline-variant: #d7c3b7;
+		--md-sys-color-scrim: #000000;
+		--md-sys-color-shadow: #000000;
+		--md-sys-color-inverse-surface: #3d2e27;
+		--md-sys-color-inverse-on-surface: #ffede6;
+		--md-sys-color-inverse-primary: #ffc66c;
+		--md-sys-color-surface-dim: #ead8d0;
+		--md-sys-color-surface-bright: #fff8f5;
+		--md-sys-color-surface-container-lowest: #ffffff;
+		--md-sys-color-surface-container-low: #fff2ed;
+		--md-sys-color-surface-container: #f9ece6;
+		--md-sys-color-surface-container-high: #f3e6df;
+		--md-sys-color-surface-container-highest: #ede0d9;
+		--background: var(--md-sys-color-surface);
+		--foreground: var(--md-sys-color-on-surface);
+		--card: var(--md-sys-color-surface-container-low);
+		--card-foreground: var(--md-sys-color-on-surface);
+		--popover: var(--md-sys-color-surface-container-high);
+		--popover-foreground: var(--md-sys-color-on-surface);
+		--primary: var(--md-sys-color-primary);
+		--primary-foreground: var(--md-sys-color-on-primary);
+		--secondary: var(--md-sys-color-secondary-container);
+		--secondary-foreground: var(--md-sys-color-on-secondary-container);
+		--muted: var(--md-sys-color-surface-container);
+		--muted-foreground: var(--md-sys-color-on-surface-variant);
+		--accent: var(--md-sys-color-tertiary-container);
+		--accent-foreground: var(--md-sys-color-on-tertiary-container);
+		--destructive: var(--md-sys-color-error);
+		--destructive-foreground: var(--md-sys-color-on-error);
+		--border: var(--md-sys-color-outline-variant);
+		--input: var(--md-sys-color-outline);
+		--ring: var(--md-sys-color-primary);
+		--chart-1: #f2a93b;
+		--chart-2: #a92335;
+		--chart-3: #398679;
+		--chart-4: #8b6ec1;
+		--chart-5: #d46c43;
+		--sidebar: var(--md-sys-color-surface);
+		--sidebar-foreground: var(--md-sys-color-on-surface);
+		--sidebar-primary: var(--md-sys-color-primary);
+		--sidebar-primary-foreground: var(--md-sys-color-on-primary);
+		--sidebar-accent: var(--md-sys-color-tertiary-container);
+		--sidebar-accent-foreground: var(--md-sys-color-on-tertiary-container);
+		--sidebar-border: var(--md-sys-color-outline-variant);
+		--sidebar-ring: var(--md-sys-color-primary);
 	}
 	:root.theme-azalee-dark,
 	.theme-azalee-dark,
@@ -689,6 +763,10 @@
 		color: var(--foreground);
 	}
 	:where(.theme-gaelle:not(:root)) {
+		background-color: var(--background);
+		color: var(--foreground);
+	}
+	:where(.theme-azalee-light:not(:root)) {
 		background-color: var(--background);
 		color: var(--foreground);
 	}

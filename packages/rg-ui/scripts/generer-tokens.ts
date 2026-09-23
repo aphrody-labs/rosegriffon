@@ -192,6 +192,7 @@ export function resoudreVar(
 export const NOMS_THEMES = [
 	"theme-roy",
 	"theme-gaelle",
+	"theme-azalee-light",
 	"theme-azalee-dark",
 	"theme-achillea",
 ] as const;
@@ -213,7 +214,7 @@ export function versCamel(nom: string): string {
 	return nom.replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase());
 }
 
-/** Rôles shadcn exposés par thème (ceux que les 4 thèmes déclarent tous). */
+/** Rôles shadcn exposés par thème (ceux que les 5 thèmes déclarent tous). */
 const ROLES_SHADCN = [
 	"background",
 	"foreground",
@@ -341,7 +342,7 @@ export function rendreModule(tokens: TokensExtraits): string {
  * renvoie \`#000000\` sans prévenir.
  */
 
-/** Les 4 thèmes unifiés, tels que posés en classe sur \`<html>\`. */
+/** Les 5 thèmes unifiés, tels que posés en classe sur \`<html>\`. */
 export const NOMS_THEMES = [
 ${NOMS_THEMES.map((n) => `\t"${n}",`).join("\n")}
 ] as const;
@@ -354,7 +355,7 @@ export type RolesMd3 = Readonly<Record<keyof (typeof THEMES)["theme-roy"]["md3"]
 /** Rôles shadcn (pont MD3 → shadcn) résolus pour un thème donné. */
 export type RolesShadcn = Readonly<Record<keyof (typeof THEMES)["theme-roy"]["shadcn"], string>>;
 
-/** Couleurs de marque Rose Griffon — identiques dans les 4 thèmes. */
+/** Couleurs de marque Rose Griffon — identiques dans les 5 thèmes. */
 export const MARQUE = ${litteral(tokens.marque, "")} as const;
 
 /** Couleurs imposées par des marques tierces (constantes, hors thème). */
@@ -363,7 +364,7 @@ export const MARQUES_TIERCES = ${litteral(tokens.marquesTierces, "")} as const;
 /** Échelle de formes M3, en pixels. */
 export const FORMES = ${litteral(tokens.formes, "")} as const;
 
-/** Tokens résolus des 4 thèmes. */
+/** Tokens résolus des 5 thèmes. */
 export const THEMES = {
 ${themes}
 } as const;
@@ -381,8 +382,8 @@ export function shadcn(nom: NomTheme): RolesShadcn {
 }
 
 if (import.meta.main) {
-	const cheminCss = new URL("../src/styles.css", import.meta.url).pathname;
-	const cheminSortie = new URL("../src/tokens.ts", import.meta.url).pathname;
+	const cheminCss = new URL("../src/styles.css", import.meta.url);
+	const cheminSortie = new URL("../src/tokens.ts", import.meta.url);
 	const css = await Bun.file(cheminCss).text();
 	await Bun.write(cheminSortie, rendreModule(extraireTokens(css)));
 	console.log(`tokens=ok source=${cheminCss} sortie=${cheminSortie}`);

@@ -27,10 +27,10 @@
 
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, resolve } from "node:path";
 import ts from "typescript";
 
-const REPO_ROOT = new URL("../../..", import.meta.url).pathname;
+const REPO_ROOT = resolve(import.meta.dir, "../../..");
 const WEBSITE_SRC = join(REPO_ROOT, "apps/website/src");
 const BASELINE_PATH = join(import.meta.dir, "presentation-literals-baseline.json");
 
