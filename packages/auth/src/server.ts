@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { resolveProfile, isAdmin } from "./index";
+import { resolveProfile, isAdmin } from "./core";
 type ProfileClient = { from: (table: string) => any };
 
 /**

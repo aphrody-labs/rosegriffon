@@ -5,14 +5,9 @@ import { oauthProvider } from "@better-auth/oauth-provider";
 import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
 import { admin, bearer, genericOAuth, jwt } from "better-auth/plugins";
-import {
-	commonAuthOptions,
-	createAccountOptions,
-	deuxFacteurs,
-	ensureUserProfile,
-	googleProvider,
-	type AccountEmailSender,
-} from "./index";
+import { type AccountEmailSender, createAccountOptions } from "./account-options";
+import { commonAuthOptions, ensureUserProfile, googleProvider } from "./core";
+import { deuxFacteurs } from "./two-factor";
 
 type BetterAuthDatabase = Parameters<typeof betterAuth>[0]["database"];
 

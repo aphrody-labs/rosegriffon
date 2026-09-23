@@ -4,7 +4,7 @@ import { betterAuth } from "better-auth";
 import { admin, jwt, mcp, openAPI } from "better-auth/plugins";
 import nodemailer from "nodemailer";
 import { getPgPool } from "@rosegriffon/db/pg";
-import { commonAuthOptions } from "./index";
+import { commonAuthOptions } from "./core";
 
 const baseURL =
 	process.env.BETTER_AUTH_API_URL ||
