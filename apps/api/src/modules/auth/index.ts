@@ -11,6 +11,7 @@ import { verifyAdminBearerToken as verifyAdminToken } from "@rosegriffon/achille
 import { dbPlugin } from "../../plugins/db";
 import { ProviderOAuthService } from "./oauth-service";
 import { resolveAchilleaSession } from "./session";
+import { findLinkedPublicProfile } from "../achillea/users/public-profile";
 
 export const authController = new Elysia({ prefix: "/auth" })
 	.use(dbPlugin)
@@ -37,7 +38,7 @@ export const authController = new Elysia({ prefix: "/auth" })
 				       coalesce(p.avatar_url, u.image) as avatar_url
 				from public.account a
 				join public."user" u on u.id = a.user_id
-				left join public.profiles p on p.id = a.user_id
+				left join public.profiles p on p.id::text = a.user_id and p.claimed_at is not null
 				where a.user_id = ${body.betterAuthUserId} and a.provider_id = 'discord'
 				limit 1
 			`.execute(db);
@@ -94,12 +95,13 @@ export const authController = new Elysia({ prefix: "/auth" })
 			set.status = 401;
 			return { error: "unauthorized" as const };
 		}
+		const publicProfile = await findLinkedPublicProfile(db, session.id);
 		return {
 			user: {
 				...session,
-				username: user.username ?? session.username ?? user.display_name,
-				avatar: user.avatar ?? session.avatar ?? null,
-				displayName: user.display_name,
+				username: publicProfile?.username ?? user.username ?? session.username ?? user.display_name,
+				avatar: publicProfile?.avatar_url ?? user.avatar ?? session.avatar ?? null,
+				displayName: publicProfile?.username ?? user.display_name,
 				role: user.role,
 				blacklisted: user.blacklist_id !== null,
 			},
@@ -115,10 +117,11 @@ export const authController = new Elysia({ prefix: "/auth" })
 			set.status = 503;
 			return { message: "Realtime authentication unavailable" as const };
 		}
+		const publicProfile = await findLinkedPublicProfile(db, session.id);
 		const token = signAchilleaRealtimeToken({
 			id: user.id,
-			username: user.username ?? user.display_name,
-			avatar: user.avatar,
+			username: publicProfile?.username ?? user.username ?? user.display_name,
+			avatar: publicProfile?.avatar_url ?? user.avatar,
 		}, secret);
 		return { token, expiresIn: 300, userId: user.id };
 	}, {

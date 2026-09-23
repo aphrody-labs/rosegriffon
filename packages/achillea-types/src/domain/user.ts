@@ -17,6 +17,8 @@ export interface UserDTO {
 	 */
 	type?: string;
 	username: string;
+	/** Canonical Rose Griffon public profile slug when the Discord account is linked. */
+	rgProfileUsername?: string;
 	/**
 	 * Champs présents uniquement sur la session de l'utilisateur courant.
 	 *

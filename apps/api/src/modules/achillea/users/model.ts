@@ -4,6 +4,7 @@ export const UsersModel = {
 	publicProfile: t.Any(),
 	enriched: t.Object({
 		id: t.String(), username: t.String(), displayName: t.String(), avatar: t.String(),
+		rgProfileUsername: t.Optional(t.String()),
 		role: t.Number(), clanId: t.Nullable(t.Number()), hasChallonge: t.Boolean(),
 	}),
 	profile: t.Object({

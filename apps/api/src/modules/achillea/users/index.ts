@@ -4,8 +4,9 @@ import { dbPlugin } from "../../../plugins/db";
 import { LeaderboardService } from "../leaderboard/service";
 import { UsersModel } from "./model";
 import { resolveAchilleaSession } from "../../auth/session";
+import { findLinkedPublicProfile, projectPublicIdentity } from "./public-profile";
 
-/** Compatibility resource for the versioned client; the query lives in one service. */
+/** Player routes backed by the unified API. */
 export const usersController = new Elysia({ prefix: "/users" })
 	.use(dbPlugin)
 	.get("/me/ranked-history", async ({ db, headers, query }) => {
@@ -89,10 +90,11 @@ export const usersController = new Elysia({ prefix: "/users" })
 	.get("/:id", async ({ db, params: { id } }) => {
 		const user = await db.selectFrom("user").select(["id", "username", "display_name", "avatar", "role", "bio", "twitch_url", "last_interact"]).where("id", "=", id).executeTakeFirst();
 		if (!user) return status(404, { message: "User not found" as const });
-		const [elos, ranks, clan] = await Promise.all([
+		const [elos, ranks, clan, publicProfile] = await Promise.all([
 			db.selectFrom("user_elo").select(["mode", "elo", "games_played", "wins", "losses"]).where("user_id", "=", id).execute(),
 			db.selectFrom("rank").selectAll().orderBy("min_elo", "asc").execute(),
 			db.selectFrom("clan_member as cm").innerJoin("clan as c", "c.id", "cm.clan_id").select(["cm.clan_id", "cm.role", "cm.distinctions", "c.name", "c.shortened_name", "c.clan_avatar_url"]).where("cm.user_id", "=", id).executeTakeFirst(),
+			findLinkedPublicProfile(db, id),
 		]);
 		const modeStats = (mode: number) => {
 			const row = elos.find((elo) => Number(elo.mode) === mode);
@@ -113,11 +115,12 @@ export const usersController = new Elysia({ prefix: "/users" })
 			}
 		})();
 		const emptyCompetition = { total: 0, wins: 0, losses: 0, draws: 0, goalsScoredAvg: 0, goalsReceivedAvg: 0, personalTotal: 0, personalWins: 0, personalLosses: 0, personalDraws: 0 };
+		const identity = projectPublicIdentity(publicProfile, { username: user.display_name ?? user.username ?? user.id, avatar, bio: user.bio ?? null });
 		return {
-			id: user.id, type: "user", username: user.display_name ?? user.username ?? user.id, sim: 0,
-			avatar,
+			id: user.id, type: "user", username: identity.username, sim: 0,
+			avatar: identity.avatar ?? avatar, rgProfileUsername: publicProfile?.username ?? undefined,
 			clanId: clan?.clan_id ?? null, soloRank: solo.rank, duoRank: duo.rank, lastInteract: user.last_interact, role: Number(user.role ?? 0),
-			bio: user.bio ?? null, twitchUrl: user.twitch_url ?? null, hasTwitch: Boolean(user.twitch_url), hasChallonge: false, hasYoutube: false,
+			bio: identity.bio, twitchUrl: user.twitch_url ?? null, hasTwitch: Boolean(user.twitch_url), hasChallonge: false, hasYoutube: false,
 			clan: clan ? { id: clan.clan_id, shortenedName: clan.shortened_name, name: clan.name, avatarUrl: clan.clan_avatar_url, role: Number(clan.role), distinctions: clan.distinctions ?? [] } : undefined,
 			interclans: emptyCompetition, tournaments: emptyCompetition, ranked: { solo: { ...solo, rank: undefined }, duo: { ...duo, rank: undefined } },
 		};
@@ -132,15 +135,20 @@ export const usersController = new Elysia({ prefix: "/users" })
 			.where("id", "=", session.id)
 			.executeTakeFirst();
 		if (!user) return status(404, { message: "User not found" as const });
-		const clan = await db.selectFrom("clan_member").select("clan_id").where("user_id", "=", session.id).executeTakeFirst();
-		const connection = await db.selectFrom("user_connection").select("user_id")
-			.where("user_id", "=", session.id).where("provider", "=", "challonge").executeTakeFirst();
+		const [clan, connection, publicProfile] = await Promise.all([
+			db.selectFrom("clan_member").select("clan_id").where("user_id", "=", session.id).executeTakeFirst(),
+			db.selectFrom("user_connection").select("user_id")
+				.where("user_id", "=", session.id).where("provider", "=", "challonge").executeTakeFirst(),
+			findLinkedPublicProfile(db, session.id),
+		]);
 		const avatar = user.avatar
 			? user.avatar.startsWith("http") ? user.avatar : `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
 			: `https://cdn.discordapp.com/embed/avatars/${(BigInt(user.id) >> 22n) % 6n}.png`;
+		const identity = projectPublicIdentity(publicProfile, { username: user.username ?? session.username ?? "", avatar, bio: null });
 		return {
-			id: user.id, username: user.username ?? session.username ?? "", displayName: user.display_name ?? "",
-			avatar, role: Number(user.role ?? 0), clanId: clan?.clan_id ?? null, hasChallonge: Boolean(connection),
+			id: user.id, username: identity.username, displayName: publicProfile?.username ?? user.display_name ?? "",
+			avatar: identity.avatar ?? avatar, rgProfileUsername: publicProfile?.username ?? undefined,
+			role: Number(user.role ?? 0), clanId: clan?.clan_id ?? null, hasChallonge: Boolean(connection),
 		};
 	}, {
 		response: {
@@ -162,13 +170,23 @@ export const usersController = new Elysia({ prefix: "/users" })
 				return status(400, { message: "Invalid Twitch URL" as const });
 			}
 		}
-		const current = await db.selectFrom("user").select(["id", "username", "display_name", "avatar", "bio", "twitch_url"]).where("id", "=", session.id).executeTakeFirst();
+		const current = await db.selectFrom("user").select(["id", "username", "display_name", "avatar", "twitch_url"]).where("id", "=", session.id).executeTakeFirst();
 		if (!current) return status(404, { message: "User not found" as const });
-		const updated = await db.updateTable("user").set({ bio: body.bio === undefined ? current.bio : bio, twitch_url: body.twitchUrl === undefined ? current.twitch_url : twitchUrl }).where("id", "=", session.id).returning(["id", "username", "display_name", "avatar", "bio", "twitch_url"]).executeTakeFirstOrThrow();
-		return { id: updated.id, username: updated.username, displayName: updated.display_name, avatar: updated.avatar, bio: updated.bio, twitchUrl: updated.twitch_url };
+		const publicProfile = await findLinkedPublicProfile(db, session.id);
+		if (body.bio !== undefined && !publicProfile) return status(409, { message: "Rose Griffon profile required" as const });
+		await db.transaction().execute(async (trx) => {
+			if (body.bio !== undefined && publicProfile) {
+				await sql`update public.profiles set bio = ${bio}, updated_at = now()
+					where id::text = ${publicProfile.id} and claimed_at is not null`.execute(trx);
+			}
+			if (body.twitchUrl !== undefined) {
+				await trx.updateTable("user").set({ twitch_url: twitchUrl }).where("id", "=", session.id).execute();
+			}
+		});
+		return { id: current.id, username: publicProfile?.username ?? current.username, displayName: publicProfile?.username ?? current.display_name ?? "", avatar: publicProfile?.avatar_url ?? current.avatar, bio: body.bio === undefined ? publicProfile?.bio ?? null : bio, twitchUrl: body.twitchUrl === undefined ? current.twitch_url : twitchUrl };
 	}, {
 		body: t.Object({ bio: t.Optional(t.Nullable(t.String({ maxLength: 2000 }))), twitchUrl: t.Optional(t.Nullable(t.String({ maxLength: 500 }))) }),
-		response: { 200: UsersModel.profile, 400: t.Object({ message: t.String() }), 401: t.Object({ message: t.Literal("Authentication required") }), 404: t.Object({ message: t.Literal("User not found") }) },
+		response: { 200: UsersModel.profile, 400: t.Object({ message: t.String() }), 401: t.Object({ message: t.Literal("Authentication required") }), 404: t.Object({ message: t.Literal("User not found") }), 409: t.Object({ message: t.Literal("Rose Griffon profile required") }) },
 	})
 	.get("/leaderboard", async ({ db, query }) => {
 		const mode = Number(query.mode ?? 2);
