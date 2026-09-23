@@ -86,6 +86,11 @@ export NODE_AUTH_TOKEN
 bun install --frozen-lockfile
 unset NODE_AUTH_TOKEN
 
+# These workspace packages export dist/ files, which are absent from git.
+# Build them before Next resolves their package exports.
+bun --cwd "$stage/packages/inagle" run build
+bun --cwd "$stage/packages/patreon-bun" run build
+
 # Next 16 standalone must be built under Node 22; Bun is used for installs and
 # for the final runtime. Docker reads the protected env file on the host only.
 docker_cmd=(docker)
