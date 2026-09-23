@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 
 import { subscribeTable } from "@/lib/realtime";
+import { getCurrentPublicProfile } from "@/app/settings/actions";
 import type { PublicProfile } from "@rosegriffon/db/profiles";
 
 type Profile = PublicProfile;
@@ -21,10 +22,11 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
 	useEffect(() => {
 		// Ne pas s'abonner si pas d'userId ou si désactivé
 		if (!userId || !enabled) return;
+		let cancelled = false;
 
 		// Le flux SSE de rg-realtime gère lui-même la reconnexion (EventSource) :
 		// plus de machinerie de retry ni de statuts de canal à surveiller.
-		return subscribeTable<Profile>({ filter: `id=eq.${userId}`, table: "profiles" }, (event) => {
+		const unsubscribe = subscribeTable<{ id: string }>({ filter: `id=eq.${userId}`, table: "profiles" }, (event) => {
 			if (process.env.NODE_ENV === "development") {
 				console.info("[useProfileSync] Changement reçu:", event.eventType);
 			}
@@ -34,9 +36,17 @@ export function useProfileSync({ userId, onProfileChange, enabled = true }: UseP
 				return;
 			}
 
-			if (event.new && onProfileChange) {
-				onProfileChange(event.new);
+			if (event.new?.id === userId && onProfileChange) {
+				void getCurrentPublicProfile()
+					.then((profile) => {
+						if (!cancelled && profile?.id === userId) onProfileChange(profile);
+					})
+					.catch((error) => console.error("[useProfileSync] Lecture du profil impossible", error));
 			}
 		});
+		return () => {
+			cancelled = true;
+			unsubscribe();
+		};
 	}, [userId, enabled, onProfileChange]);
 }
