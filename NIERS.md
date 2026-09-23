@@ -66,12 +66,12 @@ Puis lire dans `niers` :
 
 ```bash
 git -C /home/ubuntu/niers status --short --branch
-sed -n '1,220p' /home/ubuntu/niers/docs/OVH.md
+sed -n '1,220p' /home/ubuntu/aphrody-infra/docs/ops/OVH.md
 sed -n '1,180p' /home/ubuntu/niers/docs/TARGET-ARCHITECTURE.md
 just -f /home/ubuntu/niers/justfile build-wasm
 ```
 
-Avant toute modification de production, `docs/OVH.md` fait autorité pour les comptes, zones,
+Avant toute modification de production, `../aphrody-infra/docs/ops/OVH.md` fait autorité pour les comptes, zones,
 DNS et certificats. Avant toute modification de code WASM, `niers/docs/TARGET-ARCHITECTURE.md`
 fait autorité pour la cible `nie.exe → nie-web`.
 
@@ -88,7 +88,7 @@ fait autorité pour la cible `nie.exe → nie-web`.
 ## Sources de vérité
 
 - `../aphrody-infra/docs/ops/REPO-SYNC.md` — orchestration et frontière `rg ↔ niers` ;
-- `/home/ubuntu/niers/docs/OVH.md` — comptes, DNS, certificats et procédures OVH ;
+- `/home/ubuntu/aphrody-infra/docs/ops/OVH.md` — comptes, DNS, certificats et procédures OVH ;
 - `/home/ubuntu/niers/docs/TARGET-ARCHITECTURE.md` — cible WASM et suite Inacord ;
 - `/home/ubuntu/niers/docs/ARCHITECTURE.md` — état mesuré de l'architecture niers ;
 - `/home/ubuntu/niers/docs/FORGE.md` — preuve de reconstruction de `nie.exe`.

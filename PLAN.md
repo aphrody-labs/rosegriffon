@@ -1,7 +1,7 @@
 # PLAN — Source Ultime de Vérité & Architecture Unifiée Rose Griffon
 
 > **Statut : Document de référence absolu**  
-> **Dernière mise à jour : 20/09/2026**  
+> **Dernière mise à jour : 23/09/2026**  
 > **Mode : Autonome (YOLO 100% / No Human in the Loop)**  
 > **Applicabilité : Multi-agents (Claude Code, Antigravity AGY, Codex)**
 
@@ -177,3 +177,26 @@ Les anciens documents temporaires, obsolètes ou contradictoires de `docs/` ont 
 - Retrait des anciens plans de bascule temporaires (ex. `PLAN-SECURITE-BASCULE.md`, `PLAN-SESSION-3D.md`, `azalee-plan-correctifs.md`).
 - Retrait des manifests JSON d'importation brute temporaires (`achillea-phase0-import-manifest.json`, `achillea-phase0-source-map.md`, `achillea-phase0-dependencies.md`).
 - Centralisation de toute la stratégie dans `PLAN.md` et son découpage d'exécution `PARTITION.md`.
+
+---
+
+## Migration de l'exploitation transverse vers `aphrody-infra` — 23/09/2026
+
+Ce qui concernait tout le VPS ou plusieurs dépôts a quitté `rg` pour `aphrody-infra`
+(index : `../aphrody-infra/docs/ops/README.md`). Noms d'units inchangés.
+
+| Élément | Nouvel emplacement |
+|---|---|
+| `infra/sysctl/`, `infra/logrotate/` | `aphrody-infra/host/` |
+| `rg-zram-swap`, drop-ins `nginx.service.d` | `aphrody-infra/systemd/` |
+| `rg-watchdog@` + `scripts/rg-watchdog.sh` | `aphrody-infra/systemd/`, `scripts/ops/rg-watchdog.sh` |
+| `rg-infra-monitor` + `scripts/ops/stack.ts` (doublon) | `aphrody-infra/scripts/infra-status.ts` |
+| `rg-repo-sync` + `scripts/ops/repo-sync.ts`, `docs/REPO-SYNC.md` | `aphrody-infra/scripts/ops/`, `docs/ops/` |
+| `scripts/ops/archive-froid.ts`, `docs/stockage-secondaire.md` | `aphrody-infra/scripts/ops/`, `docs/ops/` |
+
+Restent dans `rg` : units applicatives, crons du bot et du site, `sauvegarde.ts`,
+`prune-runtime.ts`, `release-stack.ts` et `infra.ts` (qui lit désormais aussi
+`aphrody-infra`). `bun run infra:*` et `ops:sync*` appellent `../aphrody-infra`.
+
+**Reste à faire (opérateur)** : réinstaller ces units depuis `aphrody-infra` sur le VPS
+(`ExecStart` pointe vers `/home/ubuntu/aphrody-infra`), `daemon-reload`, vérifier les timers.
