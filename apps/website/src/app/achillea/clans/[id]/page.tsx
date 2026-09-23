@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { metadonneesAchillea, resume } from "@/app/achillea/metadonnees";
-import { createAchilleaClient } from "@/lib/achillea";
-import { signalerEchec } from "@/lib/achillea/signaler";
+import { getPublicClan } from "@/lib/achillea/unified-clans";
 import ClanProfileClient from "./clan-profile-client";
 
 /*
@@ -19,10 +18,10 @@ export async function generateMetadata({
 	params: Promise<{ id: string }>;
 }): Promise<Metadata> {
 	const { id } = await params;
-	const numero = Number.parseInt(id, 10);
+	const numero = Number(id);
 	const chemin = `/achillea/clans/${id}`;
 
-	if (!Number.isFinite(numero)) {
+	if (!Number.isSafeInteger(numero) || numero <= 0) {
 		return metadonneesAchillea({
 			titre: "Clan introuvable",
 			description: "Ce clan Achilléa n'existe pas ou a été dissous.",
@@ -31,28 +30,23 @@ export async function generateMetadata({
 		});
 	}
 
-	const resultat = await createAchilleaClient().clans.get(numero);
-	if (!resultat.ok) {
-		// Un titre de repli vaut mieux qu'une page sans métadonnées : la lecture
-		// client réessaiera, et l'échec reste tracé dans les journaux.
-		signalerEchec(`clans/${id} — métadonnées`, resultat);
+	let clan;
+	try {
+		clan = await getPublicClan(numero);
+	} catch {
 		return metadonneesAchillea({
 			titre: "Fiche de clan",
-			description: "Composition, niveau et recrutement d'un clan compétitif Achilléa.",
+			description: "Informations publiques d'un clan compétitif Achilléa.",
 			chemin,
 		});
 	}
 
-	const clan = resultat.value;
 	return metadonneesAchillea({
-		titre: `${clan.name} (${clan.shortenedName})`,
+		titre: `${clan.name} (${clan.shortName})`,
 		description:
-			resume(clan.clanBiography) ??
-			`Le clan ${clan.name} sur Achilléa : ${clan.membersCount} membre(s), niveau ${clan.experience.currentLevel}, recrutement ${clan.isRecruiting ? "ouvert" : "fermé"}.`,
+			resume(clan.biography) ??
+			`Le clan ${clan.name} sur Achilléa : recrutement ${clan.isRecruiting ? "ouvert" : "fermé"}.`,
 		chemin,
-		// Un clan dissous ou masqué reste consultable par lien direct, mais n'a
-		// rien à faire dans un index public.
-		indexable: !clan.isDisbanded && !clan.isHidden,
 	});
 }
 
