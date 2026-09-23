@@ -347,7 +347,7 @@ export function NierPassiveFamilyCard({ family }: { family: NierPassiveFamily })
 			{/* Description FR résolue (lien vers la fiche détail) */}
 			<div className="flex items-start justify-between gap-2">
 				<Link
-					href={`/passive/${representative.passive_id}`}
+					href={`/wiki/passive/${representative.passive_id}`}
 					className="text-sm font-semibold text-on-surface leading-snug whitespace-pre-line flex-1 hover:text-primary transition-colors"
 				>
 					{textFr}
@@ -375,7 +375,7 @@ export function NierPassiveFamilyCard({ family }: { family: NierPassiveFamily })
 							{insts.map((inst) => (
 								<Link
 									key={inst.string_id}
-									href={`/passive/${inst.passive_id}`}
+									href={`/wiki/passive/${inst.passive_id}`}
 									className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest text-xs font-mono text-on-surface hover:bg-primary/15 hover:text-primary transition-colors"
 									title={inst.string_id}
 								>

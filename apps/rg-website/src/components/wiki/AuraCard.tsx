@@ -70,7 +70,7 @@ export function AuraCard({
 	const imageUrl = resolveAssetUrl(image) || getAuraImageUrl(assetCode, subType);
 
 	return (
-		<Link href={`/aura/${category}/${id}`} className={cn("block h-full", className)}>
+		<Link href={`/wiki/aura/${category}/${id}`} className={cn("block h-full", className)}>
 			<div
 				className={cn(
 					"group relative flex flex-col rounded-xl overflow-hidden border transition-all duration-200",

@@ -80,7 +80,7 @@ function ShopItemTile({ item }: { item: ShopItem }) {
 
 	if (item.resolved && item.id) {
 		return (
-			<Link href={`/item/${item.id}`} className={cls}>
+			<Link href={`/wiki/item/${item.id}`} className={cls}>
 				{inner}
 			</Link>
 		);

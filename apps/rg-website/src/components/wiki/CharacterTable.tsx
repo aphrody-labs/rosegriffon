@@ -257,7 +257,7 @@ export function CharacterTable({ characters, startIndex = 0 }: CharacterTablePro
 								{/* Nom avec image */}
 								<TableCell>
 									<Link
-										href={`/chara/${(character as any).baseSlug || character.slug || character.charaParamId}`}
+										href={`/wiki/chara/${(character as any).baseSlug || character.slug || character.charaParamId}`}
 										className="flex items-center gap-3 group"
 									>
 										<div className="relative size-12 rounded-lg overflow-hidden bg-surface-container-highest shrink-0 ring-1 ring-outline-variant/30">

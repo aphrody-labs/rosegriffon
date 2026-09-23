@@ -258,7 +258,7 @@ export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: 
 										</div>
 										{(aura as any).skillInternalCode && (
 											<Link
-												href={`/skill/${(aura as any).skillInternalCode}`}
+												href={`/wiki/skill/${(aura as any).skillInternalCode}`}
 												className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 transition-colors"
 											>
 												Voir la fiche
@@ -367,7 +367,7 @@ export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: 
 			<div className="flex justify-between items-center gap-2 sm:gap-4">
 				{prevAura ? (
 					<Link
-						href={`/aura/${category}/${prevAura.auraIdStr || prevAura.auraId}`}
+						href={`/wiki/aura/${category}/${prevAura.auraIdStr || prevAura.auraId}`}
 						className="flex items-center gap-1.5 sm:gap-3 px-3 py-2 sm:px-6 sm:py-3 rounded-full bg-surface-container hover:bg-surface-container-high transition-all border border-outline-variant/20 hover:scale-105 active:scale-95 group min-w-0"
 					>
 						<ArrowLeft
@@ -389,7 +389,7 @@ export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: 
 				)}
 
 				<Link
-					href={`/aura/${category}`}
+					href={`/wiki/aura/${category}`}
 					className="flex items-center gap-2 px-3 py-2 sm:px-6 sm:py-3 rounded-full bg-surface-container-high hover:bg-surface-container-highest transition-all border border-outline-variant/20 hover:shadow-md shrink-0"
 				>
 					<LayoutGrid size={20} aria-hidden="true" />
@@ -398,7 +398,7 @@ export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: 
 
 				{nextAura ? (
 					<Link
-						href={`/aura/${category}/${nextAura.auraIdStr || nextAura.auraId}`}
+						href={`/wiki/aura/${category}/${nextAura.auraIdStr || nextAura.auraId}`}
 						className="flex items-center gap-1.5 sm:gap-3 px-3 py-2 sm:px-6 sm:py-3 rounded-full bg-surface-container hover:bg-surface-container-high transition-all border border-outline-variant/20 hover:scale-105 active:scale-95 group min-w-0"
 					>
 						<div className="flex flex-col items-end min-w-0">

@@ -18,22 +18,22 @@ import { TACTIC_FR, translateEffect } from "@rosegriffon/azalee/text/translation
 
 const TYPE_CONFIG: Record<string, { label: string; icon: string; urlPrefix: string }> = {
 	article: { icon: "newspaper", label: "Actualité", urlPrefix: "/news" },
-	aura: { icon: "auto_awesome", label: "Aura", urlPrefix: "/aura/autres" },
-	awakening: { icon: "auto_awesome", label: "Éveil", urlPrefix: "/aura/eveil" },
-	basara: { icon: "person", label: "Joueur BASARA", urlPrefix: "/chara" },
-	character: { icon: "person_outline", label: "Personnage", urlPrefix: "/chara" },
-	item: { icon: "inventory_2", label: "Objet", urlPrefix: "/item" },
-	keshin: { icon: "auto_awesome", label: "Esprit Guerrier", urlPrefix: "/aura/esprits-guerriers" },
-	miximax: { icon: "auto_awesome", label: "Miximax", urlPrefix: "/aura/miximax" },
+	aura: { icon: "auto_awesome", label: "Aura", urlPrefix: "/wiki/aura/autres" },
+	awakening: { icon: "auto_awesome", label: "Éveil", urlPrefix: "/wiki/aura/eveil" },
+	basara: { icon: "person", label: "Joueur BASARA", urlPrefix: "/wiki/chara" },
+	character: { icon: "person_outline", label: "Personnage", urlPrefix: "/wiki/chara" },
+	item: { icon: "inventory_2", label: "Objet", urlPrefix: "/wiki/item" },
+	keshin: { icon: "auto_awesome", label: "Esprit Guerrier", urlPrefix: "/wiki/aura/esprits-guerriers" },
+	miximax: { icon: "auto_awesome", label: "Miximax", urlPrefix: "/wiki/aura/miximax" },
 	modechange: {
 		icon: "auto_awesome",
 		label: "Changement Mode",
-		urlPrefix: "/aura/changement-mode",
+		urlPrefix: "/wiki/aura/changement-mode",
 	},
-	patchnote: { icon: "update", label: "Patch Note", urlPrefix: "/patch-notes" },
-	skill: { icon: "sports_soccer", label: "Technique", urlPrefix: "/skill" },
-	soul: { icon: "auto_awesome", label: "Totem", urlPrefix: "/aura/totems" },
-	tactic: { icon: "schema", label: "Tactique", urlPrefix: "/tactic" },
+	patchnote: { icon: "update", label: "Patch Note", urlPrefix: "/wiki/patch-notes" },
+	skill: { icon: "sports_soccer", label: "Technique", urlPrefix: "/wiki/skill" },
+	soul: { icon: "auto_awesome", label: "Totem", urlPrefix: "/wiki/aura/totems" },
+	tactic: { icon: "schema", label: "Tactique", urlPrefix: "/wiki/tactic" },
 	tweet: { icon: "forum", label: "Tweet X", urlPrefix: "#" },
 	re: { icon: "auto_fix_high", label: "IE RE (Remake)", urlPrefix: "#" },
 	cross: { icon: "compare_arrows", label: "IE Cross", urlPrefix: "#" },
@@ -735,7 +735,7 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
 			name: c.name_fr || c.name_en || c.id,
 			slug: c.slug || c.id,
 			subtitle: parts.join(" · "),
-			url: `/chara/${c.slug || c.id}`,
+			url: `/wiki/chara/${c.slug || c.id}`,
 		};
 	});
 
@@ -750,7 +750,7 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
 			name: s.name_fr || s.name_en || s.id,
 			slug: s.id,
 			subtitle: parts.join(" · "),
-			url: `/skill/${s.id}`,
+			url: `/wiki/skill/${s.id}`,
 		};
 	});
 
@@ -766,7 +766,7 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
 				.replaceAll(/[^a-z0-9]+/g, "-")
 				.replaceAll(/^-+|-+$/g, ""),
 			subtitle: effect,
-			url: `/tactic/${t.name
+			url: `/wiki/tactic/${t.name
 				.toLowerCase()
 				.replaceAll(/[^a-z0-9]+/g, "-")
 				.replaceAll(/^-+|-+$/g, "")}`,
@@ -784,7 +784,7 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
 			name: i.name_fr || i.name_en || i.id,
 			slug: i.id,
 			subtitle: parts.join(" · "),
-			url: `/item/${i.id}`,
+			url: `/wiki/item/${i.id}`,
 		};
 	});
 
@@ -799,7 +799,7 @@ export async function getMetaSuggestions(): Promise<MetaSuggestions> {
 			name: p.name_fr || p.name_en || p.id,
 			slug: p.id,
 			subtitle: parts.join(" · "),
-			url: `/passive/${p.id}`,
+			url: `/wiki/passive/${p.id}`,
 		};
 	});
 

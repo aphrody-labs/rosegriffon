@@ -747,7 +747,7 @@ function RosterGrid({ roster }: { roster: ResolvedChara[] }) {
 							title={[c.element, c.position, c.rarity].filter(Boolean).join(" · ")}
 						>
 							{c.baseSlug ? (
-								<Link href={`/chara/${c.baseSlug}`} className="block">
+								<Link href={`/wiki/chara/${c.baseSlug}`} className="block">
 									{inner}
 								</Link>
 							) : (

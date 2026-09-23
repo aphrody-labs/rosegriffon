@@ -33,7 +33,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/quete/${id}`,
+			url: `/wiki/quete/${id}`,
 		},
 		title: `${name} | Inazuma Eleven Victory Road - Azalée`,
 	};
@@ -54,7 +54,7 @@ function NeighborLink({ quest, dir }: { quest: Quest; dir: "prev" | "next" }) {
 	const isPrev = dir === "prev";
 	return (
 		<Link
-			href={`/quete/${quest.id}`}
+			href={`/wiki/quete/${quest.id}`}
 			className="group flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-outline-variant/30 bg-surface-container-low p-3 transition-colors hover:bg-surface-container"
 		>
 			{isPrev && (
@@ -120,7 +120,7 @@ export default async function QuestDetailPage({
 
 			{/* Fil d'Ariane */}
 			<div className="flex items-center gap-2 text-sm font-medium text-on-surface-variant">
-				<Link href="/quete" className="transition-colors hover:text-primary">
+				<Link href="/wiki/quete" className="transition-colors hover:text-primary">
 					Quêtes
 				</Link>
 				<span className="opacity-30">/</span>

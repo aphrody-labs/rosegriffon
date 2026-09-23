@@ -84,7 +84,7 @@ export function FormSelector({ forms, currentFormId }: FormSelectorProps) {
 					return (
 						<NextLink
 							key={form.id}
-							href={`/chara/${form.slug}`}
+							href={`/wiki/chara/${form.slug}`}
 							className={cn(
 								"relative shrink-0 rounded-xl overflow-hidden transition-all group",
 								"size-14 sm:w-[56px] sm:h-[56px]",

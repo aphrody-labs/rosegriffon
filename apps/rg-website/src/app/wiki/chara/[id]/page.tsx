@@ -138,7 +138,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/chara/${id}`,
+			url: `/wiki/chara/${id}`,
 		},
 		title: `${name} | Inazuma Eleven Victory Road - Azalée`,
 		twitter: {
@@ -324,7 +324,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 				if (aura) {
 					result.push({
 						category: "Hyper Technique",
-						href: `/aura/${aura.categorySlug || "autres"}/${aura.id}`,
+						href: `/wiki/aura/${aura.categorySlug || "autres"}/${aura.id}`,
 						id: aura.id,
 						isPassive: false,
 						name: aura.name_fr || aura.name_en || moveNames[index],
@@ -478,7 +478,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 		const aura = auras[0];
 		moveset.push({
 			category: "Hyper Technique",
-			href: `/aura/${aura.categorySlug || "autres"}/${aura.id}`,
+			href: `/wiki/aura/${aura.categorySlug || "autres"}/${aura.id}`,
 			id: aura.id,
 			isPassive: false,
 			name: aura.name || "Aura",
@@ -493,7 +493,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 		const aura = auras[0];
 		altMoveset.push({
 			category: "Hyper Technique",
-			href: `/aura/${aura.categorySlug || "autres"}/${aura.id}`,
+			href: `/wiki/aura/${aura.categorySlug || "autres"}/${aura.id}`,
 			id: aura.id,
 			isPassive: false,
 			name: aura.name || "Aura",
@@ -581,7 +581,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 					aria-label="Fil d'Ariane"
 					className="flex items-center gap-2 text-sm text-on-surface-variant"
 				>
-					<Link href="/chara" className="hover:underline">
+					<Link href="/wiki/chara" className="hover:underline">
 						Joueurs
 					</Link>
 					<span aria-hidden="true">/</span>
@@ -590,7 +590,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 					</span>
 				</nav>
 				<Link
-					href={`/tools/compare?char1=${baseChar.slug || id}`}
+					href={`/wiki/tools/compare?char1=${baseChar.slug || id}`}
 					className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-primary transition-all"
 				>
 					<ArrowLeftRight size={16} aria-hidden="true" />

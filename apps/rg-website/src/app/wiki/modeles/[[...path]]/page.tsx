@@ -157,7 +157,7 @@ async function Familles() {
 				{MODEL_FAMILIES.map((f, i) => (
 					<li key={f.id}>
 						<Link
-							href={`/modeles/${f.id}`}
+							href={`/wiki/modeles/${f.id}`}
 							className="block rounded-2xl border border-outline-variant bg-surface-container-low p-4 transition hover:border-primary/50 hover:bg-surface-container"
 						>
 							<span className="flex items-baseline justify-between gap-2">
@@ -343,13 +343,13 @@ async function Grille({
 		<div className="w-full space-y-5">
 			<EnTete titre={`Modèles 3D — ${def?.label ?? famille}`} description={def?.hint} />
 
-			<MediaBack href="/modeles" label="Toutes les familles" />
+			<MediaBack href="/wiki/modeles" label="Toutes les familles" />
 
 			<nav className="flex flex-wrap gap-2">
 				{MODEL_FAMILIES.filter((f) => f.id !== famille).map((f) => (
 					<Link
 						key={f.id}
-						href={`/modeles/${f.id}`}
+						href={`/wiki/modeles/${f.id}`}
 						className="rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 text-sm text-on-surface-variant transition hover:border-primary/50 hover:text-on-surface"
 					>
 						{f.label}
@@ -450,14 +450,14 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
 				}
 			/>
 
-			<MediaBack href={`/modeles/${famille}`} label={`Retour — ${def?.label ?? famille}`} />
+			<MediaBack href={`/wiki/modeles/${famille}`} label={`Retour — ${def?.label ?? famille}`} />
 
 			<nav className="flex flex-wrap items-center gap-1 text-sm text-on-surface-variant">
-				<Link href="/modeles" className="hover:text-primary">
+				<Link href="/wiki/modeles" className="hover:text-primary">
 					Modèles
 				</Link>
 				<span aria-hidden>›</span>
-				<Link href={`/modeles/${famille}`} className="hover:text-primary">
+				<Link href={`/wiki/modeles/${famille}`} className="hover:text-primary">
 					{def?.label ?? famille}
 				</Link>
 				<span aria-hidden>›</span>
@@ -467,7 +467,7 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
 						<span aria-hidden className="mx-1">
 							·
 						</span>
-						<Link href={`/chara/${entree.slug}`} className="text-primary hover:underline">
+						<Link href={`/wiki/chara/${entree.slug}`} className="text-primary hover:underline">
 							Fiche du personnage
 						</Link>
 					</>
@@ -555,7 +555,7 @@ async function Fiche({ famille, code }: { famille: ModelFamily; code: string }) 
 						{g4tx.map((t) => (
 							<li key={t.path}>
 								<Link
-									href={`/textures/${t.path.replace(/^data\/dx11\//, "")}`}
+									href={`/wiki/textures/${t.path.replace(/^data\/dx11\//, "")}`}
 									className="group block overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container transition hover:border-primary/50"
 								>
 									<span className="flex aspect-square items-center justify-center bg-surface-container-high">

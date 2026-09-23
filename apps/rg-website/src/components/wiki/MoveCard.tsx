@@ -98,7 +98,7 @@ export function MoveCard({
 
 	return (
 		<Link
-			href={`/skill/${id}`}
+			href={`/wiki/skill/${id}`}
 			className={cn(
 				"group relative flex flex-col rounded-xl overflow-hidden border transition-all duration-200",
 				"hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98]",

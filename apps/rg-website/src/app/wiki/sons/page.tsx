@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 		siteName: "Azalée - Inazuma Eleven Victory Road",
 		title: "Sons & voix | Azalée",
 		type: "website",
-		url: "/sons",
+		url: "/wiki/sons",
 	},
 	title: "Sons & voix — Inazuma Eleven Victory Road - Azalée",
 };

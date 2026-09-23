@@ -28,7 +28,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/stade/${id}`,
+			url: `/wiki/stade/${id}`,
 		},
 		title: `${name} | Inazuma Eleven Victory Road - Azalée`,
 	};
@@ -70,7 +70,7 @@ export default async function StadiumDetailPage({
 
 			{/* Breadcrumb */}
 			<div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-				<Link href="/stade" className="hover:text-primary transition-colors">
+				<Link href="/wiki/stade" className="hover:text-primary transition-colors">
 					Stades
 				</Link>
 				<span className="opacity-30">/</span>

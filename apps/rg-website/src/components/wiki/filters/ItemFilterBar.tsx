@@ -29,7 +29,7 @@ export function ItemFilterBar({ categories, currentCategory }: ItemFilterBarProp
 				params.delete("category");
 			}
 			params.delete("page");
-			router.push(`/item?${params.toString()}`);
+			router.push(`/wiki/item?${params.toString()}`);
 		},
 		[router, searchParams]
 	);

@@ -618,7 +618,7 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 				}
 				params.set("char2", slug);
 			}
-			router.push(`/tools/compare?${params.toString()}`);
+			router.push(`/wiki/tools/compare?${params.toString()}`);
 		},
 		[searchTarget, char1, char2, router]
 	);
@@ -634,7 +634,7 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 		if (char1) {
 			params.set("char2", char1.slug);
 		}
-		router.push(`/tools/compare?${params.toString()}`);
+		router.push(`/wiki/tools/compare?${params.toString()}`);
 	}, [char1, char2, router]);
 
 	const handleCopyLink = useCallback(async () => {
@@ -682,7 +682,7 @@ export function CharacterComparator({ char1, char2 }: CharacterComparatorProps) 
 					)}
 					{bothSelected && (
 						<button
-							onClick={() => router.push("/tools/compare")}
+							onClick={() => router.push("/wiki/tools/compare")}
 							aria-label="Reinitialiser la comparaison"
 							className="inline-flex items-center min-h-11 sm:min-h-0 type-label-large text-primary px-3 py-2 rounded-full state-layer relative overflow-hidden"
 						>

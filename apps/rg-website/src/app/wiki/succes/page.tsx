@@ -52,7 +52,7 @@ function TrophyCard({ trophy }: { trophy: Trophy }) {
 	const Icon = isOfficial ? TrophyIcon : Award;
 	return (
 		<Link
-			href={`/succes/${trophy.id}`}
+			href={`/wiki/succes/${trophy.id}`}
 			className="group flex h-full gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low p-4 transition-all duration-200 hover:bg-surface-container hover:shadow-lg hover:-translate-y-0.5"
 		>
 			<div

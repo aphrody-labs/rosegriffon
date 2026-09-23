@@ -49,7 +49,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/aura/${category}/${id}`,
+			url: `/wiki/aura/${category}/${id}`,
 		},
 		title,
 		twitter: {
@@ -105,11 +105,11 @@ export default async function AuraDetailPage({
 
 			{/* Breadcrumb */}
 			<div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-				<Link href="/aura" className="hover:text-primary transition-colors">
+				<Link href="/wiki/aura" className="hover:text-primary transition-colors">
 					Hyper Techniques
 				</Link>
 				<span className="opacity-30">/</span>
-				<Link href={`/aura/${category}`} className="hover:text-primary transition-colors">
+				<Link href={`/wiki/aura/${category}`} className="hover:text-primary transition-colors">
 					{categoryLabel}
 				</Link>
 				<span className="opacity-30">/</span>

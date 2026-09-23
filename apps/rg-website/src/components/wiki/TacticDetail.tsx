@@ -43,7 +43,7 @@ export function TacticDetail({ tactic }: TacticDetailProps) {
 			{/* Back Button */}
 			<div className="mb-4">
 				<Link
-					href="/tactic"
+					href="/wiki/tactic"
 					className="inline-flex items-center gap-2 text-sm font-medium text-on-surface-variant hover:text-primary transition-colors"
 				>
 					<ArrowLeft size={20} aria-hidden="true" />

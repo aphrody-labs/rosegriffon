@@ -20,7 +20,7 @@ export function CapsuleCard({
 }) {
 	return (
 		<Link
-			href={`/capsule/${prize.id}`}
+			href={`/wiki/capsule/${prize.id}`}
 			className={cn(
 				"group flex h-full flex-col gap-2 rounded-2xl p-4",
 				"border border-outline-variant/30 bg-surface-container-low",

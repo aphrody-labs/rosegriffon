@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 		siteName: "Azalée - Inazuma Eleven Victory Road",
 		title: "Calculateur de statistiques | Azalée",
 		type: "website",
-		url: "/tools/stats",
+		url: "/wiki/tools/stats",
 	},
 	title: "Calculateur de statistiques (Lv1→99) - Azalée",
 };

@@ -63,7 +63,7 @@ export function CoachCard({
 
 	return (
 		<Link
-			href={`/entraineur/${id}`}
+			href={`/wiki/entraineur/${id}`}
 			className={cn(
 				"group flex h-full flex-col overflow-hidden rounded-2xl",
 				"border border-outline-variant/30 bg-surface-container-low",

@@ -52,7 +52,7 @@ export const metadata: Metadata = {
 		siteName: "Azalée - Inazuma Eleven Victory Road",
 		title: "Vidéos & cinématiques | Azalée",
 		type: "website",
-		url: "/videos",
+		url: "/wiki/videos",
 	},
 	title: "Vidéos & cinématiques — Inazuma Eleven Victory Road - Azalée",
 };

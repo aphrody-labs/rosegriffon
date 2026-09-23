@@ -51,7 +51,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road Wiki",
 			title: `${title} | Azalée`,
 			type: "website",
-			url: "/chara",
+			url: "/wiki/chara",
 		},
 		title: `${title} | Inazuma Eleven Victory Road - Azalée`,
 	};

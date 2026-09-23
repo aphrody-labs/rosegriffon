@@ -224,7 +224,7 @@ export function PlayerDetailPanel({
 				{/* Actions */}
 				<div className="flex gap-2 pt-1">
 					<Link
-						href={`/chara/${member.slug}`}
+						href={`/wiki/chara/${member.slug}`}
 						className="flex-1 inline-flex items-center justify-center gap-1.5 min-h-11 rounded-full bg-primary text-on-primary text-sm font-bold hover:elevation-2 active:scale-[0.97] transition-all"
 						aria-label={`Voir la fiche wiki de ${member.name}`}
 					>

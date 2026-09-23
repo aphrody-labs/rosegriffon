@@ -25,7 +25,7 @@ export function QuestCard({ quest, className }: QuestCardProps) {
 
 	return (
 		<Link
-			href={`/quete/${quest.id}`}
+			href={`/wiki/quete/${quest.id}`}
 			className={cn(
 				"group flex h-full items-start gap-3 rounded-2xl p-3",
 				"border border-outline-variant/30 bg-surface-container-low",

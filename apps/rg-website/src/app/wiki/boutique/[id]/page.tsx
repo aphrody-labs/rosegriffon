@@ -52,7 +52,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/boutique/${shopId}`,
+			url: `/wiki/boutique/${shopId}`,
 		},
 		title: `${name} | Inazuma Eleven Victory Road - Azalée`,
 	};
@@ -91,7 +91,7 @@ export default async function ShopDetailPage({ params }: { params: Promise<{ id:
 
 			{/* Fil d'Ariane */}
 			<div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-				<Link href="/boutique" className="hover:text-primary transition-colors">
+				<Link href="/wiki/boutique" className="hover:text-primary transition-colors">
 					Boutiques
 				</Link>
 				<span className="opacity-30">/</span>

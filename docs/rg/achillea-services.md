@@ -1,5 +1,7 @@
 # Services et stockage Achillea
 
+> **Note d'architecture (23/09/2026)** : Le frontend autonome Angular d'Achilléa a été retiré et intégré dans `apps/website` (`/achillea`). Les unités `achillea-postgrest`, `achillea-storage` et `achillea-realtime` (ports 8820-8822) ainsi que le GoTrue dédié (`achillea-auth` port 8824) ont été retirés. La base Achilléa est désormais un schéma natif de la base `rg` (`scripts/ops/achillea-merge.ts`), et l'authentification est unifiée via Better Auth (`/api/achillea/session`). Seul `achillea-bot.service` reste actif aux côtés de `rg-api.service`.
+
 Cette fiche décrit la configuration déclarative du portage Achillea. Elle ne constitue pas
 une activation de production : aucune unité systemd, configuration Nginx, migration ou
 politique Supabase n'est appliquée automatiquement.
