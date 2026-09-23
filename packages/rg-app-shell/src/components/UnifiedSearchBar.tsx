@@ -37,6 +37,7 @@ export function UnifiedSearchBar({
 	const [query, setQuery] = React.useState(defaultValue);
 	const [results, setResults] = React.useState<SearchResult[]>([]);
 	const [isSearching, setIsSearching] = React.useState(false);
+	const [hasSearchError, setHasSearchError] = React.useState(false);
 	const inputRef = React.useRef<HTMLInputElement>(null);
 	const abortRef = React.useRef<AbortController | null>(null);
 
@@ -56,25 +57,30 @@ export function UnifiedSearchBar({
 	React.useEffect(() => {
 		const value = query.trim();
 		abortRef.current?.abort();
+		setResults([]);
+		setHasSearchError(false);
 		if (value.length < 2) {
-			setResults([]);
 			setIsSearching(false);
 			return;
 		}
 
+		setIsSearching(true);
 		const controller = new AbortController();
 		abortRef.current = controller;
 		const timer = window.setTimeout(async () => {
-			setIsSearching(true);
 			try {
 				const response = await fetch(`/api/recherche?q=${encodeURIComponent(value)}`, {
 					signal: controller.signal,
 				});
-				if (!response.ok) return;
+				if (controller.signal.aborted) return;
+				if (!response.ok) {
+					setHasSearchError(true);
+					return;
+				}
 				const data = (await response.json()) as { resultats?: SearchResult[] };
-				setResults((data.resultats ?? []).slice(0, 8));
+				if (!controller.signal.aborted) setResults((data.resultats ?? []).slice(0, 8));
 			} catch {
-				// Une nouvelle frappe annule naturellement la requête précédente.
+				if (!controller.signal.aborted) setHasSearchError(true);
 			} finally {
 				if (!controller.signal.aborted) setIsSearching(false);
 			}
@@ -106,6 +112,7 @@ export function UnifiedSearchBar({
 
 	const handleClear = () => {
 		setQuery("");
+		setResults([]);
 		inputRef.current?.focus();
 	};
 
@@ -126,7 +133,10 @@ export function UnifiedSearchBar({
 				ref={inputRef}
 				type="text"
 				value={query}
-				onChange={(e) => setQuery(e.target.value)}
+				onChange={(e) => {
+					setQuery(e.target.value);
+					setResults([]);
+				}}
 				onKeyDown={handleKeyDown}
 				placeholder={placeholder}
 				aria-label="Recherche unifiée"
@@ -151,16 +161,25 @@ export function UnifiedSearchBar({
 			{query.trim().length >= 2 && (
 				<div className="absolute left-0 top-[calc(100%+0.5rem)] z-[70] max-h-80 w-full overflow-y-auto rounded-2xl border border-outline-variant/30 bg-surface-container p-1.5 shadow-xl">
 					{results.length === 0 ? (
-						<p className="px-3 py-3 text-center text-xs text-on-surface-variant">
-							{isSearching ? "Recherche dans Azalée, Achilléa et Rose Griffon…" : "Aucun résultat."}
+						<p className="px-3 py-3 text-center text-xs text-on-surface-variant" role="status">
+							{isSearching
+								? "Recherche dans Azalée, Achilléa et Rose Griffon…"
+								: hasSearchError
+									? "Recherche temporairement indisponible. Réessayez."
+									: "Aucun résultat."}
 						</p>
 					) : (
 						<ul>
 							{results.map((result) => (
 								<li key={`${result.domaine}-${result.id}`}>
-									<Link href={result.href} className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm hover:bg-surface-container-high">
+									<Link
+										href={result.href}
+										className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm hover:bg-surface-container-high"
+									>
 										<span className="truncate text-on-surface">{result.titre}</span>
-										<span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">{DOMAIN_LABEL[result.domaine] ?? result.domaine}</span>
+										<span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">
+											{DOMAIN_LABEL[result.domaine] ?? result.domaine}
+										</span>
 									</Link>
 								</li>
 							))}

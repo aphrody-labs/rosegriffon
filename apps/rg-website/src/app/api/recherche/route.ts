@@ -22,6 +22,13 @@ import { getPgPool } from "@/lib/db/pg";
  */
 export const dynamic = "force-dynamic";
 
+function rechercheIndisponible() {
+	return NextResponse.json(
+		{ erreur: "Recherche temporairement indisponible", groupes: [], resultats: [] },
+		{ status: 503 }
+	);
+}
+
 export async function GET(requete: Request) {
 	const parametres = new URL(requete.url).searchParams;
 	const terme = (parametres.get("q") ?? "").trim();
@@ -32,14 +39,21 @@ export async function GET(requete: Request) {
 
 	try {
 		const pool = getPgPool();
+		let queryFailed = false;
 		const resultats = await rechercherPartout(
 			async (sql, params) => {
-				const { rows } = await pool.query(sql, params);
-				return rows as never;
+				try {
+					const { rows } = await pool.query(sql, params);
+					return rows as never;
+				} catch (erreur) {
+					queryFailed = true;
+					throw erreur;
+				}
 			},
 			terme,
 			{ limiteParSource: 4, limiteTotale: 12 }
 		);
+		if (queryFailed) return rechercheIndisponible();
 
 		return NextResponse.json({
 			groupes: grouperParDomaine(resultats),
@@ -47,6 +61,6 @@ export async function GET(requete: Request) {
 		});
 	} catch (erreur) {
 		console.error("Erreur API recherche unifiée:", erreur);
-		return NextResponse.json({ groupes: [], resultats: [] }, { status: 200 });
+		return rechercheIndisponible();
 	}
 }
