@@ -4,7 +4,7 @@
  * Valide, contre l'API réellement déployée, le contrat que le web Angular consomme :
  *   - endpoints de LECTURE (health, paliers ranked, tournois, clans, leaderboard),
  *   - garde-fous SÉCU sans état (lecture seule, idempotent) : auth requise,
- *     anti open-redirect sur le flow OAuth Discord, backdoor de test 404 en prod.
+ *     retrait de l'ancien flux OAuth Discord, backdoor de test 404 en prod.
  *
  * 100 % réseau, ZÉRO base live / ZÉRO binding natif (argon2/canvas) : on ne tape que
  * les routes HTTP publiques. Skip propre (`describe.skipIf`) si l'API est injoignable
@@ -188,28 +188,18 @@ describe.skipIf(!apiOnline)("API contract — sécurité (auth, idempotent)", ()
 		expect(res.status).toBe(404);
 	});
 
-	test("GET /api/auth/discord?state=%2F → 302 vers le login RG unifié", async () => {
+	test("GET /api/auth/discord → 404, ancien alias retiré", async () => {
 		const res = await http(`${API_BASE}/api/auth/discord?state=%2F`, { redirect: "manual" });
-		expect(res.status).toBe(302);
-		const loc = res.headers.get("location") ?? "";
-		const url = new URL(loc);
-		expect(url.pathname).toBe("/login");
-		expect(url.searchParams.get("redirect")).toBe("/");
+		expect(res.status).toBe(404);
 		expect(res.headers.get("set-cookie")).toBeNull();
 	});
 
-	test("SÉCU open-redirect : state=//evil.com → 302 mais state assaini (PAS //evil.com)", async () => {
-		const res = await http(`${API_BASE}/api/auth/discord?state=%2F%2Fevil.com`, {
+	test("GET /api/auth/callback → 404, ancien callback retiré", async () => {
+		const res = await http(`${API_BASE}/api/auth/callback?code=obsolete`, {
 			redirect: "manual",
 		});
-		expect(res.status).toBe(302);
-		const loc = res.headers.get("location") ?? "";
-		const url = new URL(loc);
-		expect(url.pathname).toBe("/login");
-		// Le state hostile est rejeté avant l'arrivée au login RG.
-		expect(loc).not.toContain("evil.com");
-		expect(loc).not.toContain("//evil");
-		expect(url.searchParams.get("redirect")).toBe("/achillea");
+		expect(res.status).toBe(404);
+		expect(res.headers.get("set-cookie")).toBeNull();
 	});
 });
 

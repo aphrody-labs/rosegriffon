@@ -198,23 +198,6 @@ describe("AuthController", () => {
 		container.clearInstances();
 	});
 
-	test("discordLogin redirects to the unified Rose Griffon login", async () => {
-		// Wait a brief moment to ensure dependency resolution in controller constructor completes
-		await new Promise((resolve) => setTimeout(resolve, 10));
-
-		const redirectMock = mock(() => {});
-		const mockRes = {
-			redirect: redirectMock,
-		} as any;
-
-		authController.discordLogin("/profile", mockRes);
-
-		expect(redirectMock.mock.calls.length).toBe(1);
-		const redirectUrl = new URL(redirectMock.mock.calls[0][0]);
-		expect(redirectUrl.pathname).toBe("/login");
-		expect(redirectUrl.searchParams.get("redirect")).toBe("/profile");
-	});
-
 	test("logout clears cookie and returns ok", () => {
 		const clearCookieMock = mock(() => {});
 		const jsonMock = mock(() => {});
@@ -242,15 +225,4 @@ describe("AuthController", () => {
 		expect(sendMock.mock.calls[0][0]).toContain("unified-realtime-token");
 	});
 
-	test("legacy callback routes to unified RG login without exchanging a Discord code", async () => {
-		const redirectMock = mock(() => {});
-
-		await authController.callback({ redirect: redirectMock });
-
-		expect(redirectMock).toHaveBeenCalledTimes(1);
-		const redirectUrl = new URL(redirectMock.mock.calls[0][0]);
-		expect(redirectUrl.pathname).toBe("/login");
-		expect(redirectUrl.searchParams.get("redirect")).toBe("/achillea");
-		expect(mockUserService.syncWebUser).not.toHaveBeenCalled();
-	});
 });

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
 	createAchilleaClient,
+	achilleaGuildStatsSchema,
 	rankedAdminSeasonSchema,
 	tournamentDetailSchema,
 	type AchilleaFetch,
@@ -282,6 +283,17 @@ describe("chemins et verbes par ressource", () => {
 });
 
 describe("schémas de ressource", () => {
+	test("les agrégats de guildes acceptent un premium_tier nul avant scan", () => {
+		const parsed = achilleaGuildStatsSchema.parse({
+			total_guilds: 1,
+			total_members: "0",
+			last_scan: null,
+			by_premium_tier: [{ premium_tier: null, count: 1 }],
+			by_channel_type: [],
+		});
+		expect(parsed.by_premium_tier[0]?.premium_tier).toBeNull();
+	});
+
 	test("une saison brute (snake_case) est normalisée vers le DTO du contrat", () => {
 		const parsed = rankedAdminSeasonSchema.parse({
 			id: "s-1",

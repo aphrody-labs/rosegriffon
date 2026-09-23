@@ -1,31 +1,8 @@
 /**
- * `/achillea` — les serveurs scannés par le bot Achillea, vus depuis Rose Griffon.
- *
- * ── CE QUE ÇA BRANCHE ──────────────────────────────────────────────────────
- * Achillea (le serveur compétitif) et Rose Griffon partagent une machine et une
- * communauté, mais pas un dépôt : son bot tient sa propre base et expose une API
- * (`achillea-bot.service`, :4000) dont `GET /guilds` publie les métadonnées, les
- * rôles et les salons de chaque serveur qu'il a rejoint. Rien, jusqu'ici, ne
- * traversait cette frontière : pour connaître les rôles d'Achillea depuis Rose
- * Griffon, il fallait ouvrir Discord et les lire à la main.
- *
- * ── DEUX CHOSES QUI ÉTAIENT CASSÉES, ET QUI NE LE SONT PLUS ────────────────
- *  1. Le contrôleur `/guilds` d'Achillea se disait alimenté par
- *     `scripts/ops/discord/scan-guilds.ts --db` — un script qui n'existait pas.
- *     `guild_role` et `guild_channel` étaient vides, `guild` avait toutes ses
- *     colonnes de scan à NULL, et l'API répondait `{"data":[],"total":0}`. Le
- *     script a été écrit côté Achillea ; le premier scan a relevé 102 rôles et
- *     113 salons.
- *  2. Un serveur jamais scanné répond 200 avec des champs nuls et des listes
- *     vides. La commande le DIT (« jamais scanné, lancez le scan ») au lieu
- *     d'afficher une fiche vide qui ressemblerait à un serveur désert.
- *
- * ── OÙ EST LA LOGIQUE ──────────────────────────────────────────────────────
- * Le transport et la validation sont dans `services/achillea.ts` (schémas Zod :
- * une dérive de l'API d'en face devient une erreur nommée, pas un affichage
- * faux). La mise en forme — types de salons, groupement par catégorie, découpage
- * au budget d'un champ d'embed — est dans `lib/achillea-format.ts`, où elle est
- * testée sans Discord.
+ * `/achillea` — serveurs scannés dans la base Achillea partagée.
+ * L'API unifiée expose leurs métadonnées, rôles et salons sous
+ * `/v1/achillea/guilds`. Transport et validation : `services/achillea.ts`.
+ * Mise en forme des embeds : `lib/achillea-format.ts`.
  */
 
 import { Discord, Slash, SlashGroup, SlashOption } from "@rpbey/discordx";
@@ -62,7 +39,7 @@ function messageEchec(raison: "injoignable" | "http" | "forme", detail: string):
 		case "injoignable": {
 			return [
 				"Achillea ne répond pas",
-				`Son API est injoignable (${detail}). Vérifiez \`systemctl status achillea-bot\`.`,
+				`Son API est injoignable (${detail}). Vérifiez \`systemctl status rg-api\`.`,
 			];
 		}
 		case "http": {
