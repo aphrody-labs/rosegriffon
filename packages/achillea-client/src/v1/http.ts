@@ -158,7 +158,10 @@ export class AchilleaHttp {
 	constructor(options: AchilleaClientOptions = {}) {
 		this.baseUrl = (options.baseUrl ?? DEFAULT_ACHILLEA_API_URL).replace(/\/+$/u, "");
 		this.timeoutMs = options.timeoutMs ?? DEFAULT_ACHILLEA_TIMEOUT_MS;
-		this.fetch = options.fetch ?? globalThis.fetch;
+		// Browsers require the native fetch receiver to remain Window. Calling a
+		// stored reference as this.fetch(...) otherwise throws Illegal invocation
+		// before a request is sent.
+		this.fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
 		this.credentials = options.credentials;
 		this.defaultHeaders = options.headers ?? {};
 
