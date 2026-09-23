@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 const THEMES = [
 	{ id: "theme-roy", label: "Roy", mode: "light", swatch: "#344E8C" },
 	{ id: "theme-gaelle", label: "Gaëlle", mode: "light", swatch: "#B03519" },
+	{ id: "theme-azalee-light", label: "Azalée clair", mode: "light", swatch: "#F2A93B" },
 	{
 		id: "theme-azalee-dark",
 		label: "Azalée",
@@ -34,7 +35,10 @@ export function ThemeSwitcher() {
 			container.classList.remove(t.id);
 		}
 		container.classList.add(active);
-		container.classList.toggle("dark", active === "theme-azalee-dark");
+		container.classList.toggle(
+			"dark",
+			active === "theme-azalee-dark" || active === "theme-achillea"
+		);
 	}, [active]);
 
 	return (
