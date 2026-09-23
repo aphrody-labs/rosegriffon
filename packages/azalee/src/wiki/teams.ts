@@ -22,7 +22,8 @@
 
 import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 import { createClient, hasDatabaseProvider } from "../db/provider";
-import { getCharacterFaceUrl } from "../images";
+import { TEAM_EMBLEM_MAP } from "../game/team-emblem-map";
+import { getCharacterFaceUrl, getEmblemImageUrl, resolveLegacyMenuAsset } from "../images";
 import {
 	SERIES_LABELS,
 	type TeamDetail,
@@ -117,30 +118,19 @@ function teamOrder(dataRaw: string | null): number {
 	return typeof v === "number" ? v : 9999;
 }
 
-// Ordre de préférence des séries (la « vraie » identité visuelle de l'équipe
-// dans Victory Road > Inazuma Eleven original > GO > Ares/Orion).
-const EMBLEM_SERIES_ORDER = ["v", "ie", "go", "aresOrion"] as const;
-
 function resolveTeamEmblem(row: RawTeamRow): string | null {
-	// 1) Vrai emblème : `emblems` = { série: CRC }. On choisit la série la plus
-	// représentative dispo, on mappe son CRC → `emNNNNNN` → URL CDN (sert 200).
-	const emblems = parseJson<Record<string, string>>(row.emblems);
-	if (emblems) {
-		let crc: string | null = null;
-		for (const series of EMBLEM_SERIES_ORDER) {
-			if (emblems[series]) {
-				crc = emblems[series];
-				break;
-			}
-		}
-		if (!crc) crc = Object.values(emblems).find(Boolean) ?? null;
-		if (crc) {
-			// L'index CPK est maintenant matérialisé dans `emblem_url` par l'import
-			// SQL. Aucun manifeste JSON n'est consulté au runtime.
-			if (crc && row.emblem_url) return row.emblem_url;
-		}
+	// 1) Vrai emblème : l'identifiant d'équipe → `emNNNNNN` (manifeste extrait des
+	// CPK) → URL CDN servie. C'est la seule correspondance réelle connue.
+	const emblemCode = TEAM_EMBLEM_MAP[row.id];
+	if (emblemCode) {
+		const url = getEmblemImageUrl(emblemCode);
+		if (url) return url;
 	}
-	return row.emblem_url || null;
+	// 2) `emblem_url` en base : chemin legacy du bucket `menu` disparu
+	// (`…/01_icon_emblem/0x<CRC>.webp`, CRC de l'équipe et non d'un fichier). On ne
+	// le renvoie que s'il se résout vers un vrai fichier ; sinon `null` → l'UI
+	// affiche son repli au lieu d'une image en 404.
+	return resolveLegacyMenuAsset(row.emblem_url);
 }
 
 /**

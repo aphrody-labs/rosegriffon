@@ -12,7 +12,7 @@ import { ItemCard } from "@/components/wiki/ItemCard";
 import { MoveCard } from "@/components/wiki/MoveCard";
 import { TeamCard } from "@/components/wiki/TeamCard";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
+import { getCharacterImageUrl, resolveLegacyMenuAsset } from "@rosegriffon/azalee/images";
 
 export interface WikiSectionStats {
 	characters: number;
@@ -273,7 +273,7 @@ export function AzaleeLiveHub({ stats, previewData, articles = [] }: AzaleeLiveH
 								<TeamCard
 									key={team.id}
 									team={{
-										emblemUrl: team.emblem_url,
+										emblemUrl: resolveLegacyMenuAsset(team.emblem_url),
 										id: team.id,
 										name: team.name_fr || team.name_en,
 										nameEn: team.name_en,

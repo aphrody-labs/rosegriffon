@@ -305,6 +305,27 @@ function mapStrippedMenuPath(stripped: string): string {
 	return `${MENU_CDN_BASE}/${stripped}`;
 }
 
+/**
+ * Strict variant of {@link resolveAssetUrl} for legacy `menu/` bucket paths
+ * (relative, `/menu/…` or absolute `…/storage/v1/object/public/menu/…`): the real
+ * CPK URL, or `null` when the game has no such file. The `menu` bucket no longer
+ * exists, so returning the stored path would be a guaranteed 404. Any other path
+ * is returned unchanged.
+ */
+export function resolveLegacyMenuAsset(path: string | null | undefined): string | null {
+	if (!path) {
+		return null;
+	}
+	const legacyAt = path.indexOf(LEGACY_STORAGE_PREFIX);
+	if (legacyAt >= 0) {
+		return mapLegacyMenuPath(path.slice(legacyAt + LEGACY_STORAGE_PREFIX.length));
+	}
+	if (path.startsWith("/menu/")) {
+		return mapLegacyMenuPath(path.slice("/menu/".length));
+	}
+	return path;
+}
+
 /** Resolve a potentially relative asset path to a full URL. */
 export function resolveAssetUrl(path: string | null | undefined): string | null {
 	if (!path) {

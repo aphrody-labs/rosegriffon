@@ -1075,17 +1075,21 @@ export const wikiService = {
 		const from = (page - 1) * limit;
 		const to = from + limit - 1;
 
-		// Use clean deduplicated views (no bare hex duplicates, no unknown entries)
-		const viewMap: Record<string, string> = {
-			"esprits-guerriers": "inagle_keshins_clean",
-			totems: "inagle_souls_clean",
-			miximax: "inagle_miximax_clean",
-			eveil: "inagle_awakenings_clean",
-			"changement-mode": "inagle_mode_changes_clean",
+		// Deduplicate exactly like the `*_clean` views (DISTINCT ON name_fr, lowest id)
+		// but read the base tables: the production views were created with a frozen
+		// column list, so souls/awakenings/mode_changes lack asset_code, element_id and
+		// sub_type ("column asset_code does not exist"). Every base table has them.
+		const viewMap: Record<string, AuraTableName> = {
+			"esprits-guerriers": "inagle_keshins",
+			totems: "inagle_souls",
+			miximax: "inagle_miximax",
+			eveil: "inagle_awakenings",
+			"changement-mode": "inagle_mode_changes",
 			autres: "inagle_auras",
 		};
+		const dedupe = (table: AuraTableName) => table !== "inagle_auras";
 
-		const view = viewMap[params.typeSlug] as AuraTableName | undefined;
+		const view = viewMap[params.typeSlug];
 		if (!view) return { data: [], total: 0, page, limit };
 
 		// For "éveil", combine awakenings + generic auras (which contain the real awakening entries)
@@ -1095,6 +1099,7 @@ export const wikiService = {
 					"id", "name_en", "name_fr", "name_ja", "image_url", "asset_code",
 					"element_id", "sheet_data", "description_fr", "sub_type",
 				]);
+				if (dedupe(table)) query = query.distinctOn("name_fr").orderBy("name_fr").orderBy("id");
 				if (params.q) {
 					const pattern = `%${params.q}%`;
 					query = query.where((eb) => eb.or([
@@ -1111,7 +1116,7 @@ export const wikiService = {
 			};
 
 			const [awakenings, auras] = await Promise.all([
-				buildQuery("inagle_awakenings_clean"), buildQuery("inagle_auras"),
+				buildQuery("inagle_awakenings"), buildQuery("inagle_auras"),
 			]);
 
 			const combined = [...awakenings, ...auras];
@@ -1149,10 +1154,12 @@ export const wikiService = {
 		let query = db.selectFrom(view).select([
 			"id", "name_en", "name_fr", "name_ja", "image_url", "asset_code",
 			"element_id", "sheet_data", "description_fr", "sub_type",
+			...(view === "inagle_miximax" ? (["icon_code"] as const) : []),
 		]);
+		if (dedupe(view)) query = query.distinctOn("name_fr").orderBy("name_fr").orderBy("id");
 
 		// Filter out Keshin Armed (wa*) and Link Transformations (wkt*) from Keshin list to avoid duplicates
-		if (view === "inagle_keshins_clean") {
+		if (view === "inagle_keshins") {
 			query = query.where("asset_code", "not ilike", "wa%").where("asset_code", "not ilike", "wkt%");
 		}
 
