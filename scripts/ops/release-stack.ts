@@ -44,7 +44,7 @@ const RG_ROOT = process.env.RG_ROOT ?? "/home/ubuntu/rg";
 const NIERS_ROOT = process.env.NIERS_ROOT ?? "/home/ubuntu/niers";
 const BUN = process.env.BUN_BIN ?? "/home/ubuntu/.bun/bin/bun";
 const ROOT = resolve(import.meta.dir, "../..");
-const SYNC_SCRIPT = `${ROOT}/scripts/ops/repo-sync.ts`;
+const SYNC_SCRIPT = `${process.env.APHRODY_INFRA_ROOT ?? resolve(ROOT, "../aphrody-infra")}/scripts/ops/repo-sync.ts`;
 const INVALIDATE_SCRIPT = `${ROOT}/scripts/ops/invalidate-cdn.ts`;
 const CURL_PROBE = [
 	"curl",

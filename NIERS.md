@@ -1,7 +1,7 @@
 # NIERS — contexte post-migration de `rg`
 
 Ce fichier est le point d'entrée pour reprendre le travail après la migration des capacités
-IEVR de `rg` vers `niers`. Il complète `docs/REPO-SYNC.md` ; il ne remplace ni les règles
+IEVR de `rg` vers `niers`. Il complète `../aphrody-infra/docs/ops/REPO-SYNC.md` ; il ne remplace ni les règles
 d'exploitation ni les documents de conception détaillés.
 
 ## Dépôts canoniques
@@ -14,7 +14,7 @@ d'exploitation ni les documents de conception détaillés.
 
 Les deux dépôts gardent leurs remotes, historiques et branches séparés. Une évolution qui
 touche les deux arbres se livre par deux changements coordonnés, reliés dans
-`docs/REPO-SYNC.md` ; on ne fusionne pas les dépôts par un `pull` ou un `merge` croisé.
+`../aphrody-infra/docs/ops/REPO-SYNC.md` ; on ne fusionne pas les dépôts par un `pull` ou un `merge` croisé.
 
 ## État cible
 
@@ -38,10 +38,10 @@ doit pas être présenté comme une reconstruction byte-exacte du binaire Window
 
 Dans `rg` :
 
-- `scripts/ops/repo-sync.ts` orchestre les contrôles coordonnés des deux dépôts ;
+- `../aphrody-infra/scripts/ops/repo-sync.ts` orchestre les contrôles coordonnés des deux dépôts ;
 - `scripts/ops/release-stack.ts` décrit la chaîne synchronisation → données → formats → WASM
   → services → sondes ;
-- `infra/`, `scripts/ops/` et `docs/REPO-SYNC.md` portent l'exploitation du VPS ;
+- `infra/`, `scripts/ops/` et `../aphrody-infra/docs/ops/REPO-SYNC.md` portent l'exploitation du VPS ;
 - aucun nouveau parseur IEVR, décodeur, outil RE ou composant du moteur ne doit être ajouté
   ici.
 
@@ -59,7 +59,7 @@ Depuis `rg`, commencer par :
 
 ```bash
 git status --short --branch
-bun scripts/ops/repo-sync.ts --repo all --commit --dry-run --json
+bun ../aphrody-infra/scripts/ops/repo-sync.ts --repo all --commit --dry-run --json
 ```
 
 Puis lire dans `niers` :
@@ -87,7 +87,7 @@ fait autorité pour la cible `nie.exe → nie-web`.
 
 ## Sources de vérité
 
-- `docs/REPO-SYNC.md` — orchestration et frontière `rg ↔ niers` ;
+- `../aphrody-infra/docs/ops/REPO-SYNC.md` — orchestration et frontière `rg ↔ niers` ;
 - `/home/ubuntu/niers/docs/OVH.md` — comptes, DNS, certificats et procédures OVH ;
 - `/home/ubuntu/niers/docs/TARGET-ARCHITECTURE.md` — cible WASM et suite Inacord ;
 - `/home/ubuntu/niers/docs/ARCHITECTURE.md` — état mesuré de l'architecture niers ;

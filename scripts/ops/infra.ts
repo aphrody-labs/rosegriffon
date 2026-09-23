@@ -36,8 +36,11 @@ import { join } from "node:path";
 const RACINE = "/home/ubuntu/rg";
 const INFRA_SYSTEMD = `${RACINE}/infra/systemd`;
 const INFRA_NGINX = `${RACINE}/infra/nginx`;
-const INFRA_SYSCTL = `${RACINE}/infra/sysctl`;
-const INFRA_LOGROTATE = `${RACINE}/infra/logrotate`;
+// Réglages hôte et units transverses : propriété du dépôt aphrody-infra.
+const INFRA_HOTE = process.env.APHRODY_INFRA_ROOT ?? "/home/ubuntu/aphrody-infra";
+const HOTE_SYSTEMD = `${INFRA_HOTE}/systemd`;
+const INFRA_SYSCTL = `${INFRA_HOTE}/host/sysctl`;
+const INFRA_LOGROTATE = `${INFRA_HOTE}/host/logrotate`;
 // Les services du jeu et les vhosts Aphrody ont migré dans le dépôt `niers`.
 // Les recopier ici recréerait deux sources de vérité qui divergent. Le contrôle
 // suit donc leur source canonique là où elle vit réellement.
@@ -106,8 +109,14 @@ async function unités(): Promise<Objet[]> {
 
 	const dansDépôt = await readdir(INFRA_SYSTEMD).catch(() => [] as string[]);
 	const dansNiers = await readdir(NIERS_SYSTEMD).catch(() => [] as string[]);
+	const dansHôte = await readdir(HOTE_SYSTEMD).catch(() => [] as string[]);
 	const noms = [
-		...new Set([...surMachine, ...dansDépôt.filter(suffixe), ...dansNiers.filter(suffixe)]),
+		...new Set([
+			...surMachine,
+			...dansDépôt.filter(suffixe),
+			...dansNiers.filter(suffixe),
+			...dansHôte.filter(suffixe),
+		]),
 	];
 
 	return Promise.all(
@@ -118,7 +127,11 @@ async function unités(): Promise<Objet[]> {
 			// Les unités livrées par un paquet (/usr/lib/systemd) ne sont pas les nôtres.
 			const nôtre = fragment.startsWith("/etc/systemd/system/");
 			return {
-				dépôt: dansNiers.includes(nom) ? `${NIERS_SYSTEMD}/${nom}` : `${INFRA_SYSTEMD}/${nom}`,
+				dépôt: dansNiers.includes(nom)
+					? `${NIERS_SYSTEMD}/${nom}`
+					: dansDépôt.includes(nom)
+						? `${INFRA_SYSTEMD}/${nom}`
+						: `${HOTE_SYSTEMD}/${nom}`,
 				famille: "systemd" as const,
 				machine: nôtre ? fragment : null,
 				nom,
@@ -126,7 +139,11 @@ async function unités(): Promise<Objet[]> {
 		})
 	).then((liste) =>
 		liste.filter(
-			(o) => o.machine !== null || dansDépôt.includes(o.nom) || dansNiers.includes(o.nom)
+			(o) =>
+				o.machine !== null ||
+				dansDépôt.includes(o.nom) ||
+				dansNiers.includes(o.nom) ||
+				dansHôte.includes(o.nom)
 		)
 	);
 }
@@ -136,12 +153,12 @@ async function unités(): Promise<Objet[]> {
  * limites, variables et politiques de reprise hors du contrôle de dérive.
  */
 async function dropinsSystemd(): Promise<Objet[]> {
-	const fichiers = await fichiersRecursifs(INFRA_SYSTEMD);
+	const fichiers = await fichiersRecursifs(HOTE_SYSTEMD);
 	return fichiers
 		.filter((relatif) => /\.(?:service|timer)\.d\/[^/]+\.conf$/u.test(relatif))
 		.toSorted()
 		.map((relatif) => ({
-			dépôt: `${INFRA_SYSTEMD}/${relatif}`,
+			dépôt: `${HOTE_SYSTEMD}/${relatif}`,
 			famille: "systemd" as const,
 			machine: `/etc/systemd/system/${relatif}`,
 			nom: relatif,
