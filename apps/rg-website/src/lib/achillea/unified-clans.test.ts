@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { listPublicClans } from "./unified-clans";
+import { getPublicClan, listPublicClans } from "./unified-clans";
 
 const clan = {
 	id: 1,
@@ -34,12 +34,43 @@ describe("annuaire clans unifié", () => {
 		]);
 	});
 
-	test("rejette une réponse compacte incomplète sans inventer de données", async () => {
+	test("rejette une réponse compacte incomplète", async () => {
 		const fetcher = async () =>
-			Response.json({
-				data: [{ id: 1, name: "Incomplet" }],
-				count: 1,
-			});
-		expect(listPublicClans(fetcher)).rejects.toThrow("réponse invalide");
+			Response.json({ data: [{ id: 1, name: "Incomplet" }], count: 1 });
+		await expect(listPublicClans(fetcher)).rejects.toThrow("réponse invalide");
+	});
+});
+
+describe("getPublicClan", () => {
+	test("charge la projection publique unifiée", async () => {
+		let requestedUrl = "";
+		const result = await getPublicClan(
+			61,
+			async (input) => {
+				requestedUrl = String(input);
+				return Response.json({ ...clan, id: 61 });
+			},
+			"https://api.example.test",
+		);
+
+		expect(requestedUrl).toBe("https://api.example.test/v1/achillea/clans/61");
+		expect(result).toEqual({ ...clan, id: 61 });
+	});
+
+	test("rejects invalid identifiers without requesting the API", async () => {
+		let requested = false;
+		await expect(
+			getPublicClan(0, async () => {
+				requested = true;
+				return Response.json({ ...clan, id: 1 });
+			}),
+		).rejects.toThrow("identifiant invalide");
+		expect(requested).toBe(false);
+	});
+
+	test("rejects a response for a different clan", async () => {
+		await expect(
+			getPublicClan(61, async () => Response.json({ ...clan, id: 62 })),
+		).rejects.toThrow("réponse invalide");
 	});
 });

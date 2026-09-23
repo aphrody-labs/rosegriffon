@@ -42,6 +42,43 @@ export async function listPublicClans(
 	return clans;
 }
 
+export async function getPublicClan(
+	id: number,
+	fetcher: Fetcher = fetch,
+	baseUrl = process.env.NEXT_PUBLIC_ACHILLEA_UNIFIED_API_URL ??
+		"https://api.rosegriffon.fr",
+): Promise<PublicClan> {
+	if (!Number.isSafeInteger(id) || id <= 0) {
+		throw new Error("Achilléa clans: identifiant invalide");
+	}
+	const url = new URL(`/v1/achillea/clans/${id}`, baseUrl);
+	const response = await fetcher(url, { cache: "no-store" });
+	if (!response.ok) throw new Error(`Achilléa clan ${id}: HTTP ${response.status}`);
+	const payload: unknown = await response.json();
+	if (!isPublicClan(payload) || payload.id !== id) {
+		throw new Error(`Achilléa clan ${id}: réponse invalide`);
+	}
+	return payload;
+}
+
+export function isPublicClan(
+	value: unknown,
+): value is PublicClan {
+	if (!value || typeof value !== "object") return false;
+	const item = value as Partial<PublicClan>;
+	return (
+		typeof item.id === "number" &&
+		Number.isSafeInteger(item.id) &&
+		typeof item.name === "string" &&
+		typeof item.shortName === "string" &&
+		typeof item.avatarUrl === "string" &&
+		typeof item.biography === "string" &&
+		typeof item.fame === "number" &&
+		typeof item.isRecruiting === "boolean" &&
+		typeof item.membersLimit === "boolean"
+	);
+}
+
 function isPublicClanList(
 	value: unknown,
 ): value is { data: PublicClan[]; count: number } {
@@ -52,19 +89,6 @@ function isPublicClanList(
 		Number.isInteger(result.count) &&
 		result.count >= 0 &&
 		Array.isArray(result.data) &&
-		result.data.every((clan) => {
-			if (!clan || typeof clan !== "object") return false;
-			const item = clan as Partial<PublicClan>;
-			return (
-				typeof item.id === "number" &&
-				typeof item.name === "string" &&
-				typeof item.shortName === "string" &&
-				typeof item.avatarUrl === "string" &&
-				typeof item.biography === "string" &&
-				typeof item.fame === "number" &&
-				typeof item.isRecruiting === "boolean" &&
-				typeof item.membersLimit === "boolean"
-			);
-		})
+		result.data.every(isPublicClan)
 	);
 }

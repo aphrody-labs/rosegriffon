@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
-import type { ClanDTO, ClanMemberDTO } from "@rosegriffon/achillea-types";
+import type { ClanMemberDTO } from "@rosegriffon/achillea-types";
 import { ClanMemberDistinction } from "@rosegriffon/achillea-types/enums/clanMemberRole";
-import { ClanState } from "@rosegriffon/achillea-types/enums/clanState";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import { ClanOrgchart } from "@/components/achillea/ClanOrgchart";
+import { getPublicClan, type PublicClan } from "@/lib/achillea/unified-clans";
 import {
 	Badge,
 	Button,
@@ -23,70 +23,60 @@ import {
 	Skeleton,
 } from "@rosegriffon/ui";
 import {
-	Crown,
 	Users,
 	ArrowLeft,
-	Globe,
 	Check,
-	X,
-	Calendar,
-	Sparkles,
 	ShieldAlert,
-	MessageSquare,
 	Network,
 } from "lucide-react";
-import { FaXTwitter, FaTiktok, FaInstagram, FaTwitch } from "react-icons/fa6";
 
 export default function ClanProfilePage({ id }: { id: string }) {
-	const clanId = parseInt(id, 10);
-	const { user, isAuthenticated } = useAchilleaAuth();
+	const clanId = Number(id);
+	const { isAuthenticated } = useAchilleaAuth();
 
-	const [clan, setClan] = useState<ClanDTO | null>(null);
+	const [clan, setClan] = useState<PublicClan | null>(null);
 	const [members, setMembers] = useState<ClanMemberDTO[]>([]);
+	const [membersError, setMembersError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [activeTab, setActiveTab] = useState<"members" | "orgchart">("members");
 
 	const [applicationOpen, setApplicationOpen] = useState(false);
-	const [applicationMsg, setApplicationMsg] = useState("");
 	const [selectedDistinction, setSelectedDistinction] = useState<ClanMemberDistinction>(
 		ClanMemberDistinction.Player
 	);
 	const [applying, setApplying] = useState(false);
+	const [applicationError, setApplicationError] = useState<string | null>(null);
 	const [applicationSuccess, setApplicationSuccess] = useState(false);
 
 	useEffect(() => {
 		let isMounted = true;
 		async function loadClan() {
-			if (isNaN(clanId)) {
+			if (!Number.isSafeInteger(clanId) || clanId <= 0) {
 				setError("Identifiant de clan invalide");
 				setLoading(false);
 				return;
 			}
 			setLoading(true);
-			try {
-				const client = createAchilleaClient();
-				const [clanRes, membersRes] = await Promise.all([
-					client.clans.get(clanId),
-					client.clans.members(clanId),
-				]);
+			const client = createAchilleaClient();
+			const [clanResult, membersResult] = await Promise.allSettled([
+				getPublicClan(clanId),
+				client.clans.members(clanId),
+			]);
+			if (!isMounted) return;
 
-				if (!isMounted) return;
-
-				if (clanRes.ok) {
-					setClan(clanRes.value);
-				} else {
-					setError("Clan introuvable");
-				}
-
-				if (membersRes.ok) {
-					setMembers(membersRes.value);
-				}
-			} catch {
-				if (isMounted) setError("Erreur lors du chargement du clan");
-			} finally {
-				if (isMounted) setLoading(false);
+			if (clanResult.status === "fulfilled") {
+				setClan(clanResult.value);
+			} else {
+				setError("Clan introuvable ou temporairement indisponible");
 			}
+
+			if (membersResult.status === "fulfilled" && membersResult.value.ok) {
+				setMembers(membersResult.value.value);
+			} else {
+				setMembersError("L’effectif du clan est temporairement indisponible.");
+			}
+			setLoading(false);
 		}
 		void loadClan();
 		return () => {
@@ -100,13 +90,22 @@ export default function ClanProfilePage({ id }: { id: string }) {
 			return;
 		}
 		setApplying(true);
+		setApplicationError(null);
 		try {
 			const client = createAchilleaClient({ credentials: "include" });
 			const res = await client.clans.createApplication(clanId, [selectedDistinction]);
-			if (res.ok) {
-				setApplicationSuccess(true);
-				setTimeout(() => setApplicationOpen(false), 2000);
+			if (!res.ok) {
+				setApplicationError("Envoi impossible. Vérifie ta connexion puis réessaie.");
+				return;
 			}
+			if (!res.value.success) {
+				setApplicationError(res.value.error ?? "La candidature n’a pas pu être envoyée.");
+				return;
+			}
+			setApplicationSuccess(true);
+			setTimeout(() => setApplicationOpen(false), 2000);
+		} catch {
+			setApplicationError("Une erreur a interrompu l’envoi. Réessaie.");
 		} finally {
 			setApplying(false);
 		}
@@ -190,9 +189,9 @@ export default function ClanProfilePage({ id }: { id: string }) {
 			<div className="rounded-3xl border border-outline/20 bg-surface overflow-hidden shadow-xl">
 				{/* Clan Banner Image */}
 				<div className="relative h-44 sm:h-64 w-full bg-surface-variant">
-					{clan.clanAvatarUrl ? (
+					{clan.avatarUrl ? (
 						<Image
-							src={clan.clanAvatarUrl}
+							src={clan.avatarUrl}
 							alt={`Avatar ${clan.name}`}
 							fill
 							unoptimized
@@ -208,9 +207,9 @@ export default function ClanProfilePage({ id }: { id: string }) {
 				<div className="relative px-6 pb-6 pt-0 sm:px-8 sm:pb-8 flex flex-col sm:flex-row gap-6 items-start sm:items-end -mt-16 sm:-mt-20">
 					{/* Logo */}
 					<div className="relative size-28 sm:size-36 rounded-2xl overflow-hidden border-4 border-surface bg-surface-variant shrink-0 shadow-2xl">
-						{clan.clanAvatarUrl ? (
+						{clan.avatarUrl ? (
 							<Image
-								src={clan.clanAvatarUrl}
+								src={clan.avatarUrl}
 								alt={clan.name}
 								fill
 								unoptimized
@@ -218,7 +217,7 @@ export default function ClanProfilePage({ id }: { id: string }) {
 							/>
 						) : (
 							<div className="size-full flex items-center justify-center font-black text-3xl text-on-surface-variant">
-								{clan.shortenedName}
+								{clan.shortName}
 							</div>
 						)}
 					</div>
@@ -227,56 +226,23 @@ export default function ClanProfilePage({ id }: { id: string }) {
 					<div className="flex-1 min-w-0 space-y-2">
 						<div className="flex flex-wrap items-center gap-2">
 							<h1 className="text-2xl sm:text-3xl font-black text-on-surface">
-								<span className="text-primary mr-2">[{clan.shortenedName}]</span>
+								<span className="text-primary mr-2">[{clan.shortName}]</span>
 								{clan.name}
 							</h1>
-							<Badge className="font-bold text-xs">
-								Niveau {clan.experience?.currentLevel ?? 1}
-							</Badge>
 						</div>
 
 						<div className="flex flex-wrap items-center gap-4 text-xs text-on-surface-variant">
 							<div className="flex items-center gap-1.5">
-								<Crown className="size-3.5 text-amber-500" />
-								<span>Président : <strong>{clan.president?.username ?? "Inconnu"}</strong></span>
-							</div>
-							<div className="flex items-center gap-1.5">
 								<Users className="size-3.5 text-primary" />
-								<span>{members.length} membres</span>
-							</div>
-							<div className="flex items-center gap-1.5">
-								<Calendar className="size-3.5" />
-								<span>Fondé le {new Date(clan.createdAt).toLocaleDateString("fr-FR")}</span>
+								<span>
+									{membersError ? "Effectif indisponible" : `${members.length} membres`}
+								</span>
 							</div>
 						</div>
 					</div>
 
-					{/* Actions & Socials */}
+					{/* Recrutement */}
 					<div className="flex flex-col sm:items-end gap-3 self-stretch sm:self-auto shrink-0">
-						<div className="flex items-center gap-2">
-							{clan.xUrl && (
-								<Button asChild variant="outline" size="icon" className="rounded-xl size-8">
-									<a href={clan.xUrl} target="_blank" rel="noopener noreferrer">
-										<FaXTwitter className="size-3.5" />
-									</a>
-								</Button>
-							)}
-							{clan.instagramUrl && (
-								<Button asChild variant="outline" size="icon" className="rounded-xl size-8">
-									<a href={clan.instagramUrl} target="_blank" rel="noopener noreferrer">
-										<FaInstagram className="size-3.5" />
-									</a>
-								</Button>
-							)}
-							{clan.tiktokUrl && (
-								<Button asChild variant="outline" size="icon" className="rounded-xl size-8">
-									<a href={clan.tiktokUrl} target="_blank" rel="noopener noreferrer">
-										<FaTiktok className="size-3.5" />
-									</a>
-								</Button>
-							)}
-						</div>
-
 						{clan.isRecruiting && (
 							/*
 							 * La fiche du clan est publique — identité, effectif, membres,
@@ -303,31 +269,13 @@ export default function ClanProfilePage({ id }: { id: string }) {
 				</div>
 			</div>
 
-			{/* Statut particulier du clan */}
-			{clan.state === ClanState.PendingReview && (
-				<div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex items-center gap-3 text-amber-400">
-					<ShieldAlert className="size-5 shrink-0" />
-					<p className="text-sm font-medium">
-						Ce clan est actuellement en attente d&apos;approbation par les administrateurs Achilléa.
-					</p>
-				</div>
-			)}
-			{clan.state === ClanState.Creating && (
-				<div className="p-4 rounded-2xl border border-sky-500/30 bg-sky-500/10 flex items-center gap-3 text-sky-400">
-					<Sparkles className="size-5 shrink-0" />
-					<p className="text-sm font-medium">
-						Ce clan est en cours de constitution et de validation par ses membres fondateurs.
-					</p>
-				</div>
-			)}
-
 			{/* Description & Biographie */}
-			{clan.clanBiography && (
+			{clan.biography && (
 				<Card className="rounded-2xl border-outline/20">
 					<CardContent className="p-6 space-y-2">
 						<h2 className="font-bold text-base text-on-surface">À propos du clan</h2>
 						<p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-line">
-							{clan.clanBiography}
+							{clan.biography}
 						</p>
 					</CardContent>
 				</Card>
@@ -363,7 +311,11 @@ export default function ClanProfilePage({ id }: { id: string }) {
 					</div>
 				</div>
 
-				{activeTab === "members" ? (
+				{membersError ? (
+					<div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-on-surface-variant" role="status">
+						{membersError}
+					</div>
+				) : activeTab === "members" ? (
 					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
 						{sortedMembers.map((m) => (
 							<div
@@ -407,7 +359,7 @@ export default function ClanProfilePage({ id }: { id: string }) {
 					<DialogHeader>
 						<DialogTitle>Rejoindre {clan.name}</DialogTitle>
 						<DialogDescription>
-							Postule en indiquant ton rôle souhaité et tes motivations.
+							Choisis le rôle que tu souhaites rejoindre dans ce clan.
 						</DialogDescription>
 					</DialogHeader>
 
@@ -445,20 +397,9 @@ export default function ClanProfilePage({ id }: { id: string }) {
 								</div>
 							</div>
 
-							<div className="space-y-1.5">
-								<label className="text-xs font-semibold text-on-surface">
-									Message de présentation & motivations
-								</label>
-								<textarea
-									value={applicationMsg}
-									onChange={(e) => setApplicationMsg(e.target.value)}
-									placeholder="Présente-toi brièvement (expérience de jeu, disponibilités, motivations)..."
-									rows={4}
-									className="w-full p-3 rounded-xl border border-outline/30 bg-surface-variant/20 text-sm text-on-surface focus:outline-none focus:border-primary"
-								/>
-							</div>
 						</div>
 					)}
+					{applicationError && <p className="text-sm text-destructive" role="alert">{applicationError}</p>}
 
 					<DialogFooter>
 						<Button variant="ghost" onClick={() => setApplicationOpen(false)}>
