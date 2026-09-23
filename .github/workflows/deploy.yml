@@ -80,16 +80,25 @@ jobs:
           RG_MCP_ADMIN_TOKEN: ${{ secrets.RG_MCP_ADMIN_TOKEN }}
         run: |
           set -euo pipefail
-          # `--ff-only` : on refuse de fusionner quoi que ce soit sur le VPS. Si le dépôt
-          # local a divergé, la publication s'arrête ici plutôt que de publier un état
-          # que personne n'a relu.
+          # Le commit effectivement construit doit être celui qui a déclenché ce run.
+          # Le checkout de production doit aussi être exempt de changements suivis.
+          if [[ ! "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::commit cible invalide"
+            exit 1
+          fi
+          payload=$(jq -nc --arg sha "$GITHUB_SHA" '
+            {jsonrpc:"2.0",id:1,method:"tools/call",params:{name:"shell_run",arguments:{
+              command:("test -z \"$(git -C /home/ubuntu/rg status --porcelain)\" && git -C /home/ubuntu/rg fetch --prune origin main && git -C /home/ubuntu/rg pull --ff-only origin main && test \"$(git -C /home/ubuntu/rg rev-parse HEAD)\" = " + $sha + " && test -z \"$(git -C /home/ubuntu/rg status --porcelain)\""),
+              timeoutMs:180000
+            }}}
+          ')
           reponse=$(curl -sS -X POST "$MCP_URL" \
             -H "Authorization: Bearer $RG_MCP_ADMIN_TOKEN" \
             -H 'Content-Type: application/json' \
             -H 'Accept: application/json' \
-            -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"shell_run","arguments":{"command":"git fetch --prune && git pull --ff-only && git rev-parse HEAD","timeoutMs":180000}}}')
+            -d "$payload")
           echo "$reponse" | jq -r '.result.content[]?.text // .error.message'
-          echo "$reponse" | jq -e '.result.isError != true' > /dev/null
+          echo "$reponse" | jq -e '.error == null and .result.isError != true' > /dev/null
 
       - name: Lancer la publication
         env:

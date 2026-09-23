@@ -18,9 +18,9 @@
 # On valide le succès sur la PRÉSENCE d'un BUILD_ID FRAIS + server.js.
 set -uo pipefail
 
-NODE_BIN="${NODE_BIN:-/usr/bin/node}"
-# Sur le VPS, /usr/bin/node (v22+) existe et est requis (azalee self-host).
-# Ailleurs, fallback sur le node du PATH (toujours du vrai Node ici, jamais Bun).
+NODE_BIN="${NODE_BIN:-$(command -v node || command -v node.exe || printf /usr/bin/node)}"
+# Préférer le Node du PATH (setup-node en CI, /usr/bin/node sur le VPS).
+# Bun ne peut pas produire le build Next standalone attendu ici.
 if [ ! -x "$NODE_BIN" ]; then
 	NODE_BIN="$(command -v node || command -v node.exe || true)"
 fi
