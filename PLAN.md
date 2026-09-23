@@ -218,3 +218,16 @@ relancée dans le bac à sable de rg-cron : 388 assets publiés, URLs vérifiée
 
 **Reste à faire** : reprovisionner l'environnement de build privé pour que la prochaine
 release repasse par `scripts/ops/assemble-vps-release.sh`.
+
+## Hôte VPS : consommation réduite pour RG — 23/09/2026
+
+- `certbot.timer` et `logrotate.timer` relancés : la remise à zéro du 22/09 les avait
+  arrêtés, et sans eux les certificats RG expirent à partir du 09/11. Simulation
+  `certbot renew --dry-run` : tous les certificats RG passent. `studio.rosegriffon.fr`,
+  hors catalogue, sort du renouvellement (configuration déplacée dans
+  `/var/backups/letsencrypt-renewal-retired`).
+- Docker et containerd ne tournent plus au repos (`disable --now`) : `docker.socket`
+  reste actif et les démarre à la demande pour `assemble-vps-release.sh`. État
+  précédent dans `/var/backups/docker-enable-state-*.txt`.
+- Aucun autre service système n'est relancé. Pas de nouveau timer, ni de sauvegarde
+  ni de nettoyage, ajouté sur l'hôte.
