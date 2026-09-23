@@ -200,3 +200,21 @@ Restent dans `rg` : units applicatives, crons du bot et du site, `sauvegarde.ts`
 
 **Reste à faire (opérateur)** : réinstaller ces units depuis `aphrody-infra` sur le VPS
 (`ExecStart` pointe vers `/home/ubuntu/aphrody-infra`), `daemon-reload`, vérifier les timers.
+
+## Assets CDN partagés rétablis — 23/09/2026
+
+`https://cdn.rosegriffon.fr/static/rg/public/*` répondait 404 depuis l'unification
+(8c797ba) : la tâche cron `cdn` écrivait dans `/var/www/cdn/static/static/rg/public`
+(hors `ReadWritePaths`, échec EROFS), et le vhost CDN de `infra/nginx/rg-production.conf`
+envoyait `/static/` à `rg-cdn`, qui ne le sert pas. Corrigé par 939fc1a (chemin de
+publication + `location ^~ /static/` servi depuis `/var/www/cdn`).
+
+Décision : la release `939fc1a` a été dérivée de la release `5779c9d` (seuls les
+fichiers du commit remplacés, manifeste et `SHA256SUMS` régénérés), puis activée par
+`aphrody-infra deploy --stack rg --apply`. Motif : l'environnement privé d'installation
+Bun (`/home/ubuntu/.rg-deploy-stage/root.env`) n'existe plus sur le VPS, ce qui bloque
+`assemble-vps-release.sh` ; le commit ne touche aucun artefact construit. Tâche `cdn`
+relancée dans le bac à sable de rg-cron : 388 assets publiés, URLs vérifiées en 200.
+
+**Reste à faire** : reprovisionner l'environnement de build privé pour que la prochaine
+release repasse par `scripts/ops/assemble-vps-release.sh`.
