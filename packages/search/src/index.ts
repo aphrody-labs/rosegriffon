@@ -29,11 +29,42 @@ export type DomaineRecherche = (typeof DOMAINES_RECHERCHE)[number];
 export type TypeResultat =
 	| "article"
 	| "personnage"
+	| "basara"
 	| "technique"
 	| "objet"
+	| "tactique"
+	| "keshin"
+	| "totem"
+	| "miximax"
+	| "eveil"
+	| "changement-mode"
+	| "aura"
+	| "equipe"
+	| "patchnote"
 	| "clan"
 	| "joueur"
 	| "evenement";
+
+/** Libellés communs aux cartes de recherche et à la palette rapide. */
+export const LIBELLES_TYPES_RECHERCHE: Record<TypeResultat, string> = {
+	article: "Actualité",
+	aura: "Aura",
+	basara: "Joueur BASARA",
+	"changement-mode": "Changement de mode",
+	clan: "Clan",
+	equipe: "Équipe",
+	evenement: "Tournoi",
+	eveil: "Éveil",
+	joueur: "Joueur",
+	keshin: "Esprit guerrier",
+	miximax: "Miximax",
+	objet: "Objet",
+	patchnote: "Note de mise à jour",
+	personnage: "Personnage",
+	tactique: "Tactique",
+	technique: "Technique",
+	totem: "Totem",
+};
 
 export interface ResultatRecherche {
 	id: string;
@@ -54,14 +85,20 @@ interface Source {
 	table: string;
 	/** Colonne portant le libellé cherché. */
 	colonneTitre: string;
+	/** Colonnes cherchées ensemble, sans dupliquer la branche SQL de la table. */
+	colonnesRecherche?: readonly string[];
 	/** Colonne servant à bâtir l'URL (souvent `slug`, parfois `id`). */
 	colonneCle: string;
 	/** Colonne facultative de détail. */
 	colonneDetail?: string;
 	/** Filtre SQL additionnel, sans le `AND` initial. */
 	filtre?: string;
+	/** Classe les lignes d'une table partagée dans le domaine réel de l'article. */
+	domainePourLigne?: (detail: string | null) => DomaineRecherche;
+	/** Certaines tables portent plusieurs types dans une colonne de catégorie. */
+	typePourLigne?: (detail: string | null) => TypeResultat;
 	/** Construit l'URL depuis la clé. */
-	href: (cle: string, bases: BasesRecherche) => string;
+	href: (cle: string, bases: BasesRecherche, detail: string | null) => string;
 }
 
 /** Points de montage des domaines, pour préfixer les URL. */
@@ -86,8 +123,11 @@ export const BASES_PAR_DEFAUT: BasesRecherche = {
 const SOURCES: readonly Source[] = [
 	{
 		colonneCle: "slug",
+		colonneDetail: "app",
 		colonneTitre: "title",
+		colonnesRecherche: ["title", "content", "excerpt"],
 		domaine: "association",
+		domainePourLigne: (detail) => (detail === "azalee" ? "wiki" : "association"),
 		filtre: "status = 'published'",
 		href: (cle) => `/news/${cle}`,
 		table: "public.articles",
@@ -95,27 +135,36 @@ const SOURCES: readonly Source[] = [
 	},
 	{
 		colonneCle: "slug",
-		colonneTitre: "name_fr",
+		colonneTitre: "COALESCE(name_fr, name_en, name_ja)",
+		colonnesRecherche: ["name_fr", "name_en", "name_ja"],
+		colonneDetail: "rarity_label",
 		domaine: "wiki",
 		href: (cle, bases) => `${bases.wiki}/chara/${cle}`,
 		table: "public.inagle_characters",
 		type: "personnage",
+		typePourLigne: (detail) => (detail === "BASARA" ? "basara" : "personnage"),
 	},
 	{
 		colonneCle: "id",
-		colonneTitre: "name_fr",
+		colonneTitre: "COALESCE(name_fr, name_en, name_ja)",
+		colonnesRecherche: ["name_fr", "name_en", "name_ja"],
 		domaine: "wiki",
 		href: (cle, bases) => `${bases.wiki}/skill/${cle}`,
 		table: "public.inagle_skills",
 		type: "technique",
 	},
 	{
-		colonneCle: "id",
-		colonneTitre: "name_fr",
+		colonneCle:
+			"CASE WHEN category = 'special_tactics' THEN COALESCE(internal_code, id) ELSE id END",
+		colonneTitre: "COALESCE(name_fr, name_en, name_ja)",
+		colonnesRecherche: ["name_fr", "name_en", "name_ja"],
+		colonneDetail: "category",
 		domaine: "wiki",
-		href: (cle, bases) => `${bases.wiki}/item/${cle}`,
+		href: (cle, bases, detail) =>
+			detail === "special_tactics" ? `${bases.wiki}/tactic/${cle}` : `${bases.wiki}/item/${cle}`,
 		table: "public.inagle_items",
 		type: "objet",
+		typePourLigne: (detail) => (detail === "special_tactics" ? "tactique" : "objet"),
 	},
 	{
 		colonneCle: "id",
@@ -143,6 +192,42 @@ const SOURCES: readonly Source[] = [
 		table: "achillea.event",
 		type: "evenement",
 	},
+	...(
+		[
+			["inagle_keshins_clean", "keshin", "esprits-guerriers"],
+			["inagle_souls_clean", "totem", "totems"],
+			["inagle_miximax_clean", "miximax", "miximax"],
+			["inagle_awakenings_clean", "eveil", "eveil"],
+			["inagle_mode_changes_clean", "changement-mode", "changement-mode"],
+			["inagle_auras", "aura", "autres"],
+		] as const
+	).map(([table, type, categorie]) => ({
+		colonneCle: "id",
+		colonneTitre: "COALESCE(name_fr, name_en, name_ja)",
+		colonnesRecherche: ["name_fr", "name_en", "name_ja"],
+		domaine: "wiki" as const,
+		href: (cle: string, bases: BasesRecherche) => `${bases.wiki}/aura/${categorie}/${cle}`,
+		table: `public.${table}`,
+		type,
+	})),
+	{
+		colonneCle: "id",
+		colonneTitre: "COALESCE(name_fr, name_en, name_ja)",
+		colonnesRecherche: ["name_fr", "name_en", "name_ja"],
+		domaine: "wiki",
+		href: (cle, bases) => `${bases.wiki}/equipe/${cle}`,
+		table: "public.inagle_teams",
+		type: "equipe",
+	},
+	{
+		colonneCle: "id",
+		colonneTitre: "COALESCE(title_fr, title)",
+		colonnesRecherche: ["title_fr", "title"],
+		domaine: "wiki",
+		href: (cle, bases) => `${bases.wiki}/patch-notes/${cle}`,
+		table: "public.patch_notes",
+		type: "patchnote",
+	},
 ] as const;
 
 /** Longueur minimale d'une requête. En deçà, `%a%` ramène la base entière. */
@@ -158,7 +243,7 @@ export interface LigneBrute {
 /**
  * Construit la requête d'union.
  *
- * UNE SEULE requête, pas sept : sept allers-retours coûteraient sept latences
+ * UNE SEULE requête : des allers-retours séparés coûteraient plusieurs latences
  * réseau là où Postgres trie et limite en une passe. Chaque branche porte son
  * index de source, ce qui évite de deviner la provenance d'une ligne au retour.
  *
@@ -170,9 +255,12 @@ export function construireRequete(sources: readonly Source[] = SOURCES): string 
 	const branches = sources.map((source, index) => {
 		const detail = source.colonneDetail ? `${source.colonneDetail}::text` : "NULL::text";
 		const filtre = source.filtre ? ` AND ${source.filtre}` : "";
+		const recherche = (source.colonnesRecherche ?? [source.colonneTitre])
+			.map((colonne) => `${colonne} ILIKE $1`)
+			.join(" OR ");
 		return `(SELECT ${source.colonneCle}::text AS id, ${source.colonneTitre}::text AS titre, ${detail} AS detail, ${index}::int AS source
 			FROM ${source.table}
-			WHERE ${source.colonneTitre} ILIKE $1${filtre}
+			WHERE (${recherche})${filtre}
 			ORDER BY length(${source.colonneTitre}::text) ASC
 			LIMIT $2)`;
 	});
@@ -193,14 +281,18 @@ export function formaterLigne(
 ): ResultatRecherche | null {
 	const source = sources[Number(ligne.source)];
 	if (!source) return null;
+	const type = source.typePourLigne?.(ligne.detail) ?? source.type;
+	const domaine = source.domainePourLigne?.(ligne.detail) ?? source.domaine;
 
 	return {
-		domaine: source.domaine,
-		href: source.href(ligne.id, bases),
-		id: `${source.type}:${ligne.id}`,
+		domaine,
+		href: source.href(ligne.id, bases, ligne.detail),
+		id: `${type}:${ligne.id}`,
 		titre: ligne.titre,
-		type: source.type,
-		...(ligne.detail ? { detail: ligne.detail } : {}),
+		type,
+		...(ligne.detail && ligne.detail !== "special_tactics" && source.type !== "article"
+			? { detail: ligne.detail }
+			: {}),
 	};
 }
 
@@ -218,9 +310,8 @@ export interface OptionsRecherche {
 /**
  * Cherche dans les trois domaines.
  *
- * Ne lève jamais : une source indisponible — typiquement le miroir Achilléa non
- * câblé sur une machine de développement — doit dégrader la recherche, pas
- * casser la page qui l'affiche.
+ * Une erreur SQL remonte à l'appelant pour distinguer une panne d'une
+ * recherche sans résultat. La route HTTP peut alors répondre 503.
  */
 export async function rechercherPartout(
 	executer: ExecuteurSql,
@@ -234,13 +325,7 @@ export async function rechercherPartout(
 	const limiteParSource = options.limiteParSource ?? 5;
 	const limiteTotale = options.limiteTotale ?? 20;
 
-	let lignes: LigneBrute[];
-	try {
-		lignes = await executer(construireRequete(), [motifIlike(terme), limiteParSource]);
-	} catch (erreur) {
-		console.error("[recherche] requête unifiée en échec :", erreur);
-		return [];
-	}
+	const lignes = await executer(construireRequete(), [motifIlike(terme), limiteParSource]);
 
 	const resultats = lignes
 		.map((ligne) => formaterLigne(ligne, bases))
