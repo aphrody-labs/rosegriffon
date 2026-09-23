@@ -100,6 +100,23 @@ describe("construction d'URL", () => {
 });
 
 describe("issues de requête", () => {
+	test("lie le fetch natif à globalThis avant un appel depuis le navigateur", async () => {
+		const originalFetch = globalThis.fetch;
+		globalThis.fetch = (function (this: unknown) {
+			if (this !== globalThis) throw new TypeError("Illegal invocation");
+			return Promise.resolve(jsonResponse({ value: 7 }));
+		}) as unknown as typeof fetch;
+		try {
+			const http = new AchilleaHttp({ baseUrl: "https://example.test/api" });
+			expect(await http.get("/probe", probeSchema)).toEqual({
+				ok: true,
+				value: { value: 7 },
+			});
+		} finally {
+			globalThis.fetch = originalFetch;
+		}
+	});
+
 	test("succès : la valeur validée est rendue", async () => {
 		const http = new AchilleaHttp({ fetch: async () => jsonResponse({ value: 7 }) });
 
