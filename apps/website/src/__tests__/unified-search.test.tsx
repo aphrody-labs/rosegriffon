@@ -1,11 +1,22 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	AppRouterContext,
+	type AppRouterInstance,
+} from "next/dist/shared/lib/app-router-context.shared-runtime";
+
+import { UnifiedSearchBar } from "../../../../packages/app-shell/src/components/UnifiedSearchBar";
 
 const push = mock(() => {});
-mock.module("next/navigation", () => ({ useRouter: () => ({ push }) }));
-
-const { UnifiedSearchBar } =
-	await import("../../../../packages/app-shell/src/components/UnifiedSearchBar");
+const router: AppRouterInstance = {
+	back: () => {},
+	bfcacheId: "test",
+	forward: () => {},
+	prefetch: async () => {},
+	push,
+	refresh: () => {},
+	replace: () => {},
+};
 const originalFetch = globalThis.fetch;
 
 function stubFetch(responder: () => Promise<Response>) {
@@ -29,7 +40,11 @@ describe("UnifiedSearchBar", () => {
 					{ status: 200 }
 				)
 		);
-		render(<UnifiedSearchBar />);
+		render(
+			<AppRouterContext.Provider value={router}>
+				<UnifiedSearchBar />
+			</AppRouterContext.Provider>
+		);
 		const input = screen.getByRole("textbox", { name: "Recherche unifiée" });
 		fireEvent.change(input, { target: { value: "axel" } });
 		await waitFor(() => expect(screen.getByText("Axel")).toBeTruthy());
