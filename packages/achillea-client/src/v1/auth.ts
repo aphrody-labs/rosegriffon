@@ -23,7 +23,7 @@ export const realtimeTokenResponseSchema = z.object({
 
 const providerOAuthUrlSchema = z.object({ url: z.string().url() });
 
-/** 9 routes (4 JSON, 5 redirections dont on n'expose que l'URL). */
+/** Session et fournisseurs OAuth de l'API Achilléa. */
 export class AuthResource extends AchilleaResource {
 	/** `GET /auth/me` — utilisateur de la session courante. */
 	me(): Promise<AchilleaClientResult<SessionUserDTO>> {
@@ -38,11 +38,6 @@ export class AuthResource extends AchilleaResource {
 	/** `POST /auth/logout` — route canonique de déconnexion. */
 	logout(): Promise<AchilleaClientResult<{ ok: boolean }>> {
 		return this.http.post("/auth/logout", okResponseSchema);
-	}
-
-	/** `GET /auth/logout` — variante historique, conservée le temps de la migration. */
-	logoutLegacy(): Promise<AchilleaClientResult<{ ok: boolean }>> {
-		return this.http.get("/auth/logout", okResponseSchema);
 	}
 
 	/**

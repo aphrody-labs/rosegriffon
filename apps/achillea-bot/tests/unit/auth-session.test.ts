@@ -41,13 +41,21 @@ describe("central auth session contract", () => {
 		expect((decoded.exp ?? 0) - (decoded.iat ?? 0)).toBe(300);
 	});
 
-	test("rejects legacy signed cookies by default but supports explicit compatibility", () => {
+	test("rejects legacy signed cookies without a token purpose", () => {
 		const legacy = jwt.sign({ id: "99" }, process.env.JWT_SECRET_KEY!, {
 			algorithm: "HS256",
 			expiresIn: "30d",
 		});
-		expect(() => verifySessionToken(legacy)).toThrow("Legacy token rejected");
-		expect(verifySessionToken(legacy, true).id).toBe("99");
+		expect(() => verifySessionToken(legacy)).toThrow("Invalid token use");
+	});
+
+	test("rejects a purpose-bound token without expiry", () => {
+		const token = jwt.sign({ id: "99", tokenUse: "session" }, process.env.JWT_SECRET_KEY!, {
+			algorithm: "HS256",
+			issuer: AUTH_ISSUER,
+			audience: SESSION_AUDIENCE,
+		});
+		expect(() => verifySessionToken(token)).toThrow("Token expiry missing");
 	});
 
 	test("uses identical cookie scope when setting and clearing", () => {

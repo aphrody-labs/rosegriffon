@@ -52,41 +52,27 @@ function normalizeIdentity(payload: AuthPayload): SessionIdentity {
 	};
 }
 
-/**
- * Verifies a signed Achillea token and enforces its intended use.
- *
- * Tokens issued before the centralized contract had no issuer/audience/tokenUse
- * and are rejected by default. A caller may opt into a bounded compatibility
- * window explicitly, but no runtime adapter does so.
- */
-export function verifyAuthToken(
-	token: string,
-	acceptedUse: AuthTokenUse,
-	allowLegacy = true
-): SessionIdentity {
+/** Verifies a signed Achillea token and enforces its intended use. */
+function verifyAuthToken(token: string, acceptedUse: AuthTokenUse): SessionIdentity {
 	const decoded = jwt.verify(token, secret(), { algorithms: ["HS256"] });
 	if (typeof decoded === "string") throw new Error("Invalid token payload");
 	const payload = decoded as AuthPayload;
-
-	if (payload.tokenUse === undefined) {
-		if (!allowLegacy) throw new Error("Legacy token rejected");
-		return normalizeIdentity(payload);
-	}
 
 	if (payload.tokenUse !== acceptedUse) throw new Error("Invalid token use");
 	if (payload.iss !== AUTH_ISSUER) throw new Error("Invalid token issuer");
 	const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
 	if (!audiences.includes(audienceFor(acceptedUse))) throw new Error("Invalid token audience");
+	if (typeof payload.exp !== "number") throw new Error("Token expiry missing");
 
 	return normalizeIdentity(payload);
 }
 
-export function verifySessionToken(token: string, allowLegacy = false): SessionIdentity {
-	return verifyAuthToken(token, "session", allowLegacy);
+export function verifySessionToken(token: string): SessionIdentity {
+	return verifyAuthToken(token, "session");
 }
 
-export function verifyRealtimeToken(token: string, allowLegacy = false): SessionIdentity {
-	return verifyAuthToken(token, "realtime", allowLegacy);
+export function verifyRealtimeToken(token: string): SessionIdentity {
+	return verifyAuthToken(token, "realtime");
 }
 
 export function getCookieValue(header: string | null | undefined, name: string): string | null {
