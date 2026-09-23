@@ -59,31 +59,6 @@ export async function getCurrentPublicProfile(): Promise<PublicProfile | null> {
 	return (viaDiscord as PublicProfile | null) ?? null;
 }
 
-/** Mise à jour limitée aux colonnes publiques éditables du profil courant. */
-export async function updatePublicProfile(
-	updates: Partial<PublicProfile>
-): Promise<{ data: PublicProfile | null; error: Error | null }> {
-	const user = await getServerUser();
-	if (!user) return { data: null, error: new Error("Utilisateur non connecté") };
-	const editable = [
-		"username", "avatar_url", "website", "bio", "banner_url", "banner_position",
-		"poste", "twitter_handle", "badges",
-	] as const;
-	const payload = Object.fromEntries(
-		editable.filter((key) => updates[key] !== undefined).map((key) => [key, updates[key]])
-	);
-	const { data, error } = await createPostgresClient()
-		.from("profiles")
-		.update({ ...payload, updated_at: new Date().toISOString() })
-		.eq("id", user.id)
-		.select(PUBLIC_PROFILE_COLUMNS)
-		.single();
-	return {
-		data: (data as PublicProfile | null) ?? null,
-		error: error ? new Error(error.message) : null,
-	};
-}
-
 function firstIssue(error: z.ZodError): string {
 	return error.issues[0]?.message ?? "Données invalides.";
 }

@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 import { useAuth } from "@/contexts/auth-context";
-import { useProfileSync, useUpdateProfile } from "@/hooks/use-profile-sync";
+import { useProfileSync } from "@/hooks/use-profile-sync";
 import { getCurrentPublicProfile } from "@/app/settings/actions";
 import type { PublicProfile } from "@rosegriffon/db";
 
@@ -16,9 +16,6 @@ interface ProfileContextType {
 	profile: Profile | null;
 	isLoading: boolean;
 	error: string | null;
-	updateProfile: (
-		updates: Partial<Profile>
-	) => Promise<{ data: Profile | null; error: Error | null }>;
 	refreshProfile: () => Promise<void>;
 }
 
@@ -30,7 +27,6 @@ const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
  */
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
 	const { user, isLoading: authLoading } = useAuth();
-	const { updateProfile: updateProfileAPI } = useUpdateProfile();
 	const [profile, setProfile] = useState<Profile | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -83,44 +79,11 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 		userId: user?.id,
 	});
 
-	// Wrapper pour updateProfile avec gestion de l'état
-	const handleUpdateProfile = useCallback(
-		async (updates: Partial<Profile>) => {
-			if (!user?.id) {
-				return {
-					data: null,
-					error: new Error("Utilisateur non connecté"),
-				};
-			}
-
-			try {
-				setError(null);
-				const result = await updateProfileAPI(user.id, updates);
-
-				if (result.error) {
-					setError(result.error.message);
-				} else if (result.data) {
-					// La mise à jour sera automatiquement synchronisée via le broadcast
-					// Mais on peut aussi la mettre à jour immédiatement
-					setProfile(result.data);
-				}
-
-				return result;
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
-				setError(errorMessage);
-				return { data: null, error: new Error(errorMessage) };
-			}
-		},
-		[user?.id, updateProfileAPI]
-	);
-
 	const value: ProfileContextType = {
 		error,
 		isLoading: authLoading || isLoading,
 		profile,
 		refreshProfile: fetchProfile,
-		updateProfile: handleUpdateProfile,
 	};
 
 	return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
