@@ -29,7 +29,7 @@ export function StadiumCard({ id, code, title, index, thumb, className }: Stadiu
 
 	return (
 		<Link
-			href={`/stade/${id}`}
+			href={`/wiki/stade/${id}`}
 			className={cn(
 				"group block h-full overflow-hidden rounded-2xl",
 				"border border-outline-variant/30 bg-surface-container-low",

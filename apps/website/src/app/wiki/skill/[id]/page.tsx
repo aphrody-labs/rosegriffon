@@ -192,7 +192,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/skill/${id}`,
+			url: `/wiki/skill/${id}`,
 			...(skill?.videoUrl
 				? { videos: [{ type: "video/webm", url: skill.videoUrl as string }] }
 				: {}),

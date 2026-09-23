@@ -37,7 +37,7 @@ export function ShopCard({ shopId, name, nameJa, itemCount, categories, classNam
 
 	return (
 		<Link
-			href={`/boutique/${shopId}`}
+			href={`/wiki/boutique/${shopId}`}
 			className={cn(
 				"block h-full transition-all duration-200 relative overflow-hidden group",
 				"hover:shadow-lg hover:-translate-y-0.5",

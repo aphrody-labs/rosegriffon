@@ -1,5 +1,7 @@
 # Sortie de Supabase — pile self-host sur le VPS
 
+> **Note de consolidation (23/09/2026)** : Les sous-domaines `supabase.`, `storage.`, `realtime.` et `studio.rosegriffon.fr` ont été retirés (DNS A supprimés), ainsi que l'unité `rg-postgrest` et les conteneurs `supabase-studio.yml`. Les surfaces publiques `/storage/v1` et `/realtime/v1` sont servies directement par Nginx sur `rosegriffon.fr` via `rg-storage` (:8810) et `rg-realtime` (:8812).
+
 Le projet Supabase Cloud a été restreint pour dépassement du quota de stockage
 (`exceed_storage_size_quota`, 3,99 Go sur un plafond de 1 Go), ce qui a coupé
 **toute** l'API du projet — Storage *et* Data API PostgREST, y compris avec la

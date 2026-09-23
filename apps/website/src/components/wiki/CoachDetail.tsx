@@ -32,7 +32,7 @@ export function CoachDetail({ coach }: { coach: Coach }) {
 	return (
 		<div className="mx-auto w-full max-w-3xl space-y-6">
 			<Link
-				href="/entraineur"
+				href="/wiki/entraineur"
 				className="inline-flex items-center gap-1.5 text-sm text-on-surface-variant transition-colors hover:text-primary"
 			>
 				<ArrowLeft size={16} aria-hidden="true" />

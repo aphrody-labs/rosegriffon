@@ -28,7 +28,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/succes/${id}`,
+			url: `/wiki/succes/${id}`,
 		},
 		title: `${name} | Inazuma Eleven Victory Road - Azalée`,
 	};
@@ -49,7 +49,7 @@ function NeighborLink({ trophy, dir }: { trophy: Trophy; dir: "prev" | "next" })
 	const isPrev = dir === "prev";
 	return (
 		<Link
-			href={`/succes/${trophy.id}`}
+			href={`/wiki/succes/${trophy.id}`}
 			className="group flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-outline-variant/30 bg-surface-container-low p-3 transition-colors hover:bg-surface-container"
 		>
 			{isPrev && (
@@ -116,7 +116,7 @@ export default async function TrophyDetailPage({
 
 			{/* Fil d'Ariane */}
 			<div className="flex items-center gap-2 text-sm font-medium text-on-surface-variant">
-				<Link href="/succes" className="transition-colors hover:text-primary">
+				<Link href="/wiki/succes" className="transition-colors hover:text-primary">
 					Succès
 				</Link>
 				<span className="opacity-30">/</span>

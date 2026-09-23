@@ -150,8 +150,7 @@ Chaque palier expose ses 5 stops hexadécimaux et sa classe utilitaire dégradé
 
 ### 5.1 — Base de Données Unifiée
 - `rg` et `achillea` résident sur le même cluster PostgreSQL 18 local.
-- Les 75 tables d'Achilléa sont exposées en lecture directe dans la base `rg` sous le schéma `achillea` via `postgres_fdw` (`scripts/ops/achillea-fdw.ts`).
-- Tâche planifiée `rg-cron` `sync:achillea` synchronise la structure automatiquement.
+- Les tables d'Achilléa sont consolidées dans la base `rg` sous le schéma natif `achillea` via `scripts/ops/achillea-merge.ts` (les tables FDW étrangères et la tâche `sync:achillea` ont été retirées).
 - Clé de réconciliation universelle : `profiles.discord_id = achillea."user".id` (538 comptes communs actifs dès l'ouverture).
 
 ### 5.2 — Passerelles Croisées UI / UX
@@ -194,9 +193,10 @@ Ce qui concernait tout le VPS ou plusieurs dépôts a quitté `rg` pour `aphrody
 | `rg-repo-sync` + `scripts/ops/repo-sync.ts`, `docs/REPO-SYNC.md` | `aphrody-infra/scripts/ops/`, `docs/ops/` |
 | `scripts/ops/archive-froid.ts`, `docs/stockage-secondaire.md` | `aphrody-infra/scripts/ops/`, `docs/ops/` |
 
-Restent dans `rg` : units applicatives, crons du bot et du site, `sauvegarde.ts`,
-`prune-runtime.ts`, `release-stack.ts` et `infra.ts` (qui lit désormais aussi
-`aphrody-infra`). `bun run infra:*` et `ops:sync*` appellent `../aphrody-infra`.
+Restent dans `rg` : units applicatives, crons du bot et du site, et le script
+d'assemblage de release (`scripts/ops/assemble-vps-release.sh`). Les scripts d'exploitation
+(`sauvegarde.ts`, `infra.ts`, etc.) sont portés par `aphrody-infra/scripts/rg/`. `bun run infra:*`
+et `ops:sync*` appellent `../aphrody-infra`.
 
 **Reste à faire (opérateur)** : réinstaller ces units depuis `aphrody-infra` sur le VPS
 (`ExecStart` pointe vers `/home/ubuntu/aphrody-infra`), `daemon-reload`, vérifier les timers.

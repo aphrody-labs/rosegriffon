@@ -93,7 +93,7 @@ export default function AuraHubPage() {
 				{CATEGORIES.map((cat) => (
 					<Link
 						key={cat.id}
-						href={`/aura/${cat.id}`}
+						href={`/wiki/aura/${cat.id}`}
 						className="group flex items-center gap-4 p-4 rounded-2xl bg-surface-container border border-outline-variant/20 hover:border-primary/40 hover:bg-surface-container-high transition-all duration-200 active:scale-[0.98]"
 					>
 						<div
@@ -123,7 +123,7 @@ export default function AuraHubPage() {
 
 			{/* Accès galerie modèles 3D Keshin + Armures (assemblés live depuis les CPK). */}
 			<Link
-				href="/keshin"
+				href="/wiki/modeles"
 				className="group flex items-center gap-4 p-4 rounded-2xl bg-surface-container border border-outline-variant/20 hover:border-primary/40 hover:bg-surface-container-high transition-all duration-200 active:scale-[0.98]"
 			>
 				<div className="size-14 rounded-2xl flex items-center justify-center shrink-0 bg-primary/10 text-primary">

@@ -35,7 +35,7 @@ export default function Error({
 					Réessayer
 				</Button>
 				<Button asChild className="rounded-full gap-2">
-					<Link href="/tactic">
+					<Link href="/wiki/tactic">
 						<ArrowLeft className="size-4" />
 						Retour aux tactiques
 					</Link>

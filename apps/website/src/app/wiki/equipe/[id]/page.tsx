@@ -113,7 +113,7 @@ function RosterMember({ member }: { member: TeamRosterMember }) {
 	);
 
 	if (member.slug) {
-		return <Link href={`/chara/${member.slug}`}>{inner}</Link>;
+		return <Link href={`/wiki/chara/${member.slug}`}>{inner}</Link>;
 	}
 	return inner;
 }
@@ -135,7 +135,7 @@ export default async function TeamDetailPage({
 	return (
 		<div className="space-y-8">
 			<Link
-				href="/equipe"
+				href="/wiki/equipe"
 				className="inline-flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-primary transition-colors"
 			>
 				<ArrowLeft size={16} aria-hidden="true" />

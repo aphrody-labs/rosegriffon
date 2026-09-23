@@ -27,7 +27,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/entraineur/${id}`,
+			url: `/wiki/entraineur/${id}`,
 		},
 		title: `${name} | Inazuma Eleven Victory Road - Azalée`,
 	};

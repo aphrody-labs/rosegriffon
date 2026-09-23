@@ -55,7 +55,10 @@ const ROLES = [
 	{ nom: "achillea_realtime", ecriture: false },
 ] as const;
 
-/** Fichiers d'environnement à repointer sur la base `rg`. */
+/** Fichiers d'environnement à repointer sur la base `rg`.
+ * Note: achillea-postgrest, storage et realtime sont retirés depuis le 23/09/2026.
+ * Seul achillea.env (achillea-bot.service) reste le runtime actif.
+ */
 const ENV_A_BASCULER = [
 	{ chemin: "/etc/rose-griffon/achillea.env", cle: "DATABASE_URL" },
 	{ chemin: "/etc/rose-griffon/achillea-postgrest.env", cle: "PGRST_DB_URI" },
@@ -369,8 +372,8 @@ async function basculer(): Promise<void> {
 	await $`sudo sed -i ${`s/^PGRST_DB_SCHEMAS=.*/PGRST_DB_SCHEMAS=${SCHEMA}/`} /etc/rose-griffon/achillea-postgrest.env`.nothrow();
 	await $`sudo systemctl daemon-reload`;
 
-	console.info("→ redémarrage des services Achilléa");
-	await $`sudo systemctl restart achillea-postgrest.service achillea-storage.service achillea-bot.service`;
+	console.info("→ redémarrage du service Achilléa actif (achillea-bot)");
+	await $`sudo systemctl restart achillea-bot.service`;
 	console.info("✓ bascule terminée — vérifier `journalctl -u achillea-bot.service -n 50`");
 }
 

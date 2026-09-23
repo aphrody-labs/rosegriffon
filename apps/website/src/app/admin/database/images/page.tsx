@@ -292,7 +292,7 @@ export default async function ImageValidationPage({
 												)}
 											</div>
 											<Link
-												href={`/chara/${row.slug || row.id}`}
+												href={`/wiki/chara/${row.slug || row.id}`}
 												className="text-[10px] text-primary hover:underline font-bold"
 												target="_blank"
 											>

@@ -21,12 +21,12 @@ export interface TranslationResult {
 }
 
 const ENTITY_TYPE_CONFIG: Record<string, { label: string; urlPrefix: string }> = {
-	character: { label: "Personnage", urlPrefix: "/chara" },
-	item: { label: "Objet", urlPrefix: "/item" },
-	keshin: { label: "Esprit Guerrier", urlPrefix: "/aura/esprits-guerriers" },
-	skill: { label: "Technique", urlPrefix: "/skill" },
-	soul: { label: "Totem", urlPrefix: "/aura/totems" },
-	tactic: { label: "Tactique", urlPrefix: "/tactic" },
+	character: { label: "Personnage", urlPrefix: "/wiki/chara" },
+	item: { label: "Objet", urlPrefix: "/wiki/item" },
+	keshin: { label: "Esprit Guerrier", urlPrefix: "/wiki/aura/esprits-guerriers" },
+	skill: { label: "Technique", urlPrefix: "/wiki/skill" },
+	soul: { label: "Totem", urlPrefix: "/wiki/aura/totems" },
+	tactic: { label: "Tactique", urlPrefix: "/wiki/tactic" },
 	team: { label: "Équipe", urlPrefix: "/team" },
 };
 
@@ -440,7 +440,7 @@ async function searchPostgres(query: string, entityType?: string): Promise<Trans
 								name_roma: japaneseToRomaji(c.name_ja),
 								type: "character",
 								typeLabel: ENTITY_TYPE_CONFIG.character.label,
-								url: `/chara/${c.slug}`,
+								url: `/wiki/chara/${c.slug}`,
 							});
 						}
 					}
@@ -467,7 +467,7 @@ async function searchPostgres(query: string, entityType?: string): Promise<Trans
 								name_roma: japaneseToRomaji(s.name_ja),
 								type: "skill",
 								typeLabel: ENTITY_TYPE_CONFIG.skill.label,
-								url: `/skill/${s.id}`,
+								url: `/wiki/skill/${s.id}`,
 							});
 						}
 					}
@@ -495,7 +495,7 @@ async function searchPostgres(query: string, entityType?: string): Promise<Trans
 								name_roma: japaneseToRomaji(i.name_ja),
 								type: "item",
 								typeLabel: ENTITY_TYPE_CONFIG.item.label,
-								url: `/item/${i.id}`,
+								url: `/wiki/item/${i.id}`,
 							});
 						}
 					}
@@ -523,7 +523,7 @@ async function searchPostgres(query: string, entityType?: string): Promise<Trans
 								name_roma: japaneseToRomaji(t.name_ja),
 								type: "tactic",
 								typeLabel: ENTITY_TYPE_CONFIG.tactic.label,
-								url: `/tactic/${t.id}`,
+								url: `/wiki/tactic/${t.id}`,
 							});
 						}
 					}
@@ -551,7 +551,7 @@ async function searchPostgres(query: string, entityType?: string): Promise<Trans
 								type: "team",
 								typeLabel: ENTITY_TYPE_CONFIG.team.label,
 								// `/team` n'existe dans aucune des deux apps : la route est `/equipe/[id]`
-								url: `/equipe/${t.id}`,
+								url: `/wiki/equipe/${t.id}`,
 							});
 						}
 					}
@@ -578,7 +578,7 @@ async function searchPostgres(query: string, entityType?: string): Promise<Trans
 								name_roma: japaneseToRomaji(k.name_ja),
 								type: "keshin",
 								typeLabel: ENTITY_TYPE_CONFIG.keshin.label,
-								url: `/aura/esprits-guerriers/${k.id}`,
+								url: `/wiki/aura/esprits-guerriers/${k.id}`,
 							});
 						}
 					}
@@ -605,7 +605,7 @@ async function searchPostgres(query: string, entityType?: string): Promise<Trans
 								name_roma: japaneseToRomaji(s.name_ja),
 								type: "soul",
 								typeLabel: ENTITY_TYPE_CONFIG.soul.label,
-								url: `/aura/totems/${s.id}`,
+								url: `/wiki/aura/totems/${s.id}`,
 							});
 						}
 					}

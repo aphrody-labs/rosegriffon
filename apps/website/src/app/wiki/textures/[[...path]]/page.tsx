@@ -98,14 +98,14 @@ export default async function TexturesPage({
 					aria-label="Fil d'Ariane"
 					className="flex flex-wrap items-center gap-1 pt-1 text-sm text-on-surface-variant"
 				>
-					<Link href="/textures" className="hover:text-primary">
+					<Link href="/wiki/textures" className="hover:text-primary">
 						dx11
 					</Link>
 					{segments.map((seg, i) => (
 						<span key={`${seg}-${i}`} className="flex items-center gap-1">
 							<span aria-hidden>›</span>
 							<Link
-								href={`/textures/${segments.slice(0, i + 1).join("/")}`}
+								href={`/wiki/textures/${segments.slice(0, i + 1).join("/")}`}
 								className="hover:text-primary"
 							>
 								{segLabel(seg)}
@@ -122,7 +122,7 @@ export default async function TexturesPage({
 
 			{segments.length > 0 && (
 				<MediaBack
-					href={`/textures${segments.length > 1 ? `/${segments.slice(0, -1).join("/")}` : ""}`}
+					href={`/wiki/textures${segments.length > 1 ? `/${segments.slice(0, -1).join("/")}` : ""}`}
 					label={
 						segments.length > 1
 							? `Retour à ${segLabel(segments.at(-2) ?? "")}`
@@ -252,14 +252,14 @@ async function VueConteneur({ rel, segments }: { rel: string; segments: string[]
 					aria-label="Fil d'Ariane"
 					className="flex flex-wrap items-center gap-1 pt-1 text-sm text-on-surface-variant"
 				>
-					<Link href="/textures" className="hover:text-primary">
+					<Link href="/wiki/textures" className="hover:text-primary">
 						dx11
 					</Link>
 					{segments.slice(0, -1).map((seg, i) => (
 						<span key={`${seg}-${i}`} className="flex items-center gap-1">
 							<span aria-hidden>›</span>
 							<Link
-								href={`/textures/${segments.slice(0, i + 1).join("/")}`}
+								href={`/wiki/textures/${segments.slice(0, i + 1).join("/")}`}
 								className="hover:text-primary"
 							>
 								{segLabel(seg)}

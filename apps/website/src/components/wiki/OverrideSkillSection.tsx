@@ -101,7 +101,7 @@ function OverrideCard({
 			className={`rounded-xl border ${elAccent} bg-surface-container-high/50 hover:bg-surface-container-high transition-colors p-3`}
 		>
 			{/* Result skill header */}
-			<Link href={`/skill/${override.id}`} className="flex items-center gap-3 group">
+			<Link href={`/wiki/skill/${override.id}`} className="flex items-center gap-3 group">
 				<div className="w-14 h-10 rounded-lg bg-surface-container-highest border border-outline-variant/10 relative overflow-hidden shrink-0">
 					<SkillThumb skillId={override.id} name={override.name_fr || ""} />
 				</div>
@@ -131,7 +131,7 @@ function OverrideCard({
 						<span key={`${rs.skill_id}-${i}`} className="contents">
 							{i > 0 && <Plus size={12} className="text-on-surface-variant/40 shrink-0" />}
 							<Link
-								href={`/skill/${rs.skill_id}`}
+								href={`/wiki/skill/${rs.skill_id}`}
 								className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
 									isCurrent
 										? "bg-primary/15 text-primary border border-primary/30"

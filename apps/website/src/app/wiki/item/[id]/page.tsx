@@ -34,7 +34,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/item/${id}`,
+			url: `/wiki/item/${id}`,
 		},
 		title,
 		twitter: {
@@ -84,7 +84,7 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
 
 			{/* Breadcrumb */}
 			<div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-				<Link href="/item" className="hover:text-primary transition-colors">
+				<Link href="/wiki/item" className="hover:text-primary transition-colors">
 					Objets
 				</Link>
 				<span className="opacity-30">/</span>

@@ -193,7 +193,7 @@ function HeroTypeSelector({
 				) : (
 					<NextLink
 						key={hf.type}
-						href={`/chara/${hf.slug}`}
+						href={`/wiki/chara/${hf.slug}`}
 						prefetch
 						className={cn(
 							"px-4 py-2 sm:px-3 sm:py-1 rounded-full text-xs sm:text-[11px] font-bold transition-all flex items-center justify-center min-h-9 sm:min-h-0",
@@ -626,7 +626,7 @@ export function CharacterSheet({
 
 							{slug && (
 								<NextLink
-									href={`/tools/compare?char1=${slug}`}
+									href={`/wiki/tools/compare?char1=${slug}`}
 									className="inline-flex items-center gap-1.5 px-4 py-2 sm:px-3 sm:py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white text-xs font-bold ml-auto min-h-11 sm:min-h-0"
 									title="Comparer avec un autre personnage"
 								>
@@ -772,7 +772,7 @@ export function CharacterSheet({
 								<div className="flex rounded-full p-0.5 border border-purple-500/30 bg-purple-950/20">
 									{normalFormSlug ? (
 										<NextLink
-											href={`/chara/${normalFormSlug}`}
+											href={`/wiki/chara/${normalFormSlug}`}
 											prefetch
 											className="px-4 py-2 sm:px-3 sm:py-1 rounded-full text-xs sm:text-[11px] font-bold text-white/60 hover:text-white/90 hover:bg-white/10 transition-all flex items-center justify-center min-h-9 sm:min-h-0"
 										>
@@ -785,7 +785,7 @@ export function CharacterSheet({
 									)}
 									{basaraFormSlug ? (
 										<NextLink
-											href={`/chara/${basaraFormSlug}`}
+											href={`/wiki/chara/${basaraFormSlug}`}
 											prefetch
 											className="px-4 py-2 sm:px-3 sm:py-1 rounded-full text-xs sm:text-[11px] font-bold text-purple-300/70 hover:text-purple-200 hover:bg-purple-500/20 transition-all flex items-center justify-center min-h-9 sm:min-h-0"
 										>

@@ -35,7 +35,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${cleanName} | Azalée`,
 			type: "article",
-			url: `/passive/${id}`,
+			url: `/wiki/passive/${id}`,
 		},
 		title,
 		twitter: {
@@ -81,7 +81,7 @@ export default async function PassiveDetailPage({ params }: { params: Promise<{ 
 
 			{/* Fil d'Ariane */}
 			<div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-				<Link href="/passive" className="hover:text-primary transition-colors">
+				<Link href="/wiki/passive" className="hover:text-primary transition-colors">
 					Passifs
 				</Link>
 				<span className="opacity-30">/</span>

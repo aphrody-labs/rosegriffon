@@ -140,7 +140,7 @@ export function SkillDetail({
 			{/* Back Button */}
 			<div className="mb-4">
 				<Link
-					href="/skill"
+					href="/wiki/skill"
 					className="inline-flex items-center gap-2 text-sm font-medium text-on-surface-variant hover:text-primary transition-colors"
 				>
 					<ArrowLeft size={20} aria-hidden="true" />
@@ -590,7 +590,7 @@ function RelatedSkillItem({ skill }: { skill: Skill }) {
 
 	return (
 		<Link
-			href={`/skill/${(skill as any).internalCode || skill.skillIDStr || skill.skillID}`}
+			href={`/wiki/skill/${(skill as any).internalCode || skill.skillIDStr || skill.skillID}`}
 			className="flex gap-2 group p-2 rounded-xl hover:bg-surface-container-highest transition-colors"
 		>
 			{/* Thumbnail */}

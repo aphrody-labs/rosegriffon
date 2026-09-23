@@ -33,7 +33,7 @@ export function TacticCard({
 
 	return (
 		<Link
-			href={`/tactic/${id}`}
+			href={`/wiki/tactic/${id}`}
 			className={cn(
 				"group block h-full overflow-hidden rounded-2xl",
 				"border border-outline-variant/30 bg-surface-container-low",

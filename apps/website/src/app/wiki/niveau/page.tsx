@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 		siteName: "Azalée - Inazuma Eleven Victory Road",
 		title: "Niveaux & Expérience | Azalée",
 		type: "website",
-		url: "/niveau",
+		url: "/wiki/niveau",
 	},
 	title: "Niveaux & Expérience | Inazuma Eleven Victory Road - Azalée",
 	// `site`/`creator` sont recopiés : un bloc `twitter` local efface celui du layout.

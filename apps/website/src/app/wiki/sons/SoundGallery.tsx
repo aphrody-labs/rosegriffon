@@ -227,7 +227,7 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
 												<span>{cat.cueCount.toLocaleString("fr")} cues</span>
 												{b.ownerSlug && (
 													<Link
-														href={`/chara/${b.ownerSlug}`}
+														href={`/wiki/chara/${b.ownerSlug}`}
 														className="text-primary hover:underline"
 													>
 														Fiche du personnage

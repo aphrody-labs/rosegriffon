@@ -82,7 +82,7 @@ export function AuraList({
 			}
 
 			params.delete("page");
-			router.push(`/aura/${category}?${params.toString()}`);
+			router.push(`/wiki/aura/${category}?${params.toString()}`);
 		},
 		[router, searchParams, category]
 	);

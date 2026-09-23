@@ -88,7 +88,7 @@ export function SkillFilterBar({
 			// Reset page on filter change
 			params.delete("page");
 
-			router.push(`/skill?${params.toString()}`);
+			router.push(`/wiki/skill?${params.toString()}`);
 		},
 		[router, searchParams]
 	);
@@ -112,7 +112,7 @@ export function SkillFilterBar({
 			}
 
 			params.delete("page");
-			router.push(`/skill?${params.toString()}`);
+			router.push(`/wiki/skill?${params.toString()}`);
 		},
 		[router, searchParams]
 	);
@@ -125,7 +125,7 @@ export function SkillFilterBar({
 		params.delete("power_min");
 		params.delete("power_max");
 		params.delete("page");
-		router.push(`/skill?${params.toString()}`);
+		router.push(`/wiki/skill?${params.toString()}`);
 	}, [router, searchParams]);
 
 	return (

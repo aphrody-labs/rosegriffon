@@ -39,13 +39,13 @@ doit pas être présenté comme une reconstruction byte-exacte du binaire Window
 Dans `rg` :
 
 - `../aphrody-infra/scripts/ops/repo-sync.ts` orchestre les contrôles coordonnés des deux dépôts ;
-- `scripts/ops/release-stack.ts` décrit la chaîne synchronisation → données → formats → WASM
-  → services → sondes ;
-- `infra/`, `scripts/ops/` et `../aphrody-infra/docs/ops/REPO-SYNC.md` portent l'exploitation du VPS ;
+- `../aphrody-infra/config/pipeline.json` et les scripts d'aphrody-infra orchestrent la chaîne
+  synchronisation → données → formats → WASM → services → sondes ;
+- `../aphrody-infra/` porte l'infrastructure transverse et l'exploitation du VPS ;
 - aucun nouveau parseur IEVR, décodeur, outil RE ou composant du moteur ne doit être ajouté
   ici.
 
-Dans `niers` :
+Dans `nie` :
 
 - `crates/engine/` porte le moteur, les formats, le VFS, le rendu et `nie-wasm` ;
 - `crates/forge/` porte le RE et la forge byte-exacte de `nie.exe` ;

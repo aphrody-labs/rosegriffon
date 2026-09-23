@@ -29,7 +29,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/tactic/${id}`,
+			url: `/wiki/tactic/${id}`,
 		},
 		title: `${name} | Inazuma Eleven Victory Road - Azalée`,
 	};
@@ -67,7 +67,7 @@ export default async function TacticDetailPage({ params }: { params: Promise<{ i
 
 			{/* Breadcrumb */}
 			<div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-				<Link href="/tactic" className="hover:text-primary transition-colors">
+				<Link href="/wiki/tactic" className="hover:text-primary transition-colors">
 					Tactiques
 				</Link>
 				<span className="opacity-30">/</span>

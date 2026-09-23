@@ -26,7 +26,7 @@ export async function generateMetadata({
 			siteName: "Azalée - Inazuma Eleven Victory Road",
 			title: `${name} | Azalée`,
 			type: "article",
-			url: `/capsule/${id}`,
+			url: `/wiki/capsule/${id}`,
 		},
 		title: `${name} | Inazuma Eleven Victory Road - Azalée`,
 	};
@@ -78,7 +78,7 @@ export default async function CapsuleDetailPage({
 
 			{/* Fil d'Ariane */}
 			<div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-				<Link href="/capsule" className="hover:text-primary transition-colors">
+				<Link href="/wiki/capsule" className="hover:text-primary transition-colors">
 					Capsules & Costumes
 				</Link>
 				<span className="opacity-30">/</span>
@@ -98,7 +98,7 @@ export default async function CapsuleDetailPage({
 					<p className="mt-1 text-sm text-on-surface-variant">
 						Référencé dans le pool de tirage{" "}
 						<Link
-							href={`/capsule?onglet=capsules&pool=${encodeURIComponent(prize.poolRef)}`}
+							href={`/wiki/capsule?onglet=capsules&pool=${encodeURIComponent(prize.poolRef)}`}
 							className="font-mono text-primary hover:underline"
 						>
 							{prize.poolRef}
