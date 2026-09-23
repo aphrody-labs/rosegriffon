@@ -1,5 +1,5 @@
 // Contrat Achilléa — FICHIER GÉNÉRÉ, ne pas éditer à la main.
-// Source : @rosegriffon/achillea-types@1.0.0
+// Source : @rosegriffon/achillea-types@1.0.1
 // Régénérer : bun --filter @rosegriffon/achillea-contract generate
 
 package fr.rosegriffon.achillea
@@ -1575,7 +1575,7 @@ data class RankedHistoryEntry(
 	val myScore: Double,
 	val opponentScore: Double,
 	val eloDelta: Double,
-	val result: String,
+	val result: MatchResult,
 	val opponent: JsonElement,
 )
 

@@ -1,5 +1,5 @@
 // Contrat Achilléa — FICHIER GÉNÉRÉ, ne pas éditer à la main.
-// Source : @rosegriffon/achillea-types@1.0.0
+// Source : @rosegriffon/achillea-types@1.0.1
 // Régénérer : bun --filter @rosegriffon/achillea-contract generate
 
 import Foundation
@@ -1416,7 +1416,7 @@ public struct RankedHistoryEntry: Codable, Sendable {
 	public let myScore: Double
 	public let opponentScore: Double
 	public let eloDelta: Double
-	public let result: String
+	public let result: MatchResult
 	public let opponent: AnyCodable
 }
 

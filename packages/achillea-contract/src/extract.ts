@@ -9,6 +9,8 @@
  * aplatie en `unknown` dans le Rust généré.
  */
 
+import { isAbsolute, join, relative, resolve, sep } from "node:path";
+
 import ts from "typescript";
 
 import type {
@@ -46,7 +48,7 @@ function docOf(node: ts.Node): string | undefined {
 	const comment = jsDoc?.at(-1)?.comment;
 	if (!comment) return undefined;
 	const text = typeof comment === "string" ? comment : comment.map((part) => part.text).join("");
-	return text.trim() || undefined;
+	return text.replaceAll("\r\n", "\n").trim() || undefined;
 }
 
 /**
@@ -303,8 +305,9 @@ export interface ExtractOptions {
 
 /** Lit toutes les sources `.ts` du contrat et produit l'IR. */
 export function extractContract(options: ExtractOptions): IrContract {
+	const root = resolve(options.root);
 	const program = ts.createProgram({
-		rootNames: [`${options.root}/index.ts`],
+		rootNames: [join(root, "index.ts")],
 		options: {
 			target: ts.ScriptTarget.ESNext,
 			module: ts.ModuleKind.ESNext,
@@ -314,9 +317,16 @@ export function extractContract(options: ExtractOptions): IrContract {
 		},
 	});
 
-	const sources = program
-		.getSourceFiles()
-		.filter((file) => !file.isDeclarationFile && file.fileName.startsWith(options.root));
+	const sources = program.getSourceFiles().filter((file) => {
+		if (file.isDeclarationFile) return false;
+		const pathFromRoot = relative(root, resolve(file.fileName));
+		return (
+			pathFromRoot !== "" &&
+			pathFromRoot !== ".." &&
+			!pathFromRoot.startsWith(`..${sep}`) &&
+			!isAbsolute(pathFromRoot)
+		);
+	});
 
 	// Première passe : collecter les unions de littéraux, requises par `Exclude`.
 	const literalUnions = new Map<string, IrType[]>();
