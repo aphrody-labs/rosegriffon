@@ -21,7 +21,13 @@ import {
  * depuis l'app, pas depuis la racine, sinon le `.env` racine l'écrase.
  */
 export function achilleaApiUrl(): string {
-	return process.env["NEXT_PUBLIC_ACHILLEA_API_URL"] ?? DEFAULT_ACHILLEA_API_URL;
+	// Next only inlines direct NEXT_PUBLIC_* lookups. The variable is optional,
+	// so an unconfigured browser build must also work without a global process.
+	try {
+		return process.env.NEXT_PUBLIC_ACHILLEA_API_URL || DEFAULT_ACHILLEA_API_URL;
+	} catch {
+		return DEFAULT_ACHILLEA_API_URL;
+	}
 }
 
 /**
