@@ -68,10 +68,12 @@ export async function updateProfile(
 	const admin = createPostgresClient();
 	const badges = await badgesAutorises(user.id, parsed.data.badges);
 
-	const { error } = await admin
+	const { data: updated, error } = await admin
 		.from("profiles")
 		.update({ ...parsed.data, badges, updated_at: new Date().toISOString() })
-		.eq("id", user.id);
+		.eq("id", user.id)
+		.select("id")
+		.maybeSingle();
 
 	if (error) {
 		if (error.code === "23505") {
@@ -80,6 +82,7 @@ export async function updateProfile(
 		console.error("[compte] mise à jour du profil impossible", error);
 		return { error: "Erreur lors de la mise à jour du profil." };
 	}
+	if (!updated) return { error: "Profil introuvable. Reconnecte-toi avant de réessayer." };
 
 	revalidatePath("/settings");
 	revalidatePath(`/profil/${parsed.data.username}`);
@@ -131,15 +134,18 @@ export async function updateAddress(
 		return { error: firstIssue(parsed.error) };
 	}
 
-	const { error } = await createPostgresClient()
+	const { data: updated, error } = await createPostgresClient()
 		.from("profiles")
 		.update({ ...parsed.data, updated_at: new Date().toISOString() })
-		.eq("id", user.id);
+		.eq("id", user.id)
+		.select("id")
+		.maybeSingle();
 
 	if (error) {
 		console.error("[compte] mise à jour de l'adresse impossible", error);
 		return { error: "Erreur lors de l'enregistrement de l'adresse." };
 	}
+	if (!updated) return { error: "Profil introuvable. Reconnecte-toi avant de réessayer." };
 
 	revalidatePath("/settings");
 	return {};
@@ -159,23 +165,21 @@ export async function updateAvatarUrl(avatarUrl: string): Promise<{ error?: stri
 	}
 
 	const admin = createPostgresClient();
-	const { error } = await admin
+	const { data: updated, error } = await admin
 		.from("profiles")
 		.update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
-		.eq("id", user.id);
+		.eq("id", user.id)
+		.select("username")
+		.maybeSingle();
 
 	if (error) {
 		console.error("[compte] mise à jour de l'avatar impossible", error);
 		return { error: "Impossible d'enregistrer le nouvel avatar." };
 	}
+	if (!updated) return { error: "Profil introuvable. Reconnecte-toi avant de réessayer." };
 
 	revalidatePath("/settings");
-	const { data: profile } = await admin
-		.from("profiles")
-		.select("username")
-		.eq("id", user.id)
-		.maybeSingle();
-	const username = (profile as { username?: string } | null)?.username;
+	const username = updated.username;
 	if (username) {
 		revalidatePath(`/profil/${username}`);
 	}

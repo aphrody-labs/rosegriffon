@@ -126,6 +126,7 @@ export const userDtoSchema = z.object({
 	id: z.string(),
 	type: z.string().optional(),
 	username: z.string(),
+	rgProfileUsername: z.string().optional(),
 	sim: z.number().optional(),
 	avatar: z.string().optional(),
 	// Le backend retourne explicitement `null` pour un joueur sans clan.
