@@ -9,12 +9,12 @@ Nginx reste la gateway publique.
 ## Commandes
 
 ```bash
-bun scripts/ops/stack.ts check          # contrat statique, aucune mutation
-bun scripts/ops/stack.ts status         # units + probes + hôte + disque + réseau
-bun scripts/ops/stack.ts status --json --strict
-bun scripts/ops/stack.ts status --json --deep # inventaire du stockage (du), plus coûteux
+bun ../aphrody-infra/scripts/infra-status.ts check          # contrat statique, aucune mutation
+bun ../aphrody-infra/scripts/infra-status.ts status         # units + probes + hôte + disque + réseau
+bun ../aphrody-infra/scripts/infra-status.ts status --json --strict
+bun ../aphrody-infra/scripts/infra-status.ts status --json --deep # inventaire du stockage (du), plus coûteux
 bun run infra:inventory                     # alias de l’inventaire profond
-bun scripts/ops/stack.ts plan           # check + état live, aucune mutation
+bun ../aphrody-infra/scripts/infra-status.ts plan           # check + état live, aucune mutation
 bun scripts/ops/infra.ts check          # drift fichier dépôt ↔ machine
 ```
 
