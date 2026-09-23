@@ -24,7 +24,10 @@ export class PlayerNotesController extends BaseController {
 
 	@Get("/")
 	async list(@Req() req: Request, @Res() res: Response) {
-		return this.forward(req, res, `/player-notes${req.url === "/" ? "" : req.url}`);
+		// Express may expose the full mounted path in req.url. Only forward its
+		// query string; appending the path produced /player-notes/api/player-notes.
+		const search = new URL(req.originalUrl, "http://localhost").search;
+		return this.forward(req, res, `/player-notes${search}`);
 	}
 
 	@Get("/summary/:userId")
