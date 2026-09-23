@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
+import { signalerEchec, signalerException } from "@/lib/achillea/signaler";
 import type {
 	AdminOpsOverview,
 	AdminUserRow,
@@ -89,6 +90,7 @@ export default function AchilleaAdminDashboardPage() {
 	const [activeTab, setActiveTab] = useState<AdminTab>("overview");
 
 	const [ops, setOps] = useState<AdminOpsOverview | null>(null);
+	const [opsError, setOpsError] = useState<string | null>(null);
 	const [disputes, setDisputes] = useState<RankedAdminDispute[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
@@ -140,12 +142,17 @@ export default function AchilleaAdminDashboardPage() {
 
 			if (opsRes.ok && opsRes.value) {
 				setOps(opsRes.value);
+				setOpsError(null);
+			} else {
+				setOpsError(signalerEchec("admin/ops/overview", opsRes));
 			}
 			if (dispRes.ok && dispRes.value) {
 				setDisputes(dispRes.value);
+			} else {
+				signalerEchec("admin/lobbies/disputes", dispRes);
 			}
-		} catch {
-			// silent fallback
+		} catch (cause) {
+			setOpsError(signalerException("admin/dashboard", cause));
 		} finally {
 			setRefreshing(false);
 			setLoading(false);
@@ -309,7 +316,7 @@ export default function AchilleaAdminDashboardPage() {
 					prev
 						? {
 								...prev,
-								bot: { ...prev.bot, maintenance: nextState },
+								bot: prev.bot ? { ...prev.bot, maintenance: nextState } : undefined,
 						  }
 						: null
 				);
@@ -416,6 +423,12 @@ export default function AchilleaAdminDashboardPage() {
 				</div>
 			</div>
 
+			{opsError && (
+				<p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+					{opsError} Les derniers indicateurs chargés restent affichés.
+				</p>
+			)}
+
 			{/* Navigation par Onglets */}
 			<div className="flex flex-wrap items-center gap-2 border-b border-border/60 pb-3">
 				<Button
@@ -512,9 +525,9 @@ export default function AchilleaAdminDashboardPage() {
 						<Card className="bg-card/50 border-border/60">
 							<CardContent className="p-4 space-y-1">
 								<div className="text-xs text-muted-foreground">Membres inscrits</div>
-								<div className="text-2xl font-bold">{ops?.users?.total ?? 0}</div>
+								<div className="text-2xl font-bold">{ops?.users?.total ?? "—"}</div>
 								<div className="text-xs text-muted-foreground">
-									{ops?.users?.staff ?? 0} staff
+									{ops?.users?.staff ?? "—"} staff
 								</div>
 							</CardContent>
 						</Card>
@@ -537,7 +550,7 @@ export default function AchilleaAdminDashboardPage() {
 							<CardContent className="p-4 space-y-1">
 								<div className="text-xs text-muted-foreground">Matchs en cours</div>
 								<div className="text-2xl font-bold text-amber-400">
-									{ops?.ranked?.activeMatches ?? 0}
+									{ops?.ranked?.activeMatches ?? "—"}
 								</div>
 								<div className="text-xs text-muted-foreground">Lobbies actifs</div>
 							</CardContent>
@@ -546,7 +559,7 @@ export default function AchilleaAdminDashboardPage() {
 						<Card className="bg-card/50 border-border/60">
 							<CardContent className="p-4 space-y-1">
 								<div className="text-xs text-muted-foreground">Clans en attente</div>
-								<div className="text-2xl font-bold">{ops?.community?.clansPending ?? 0}</div>
+								<div className="text-2xl font-bold">{ops?.community?.clansPending ?? "—"}</div>
 								<div className="text-xs text-muted-foreground">Validation fondateurs</div>
 							</CardContent>
 						</Card>
@@ -554,7 +567,7 @@ export default function AchilleaAdminDashboardPage() {
 						<Card className="bg-card/50 border-border/60">
 							<CardContent className="p-4 space-y-1">
 								<div className="text-xs text-muted-foreground">Organisations</div>
-								<div className="text-2xl font-bold">{ops?.community?.orgsPending ?? 0}</div>
+								<div className="text-2xl font-bold">{ops?.community?.orgsPending ?? "—"}</div>
 								<div className="text-xs text-muted-foreground">
 									<Link
 										href="/achillea/organizations/validate"
@@ -570,10 +583,10 @@ export default function AchilleaAdminDashboardPage() {
 							<CardContent className="p-4 space-y-1">
 								<div className="text-xs text-muted-foreground">Bot Uptime</div>
 								<div className="text-2xl font-bold font-mono">
-									{ops?.bot?.uptime ? `${Math.floor(ops.bot.uptime / 3600)}h` : "Actif"}
+									{typeof ops?.bot?.uptime === "number" ? formaterDuree(ops.bot.uptime) : "—"}
 								</div>
 								<div className="text-xs text-emerald-400">
-									{ops?.bot?.online ? "En ligne" : "Inactif"}
+									{ops?.bot ? (ops.bot.online ? "En ligne" : "Inactif") : "Non mesuré"}
 								</div>
 							</CardContent>
 						</Card>
@@ -1243,7 +1256,7 @@ export default function AchilleaAdminDashboardPage() {
 							variant={ops?.bot?.maintenance ? "destructive" : "outline"}
 							size="sm"
 							onClick={handleToggleMaintenance}
-							disabled={togglingMaintenance}
+							disabled={togglingMaintenance || !ops?.bot}
 							className="text-xs gap-1.5"
 						>
 							<Power className="size-3.5" />
@@ -1282,7 +1295,9 @@ export default function AchilleaAdminDashboardPage() {
 								</div>
 								<div className="flex justify-between py-1">
 									<span className="text-muted-foreground">Mode maintenance</span>
-									{ops?.bot?.maintenance ? (
+									{!ops?.bot ? (
+										<span className="text-muted-foreground">Non mesuré</span>
+									) : ops.bot.maintenance ? (
 										<span className="text-amber-400 font-semibold flex items-center gap-1">
 											<AlertTriangle className="size-3" /> Actif
 										</span>
@@ -1303,7 +1318,9 @@ export default function AchilleaAdminDashboardPage() {
 							<CardContent className="p-5 pt-2 text-xs space-y-2">
 								<div className="flex justify-between py-1 border-b border-border/40">
 									<span className="text-muted-foreground">Gateway Discord</span>
-									{ops?.bot?.online ? (
+									{!ops?.bot ? (
+										<span className="text-muted-foreground">Non mesuré</span>
+									) : ops.bot.online ? (
 										<span className="text-emerald-400 font-semibold flex items-center gap-1">
 											<CheckCircle2 className="size-3" /> Connecté
 										</span>

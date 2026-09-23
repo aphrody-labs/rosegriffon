@@ -6,6 +6,7 @@ import {
 	achilleaGuildStatsSchema,
 } from "../src/v1";
 import { clanDtoSchema } from "../src/v1/clans";
+import { adminOpsOverviewSchema, adminWalletsResponseSchema } from "../src/v1/admin";
 
 const guild = {
 	id: "123456789012345678",
@@ -91,4 +92,29 @@ test("normalizes the compact unified clans projection", () => {
 	expect(parsed.shortenedName).toBe("ZOO");
 	expect(parsed.normalizedShortName).toBe("zoo");
 	expect(parsed.founders).toEqual([]);
+});
+
+test("accepts the unified admin overview without legacy bot telemetry", () => {
+	const result = adminOpsOverviewSchema.safeParse({
+		users: { total: 3850, staff: 4 },
+		wallet: { wallets: 14, totalBalance: 0, txToday: 0 },
+		moderation: { sanctionsActive: 0, licensesActive: 0 },
+		community: { tournamentsOngoing: 0, clansPending: 0, orgsPending: 0, castEventsOpen: 0 },
+		ranked: { activeMatches: 0, contestedMatches: 0, finishedToday: 0, matchesToday: 0, totalPlayers: 12 },
+		audit24h: 0,
+		generatedAt: "2026-09-23T00:00:00.000Z",
+	});
+	expect(result.success).toBe(true);
+});
+
+test("preserves transaction ids serialized as strings by the unified API", () => {
+	const result = adminWalletsResponseSchema.safeParse({
+		top: [{ userId: "1", displayName: "Joueur", balance: 0, currency: "ACH" }],
+		recent: [{
+			id: "12345678901234567890", type: "Credit", amount: 1, reason: "Test",
+			fromUserId: "1", toUserId: null, createdAt: "2026-09-23T00:00:00.000Z",
+		}],
+	});
+	expect(result.success).toBe(true);
+	if (result.success) expect(result.data.recent[0]?.id).toBe("12345678901234567890");
 });

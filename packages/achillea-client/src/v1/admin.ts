@@ -70,8 +70,8 @@ export const adminOpsOverviewSchema = z.object({
 		uptime: z.number(),
 		maintenance: z.boolean(),
 		guilds: z.number(),
-	}),
-	generatedAt: z.string(),
+	}).optional(),
+	generatedAt: z.string().optional(),
 }) satisfies z.ZodType<AdminOpsOverview>;
 
 export const adminUserRowSchema = z.object({
@@ -104,7 +104,7 @@ export const adminWalletRowSchema = z.object({
 }) satisfies z.ZodType<AdminWalletRow>;
 
 export const adminTransactionRowSchema = z.object({
-	id: z.number(),
+	id: z.union([z.string(), z.number()]),
 	type: z.string(),
 	amount: z.number(),
 	reason: z.string().nullable(),

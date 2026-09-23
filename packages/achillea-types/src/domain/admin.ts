@@ -58,8 +58,8 @@ export interface AdminOpsOverview {
 		totalPlayers: number;
 	};
 	audit24h: number;
-	bot: { online: boolean; uptime: number; maintenance: boolean; guilds: number };
-	generatedAt: string;
+	bot?: { online: boolean; uptime: number; maintenance: boolean; guilds: number };
+	generatedAt?: string;
 }
 
 export interface AdminUserRow {
@@ -79,7 +79,7 @@ export interface AdminWalletRow {
 }
 
 export interface AdminTransactionRow {
-	id: number;
+	id: string | number;
 	type: string;
 	amount: number;
 	reason: string | null;
