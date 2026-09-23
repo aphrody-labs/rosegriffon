@@ -10,6 +10,7 @@
 // `Bun.SQL` n'expose pas LISTEN/NOTIFY (1.4.0) : la fabrique SQL commune
 // fournit donc la connexion dédiée nécessaire à ce flux long.
 import { createPgClient } from "@rosegriffon/db/pg";
+import { isPublicSubscription, publicEvent, type RealtimeEvent } from "./events";
 
 const PORT = Number(process.env.RG_REALTIME_PORT ?? 8812);
 const HOST = process.env.RG_REALTIME_HOST ?? "127.0.0.1";
@@ -18,21 +19,12 @@ const CHANNEL = "rg_realtime";
 
 if (!DATABASE_URL) throw new Error("[rg-realtime] DATABASE_URL manquant");
 
-interface Event {
-	schema: string;
-	table: string;
-	eventType: "INSERT" | "UPDATE" | "DELETE";
-	new?: Record<string, unknown> | null;
-	old?: Record<string, unknown> | null;
-	truncated?: boolean;
-}
-
 interface Subscriber {
 	table: string;
 	schema: string;
 	/** Filtre `colonne=eq.valeur`, décomposé une fois à l'abonnement. */
 	filter: { column: string; value: string } | null;
-	send: (event: Event) => void;
+	send: (event: RealtimeEvent) => void;
 	close: () => void;
 }
 
@@ -46,7 +38,7 @@ function parseFilter(raw: string | null): Subscriber["filter"] {
 }
 
 /** Vrai si l'événement concerne l'abonnement (table, schéma et filtre). */
-function matches(sub: Subscriber, event: Event): boolean {
+function matches(sub: Subscriber, event: RealtimeEvent): boolean {
 	if (sub.table !== event.table || sub.schema !== event.schema) return false;
 	if (!sub.filter) return true;
 	const row = event.new ?? event.old;
@@ -66,14 +58,16 @@ async function listen(): Promise<void> {
 			await client.connect();
 			client.on("notification", (message) => {
 				if (message.channel !== CHANNEL || !message.payload) return;
-				let event: Event;
+				let event: RealtimeEvent;
 				try {
-					event = JSON.parse(message.payload) as Event;
+					event = JSON.parse(message.payload) as RealtimeEvent;
 				} catch {
 					return;
 				}
+				const safeEvent = publicEvent(event);
+				if (!safeEvent) return;
 				for (const sub of subscribers) {
-					if (matches(sub, event)) sub.send(event);
+					if (matches(sub, event)) sub.send(safeEvent);
 				}
 			});
 			await client.query(`LISTEN ${CHANNEL}`);
@@ -115,8 +109,11 @@ const server = Bun.serve({
 
 		const table = url.searchParams.get("table");
 		if (!table) return new Response("parametre `table` requis", { status: 400, headers: cors });
+		const schema = url.searchParams.get("schema") ?? "public";
+		if (!isPublicSubscription(schema, table)) return new Response("table non publique", { status: 403, headers: cors });
 
 		let sub: Subscriber;
+		let cleanup = () => {};
 		const stream = new ReadableStream({
 			start(controller) {
 				const encoder = new TextEncoder();
@@ -129,7 +126,7 @@ const server = Bun.serve({
 				};
 				sub = {
 					table,
-					schema: url.searchParams.get("schema") ?? "public",
+					schema,
 					filter: parseFilter(url.searchParams.get("filter")),
 					send: (event) => write(`data: ${JSON.stringify(event)}\n\n`),
 					close: () => {
@@ -144,14 +141,16 @@ const server = Bun.serve({
 				write(": connecte\n\n");
 				// Battement régulier : garde le flux ouvert à travers nginx et les proxys.
 				const beat = setInterval(() => write(": ping\n\n"), 25_000);
-				req.signal.addEventListener("abort", () => {
+				cleanup = () => {
 					clearInterval(beat);
 					subscribers.delete(sub);
+					req.signal.removeEventListener("abort", cleanup);
 					sub.close();
-				});
+				};
+				req.signal.addEventListener("abort", cleanup, { once: true });
 			},
 			cancel() {
-				subscribers.delete(sub);
+				cleanup();
 			},
 		});
 
