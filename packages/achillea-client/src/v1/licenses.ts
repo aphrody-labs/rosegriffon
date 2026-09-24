@@ -29,13 +29,14 @@ export const licenseSchema = z.object({
 	issuedAt: z.string(),
 	validUntil: z.string(),
 	status: licenseStatusSchema,
-	pdfUrl: z.string(),
+	pdfUrl: z.string().nullable(),
 	createdAt: z.string(),
 	updatedAt: z.string(),
 }) satisfies z.ZodType<License>;
 
 export const licenseHolderResponseSchema = z.object({
 	license: licenseSchema.nullable(),
+	verificationToken: z.string().nullable(),
 }) satisfies z.ZodType<LicenseHolderResponse>;
 
 export const licenseVerifyResultSchema = z.object({
@@ -43,9 +44,7 @@ export const licenseVerifyResultSchema = z.object({
 	reason: licenseVerifyReasonSchema.optional(),
 	licenseNumber: z.string().optional(),
 	validUntil: z.string().optional(),
-	holder: z
-		.object({ displayName: z.string(), avatar: z.string().nullable() })
-		.optional(),
+	holder: z.object({ displayName: z.string(), avatar: z.string().nullable() }).optional(),
 }) satisfies z.ZodType<LicenseVerifyResult>;
 
 /** 5 routes. */

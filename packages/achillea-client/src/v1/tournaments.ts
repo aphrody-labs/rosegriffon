@@ -19,6 +19,7 @@ import type {
 	LobbyUserDataDTO,
 	LobbyUserDTO,
 } from "@rosegriffon/achillea-types/domain/lobby";
+import type { TournamentListItem } from "@rosegriffon/achillea-types/domain/tournament";
 import type {
 	CircuitClanEntry,
 	CircuitClanTag,
@@ -131,6 +132,16 @@ export const tournamentSeriesSchema: z.ZodType<WireTournamentSeries> = z.object(
 	logo: z.string(),
 	organization: entityRef(organizationDtoSchema),
 	tournaments: z.array(z.lazy(() => entityRef(tournamentSchema))).optional(),
+});
+
+export const tournamentListItemSchema: z.ZodType<TournamentListItem> = z.object({
+	id: z.number(),
+	name: z.string(),
+	description: z.string(),
+	type: z.string(),
+	status: z.string().nullable(),
+	createdAt: apiDateSchema,
+	updatedAt: apiDateSchema,
 });
 
 export const tournamentSchema: z.ZodType<WireTournament> = z.object({
@@ -526,8 +537,8 @@ export class TournamentsResource extends AchilleaResource {
 	/** `GET /tournaments` — liste paginée, filtrable par organisation et par état. */
 	list(
 		query: TournamentListQuery = {}
-	): Promise<AchilleaClientResult<Paginated<WireTournament>>> {
-		return this.http.get("/tournaments", paginatedSchema(tournamentSchema), {
+	): Promise<AchilleaClientResult<Paginated<TournamentListItem>>> {
+		return this.http.get("/tournaments", paginatedSchema(tournamentListItemSchema), {
 			query,
 		});
 	}

@@ -48,6 +48,7 @@ export interface MessageMatch {
 export interface EtatMatch {
 	/** `null` tant qu'aucune salle n'est rejointe. */
 	codeSalle: string | null;
+	lobbyId: number;
 	statut: string;
 	classe: boolean;
 	motifLitige: string;
@@ -129,6 +130,7 @@ function lireMessages(state: unknown): MessageMatch[] {
  */
 export function useRankedMatch(idSalle?: string | null): EtatMatch {
 	const [codeSalle, setCodeSalle] = useState<string | null>(null);
+	const [lobbyId, setLobbyId] = useState(0);
 	const [statut, setStatut] = useState("waiting");
 	const [classe, setClasse] = useState(true);
 	const [motifLitige, setMotifLitige] = useState("");
@@ -143,8 +145,7 @@ export function useRankedMatch(idSalle?: string | null): EtatMatch {
 		let annule = false;
 
 		const cible =
-			idSalle ??
-			(typeof window === "undefined" ? null : window.localStorage.getItem(CLE_SALLE));
+			idSalle ?? (typeof window === "undefined" ? null : window.localStorage.getItem(CLE_SALLE));
 		if (!cible) {
 			setConnexion("inactive");
 			return;
@@ -187,6 +188,8 @@ export function useRankedMatch(idSalle?: string | null): EtatMatch {
 				rejointe.onStateChange((state) => {
 					const brut = state as Record<string, unknown>;
 					setCodeSalle(String(brut["roomCode"] ?? "") || null);
+					const idLobby = Number(brut["lobbyId"] ?? 0);
+					setLobbyId(Number.isSafeInteger(idLobby) && idLobby > 0 ? idLobby : 0);
 					setStatut(String(brut["status"] ?? "waiting"));
 					setClasse(brut["ranked"] !== false);
 					setMotifLitige(String(brut["disputeReason"] ?? ""));
@@ -213,9 +216,7 @@ export function useRankedMatch(idSalle?: string | null): EtatMatch {
 				if (annule) return;
 				setConnexion("erreur");
 				setErreur(
-					cause instanceof Error
-						? `Match injoignable : ${cause.message}`
-						: "Match injoignable."
+					cause instanceof Error ? `Match injoignable : ${cause.message}` : "Match injoignable."
 				);
 			}
 		})();
@@ -247,6 +248,7 @@ export function useRankedMatch(idSalle?: string | null): EtatMatch {
 		),
 		erreur,
 		joueurs,
+		lobbyId,
 		messages,
 		motifLitige,
 		resume,

@@ -410,7 +410,7 @@ export default function RankedHubPage() {
 
 							<button
 								type="button"
-								onClick={() => void rejoindreFile(mode === 4 ? "2v2" : "1v1")}
+					onClick={() => void rejoindreFile(mode === 4 ? "2v2" : "1v1", isRanked)}
 								className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--achillea-primary)] hover:bg-[var(--achillea-primary-400)] text-white font-bold text-sm rounded-xl transition shadow-lg active:scale-95"
 							>
 								<Search className="w-4 h-4" />

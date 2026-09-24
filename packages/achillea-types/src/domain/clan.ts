@@ -1,6 +1,7 @@
 import type { ClanMemberDistinction, ClanMemberRole } from "../enums/clanMemberRole";
 import type { ClanState } from "../enums/clanState";
 
+import type { Country } from "./common";
 import type { Rank, UserDTO } from "./user";
 
 export interface ClanDTO {
@@ -69,13 +70,20 @@ export interface ClanInviteDTO {
 	lastNotifiedAt: Date;
 }
 
-/** Création d'un clan (POST /clans). */
+/** Création d'un clan (POST /clans/create, API Achilléa historique). */
 export interface NewClanPayload {
+	founders: Array<{ id: string }>;
+	logo: string;
 	name: string;
-	shortenedName: string;
-	clanBiography?: string;
-	languages?: string[];
-	origin?: string;
+	normalizedName: string;
+	shortName: string;
+	normalizedShortName: string;
+	description: string;
+	twitter?: string;
+	instagram?: string;
+	tiktok?: string;
+	origin?: Country;
+	languages?: Country[];
 }
 
 /** Mise à jour partielle d'un clan (PUT /clans/:id). */

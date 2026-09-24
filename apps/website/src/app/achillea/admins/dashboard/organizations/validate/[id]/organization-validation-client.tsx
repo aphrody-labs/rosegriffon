@@ -69,7 +69,7 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
 		try {
 			const res = await client.organizations.approve(orgId);
 			if (res.ok) {
-				router.push("/achillea/admins/dashboard/organizations/validate");
+				router.push("/achillea/organizations/validate");
 			} else {
 				setError(res.detail || "Action non autorisée.");
 			}
@@ -85,7 +85,7 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
 		try {
 			const res = await client.organizations.reject(orgId);
 			if (res.ok) {
-				router.push("/achillea/admins/dashboard/organizations/validate");
+				router.push("/achillea/organizations/validate");
 			} else {
 				setError(res.detail || "Action non autorisée.");
 			}
@@ -109,7 +109,7 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
 			{/* Breadcrumb */}
 			<div className="space-y-1 border-b border-border pb-6">
 				<Link
-					href="/achillea/admins/dashboard/organizations/validate"
+					href="/achillea/organizations/validate"
 					className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition mb-2"
 				>
 					<ArrowLeft className="w-3.5 h-3.5" />

@@ -1092,8 +1092,9 @@ pub struct License {
 	#[serde(rename = "validUntil")]
 	pub valid_until: String,
 	pub status: LicenseStatus,
-	#[serde(rename = "pdfUrl")]
-	pub pdf_url: String,
+	/// Nullable until the printable licence PDF has been generated.
+	#[serde(rename = "pdfUrl", default, skip_serializing_if = "Option::is_none")]
+	pub pdf_url: Option<String>,
 	#[serde(rename = "createdAt")]
 	pub created_at: String,
 	#[serde(rename = "updatedAt")]
@@ -1105,6 +1106,9 @@ pub struct License {
 pub struct LicenseHolderResponse {
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub license: Option<License>,
+	/// Owner-only bearer token used to share the public verification URL.
+	#[serde(rename = "verificationToken", default, skip_serializing_if = "Option::is_none")]
+	pub verification_token: Option<String>,
 }
 
 /// État d'une licence joueur.
@@ -1257,18 +1261,29 @@ pub struct ModerationSyncResult {
 	pub sanction_id: String,
 }
 
-/// Création d'un clan (POST /clans).
+/// Création d'un clan (POST /clans/create, API Achilléa historique).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewClanPayload {
+	pub founders: Vec<serde_json::Value>,
+	pub logo: String,
 	pub name: String,
-	#[serde(rename = "shortenedName")]
-	pub shortened_name: String,
-	#[serde(rename = "clanBiography", default, skip_serializing_if = "Option::is_none")]
-	pub clan_biography: Option<String>,
+	#[serde(rename = "normalizedName")]
+	pub normalized_name: String,
+	#[serde(rename = "shortName")]
+	pub short_name: String,
+	#[serde(rename = "normalizedShortName")]
+	pub normalized_short_name: String,
+	pub description: String,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
-	pub languages: Option<Vec<String>>,
+	pub twitter: Option<String>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
-	pub origin: Option<String>,
+	pub instagram: Option<String>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub tiktok: Option<String>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub origin: Option<Country>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub languages: Option<Vec<Country>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -2693,6 +2708,21 @@ pub enum TournamentEventType {
 	TournamentCanceled,
 	#[serde(rename = "tournament_restored")]
 	TournamentRestored,
+}
+
+/// Projection compacte de la liste publique `/tournaments`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TournamentListItem {
+	pub id: f64,
+	pub name: String,
+	pub description: String,
+	pub r#type: String,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub status: Option<String>,
+	#[serde(rename = "createdAt")]
+	pub created_at: Timestamp,
+	#[serde(rename = "updatedAt")]
+	pub updated_at: Timestamp,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

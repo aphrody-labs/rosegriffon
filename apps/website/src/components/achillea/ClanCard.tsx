@@ -4,6 +4,7 @@ import { Badge, Card, CardContent } from "@rosegriffon/ui";
 import { Check, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import type { PublicClan } from "@/lib/achillea/unified-clans";
 
 interface ClanCardProps {
@@ -12,6 +13,8 @@ interface ClanCardProps {
 }
 
 export function ClanCard({ clan, className }: ClanCardProps) {
+	const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
+
 	return (
 		<Link href={`/achillea/clans/${clan.id}`} className="block group">
 			<Card
@@ -19,13 +22,14 @@ export function ClanCard({ clan, className }: ClanCardProps) {
 			>
 				<CardContent className="p-4 sm:p-5 flex gap-4 items-start">
 					<div className="relative shrink-0 size-20 sm:size-24 rounded-xl overflow-hidden border border-outline/30 bg-surface-variant">
-						{clan.avatarUrl ? (
+						{clan.avatarUrl && failedAvatarUrl !== clan.avatarUrl ? (
 							<Image
 								src={clan.avatarUrl}
 								alt={`Logo ${clan.name}`}
 								fill
 								unoptimized
 								className="object-cover"
+								onError={() => setFailedAvatarUrl(clan.avatarUrl)}
 							/>
 						) : (
 							<div className="size-full flex items-center justify-center font-black text-xl text-on-surface-variant">

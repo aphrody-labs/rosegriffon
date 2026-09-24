@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import { type RankedChallengePreview, MatchMode } from "@rosegriffon/achillea-types";
+import { rankedMatchPath, roomIdFromReservation } from "@/lib/achillea/ranked-room";
 import {
 	Swords,
 	ShieldAlert,
@@ -65,7 +66,17 @@ export default function RankedChallengePage({ code }: { code: string }) {
 		try {
 			const res = await client.ranked.acceptChallenge(rawCode);
 			if (res.ok) {
-				router.push("/achillea/ranked/match");
+				const roomId = roomIdFromReservation(res.value.reservation);
+				if (!roomId) {
+					setNotFound(true);
+					return;
+				}
+				try {
+					window.localStorage.setItem("achillea:ranked:salle", roomId);
+				} catch {
+					// Le query param suffit pour rejoindre la salle dans cet onglet.
+				}
+				router.push(rankedMatchPath(roomId));
 			} else {
 				setNotFound(true);
 			}

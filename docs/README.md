@@ -59,7 +59,7 @@ dans `.gitignore`.
 
 | Doc | Portée |
 | --- | --- |
-| [achillea.md](achillea.md) | Intégration d'Achillea (troisième site) : API, CDN, SEO, liens croisés. |
+| [achillea.md](achillea.md) | Journal historique d'intégration ; architecture courante dans [achillea-migration-next.md](achillea-migration-next.md). |
 | [assets-cdn.md](assets-cdn.md) | Contrat unique des assets partagés, des URL CDN et de leur publication. |
 | [cloud-deployment.md](cloud-deployment.md) | Déploiement portable de Website sur Vercel, Fly.io ou Cloud Run, avec Supabase Cloud ou Neon. |
 

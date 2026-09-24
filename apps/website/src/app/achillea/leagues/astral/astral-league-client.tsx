@@ -20,6 +20,28 @@ import {
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
+interface PlayoffResult {
+	round: string;
+	label: string;
+	homeId: string;
+	awayId: string;
+	homeScore: number;
+	awayScore: number;
+}
+
+function isPlayoffResult(value: unknown): value is PlayoffResult {
+	if (typeof value !== "object" || value === null) return false;
+	const result = value as Partial<PlayoffResult>;
+	return (
+		typeof result.round === "string" &&
+		typeof result.label === "string" &&
+		typeof result.homeId === "string" &&
+		typeof result.awayId === "string" &&
+		typeof result.homeScore === "number" &&
+		typeof result.awayScore === "number"
+	);
+}
+
 export default function AstralLeaguePage({
 	initialSeason = null,
 }: {
@@ -77,6 +99,11 @@ export default function AstralLeaguePage({
 		if (!season?.results) return [];
 		return season.results.filter((m: LeagueMatchRow) => m.matchday === selectedMatchday);
 	}, [season, selectedMatchday]);
+
+	const playoffResults = useMemo(
+		() => (Array.isArray(season?.playoffs) ? season.playoffs.filter(isPlayoffResult) : []),
+		[season]
+	);
 
 	return (
 		<div className="mx-auto max-w-5xl space-y-6 px-4 py-4 min-[600px]:px-6 min-[600px]:py-6">
@@ -183,8 +210,9 @@ export default function AstralLeaguePage({
 											<th className="py-3 px-4">Équipe</th>
 											<th className="py-3 px-3 text-center">J</th>
 											<th className="py-3 px-3 text-center">V</th>
-											<th className="py-3 px-3 text-center">N</th>
+											<th className="py-3 px-3 text-center">V.P.</th>
 											<th className="py-3 px-3 text-center">D</th>
+											<th className="py-3 px-3 text-center">D.P.</th>
 											<th className="py-3 px-3 text-center">BP</th>
 											<th className="py-3 px-3 text-center">BC</th>
 											<th className="py-3 px-3 text-center">Diff</th>
@@ -234,11 +262,14 @@ export default function AstralLeaguePage({
 													<td className="py-3 px-3 text-center font-semibold text-emerald-400 font-mono">
 														{row.wins}
 													</td>
-													<td className="py-3 px-3 text-center text-muted-foreground font-mono">
-														{row.draws}
+													<td className="py-3 px-3 text-center font-semibold text-emerald-300 font-mono">
+														{row.winsOt}
 													</td>
 													<td className="py-3 px-3 text-center text-rose-400 font-mono">
 														{row.losses}
+													</td>
+													<td className="py-3 px-3 text-center text-rose-300 font-mono">
+														{row.lossesOt}
 													</td>
 													<td className="py-3 px-3 text-center text-muted-foreground font-mono">
 														{row.mapsFor}
@@ -366,122 +397,42 @@ export default function AstralLeaguePage({
 								</span>
 							</div>
 
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-								{/* Demi-finale 1 */}
-								<div className="border border-border bg-card rounded-2xl p-5 space-y-3 shadow-xs">
-									<div className="flex items-center justify-between border-b border-border/60 pb-2">
-										<span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-											Demi-finale 1
-										</span>
-										<span className="text-xs font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
-											BO3
-										</span>
-									</div>
-
-									<div className="space-y-2">
-										<div className="flex items-center justify-between p-2.5 rounded-xl bg-background border border-border/80 text-xs">
-											<div className="flex items-center gap-2">
-												<span className="w-5 h-5 rounded-full bg-amber-400/20 text-amber-400 font-bold flex items-center justify-center text-xs">
-													1
-												</span>
-												<span className="font-semibold text-foreground">
-													{standings[0]
-														? teamsMap.get(standings[0].teamId) || standings[0].teamId
-														: "Seed 1 (1er)"}
-												</span>
-											</div>
-											<span className="font-mono font-bold">-</span>
-										</div>
-
-										<div className="flex items-center justify-between p-2.5 rounded-xl bg-background border border-border/80 text-xs">
-											<div className="flex items-center gap-2">
-												<span className="w-5 h-5 rounded-full bg-muted text-muted-foreground font-bold flex items-center justify-center text-xs">
-													4
-												</span>
-												<span className="font-semibold text-foreground">
-													{standings[3]
-														? teamsMap.get(standings[3].teamId) || standings[3].teamId
-														: "Seed 4 (4ème)"}
-												</span>
-											</div>
-											<span className="font-mono font-bold">-</span>
-										</div>
-									</div>
+							{season?.meta?.champion && (
+								<div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-300">
+									Champion de la saison :{" "}
+									{teamsMap.get(season.meta.champion) ?? season.meta.champion}
 								</div>
+							)}
 
-								{/* Demi-finale 2 */}
-								<div className="border border-border bg-card rounded-2xl p-5 space-y-3 shadow-xs">
-									<div className="flex items-center justify-between border-b border-border/60 pb-2">
-										<span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-											Demi-finale 2
-										</span>
-										<span className="text-xs font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
-											BO3
-										</span>
-									</div>
-
-									<div className="space-y-2">
-										<div className="flex items-center justify-between p-2.5 rounded-xl bg-background border border-border/80 text-xs">
-											<div className="flex items-center gap-2">
-												<span className="w-5 h-5 rounded-full bg-slate-400/20 text-slate-300 font-bold flex items-center justify-center text-xs">
-													2
-												</span>
-												<span className="font-semibold text-foreground">
-													{standings[1]
-														? teamsMap.get(standings[1].teamId) || standings[1].teamId
-														: "Seed 2 (2ème)"}
-												</span>
-											</div>
-											<span className="font-mono font-bold">-</span>
-										</div>
-
-										<div className="flex items-center justify-between p-2.5 rounded-xl bg-background border border-border/80 text-xs">
-											<div className="flex items-center gap-2">
-												<span className="w-5 h-5 rounded-full bg-amber-700/20 text-amber-600 font-bold flex items-center justify-center text-xs">
-													3
-												</span>
-												<span className="font-semibold text-foreground">
-													{standings[2]
-														? teamsMap.get(standings[2].teamId) || standings[2].teamId
-														: "Seed 3 (3ème)"}
-												</span>
-											</div>
-											<span className="font-mono font-bold">-</span>
-										</div>
-									</div>
+							{playoffResults.length === 0 ? (
+								<div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+									Aucun résultat de play-offs publié pour cette saison.
 								</div>
-
-								{/* Grande Finale */}
-								<div className="md:col-span-2 border-2 border-amber-500/30 bg-card rounded-2xl p-6 space-y-4 shadow-sm">
-									<div className="flex items-center justify-between border-b border-border/60 pb-2">
-										<div className="flex items-center gap-2">
-											<Trophy className="w-4 h-4 text-amber-400" />
-											<span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
-												Grande Finale Astral League
-											</span>
-										</div>
-										<span className="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold">
-											BO5
-										</span>
-									</div>
-
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div className="p-3 rounded-xl bg-background/80 border border-border text-center space-y-1">
-											<div className="text-xs text-muted-foreground">Finaliste 1</div>
-											<div className="font-bold text-sm text-foreground">
-												Vainqueur Demi-finale 1
+							) : (
+								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+									{playoffResults.map((match, index) => (
+										<article
+											key={`${match.round}-${index}`}
+											className="rounded-2xl border border-border bg-card p-5 shadow-xs"
+										>
+											<h4 className="mb-3 border-b border-border/60 pb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+												{match.label}
+											</h4>
+											<div className="flex items-center justify-between gap-3 text-sm">
+												<span className="min-w-0 truncate font-semibold">
+													{teamsMap.get(match.homeId) ?? match.homeId}
+												</span>
+												<span className="shrink-0 rounded-lg bg-background px-3 py-1 font-mono font-bold">
+													{match.homeScore} - {match.awayScore}
+												</span>
+												<span className="min-w-0 truncate text-right font-semibold">
+													{teamsMap.get(match.awayId) ?? match.awayId}
+												</span>
 											</div>
-										</div>
-
-										<div className="p-3 rounded-xl bg-background/80 border border-border text-center space-y-1">
-											<div className="text-xs text-muted-foreground">Finaliste 2</div>
-											<div className="font-bold text-sm text-foreground">
-												Vainqueur Demi-finale 2
-											</div>
-										</div>
-									</div>
+										</article>
+									))}
 								</div>
-							</div>
+							)}
 						</div>
 					)}
 

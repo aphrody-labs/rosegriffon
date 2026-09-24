@@ -29,7 +29,10 @@ import { signalerException } from "@/lib/achillea/signaler";
 export default function LicencePage() {
 	const { user, isAuthenticated, login, isLoading: authLoading } = useAchilleaAuth();
 	const [license, setLicense] = useState<License | null>(null);
+	const [verificationToken, setVerificationToken] = useState<string | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [loadError, setLoadError] = useState<string | null>(null);
+	const [reload, setReload] = useState(0);
 
 	useEffect(() => {
 		if (!isAuthenticated) {
@@ -39,17 +42,24 @@ export default function LicencePage() {
 
 		let cancelled = false;
 		setLoading(true);
+		setLoadError(null);
 		const client = createAchilleaClient({ credentials: "include" });
 
 		client.licenses
 			.mine()
 			.then((res) => {
 				if (cancelled) return;
-				if (res.ok && res.value?.license) {
-					setLicense(res.value.license);
+				if (!res.ok) {
+					setLoadError("Impossible de charger votre licence. Réessayez dans un instant.");
+					return;
 				}
+				setLicense(res.value.license);
+				setVerificationToken(res.value.verificationToken);
 			})
 			.catch((cause) => {
+				if (!cancelled) {
+					setLoadError("Impossible de charger votre licence. Réessayez dans un instant.");
+				}
 				signalerException("licence", cause);
 			})
 			.finally(() => {
@@ -59,7 +69,7 @@ export default function LicencePage() {
 		return () => {
 			cancelled = true;
 		};
-	}, [isAuthenticated]);
+	}, [isAuthenticated, reload]);
 
 	/*
 	 * La session arrive par un aller-retour réseau (`GET /auth/me`) : tant qu'il
@@ -86,7 +96,7 @@ export default function LicencePage() {
 				</p>
 				<button
 					type="button"
-					onClick={() => login()}
+					onClick={() => login("/achillea/licence")}
 					className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition shadow-sm text-xs"
 				>
 					Se connecter
@@ -117,7 +127,8 @@ export default function LicencePage() {
 					<h1 className="text-3xl font-bold tracking-tight">Licence Compétiteur</h1>
 				</div>
 				<p className="text-sm text-muted-foreground">
-					Votre titre officiel d'adhésion pour la participation aux compétitions homologuées Achilléa.
+					Votre titre officiel d'adhésion pour la participation aux compétitions homologuées
+					Achilléa.
 				</p>
 			</div>
 
@@ -126,12 +137,29 @@ export default function LicencePage() {
 					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
 					<p className="text-sm text-muted-foreground">Chargement de votre licence...</p>
 				</div>
+			) : loadError ? (
+				<div
+					role="alert"
+					className="border border-destructive/30 bg-destructive/5 rounded-2xl p-8 text-center space-y-4"
+				>
+					<AlertCircle className="w-10 h-10 text-rose-400 mx-auto" />
+					<h3 className="font-bold text-base">Licence temporairement indisponible</h3>
+					<p className="text-sm text-muted-foreground">{loadError}</p>
+					<button
+						type="button"
+						onClick={() => setReload((value) => value + 1)}
+						className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90"
+					>
+						Réessayer
+					</button>
+				</div>
 			) : !license ? (
 				<div className="border border-dashed border-border rounded-2xl p-12 text-center space-y-3">
 					<AlertCircle className="w-10 h-10 text-muted-foreground/60 mx-auto" />
 					<h3 className="font-bold text-base">Aucune licence active</h3>
 					<p className="text-xs text-muted-foreground max-w-sm mx-auto">
-						Vous n'avez pas encore de licence joueur émise. Rejoignez un clan ou participez à un tournoi pour générer votre numéro de licence.
+						Vous n'avez pas encore de licence joueur émise. Rejoignez un clan ou participez à un
+						tournoi pour générer votre numéro de licence.
 					</p>
 				</div>
 			) : (
@@ -159,9 +187,7 @@ export default function LicencePage() {
 								className="w-16 h-16 ring-2 ring-primary shrink-0"
 							/>
 							<div className="space-y-1 min-w-0 flex-1">
-								<h2 className="text-xl font-black text-foreground truncate">
-									{user?.username}
-								</h2>
+								<h2 className="text-xl font-black text-foreground truncate">{user?.username}</h2>
 								<div className="font-mono text-xs font-semibold text-primary">
 									N° {license.licenseNumber}
 								</div>
@@ -189,27 +215,32 @@ export default function LicencePage() {
 
 						{/* Verification link */}
 						<div className="text-center pt-2">
-							<Link
-								href={`/achillea/licence/verify/${license.id}`}
-								className="text-[11px] text-muted-foreground hover:text-primary transition underline underline-offset-4"
-							>
-								Lien de vérification officiel pour les arbitres
-							</Link>
+							{verificationToken && (
+								<Link
+									prefetch={false}
+									href={`/achillea/licence/verify/${encodeURIComponent(verificationToken)}`}
+									className="text-[11px] text-muted-foreground hover:text-primary transition underline underline-offset-4"
+								>
+									Lien de vérification officiel pour les arbitres
+								</Link>
+							)}
 						</div>
 					</div>
 
 					{/* Download PDF button */}
-					<div className="flex justify-end">
-						<a
-							href={license.pdfUrl}
-							target="_blank"
-							rel="noreferrer"
-							className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:bg-primary/90 transition shadow-sm"
-						>
-							<Download className="w-4 h-4" />
-							Télécharger ma licence (PDF)
-						</a>
-					</div>
+					{license.pdfUrl && (
+						<div className="flex justify-end">
+							<a
+								href={license.pdfUrl}
+								target="_blank"
+								rel="noreferrer"
+								className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:bg-primary/90 transition shadow-sm"
+							>
+								<Download className="w-4 h-4" />
+								Télécharger ma licence (PDF)
+							</a>
+						</div>
+					)}
 				</div>
 			)}
 		</div>

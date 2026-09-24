@@ -15,24 +15,32 @@ import {
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function OrganizationsPendingValidationPage() {
-	const { user, isAuthenticated } = useAchilleaAuth();
+	const { user, isAuthenticated, isLoading: authLoading, login } = useAchilleaAuth();
 	const [orgs, setOrgs] = useState<OrganizationDTO[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [loadError, setLoadError] = useState<string | null>(null);
 
 	useEffect(() => {
+		if (authLoading || !isAuthenticated || (user?.role ?? 0) < 2) return;
 		let cancelled = false;
 		setLoading(true);
+		setLoadError(null);
 		const client = createAchilleaClient({ credentials: "include" });
 
 		client.organizations
 			.list({ page: 1, pagination: 50, state: OrganizationState.Pending })
 			.then((res) => {
 				if (cancelled) return;
-				if (res.ok && res.value?.data) {
+				if (res.ok) {
 					setOrgs(res.value.data);
+				} else {
+					setLoadError("Impossible de charger la file de validation des organisations.");
+					signalerException("organizations/validate", new Error(`${res.kind}: ${res.detail}`));
 				}
 			})
 			.catch((cause) => {
+				if (cancelled) return;
+				setLoadError("Impossible de charger la file de validation des organisations.");
 				signalerException("organizations/validate", cause);
 			})
 			.finally(() => {
@@ -42,7 +50,7 @@ export default function OrganizationsPendingValidationPage() {
 		return () => {
 			cancelled = true;
 		};
-	}, []);
+	}, [authLoading, isAuthenticated, user?.role]);
 
 	return (
 		<div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
@@ -62,10 +70,31 @@ export default function OrganizationsPendingValidationPage() {
 				</div>
 			</div>
 
-			{loading ? (
+			{authLoading ? (
+				<div className="py-20 text-center space-y-3">
+					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
+					<p className="text-sm text-muted-foreground">Vérification des droits…</p>
+				</div>
+			) : !isAuthenticated ? (
+				<div className="py-16 text-center space-y-4">
+					<ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+					<p className="text-sm text-muted-foreground">Connectez-vous pour accéder à cette file de validation.</p>
+					<button type="button" onClick={() => login("/achillea/organizations/validate")} className="px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">Se connecter</button>
+				</div>
+			) : (user?.role ?? 0) < 2 ? (
+				<div className="py-16 text-center space-y-3">
+					<ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+					<p className="text-sm text-muted-foreground">Cette file est réservée aux administrateurs.</p>
+				</div>
+			) : loading ? (
 				<div className="py-20 text-center space-y-3">
 					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
 					<p className="text-sm text-muted-foreground">Chargement des organisations...</p>
+				</div>
+			) : loadError ? (
+				<div role="alert" className="border border-destructive/30 bg-destructive/5 rounded-2xl p-8 text-center space-y-3">
+					<p className="text-sm text-muted-foreground">{loadError}</p>
+					<button type="button" onClick={() => window.location.reload()} className="text-sm font-semibold text-primary underline underline-offset-4">Réessayer</button>
 				</div>
 			) : orgs.length === 0 ? (
 				<div className="border border-dashed border-border rounded-2xl p-12 text-center text-xs text-muted-foreground">

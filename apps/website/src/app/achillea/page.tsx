@@ -217,38 +217,28 @@ async function loadTournamentData(): Promise<{
 			return { featured: null, featuredParticipants: [], otherActive: [] };
 		}
 
-		const list = res.value.data.filter((tournament) =>
-			Object.prototype.hasOwnProperty.call(STATE_PRIORITY, tournament.internalState)
-		);
-		if (list.length === 0) {
+		const summaries = res.value.data
+			.filter((tournament) => tournament.type === "TOURNAMENT")
+			.sort((a, b) => {
+				const priority = (status: string | null) => status === "Open" || status === "Ongoing" ? 0 : status === "Finished" ? 2 : 1;
+				return priority(a.status) - priority(b.status) || b.updatedAt.getTime() - a.updatedAt.getTime();
+			})
+			.slice(0, 8);
+		if (summaries.length === 0) {
 			return { featured: null, featuredParticipants: [], otherActive: [] };
 		}
-		const now = Date.now();
-		const sorted = [...list].sort((a, b) => {
-			const pa = STATE_PRIORITY[a.internalState] ?? 9;
-			const pb = STATE_PRIORITY[b.internalState] ?? 9;
-			if (pa !== pb) return pa - pb;
-			const da = Math.abs(new Date(a.startsAt).getTime() - now);
-			const db = Math.abs(new Date(b.startsAt).getTime() - now);
-			return da - db;
-		});
-
-		const primary = sorted[0]!;
-		const otherActive = sorted.slice(1, 4);
-
-		const detailRes = await client.tournaments.get(primary.id);
-		if (detailRes.ok) {
-			return {
-				featured: detailRes.value[0],
-				featuredParticipants: detailRes.value[1] ?? [],
-				otherActive,
-			};
-		}
-
+		const details = await Promise.all(summaries.map((item) => client.tournaments.get(item.id)));
+		const loaded = details.flatMap((detail) => detail.ok ? [detail.value] : []);
+		const active = loaded
+			.map(([tournament, participants]) => ({ tournament, participants }))
+			.filter(({ tournament }) => Object.prototype.hasOwnProperty.call(STATE_PRIORITY, tournament.internalState))
+			.sort((a, b) => (STATE_PRIORITY[a.tournament.internalState] ?? 9) - (STATE_PRIORITY[b.tournament.internalState] ?? 9));
+		const [primary, ...rest] = active;
+		if (!primary) return { featured: null, featuredParticipants: [], otherActive: [] };
 		return {
-			featured: primary,
-			featuredParticipants: [] as ParticipantDTO[],
-			otherActive,
+			featured: primary.tournament,
+			featuredParticipants: primary.participants,
+			otherActive: rest.slice(0, 3).map(({ tournament }) => tournament),
 		};
 	} catch {
 		return { featured: null, featuredParticipants: [], otherActive: [] };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
@@ -10,6 +10,7 @@ import {
 	ScoreReportPolicy,
 } from "@rosegriffon/achillea-types/enums/eventEnums";
 import type { SeedOrdering } from "@rosegriffon/achillea-types/domain/brackets";
+import type { OrganizationDTO } from "@rosegriffon/achillea-types/domain/organization";
 import {
 	isPlacementPrizeEligible,
 	prizeTableForTournamentSize,
@@ -76,6 +77,9 @@ const SCORE_REPORT_OPTIONS = [
 export default function TournamentCreationPage() {
 	const router = useRouter();
 	const { isAuthenticated, login, isLoading: authLoading } = useAchilleaAuth();
+	const [organizations, setOrganizations] = useState<OrganizationDTO[]>([]);
+	const [organizationsLoading, setOrganizationsLoading] = useState(false);
+	const [organizationId, setOrganizationId] = useState<string>("");
 
 	const [step, setStep] = useState<1 | 2 | 3>(1);
 
@@ -105,6 +109,34 @@ export default function TournamentCreationPage() {
 
 	const [submitting, setSubmitting] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		if (authLoading || !isAuthenticated) return;
+		let cancelled = false;
+		setOrganizationsLoading(true);
+		createAchilleaClient({ credentials: "include" }).organizations
+			.mine()
+			.then((result) => {
+				if (cancelled) return;
+				if (!result.ok) {
+					setError("Impossible de charger vos organisations. Vérifiez vos droits d'organisateur.");
+					return;
+				}
+				const available = (result.value.data ?? []).filter((organization) => {
+					const id = Number(organization.id);
+					return Number.isInteger(id) && id > 0;
+				});
+				setOrganizations(available);
+				setOrganizationId((current) => current || String(available[0]?.id ?? ""));
+			})
+			.catch(() => setError("Impossible de charger vos organisations. Réessayez dans quelques instants."))
+			.finally(() => {
+				if (!cancelled) setOrganizationsLoading(false);
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [authLoading, isAuthenticated]);
 
 	// Bonus podium preview
 	const isEligibleForPrizes = isPlacementPrizeEligible(stageType);
@@ -161,6 +193,11 @@ export default function TournamentCreationPage() {
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!validateStep1() || !validateStep2()) return;
+		if (!organizationId) {
+			setError("Sélectionnez une organisation avant de créer le tournoi.");
+			setStep(1);
+			return;
+		}
 
 		setError(null);
 		setSubmitting(true);
@@ -178,7 +215,7 @@ export default function TournamentCreationPage() {
 				tournamentType: stageType,
 				participantsNumber: capacity,
 				matchFormat: matchFormat,
-				organization: 1,
+				organization: Number(organizationId),
 				managers: [],
 				seedOrdering: seedOrdering,
 				groupStageEnabled: false,
@@ -381,6 +418,32 @@ export default function TournamentCreationPage() {
 						</div>
 
 						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							<div className="space-y-1.5 sm:col-span-2">
+								<label htmlFor="tournament-organization" className="text-xs font-bold text-foreground flex items-center gap-1.5">
+									<ShieldCheck className="w-3.5 h-3.5 text-primary" />
+									Organisation porteuse *
+								</label>
+								<select
+									id="tournament-organization"
+									value={organizationId}
+									onChange={(event) => setOrganizationId(event.target.value)}
+									disabled={organizationsLoading || organizations.length === 0}
+									className="w-full px-3.5 py-2.5 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60"
+								>
+									<option value="">
+										{organizationsLoading ? "Chargement des organisations…" : "Sélectionner une organisation"}
+									</option>
+									{organizations.map((organization) => (
+										<option key={String(organization.id)} value={String(organization.id)}>
+											{organization.name}
+										</option>
+									))}
+								</select>
+								{!organizationsLoading && organizations.length === 0 && (
+									<p className="text-xs text-muted-foreground">Aucune organisation administrable n'est associée à votre compte.</p>
+								)}
+							</div>
+
 							<div className="space-y-1.5">
 								<label className="text-xs font-bold text-foreground flex items-center gap-1.5">
 									<Layers className="w-3.5 h-3.5 text-primary" />

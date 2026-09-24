@@ -876,7 +876,8 @@ public struct License: Codable, Sendable {
 	public let issuedAt: String
 	public let validUntil: String
 	public let status: LicenseStatus
-	public let pdfUrl: String
+	/// Nullable until the printable licence PDF has been generated.
+	public let pdfUrl: String?
 	public let createdAt: String
 	public let updatedAt: String
 }
@@ -884,6 +885,8 @@ public struct License: Codable, Sendable {
 /// `GET /licenses/me` — `null` tant qu'aucune licence n'a été émise.
 public struct LicenseHolderResponse: Codable, Sendable {
 	public let license: License?
+	/// Owner-only bearer token used to share the public verification URL.
+	public let verificationToken: String?
 }
 
 /// État d'une licence joueur.
@@ -985,13 +988,20 @@ public struct ModerationSyncResult: Codable, Sendable {
 	public let sanctionId: String
 }
 
-/// Création d'un clan (POST /clans).
+/// Création d'un clan (POST /clans/create, API Achilléa historique).
 public struct NewClanPayload: Codable, Sendable {
+	public let founders: [AnyCodable]
+	public let logo: String
 	public let name: String
-	public let shortenedName: String
-	public let clanBiography: String?
-	public let languages: [String]?
-	public let origin: String?
+	public let normalizedName: String
+	public let shortName: String
+	public let normalizedShortName: String
+	public let description: String
+	public let twitter: String?
+	public let instagram: String?
+	public let tiktok: String?
+	public let origin: Country?
+	public let languages: [Country]?
 }
 
 public struct NewClanResponse: Codable, Sendable {
@@ -1953,6 +1963,17 @@ public enum TournamentEventType: String, Codable, Sendable, CaseIterable {
 	case tournamentClosed = "tournament_closed"
 	case tournamentCanceled = "tournament_canceled"
 	case tournamentRestored = "tournament_restored"
+}
+
+/// Projection compacte de la liste publique `/tournaments`.
+public struct TournamentListItem: Codable, Sendable {
+	public let id: Double
+	public let name: String
+	public let description: String
+	public let type: String
+	public let status: String?
+	public let createdAt: String
+	public let updatedAt: String
 }
 
 public struct TournamentMatchStats: Codable, Sendable {
