@@ -320,9 +320,7 @@
 				"moderation",
 				"community",
 				"ranked",
-				"audit24h",
-				"bot",
-				"generatedAt"
+				"audit24h"
 			]
 		},
 		"AdminRoleUpdateResult": {
@@ -348,7 +346,14 @@
 			"type": "object",
 			"properties": {
 				"id": {
-					"type": "number"
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "number"
+						}
+					]
 				},
 				"type": {
 					"type": "string"
@@ -7267,6 +7272,10 @@
 				},
 				"username": {
 					"type": "string"
+				},
+				"rgProfileUsername": {
+					"type": "string",
+					"description": "Canonical Rose Griffon public profile slug when the Discord account is linked."
 				},
 				"sim": {
 					"type": "number",

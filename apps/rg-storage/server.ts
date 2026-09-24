@@ -19,13 +19,29 @@ import { canTransferObject } from "./permissions";
 const PORT = Number(process.env.RG_STORAGE_PORT ?? 8810);
 const HOST = process.env.RG_STORAGE_HOST ?? "127.0.0.1";
 const ROOT = resolve(process.env.RG_STORAGE_ROOT ?? "/var/www/rg-storage");
-const JWT_SECRET = process.env.SUPABASE_JWT_SECRET ?? "";
-const DATABASE_URL = process.env.DATABASE_URL ?? "";
 
-if (!JWT_SECRET) throw new Error("[rg-storage] SUPABASE_JWT_SECRET manquant");
-if (!DATABASE_URL) throw new Error("[rg-storage] DATABASE_URL manquant");
+function getJwtSecret(): string {
+	return process.env.SUPABASE_JWT_SECRET ?? "";
+}
 
-const sql = createBunSql({ url: DATABASE_URL });
+let sqlInstance: ReturnType<typeof createBunSql> | null = null;
+function getSql(): ReturnType<typeof createBunSql> {
+	if (!sqlInstance) {
+		const dbUrl = process.env.DATABASE_URL ?? "";
+		if (!dbUrl) throw new Error("[rg-storage] DATABASE_URL manquant");
+		sqlInstance = createBunSql({ url: dbUrl });
+	}
+	return sqlInstance;
+}
+
+const sql = new Proxy((() => {}) as unknown as ReturnType<typeof createBunSql>, {
+	apply(_target, _thisArg, args) {
+		return (getSql() as any)(...args);
+	},
+	get(_target, prop) {
+		return (getSql() as any)[prop];
+	},
+});
 
 const CORS: Record<string, string> = {
 	"access-control-allow-origin": "*",
@@ -61,7 +77,7 @@ function verifyJwt(token: string): Claims | null {
 	const parts = token.split(".");
 	if (parts.length !== 3) return null;
 	const [head, payload, signature] = parts;
-	const expected = createHmac("sha256", JWT_SECRET).update(`${head}.${payload}`).digest();
+	const expected = createHmac("sha256", getJwtSecret()).update(`${head}.${payload}`).digest();
 	let given: Buffer;
 	try {
 		given = Buffer.from(signature, "base64url");
@@ -182,7 +198,7 @@ async function unindexObject(bucket: string, name: string) {
 // ───────────────────────── URL signées ─────────────────────────
 
 function signPath(bucket: string, name: string, expiresAt: number): string {
-	return createHmac("sha256", JWT_SECRET).update(`${bucket}/${name}:${expiresAt}`).digest("base64url");
+	return createHmac("sha256", getJwtSecret()).update(`${bucket}/${name}:${expiresAt}`).digest("base64url");
 }
 
 function checkSignature(bucket: string, name: string, token: string | null): boolean {
@@ -449,18 +465,22 @@ async function handle(req: Request): Promise<Response> {
 	return fail(404, "not_found", `Route inconnue : ${req.method} ${path}`);
 }
 
-const server = Bun.serve({
-	port: PORT,
-	hostname: HOST,
-	maxRequestBodySize: 512 * 1024 * 1024,
-	async fetch(req) {
-		try {
-			return await handle(req);
-		} catch (error) {
-			console.error("[rg-storage]", error);
-			return fail(500, "InternalError", error instanceof Error ? error.message : String(error));
-		}
-	},
-});
+export { handle as handleStorage };
 
-console.log(`rg-storage port=${server.port} root=${ROOT}`);
+if (import.meta.main) {
+	const server = Bun.serve({
+		port: PORT,
+		hostname: HOST,
+		maxRequestBodySize: 512 * 1024 * 1024,
+		async fetch(req) {
+			try {
+				return await handle(req);
+			} catch (error) {
+				console.error("[rg-storage]", error);
+				return fail(500, "InternalError", error instanceof Error ? error.message : String(error));
+			}
+		},
+	});
+
+	console.log(`rg-storage port=${server.port} root=${ROOT}`);
+}

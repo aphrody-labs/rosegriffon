@@ -73,9 +73,10 @@ pub struct AdminOpsOverview {
 	pub community: serde_json::Value,
 	pub ranked: serde_json::Value,
 	pub audit24h: f64,
-	pub bot: serde_json::Value,
-	#[serde(rename = "generatedAt")]
-	pub generated_at: String,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub bot: Option<serde_json::Value>,
+	#[serde(rename = "generatedAt", default, skip_serializing_if = "Option::is_none")]
+	pub generated_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -87,7 +88,7 @@ pub struct AdminRoleUpdateResult {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AdminTransactionRow {
-	pub id: f64,
+	pub id: serde_json::Value,
 	pub r#type: String,
 	pub amount: f64,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
@@ -2858,6 +2859,9 @@ pub struct UserDto {
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub r#type: Option<String>,
 	pub username: String,
+	/// Canonical Rose Griffon public profile slug when the Discord account is linked.
+	#[serde(rename = "rgProfileUsername", default, skip_serializing_if = "Option::is_none")]
+	pub rg_profile_username: Option<String>,
 	/// Champs présents uniquement sur la session de l'utilisateur courant.
 	///
 	/// `GET /clans` imbrique un président réduit (identité et profil public) qui

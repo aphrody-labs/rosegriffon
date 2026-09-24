@@ -115,8 +115,8 @@ public struct AdminOpsOverview: Codable, Sendable {
 	public let community: AnyCodable
 	public let ranked: AnyCodable
 	public let audit24h: Double
-	public let bot: AnyCodable
-	public let generatedAt: String
+	public let bot: AnyCodable?
+	public let generatedAt: String?
 }
 
 public struct AdminRoleUpdateResult: Codable, Sendable {
@@ -126,7 +126,7 @@ public struct AdminRoleUpdateResult: Codable, Sendable {
 }
 
 public struct AdminTransactionRow: Codable, Sendable {
-	public let id: Double
+	public let id: AnyCodable
 	public let type: String
 	public let amount: Double
 	public let reason: String?
@@ -677,6 +677,8 @@ public struct EnrichedUserDTO: Codable, Sendable {
 	/// session : optionnel pour que `SessionUserDTO` reste assignable.
 	public let type: String?
 	public let username: String
+	/// Canonical Rose Griffon public profile slug when the Discord account is linked.
+	public let rgProfileUsername: String?
 	/// Champs présents uniquement sur la session de l'utilisateur courant.
 	///
 	/// `GET /clans` imbrique un président réduit (identité et profil public) qui
@@ -2062,6 +2064,8 @@ public struct UserDTO: Codable, Sendable {
 	/// session : optionnel pour que `SessionUserDTO` reste assignable.
 	public let type: String?
 	public let username: String
+	/// Canonical Rose Griffon public profile slug when the Discord account is linked.
+	public let rgProfileUsername: String?
 	/// Champs présents uniquement sur la session de l'utilisateur courant.
 	///
 	/// `GET /clans` imbrique un président réduit (identité et profil public) qui

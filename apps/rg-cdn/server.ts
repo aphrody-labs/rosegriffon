@@ -150,12 +150,12 @@ function publicBaseFor(req: Request): string {
   return FALLBACK_PUBLIC_BASE;
 }
 
-if (!API_KEY) {
+if (!API_KEY && import.meta.main) {
   console.error("CDN_API_KEY required");
   process.exit(1);
 }
 
-await Bun.$`mkdir -p ${STORAGE}`.quiet();
+await Bun.$`mkdir -p ${STORAGE}`.quiet().catch(() => {});
 
 const MIME_TO_EXT: Record<string, string> = {
   "image/png": "png",
@@ -186,7 +186,7 @@ async function serveAssetManifest(req: Request): Promise<Response> {
   if (ifNone && ifNone === cache.etag) {
     return new Response(null, { status: 304, headers: withCors({ ETag: cache.etag }) });
   }
-  return new Response(cache.bytes, {
+  return new Response(cache.bytes as any, {
     status: 200,
     headers: withCors({
       "content-type": "application/json; charset=utf-8",
@@ -408,107 +408,120 @@ function preflight(): Response {
   return new Response(null, { status: 204, headers: withCors() });
 }
 
-const server = Bun.serve({
-  hostname: HOST,
-  port: PORT,
-  routes: {
-    "/health": {
-      OPTIONS: preflight,
-      GET: () =>
-        corsJson({
-          ok: true,
-          storage: STORAGE,
-          assetsManifest: manifestCache
-            ? {
-                bytes: manifestCache.bytes.byteLength,
-                etag: manifestCache.etag,
-              }
-            : null,
-        }),
-    },
+export async function handleCdn(req: Request): Promise<Response> {
+  const url = new URL(req.url);
+  if (req.method === "OPTIONS") return preflight();
 
-    "/api/assets/manifest": {
-      OPTIONS: preflight,
-      GET: (req: Request) => serveAssetManifest(req),
-    },
-
-    "/api/assets/manifest/refresh": {
-      OPTIONS: preflight,
-      POST: async (req: Request) => {
-        if (req.headers.get("x-api-key") !== API_KEY) return unauthorized();
-        const cache = await loadManifestCache(true);
-        if (!cache) return corsJson({ ok: false, error: "missing" }, { status: 503 });
-        return corsJson({
-          ok: true,
-          bytes: cache.bytes.byteLength,
-          etag: cache.etag,
-          mtimeMs: cache.mtimeMs,
-        });
-      },
-    },
-
-    "/upload": {
-      OPTIONS: preflight,
-      POST: async (req) => {
-        if (req.headers.get("x-api-key") !== API_KEY) return unauthorized();
-
-        const ct = req.headers.get("content-type") ?? "application/octet-stream";
-        const ext = MIME_TO_EXT[ct.split(";")[0].trim().toLowerCase()];
-        if (!ext) return corsJson({ error: `Unsupported content-type: ${ct}` }, { status: 415 });
-
-        const id = genId(ext);
-        const path = `${STORAGE}/${id}`;
-
-        const body = await req.arrayBuffer();
-        if (body.byteLength === 0) return corsJson({ error: "Empty body" }, { status: 400 });
-        if (body.byteLength > 25 * 1024 * 1024)
-          return corsJson({ error: "File too large (>25MB)" }, { status: 413 });
-
-        await Bun.write(path, body);
-
-        const base = publicBaseFor(req);
-        return corsJson({ id, url: `${base}/${id}` });
-      },
-    },
-
-    "/images/:id": {
-      OPTIONS: preflight,
-      DELETE: async (req) => {
-        if (req.headers.get("x-api-key") !== API_KEY) return unauthorized();
-
-        const id = (req as Request & { params: { id: string } }).params.id;
-        if (!/^[a-f0-9]{16}\.(png|jpg|webp|gif|svg)$/.test(id))
-          return corsJson({ error: "Invalid id" }, { status: 400 });
-
-        const file = Bun.file(`${STORAGE}/${id}`);
-        if (!(await file.exists())) return corsJson({ success: false }, { status: 404 });
-
-        await Bun.$`rm -f ${STORAGE}/${id}`.quiet();
-        return corsJson({ success: true });
-      },
-    },
-  },
-
-  fetch(req) {
-    // Préflight CORS universel sur les paths non capturés par `routes`.
-    if (req.method === "OPTIONS") return preflight();
-    // Fallback wildcard pour les paths non capturés par routes — utilisé
-    // par /api/assets/<scope>/<arbitrary/sub/path.ext>.
-    const url = new URL(req.url);
-    if (url.pathname.startsWith("/api/assets/")) {
-      return serveAssetFile(req, url);
+  if (url.pathname === "/health" || url.pathname === "/cdn/health") {
+    if (req.method === "GET") {
+      return corsJson({
+        ok: true,
+        storage: STORAGE,
+        assetsManifest: manifestCache
+          ? {
+              bytes: manifestCache.bytes.byteLength,
+              etag: manifestCache.etag,
+            }
+          : null,
+      });
     }
-    return new Response("Not Found", { status: 404, headers: withCors() });
-  },
-});
+    return preflight();
+  }
 
-console.warn(`cdn listening on http://${server.hostname}:${server.port}`);
+  if (url.pathname === "/api/assets/manifest") {
+    if (req.method === "GET") return serveAssetManifest(req);
+    return preflight();
+  }
 
-// Arrêt gracieux (Cloud Run / SIGTERM) : on draine puis on coupe le serveur.
-function shutdown(signal: string): void {
-  console.warn(`cdn received ${signal}, shutting down`);
-  void server.stop(/* closeActiveConnections */ false);
-  process.exit(0);
+  if (url.pathname === "/api/assets/manifest/refresh") {
+    if (req.method === "POST") {
+      const key = process.env.CDN_API_KEY ?? API_KEY;
+      if (req.headers.get("x-api-key") !== key) return unauthorized();
+      const cache = await loadManifestCache(true);
+      if (!cache) return corsJson({ ok: false, error: "missing" }, { status: 503 });
+      return corsJson({
+        ok: true,
+        bytes: cache.bytes.byteLength,
+        etag: cache.etag,
+        mtimeMs: cache.mtimeMs,
+      });
+    }
+    return preflight();
+  }
+
+  if (url.pathname === "/upload") {
+    if (req.method === "POST") {
+      const key = process.env.CDN_API_KEY ?? API_KEY;
+      if (req.headers.get("x-api-key") !== key) return unauthorized();
+
+      const ct = req.headers.get("content-type") ?? "application/octet-stream";
+      const ext = MIME_TO_EXT[ct.split(";")[0].trim().toLowerCase()];
+      if (!ext) return corsJson({ error: `Unsupported content-type: ${ct}` }, { status: 415 });
+
+      const id = genId(ext);
+      const path = `${STORAGE}/${id}`;
+
+      const body = await req.arrayBuffer();
+      if (body.byteLength === 0) return corsJson({ error: "Empty body" }, { status: 400 });
+      if (body.byteLength > 25 * 1024 * 1024)
+        return corsJson({ error: "File too large (>25MB)" }, { status: 413 });
+
+      await Bun.write(path, body);
+
+      const base = publicBaseFor(req);
+      return corsJson({ id, url: `${base}/${id}` });
+    }
+    return preflight();
+  }
+
+  const imgMatch = url.pathname.match(/^\/images\/([^/]+)$/);
+  if (imgMatch) {
+    const id = imgMatch[1];
+    if (req.method === "DELETE") {
+      const key = process.env.CDN_API_KEY ?? API_KEY;
+      if (req.headers.get("x-api-key") !== key) return unauthorized();
+
+      if (!/^[a-f0-9]{16}\.(png|jpg|webp|gif|svg)$/.test(id))
+        return corsJson({ error: "Invalid id" }, { status: 400 });
+
+      const file = Bun.file(`${STORAGE}/${id}`);
+      if (!(await file.exists())) return corsJson({ success: false }, { status: 404 });
+
+      await Bun.$`rm -f ${STORAGE}/${id}`.quiet();
+      return corsJson({ success: true });
+    }
+    if (req.method === "GET") {
+      const file = Bun.file(`${STORAGE}/${id}`);
+      if (!(await file.exists())) return new Response("Not Found", { status: 404, headers: withCors() });
+      return new Response(file, { status: 200, headers: withCors({ "content-type": detectAssetMime(id) }) });
+    }
+    return preflight();
+  }
+
+  if (url.pathname.startsWith("/api/assets/")) {
+    return serveAssetFile(req, url);
+  }
+
+  return new Response("Not Found", { status: 404, headers: withCors() });
 }
-process.on("SIGTERM", () => shutdown("SIGTERM"));
-process.on("SIGINT", () => shutdown("SIGINT"));
+
+if (import.meta.main) {
+  const server = Bun.serve({
+    hostname: HOST,
+    port: PORT,
+    fetch(req) {
+      return handleCdn(req);
+    },
+  });
+
+  console.warn(`cdn listening on http://${server.hostname}:${server.port}`);
+
+  // Arrêt gracieux (Cloud Run / SIGTERM) : on draine puis on coupe le serveur.
+  function shutdown(signal: string): void {
+    console.warn(`cdn received ${signal}, shutting down`);
+    void server.stop(/* closeActiveConnections */ false);
+    process.exit(0);
+  }
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
+}
