@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/api",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "API unique et unifiée Rose Griffon (ElysiaJS + Kysely + Bun)",
   "type": "module",
   "main": "src/index.ts",
@@ -25,5 +25,9 @@
     "elysia": "^1.4.28",
     "kysely": "catalog:",
     "pg": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }

@@ -1,6 +1,6 @@
 {
 	"name": "@rosegriffon/db",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Accès PostgreSQL partagé, façades SQL et types Database générés (site + bot)",
 	"type": "module",
 	"exports": {
@@ -32,7 +32,7 @@
 		"lint": "bunx oxlint -c ../../.oxlintrc.json src"
 	},
 	"dependencies": {
-		"@rosegriffon/types": "^1.0.1",
+		"@rosegriffon/types": "^1.0.3",
 		"@supabase/ssr": "catalog:",
 		"kysely": "catalog:",
 		"pg": "catalog:"
