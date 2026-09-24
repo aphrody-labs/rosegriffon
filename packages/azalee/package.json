@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/azalee",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Bibliothèque Bun du wiki Azalée (Inazuma Eleven: Victory Road) — accès PostgreSQL, index CPK, recherche et CLI.",
   "keywords": [
     "azalee",
