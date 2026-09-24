@@ -57,8 +57,8 @@ data class AdminOpsOverview(
 	val community: JsonElement,
 	val ranked: JsonElement,
 	val audit24h: Double,
-	val bot: JsonElement,
-	val generatedAt: String,
+	val bot: JsonElement? = null,
+	val generatedAt: String? = null,
 )
 
 @Serializable
@@ -70,7 +70,7 @@ data class AdminRoleUpdateResult(
 
 @Serializable
 data class AdminTransactionRow(
-	val id: Double,
+	val id: JsonElement,
 	val type: String,
 	val amount: Double,
 	val reason: String?,
@@ -697,6 +697,8 @@ data class EnrichedUserDTO(
 	/// session : optionnel pour que `SessionUserDTO` reste assignable.
 	val type: String? = null,
 	val username: String,
+	/// Canonical Rose Griffon public profile slug when the Discord account is linked.
+	val rgProfileUsername: String? = null,
 	/// Champs présents uniquement sur la session de l'utilisateur courant.
 	///
 	/// `GET /clans` imbrique un président réduit (identité et profil public) qui
@@ -2338,6 +2340,8 @@ data class UserDTO(
 	/// session : optionnel pour que `SessionUserDTO` reste assignable.
 	val type: String? = null,
 	val username: String,
+	/// Canonical Rose Griffon public profile slug when the Discord account is linked.
+	val rgProfileUsername: String? = null,
 	/// Champs présents uniquement sur la session de l'utilisateur courant.
 	///
 	/// `GET /clans` imbrique un président réduit (identité et profil public) qui

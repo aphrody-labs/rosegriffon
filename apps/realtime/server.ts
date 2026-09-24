@@ -14,10 +14,11 @@ import { isPublicSubscription, publicEvent, type RealtimeEvent } from "./events"
 
 const PORT = Number(process.env.RG_REALTIME_PORT ?? 8812);
 const HOST = process.env.RG_REALTIME_HOST ?? "127.0.0.1";
-const DATABASE_URL = process.env.DATABASE_URL ?? "";
 const CHANNEL = "rg_realtime";
 
-if (!DATABASE_URL) throw new Error("[rg-realtime] DATABASE_URL manquant");
+function getDatabaseUrl(): string {
+	return process.env.DATABASE_URL ?? "";
+}
 
 interface Subscriber {
 	table: string;
@@ -50,7 +51,9 @@ function matches(sub: Subscriber, event: RealtimeEvent): boolean {
 // jamais laisser le service muet sans le signaler.
 async function listen(): Promise<void> {
 	for (;;) {
-		const client = createPgClient(DATABASE_URL);
+		const dbUrl = getDatabaseUrl();
+		if (!dbUrl) break;
+		const client = createPgClient(dbUrl);
 		try {
 			await client.connect();
 			client.on("notification", (message) => {
@@ -82,13 +85,19 @@ async function listen(): Promise<void> {
 	}
 }
 
-void listen();
+let listening = false;
+export async function startRealtimeListener(): Promise<void> {
+	if (listening) return;
+	const dbUrl = getDatabaseUrl();
+	if (!dbUrl) {
+		console.warn("[rg-realtime] DATABASE_URL manquant, ecoute pg ignoree");
+		return;
+	}
+	listening = true;
+	void listen();
+}
 
-const server = Bun.serve({
-	port: PORT,
-	hostname: HOST,
-	idleTimeout: 0,
-	fetch(req) {
+export function handleRealtime(req: Request): Response {
 		const url = new URL(req.url);
 		const path = url.pathname.replace(/^\/realtime\/v1/, "") || "/";
 		const cors = {
@@ -167,7 +176,18 @@ const server = Bun.serve({
 				"x-accel-buffering": "no",
 			},
 		});
-	},
-});
+}
 
-console.log(`rg-realtime port=${server.port}`);
+if (import.meta.main) {
+	void startRealtimeListener();
+	const server = Bun.serve({
+		port: PORT,
+		hostname: HOST,
+		idleTimeout: 0,
+		fetch(req) {
+			return handleRealtime(req);
+		},
+	});
+
+	console.log(`rg-realtime port=${server.port}`);
+}

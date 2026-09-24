@@ -14,6 +14,10 @@ import { authController } from "./modules/auth";
 import { dbPlugin } from "./plugins/db";
 import { elysiaAuth } from "@rosegriffon/auth/elysia";
 
+import { handleStorage } from "../../storage/server";
+import { handleRealtime, startRealtimeListener } from "../../realtime/server";
+import { handleCdn } from "../../cdn/server";
+
 const allowedOrigins = new Set(
 	[
 		process.env.WEBSITE_URL,
@@ -60,6 +64,19 @@ export const app = new Elysia()
 		uptime: process.uptime(),
 		timestamp: Date.now()
 	}))
+	// Surface Supabase Storage unifiée (remplace rg-storage:8810)
+	.all("/storage/v1/*", ({ request }) => handleStorage(request))
+	.all("/storage/v1", ({ request }) => handleStorage(request))
+
+	// Surface Supabase Realtime SSE unifiée (remplace rg-realtime:8812)
+	.all("/realtime/v1/*", ({ request }) => handleRealtime(request))
+	.all("/realtime/v1", ({ request }) => handleRealtime(request))
+
+	// Surface CDN unifiée (remplace rg-cdn:8801)
+	.all("/upload", ({ request }) => handleCdn(request))
+	.all("/images/*", ({ request }) => handleCdn(request))
+	.all("/api/assets/*", ({ request }) => handleCdn(request))
+	.all("/cdn/health", ({ request }) => handleCdn(request))
 	.group("/v1", (v1) => v1
 		.use(achilleaModule)
 		.use(wikiController)
@@ -77,8 +94,10 @@ const PORT = Number(process.env.API_PORT ?? 8800);
 const HOST = process.env.API_HOST ?? "0.0.0.0";
 
 if (import.meta.main) {
+	void startRealtimeListener();
 	app.listen({ port: PORT, hostname: HOST }, () => {
 		console.info(`[rg-api] Rose Griffon Unified API listening on http://${HOST}:${PORT}`);
+		console.info(`[rg-api] Unified services active: API (:8800), Storage (/storage/v1), Realtime (/realtime/v1), CDN (/upload, /images)`);
 		console.info(`[rg-api] OpenAPI documentation available on http://${HOST}:${PORT}/docs`);
 	});
 }
