@@ -4,8 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { createAchilleaClient } from "@/lib/achillea";
 import { TournamentTable } from "@/components/achillea/TournamentTable";
-import type { Tournament } from "@rosegriffon/achillea-types";
-import { TournamentState } from "@rosegriffon/achillea-types/enums/eventEnums";
+import type { TournamentListItem } from "@rosegriffon/achillea-types/domain/tournament";
 import {
 	Trophy,
 	Plus,
@@ -21,12 +20,13 @@ import { signalerException } from "@/lib/achillea/signaler";
 export default function TournamentsListPage({
 	initialTournaments = [],
 }: {
-	initialTournaments?: Tournament[];
+	initialTournaments?: TournamentListItem[];
 }) {
-	const [tournaments, setTournaments] = useState<Tournament[]>(initialTournaments);
+	const [tournaments, setTournaments] = useState<TournamentListItem[]>(initialTournaments);
 	const [loading, setLoading] = useState<boolean>(initialTournaments.length === 0);
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [selectedTab, setSelectedTab] = useState<"all" | "open" | "ongoing" | "finished">("all");
+	const [loadError, setLoadError] = useState<string | null>(null);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -38,11 +38,14 @@ export default function TournamentsListPage({
 			.then((res) => {
 				if (cancelled) return;
 				if (res.ok && res.value) {
-					const list = Array.isArray(res.value) ? res.value : (res.value as any).data ?? [];
-					setTournaments(list);
+					setTournaments(res.value.data);
+					setLoadError(null);
+				} else if (!res.ok) {
+					setLoadError("Impossible de charger les tournois pour le moment.");
 				}
 			})
 			.catch((cause) => {
+				setLoadError("Le service des tournois est momentanément indisponible.");
 				signalerException("tournaments", cause);
 			})
 			.finally(() => {
@@ -57,16 +60,16 @@ export default function TournamentsListPage({
 	const filteredTournaments = useMemo(() => {
 		return tournaments.filter((t) => {
 			// Tab filtering
-			if (selectedTab === "open" && t.internalState !== TournamentState.PREREGISTERING) return false;
-			if (selectedTab === "ongoing" && t.internalState !== TournamentState.ONGOING) return false;
-			if (selectedTab === "finished" && t.internalState !== TournamentState.FINISHED) return false;
+			if (selectedTab === "open" && t.status !== "Open") return false;
+			if (selectedTab === "ongoing" && t.status !== "Ongoing") return false;
+			if (selectedTab === "finished" && t.status !== "Finished") return false;
 
 			// Search query
 			if (searchQuery.trim()) {
 				const q = searchQuery.toLowerCase();
 				const matchesName = t.name.toLowerCase().includes(q);
-				const matchesOrg = t.organization?.name?.toLowerCase().includes(q);
-				if (!matchesName && !matchesOrg) return false;
+				const matchesDescription = t.description.toLowerCase().includes(q);
+				if (!matchesName && !matchesDescription) return false;
 			}
 
 			return true;
@@ -174,7 +177,13 @@ export default function TournamentsListPage({
 			</div>
 
 			{/* Tournaments Table */}
-			<TournamentTable tournaments={filteredTournaments} loading={loading} />
+			{loadError && !loading ? (
+				<div role="alert" className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center text-sm text-destructive">
+					{loadError}
+				</div>
+			) : (
+				<TournamentTable tournaments={filteredTournaments} loading={loading} />
+			)}
 		</div>
 	);
 }

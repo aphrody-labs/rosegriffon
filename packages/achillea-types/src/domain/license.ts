@@ -11,7 +11,8 @@ export interface License {
 	issuedAt: string;
 	validUntil: string;
 	status: LicenseStatus;
-	pdfUrl: string;
+	/** Nullable until the printable licence PDF has been generated. */
+	pdfUrl: string | null;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -34,4 +35,6 @@ export interface LicenseVerifyResult {
 /** `GET /licenses/me` — `null` tant qu'aucune licence n'a été émise. */
 export interface LicenseHolderResponse {
 	license: License | null;
+	/** Owner-only bearer token used to share the public verification URL. */
+	verificationToken: string | null;
 }

@@ -6,10 +6,10 @@ import { resolveAchilleaSession } from "../../auth/session";
 
 export const licenseController = new Elysia({ prefix: "/licenses" })
 	.use(dbPlugin)
-	.get("/me", async ({ db, headers, set }) => {
+	.get("/me", async ({ db, headers }) => {
 		const session = await resolveAchilleaSession(headers);
 		if (!session) return status(401, { message: "Authentication required" as const });
-		return { license: await LicenseService.findLatestForUser(db, session.id) };
+		return LicenseService.findLatestForUser(db, session.id);
 	}, {
 		response: {
 			200: LicenseModel.me,

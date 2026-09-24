@@ -22,11 +22,14 @@ interface RecordedCall {
  * jamais le réseau. Le corps renvoyé est volontairement hors-schéma — ces
  * tests portent sur la construction de la requête.
  */
-function tracingClient(): { client: ReturnType<typeof createAchilleaClient>; calls: RecordedCall[] } {
+function tracingClient(response: unknown = {}): {
+	client: ReturnType<typeof createAchilleaClient>;
+	calls: RecordedCall[];
+} {
 	const calls: RecordedCall[] = [];
 	const fetch: AchilleaFetch = async (input, init) => {
 		calls.push({ url: String(input), method: init?.method, body: init?.body });
-		return Response.json({});
+		return Response.json(response);
 	};
 	return { client: createAchilleaClient({ baseUrl: "https://a.test/api", fetch }), calls };
 }
@@ -146,6 +149,31 @@ describe("chemins et verbes par ressource", () => {
 		expect(calls[7]?.method).toBe("PUT");
 	});
 
+	test("tournois : valide la projection publique compacte renvoyée par l'API", async () => {
+		const { client } = tracingClient({
+			data: [
+				{
+					id: 91,
+					name: "Coupe de test",
+					description: "Édition ouverte",
+					type: "TOURNAMENT",
+					status: "Open",
+					createdAt: "2026-09-20T12:00:00.000Z",
+					updatedAt: "2026-09-21T12:00:00.000Z",
+				},
+			],
+			meta: { page: 1, limit: 25, total: 1, pageCount: 1 },
+		});
+
+		const result = await client.tournaments.list();
+		expect(result.ok).toBe(true);
+		if (result.ok) {
+			expect(result.value.data[0]?.name).toBe("Coupe de test");
+			expect(result.value.data[0]?.status).toBe("Open");
+			expect(result.value.data[0]?.createdAt).toBeInstanceOf(Date);
+		}
+	});
+
 	test("tournois : les états sont répétés dans la query-string", async () => {
 		const { client, calls } = tracingClient();
 
@@ -220,6 +248,30 @@ describe("chemins et verbes par ressource", () => {
 		expect(calls[2]?.method).toBe("PATCH");
 		expect(calls[7]?.method).toBe("PATCH");
 		expect(client.licenses.pdfUrl("abc")).toBe("https://a.test/api/licenses/abc.pdf");
+	});
+
+	test("licence me expose le jeton de vérification propriétaire et accepte un PDF absent", async () => {
+		const verificationToken = "a".repeat(64);
+		const { client } = tracingClient({
+			license: {
+				id: "licence-1",
+				userId: "user-1",
+				licenseNumber: "RG-2026-001",
+				issuedAt: "2026-01-01T00:00:00.000Z",
+				validUntil: "2027-01-01T00:00:00.000Z",
+				status: "Active",
+				pdfUrl: null,
+				createdAt: "2026-01-01T00:00:00.000Z",
+				updatedAt: "2026-01-01T00:00:00.000Z",
+			},
+			verificationToken,
+		});
+
+		const result = await client.licenses.mine();
+		expect(result).toMatchObject({
+			ok: true,
+			value: { verificationToken, license: { pdfUrl: null } },
+		});
 	});
 
 	test("sanctions, notes joueur, portefeuille, notifications", async () => {

@@ -18,12 +18,25 @@ async function session(headers: { authorization?: string; cookie?: string }) {
 
 export const organizationController = new Elysia({ prefix: "/organizations" })
 	.use(dbPlugin)
-	.get("/", async ({ db, query }) => OrganizationService.findAll(db, query.page, query.pageSize, query.state), {
+	.get("/", async ({ db, headers, query }) => {
+		// Approved organizations are public; pending/rejected review data is staff-only.
+		if (query.state !== undefined && query.state !== 1) {
+			const user = await session(headers);
+			if (!user) return status(401, { message: "Authentication required" as const });
+			const actor = await db.selectFrom("user").select("role").where("id", "=", user.id).executeTakeFirst();
+			if (!actor || actor.role < 2) return status(403, { message: "Administrator role required" });
+		}
+		return OrganizationService.findAll(db, query.page, query.pageSize, query.state);
+	}, {
 		query: t.Object({
 			page: t.Optional(t.Numeric({ minimum: 1 })), pageSize: t.Optional(t.Numeric({ minimum: 1, maximum: 50 })),
 			state: t.Optional(t.Numeric()),
 		}),
-		response: { 200: OrganizationModel.listResponse },
+		response: {
+			200: OrganizationModel.listResponse,
+			401: OrganizationModel.unauthorized,
+			403: t.Object({ message: t.String() }),
+		},
 	})
 	.get("/me", async ({ db, headers }) => {
 		const user = await session(headers);

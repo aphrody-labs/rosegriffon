@@ -929,7 +929,8 @@ data class License(
 	val issuedAt: String,
 	val validUntil: String,
 	val status: LicenseStatus,
-	val pdfUrl: String,
+	/// Nullable until the printable licence PDF has been generated.
+	val pdfUrl: String?,
 	val createdAt: String,
 	val updatedAt: String,
 )
@@ -938,6 +939,8 @@ data class License(
 @Serializable
 data class LicenseHolderResponse(
 	val license: License?,
+	/// Owner-only bearer token used to share the public verification URL.
+	val verificationToken: String?,
 )
 
 /// État d'une licence joueur.
@@ -1074,14 +1077,21 @@ data class ModerationSyncResult(
 	val sanctionId: String,
 )
 
-/// Création d'un clan (POST /clans).
+/// Création d'un clan (POST /clans/create, API Achilléa historique).
 @Serializable
 data class NewClanPayload(
+	val founders: List<JsonElement>,
+	val logo: String,
 	val name: String,
-	val shortenedName: String,
-	val clanBiography: String? = null,
-	val languages: List<String>? = null,
-	val origin: String? = null,
+	val normalizedName: String,
+	val shortName: String,
+	val normalizedShortName: String,
+	val description: String,
+	val twitter: String? = null,
+	val instagram: String? = null,
+	val tiktok: String? = null,
+	val origin: Country? = null,
+	val languages: List<Country>? = null,
 )
 
 @Serializable
@@ -2212,6 +2222,18 @@ enum class TournamentEventType {
 	@SerialName("tournament_restored")
 	TOURNAMENT_RESTORED,
 }
+
+/// Projection compacte de la liste publique `/tournaments`.
+@Serializable
+data class TournamentListItem(
+	val id: Double,
+	val name: String,
+	val description: String,
+	val type: String,
+	val status: String?,
+	val createdAt: String,
+	val updatedAt: String,
+)
 
 @Serializable
 data class TournamentMatchStats(

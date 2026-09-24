@@ -1,28 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRankedMatch } from "@/lib/achillea/use-ranked-match";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
+import { matchStatusLabel, rankedMatchViewState } from "@/lib/achillea/ranked-room";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import {
 	Swords,
 	ArrowLeft,
 	ShieldCheck,
-	ShieldAlert,
 	AlertTriangle,
 	Send,
 	Upload,
 	Check,
 	Loader2,
 	MessageSquare,
-	Flag,
-	HelpCircle,
 } from "lucide-react";
 
 export default function RankedMatchPage() {
-	const { user, status, login } = useAchilleaAuth();
+	const { user, isAuthenticated, isLoading: authLoading, login } = useAchilleaAuth();
 
 	// État RÉEL du match, poussé par le serveur (Colyseus). Tout ce qui suivait
 	// ici était inventé : code de salon, mode, adversaire, ELO, chat local,
@@ -31,6 +29,7 @@ export default function RankedMatchPage() {
 	const match = useRankedMatch(parametres.get("salle"));
 
 	const roomCode = match.codeSalle;
+	const matchView = rankedMatchViewState({ authLoading, isAuthenticated, connection: match.connexion, roomCode });
 	const matchMode = `${match.joueurs.length === 4 ? "2v2" : "1v1"} ${match.classe ? "Classé" : "Amical"}`;
 
 	// Le joueur courant et son adversaire sortent de l'état du serveur, jamais
@@ -44,9 +43,11 @@ export default function RankedMatchPage() {
 	const scoreSubmitted = moi?.submitted ?? false;
 	const proofUploaded = moi?.proofUploaded ?? false;
 
-	const [disputeOpen, setDisputeOpen] = useState<boolean>(false);
-	const [disputeReason, setDisputeReason] = useState<string>("");
 	const [chatInput, setChatInput] = useState<string>("");
+	const [proofUploading, setProofUploading] = useState(false);
+	const [proofError, setProofError] = useState<string | null>(null);
+	const [confirmForfeit, setConfirmForfeit] = useState(false);
+	const proofInput = useRef<HTMLInputElement>(null);
 
 	// Les scores saisis suivent ceux que le serveur a déjà enregistrés : après
 	// un rechargement, le formulaire reflète l'état réel au lieu de repartir de
@@ -67,9 +68,84 @@ export default function RankedMatchPage() {
 		match.soumettreScore(myScore, oppScore);
 	};
 
-	const handleUploadProof = () => {
-		match.signalerPreuve();
+	const handleUploadProof = async (file: File | undefined) => {
+		setProofError(null);
+		if (!file) return;
+		if (file.size > 5 * 1024 * 1024) {
+			setProofError("La capture doit faire 5 Mio maximum.");
+			return;
+		}
+		if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+			setProofError("Formats acceptés : PNG, JPEG ou WebP.");
+			return;
+		}
+		if (match.lobbyId <= 0) {
+			setProofError("Le salon de preuve n'est pas encore prêt. Réessayez après le début du match.");
+			return;
+		}
+		setProofUploading(true);
+		try {
+			const dataUrl = await new Promise<string>((resolve, reject) => {
+				const reader = new FileReader();
+				reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Lecture du fichier impossible."));
+				reader.onerror = () => reject(new Error("Lecture du fichier impossible."));
+				reader.readAsDataURL(file);
+			});
+			const result = await createAchilleaClient({ credentials: "include" }).ranked.uploadDisputeProof(match.lobbyId, dataUrl);
+			if (!result.ok) {
+				setProofError("Le dépôt de la capture a échoué. Vérifiez que le match est bien ouvert puis réessayez.");
+				return;
+			}
+			match.signalerPreuve();
+		} catch {
+			setProofError("Le dépôt de la capture a échoué. Réessayez.");
+		} finally {
+			setProofUploading(false);
+		}
 	};
+
+	if (matchView === "loading") {
+		return <div className="max-w-3xl mx-auto px-4 py-20 text-center text-muted-foreground">Vérification de la session et du salon de match…</div>;
+	}
+	if (matchView === "login") {
+		return (
+			<div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+				<h1 className="text-2xl font-bold">Connexion requise</h1>
+				<p className="text-muted-foreground">Connectez-vous pour rejoindre votre match Achilléa.</p>
+				<button type="button" onClick={() => login("/achillea/ranked/match")} className="px-5 py-2 rounded-lg bg-primary text-primary-foreground font-semibold">Se connecter</button>
+			</div>
+		);
+	}
+	if (matchView === "error") {
+		return (
+			<div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+				<h1 className="text-2xl font-bold">Match inaccessible</h1>
+				<p role="alert" className="text-destructive">{match.erreur ?? "Impossible de rejoindre ce salon."}</p>
+				<Link href="/achillea/ranked" className="underline">Retour au mode classé</Link>
+			</div>
+		);
+	}
+	if (matchView === "empty") {
+		return (
+			<div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+				<h1 className="text-2xl font-bold">Aucun match à rejoindre</h1>
+				<p className="text-muted-foreground">Lancez une recherche ou acceptez un défi depuis le mode classé pour ouvrir un salon de match.</p>
+				<Link href="/achillea/ranked" className="inline-flex px-5 py-2 rounded-lg bg-primary text-primary-foreground font-semibold">Retour au mode classé</Link>
+			</div>
+		);
+	}
+	if (matchView === "disconnected") {
+		return (
+			<div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+				<h1 className="text-2xl font-bold">Connexion au match interrompue</h1>
+				<p role="status" className="text-muted-foreground">Rechargez la page pour tenter de rejoindre à nouveau le salon {roomCode}.</p>
+				<Link href="/achillea/ranked" className="underline">Retour au mode classé</Link>
+			</div>
+		);
+	}
+	if (matchView === "syncing") {
+		return <div className="max-w-3xl mx-auto px-4 py-20 text-center text-muted-foreground">Synchronisation de l'état du match…</div>;
+	}
 
 	return (
 		<div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
@@ -102,10 +178,40 @@ export default function RankedMatchPage() {
 				<div className="flex items-center gap-2">
 					<span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
 						<span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-						En cours de jeu
+						{matchStatusLabel(match.statut)}
 					</span>
 				</div>
 			</div>
+
+			{match.statut === "waiting" && (
+				<div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-5 text-center space-y-3">
+					<p className="text-sm">Les deux joueurs doivent confirmer avant le début de la rencontre.</p>
+					<button type="button" onClick={match.demarrer} disabled={moi?.startedMatch ?? true} className="px-5 py-2 rounded-lg bg-primary text-primary-foreground font-semibold disabled:opacity-50">
+						{moi?.startedMatch ? "Prêt — en attente de l'adversaire" : "Je suis prêt"}
+					</button>
+				</div>
+			)}
+			{match.statut === "playing" && (
+				<div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-center space-y-3">
+					<p className="text-sm">Quand la rencontre est terminée, passez à la saisie du score.</p>
+					<button type="button" onClick={match.terminer} disabled={moi?.confirmedFinish ?? true} className="px-5 py-2 rounded-lg bg-primary text-primary-foreground font-semibold disabled:opacity-50">
+						{moi?.confirmedFinish ? "Fin confirmée — en attente de l'adversaire" : "Fin de la rencontre"}
+					</button>
+				</div>
+			)}
+			{["waiting", "playing", "scoring"].includes(match.statut) && (
+				<div className="text-center space-y-2">
+					{confirmForfeit ? (
+						<div role="alertdialog" aria-label="Confirmer le forfait" className="inline-flex flex-wrap items-center justify-center gap-3 rounded-lg border border-destructive/40 p-3">
+							<span className="text-sm">Confirmer votre forfait ?</span>
+							<button type="button" onClick={() => { match.abandonner(); setConfirmForfeit(false); }} className="px-3 py-1.5 rounded bg-destructive text-destructive-foreground font-semibold">Oui, déclarer forfait</button>
+							<button type="button" onClick={() => setConfirmForfeit(false)} className="px-3 py-1.5 rounded border border-border">Annuler</button>
+						</div>
+					) : (
+						<button type="button" onClick={() => setConfirmForfeit(true)} className="text-xs text-destructive underline">Déclarer forfait</button>
+					)}
+				</div>
+			)}
 
 			{/* Match Versus Card */}
 			<div className="border border-border bg-card rounded-2xl p-6 shadow-sm">
@@ -173,7 +279,7 @@ export default function RankedMatchPage() {
 						</p>
 					</div>
 
-					{!scoreSubmitted ? (
+					{match.statut === "scoring" && !scoreSubmitted ? (
 						<div className="space-y-4">
 							<div className="grid grid-cols-2 gap-4">
 								<div className="space-y-1.5">
@@ -218,25 +324,8 @@ export default function RankedMatchPage() {
 								Confirmer et envoyer le score
 							</button>
 
-							<div className="flex items-center justify-between text-xs pt-2">
-								<button
-									type="button"
-									onClick={() => setDisputeOpen(!disputeOpen)}
-									className="text-amber-400 hover:underline flex items-center gap-1"
-								>
-									<AlertTriangle className="w-3.5 h-3.5" />
-									Signaler un litige / problème
-								</button>
-								<button
-									type="button"
-									className="text-muted-foreground hover:text-destructive flex items-center gap-1"
-								>
-									<Flag className="w-3.5 h-3.5" />
-									Déclarer forfait
-								</button>
-							</div>
 						</div>
-					) : (
+					) : scoreSubmitted ? (
 						<div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-2">
 							<Check className="w-8 h-8 text-emerald-400 mx-auto" />
 							<div className="font-bold text-sm text-emerald-400">Score soumis avec succès !</div>
@@ -244,28 +333,36 @@ export default function RankedMatchPage() {
 								En attente de validation par l'adversaire. La mise à jour de vos AP sera appliquée instantanément.
 							</p>
 						</div>
+					) : match.statut === "finished" || match.statut === "disputed" ? (
+						<div role="status" className="p-4 rounded-xl bg-muted/40 border border-border text-center text-sm">{matchStatusLabel(match.statut)}.</div>
+					) : (
+						<div className="p-4 rounded-xl bg-muted/40 border border-border text-center text-sm text-muted-foreground">La saisie du score sera disponible après la fin de la rencontre.</div>
 					)}
 
 					{/* Dispute block */}
-					{disputeOpen && (
+					{match.statut === "disputed" && (
 						<div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-3 text-xs">
 							<div className="font-bold text-amber-400 flex items-center gap-1.5">
 								<AlertTriangle className="w-4 h-4" />
-								Ouverture d'un litige
+								Fournir une preuve au dossier d'arbitrage
 							</div>
 							<p className="text-muted-foreground">
-								En cas de déconnexion volontaire, triche ou désaccord sur le score, téléchargez une capture d'écran du résultat final pour l'arbitre Achilléa.
+								{match.motifLitige || "Le résultat est contesté. Vous pouvez joindre une capture d'écran du résultat final pour l'arbitre Achilléa."}
 							</p>
 							<div className="flex items-center gap-2">
+								<input ref={proofInput} type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ""; void handleUploadProof(file); }} />
 								<button
 									type="button"
-									onClick={handleUploadProof}
+									onClick={() => proofInput.current?.click()}
+									disabled={proofUploading || match.lobbyId <= 0 || proofUploaded}
 									className="py-1.5 px-3 rounded-lg border border-border bg-background hover:bg-muted font-medium flex items-center gap-1.5"
 								>
 									<Upload className="w-3.5 h-3.5" />
-									{proofUploaded ? "Capture déposée !" : "Télécharger une capture"}
+									{proofUploading ? "Dépôt en cours…" : proofUploaded ? "Capture déposée !" : "Choisir une capture"}
 								</button>
 							</div>
+							{proofError && <p role="alert" className="text-xs text-destructive">{proofError}</p>}
+							{match.lobbyId <= 0 && <p className="text-xs text-muted-foreground">La preuve sera disponible après confirmation de la fin du match.</p>}
 						</div>
 					)}
 				</div>

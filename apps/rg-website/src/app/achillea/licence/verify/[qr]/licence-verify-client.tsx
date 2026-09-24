@@ -21,10 +21,13 @@ export default function LicenseVerifyPage({ qr }: { qr: string }) {
 
 	const [result, setResult] = useState<LicenseVerifyResult | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [unavailable, setUnavailable] = useState(false);
+	const [reload, setReload] = useState(0);
 
 	useEffect(() => {
 		let cancelled = false;
 		setLoading(true);
+		setUnavailable(false);
 		const client = createAchilleaClient();
 
 		client.licenses
@@ -34,11 +37,16 @@ export default function LicenseVerifyPage({ qr }: { qr: string }) {
 				if (res.ok && res.value) {
 					setResult(res.value);
 				} else {
-					setResult({ valid: false, reason: "not_found" });
+					setUnavailable(true);
+					setResult(null);
 				}
 			})
-			.catch(() => {
-				if (!cancelled) setResult({ valid: false, reason: "not_found" });
+			.catch((cause) => {
+				if (!cancelled) {
+					setUnavailable(true);
+					setResult(null);
+				}
+				// Do not log this failure: the request path contains the QR bearer token.
 			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
@@ -47,7 +55,7 @@ export default function LicenseVerifyPage({ qr }: { qr: string }) {
 		return () => {
 			cancelled = true;
 		};
-	}, [qrSecret]);
+	}, [qrSecret, reload]);
 
 	return (
 		<div className="max-w-md mx-auto px-4 py-16 space-y-6">
@@ -68,7 +76,29 @@ export default function LicenseVerifyPage({ qr }: { qr: string }) {
 			{loading ? (
 				<div className="py-12 text-center space-y-3">
 					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-					<p className="text-xs text-muted-foreground">Vérification de l'empreinte de sécurité...</p>
+					<p className="text-xs text-muted-foreground">
+						Vérification de l'empreinte de sécurité...
+					</p>
+				</div>
+			) : unavailable ? (
+				<div
+					role="alert"
+					className="border border-amber-500/30 bg-amber-500/5 rounded-3xl p-8 text-center space-y-4"
+				>
+					<ShieldAlert className="w-14 h-14 text-amber-400 mx-auto" />
+					<div className="space-y-1">
+						<h2 className="text-xl font-bold">Vérification indisponible</h2>
+						<p className="text-sm text-muted-foreground">
+							Le service n’a pas pu vérifier cette licence. Son statut n’a pas pu être confirmé.
+						</p>
+					</div>
+					<button
+						type="button"
+						onClick={() => setReload((value) => value + 1)}
+						className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90"
+					>
+						Réessayer
+					</button>
 				</div>
 			) : !result || !result.valid ? (
 				<div className="border border-destructive/30 bg-destructive/5 rounded-3xl p-8 text-center space-y-4">
@@ -79,8 +109,8 @@ export default function LicenseVerifyPage({ qr }: { qr: string }) {
 							{result?.reason === "expired"
 								? "Cette licence a expiré. Le joueur doit renouveler son adhésion."
 								: result?.reason === "revoked"
-								? "Cette licence a été révoquée par l'arbitrage officiel."
-								: "Ce QR code ne correspond à aucune licence valide sur le réseau Achilléa."}
+									? "Cette licence a été révoquée par l'arbitrage officiel."
+									: "Ce QR code ne correspond à aucune licence valide sur le réseau Achilléa."}
 						</p>
 					</div>
 				</div>

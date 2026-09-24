@@ -16,7 +16,7 @@ import {
 	apiDateSchema,
 	apiEnvelopeSchema,
 	countrySchema,
-	paginatedSchema,
+	pageMetaSchema,
 	socialMediaDtoSchema,
 	userDtoSchema,
 } from "./common";
@@ -92,7 +92,19 @@ export const organizationValidationDtoSchema = z.object({
 
 const organizationEnvelopeSchema = apiEnvelopeSchema(organizationDtoSchema);
 const organizationListEnvelopeSchema = apiEnvelopeSchema(z.array(organizationDtoSchema));
-const orgManagerListEnvelopeSchema = apiEnvelopeSchema(z.array(orgManagerDtoSchema));
+const organizationCreateEnvelopeSchema = apiEnvelopeSchema(z.union([organizationDtoSchema, z.null()]));
+/** Both deployed generations currently return `{ data, count }`; normalize it to Paginated. */
+const organizationPageSchema: z.ZodType<Paginated<OrganizationDTO>> = z
+	.object({
+		data: z.array(organizationDtoSchema),
+		count: z.number().optional(),
+		total: z.number().optional(),
+		meta: pageMetaSchema.optional(),
+	})
+	.transform(({ data, count, total, meta }) => ({
+		data,
+		meta: meta ?? { total: total ?? count ?? data.length },
+	}));
 const opaqueEnvelopeSchema = apiEnvelopeSchema(z.unknown());
 
 export type OrganizationListQuery = {
@@ -108,7 +120,7 @@ export class OrganizationsResource extends AchilleaResource {
 	list(
 		query: OrganizationListQuery = {}
 	): Promise<AchilleaClientResult<Paginated<OrganizationDTO>>> {
-		return this.http.get("/organizations", paginatedSchema(organizationDtoSchema), {
+		return this.http.get("/organizations", organizationPageSchema, {
 			query,
 		});
 	}
@@ -130,15 +142,15 @@ export class OrganizationsResource extends AchilleaResource {
 	}
 
 	/** `POST /organizations/create` — dépose une demande de création. */
-	create(payload: OrganizationDTO): Promise<AchilleaClientResult<ApiEnvelope<OrgManagerDTO[]>>> {
-		return this.http.post("/organizations/create", orgManagerListEnvelopeSchema, payload);
+	create(payload: OrganizationDTO): Promise<AchilleaClientResult<ApiEnvelope<OrganizationDTO | null>>> {
+		return this.http.post("/organizations/create", organizationCreateEnvelopeSchema, payload);
 	}
 
 	/** `POST /organizations/validate` — même traitement, chemin de revue historique. */
 	validate(
 		payload: OrganizationDTO
-	): Promise<AchilleaClientResult<ApiEnvelope<OrgManagerDTO[]>>> {
-		return this.http.post("/organizations/validate", orgManagerListEnvelopeSchema, payload);
+	): Promise<AchilleaClientResult<ApiEnvelope<OrganizationDTO | null>>> {
+		return this.http.post("/organizations/validate", organizationCreateEnvelopeSchema, payload);
 	}
 
 	/** `POST /organizations/:id/approve` — approuve une organisation en attente. */

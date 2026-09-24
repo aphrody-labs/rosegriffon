@@ -18,21 +18,28 @@ import { signalerException } from "@/lib/achillea/signaler";
 export default function CastsPublicPage() {
 	const [casters, setCasters] = useState<CasterPublic[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [loadError, setLoadError] = useState<string | null>(null);
 
 	useEffect(() => {
 		let cancelled = false;
 		setLoading(true);
+		setLoadError(null);
 		const client = createAchilleaClient();
 
 		client.casts
 			.listCasters()
 			.then((res) => {
 				if (cancelled) return;
-				if (res.ok && res.value) {
+				if (res.ok) {
 					setCasters(res.value);
+				} else {
+					setLoadError("La liste des casters est temporairement indisponible. Réessaie dans quelques instants.");
+					signalerException("casts", new Error(`${res.kind}: ${res.detail}`));
 				}
 			})
-			.catch((cause) => {
+			.catch((cause: unknown) => {
+				if (cancelled) return;
+				setLoadError("La liste des casters est temporairement indisponible. Réessaie dans quelques instants.");
 				signalerException("casts", cause);
 			})
 			.finally(() => {
@@ -82,6 +89,11 @@ export default function CastsPublicPage() {
 				<div className="py-20 text-center space-y-3">
 					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
 					<p className="text-sm text-muted-foreground">Chargement des casters...</p>
+				</div>
+			) : loadError ? (
+				<div role="alert" className="border border-amber-500/30 bg-amber-500/5 rounded-2xl p-8 text-center space-y-3">
+					<p className="text-sm text-muted-foreground">{loadError}</p>
+					<button type="button" onClick={() => window.location.reload()} className="text-sm font-semibold text-primary underline underline-offset-4">Réessayer</button>
 				</div>
 			) : casters.length === 0 ? (
 				<div className="border border-dashed border-border rounded-2xl p-12 text-center text-xs text-muted-foreground">

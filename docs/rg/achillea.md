@@ -1,14 +1,23 @@
-# Achillea — intégration dans l'écosystème Rose Griffon
+# Achillea — journal historique d'intégration
 
-Design / plan d'intégration d'**Achillea** (dashboard communautaire Inazuma Eleven — repo séparé
-`rose-griffon/achillea`, front **Angular 21** auto-hébergé) dans l'écosystème RG : API distante via
-`ranked.rosegriffon.fr` puis `api.rosegriffon.fr`, assets publics à aligner avec `cdn.rosegriffon.fr`,
-SEO aligné sur le monorepo RG, et intégration cross-site entre les **3 sites**.
+Ce document conserve l'audit et les propositions de l'intégration historique
+d'Achillea. **Il ne décrit plus l'architecture ni les routes courantes.** Depuis
+le 21/9/2026, le site compétitif est intégré dans `apps/website` (Next.js) sous
+`https://rosegriffon.fr/achillea`; le dossier Angular autonome a été retiré.
+Consulter [`achillea-migration-next.md`](achillea-migration-next.md) pour
+l'architecture et les routes applicatives actuelles, et
+[`achillea-services.md`](achillea-services.md) pour les services/API.
 
-> Statut : **document de référence et journal d'exécution** pour la cible monorepo et les points
-> de contact Achillea/RG. La première passerelle réelle est en service depuis le 14/8/2026 — voir
+Le sous-domaine `https://achillea.rosegriffon.fr/` redirige vers
+`https://rosegriffon.fr/achillea` (vérifié le 24/9/2026). Une vérification HTTP
+live le même jour a renvoyé `200` pour l'accueil et les routes statiques de
+Ranked, tournois, clans, casts, licence, portefeuille, guide, ligues,
+organisations et administration. Ces réponses prouvent que Next sert les URLs,
+pas le fonctionnement des actions authentifiées côté navigateur.
+
+> Statut historique : la première passerelle réelle est en service depuis le 14/8/2026 — voir
 > la section ci-dessous. Le code du commit source audité est désormais importé dans les workspaces
-> dédiés de ce dépôt ; la production historique n'a pas été basculée.
+> dédiés de ce dépôt ; la passerelle décrite dans cet audit historique n'avait pas été basculée.
 > **Décision de cadrage (7/9/2026)** : préparer l'intégration dans l'arbre RG par des chemins
 > dédiés (`apps/website`, `apps/achillea-bot`, `packages/achillea-core` et
 > `packages/achillea-types`), avec un client partagé éventuel séparé, sans copier Achillea
@@ -93,7 +102,8 @@ publique stable `https://ranked.rosegriffon.fr/api`, indépendante de l'IP du VP
 | --- | --- | --- | --- |
 | **website** | `rosegriffon.fr` | Next.js 16 (`apps/website`) | site principal RG et wiki Azalée sous `/wiki` |
 | **azalee** | `azalee.rosegriffon.fr` | redirection HTTP permanente | compatibilité vers `rosegriffon.fr/wiki`, aucun build autonome |
-| **achillea** | `achillea.rosegriffon.fr` | Angular 21 (repo `rose-griffon/achillea`) | dashboard communautaire : clans, tournois, ranked, casts |
+| **Achilléa** | `rosegriffon.fr/achillea` | Next.js (`apps/website`) | espace compétitif : clans, tournois, ranked, casts |
+| Alias historique | `achillea.rosegriffon.fr` | redirection permanente vers `/achillea` | compatibilité de l'ancien domaine |
 
 Infra partagée : `api.rosegriffon.fr` (stub nginx, `/health`), `cdn.rosegriffon.fr` (service CDN d'images
 `cdn.service`), backend Achillea sur `ranked.rosegriffon.fr` (bot Bun :4002/:4000).

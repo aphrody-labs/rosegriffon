@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
+import { normalizeNames } from "@rosegriffon/achillea-core/names";
 import { SocialMedia, type SocialMediaDTO } from "@rosegriffon/achillea-types/domain/common";
 import {
 	Building2,
@@ -36,7 +37,7 @@ const COUNTRY_OPTIONS = [
 
 export default function OrganizationCreationPage() {
 	const router = useRouter();
-	const { user, isAuthenticated, login, isLoading: authLoading } = useAchilleaAuth();
+	const { isAuthenticated, login, isLoading: authLoading } = useAchilleaAuth();
 
 	const [name, setName] = useState<string>("");
 	const [normalizedName, setNormalizedName] = useState<string>("");
@@ -56,19 +57,17 @@ export default function OrganizationCreationPage() {
 
 	const handleNameChange = (val: string) => {
 		setName(val);
-		const autoSlug = val
-			.toLowerCase()
-			.normalize("NFD")
-			.replace(/[\u0300-\u036f]/g, "")
-			.replace(/[^a-z0-9]+/g, "-")
-			.replace(/^-+|-+$/g, "");
-		setNormalizedName(autoSlug);
+		setNormalizedName(normalizeNames(val.trim()));
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (name.trim().length < 3) {
-			setError("Le nom de l'organisation doit comporter au moins 3 caractères.");
+		if ([...name.trim()].length < 3 || [...name.trim()].length > 30) {
+			setError("Le nom de l'organisation doit comporter entre 3 et 30 caractères.");
+			return;
+		}
+		if (!normalizedName || normalizedName !== normalizeNames(name.trim())) {
+			setError("L'identifiant normalisé ne correspond pas au nom de l'organisation.");
 			return;
 		}
 
@@ -123,11 +122,10 @@ export default function OrganizationCreationPage() {
 		try {
 			const res = await client.organizations.create({
 				name: name.trim(),
-				normalizedName: normalizedName.trim() || name.trim().toLowerCase().replace(/\s+/g, "-"),
+				normalizedName: normalizedName.trim(),
 				description: description.trim() || "Organisation esport officielle Achilléa.",
 				logo: logo.trim() || "https://rosegriffon.fr/achillea/achillea.png",
 				origin: origin,
-				owner: user as any,
 				orgManagers: [],
 				socialMedias,
 				broadcastMedias,
@@ -223,14 +221,15 @@ export default function OrganizationCreationPage() {
 						/>
 					</div>
 
-					{/* Identifiant URL / Normalized name */}
+					{/* Identifiant normalisé */}
 					<div className="space-y-1.5">
 						<label className="text-xs font-bold text-foreground flex items-center gap-1.5">
 							<Sparkles className="w-3.5 h-3.5 text-primary" />
-							Identifiant URL (Slug unique)
+							Identifiant unique
 						</label>
+						<p className="text-xs text-muted-foreground">Généré selon le nom de la structure.</p>
 						<div className="flex items-center gap-2">
-							<span className="text-xs font-mono text-muted-foreground">achillea.fr/orgs/</span>
+							<span className="text-xs font-mono text-muted-foreground">ACHILLÉA</span>
 							<input
 								type="text"
 								value={normalizedName}

@@ -57,6 +57,17 @@ export interface NewTournamentDTO {
 	bypassRules?: boolean;
 }
 
+/** Projection compacte de la liste publique `/tournaments`. */
+export interface TournamentListItem {
+	id: number;
+	name: string;
+	description: string;
+	type: string;
+	status: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
 export interface Tournament extends EventEntity {
 	internalState: TournamentState;
 	startsAt: Date;

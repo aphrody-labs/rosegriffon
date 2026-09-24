@@ -17,14 +17,23 @@ import { signalerException } from "@/lib/achillea/signaler";
 
 export default function CastPlanningPage({ id }: { id: string }) {
 	const eventId = id;
+	const { isAuthenticated, login, isLoading: authLoading } = useAchilleaAuth();
 
 	const [detail, setDetail] = useState<CastEventDetail | null>(null);
-	const [loading, setLoading] = useState<boolean>(true);
+	const [loading, setLoading] = useState<boolean>(false);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
+		if (authLoading || !isAuthenticated) {
+			setDetail(null);
+			setLoading(false);
+			return;
+		}
+
 		let cancelled = false;
 		setLoading(true);
-		const client = createAchilleaClient();
+		setError(null);
+		const client = createAchilleaClient({ credentials: "include" });
 
 		client.casts
 			.getEvent(eventId)
@@ -32,9 +41,16 @@ export default function CastPlanningPage({ id }: { id: string }) {
 				if (cancelled) return;
 				if (res.ok && res.value) {
 					setDetail(res.value);
+				} else if (!res.ok) {
+					setError(
+						res.kind === "http" && res.status === 404
+							? "Évènement de cast introuvable."
+							: "Impossible de charger le planning. Réessaie dans quelques instants."
+					);
 				}
 			})
 			.catch((cause) => {
+				if (!cancelled) setError("Une erreur inattendue est survenue lors du chargement.");
 				signalerException("casts/[id]/planning", cause);
 			})
 			.finally(() => {
@@ -44,7 +60,7 @@ export default function CastPlanningPage({ id }: { id: string }) {
 		return () => {
 			cancelled = true;
 		};
-	}, [eventId]);
+	}, [authLoading, eventId, isAuthenticated]);
 
 	return (
 		<div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
@@ -68,10 +84,29 @@ export default function CastPlanningPage({ id }: { id: string }) {
 				</p>
 			</div>
 
-			{loading ? (
+			{authLoading ? (
+				<div className="py-20 text-center text-sm text-muted-foreground">
+					Vérification de la session…
+				</div>
+			) : !isAuthenticated ? (
+				<div className="max-w-md mx-auto py-20 text-center space-y-4">
+					<p className="text-sm text-muted-foreground">Connectez-vous pour consulter le planning de régie.</p>
+					<button
+						type="button"
+						onClick={() => login(`/achillea/casts/${encodeURIComponent(eventId)}/planning`)}
+						className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition shadow-sm text-xs"
+					>
+						Se connecter
+					</button>
+				</div>
+			) : loading ? (
 				<div className="py-20 text-center space-y-3">
 					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
 					<p className="text-sm text-muted-foreground">Chargement du planning...</p>
+				</div>
+			) : error ? (
+				<div role="alert" className="border border-dashed border-border rounded-2xl p-12 text-center text-sm text-muted-foreground">
+					{error}
 				</div>
 			) : !detail ? (
 				<div className="border border-dashed border-border rounded-2xl p-12 text-center text-xs text-muted-foreground">

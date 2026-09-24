@@ -2859,7 +2859,15 @@
 					"$ref": "#/$defs/LicenseStatus"
 				},
 				"pdfUrl": {
-					"type": "string"
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"description": "Nullable until the printable licence PDF has been generated."
 				},
 				"createdAt": {
 					"type": "string"
@@ -2893,10 +2901,22 @@
 							"type": "null"
 						}
 					]
+				},
+				"verificationToken": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					],
+					"description": "Owner-only bearer token used to share the public verification URL."
 				}
 			},
 			"required": [
-				"license"
+				"license",
+				"verificationToken"
 			]
 		},
 		"LicenseStatus": {
@@ -3221,31 +3241,68 @@
 			]
 		},
 		"NewClanPayload": {
-			"description": "Création d'un clan (POST /clans).",
+			"description": "Création d'un clan (POST /clans/create, API Achilléa historique).",
 			"type": "object",
 			"properties": {
+				"founders": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"id"
+						]
+					}
+				},
+				"logo": {
+					"type": "string"
+				},
 				"name": {
 					"type": "string"
 				},
-				"shortenedName": {
+				"normalizedName": {
 					"type": "string"
 				},
-				"clanBiography": {
+				"shortName": {
 					"type": "string"
+				},
+				"normalizedShortName": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				},
+				"twitter": {
+					"type": "string"
+				},
+				"instagram": {
+					"type": "string"
+				},
+				"tiktok": {
+					"type": "string"
+				},
+				"origin": {
+					"$ref": "#/$defs/Country"
 				},
 				"languages": {
 					"type": "array",
 					"items": {
-						"type": "string"
+						"$ref": "#/$defs/Country"
 					}
-				},
-				"origin": {
-					"type": "string"
 				}
 			},
 			"required": [
+				"founders",
+				"logo",
 				"name",
-				"shortenedName"
+				"normalizedName",
+				"shortName",
+				"normalizedShortName",
+				"description"
 			]
 		},
 		"NewClanResponse": {
@@ -6874,6 +6931,51 @@
 				"TOURNAMENT_CLOSED",
 				"TOURNAMENT_CANCELED",
 				"TOURNAMENT_RESTORED"
+			]
+		},
+		"TournamentListItem": {
+			"description": "Projection compacte de la liste publique `/tournaments`.",
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "number"
+				},
+				"name": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				},
+				"status": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "null"
+						}
+					]
+				},
+				"createdAt": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"updatedAt": {
+					"type": "string",
+					"format": "date-time"
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"description",
+				"type",
+				"status",
+				"createdAt",
+				"updatedAt"
 			]
 		},
 		"TournamentMatchStats": {

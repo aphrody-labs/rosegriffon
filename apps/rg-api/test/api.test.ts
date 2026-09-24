@@ -14,29 +14,41 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 	});
 
 	it("Better Auth Elysia mount exposes session, agent, MCP and API-key routes", async () => {
-		const session = await app.handle(new Request("http://localhost/v1/auth/get-session", {
-			headers: { "x-forwarded-for": "127.0.0.1" },
-		}));
+		const session = await app.handle(
+			new Request("http://localhost/v1/auth/get-session", {
+				headers: { "x-forwarded-for": "127.0.0.1" },
+			})
+		);
 		expect(session.status).toBe(200);
 		expect(await session.json()).toBeNull();
 
 		const agent = await app.handle(new Request("http://localhost/v1/auth/agent-configuration"));
 		expect(agent.status).toBe(200);
-		expect((await agent.json()) as { provider_name: string }).toMatchObject({ provider_name: "Rose Griffon" });
+		expect((await agent.json()) as { provider_name: string }).toMatchObject({
+			provider_name: "Rose Griffon",
+		});
 
-		const discovery = await app.handle(new Request("http://localhost/.well-known/agent-configuration"));
+		const discovery = await app.handle(
+			new Request("http://localhost/.well-known/agent-configuration")
+		);
 		expect(discovery.status).toBe(200);
-		expect((await discovery.json()) as { provider_name: string }).toMatchObject({ provider_name: "Rose Griffon" });
+		expect((await discovery.json()) as { provider_name: string }).toMatchObject({
+			provider_name: "Rose Griffon",
+		});
 
 		const capabilities = await app.handle(new Request("http://localhost/v1/auth/capability/list"));
 		expect(capabilities.status).toBe(200);
-		expect((await capabilities.json()) as { capabilities: unknown[] }).toMatchObject({ capabilities: expect.any(Array) });
+		expect((await capabilities.json()) as { capabilities: unknown[] }).toMatchObject({
+			capabilities: expect.any(Array),
+		});
 
-		const apiKeyCreate = await app.handle(new Request("http://localhost/v1/auth/api-key/create", {
-			method: "POST",
-			headers: { "content-type": "application/json", "x-forwarded-for": "127.0.0.1" },
-			body: "{}",
-		}));
+		const apiKeyCreate = await app.handle(
+			new Request("http://localhost/v1/auth/api-key/create", {
+				method: "POST",
+				headers: { "content-type": "application/json", "x-forwarded-for": "127.0.0.1" },
+				body: "{}",
+			})
+		);
 		expect(apiKeyCreate.status).toBe(401);
 	});
 
@@ -50,11 +62,16 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		}
 	});
 
-
 	it("GET /v1/achillea/tournaments/circuit/ranking returns the unified circuit projection", async () => {
-		const res = await app.handle(new Request("http://localhost/v1/achillea/tournaments/circuit/ranking"));
+		const res = await app.handle(
+			new Request("http://localhost/v1/achillea/tournaments/circuit/ranking")
+		);
 		expect(res.status).toBe(200);
-		const data = await res.json() as { leaderboard?: unknown[]; tournaments?: unknown[]; clanRanking?: unknown[] };
+		const data = (await res.json()) as {
+			leaderboard?: unknown[];
+			tournaments?: unknown[];
+			clanRanking?: unknown[];
+		};
 		expect(Array.isArray(data.leaderboard)).toBe(true);
 		expect(Array.isArray(data.tournaments)).toBe(true);
 		expect(Array.isArray(data.clanRanking)).toBe(true);
@@ -182,7 +199,9 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 			}),
 			new Request("http://localhost/v1/achillea/tournaments/99999999/restore", { method: "POST" }),
 			new Request("http://localhost/v1/achillea/tournaments/start/99999999", { method: "PUT" }),
-			new Request("http://localhost/v1/achillea/tournaments/next-phase/99999999", { method: "PUT" }),
+			new Request("http://localhost/v1/achillea/tournaments/next-phase/99999999", {
+				method: "PUT",
+			}),
 		];
 		for (const request of requests) expect((await app.handle(request)).status).toBe(401);
 	});
@@ -237,12 +256,21 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 	});
 
 	it("tournament placement prizes require the unified session", async () => {
-		const res = await app.handle(new Request("http://localhost/v1/achillea/tournaments/99999999/apply-placement-prizes", { method: "POST" }));
+		const res = await app.handle(
+			new Request("http://localhost/v1/achillea/tournaments/99999999/apply-placement-prizes", {
+				method: "POST",
+			})
+		);
 		expect(res.status).toBe(401);
 	});
 
 	it("internal tournament placement trigger requires API_ADMIN_TOKEN", async () => {
-		const res = await app.handle(new Request("http://localhost/v1/achillea/tournaments/internal/99999999/apply-placement-prizes", { method: "POST" }));
+		const res = await app.handle(
+			new Request(
+				"http://localhost/v1/achillea/tournaments/internal/99999999/apply-placement-prizes",
+				{ method: "POST" }
+			)
+		);
 		expect(res.status).toBe(401);
 	});
 
@@ -266,14 +294,20 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 	});
 
 	it("admin users and wallets read contracts require the unified session", async () => {
-		const users = await app.handle(new Request("http://localhost/v1/achillea/admin/ops/users?page=1&pagination=25"));
-		const wallets = await app.handle(new Request("http://localhost/v1/achillea/admin/ops/wallets?limit=25"));
+		const users = await app.handle(
+			new Request("http://localhost/v1/achillea/admin/ops/users?page=1&pagination=25")
+		);
+		const wallets = await app.handle(
+			new Request("http://localhost/v1/achillea/admin/ops/wallets?limit=25")
+		);
 		expect(users.status).toBe(401);
 		expect(wallets.status).toBe(401);
 	});
 
 	it("admin overview is owned by the unified API", async () => {
-		const overview = await app.handle(new Request("http://localhost/v1/achillea/admin/ops/overview"));
+		const overview = await app.handle(
+			new Request("http://localhost/v1/achillea/admin/ops/overview")
+		);
 		expect(overview.status).toBe(401);
 	});
 
@@ -281,7 +315,11 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		const requests = [
 			new Request("http://localhost/v1/achillea/player-notes"),
 			new Request("http://localhost/v1/achillea/player-notes/summary/u"),
-			new Request("http://localhost/v1/achillea/player-notes", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ targetId: "u", content: "note" }) }),
+			new Request("http://localhost/v1/achillea/player-notes", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ targetId: "u", content: "note" }),
+			}),
 		];
 		for (const request of requests) expect((await app.handle(request)).status).toBe(401);
 	});
@@ -322,11 +360,13 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 	});
 
 	it("PATCH /v1/achillea/clans/:id requires the unified session", async () => {
-		const response = await app.handle(new Request("http://localhost/v1/achillea/clans/1", {
-			method: "PATCH",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ clanBiography: "unauthorized" }),
-		}));
+		const response = await app.handle(
+			new Request("http://localhost/v1/achillea/clans/1", {
+				method: "PATCH",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ clanBiography: "unauthorized" }),
+			})
+		);
 		expect(response.status).toBe(401);
 	});
 
@@ -334,9 +374,11 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		const list = await api.v1.achillea.clans.get();
 		const id = list.data?.data[0]?.id;
 		if (id === undefined) return;
-		const response = await app.handle(new Request(`http://localhost/v1/achillea/clans/${id}/members`));
+		const response = await app.handle(
+			new Request(`http://localhost/v1/achillea/clans/${id}/members`)
+		);
 		expect(response.status).toBe(200);
-		const members = await response.json() as Array<Record<string, unknown>>;
+		const members = (await response.json()) as Array<Record<string, unknown>>;
 		expect(Array.isArray(members)).toBe(true);
 		const first = members[0];
 		if (first) {
@@ -353,16 +395,22 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 	});
 
 	it("ranked public reads use the canonical unified contract", async () => {
-		const leaderboard = await app.handle(new Request("http://localhost/v1/achillea/ranked/leaderboard?mode=2&page=0&pageSize=5"));
+		const leaderboard = await app.handle(
+			new Request("http://localhost/v1/achillea/ranked/leaderboard?mode=2&page=0&pageSize=5")
+		);
 		expect(leaderboard.status).toBe(200);
-		const ladder = await leaderboard.json() as { mode: number; total: number; entries: unknown[] };
+		const ladder = (await leaderboard.json()) as {
+			mode: number;
+			total: number;
+			entries: unknown[];
+		};
 		expect(ladder.mode).toBe(2);
 		expect(typeof ladder.total).toBe("number");
 		expect(Array.isArray(ladder.entries)).toBe(true);
 
 		const tiers = await app.handle(new Request("http://localhost/v1/achillea/ranked/tiers?mode=2"));
 		expect(tiers.status).toBe(200);
-		const tierData = await tiers.json() as unknown[];
+		const tierData = (await tiers.json()) as unknown[];
 		expect(tierData.length).toBeGreaterThan(0);
 	});
 
@@ -373,7 +421,9 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 
 	it("ranked endpoints reject unsupported match modes", async () => {
 		for (const path of ["leaderboard", "tiers", "me"]) {
-			const response = await app.handle(new Request(`http://localhost/v1/achillea/ranked/${path}?mode=3`));
+			const response = await app.handle(
+				new Request(`http://localhost/v1/achillea/ranked/${path}?mode=3`)
+			);
 			expect(response.status).toBe(400);
 		}
 	});
@@ -399,6 +449,13 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 			broadcastMedias: [],
 		});
 		expect(create.status).toBe(401);
+	});
+
+	it("organization review states require an administrator session", async () => {
+		const response = await app.handle(
+			new Request("http://localhost/v1/achillea/organizations?state=0")
+		);
+		expect(response.status).toBe(401);
 	});
 
 	it("sanction persistence routes require a session", async () => {
@@ -443,9 +500,16 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		});
 		const userId = leaderboard.data?.entries[0]?.userId;
 		if (!userId) return;
-		const res = await app.handle(new Request(`http://localhost/v1/achillea/users/${encodeURIComponent(userId)}`));
+		const res = await app.handle(
+			new Request(`http://localhost/v1/achillea/users/${encodeURIComponent(userId)}`)
+		);
 		expect(res.status).toBe(200);
-		const profile = await res.json() as { id?: string; ranked?: { solo?: { mode?: number }; duo?: { mode?: number } }; interclans?: unknown; tournaments?: unknown };
+		const profile = (await res.json()) as {
+			id?: string;
+			ranked?: { solo?: { mode?: number }; duo?: { mode?: number } };
+			interclans?: unknown;
+			tournaments?: unknown;
+		};
 		expect(profile.id).toBe(userId);
 		expect(profile.ranked?.solo?.mode).toBe(2);
 		expect(profile.ranked?.duo?.mode).toBe(4);
@@ -459,23 +523,40 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 	});
 
 	it("GET /v1/achillea/users/me/ranked-history is owned by the unified API", async () => {
-		const res = await app.handle(new Request("http://localhost/v1/achillea/users/me/ranked-history?limit=20"));
+		const res = await app.handle(
+			new Request("http://localhost/v1/achillea/users/me/ranked-history?limit=20")
+		);
 		expect(res.status).toBe(401);
 	});
 
 	it("GET /v1/achillea/users/me/ranked-trend is owned by the unified API", async () => {
-		const res = await app.handle(new Request("http://localhost/v1/achillea/users/me/ranked-trend?days=7&last=20"));
+		const res = await app.handle(
+			new Request("http://localhost/v1/achillea/users/me/ranked-trend?days=7&last=20")
+		);
 		expect(res.status).toBe(401);
 	});
 
 	it("GET /v1/achillea/users/me/ranked-history returns the shared DTO for a session", async () => {
-		const leaderboard = await api.v1.achillea.users.leaderboard.get({ query: { mode: 2, limit: 1 } });
+		const leaderboard = await api.v1.achillea.users.leaderboard.get({
+			query: { mode: 2, limit: 1 },
+		});
 		const userId = leaderboard.data?.entries[0]?.userId;
 		const secret = process.env.JWT_SECRET_KEY;
 		if (!userId || !secret) return;
-		const token = signAchilleaSessionToken({ id: userId, username: "contract-test", avatar: null }, secret);
-		const history = await app.handle(new Request("http://localhost/v1/achillea/users/me/ranked-history?limit=20", { headers: { authorization: `Bearer ${token}` } }));
-		const trend = await app.handle(new Request("http://localhost/v1/achillea/users/me/ranked-trend?days=7&last=20", { headers: { authorization: `Bearer ${token}` } }));
+		const token = signAchilleaSessionToken(
+			{ id: userId, username: "contract-test", avatar: null },
+			secret
+		);
+		const history = await app.handle(
+			new Request("http://localhost/v1/achillea/users/me/ranked-history?limit=20", {
+				headers: { authorization: `Bearer ${token}` },
+			})
+		);
+		const trend = await app.handle(
+			new Request("http://localhost/v1/achillea/users/me/ranked-trend?days=7&last=20", {
+				headers: { authorization: `Bearer ${token}` },
+			})
+		);
 		expect(history.status).toBe(200);
 		expect(Array.isArray(await history.json())).toBe(true);
 		expect(trend.status).toBe(200);
@@ -489,9 +570,10 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 	});
 
 	it("GET /v1/achillea/licenses/me requires the unified session", async () => {
-		const res = await api.v1.achillea.licenses.me.get();
+		const res = await app.handle(new Request("http://localhost/v1/achillea/licenses/me"));
 		expect(res.status).toBe(401);
-		expect(res.data).toBeNull();
+		const body = (await res.json()) as Record<string, unknown>;
+		expect(body).not.toHaveProperty("verificationToken");
 	});
 
 	it("GET /v1/achillea/wallet/me requires the unified session", async () => {
@@ -518,11 +600,13 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 	});
 
 	it("POST /v1/auth/session/exchange is restricted to the internal bridge", async () => {
-		const res = await app.handle(new Request("http://localhost/v1/auth/session/exchange", {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ id: "discord-user" }),
-		}));
+		const res = await app.handle(
+			new Request("http://localhost/v1/auth/session/exchange", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ id: "discord-user" }),
+			})
+		);
 		expect(res.status).toBe(401);
 	});
 
