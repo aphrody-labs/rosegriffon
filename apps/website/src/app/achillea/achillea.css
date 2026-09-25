@@ -105,6 +105,22 @@
  */
 .achillea-scope {
 	font-family: "Achillea Sans", var(--font-poppins), system-ui, sans-serif;
+	/* La zone est rendue dans le `SidebarInset` partagé. Ces garde-fous
+	 * empêchent une grille ou une table de rétrécir son parent et garantissent
+	 * que le fond d'Achilléa occupe toute la zone disponible après le chrome. */
+	width: 100%;
+	min-width: 0;
+	overflow-x: clip;
+	color-scheme: dark;
+}
+
+.achillea-shell {
+	width: 100%;
+	min-width: 0;
+	min-height: 100%;
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
 }
 
 /*
@@ -118,6 +134,33 @@
 	font-family: "Achillea Title", "Achillea Sans", sans-serif;
 	letter-spacing: 0.02em;
 	line-height: 1.05;
+}
+
+/*
+ * Contrat basse vision Achilléa : le texte de lecture et les commandes ne
+ * descendent jamais sous 18 px. Le portage gardait plusieurs centaines de
+ * `text-xs`/`text-sm` (12–14 px), y compris dans les classements et les
+ * tableaux d'administration. La règle reste strictement limitée au domaine.
+ */
+.achillea-scope .text-xs,
+.achillea-scope .text-sm,
+.achillea-scope .text-base,
+.achillea-scope .text-\[10px\],
+.achillea-scope .text-\[11px\] {
+	font-size: 1.125rem;
+	line-height: 1.5rem;
+}
+
+.achillea-scope :is(input, select, textarea) {
+	min-height: 2.75rem;
+	color: #f3edf7;
+	background-color: #150d20;
+	border-color: #948b9d;
+}
+
+.achillea-scope :is(a, button, input, select, textarea):focus-visible {
+	outline: 0.25rem solid #dfff57;
+	outline-offset: 0.25rem;
 }
 
 /* Les chiffres de score et d'ELO sont monospacés dans l'original
@@ -176,6 +219,52 @@
 	background-size: cover;
 	background-attachment: fixed;
 	min-height: 100%;
+}
+
+/*
+ * Les pages données utilisent le même conteneur `max-w-7xl` que le portail
+ * général. Après la barre latérale, cela laissait plus de 500 px vides sur un
+ * écran large. Achilléa emploie la largeur disponible pour ses grilles et ses
+ * tableaux, tandis que les paragraphes gardent déjà leur propre `max-w-*`.
+ */
+.achillea-scope .max-w-7xl {
+	max-width: 112rem;
+}
+
+.achillea-scope .max-w-6xl {
+	max-width: 104rem;
+}
+
+.achillea-scope .max-w-5xl {
+	max-width: 96rem;
+}
+
+@media (min-width: 600px) {
+	.achillea-scope .max-w-7xl,
+	.achillea-scope .max-w-6xl,
+	.achillea-scope .max-w-5xl {
+		width: calc(100% - 3rem);
+	}
+}
+
+@media (min-width: 840px) {
+	.achillea-scope .max-w-7xl,
+	.achillea-scope .max-w-6xl,
+	.achillea-scope .max-w-5xl {
+		width: calc(100% - 4rem);
+	}
+}
+
+@media (max-width: 599px) {
+	.achillea-scope {
+		background-attachment: scroll;
+	}
+
+	.achillea-scope .max-w-7xl,
+	.achillea-scope .max-w-6xl,
+	.achillea-scope .max-w-5xl {
+		width: 100%;
+	}
 }
 
 /* Gradients de Paliers ELO */
