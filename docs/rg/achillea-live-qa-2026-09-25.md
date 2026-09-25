@@ -68,3 +68,21 @@ requête malgré des accès au site. Le journal `/var/log/nginx/rg-stats.log`
 était vide et la configuration Nginx active ne définissait pas `rg_stats`.
 Une correction infra est préparée, mais elle n'est pas validée dans cette
 release ; l'audience ne doit pas être présentée comme complète.
+
+## Validation de la release `72632af`
+
+La dernière collecte RG a terminé sans erreur : Rose Griffon 1 854/1 854
+membres et 92 rôles ; Achilléa 3 261/3 261 membres et 105 rôles. Dans le
+miroir partagé, le profil `rg` porte 2 guildes et 5 115 membres avec les deux
+inventaires complets. `current` porte 58 guildes et `legacy` 4, leurs membres
+restant incomplets faute d'intents privilégiés. Redis portait 64 résumés.
+
+La release `72632af` est active avec ses cinq services. `nginx -t` réussit,
+`rg_stats` est chargé et le journal a commencé à recevoir des lignes. En
+session admin, `/admin/stats` affichait 62 requêtes analysées et 6 domaines
+actifs après redémarrage ; l'onglet Achilléa montrait son trafic local, sans
+additionner le cache planifié. `/admin/settings` affichait trois champs RG et
+quatre champs Achilléa, tous issus du contrat public, et `/admin/achillea`
+affichait le rapprochement des comptes. `GET /api/admin/config/public` répond
+401 sans session ; son accès authentifié direct n'a pas été vérifié car le
+navigateur connecté bloque la navigation brute vers cette API.

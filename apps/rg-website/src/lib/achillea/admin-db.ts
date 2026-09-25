@@ -99,7 +99,7 @@ export async function volumesAchillea(): Promise<VolumesAchillea> {
 	const { rows } = await pool.query<Record<string, string>>(
 		`SELECT
 			(SELECT count(*) FROM achillea.clan)                                    AS clans,
-			(SELECT count(*) FROM achillea.tournament_event)                        AS tournois,
+			(SELECT count(*) FROM achillea.event WHERE internal_state = 'Finished') AS tournois,
 			(SELECT count(*) FROM achillea.license WHERE status = 'Active')         AS licences_actives,  -- l'énum distant est capitalisé ('Active'), pas 'active'
 			(SELECT count(*) FROM achillea.sanction)                                AS sanctions,
 			(SELECT count(*) FROM achillea.lobby_match)                             AS matchs_classes`

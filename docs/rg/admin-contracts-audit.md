@@ -16,4 +16,9 @@
 
 ## À poursuivre
 
+La page `/admin/achillea` comptait `achillea.tournament_event` (0 ligne) pour
+« Tournois disputés » alors que la liste publique est issue d'`achillea.event`.
+Le compteur lit maintenant les événements historiques `internal_state = 'Finished'`
+(9 lignes observées en production), sans mélanger les deux tables.
+
 Raccorder les champs visuels à de vrais consommateurs ou retirer leur promesse de sauvegarde, puis bâtir les formulaires métier par domaine sur les schémas existants. Tester chaque écriture avec une session admin et une session non admin, sur une base de test, avant toute déclaration de couverture complète.
