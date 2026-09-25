@@ -29,3 +29,20 @@ Ce journal couvre seulement les actions listées. La matrice
 les autres pages, contrôles, rôles et routes au statut « à tester ».
 Les écritures de scores, distributions d'AP et actions d'administration sur
 les tournois historiques n'ont pas été utilisées comme tests.
+
+## Nouvelle release `da1e899` (25 septembre 2026)
+
+Le pointeur `/srv/rg/current` cible `da1e8991484bee7f45302c0f76824dba605b0966`.
+Les cinq services RG sont actifs. Dans la même session Chrome connectée,
+`/achillea/ranked` affiche désormais le profil public `aphrody_code`, le palier
+Fer, les statistiques et les commandes de défi et recherche. L'échec RLS
+observé ci-dessus est donc corrigé sur cette lecture authentifiée.
+
+Le miroir Discord partagé est déployé avec la même valeur absolue de
+`RG_DISCORD_SYNC_SQLITE_PATH` dans `rg-bot`, `rg-achillea-bot` et `rg-cron`.
+Sa présence dans la configuration ne prouve pas encore que les guildes ont été
+collectées ; vérifier les lignes de `rg_discord_sync_runs` par profil après
+une exécution réelle de synchronisation. Le bot Achilléa courant a signalé
+58 guildes rejointes, mais ses intents privilégiés `GuildMembers`,
+`GuildPresences` et `MessageContent` sont refusés par Discord : l'inventaire
+des membres de ce profil ne peut pas être complet dans cet état.
