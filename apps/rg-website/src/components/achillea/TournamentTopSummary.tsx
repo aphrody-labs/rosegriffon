@@ -41,15 +41,15 @@ export function TournamentTopSummary({ tournamentId }: TournamentTopSummaryProps
 		return (
 			<div className="py-8 text-center space-y-2">
 				<Loader2 className="w-6 h-6 animate-spin text-amber-400 mx-auto" />
-				<p className="text-xs text-muted-foreground">Chargement des classements et du podium…</p>
+				<p className="text-lg text-muted-foreground">Chargement des classements et du podium…</p>
 			</div>
 		);
 	}
 
 	if (!summary?.top10 || summary.top10.length === 0) return null;
 
-	const top3 = summary.top10.slice(0, 3);
-	const rest = summary.top10.slice(3);
+	const podium = summary.top10.filter((entry) => entry.rank <= 3);
+	const rest = summary.top10.filter((entry) => entry.rank > 3);
 
 	return (
 		<div className="space-y-6">
@@ -59,15 +59,15 @@ export function TournamentTopSummary({ tournamentId }: TournamentTopSummaryProps
 					<span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
 						<Trophy className="w-4 h-4" />
 					</span>
-					<h3 className="font-bold text-sm uppercase tracking-wider text-foreground">
-						Podium Officiel du Tournoi
+					<h3 className="font-bold text-lg uppercase tracking-wider text-foreground">
+						Classement (ex æquo inclus)
 					</h3>
 				</div>
 
 				<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-					{top3.map((entry, idx) => {
-						const isWinner = idx === 0;
-						const isSecond = idx === 1;
+					{podium.map((entry, idx) => {
+						const isWinner = entry.rank === 1;
+						const isSecond = entry.rank === 2;
 
 						const medalBg = isWinner
 							? "bg-amber-500/10 border-amber-500/30 text-amber-400"
@@ -81,7 +81,7 @@ export function TournamentTopSummary({ tournamentId }: TournamentTopSummaryProps
 								className={`p-5 rounded-2xl border text-center space-y-3 flex flex-col items-center justify-center relative shadow-xs ${medalBg}`}
 							>
 								<div className="absolute top-3 left-3 font-mono font-black text-lg">
-									#{idx + 1}
+									#{entry.rank}
 								</div>
 
 								<UserAvatar
@@ -91,18 +91,18 @@ export function TournamentTopSummary({ tournamentId }: TournamentTopSummaryProps
 								/>
 
 								<div className="space-y-0.5">
-									<div className="font-bold text-sm text-foreground truncate max-w-[150px]">
+									<div className="font-bold text-lg text-foreground truncate max-w-[150px]">
 										{entry.displayName}
 									</div>
 									{entry.clan && (
-										<div className="text-xs text-muted-foreground font-semibold">
+										<div className="text-lg text-muted-foreground font-semibold">
 											[{entry.clan.shortName}] {entry.clan.name}
 										</div>
 									)}
 								</div>
 
 								{entry.points > 0 && (
-									<div className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-mono font-bold flex items-center gap-1">
+									<div className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 text-lg font-mono font-bold flex items-center gap-1">
 										<Coins className="w-3 h-3" />+{entry.points} AP
 									</div>
 								)}
@@ -112,21 +112,21 @@ export function TournamentTopSummary({ tournamentId }: TournamentTopSummaryProps
 				</div>
 			</div>
 
-			{/* Rest of Top 10 */}
+			{/* Classement hors podium, ex æquo inclus. */}
 			{rest.length > 0 && (
 				<div className="border border-border bg-card rounded-2xl overflow-hidden shadow-xs">
-					<div className="p-4 bg-muted/30 border-b border-border text-xs font-bold uppercase tracking-wider text-muted-foreground">
-						Places d&apos;honneur (Top 4 à 10)
+					<div className="p-4 bg-muted/30 border-b border-border text-lg font-bold uppercase tracking-wider text-muted-foreground">
+						Autres places classées
 					</div>
 					<div className="divide-y divide-border/60">
 						{rest.map((entry, idx) => (
 							<div
 								key={entry.userId || idx}
-								className="p-3 px-4 flex items-center justify-between text-xs hover:bg-muted/20 transition"
+								className="p-3 px-4 flex flex-wrap items-center justify-between gap-3 text-lg hover:bg-muted/20 transition"
 							>
 								<div className="flex items-center gap-3">
-									<span className="font-mono font-bold text-muted-foreground w-6 text-center">
-										#{idx + 4}
+									<span className="font-mono font-bold text-muted-foreground min-w-6">
+										{entry.rankLabel}
 									</span>
 									<UserAvatar
 										avatar={entry.avatar}
@@ -135,7 +135,7 @@ export function TournamentTopSummary({ tournamentId }: TournamentTopSummaryProps
 									/>
 									<span className="font-semibold text-foreground">{entry.displayName}</span>
 									{entry.clan && (
-										<span className="text-xs text-muted-foreground">
+										<span className="text-lg text-muted-foreground">
 											[{entry.clan.shortName}]
 										</span>
 									)}

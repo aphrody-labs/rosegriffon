@@ -341,9 +341,9 @@ export default function CircuitRankingPage() {
 
 									{/* Podium preview */}
 									<div className="space-y-1.5 pt-2 border-t border-border/60 text-lg">
-										{t.podium.length === 0 && <p className="text-lg text-muted-foreground">Résultats du bracket en attente.</p>}
+										{t.standingsStatus === "unresolved" && <p className="text-lg text-muted-foreground">Classement historique non résolu : aucun podium ni point attribué.</p>}
 										{t.podium.map((p) => (
-											<div key={p.rank} className="flex items-center justify-between text-muted-foreground">
+											<div key={p.userId} className="flex items-center justify-between text-muted-foreground">
 												<span className="font-medium text-foreground">
 													{p.rankLabel || (p.rank === 1 ? "🥇 1er" : p.rank === 2 ? "🥈 2e" : "🥉 3e")} : {p.displayName}
 												</span>

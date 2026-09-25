@@ -316,6 +316,7 @@ export const circuitTournamentSummarySchema = z.object({
 	size: z.number(),
 	grandFinalAt: z.string(),
 	podium: z.array(circuitPodiumEntrySchema),
+	standingsStatus: z.enum(["resolved", "unresolved"]),
 }) satisfies z.ZodType<CircuitTournamentSummary>;
 
 export const circuitRankingSchema = z.object({

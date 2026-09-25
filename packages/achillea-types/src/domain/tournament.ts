@@ -210,6 +210,7 @@ export interface CircuitTournamentSummary {
 	size: number;
 	grandFinalAt: string;
 	podium: CircuitPodiumEntry[];
+	standingsStatus: "resolved" | "unresolved";
 }
 
 export interface CircuitRanking {
