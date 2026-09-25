@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { openDiscordSnapshot, syncOAuthLinkMetadata } from "./index";
+import { openDiscordSnapshot, syncOAuthLinkMetadata, syncSiteTelemetryAggregates } from "./index";
 
 test("OAuth mirror keeps link metadata and marks revoked links without credentials", async () => {
 	const directory = mkdtempSync(join(tmpdir(), "rg-oauth-links-"));
@@ -21,8 +21,13 @@ test("OAuth mirror keeps link metadata and marks revoked links without credentia
 			expect(schema.sql).not.toContain("access_token");
 		} finally { db.close(); }
 		await syncOAuthLinkMetadata([]);
+		await syncSiteTelemetryAggregates([{ host: "rosegriffon.fr", windowStart: "2026-09-25T04:00:00.000Z",
+			requests: 12, bytes: 456, errors4xx: 1, errors5xx: 0 }], true);
 		db = openDiscordSnapshot()!;
-		try { expect(db.query("SELECT active FROM rg_oauth_account_links WHERE account_id='link-1'").get()).toEqual({ active: 0 }); }
+		try {
+			expect(db.query("SELECT active FROM rg_oauth_account_links WHERE account_id='link-1'").get()).toEqual({ active: 0 });
+			expect(db.query("SELECT requests,errors_4xx,complete FROM rg_site_telemetry").get()).toEqual({ requests: 12, errors_4xx: 1, complete: 1 });
+		}
 		finally { db.close(); }
 	} finally {
 		if (previous === undefined) delete Bun.env.RG_DISCORD_SYNC_SQLITE_PATH;

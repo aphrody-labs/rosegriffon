@@ -90,6 +90,12 @@ export function openDiscordSnapshot(path = Bun.env.RG_DISCORD_SYNC_SQLITE_PATH):
 			provider_account_id TEXT NOT NULL, linked_at TEXT, updated_at TEXT,
 			active INTEGER NOT NULL, seen_at TEXT NOT NULL
 		);
+		CREATE TABLE IF NOT EXISTS rg_site_telemetry (
+			host TEXT NOT NULL, window_start TEXT NOT NULL, requests INTEGER NOT NULL,
+			bytes INTEGER NOT NULL, errors_4xx INTEGER NOT NULL, errors_5xx INTEGER NOT NULL,
+			complete INTEGER NOT NULL, synced_at TEXT NOT NULL,
+			PRIMARY KEY (host, window_start)
+		);
 	`);
 	return db;
 }
@@ -102,6 +108,45 @@ export interface OAuthLinkMetadata {
 	providerAccountId: string;
 	linkedAt: string | null;
 	updatedAt: string | null;
+}
+
+export interface SiteTelemetryAggregate {
+	host: string;
+	windowStart: string;
+	requests: number;
+	bytes: number;
+	errors4xx: number;
+	errors5xx: number;
+}
+
+/** Hourly aggregate only: no IP, URL query, cookie or visitor identifier. */
+export async function syncSiteTelemetryAggregates(rows: readonly SiteTelemetryAggregate[], complete: boolean): Promise<number | null> {
+	const db = openDiscordSnapshot();
+	if (!db) return null;
+	try {
+		const syncedAt = new Date().toISOString();
+		const upsert = db.query(`INSERT INTO rg_site_telemetry VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+			ON CONFLICT(host,window_start) DO UPDATE SET requests=excluded.requests,bytes=excluded.bytes,
+			errors_4xx=excluded.errors_4xx,errors_5xx=excluded.errors_5xx,
+			complete=excluded.complete,synced_at=excluded.synced_at`);
+		db.transaction(() => {
+			for (const row of rows) upsert.run(row.host, row.windowStart, row.requests, row.bytes,
+				row.errors4xx, row.errors5xx, Number(complete), syncedAt);
+		})();
+		const url = Bun.env.RG_DISCORD_SYNC_REDIS_URL ?? Bun.env.REDIS_URL;
+		if (url) {
+			const redis = new RedisClient(url);
+			try {
+				await redis.set("rg:site-telemetry-summary", JSON.stringify({
+					hours: rows.length, requests: rows.reduce((sum, row) => sum + row.requests, 0),
+					complete, syncedAt,
+				}), "EX", 3600);
+			} catch (error) {
+				console.warn("[discord-sync] Site telemetry cache unavailable:", error instanceof Error ? error.message : String(error));
+			} finally { redis.close(); }
+		}
+		return rows.length;
+	} finally { db.close(); }
 }
 
 export async function syncOAuthLinkMetadata(rows: readonly OAuthLinkMetadata[]): Promise<number | null> {
