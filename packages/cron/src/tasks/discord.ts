@@ -61,12 +61,16 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
 			}
 
 			console.log(`[Cron Discord] ${serveur.nom} (${guild.id}) — rôles...`);
+			let snapshotMembersComplete = false;
 			if (client.user) {
 				const instantane = await syncDiscordGuildSnapshot(guild, {
 					sourceBotId: client.user.id,
 					profile: "rg",
 				});
-				if (instantane) console.log(`[Cron Discord] ${serveur.nom} — miroir SQLite : ${instantane.memberCount} membres, complétude=${instantane.membersComplete}`);
+				if (instantane) {
+					snapshotMembersComplete = instantane.membersComplete;
+					console.log(`[Cron Discord] ${serveur.nom} — miroir SQLite : ${instantane.memberCount} membres, complétude=${instantane.membersComplete}`);
+				}
 			}
 			const rapportRoles = await syncAllRoles(guild);
 			console.log(
@@ -74,7 +78,10 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
 			);
 
 			console.log(`[Cron Discord] ${serveur.nom} — membres...`);
-			const rapportMembres = await syncAllMembers(guild);
+			const rapportMembres = await syncAllMembers(
+				guild,
+				snapshotMembersComplete ? guild.members.cache : undefined,
+			);
 			console.log(
 				`[Cron Discord] ${serveur.nom} — membres : ${rapportMembres.upserted}/${rapportMembres.fetched}, ${rapportMembres.partis} parti(s) en ${rapportMembres.durationMs} ms`
 			);
