@@ -21,7 +21,7 @@ export interface DiscordCollectionCoverage {
 /** An identity link is metadata, never an OAuth credential or authorization grant. */
 export interface OAuthAccountLink {
 	userId: string;
-	provider: "discord" | "twitch" | "google";
+	provider: "discord" | "patreon" | "twitch" | "google" | (string & {});
 	providerAccountId: string;
 	linkedAt: string | null;
 	lastVerifiedAt: string | null;

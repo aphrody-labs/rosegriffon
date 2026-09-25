@@ -55,8 +55,6 @@ export default class ReadyEvent {
 		// log startup
 		await this.logger.logStartingConsole();
 
-		// synchronize guilds between discord and the database
-		await syncAllGuilds(client);
 		if (process.env.RG_DISCORD_SYNC_SQLITE_PATH && client.user) {
 			for (const guild of client.guilds.cache.values()) {
 				try {
@@ -70,6 +68,9 @@ export default class ReadyEvent {
 				}
 			}
 		}
+		// The legacy PostgreSQL projection may take minutes across many guilds.
+		// Record the source-specific snapshot first so it is observable on startup.
+		await syncAllGuilds(client);
 
 		// the bot is fully ready
 		this.store.update("ready", (e) => ({ ...e, bot: true }));
