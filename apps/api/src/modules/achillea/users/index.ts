@@ -16,7 +16,12 @@ async function rankedHistory(db: Kysely<Database>, userId: string, query: { mode
 	const mode = query.mode == null ? null : Number(query.mode);
 	let request = db.selectFrom("lobby as l")
 		.innerJoin("lobby_user as me", (join) => join.onRef("me.lobby_id", "=", "l.id").on("me.user_id", "=", userId))
-		.innerJoin("lobby_user as opp", (join) => join.onRef("opp.lobby_id", "=", "l.id").onRef("opp.user_id", "<>", "me.user_id"))
+		// A duo lobby contains a teammate as well as two opponents.  The old
+		// `user_id <> me.user_id` predicate selected all three rows, so the
+		// history could label a teammate as an opponent and render the same
+		// lobby more than once.  The public DTO has one opponent slot, therefore
+		// project one stable player from the opposing team per lobby below.
+		.innerJoin("lobby_user as opp", (join) => join.onRef("opp.lobby_id", "=", "l.id").onRef("opp.team", "<>", "me.team"))
 		.innerJoin("user as u", "u.id", "opp.user_id")
 		.select([
 			"l.id as lobby_id", "l.mode", "l.state", "l.created_at",
@@ -30,7 +35,19 @@ async function rankedHistory(db: Kysely<Database>, userId: string, query: { mode
 			eb.and([eb("l.event_type", "=", "TOURNAMENT"), eb("l.ranked_elo_applied", "=", true)]),
 		]));
 	if (mode !== null && Number.isFinite(mode)) request = request.where("l.mode", "=", mode);
-	const rows = await request.orderBy("l.created_at", "desc").limit(limit).offset(offset).execute();
+	const rows = await db
+		.selectFrom(
+			request
+				.distinctOn("l.id")
+				.orderBy("l.id")
+				.orderBy("opp.user_id")
+				.as("ranked_history")
+		)
+		.selectAll()
+		.orderBy("created_at", "desc")
+		.limit(limit)
+		.offset(offset)
+		.execute();
 	const avatar = (id: string, value: string | null) => {
 		if (value?.startsWith("http")) return value;
 		try { return `https://cdn.discordapp.com/embed/avatars/${(BigInt(id) >> 22n) % 6n}.png`; }
