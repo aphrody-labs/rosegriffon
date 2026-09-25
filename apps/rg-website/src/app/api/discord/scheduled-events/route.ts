@@ -11,7 +11,12 @@ import { NextResponse } from "next/server";
 // (le hook caller log une erreur mais l'écran reste utilisable).
 
 export const runtime = "nodejs";
-export const revalidate = 300; // 5 min — burst protection vs rate-limit Discord
+
+// Un handler GET ne doit pas être pré-rendu : Discord n'est joignable qu'au
+// runtime et un build ne doit jamais utiliser le jeton du bot. Le cache reste
+// volontairement sur la requête amont, afin de limiter Discord à une relève
+// toutes les cinq minutes pour les réponses identiques.
+const DISCORD_EVENTS_REVALIDATE_SECONDS = 300;
 
 interface DiscordScheduledEventRaw {
 	id: string;
@@ -47,8 +52,9 @@ export async function GET() {
 		const res = await fetch(
 			`https://discord.com/api/v10/guilds/${guildId}/scheduled-events?with_user_count=true`,
 			{
+				cache: "force-cache",
 				headers: { Authorization: `Bot ${token}` },
-				next: { revalidate: 300 },
+				next: { revalidate: DISCORD_EVENTS_REVALIDATE_SECONDS },
 			}
 		);
 
