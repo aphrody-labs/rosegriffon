@@ -208,7 +208,7 @@ export default function RankedHistoryPage({ playerId, initialMode = -1, initialP
 							type="button"
 							aria-pressed={mode === -1}
 							onClick={() => changeFilter("mode", "all")}
-							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+							className={`min-h-11 px-3 py-1 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 								mode === -1
 									? "bg-primary text-primary-foreground shadow-sm"
 									: "text-muted-foreground hover:text-foreground"
@@ -220,7 +220,7 @@ export default function RankedHistoryPage({ playerId, initialMode = -1, initialP
 							type="button"
 							aria-pressed={mode === 2}
 							onClick={() => changeFilter("mode", "2")}
-							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+							className={`min-h-11 px-3 py-1 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 								mode === 2
 									? "bg-primary text-primary-foreground shadow-sm"
 									: "text-muted-foreground hover:text-foreground"
@@ -232,7 +232,7 @@ export default function RankedHistoryPage({ playerId, initialMode = -1, initialP
 							type="button"
 							aria-pressed={mode === 4}
 							onClick={() => changeFilter("mode", "4")}
-							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+							className={`min-h-11 px-3 py-1 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 								mode === 4
 									? "bg-primary text-primary-foreground shadow-sm"
 									: "text-muted-foreground hover:text-foreground"
@@ -251,7 +251,7 @@ export default function RankedHistoryPage({ playerId, initialMode = -1, initialP
 							type="button"
 							aria-pressed={period === 7}
 							onClick={() => changeFilter("period", "7")}
-							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+							className={`min-h-11 px-3 py-1 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 								period === 7
 									? "bg-secondary text-secondary-foreground shadow-sm"
 									: "text-muted-foreground hover:text-foreground"
@@ -263,7 +263,7 @@ export default function RankedHistoryPage({ playerId, initialMode = -1, initialP
 							type="button"
 							aria-pressed={period === 30}
 							onClick={() => changeFilter("period", "30")}
-							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+							className={`min-h-11 px-3 py-1 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 								period === 30
 									? "bg-secondary text-secondary-foreground shadow-sm"
 									: "text-muted-foreground hover:text-foreground"
@@ -275,7 +275,7 @@ export default function RankedHistoryPage({ playerId, initialMode = -1, initialP
 							type="button"
 							aria-pressed={period === 0}
 							onClick={() => changeFilter("period", "0")}
-							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+							className={`min-h-11 px-3 py-1 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 								period === 0
 									? "bg-secondary text-secondary-foreground shadow-sm"
 									: "text-muted-foreground hover:text-foreground"
@@ -286,7 +286,7 @@ export default function RankedHistoryPage({ playerId, initialMode = -1, initialP
 					</div>
 					<label className="flex flex-col gap-1 text-lg font-semibold">
 						Résultat
-						<select value={resultFilter} onChange={(event) => changeFilter("result", event.target.value)} className="rounded-lg border border-border bg-card px-3 py-2 text-lg text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+						<select value={resultFilter} onChange={(event) => changeFilter("result", event.target.value)} className="min-h-11 rounded-lg border border-border bg-card px-3 py-2 text-lg text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
 							<option value="all">Tous les résultats</option>
 							<option value="win">Victoires</option>
 							<option value="loss">Défaites</option>
@@ -368,7 +368,7 @@ export default function RankedHistoryPage({ playerId, initialMode = -1, initialP
 									{stats.total} match{stats.total > 1 ? "s" : ""} enregistré
 									{stats.total > 1 ? "s" : ""}
 								</div>
-								{hasMore && <p className="text-lg text-muted-foreground">Bilan provisoire : d’autres matchs sont disponibles.</p>}
+								{hasMore && <p className="text-lg text-muted-foreground">Bilan provisoire : d’autres matchs sont disponibles. Les filtres portent sur les matchs chargés.</p>}
 							</div>
 
 							<div className="flex items-center gap-2">
@@ -497,7 +497,7 @@ export default function RankedHistoryPage({ playerId, initialMode = -1, initialP
 												<span className="text-lg text-muted-foreground hidden sm:inline">vs</span>
 												<Link
 													href={`/achillea/users/${match.opponent.userId}`}
-													className="flex items-center gap-2 text-lg font-semibold hover:text-primary transition"
+											className="inline-flex min-h-11 items-center gap-2 text-lg font-semibold hover:text-primary transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 												>
 													<UserAvatar
 														avatar={match.opponent.avatar}
@@ -535,7 +535,7 @@ export default function RankedHistoryPage({ playerId, initialMode = -1, initialP
 					)}
 					{hasMore && (
 						<div className="flex flex-col items-center gap-2">
-							<button type="button" onClick={loadMore} disabled={loadingMore} className="rounded-lg border border-border bg-card px-5 py-2 text-lg font-semibold hover:bg-muted disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+							<button type="button" onClick={loadMore} disabled={loadingMore} className="min-h-11 rounded-lg border border-border bg-card px-5 py-2 text-lg font-semibold hover:bg-muted disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
 								{loadingMore ? "Chargement…" : "Charger 100 matchs supplémentaires"}
 							</button>
 							{loadMoreError && <p role="alert" className="text-lg text-rose-400">{loadMoreError}</p>}

@@ -9,12 +9,9 @@ import {
 	Trophy,
 	ArrowLeft,
 	Crown,
-	Medal,
 	Shield,
 	Users,
-	Sparkles,
 	Loader2,
-	Calendar,
 	ChevronRight,
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
@@ -26,6 +23,8 @@ export default function CircuitRankingPage() {
 	const [activeTab, setActiveTab] = useState<"players" | "clans" | "tournaments">("players");
 	const [playerQuery, setPlayerQuery] = useState("");
 	const [minimumTournaments, setMinimumTournaments] = useState(0);
+	const [clanQuery, setClanQuery] = useState("");
+	const [standingsFilter, setStandingsFilter] = useState<"all" | "resolved" | "unresolved">("all");
 
 	useEffect(() => {
 		let cancelled = false;
@@ -66,6 +65,8 @@ export default function CircuitRankingPage() {
 		return player.tournamentsPlayed >= minimumTournaments &&
 			(!query || `${player.displayName} ${player.username} ${player.clan?.name ?? ""} ${player.clan?.shortName ?? ""}`.toLocaleLowerCase("fr-FR").includes(query));
 	});
+	const visibleClans = clanRanking.filter((clan) => `${clan.name} ${clan.shortName}`.toLocaleLowerCase("fr-FR").includes(clanQuery.trim().toLocaleLowerCase("fr-FR")));
+	const visibleTournaments = tournaments.filter((tournament) => standingsFilter === "all" || tournament.standingsStatus === standingsFilter);
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
@@ -233,17 +234,24 @@ export default function CircuitRankingPage() {
 						<div className="space-y-4">
 							<div className="flex flex-wrap gap-4 rounded-xl border border-border bg-card p-4 text-lg">
 								<label className="flex flex-col gap-1">Rechercher un joueur ou un clan
-									<input type="search" value={playerQuery} onChange={(event) => setPlayerQuery(event.target.value)} className="rounded-md border border-border bg-background px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
+									<input type="search" value={playerQuery} onChange={(event) => setPlayerQuery(event.target.value)} className="min-h-11 rounded-md border border-border bg-background px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
 								</label>
 								<label className="flex flex-col gap-1">Tournois minimum
-									<select value={minimumTournaments} onChange={(event) => setMinimumTournaments(Number(event.target.value))} className="rounded-md border border-border bg-background px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+									<select value={minimumTournaments} onChange={(event) => setMinimumTournaments(Number(event.target.value))} className="min-h-11 rounded-md border border-border bg-background px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
 										<option value={0}>Tous</option><option value={2}>2 ou plus</option><option value={3}>3 ou plus</option><option value={5}>5 ou plus</option>
 									</select>
 								</label>
 								<p aria-live="polite" className="self-end text-muted-foreground">{visiblePlayers.length} joueur{visiblePlayers.length > 1 ? "s" : ""} sur {leaderboard.length}</p>
 							</div>
-							{visiblePlayers.length === 0 ? <p className="rounded-xl border border-border p-5 text-lg">Aucun joueur ne correspond aux filtres.</p> :
-						<div className="border border-border rounded-2xl bg-card overflow-x-auto">
+							{visiblePlayers.length === 0 ? <p className="rounded-xl border border-border p-5 text-lg">Aucun joueur ne correspond aux filtres.</p> : <>
+						<div className="grid gap-3 lg:hidden" aria-label="Classement des joueurs">
+							{visiblePlayers.map((player) => <article key={player.userId} className="rounded-2xl border border-border bg-card p-4 text-lg space-y-3">
+								<div className="flex items-center justify-between gap-3"><span className="font-bold text-amber-400">#{leaderboard.indexOf(player) + 1}</span><strong className="text-amber-400">{player.points} pts</strong></div>
+								<Link href={`/achillea/users/${player.userId}`} className="flex min-h-11 items-center gap-3 font-semibold text-foreground hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"><UserAvatar avatar={player.avatar} displayName={player.displayName} className="h-10 w-10" />{player.displayName}</Link>
+								<dl className="grid grid-cols-2 gap-2 text-muted-foreground"><div><dt>Clan</dt><dd className="text-foreground">{player.clan?.shortName ?? "—"}</dd></div><div><dt>Tournois</dt><dd className="text-foreground">{player.tournamentsPlayed}</dd></div><div><dt>Titres</dt><dd className="text-foreground">{player.wins}</dd></div><div><dt>Podiums</dt><dd className="text-foreground">{player.podiums}</dd></div><div><dt>Meilleur rang</dt><dd className="text-foreground">{player.bestRankLabel || `#${player.bestRank}`}</dd></div><div><dt>Palier</dt><dd className="text-foreground capitalize">{player.tier}</dd></div></dl>
+							</article>)}
+						</div>
+						<div className="hidden lg:block border border-border rounded-2xl bg-card overflow-x-auto">
 							<table className="w-full min-w-[1000px] text-left text-lg">
 								<thead>
 									<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-lg tracking-wider">
@@ -303,14 +311,21 @@ export default function CircuitRankingPage() {
 								</tbody>
 							</table>
 						</div>
-							}
+							</>}
 						</div>
 					)}
 
 					{/* Clans Tab */}
 					{activeTab === "clans" && (
 						clanRanking.length === 0 ? <p className="rounded-xl border border-border p-5 text-lg">Aucun classement de clan calculé pour le moment.</p> :
-						<div className="border border-border rounded-2xl bg-card overflow-x-auto">
+						<div className="space-y-4">
+							<label className="flex max-w-md flex-col gap-1 text-lg">Rechercher un clan
+								<input type="search" value={clanQuery} onChange={(event) => setClanQuery(event.target.value)} className="min-h-11 rounded-md border border-border bg-background px-3 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
+							</label>
+							<p aria-live="polite" className="text-lg text-muted-foreground">{visibleClans.length} clan{visibleClans.length > 1 ? "s" : ""} sur {clanRanking.length}</p>
+							{visibleClans.length === 0 && <p className="rounded-xl border border-border p-5 text-lg">Aucun clan ne correspond à la recherche.</p>}
+							<div className="grid gap-3 md:hidden">{visibleClans.map((clan) => <article key={clan.id} className="rounded-2xl border border-border bg-card p-4 text-lg"><div className="flex justify-between gap-3"><strong>#{clanRanking.indexOf(clan) + 1}</strong><strong className="text-amber-400">{clan.points} pts</strong></div><Link href={`/achillea/clans/${clan.id}`} className="flex min-h-11 items-center font-bold hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{clan.name} [{clan.shortName}]</Link><p>{clan.wins} titre{clan.wins > 1 ? "s" : ""} · {clan.players} joueurs actifs</p></article>)}</div>
+						<div className="hidden md:block border border-border rounded-2xl bg-card overflow-x-auto">
 							<table className="w-full min-w-[720px] text-left text-lg">
 								<thead>
 									<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-lg tracking-wider">
@@ -322,10 +337,10 @@ export default function CircuitRankingPage() {
 									</tr>
 								</thead>
 								<tbody className="divide-y divide-border/60">
-									{clanRanking.map((clan, idx) => (
+									{visibleClans.map((clan) => (
 										<tr key={clan.id} className="hover:bg-muted/30 transition">
 											<td className="py-3 px-4 text-center font-bold text-muted-foreground font-mono">
-												#{idx + 1}
+												#{clanRanking.indexOf(clan) + 1}
 											</td>
 											<td className="py-3 px-4">
 												<Link
@@ -349,13 +364,20 @@ export default function CircuitRankingPage() {
 								</tbody>
 							</table>
 						</div>
+						</div>
 					)}
 
 					{/* Tournaments Palmarès */}
 					{activeTab === "tournaments" && (
 						tournaments.length === 0 ? <p className="rounded-xl border border-border p-5 text-lg">Aucun tournoi du circuit disponible pour le moment.</p> :
+						<div className="space-y-4">
+							<label className="flex max-w-md flex-col gap-1 text-lg">État du classement
+								<select value={standingsFilter} onChange={(event) => setStandingsFilter(event.target.value as typeof standingsFilter)} className="min-h-11 rounded-md border border-border bg-background px-3 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"><option value="all">Tous les tournois</option><option value="resolved">Classement résolu</option><option value="unresolved">Classement non résolu</option></select>
+							</label>
+							<p aria-live="polite" className="text-lg text-muted-foreground">{visibleTournaments.length} tournoi{visibleTournaments.length > 1 ? "s" : ""} sur {tournaments.length}</p>
+							{visibleTournaments.length === 0 && <p className="rounded-xl border border-border p-5 text-lg">Aucun tournoi ne correspond au filtre.</p>}
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							{tournaments.map((t) => (
+							{visibleTournaments.map((t) => (
 								<div
 									key={t.id}
 									className="border border-border bg-card rounded-2xl p-5 space-y-3 transition hover:shadow-md"
@@ -381,13 +403,14 @@ export default function CircuitRankingPage() {
 
 									<Link
 										href={`/achillea/tournaments/${t.id}`}
-										className="inline-flex items-center gap-1 text-lg text-primary font-semibold hover:underline pt-1"
+									className="inline-flex min-h-11 items-center gap-1 text-lg text-primary font-semibold hover:underline pt-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 									>
 										Voir le tournoi
 										<ChevronRight className="w-3.5 h-3.5" />
 									</Link>
 								</div>
 							))}
+						</div>
 						</div>
 					)}
 				</>

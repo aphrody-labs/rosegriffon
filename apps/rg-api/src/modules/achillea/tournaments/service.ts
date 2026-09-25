@@ -37,14 +37,25 @@ export abstract class TournamentService {
 			statusReason: includeReasons ? participant.status_reason : null,
 		})), bracketData] as const;
 	}
-	public static async findAll(db: Kysely<Database>, page = 1, pageSize = 25): Promise<{ data: TournamentDTO[]; meta: { page: number; limit: number; total: number; pageCount: number } }> {
-		const base = db
+	public static async findAll(db: Kysely<Database>, page = 1, pageSize = 25, organization?: number, states: string[] = []): Promise<{ data: TournamentDTO[]; meta: { page: number; limit: number; total: number; pageCount: number } }> {
+		let base = db
 			.selectFrom("event")
 			.selectAll()
 			.where("type", "=", "TOURNAMENT");
+		let countBase = db.selectFrom("event").select(({ fn }) => fn.countAll<number>().as("count")).where("type", "=", "TOURNAMENT");
+		if (organization !== undefined) {
+			base = base.where("organization_id", "=", organization);
+			countBase = countBase.where("organization_id", "=", organization);
+		}
+		if (states.length > 0) {
+			const allowed = ["Pending", "Preregistering", "Preparing", "Ongoing", "Finished", "Canceled"] as const;
+			const internalStates = [...new Set(states.flatMap((state) => state === "Open" ? ["Preregistering", "Preparing"] : [state]).filter((state): state is typeof allowed[number] => allowed.some((value) => value === state)))];
+			base = base.where("internal_state", "in", internalStates);
+			countBase = countBase.where("internal_state", "in", internalStates);
+		}
 		const [rows, countRow] = await Promise.all([
 			base.orderBy("id", "desc").limit(pageSize).offset((page - 1) * pageSize).execute(),
-			db.selectFrom("event").select(({ fn }) => fn.countAll<number>().as("count")).where("type", "=", "TOURNAMENT").executeTakeFirst(),
+			countBase.executeTakeFirst(),
 		]);
 
 		const data: TournamentDTO[] = rows.map((r) => ({
