@@ -1,7 +1,8 @@
 import { ActivityType } from "discord.js";
 import { Client } from "@aphrody/discordx";
+import { syncDiscordGuildSnapshot } from "@rosegriffon/discord-sync";
 
-import { generalConfig } from "@/configs";
+import { discordBotProfile, generalConfig } from "@/configs";
 import { Discord, Injectable, Once, Schedule } from "@/decorators";
 // Imports VALEUR obligatoires : ces classes sont injectées dans le constructeur → `import type`
 // efface le runtime et casse `design:paramtypes` (ReadyEvent jamais instancié, readyHandler mort).
@@ -56,6 +57,19 @@ export default class ReadyEvent {
 
 		// synchronize guilds between discord and the database
 		await syncAllGuilds(client);
+		if (process.env.RG_DISCORD_SYNC_SQLITE_PATH && client.user) {
+			for (const guild of client.guilds.cache.values()) {
+				try {
+					const report = await syncDiscordGuildSnapshot(guild, {
+						sourceBotId: client.user.id,
+						profile: discordBotProfile.name,
+					});
+					if (report) console.info(`[discord-sync] guild=${report.guildId} members=${report.memberCount} complete=${report.membersComplete} roles=${report.roleCount} channels=${report.channelCount}`);
+				} catch (error) {
+					console.error(`[discord-sync] guild=${guild.id} failed:`, error instanceof Error ? error.message : String(error));
+				}
+			}
+		}
 
 		// the bot is fully ready
 		this.store.update("ready", (e) => ({ ...e, bot: true }));

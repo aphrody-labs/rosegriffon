@@ -402,7 +402,8 @@ if (indexRun >= 0) {
 	} else if (task === "warm") {
 		await executeTask("warm", warmCaches);
 	} else if (task === "discord") {
-		await executeTask("discord:sync", runDiscordSync);
+		const collecte = await executeTask("discord:sync", runDiscordSync);
+		if (collecte.success) await executeTask("sync:achillea", runAchilleaSync);
 	} else if (task === "discord:scan") {
 		await executeTask("discord:scan", runDiscordChannelScan);
 	} else if (task === "discord:messages" || task === "discord-messages") {
@@ -491,8 +492,8 @@ if (indexRun >= 0) {
 		await executeTask("cdn", syncCdnAssets);
 		await executeTask("crawl", runIeCrawl);
 		await executeTask("reminders", () => triggerPatreonReminders("announce"));
-		await executeTask("discord:sync", runDiscordSync);
-		await executeTask("sync:achillea", runAchilleaSync);
+		const collecte = await executeTask("discord:sync", runDiscordSync);
+		if (collecte.success) await executeTask("sync:achillea", runAchilleaSync);
 		await executeTask("discord:scan", runDiscordChannelScan);
 		await executeTask("discord:messages", runDiscordMessagesSync);
 		await executeTask("discord:polls", () => runDiscordPollsImport());
@@ -531,8 +532,8 @@ Bun.cron("7,37 * * * *", async () => {
 // L'ordre compte — la projection recopie ce que la collecte vient d'écrire, et
 // ne parle jamais à Discord elle-même.
 Bun.cron("12,42 * * * *", async () => {
-	await executeTask("discord:sync", runDiscordSync);
-	await executeTask("sync:achillea", runAchilleaSync);
+	const collecte = await executeTask("discord:sync", runDiscordSync);
+	if (collecte.success) await executeTask("sync:achillea", runAchilleaSync);
 });
 
 // 2c. Veille des salons Discord suivis : toutes les 15 minutes.
@@ -768,7 +769,7 @@ const server = Bun.serve({
 						.maybeSingle();
 
 					if (session && new Date(session.expires_at) > new Date()) {
-					const profile = await resolveProfile(db as never, { id: session.user_id });
+						const profile = await resolveProfile(db as never, { id: session.user_id });
 						if (profile && isAdmin(profile.role)) {
 							isAuthorized = true;
 							console.log(`[Cron Auth] Accès autorisé pour l'administrateur : ${profile.username}`);

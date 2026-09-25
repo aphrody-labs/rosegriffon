@@ -48,6 +48,7 @@
         "@rosegriffon/achillea-types": "workspace:*",
         "@rosegriffon/auth": "workspace:*",
         "@rosegriffon/db": "workspace:*",
+        "@rosegriffon/discord-sync": "workspace:*",
         "@rushstack/node-core-library": "^5.23.1",
         "@tsed/common": "^8.30.0",
         "@tsed/core": "^8.30.0",
@@ -136,7 +137,7 @@
     },
     "apps/api": {
       "name": "@rosegriffon/api",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "dependencies": {
         "@elysia/eden": "^1.4.10",
         "@elysiajs/cors": "^1.4.2",
@@ -453,11 +454,11 @@
     },
     "packages/assets": {
       "name": "@rosegriffon/assets",
-      "version": "1.0.2",
+      "version": "1.0.3",
     },
     "packages/auth": {
       "name": "@rosegriffon/auth",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "dependencies": {
         "@better-auth/agent-auth": "0.5.1",
         "@better-auth/api-key": "1.6.28",
@@ -481,7 +482,7 @@
     },
     "packages/azalee": {
       "name": "@rosegriffon/azalee",
-      "version": "1.0.2",
+      "version": "1.0.5",
       "bin": {
         "azalee": "./src/cli.ts",
       },
@@ -503,7 +504,7 @@
     },
     "packages/config": {
       "name": "@rosegriffon/config",
-      "version": "1.0.2",
+      "version": "1.0.3",
     },
     "packages/cron": {
       "name": "@rosegriffon/cron",
@@ -515,6 +516,7 @@
         "@rosegriffon/assets": "workspace:*",
         "@rosegriffon/auth": "workspace:*",
         "@rosegriffon/db": "workspace:*",
+        "@rosegriffon/discord-sync": "workspace:*",
         "@rosegriffon/inagle": "workspace:*",
         "@rosegriffon/types": "workspace:*",
         "cheerio": "catalog:",
@@ -528,9 +530,9 @@
     },
     "packages/db": {
       "name": "@rosegriffon/db",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "dependencies": {
-        "@rosegriffon/types": "^1.0.1",
+        "@rosegriffon/types": "^1.0.3",
         "@supabase/ssr": "catalog:",
         "kysely": "catalog:",
         "pg": "catalog:",
@@ -543,6 +545,13 @@
         "vitest": "catalog:",
       },
     },
+    "packages/discord-sync": {
+      "name": "@rosegriffon/discord-sync",
+      "version": "0.1.0",
+      "dependencies": {
+        "discord.js": "catalog:",
+      },
+    },
     "packages/i18n": {
       "name": "@rosegriffon/i18n",
       "version": "1.0.1",
@@ -553,7 +562,7 @@
     },
     "packages/inagle": {
       "name": "@rosegriffon/inagle",
-      "version": "1.0.1",
+      "version": "2.0.4",
       "bin": {
         "inagle": "./dist/cli.js",
       },
@@ -578,7 +587,7 @@
     },
     "packages/inagle-cross": {
       "name": "@rosegriffon/inagle-cross",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "dependencies": {
         "zod": "catalog:",
       },
@@ -589,7 +598,7 @@
     },
     "packages/patreon-bun": {
       "name": "@rosegriffon/patreon-bun",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "devDependencies": {
         "@types/bun": "catalog:",
         "msw": "catalog:",
@@ -654,7 +663,7 @@
     },
     "packages/preferences": {
       "name": "@rosegriffon/preferences",
-      "version": "1.0.2",
+      "version": "1.0.3",
     },
     "packages/search": {
       "name": "@rosegriffon/search",
@@ -662,7 +671,7 @@
     },
     "packages/types": {
       "name": "@rosegriffon/types",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "dependencies": {
         "zod": "^4.4.3",
       },
@@ -677,7 +686,7 @@
     },
     "packages/ui": {
       "name": "@rosegriffon/ui",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "dependencies": {
         "@hookform/resolvers": "catalog:",
         "@radix-ui/react-accordion": "catalog:",
@@ -2088,6 +2097,8 @@
     "@rosegriffon/cron": ["@rosegriffon/cron@workspace:packages/cron"],
 
     "@rosegriffon/db": ["@rosegriffon/db@workspace:packages/db"],
+
+    "@rosegriffon/discord-sync": ["@rosegriffon/discord-sync@workspace:packages/discord-sync"],
 
     "@rosegriffon/i18n": ["@rosegriffon/i18n@workspace:packages/i18n"],
 

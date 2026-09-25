@@ -15,18 +15,18 @@ export interface ResultatRolloverSaisons {
 }
 
 export async function runAchilleaSeasonRollover(): Promise<ResultatRolloverSaisons> {
-	try {
+	return sql.begin(async (tx) => {
 		// Les tables importées d'Achilléa gardent leurs politiques RLS historiques.
 		// `service_role` est le rôle d'écriture déjà utilisé par la projection
 		// Discord dans `achillea-sync.ts`; il est impérativement réinitialisé.
-		await sql`SET ROLE service_role`;
+		await tx`SET LOCAL ROLE service_role`;
 
-		const activees = await sql`
+		const activees = await tx`
 			UPDATE achillea.season
 			   SET state = 'Active', updated_at = now()
 			 WHERE state = 'Upcoming' AND starts_at <= now()
 			 RETURNING id`;
-		const cloturees = await sql`
+		const cloturees = await tx`
 			UPDATE achillea.season
 			   SET state = 'Closed', updated_at = now()
 			 WHERE state = 'Active' AND ends_at <= now()
@@ -36,7 +36,5 @@ export async function runAchilleaSeasonRollover(): Promise<ResultatRolloverSaiso
 			`[achillea] rollover saisons : ${activees.length} activée(s), ${cloturees.length} clôturée(s)`
 		);
 		return { activees: activees.length, cloturees: cloturees.length, success: true };
-	} finally {
-		await sql`RESET ROLE`.catch(() => undefined);
-	}
+	});
 }
