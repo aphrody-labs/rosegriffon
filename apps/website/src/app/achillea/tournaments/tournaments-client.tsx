@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { createAchilleaClient } from "@/lib/achillea";
+import { remainingTournamentPages } from "@/lib/achillea/tournament-pagination";
 import { TournamentTable } from "@/components/achillea/TournamentTable";
 import type { TournamentListItem } from "@rosegriffon/achillea-types/domain/tournament";
 import {
@@ -42,9 +43,8 @@ export default function TournamentsListPage({
 				if (cancelled) return;
 				if (res.ok && res.value) {
 					const first = res.value;
-					const pageCount = Math.ceil(first.meta.total / 50);
-					return Promise.all(Array.from({ length: Math.max(0, pageCount - 1) }, (_, index) =>
-						client.tournaments.list({ page: index + 2, pageSize: 50 })
+					return Promise.all(remainingTournamentPages(first.meta).map((page) =>
+						client.tournaments.list({ page, pageSize: 50 })
 					)).then((pages) => {
 						if (cancelled) return;
 						if (pages.some((page) => !page.ok)) {
