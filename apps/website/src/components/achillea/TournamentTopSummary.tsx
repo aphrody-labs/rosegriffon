@@ -8,15 +8,20 @@ import type { TournamentSummary } from "@rosegriffon/achillea-types";
 
 interface TournamentTopSummaryProps {
 	tournamentId: number;
+	isFinished?: boolean;
 }
 
-export function TournamentTopSummary({ tournamentId }: TournamentTopSummaryProps) {
+export function TournamentTopSummary({ tournamentId, isFinished = false }: TournamentTopSummaryProps) {
 	const [summary, setSummary] = useState<TournamentSummary | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [error, setError] = useState<string | null>(null);
+	const [attempt, setAttempt] = useState(0);
 
 	useEffect(() => {
 		let cancelled = false;
 		setLoading(true);
+		setSummary(null);
+		setError(null);
 		const client = createAchilleaClient();
 
 		client.tournaments
@@ -25,9 +30,13 @@ export function TournamentTopSummary({ tournamentId }: TournamentTopSummaryProps
 				if (cancelled) return;
 				if (res.ok && res.value) {
 					setSummary(res.value);
+				} else {
+					setError("Le classement est temporairement indisponible.");
 				}
 			})
-			.catch(() => {})
+			.catch(() => {
+				if (!cancelled) setError("La connexion au serveur a échoué.");
+			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
 			});
@@ -35,18 +44,32 @@ export function TournamentTopSummary({ tournamentId }: TournamentTopSummaryProps
 		return () => {
 			cancelled = true;
 		};
-	}, [tournamentId]);
+	}, [tournamentId, attempt]);
 
 	if (loading) {
 		return (
-			<div className="py-8 text-center space-y-2">
+			<div role="status" aria-live="polite" className="py-8 text-center space-y-2">
 				<Loader2 className="w-6 h-6 animate-spin text-amber-400 mx-auto" />
 				<p className="text-lg text-muted-foreground">Chargement des classements et du podium…</p>
 			</div>
 		);
 	}
 
-	if (!summary?.top10 || summary.top10.length === 0) return null;
+	if (error) return (
+		<div role="alert" className="rounded-2xl border border-rose-500/50 bg-rose-500/10 p-6 text-lg space-y-4">
+			<p>{error}</p>
+			<button type="button" onClick={() => setAttempt((value) => value + 1)} className="min-h-11 rounded-lg border border-current px-5 font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-amber-300">Réessayer</button>
+		</div>
+	);
+
+	if (!summary?.top10?.length) return (
+		<div role="status" className="rounded-2xl border border-border bg-card p-6 text-lg space-y-2">
+			<h3 className="font-bold">{isFinished ? "Classement non résolu" : "Aucun classement disponible"}</h3>
+			<p className="text-muted-foreground">{isFinished
+				? "Les résultats enregistrés ne permettent pas encore de valider le bracket et le podium. Aucun rang ni AP n'est attribué ici."
+				: "Le tournoi n'a pas encore de classement confirmé. Revenez après la validation des matchs."}</p>
+		</div>
+	);
 
 	const podium = summary.top10.filter((entry) => entry.rank <= 3);
 	const rest = summary.top10.filter((entry) => entry.rank > 3);

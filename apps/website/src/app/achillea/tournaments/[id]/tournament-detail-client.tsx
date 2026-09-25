@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -57,6 +57,7 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 	const [activeTab, setActiveTab] = useState<"overview" | "bracket" | "participants" | "summary" | "events" | "organizers" | "notes">("overview");
+	const tabListRef = useRef<HTMLDivElement>(null);
 
 	const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
 	const [isRegistering, setIsRegistering] = useState<boolean>(false);
@@ -167,6 +168,30 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 	const firstPrize = placementPrizeAp(nbParticipants, 1);
 	const secondPrize = placementPrizeAp(nbParticipants, 2);
 	const semiPrize = placementPrizeAp(nbParticipants, 3);
+	const tabs: { id: typeof activeTab; label: string; icon: typeof FileText }[] = [
+		{ id: "overview", label: "Présentation & Règles", icon: FileText },
+		{ id: "bracket", label: "Arbre du tournoi", icon: Layers },
+		{ id: "participants", label: `Participants (${participants.length})`, icon: Users },
+		{ id: "summary", label: "Podium & Résultats", icon: Trophy },
+		{ id: "events", label: "Journal d'arbitrage", icon: Activity },
+		{ id: "organizers", label: "Organisateurs", icon: ShieldCheck },
+		...(isOrganizer ? [{ id: "notes" as const, label: "Notes Staff", icon: ShieldAlert }] : []),
+	];
+	const selectTab = (tabId: typeof activeTab, focus = false) => {
+		setActiveTab(tabId);
+		if (focus) requestAnimationFrame(() => tabListRef.current?.querySelector<HTMLButtonElement>(`#tournament-tab-${tabId}`)?.focus());
+	};
+	const onTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+		const index = tabs.findIndex((tab) => tab.id === activeTab);
+		let next = index;
+		if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
+		else if (event.key === "ArrowLeft") next = (index - 1 + tabs.length) % tabs.length;
+		else if (event.key === "Home") next = 0;
+		else if (event.key === "End") next = tabs.length - 1;
+		else return;
+		event.preventDefault();
+		selectTab(tabs[next].id, true);
+	};
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
@@ -313,94 +338,19 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 			)}
 
 			{/* Tabs Navigation */}
-			<div className="flex items-center gap-2 border-b border-border pb-px overflow-x-auto">
-				<button
-					type="button"
-					onClick={() => setActiveTab("overview")}
-					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
-						activeTab === "overview"
-							? "border-primary text-foreground"
-							: "border-transparent text-muted-foreground hover:text-foreground"
-					}`}
-				>
-					<FileText className="w-3.5 h-3.5" />
-					Présentation & Règles
-				</button>
-				<button
-					type="button"
-					onClick={() => setActiveTab("bracket")}
-					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
-						activeTab === "bracket"
-							? "border-primary text-foreground"
-							: "border-transparent text-muted-foreground hover:text-foreground"
-					}`}
-				>
-					<Layers className="w-3.5 h-3.5" />
-					Arbre du tournoi
-				</button>
-				<button
-					type="button"
-					onClick={() => setActiveTab("participants")}
-					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
-						activeTab === "participants"
-							? "border-primary text-foreground"
-							: "border-transparent text-muted-foreground hover:text-foreground"
-					}`}
-				>
-					<Users className="w-3.5 h-3.5" />
-					Participants ({participants.length})
-				</button>
-				<button
-					type="button"
-					onClick={() => setActiveTab("summary")}
-					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
-						activeTab === "summary"
-							? "border-primary text-foreground"
-							: "border-transparent text-muted-foreground hover:text-foreground"
-					}`}
-				>
-					<Trophy className="w-3.5 h-3.5" />
-					Podium & Résultats
-				</button>
-				<button
-					type="button"
-					onClick={() => setActiveTab("events")}
-					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
-						activeTab === "events"
-							? "border-primary text-foreground"
-							: "border-transparent text-muted-foreground hover:text-foreground"
-					}`}
-				>
-					<Activity className="w-3.5 h-3.5" />
-					Journal d&apos;arbitrage
-				</button>
-				<button
-					type="button"
-					onClick={() => setActiveTab("organizers")}
-					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
-						activeTab === "organizers"
-							? "border-primary text-foreground"
-							: "border-transparent text-muted-foreground hover:text-foreground"
-					}`}
-				>
-					<ShieldCheck className="w-3.5 h-3.5" />
-					Organisateurs
-				</button>
-				{isOrganizer && (
-					<button
-						type="button"
-						onClick={() => setActiveTab("notes")}
-						className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
-							activeTab === "notes"
-								? "border-primary text-foreground"
-								: "border-transparent text-muted-foreground hover:text-foreground"
-						}`}
+			<div ref={tabListRef} role="tablist" aria-label="Sections du tournoi" className="flex items-center gap-2 border-b border-border pb-px overflow-x-auto">
+				{tabs.map(({ id: tabId, label, icon: Icon }) => (
+					<button key={tabId} id={`tournament-tab-${tabId}`} type="button" role="tab"
+						aria-selected={activeTab === tabId} aria-controls={`tournament-panel-${tabId}`}
+						tabIndex={activeTab === tabId ? 0 : -1}
+						onClick={() => selectTab(tabId)} onKeyDown={onTabKeyDown}
+						className={`min-h-11 shrink-0 px-4 py-2 text-lg font-semibold border-b-2 transition -mb-px flex items-center gap-2 rounded-t-lg focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[-3px] focus-visible:outline-amber-300 ${activeTab === tabId ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
 					>
-						<ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
-						Notes Staff
+						<Icon aria-hidden="true" className="w-5 h-5" />{label}
 					</button>
-				)}
+				))}
 			</div>
+			<div role="tabpanel" id={`tournament-panel-${activeTab}`} aria-labelledby={`tournament-tab-${activeTab}`} tabIndex={0} className="focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-amber-300 rounded-lg">
 
 			{/* Tab 1: Overview */}
 			{activeTab === "overview" && (
@@ -472,7 +422,7 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 
 			{/* Tab 4: Podium & Summary */}
 			{activeTab === "summary" && (
-				<TournamentTopSummary tournamentId={tournament.id} />
+				<TournamentTopSummary tournamentId={tournament.id} isFinished={tournament.internalState === TournamentState.FINISHED} />
 			)}
 
 			{/* Tab 5: Events Journal */}
@@ -512,6 +462,7 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 					title={`Registre des signalements — Tournoi #${tournament.id}`}
 				/>
 			)}
+			</div>
 
 			{/* Modal Dialog de Saisie & Validation des Scores */}
 			{selectedMatchId !== null && (
