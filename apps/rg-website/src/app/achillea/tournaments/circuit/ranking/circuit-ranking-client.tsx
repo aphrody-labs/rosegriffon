@@ -272,6 +272,7 @@ export default function CircuitRankingPage() {
 										Rechercher un joueur ou un clan
 										<input
 											type="search"
+											aria-label="Rechercher un joueur ou un clan"
 											value={playerQuery}
 											onChange={(event) => setPlayerQuery(event.target.value)}
 											className="min-h-11 rounded-md border border-border bg-background px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -434,6 +435,7 @@ export default function CircuitRankingPage() {
 									Rechercher un clan
 									<input
 										type="search"
+										aria-label="Rechercher un clan"
 										value={clanQuery}
 										onChange={(event) => setClanQuery(event.target.value)}
 										className="min-h-11 rounded-md border border-border bg-background px-3 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
