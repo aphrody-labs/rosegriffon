@@ -25,28 +25,7 @@ import { describeMimeType, listRecentDriveFiles } from "@/lib/google/drive";
 
 import { QuickActions } from "./_components/quick-actions";
 import { SignupsChartLoader } from "./_components/signups-chart-loader";
-import type { SignupPoint } from "./_components/signups-chart";
-
-function buildDailySignups(rows: { created_at: string | null }[]): SignupPoint[] {
-	const today = new Date();
-	today.setUTCHours(0, 0, 0, 0);
-	const buckets = new Map<string, number>();
-	for (let i = 29; i >= 0; i--) {
-		const d = new Date(today);
-		d.setUTCDate(d.getUTCDate() - i);
-		buckets.set(d.toISOString().slice(0, 10), 0);
-	}
-	for (const row of rows) {
-		if (!row.created_at) {
-			continue;
-		}
-		const key = row.created_at.slice(0, 10);
-		if (buckets.has(key)) {
-			buckets.set(key, (buckets.get(key) ?? 0) + 1);
-		}
-	}
-	return Array.from(buckets, ([date, count]) => ({ count, date }));
-}
+import { buildDailySignups } from "./_lib/signups";
 
 export const dynamic = "force-dynamic";
 
