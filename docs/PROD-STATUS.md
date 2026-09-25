@@ -9,6 +9,11 @@ status: "stable"
 
 Last verified: **2026-09-20 UTC** on the Rose Griffon VPS.
 
+> **Authority.** Ports, units, hosts and routes are owned by `aphrody-infra`
+> (`config/service-catalog.json`, `config/nginx-routes.json`, `config/production-topology.json`);
+> where this page disagrees, `aphrody-infra` wins. As of 2026-09-25 the VPS runs only RG and
+> Shenron: Aphrody, NIE and IECode are not deployed.
+
 ## Live surfaces
 
 - `rosegriffon.fr` : application Next.js 16 unifiée (`apps/website`, `website-web.service` :3004 / `-b` :3014)
@@ -23,7 +28,6 @@ Last verified: **2026-09-20 UTC** on the Rose Griffon VPS.
   `users/leaderboard`, liste `clans`, `sanctions`) passent par `rg-api` ; le ranked (:4002),
   Socket.IO (:4005) et les mutations encore non portées restent temporairement dans
   `achillea-bot` (:4000).
-- `nie.aphrody.com` : servi depuis le VPS derrière nginx.
 - Postgres (port 5432), PostgREST (:8809), Storage (:8810), Realtime (:8812), CDN (:8804, :8788),
   API unifiée (`rg-api.service`, montage Azalée `/v1/azalee`) et bot Achilléa (`achillea-bot.service`)
   actifs. Les anciens `azalee-api` et `azalee-bot` sont retirés.
