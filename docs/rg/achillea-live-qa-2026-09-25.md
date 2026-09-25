@@ -128,3 +128,22 @@ Dans `/admin/settings` connecté, l'onglet Achilléa a activé le bouton de
 sauvegarde après saisie temporaire de `javascript:alert(1)` dans « Lien du
 site ». Le serveur a répondu « URL HTTPS ou chemin local absolu requis » ; la
 valeur affichée a été rétablie sans écriture et le bouton est redevenu inactif.
+
+## Validation de la release `8a79398`
+
+La liste `/achillea/tournaments` a affiché 9 événements après chargement ; son
+état initial à 0 était transitoire. Le classement du circuit a affiché 95 joueurs,
+18 clans et 5 tournois. Dans Chrome connecté, `/achillea/ranked/history` affiche
+désormais 7 matchs dont 3 victoires, 1 défaite, 2 nuls et 1 forfait. Les deux
+entrées `draw` portent le libellé « Match nul » et les filtres exposent leur état
+`aria-pressed`. Une autre entrée `1–1` est classée `win` par l'API ; sa règle
+d'arbitrage reste à vérifier avant de modifier le résultat.
+
+`GET https://ranked.rosegriffon.fr/api/tournaments/23/summary` a répondu 200
+après déploiement : 31 matchs, 30 entrées du classement avec des buts non nuls,
+21 buts marqués pour Ban. Avant la release, les champs de buts du classement
+étaient tous à zéro malgré 206 buts dans les statistiques de matchs. Les cinq
+services RG et le pointeur `/srv/rg/current` étaient actifs sur `8a79398`.
+Les tests `auth-status` (2/2) et les contrôles TypeScript API et site passent.
+Le scénario d'une panne réelle `/auth/me` n'a pas été reproduit en production ;
+sa classification est couverte par les tests ciblés.
