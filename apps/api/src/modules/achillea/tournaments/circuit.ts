@@ -19,9 +19,11 @@ export async function circuitRanking(db: Kysely<Database>) {
 		.where("tournament_type", "in", ["single_elimination", "double_elimination"])
 		.orderBy("grand_final_at", "desc").execute();
 	const players = new Map<string, Player>();
-	const summaries: Array<{ id: number; name: string; size: number; grandFinalAt: string; podium: unknown[] }> = [];
+	const summaries: Array<{ id: number; name: string; size: number; grandFinalAt: string; podium: unknown[]; standingsStatus: "resolved" | "unresolved" }> = [];
 	for (const tournament of tournaments) {
 		const size = Number(tournament.participants_number ?? 0);
+		const summary = { id: tournament.id, name: tournament.name, size, grandFinalAt: (tournament.grand_final_at ?? new Date(0)).toISOString(), podium: [] as unknown[], standingsStatus: "unresolved" as "resolved" | "unresolved" };
+		summaries.push(summary);
 		if (size <= 0) continue;
 		let standings;
 		try {
@@ -35,7 +37,7 @@ export async function circuitRanking(db: Kysely<Database>) {
 		const users = ids.length ? await db.selectFrom("user").select(["id", "display_name", "username", "avatar"])
 			.where("id", "in", ids).execute() : [];
 		const byId = new Map(users.map((u) => [u.id, u]));
-		const podium: unknown[] = [];
+		if (standings.length > 0) summary.standingsStatus = "resolved";
 		for (const standing of standings) {
 			const user = byId.get(standing.userId);
 			if (!user) continue;
@@ -55,9 +57,8 @@ export async function circuitRanking(db: Kysely<Database>) {
 			if (standing.rank < entry.bestRank) { entry.bestRank = standing.rank; entry.bestRankLabel = tier.label; }
 			entry.tier = circuitPointsToTier(entry.points).key;
 			players.set(user.id, entry);
-			if (standing.rank <= 8) podium.push({ rank: standing.rank, rankLabel: tier.label, userId: user.id, displayName: user.display_name, avatar: user.avatar ?? "" });
+			if (standing.rank <= 8) summary.podium.push({ rank: standing.rank, rankLabel: tier.label, userId: user.id, displayName: user.display_name, avatar: user.avatar ?? "" });
 		}
-		summaries.push({ id: tournament.id, name: tournament.name, size, grandFinalAt: (tournament.grand_final_at ?? new Date(0)).toISOString(), podium });
 	}
 	const memberships = players.size ? await db.selectFrom("clan_member as cm")
 		.innerJoin("clan as c", "c.id", "cm.clan_id")

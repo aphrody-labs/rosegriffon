@@ -253,14 +253,20 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 			) : !isAuthenticated && !playerId ? (
 				<div className="p-8 border border-border bg-card rounded-2xl text-center space-y-4">
 					<ShieldAlert className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
-					<h2 className="text-xl font-bold">Connexion requise</h2>
+					<h2 className="text-xl font-bold">Consulter les matchs classés</h2>
 					<p className="text-lg text-muted-foreground max-w-md mx-auto">
-						Connectez-vous pour consulter votre historique personnel de matchs classés.
+						Choisissez un joueur dans le classement pour consulter son historique public. Connectez-vous pour retrouver votre historique personnel.
 					</p>
+					<Link
+						href="/achillea/ranked/leaderboard"
+						className="inline-flex items-center px-6 py-2.5 border border-border rounded-lg text-lg font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+					>
+						Voir le classement et les historiques publics
+					</Link>
 					<button
 						type="button"
 						onClick={() => login()}
-						className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition shadow-sm"
+						className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground text-lg font-semibold rounded-lg hover:bg-primary/90 transition shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 					>
 						Se connecter
 					</button>

@@ -77,8 +77,10 @@ export const usersController = new Elysia({ prefix: "/users" })
 		`.execute(db);
 		const period = await sql<{ delta_total: number | string; games: number | string; wins: number | string }>`
 			select coalesce(sum(lu.elo_variation), 0) as delta_total, count(*) as games,
-			count(*) filter (where not lu.forfeit and lu.score > (
-				select opp.score from lobby_user opp where opp.lobby_id = l.id and opp.user_id <> lu.user_id limit 1
+			count(*) filter (where not lu.forfeit and exists (
+				select 1 from lobby_user opp
+				where opp.lobby_id = l.id and opp.user_id <> lu.user_id
+				and (opp.forfeit or lu.score > opp.score)
 			)) as wins
 			from lobby l join lobby_user lu on lu.lobby_id = l.id and lu.user_id = ${session.id}
 			where l.event_type = 'RANKED' and l.state in ('Finished', 'Forfeited')
@@ -106,18 +108,45 @@ export const usersController = new Elysia({ prefix: "/users" })
 	.get("/:id", async ({ db, params: { id } }) => {
 		const user = await db.selectFrom("user").select(["id", "username", "display_name", "avatar", "role", "bio", "twitch_url", "last_interact"]).where("id", "=", id).executeTakeFirst();
 		if (!user) return status(404, { message: "User not found" as const });
-		const [elos, ranks, clan, publicProfile] = await Promise.all([
+		const [elos, ranks, clan, publicProfile, rankedStats] = await Promise.all([
 			db.selectFrom("user_elo").select(["mode", "elo", "games_played", "wins", "losses"]).where("user_id", "=", id).execute(),
 			db.selectFrom("rank").selectAll().orderBy("min_elo", "asc").execute(),
 			db.selectFrom("clan_member as cm").innerJoin("clan as c", "c.id", "cm.clan_id").select(["cm.clan_id", "cm.role", "cm.distinctions", "c.name", "c.shortened_name", "c.clan_avatar_url"]).where("cm.user_id", "=", id).executeTakeFirst(),
 			findLinkedPublicProfile(db, id),
+			sql<{ mode: number; total: number | string; wins: number | string; losses: number | string; draws: number | string; goals_scored: number | string; goals_received: number | string }>`
+				with user_matches as (
+					select l.id as lobby_id, l.mode, me.score as my_score, opp.score as opp_score,
+						me.forfeit as my_forfeit, opp.forfeit as opp_forfeit
+					from lobby l
+					join lobby_user me on me.lobby_id = l.id and me.user_id = ${id}
+					join lobby_user opp on opp.lobby_id = l.id and opp.team <> me.team
+					where l.state in ('Finished', 'Forfeited')
+					and (l.event_type = 'RANKED' or (l.event_type = 'TOURNAMENT' and l.ranked_elo_applied = true))
+				), stats as (
+					select mode, count(distinct lobby_id) as total,
+						count(distinct case when not my_forfeit and (opp_forfeit or my_score > opp_score) then lobby_id end) as wins,
+						count(distinct case when my_forfeit or (not opp_forfeit and my_score < opp_score) then lobby_id end) as losses,
+						count(distinct case when not my_forfeit and not opp_forfeit and my_score = opp_score then lobby_id end) as draws
+					from user_matches group by mode
+				), goals as (
+					select mode, sum(my_score)::bigint as goals_scored, sum(opp_score)::bigint as goals_received
+					from (select distinct lobby_id, mode, my_score, opp_score from user_matches
+						where not my_forfeit and not opp_forfeit) scored
+					group by mode
+				)
+				select stats.*, coalesce(goals.goals_scored, 0) as goals_scored,
+					coalesce(goals.goals_received, 0) as goals_received
+				from stats left join goals on goals.mode = stats.mode
+			`.execute(db).then((result) => result.rows),
 		]);
 		const modeStats = (mode: number) => {
 			const row = elos.find((elo) => Number(elo.mode) === mode);
+			const matches = rankedStats.find((stats) => Number(stats.mode) === mode);
 			const rating = Number(row?.elo ?? 0);
 			const tier = ranks.find((rank) => rating >= rank.min_elo && rating <= rank.max_elo);
 			return {
-				mode, total: Number(row?.games_played ?? 0), wins: Number(row?.wins ?? 0), losses: Number(row?.losses ?? 0), draws: 0, goalsScored: 0, goalsReceived: 0,
+				mode, total: Number(matches?.total ?? 0), wins: Number(matches?.wins ?? 0), losses: Number(matches?.losses ?? 0),
+				draws: Number(matches?.draws ?? 0), goalsScored: Number(matches?.goals_scored ?? 0), goalsReceived: Number(matches?.goals_received ?? 0),
 				rank: { elo: rating, key: tier?.key ?? "Non classé", gradient: tier?.gradient ?? [] },
 			};
 		};
