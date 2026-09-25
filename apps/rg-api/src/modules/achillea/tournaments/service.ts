@@ -2,6 +2,12 @@ import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 import type { TournamentDTO } from "./model";
 import { OrganizationService } from "../organizations/service";
+import { tournamentBracketData } from "./bracket";
+
+function publicTournamentStatus(state: string | null): string | null {
+	if (state === "Preregistering" || state === "Preparing") return "Open";
+	return state;
+}
 
 export abstract class TournamentService {
 	public static async findDetail(db: Kysely<Database>, id: number, includeReasons = false) {
@@ -24,11 +30,12 @@ export abstract class TournamentService {
 			registrationClosesAt: row.registration_closes_at?.toISOString() ?? null, autoStart: row.auto_start, discordRoleEnabled: row.discord_role_enabled, scoreReportPolicy: row.score_report_policy ?? "players",
 			discordRoleId: row.discord_role_id, cancelReason: row.cancel_reason, canceledAt: row.canceled_at?.toISOString() ?? null, closedAt: row.closed_at?.toISOString() ?? null,
 		};
+		const bracketData = await tournamentBracketData(id);
 		return [tournament, participants.map((participant, index) => ({
 			id: participant.id, tournament: tournament, user: { id: participant.user_id, username: participant.username ?? participant.user_id, avatar: participant.avatar ?? undefined }, bracketParticipantId: participant.bracket_participant_id,
 			seed: participant.seed, hasCheckedIn: participant.has_checked_in, status: participant.status, registeredAt: participant.registered_at.toISOString(), waitlistPosition: participant.status === "Waitlisted" ? waitlisted.indexOf(participant) + 1 : null,
 			statusReason: includeReasons ? participant.status_reason : null,
-		})), { stage: [], group: [], round: [], match: [] }] as const;
+		})), bracketData] as const;
 	}
 	public static async findAll(db: Kysely<Database>, page = 1, pageSize = 25): Promise<{ data: TournamentDTO[]; meta: { page: number; limit: number; total: number; pageCount: number } }> {
 		const base = db
@@ -45,7 +52,7 @@ export abstract class TournamentService {
 			name: r.name,
 			description: r.description,
 			type: r.type,
-			status: r.status,
+			status: publicTournamentStatus(r.internal_state),
 			createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
 			updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
 		}));
@@ -68,7 +75,7 @@ export abstract class TournamentService {
 			name: r.name,
 			description: r.description,
 			type: r.type,
-			status: r.status,
+			status: publicTournamentStatus(r.internal_state),
 			createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
 			updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
 		};

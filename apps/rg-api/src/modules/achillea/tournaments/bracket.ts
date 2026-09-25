@@ -200,7 +200,10 @@ export async function tournamentBracketData(tournamentId: number) {
 
 /** Résout le classement final et le remappe vers les identifiants Achillea. */
 export async function finalTournamentStandings(db: Kysely<Database>, tournamentId: number) {
-	const stage = await manager.get.currentStage(tournamentId);
+	// currentStage deliberately returns null once every match is completed.
+	// Circuit standings need the last persisted stage precisely in that case.
+	const stages = await manager.storage.select("stage", { tournament_id: tournamentId });
+	const stage = stages?.at(-1);
 	if (!stage) return [];
 	const standings = await manager.get.finalStandings(stage.id);
 	const participants = await db
