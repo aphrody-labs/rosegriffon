@@ -203,3 +203,11 @@ Sur la fiche 23, le résumé affiche le rang 1, le rang 2 et deux rangs 3 ex æq
 `https://ranked.rosegriffon.fr/api/tournaments` est une autre surface, encore interrogée par le client Achilléa dans sa configuration par défaut. Son contrat de pagination diffère (`pageSize=50` a conservé une limite de 25). Il faut inventorier les routes et la configuration effective avant de basculer le client vers l'API RG ; le succès du filtre RG ne prouve pas la parité des deux services.
 
 Dans Chrome connecté, le circuit affiche 95 joueurs, 18 clans et 9 tournois ; la vue mobile demandée à 390 px expose 95 cartes de joueurs. Le filtre « Classement non résolu » ramène les tournois de 9 à 4. La fiche 23 affiche maintenant « +100 points de circuit » pour Ban, distinct de son prix de première place de 50 AP. Le leaderboard solo expose 12 cartes mobiles avec liens vers les historiques publics. Les scénarios duo, pagination de plus de 100 matchs, session anonyme réellement séparée, zoom 200 % et tous les rôles restent à vérifier.
+
+## Validation de la release `c85d675`
+
+`/srv/rg/current` désigne `c85d675a45d96301b4a11bdabe754f723334d118` ; les cinq services RG sont actifs, Nginx valide et la route `/achillea/ranked/tiers` répond HTTPS 200. Dans Chrome connecté, les sélecteurs Solo/Duo des paliers sont rendus à 18 px, avec une hauteur minimale de 44 px et leur état `aria-pressed`; les onze paliers sont présents.
+
+Le tableau `/admin`, qui affichait auparavant le digest React `2926058691`, rend maintenant « Tableau de bord » sans écran d'erreur. La correction normalise les dates PostgreSQL utilisées par le graphe d'inscriptions. Les pages `/achillea/tournaments` et `/achillea/tournaments/circuit/ranking` ont aussi rendu leurs titres et contenu réels dans cette session.
+
+La liste de tournois utilise la limite effective renvoyée par l'API lors de sa pagination, y compris sur le contrat legacy qui plafonne la limite demandée à 25. Les quatre tests ciblés de cette pagination et du graphe admin passent (0 échec) ainsi que le typecheck du site. La construction de release signale encore un appel Discord `401` pendant le rendu statique et trois valeurs `/admin/database` trop grandes pour le cache Next; l'artefact est assemblé et activé, mais ces avertissements restent à corriger avant de déclarer le build silencieux.
