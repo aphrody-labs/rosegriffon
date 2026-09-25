@@ -20,6 +20,7 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { syncSiteTelemetryAggregates, type SiteTelemetryAggregate } from "@rosegriffon/discord-sync";
 
 /** Où la page de statistiques du site va lire le résultat. */
 export const CHEMIN_CACHE = "/var/lib/rg/achillea-audience.json";
@@ -116,13 +117,33 @@ export async function collecterAudienceAchillea(): Promise<{
 
 	const debut = Date.now() - FENETRE_HEURES * 3600_000;
 	const parDomaine = new Map<string, Acc>();
+	const siteHours = new Map<string, SiteTelemetryAggregate>();
+	let lignesVues = 0;
 
 	for (const ligne of sortie.split("\n")) {
+		if (ligne) lignesVues++;
 		const champs = ligne.split("\t");
 		if (champs.length < 12) {
 			continue;
 		}
 		const [horodatage, host, , uri, statut, octets, duree, , , , , ip] = champs;
+		const instantSite = Date.parse(horodatage ?? "");
+		if (host && (host === "rosegriffon.fr" || host.endsWith(".rosegriffon.fr") ||
+			host === "rpbey.fr" || host.endsWith(".rpbey.fr")) &&
+			Number.isFinite(instantSite) && instantSite >= debut) {
+			const windowStart = new Date(Math.floor(instantSite / 3600_000) * 3600_000).toISOString();
+			const key = `${host}\t${windowStart}`;
+			let bucket = siteHours.get(key);
+			if (!bucket) {
+				bucket = { host, windowStart, requests: 0, bytes: 0, errors4xx: 0, errors5xx: 0 };
+				siteHours.set(key, bucket);
+			}
+			bucket.requests++;
+			bucket.bytes += Number.parseInt(octets ?? "0", 10) || 0;
+			const statusCode = Number.parseInt(statut ?? "0", 10) || 0;
+			if (statusCode >= 500) bucket.errors5xx++;
+			else if (statusCode >= 400) bucket.errors4xx++;
+		}
 		if (!host || !DOMAINES.has(host)) {
 			continue;
 		}
@@ -184,6 +205,7 @@ export async function collecterAudienceAchillea(): Promise<{
 		JSON.stringify({ collecteLe: new Date().toISOString(), domaines }, null, "\t"),
 		"utf8"
 	);
+	await syncSiteTelemetryAggregates([...siteHours.values()], lignesVues < MAX_LIGNES);
 
 	return {
 		domaines: domaines.length,

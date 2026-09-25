@@ -22,5 +22,9 @@ PostgreSQL remain authoritative for accounts and OAuth links. The cron task
 mirrors account-link IDs, provider IDs and timestamps into
 `rg_oauth_account_links`, with a provider count in Redis. OAuth access,
 refresh and ID tokens, Discord message bodies, DMs, audit logs, attachments,
-and site telemetry are not copied into SQLite or Redis. Obtaining those requires
+and raw site telemetry are not copied into SQLite or Redis. The scheduled
+`stats:achillea` task writes hourly host aggregates (requests, bytes, 4xx,
+5xx) for the last 24 hours to `rg_site_telemetry` and a Redis summary.
+`complete=0` means the 200,000-line source cap was reached. Obtaining raw
+private data requires
 separate consent, gateway intents or API permissions and retention rules.
