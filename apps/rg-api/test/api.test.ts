@@ -560,6 +560,7 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		const history = (await response.json()) as Array<{ lobbyId: number; opponent: { userId: string } }>;
 		expect(Array.isArray(history)).toBe(true);
 		expect(history.length).toBeLessThanOrEqual(5);
+		expect(new Set(history.map((match) => match.lobbyId)).size).toBe(history.length);
 		for (const match of history) {
 			expect(typeof match.lobbyId).toBe("number");
 			expect(typeof match.opponent.userId).toBe("string");
