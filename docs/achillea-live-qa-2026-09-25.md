@@ -169,3 +169,21 @@ Les contrôles TypeScript des packages API, site, client et types passent ;
 les tests ciblés de lecture de profil passent (4/4). L'agrégation historique
 reste limitée aux matchs `lobby_user` réellement enregistrés ; aucun résultat
 absent n'a été reconstitué.
+
+## Validation de la release `70c0545`
+
+Les quatre brackets non résolus ont été inspectés en base : tournois 3 et 7
+sans tableau enregistré ; tournoi 9 avec un match non validé ; tournoi 18 avec
+sept matchs non clos. Le tournoi 18 contient 127 matchs de bracket, dont 93
+avec deux scores (329 buts) : ces scores partiels ne prouvent pas un champion.
+La garde de versement AP refuse ces cas avant mutation. Les cinq brackets
+résolus (19, 21, 22, 23, 32) n'ont aucun match non clos selon la même requête.
+
+Dans Chrome connecté, le bouton « Distribuer les AP Podium » du tournoi 18
+est désactivé avec l'explication « bracket historique ne fournit pas de champion
+vérifié » ; celui du tournoi 23 est activé après vérification du classement.
+Aucun bouton de versement n'a été déclenché. Le filtre « Nuls » de l'historique
+affiche 2 matchs et encode `?result=draw` ; le filtre « 3 ou plus » du circuit
+affiche 18 joueurs sur 95. Les contrôles TypeScript API et site et 4 tests
+ciblés de lecture de profil passent. Le bouton de pagination des historiques
+reste à éprouver avec un joueur ayant plus de 100 matchs.
