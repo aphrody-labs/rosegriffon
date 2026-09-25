@@ -147,3 +147,25 @@ services RG et le pointeur `/srv/rg/current` étaient actifs sur `8a79398`.
 Les tests `auth-status` (2/2) et les contrôles TypeScript API et site passent.
 Le scénario d'une panne réelle `/auth/me` n'a pas été reproduit en production ;
 sa classification est couverte par les tests ciblés.
+
+## Validation de la release `f856710`
+
+En production, l'API du circuit retourne 9 tournois terminés : 5 classements
+résolus et 4 non résolus, avec 95 joueurs classés. L'onglet « Tournois du circuit
+(9) » du navigateur connecté montre la Masia Winter Cup V2 sans podium ni AP
+inventés et explique que son classement historique n'est pas résolu. Sur le
+tournoi 23, « Podium & Résultats » affiche les groupes ex æquo `5e-8e`, `9e-16e`
+et `17e-32e` avec leurs points, sans faux rangs séquentiels.
+
+`GET /api/users/281114294152724491` retourne, pour le solo, 7 matchs,
+3 victoires, 2 défaites, 2 nuls, 11 buts marqués et 7 encaissés hors forfait.
+La victoire au score `1–1` du match 329 provient du forfait adverse vérifié dans
+PostgreSQL ; le score seul ne doit pas la reclasser en nul. Le navigateur a aussi
+suivi le lien du leaderboard solo (12 joueurs) vers l'historique public de
+Richo (3 matchs) ; le duo affiche 0 joueur après chargement. Les cinq services
+RG et `/srv/rg/current` pointaient sur `f856710` après activation.
+
+Les contrôles TypeScript des packages API, site, client et types passent ;
+les tests ciblés de lecture de profil passent (4/4). L'agrégation historique
+reste limitée aux matchs `lobby_user` réellement enregistrés ; aucun résultat
+absent n'a été reconstitué.
