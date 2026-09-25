@@ -1736,12 +1736,16 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
 	.get(
 		"/",
 		async ({ db, query }) => {
-			return await TournamentService.findAll(db, query.page, query.pageSize);
+			const states = query.states === undefined ? [] : Array.isArray(query.states) ? query.states : [query.states];
+			return await TournamentService.findAll(db, query.page, query.pageSize ?? query.pagination, query.organization, states);
 		},
 		{
 			query: t.Object({
 				page: t.Optional(t.Numeric({ minimum: 1 })),
 				pageSize: t.Optional(t.Numeric({ minimum: 1, maximum: 50 })),
+				pagination: t.Optional(t.Numeric({ minimum: 1, maximum: 50 })),
+				organization: t.Optional(t.Numeric({ minimum: 1 })),
+				states: t.Optional(t.Union([t.String(), t.Array(t.String())])),
 			}),
 			response: {
 				200: TournamentModel.listResponse,

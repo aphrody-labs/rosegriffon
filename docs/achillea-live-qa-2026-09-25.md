@@ -187,3 +187,11 @@ affiche 2 matchs et encode `?result=draw` ; le filtre « 3 ou plus » du circuit
 affiche 18 joueurs sur 95. Les contrôles TypeScript API et site et 4 tests
 ciblés de lecture de profil passent. Le bouton de pagination des historiques
 reste à éprouver avec un joueur ayant plus de 100 matchs.
+
+## Validation de la release `99b989b`
+
+Le pointeur `/srv/rg/current` désigne `99b989bc5b68bfdc6404b3a0bba6c29b58bbeda4` ; les cinq services RG sont actifs, Nginx valide et sept pages publiques (les cinq parcours demandés et les fiches des tournois 18 et 23) répondent HTTP 200. `bun run --cwd apps/website type-check` et `git diff --cached --check` ont passé avant la release. La construction a nécessité le nettoyage catalogué `aphrody-infra reclaim` : le VPS est passé de 176 Mo à 5,1 Gio libres avant assemblage et conserve 4,0 Gio après activation.
+
+Dans Chrome avec la session `aphrody_code`, la liste affiche 9 tournois après chargement ; le filtre « Terminés » puis « Effacer les filtres » fonctionnent. À la largeur mobile demandée de 390 px, le DOM expose neuf cartes et leurs liens vers les fiches. La fiche 18 expose sept onglets, dont « Notes Staff » selon le rôle, et la flèche droite déplace la sélection et le focus. Son onglet « Podium & Résultats » indique « Classement non résolu » ; le versement AP demeure désactivé. La vue mobile de son bracket expose les rencontres avec un nom accessible et les scores enregistrés.
+
+Sur la fiche 23, le résumé affiche le rang 1, le rang 2 et deux rangs 3 ex æquo ; le bouton de versement est actif, sans avoir été déclenché. Un écart de libellé est confirmé : l'en-tête annonce « Cashprize 1er 50 AP » et le résumé affiche « Ban +100 AP ». L'API fournit ici 100 points de circuit, tandis que 50 AP proviennent de la règle du prix de première place. Le libellé du résumé est corrigé dans le lot suivant ; aucun versement ni rang n'a été modifié. Les contrôles Chrome post-release ont porté sur ces interactions ciblées, pas sur tous les rôles, tous les onglets, le zoom 200 % ni les largeurs 320/768/1440 px.

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { createAchilleaClient } from "@/lib/achillea";
 import { UserAvatar } from "./UserAvatar";
-import { Trophy, Coins, Loader2 } from "lucide-react";
+import { Trophy, Loader2 } from "lucide-react";
 import type { TournamentSummary } from "@rosegriffon/achillea-types";
 
 interface TournamentTopSummaryProps {
@@ -66,7 +66,7 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
 		<div role="status" className="rounded-2xl border border-border bg-card p-6 text-lg space-y-2">
 			<h3 className="font-bold">{isFinished ? "Classement non résolu" : "Aucun classement disponible"}</h3>
 			<p className="text-muted-foreground">{isFinished
-				? "Les résultats enregistrés ne permettent pas encore de valider le bracket et le podium. Aucun rang ni AP n'est attribué ici."
+				? "Les résultats enregistrés ne permettent pas encore de valider le bracket et le podium. Aucun rang ni point de circuit n'est attribué ici."
 				: "Le tournoi n'a pas encore de classement confirmé. Revenez après la validation des matchs."}</p>
 		</div>
 	);
@@ -126,7 +126,7 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
 
 								{entry.points > 0 && (
 									<div className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 text-lg font-mono font-bold flex items-center gap-1">
-										<Coins className="w-3 h-3" />+{entry.points} AP
+										+{entry.points} points de circuit
 									</div>
 								)}
 							</div>
@@ -166,7 +166,7 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
 
 								{entry.points > 0 && (
 									<span className="font-mono font-bold text-amber-400">
-										+{entry.points} AP
+										+{entry.points} points de circuit
 									</span>
 								)}
 							</div>

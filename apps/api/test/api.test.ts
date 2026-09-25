@@ -62,6 +62,28 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		}
 	});
 
+	it("GET /v1/achillea/tournaments applies public organization and state filters to data and total", async () => {
+		const absent = await app.handle(new Request("http://localhost/v1/achillea/tournaments?organization=2147483647&states=Finished&pageSize=1"));
+		expect(absent.status).toBe(200);
+		const empty = (await absent.json()) as { data: unknown[]; meta: { total: number } };
+		expect(empty.data).toEqual([]);
+		expect(empty.meta.total).toBe(0);
+		const all = await api.v1.achillea.tournaments.get();
+		const first = all.data?.data[0];
+		if (!first) return;
+		const detail = await api.v1.achillea.tournaments({ id: first.id }).get();
+		const organization = detail.data?.[0]?.organization;
+		const organizationId = organization && typeof organization === "object" && "id" in organization ? Number(organization.id) : null;
+		if (organizationId === null) return;
+		const response = await app.handle(new Request(`http://localhost/v1/achillea/tournaments?page=1&pagination=1&organization=${organizationId}&states=${encodeURIComponent(first.status ?? "Pending")}`));
+		expect(response.status).toBe(200);
+		const filtered = (await response.json()) as { data: Array<{ status: string | null }>; meta: { total: number; limit: number } };
+		expect(filtered.meta.limit).toBe(1);
+		expect(filtered.meta.total).toBeGreaterThanOrEqual(1);
+		expect(filtered.data).toHaveLength(1);
+		expect(filtered.data[0]?.status).toBe(first.status);
+	});
+
 	it("GET /v1/achillea/tournaments/circuit/ranking returns the unified circuit projection", async () => {
 		const res = await app.handle(
 			new Request("http://localhost/v1/achillea/tournaments/circuit/ranking")

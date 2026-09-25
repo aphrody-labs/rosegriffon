@@ -34,6 +34,7 @@ export default function RankedLeaderboardPage({
 	const [search, setSearch] = useState<string>("");
 	const [tierKey, setTierKey] = useState<string>("");
 	const [error, setError] = useState<string | null>(null);
+	const [tiersError, setTiersError] = useState(false);
 	useEffect(() => {
 		const timer = setTimeout(() => { setSearch(searchQuery.trim()); setPage(0); }, 300);
 		return () => clearTimeout(timer);
@@ -41,18 +42,23 @@ export default function RankedLeaderboardPage({
 
 	useEffect(() => {
 		let cancelled = false;
+		setTiersError(false);
 		createAchilleaClient().ranked.tiers(mode).then((result) => {
-			if (!cancelled) setTiers(result.ok ? result.value : null);
+			if (!cancelled) {
+				setTiers(result.ok ? result.value : null);
+				setTiersError(!result.ok);
+				if (!result.ok) setTierKey("");
+			}
 		}).catch((cause) => {
 			signalerException("ranked/tiers", cause);
-			if (!cancelled) setTiers(null);
+			if (!cancelled) { setTiers(null); setTiersError(true); setTierKey(""); }
 		});
 		return () => { cancelled = true; };
 	}, [mode]);
 
 	const selectedTier = tiers?.find((tier) => tier.key === tierKey);
 	useEffect(() => {
-		if (tierKey && !selectedTier) return;
+		if (tierKey && !selectedTier && !tiersError) return;
 		let cancelled = false;
 		setLoading(true);
 		setError(null);
@@ -70,7 +76,7 @@ export default function RankedLeaderboardPage({
 		return () => {
 			cancelled = true;
 		};
-	}, [mode, page, search, tierKey, selectedTier]);
+	}, [mode, page, search, tierKey, selectedTier, tiersError]);
 
 	const entries = data?.entries ?? [];
 	const total = data?.total ?? 0;
@@ -110,7 +116,7 @@ export default function RankedLeaderboardPage({
 							setTierKey("");
 							setTiers(null);
 						}}
-						className={`px-4 py-1.5 text-lg font-semibold rounded-md transition-all ${
+						className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 							mode === 2
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
@@ -127,7 +133,7 @@ export default function RankedLeaderboardPage({
 							setTierKey("");
 							setTiers(null);
 						}}
-						className={`px-4 py-1.5 text-lg font-semibold rounded-md transition-all ${
+						className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 							mode === 4
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
@@ -148,7 +154,7 @@ export default function RankedLeaderboardPage({
 						placeholder="Rechercher un joueur..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
-						className="w-full pl-9 pr-3 py-2 text-lg bg-card border border-border rounded-lg placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+						className="min-h-11 w-full pl-9 pr-3 py-2 text-lg bg-card border border-border rounded-lg placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 					/>
 					</div>
 					<label className="flex w-full flex-col gap-1 text-lg sm:w-64">
@@ -156,12 +162,13 @@ export default function RankedLeaderboardPage({
 						<select
 							value={tierKey}
 								onChange={(event) => { setTierKey(event.target.value); setPage(0); }}
-								className="rounded-lg border border-border bg-card px-3 py-2 text-lg text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+							className="min-h-11 rounded-lg border border-border bg-card px-3 py-2 text-lg text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 						>
 							<option value="">Tous les paliers</option>
 							{tiers?.map((tier) => <option key={tier.key} value={tier.key}>{tier.key} ({tier.playerCount})</option>)}
 						</select>
-					</label>
+				</label>
+				{tiersError && <p role="status" className="text-lg text-amber-400">Paliers indisponibles. Le classement reste consultable.</p>}
 
 					<div className="text-lg text-muted-foreground self-end sm:self-auto">
 					Total : <span className="font-semibold text-foreground">{total}</span> joueur{total > 1 ? "s" : ""} classé{total > 1 ? "s" : ""}
@@ -178,11 +185,13 @@ export default function RankedLeaderboardPage({
 				) : error && !data ? (
 					<div role="alert" className="py-16 text-center text-rose-400 text-lg">{error}</div>
 				) : entries.length === 0 ? (
-					<div className="py-16 text-center text-muted-foreground text-lg">
-						Aucun joueur trouvé.
+					<div role="status" className="py-16 text-center text-muted-foreground text-lg space-y-2">
+						<p>{search || tierKey ? "Aucun joueur ne correspond aux filtres." : "Aucun joueur classé pour ce mode."}</p>
+						{(search || tierKey) && <button type="button" onClick={() => { setSearchQuery(""); setTierKey(""); setPage(0); }} className="min-h-11 rounded-lg border border-border px-4 text-lg font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">Effacer les filtres</button>}
 					</div>
 				) : (
-					<div className="overflow-x-auto">
+					<>
+					<div className="hidden overflow-x-auto lg:block">
 						<table className="w-full text-left text-lg">
 							<caption className="sr-only">Classement des joueurs en {mode === 2 ? "solo" : "duo"}, {total} joueur{total > 1 ? "s" : ""} classé{total > 1 ? "s" : ""}</caption>
 							<thead>
@@ -257,16 +266,37 @@ export default function RankedLeaderboardPage({
 							</tbody>
 						</table>
 					</div>
+					<div className="divide-y divide-border lg:hidden" aria-label="Classement des joueurs">
+						{entries.map((entry) => (
+							<article key={entry.userId} className="space-y-3 p-4 text-lg">
+								<div className="flex items-center gap-3">
+									<span className="min-w-12 font-bold text-amber-400">#{entry.rank}</span>
+									<Link href={`/achillea/users/${entry.userId}`} className="inline-flex min-h-11 min-w-0 items-center gap-2 font-semibold hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+										<UserAvatar avatar={entry.avatar} displayName={entry.displayName} className="h-8 w-8 shrink-0" />
+										<span className="truncate">{entry.displayName}</span>
+									</Link>
+								</div>
+								<dl className="grid grid-cols-2 gap-2 text-muted-foreground">
+									<div><dt>Points</dt><dd className="font-bold text-amber-400">{entry.elo} AP</dd></div>
+									<div><dt>Palier</dt><dd className="font-semibold text-foreground">{tiers?.find((tier) => entry.elo >= tier.minElo && entry.elo <= tier.maxElo)?.key ?? "—"}</dd></div>
+									<div><dt>Parties</dt><dd className="text-foreground">{entry.gamesPlayed}</dd></div>
+									<div><dt>Pic</dt><dd className="text-foreground">{entry.peakRating}</dd></div>
+								</dl>
+								<Link href={`/achillea/ranked/history?player=${encodeURIComponent(entry.userId)}`} className="inline-flex min-h-11 items-center text-primary underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">Voir les matchs de {entry.displayName}</Link>
+							</article>
+						))}
+					</div>
+					</>
 				)}
 
 				{/* Pagination */}
 				{totalPages > 1 && (
-					<div className="flex items-center justify-between p-4 border-t border-border bg-muted/20">
+					<nav aria-label="Pages du classement" className="flex flex-wrap items-center justify-between gap-3 p-4 border-t border-border bg-muted/20">
 						<button
 							type="button"
 							onClick={() => setPage((p) => Math.max(0, p - 1))}
 							disabled={page === 0 || loading}
-							className="inline-flex items-center gap-1 px-3 py-1.5 text-lg font-semibold rounded-md border border-border bg-card hover:bg-muted disabled:opacity-40 transition"
+							className="inline-flex min-h-11 items-center gap-1 px-3 py-1.5 text-lg font-semibold rounded-md border border-border bg-card hover:bg-muted disabled:opacity-40 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 						>
 							<ChevronLeft className="w-3.5 h-3.5" />
 							Précédent
@@ -279,12 +309,12 @@ export default function RankedLeaderboardPage({
 							type="button"
 							onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
 							disabled={page >= totalPages - 1 || loading}
-							className="inline-flex items-center gap-1 px-3 py-1.5 text-lg font-semibold rounded-md border border-border bg-card hover:bg-muted disabled:opacity-40 transition"
+							className="inline-flex min-h-11 items-center gap-1 px-3 py-1.5 text-lg font-semibold rounded-md border border-border bg-card hover:bg-muted disabled:opacity-40 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 						>
 							Suivant
 							<ChevronRight className="w-3.5 h-3.5" />
 						</button>
-					</div>
+					</nav>
 				)}
 			</div>
 		</div>
