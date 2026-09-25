@@ -6,11 +6,12 @@ import { logAdminAction } from "@/lib/admin-logger";
 import { getServerUser } from "@/lib/auth-helpers";
 import { isAdmin, resolveProfile } from "@rosegriffon/auth";
 import { parseAdminPublicSetting } from "@/lib/admin-settings-contract";
+import { ADMIN_PUBLIC_SETTINGS } from "@/lib/admin-settings-contract";
 
 export async function updateSetting(
 	key: string,
 	value: unknown, // Changed to unknown to avoid any lint error
-	description?: string
+	_description?: string
 ) {
 	const parsed = parseAdminPublicSetting(key, value);
 	if (!parsed.ok) return { message: `Erreur : ${parsed.message}` };
@@ -32,7 +33,8 @@ export async function updateSetting(
 		updated_at: new Date().toISOString(),
 		value: parsed.value,
 	};
-	if (description) updateData.description = description.slice(0, 500);
+	// The client does not define the contract or audit text.
+	updateData.description = ADMIN_PUBLIC_SETTINGS[parsed.key].label;
 
 	const { error } = await supabase.from("settings").upsert(updateData);
 
