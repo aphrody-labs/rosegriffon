@@ -86,3 +86,16 @@ quatre champs Achilléa, tous issus du contrat public, et `/admin/achillea`
 affichait le rapprochement des comptes. `GET /api/admin/config/public` répond
 401 sans session ; son accès authentifié direct n'a pas été vérifié car le
 navigateur connecté bloque la navigation brute vers cette API.
+
+## Validation de la release `cc06f11`
+
+Le compteur « Tournois disputés » de `/admin/achillea` affiche 9, concordant
+avec les 9 lignes `achillea.event` terminées, au lieu des 0 lignes de
+`achillea.tournament_event`. Une nouvelle collecte Discord a alimenté
+`rg_oauth_account_links` avec 10 liens Discord, 2 Patreon et 2 Twitch ; leurs
+jetons ne sont pas copiés. La tâche de statistiques lancée en session de
+service a écrit 7 agrégats horaires couvrant 7 hôtes et 1 112 requêtes,
+`complete=1`, avec les deux résumés OAuth et télémétrie présents dans Redis.
+Le clic admin sur la tâche `stats:achillea` répondait encore 400 car son nom
+encodé (`%3A`) n'était pas décodé par le routeur cron. Ce défaut a été corrigé
+en source mais doit être retesté après déploiement de la prochaine release.

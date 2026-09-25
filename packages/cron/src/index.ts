@@ -807,7 +807,12 @@ const server = Bun.serve({
 			url.pathname.endsWith("/run") &&
 			req.method === "POST"
 		) {
-			const taskName = url.pathname.slice(7, -4);
+			let taskName: string;
+			try {
+				taskName = decodeURIComponent(url.pathname.slice(7, -4));
+			} catch {
+				return Response.json({ error: "Nom de tâche invalide" }, { status: 400 });
+			}
 
 			const runnerMap: Record<string, () => Promise<any>> = {
 				db: runInaglePush,
