@@ -22,11 +22,13 @@ import { signalerException } from "@/lib/achillea/signaler";
 export default function CircuitRankingPage() {
 	const [data, setData] = useState<CircuitRanking | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [error, setError] = useState<string | null>(null);
 	const [activeTab, setActiveTab] = useState<"players" | "clans" | "tournaments">("players");
 
 	useEffect(() => {
 		let cancelled = false;
 		setLoading(true);
+		setError(null);
 		const client = createAchilleaClient();
 
 		client.tournaments
@@ -35,10 +37,13 @@ export default function CircuitRankingPage() {
 				if (cancelled) return;
 				if (res.ok && res.value) {
 					setData(res.value);
+				} else {
+					setError("Le classement du circuit est indisponible pour le moment.");
 				}
 			})
 			.catch((cause) => {
 				signalerException("tournaments/circuit/ranking", cause);
+				if (!cancelled) setError("Le classement du circuit est indisponible pour le moment.");
 			})
 			.finally(() => {
 				if (!cancelled) setLoading(false);
@@ -61,7 +66,7 @@ export default function CircuitRankingPage() {
 			<div className="space-y-1 border-b border-border pb-6">
 				<Link
 					href="/achillea/tournaments"
-					className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition mb-2"
+					className="inline-flex items-center gap-1.5 text-lg text-muted-foreground hover:text-foreground transition mb-2"
 				>
 					<ArrowLeft className="w-3.5 h-3.5" />
 					Retour aux tournois
@@ -72,7 +77,7 @@ export default function CircuitRankingPage() {
 					</span>
 					<h1 className="text-3xl font-bold tracking-tight">Circuit Achilléa — Classement Officiel</h1>
 				</div>
-				<p className="text-sm text-muted-foreground">
+				<p className="text-lg text-muted-foreground">
 					Barème de points cumulés sur l'ensemble des tournois homologués de la saison compétitive.
 				</p>
 			</div>
@@ -83,7 +88,7 @@ export default function CircuitRankingPage() {
 					{/* #2 */}
 					{top3[1] && (
 						<div className="order-2 sm:order-1 border border-slate-700/60 bg-gradient-to-b from-slate-800/40 to-card rounded-2xl p-5 text-center space-y-3 relative shadow-md">
-							<span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-xs font-bold bg-slate-300 text-black shadow">
+							<span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold bg-slate-300 text-black shadow">
 								#2 Argent
 							</span>
 							<div className="pt-2">
@@ -94,12 +99,12 @@ export default function CircuitRankingPage() {
 								/>
 							</div>
 							<div>
-								<div className="font-bold text-sm">{top3[1].displayName}</div>
+								<div className="font-bold text-lg">{top3[1].displayName}</div>
 								{top3[1].clan && (
-									<span className="text-[11px] text-muted-foreground">[{top3[1].clan.shortName}]</span>
+									<span className="text-lg text-muted-foreground">[{top3[1].clan.shortName}]</span>
 								)}
 								<div className="text-xl font-extrabold text-slate-300 mt-1">{top3[1].points} pts</div>
-								<div className="text-[11px] text-muted-foreground mt-0.5">
+								<div className="text-lg text-muted-foreground mt-0.5">
 									{top3[1].wins} titre{top3[1].wins > 1 ? "s" : ""} · {top3[1].tournamentsPlayed} tournois
 								</div>
 							</div>
@@ -109,7 +114,7 @@ export default function CircuitRankingPage() {
 					{/* #1 Champion */}
 					{top3[0] && (
 						<div className="order-1 sm:order-2 border-2 border-amber-500/80 bg-gradient-to-b from-amber-500/10 via-card to-card rounded-2xl p-6 text-center space-y-3 relative shadow-xl sm:-translate-y-2">
-							<div className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3.5 py-1 rounded-full text-xs font-bold bg-amber-400 text-black shadow-lg">
+							<div className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3.5 py-1 rounded-full text-lg font-bold bg-amber-400 text-black shadow-lg">
 								<Crown className="w-3.5 h-3.5 fill-black" />
 								#1 Leader Circuit
 							</div>
@@ -125,10 +130,10 @@ export default function CircuitRankingPage() {
 									{top3[0].displayName}
 								</div>
 								{top3[0].clan && (
-									<span className="text-xs text-muted-foreground">[{top3[0].clan.shortName}]</span>
+									<span className="text-lg text-muted-foreground">[{top3[0].clan.shortName}]</span>
 								)}
 								<div className="text-2xl font-black text-amber-400 mt-1">{top3[0].points} pts</div>
-								<div className="text-xs text-muted-foreground mt-0.5">
+								<div className="text-lg text-muted-foreground mt-0.5">
 									{top3[0].wins} titre{top3[0].wins > 1 ? "s" : ""} · {top3[0].tournamentsPlayed} tournois
 								</div>
 							</div>
@@ -138,7 +143,7 @@ export default function CircuitRankingPage() {
 					{/* #3 */}
 					{top3[2] && (
 						<div className="order-3 border border-amber-800/60 bg-gradient-to-b from-amber-950/20 to-card rounded-2xl p-5 text-center space-y-3 relative shadow-md">
-							<span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-xs font-bold bg-amber-700 text-amber-100 shadow">
+							<span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold bg-amber-700 text-amber-100 shadow">
 								#3 Bronze
 							</span>
 							<div className="pt-2">
@@ -149,12 +154,12 @@ export default function CircuitRankingPage() {
 								/>
 							</div>
 							<div>
-								<div className="font-bold text-sm">{top3[2].displayName}</div>
+								<div className="font-bold text-lg">{top3[2].displayName}</div>
 								{top3[2].clan && (
-									<span className="text-[11px] text-muted-foreground">[{top3[2].clan.shortName}]</span>
+									<span className="text-lg text-muted-foreground">[{top3[2].clan.shortName}]</span>
 								)}
 								<div className="text-xl font-extrabold text-amber-600 mt-1">{top3[2].points} pts</div>
-								<div className="text-[11px] text-muted-foreground mt-0.5">
+								<div className="text-lg text-muted-foreground mt-0.5">
 									{top3[2].wins} titre{top3[2].wins > 1 ? "s" : ""} · {top3[2].tournamentsPlayed} tournois
 								</div>
 							</div>
@@ -164,11 +169,12 @@ export default function CircuitRankingPage() {
 			)}
 
 			{/* Tabs */}
-			<div className="flex items-center gap-2 border-b border-border pb-px">
+			<div role="group" aria-label="Vues du circuit" className="flex flex-wrap items-center gap-2 border-b border-border pb-px">
 				<button
 					type="button"
+					aria-pressed={activeTab === "players"}
 					onClick={() => setActiveTab("players")}
-					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+					className={`px-4 py-2 text-lg font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 						activeTab === "players"
 							? "border-primary text-foreground"
 							: "border-transparent text-muted-foreground hover:text-foreground"
@@ -179,8 +185,9 @@ export default function CircuitRankingPage() {
 				</button>
 				<button
 					type="button"
+					aria-pressed={activeTab === "clans"}
 					onClick={() => setActiveTab("clans")}
-					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+					className={`px-4 py-2 text-lg font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 						activeTab === "clans"
 							? "border-primary text-foreground"
 							: "border-transparent text-muted-foreground hover:text-foreground"
@@ -191,31 +198,35 @@ export default function CircuitRankingPage() {
 				</button>
 				<button
 					type="button"
+					aria-pressed={activeTab === "tournaments"}
 					onClick={() => setActiveTab("tournaments")}
-					className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+					className={`px-4 py-2 text-lg font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 						activeTab === "tournaments"
 							? "border-primary text-foreground"
 							: "border-transparent text-muted-foreground hover:text-foreground"
 					}`}
 				>
 					<Trophy className="w-3.5 h-3.5" />
-					Palmarès des Tournois ({tournaments.length})
+					Tournois du circuit ({tournaments.length})
 				</button>
 			</div>
 
 			{loading ? (
 				<div className="py-20 text-center space-y-3">
 					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-					<p className="text-sm text-muted-foreground">Chargement du classement du circuit...</p>
+					<p className="text-lg text-muted-foreground">Chargement du classement du circuit...</p>
 				</div>
+			) : error ? (
+				<p role="alert" className="rounded-xl border border-destructive p-5 text-lg">{error}</p>
 			) : (
 				<>
 					{/* Players Tab */}
 					{activeTab === "players" && (
-						<div className="border border-border rounded-2xl bg-card overflow-hidden">
-							<table className="w-full text-left text-xs">
+						leaderboard.length === 0 ? <p className="rounded-xl border border-border p-5 text-lg">Aucun résultat de bracket homologué pour le moment.</p> :
+						<div className="border border-border rounded-2xl bg-card overflow-x-auto">
+							<table className="w-full min-w-[850px] text-left text-lg">
 								<thead>
-									<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-[10px] tracking-wider">
+									<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-lg tracking-wider">
 										<th className="py-3 px-4 w-16 text-center">Rang</th>
 										<th className="py-3 px-4">Joueur</th>
 										<th className="py-3 px-4 text-center">Clan</th>
@@ -245,14 +256,14 @@ export default function CircuitRankingPage() {
 											</td>
 											<td className="py-3 px-4 text-center">
 												{player.clan ? (
-													<span className="px-2 py-0.5 rounded bg-muted text-[11px] font-mono">
+													<span className="px-2 py-0.5 rounded bg-muted text-lg font-mono">
 														[{player.clan.shortName}]
 													</span>
 												) : (
 													<span className="text-muted-foreground">-</span>
 												)}
 											</td>
-											<td className="py-3 px-4 text-right font-bold text-amber-400 font-mono text-sm">
+											<td className="py-3 px-4 text-right font-bold text-amber-400 font-mono text-lg">
 												{player.points} pts
 											</td>
 											<td className="py-3 px-4 text-right font-semibold text-emerald-400">
@@ -270,10 +281,11 @@ export default function CircuitRankingPage() {
 
 					{/* Clans Tab */}
 					{activeTab === "clans" && (
-						<div className="border border-border rounded-2xl bg-card overflow-hidden">
-							<table className="w-full text-left text-xs">
+						clanRanking.length === 0 ? <p className="rounded-xl border border-border p-5 text-lg">Aucun classement de clan calculé pour le moment.</p> :
+						<div className="border border-border rounded-2xl bg-card overflow-x-auto">
+							<table className="w-full min-w-[720px] text-left text-lg">
 								<thead>
-									<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-[10px] tracking-wider">
+									<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-lg tracking-wider">
 										<th className="py-3 px-4 w-16 text-center">Rang</th>
 										<th className="py-3 px-4">Clan</th>
 										<th className="py-3 px-4 text-right">Points Cumulés</th>
@@ -295,7 +307,7 @@ export default function CircuitRankingPage() {
 													{clan.name} [{clan.shortName}]
 												</Link>
 											</td>
-											<td className="py-3 px-4 text-right font-bold text-amber-400 font-mono text-sm">
+											<td className="py-3 px-4 text-right font-bold text-amber-400 font-mono text-lg">
 												{clan.points} pts
 											</td>
 											<td className="py-3 px-4 text-right font-semibold text-emerald-400">
@@ -313,6 +325,7 @@ export default function CircuitRankingPage() {
 
 					{/* Tournaments Palmarès */}
 					{activeTab === "tournaments" && (
+						tournaments.length === 0 ? <p className="rounded-xl border border-border p-5 text-lg">Aucun tournoi du circuit disponible pour le moment.</p> :
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							{tournaments.map((t) => (
 								<div
@@ -320,14 +333,15 @@ export default function CircuitRankingPage() {
 									className="border border-border bg-card rounded-2xl p-5 space-y-3 transition hover:shadow-md"
 								>
 									<div className="flex items-center justify-between">
-										<h4 className="font-bold text-sm">{t.name}</h4>
-										<span className="text-[11px] text-muted-foreground">
+										<h4 className="font-bold text-lg">{t.name}</h4>
+										<span className="text-lg text-muted-foreground">
 											{new Date(t.grandFinalAt).toLocaleDateString("fr-FR")}
 										</span>
 									</div>
 
 									{/* Podium preview */}
-									<div className="space-y-1.5 pt-2 border-t border-border/60 text-xs">
+									<div className="space-y-1.5 pt-2 border-t border-border/60 text-lg">
+										{t.podium.length === 0 && <p className="text-lg text-muted-foreground">Résultats du bracket en attente.</p>}
 										{t.podium.map((p) => (
 											<div key={p.rank} className="flex items-center justify-between text-muted-foreground">
 												<span className="font-medium text-foreground">
@@ -339,7 +353,7 @@ export default function CircuitRankingPage() {
 
 									<Link
 										href={`/achillea/tournaments/${t.id}`}
-										className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline pt-1"
+										className="inline-flex items-center gap-1 text-lg text-primary font-semibold hover:underline pt-1"
 									>
 										Voir le tournoi
 										<ChevronRight className="w-3.5 h-3.5" />

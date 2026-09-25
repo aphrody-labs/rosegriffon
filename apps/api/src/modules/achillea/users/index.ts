@@ -1,10 +1,55 @@
 import { Elysia, status, t } from "elysia";
 import { sql } from "kysely";
+import type { Kysely } from "kysely";
+import type { Database } from "@rosegriffon/db/schema";
 import { dbPlugin } from "../../../plugins/db";
 import { LeaderboardService } from "../leaderboard/service";
 import { UsersModel } from "./model";
 import { resolveAchilleaSession } from "../../auth/session";
 import { findLinkedPublicProfile, projectPublicIdentity } from "./public-profile";
+
+async function rankedHistory(db: Kysely<Database>, userId: string, query: { mode?: number; limit?: number; offset?: number }) {
+	const user = await db.selectFrom("user").select("id").where("id", "=", userId).executeTakeFirst();
+	if (!user) return null;
+	const limit = Math.max(1, Math.min(100, Number(query.limit ?? 20) || 20));
+	const offset = Math.max(0, Number(query.offset ?? 0) || 0);
+	const mode = query.mode == null ? null : Number(query.mode);
+	let request = db.selectFrom("lobby as l")
+		.innerJoin("lobby_user as me", (join) => join.onRef("me.lobby_id", "=", "l.id").on("me.user_id", "=", userId))
+		.innerJoin("lobby_user as opp", (join) => join.onRef("opp.lobby_id", "=", "l.id").onRef("opp.user_id", "<>", "me.user_id"))
+		.innerJoin("user as u", "u.id", "opp.user_id")
+		.select([
+			"l.id as lobby_id", "l.mode", "l.state", "l.created_at",
+			"me.score as my_score", "me.elo_variation as my_elo_delta", "me.forfeit as my_forfeit",
+			"opp.user_id as opp_user_id", "opp.score as opp_score", "opp.forfeit as opp_forfeit",
+			"u.display_name as opp_display_name", "u.username as opp_username", "u.avatar as opp_avatar",
+		])
+		.where("l.state", "in", ["Finished", "Forfeited"])
+		.where((eb) => eb.or([
+			eb("l.event_type", "=", "RANKED"),
+			eb.and([eb("l.event_type", "=", "TOURNAMENT"), eb("l.ranked_elo_applied", "=", true)]),
+		]));
+	if (mode !== null && Number.isFinite(mode)) request = request.where("l.mode", "=", mode);
+	const rows = await request.orderBy("l.created_at", "desc").limit(limit).offset(offset).execute();
+	const avatar = (id: string, value: string | null) => {
+		if (value?.startsWith("http")) return value;
+		try { return `https://cdn.discordapp.com/embed/avatars/${(BigInt(id) >> 22n) % 6n}.png`; }
+		catch { return "https://cdn.discordapp.com/embed/avatars/0.png"; }
+	};
+	return rows.map((row) => {
+		const mine = Number(row.my_score ?? 0);
+		const theirs = Number(row.opp_score ?? 0);
+		const forfeited = Boolean(row.my_forfeit);
+		const opponentForfeited = Boolean(row.opp_forfeit);
+		return {
+			lobbyId: Number(row.lobby_id), mode: Number(row.mode), state: String(row.state),
+			endedAt: new Date(row.created_at).toISOString(), myScore: mine, opponentScore: theirs,
+			eloDelta: Number(row.my_elo_delta ?? 0),
+			result: forfeited ? "forfeit" : opponentForfeited || mine > theirs ? "win" : mine < theirs ? "loss" : "draw",
+			opponent: { userId: String(row.opp_user_id), displayName: row.opp_display_name ?? row.opp_username ?? String(row.opp_user_id), avatar: avatar(String(row.opp_user_id), row.opp_avatar) },
+		};
+	});
+}
 
 /** Player routes backed by the unified API. */
 export const usersController = new Elysia({ prefix: "/users" })
@@ -12,44 +57,7 @@ export const usersController = new Elysia({ prefix: "/users" })
 	.get("/me/ranked-history", async ({ db, headers, query }) => {
 		const session = await resolveAchilleaSession(headers);
 		if (!session) return status(401, { message: "Authentication required" as const });
-		const limit = Math.max(1, Math.min(100, Number(query.limit ?? 20) || 20));
-		const offset = Math.max(0, Number(query.offset ?? 0) || 0);
-		const mode = query.mode == null ? null : Number(query.mode);
-		let request = db.selectFrom("lobby as l")
-			.innerJoin("lobby_user as me", (join) => join.onRef("me.lobby_id", "=", "l.id").on("me.user_id", "=", session.id))
-			.innerJoin("lobby_user as opp", (join) => join.onRef("opp.lobby_id", "=", "l.id").onRef("opp.user_id", "<>", "me.user_id"))
-			.innerJoin("user as u", "u.id", "opp.user_id")
-			.select([
-				"l.id as lobby_id", "l.mode", "l.state", "l.created_at",
-				"me.score as my_score", "me.elo_variation as my_elo_delta", "me.forfeit as my_forfeit",
-				"opp.user_id as opp_user_id", "opp.score as opp_score", "opp.forfeit as opp_forfeit",
-				"u.display_name as opp_display_name", "u.username as opp_username", "u.avatar as opp_avatar",
-			])
-			.where("l.state", "in", ["Finished", "Forfeited"])
-			.where((eb) => eb.or([
-				eb("l.event_type", "=", "RANKED"),
-				eb.and([eb("l.event_type", "=", "TOURNAMENT"), eb("l.ranked_elo_applied", "=", true)]),
-			]));
-		if (mode !== null && Number.isFinite(mode)) request = request.where("l.mode", "=", mode);
-		const rows = await request.orderBy("l.created_at", "desc").limit(limit).offset(offset).execute();
-		const avatar = (id: string, value: string | null) => {
-			if (value?.startsWith("http")) return value;
-			try { return `https://cdn.discordapp.com/embed/avatars/${(BigInt(id) >> 22n) % 6n}.png`; }
-			catch { return "https://cdn.discordapp.com/embed/avatars/0.png"; }
-		};
-		return rows.map((row) => {
-			const mine = Number(row.my_score ?? 0);
-			const theirs = Number(row.opp_score ?? 0);
-			const forfeited = Boolean(row.my_forfeit);
-			const opponentForfeited = Boolean(row.opp_forfeit);
-			return {
-				lobbyId: Number(row.lobby_id), mode: Number(row.mode), state: String(row.state),
-				endedAt: new Date(row.created_at).toISOString(), myScore: mine, opponentScore: theirs,
-				eloDelta: Number(row.my_elo_delta ?? 0),
-				result: forfeited ? "forfeit" : opponentForfeited || mine > theirs ? "win" : mine < theirs ? "loss" : "draw",
-				opponent: { userId: String(row.opp_user_id), displayName: row.opp_display_name ?? row.opp_username ?? String(row.opp_user_id), avatar: avatar(String(row.opp_user_id), row.opp_avatar) },
-			};
-		});
+		return (await rankedHistory(db, session.id, query)) ?? [];
 	}, {
 		query: t.Object({ mode: t.Optional(t.Numeric()), limit: t.Optional(t.Numeric()), offset: t.Optional(t.Numeric()) }),
 		response: { 200: t.Array(t.Any()), 401: t.Object({ message: t.Literal("Authentication required") }) },
@@ -86,6 +94,14 @@ export const usersController = new Elysia({ prefix: "/users" })
 	}, {
 		query: t.Object({ mode: t.Optional(t.Numeric()), days: t.Optional(t.Numeric()), last: t.Optional(t.Numeric()) }),
 		response: { 200: t.Any(), 401: t.Object({ message: t.Literal("Authentication required") }) },
+	})
+	.get("/:id/ranked-history", async ({ db, params: { id }, query }) => {
+		const history = await rankedHistory(db, id, query);
+		return history ?? status(404, { message: "User not found" as const });
+	}, {
+		params: t.Object({ id: t.String() }),
+		query: t.Object({ mode: t.Optional(t.Numeric()), limit: t.Optional(t.Numeric()), offset: t.Optional(t.Numeric()) }),
+		response: { 200: t.Array(t.Any()), 404: t.Object({ message: t.Literal("User not found") }) },
 	})
 	.get("/:id", async ({ db, params: { id } }) => {
 		const user = await db.selectFrom("user").select(["id", "username", "display_name", "avatar", "role", "bio", "twitch_url", "last_interact"]).where("id", "=", id).executeTakeFirst();

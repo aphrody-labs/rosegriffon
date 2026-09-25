@@ -72,6 +72,11 @@ export async function POST() {
 			cache: "no-store",
 		});
 		if (!exchange.ok) {
+			if (exchange.status === 409) {
+				const magasin = await cookies();
+				magasin.set(ACHILLEA_SESSION_COOKIE_NAME, "", { ...COOKIE, maxAge: 0 });
+				return NextResponse.json({ error: "discord_non_lie" }, { status: 409 });
+			}
 			console.error("[achillea/session] API exchange failed", exchange.status);
 			return NextResponse.json({ error: "api_unifiee_indisponible" }, { status: 503 });
 		}

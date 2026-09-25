@@ -17,5 +17,5 @@ export const metadata = metadonneesAchillea({
 export default async function TournamentsPage() {
 	const result = await createAchilleaClient().tournaments.list();
 	const tournaments = result.ok ? result.value.data : [];
-	return <TournamentsClient initialTournaments={tournaments} />;
+	return <TournamentsClient initialTournaments={tournaments} initialLoadError={!result.ok} />;
 }

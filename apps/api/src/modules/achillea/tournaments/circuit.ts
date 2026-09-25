@@ -5,7 +5,8 @@ import { finalTournamentStandings } from "./bracket";
 
 type Player = {
 	userId: string; displayName: string; username: string; avatar: string;
-	clan: null; tournamentsPlayed: number; points: number; tournaments: number;
+	clan: { id: number; name: string; shortName: string; avatar: string } | null;
+	tournamentsPlayed: number; points: number; tournaments: number;
 	wins: number; podiums: number; top4: number; top8: number; bestRank: number;
 	bestRankLabel: string; tier: string;
 };
@@ -58,10 +59,32 @@ export async function circuitRanking(db: Kysely<Database>) {
 		}
 		summaries.push({ id: tournament.id, name: tournament.name, size, grandFinalAt: (tournament.grand_final_at ?? new Date(0)).toISOString(), podium });
 	}
+	const memberships = players.size ? await db.selectFrom("clan_member as cm")
+		.innerJoin("clan as c", "c.id", "cm.clan_id")
+		.select(["cm.user_id", "c.id", "c.name", "c.shortened_name", "c.clan_avatar_url"])
+		.where("cm.user_id", "in", [...players.keys()])
+		.where("c.is_hidden", "=", false)
+		.where("c.is_disbanded", "=", false)
+		.orderBy("c.id", "asc").execute() : [];
+	const clanTotals = new Map<number, { id: number; name: string; shortName: string; avatar: string; points: number; players: number; tournamentsPlayed: number; wins: number; podiums: number; tier: string }>();
+	for (const membership of memberships) {
+		const player = players.get(membership.user_id);
+		if (!player || player.clan) continue;
+		const clan = { id: membership.id, name: membership.name, shortName: membership.shortened_name, avatar: membership.clan_avatar_url };
+		player.clan = clan;
+		const total = clanTotals.get(clan.id) ?? { ...clan, points: 0, players: 0, tournamentsPlayed: 0, wins: 0, podiums: 0, tier: circuitPointsToTier(0).key };
+		total.points += player.points;
+		total.players += 1;
+		total.tournamentsPlayed += player.tournamentsPlayed;
+		total.wins += player.wins;
+		total.podiums += player.podiums;
+		total.tier = circuitPointsToTier(total.points).key;
+		clanTotals.set(clan.id, total);
+	}
 	return {
 		leaderboard: [...players.values()].sort((a, b) => b.points - a.points || b.tournamentsPlayed - a.tournamentsPlayed || a.bestRank - b.bestRank),
 		tournaments: summaries,
-		clanRanking: [],
+		clanRanking: [...clanTotals.values()].sort((a, b) => b.points - a.points || b.wins - a.wins || a.id - b.id),
 	};
 }
 

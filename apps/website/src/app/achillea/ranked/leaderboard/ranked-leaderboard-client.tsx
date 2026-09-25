@@ -13,7 +13,6 @@ import {
 	Loader2,
 	ChevronLeft,
 	ChevronRight,
-	Swords,
 	ArrowLeft,
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
@@ -33,6 +32,7 @@ export default function RankedLeaderboardPage({
 	const [loading, setLoading] = useState<boolean>(initialData == null);
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [search, setSearch] = useState<string>("");
+	const [tierKey, setTierKey] = useState<string>("");
 	const [error, setError] = useState<string | null>(null);
 	useEffect(() => {
 		const timer = setTimeout(() => { setSearch(searchQuery.trim()); setPage(0); }, 300);
@@ -41,15 +41,28 @@ export default function RankedLeaderboardPage({
 
 	useEffect(() => {
 		let cancelled = false;
+		createAchilleaClient().ranked.tiers(mode).then((result) => {
+			if (!cancelled) setTiers(result.ok ? result.value : null);
+		}).catch((cause) => {
+			signalerException("ranked/tiers", cause);
+			if (!cancelled) setTiers(null);
+		});
+		return () => { cancelled = true; };
+	}, [mode]);
+
+	const selectedTier = tiers?.find((tier) => tier.key === tierKey);
+	useEffect(() => {
+		if (tierKey && !selectedTier) return;
+		let cancelled = false;
 		setLoading(true);
 		setError(null);
+		setData(null);
 		const client = createAchilleaClient();
-		Promise.all([client.ranked.leaderboard({ mode, page, pageSize, search }), client.ranked.tiers(mode)])
-			.then(([board, tierResult]) => {
+		client.ranked.leaderboard({ mode, page, pageSize, search, minElo: selectedTier?.minElo, maxElo: selectedTier?.maxElo })
+			.then((board) => {
 				if (cancelled) return;
 				if (!board.ok) { setError("Le classement est momentanément indisponible."); return; }
 				setData(board.value);
-				if (tierResult.ok) setTiers(tierResult.value);
 			})
 			.catch((cause) => { signalerException("ranked/leaderboard", cause); if (!cancelled) setError("Le classement est momentanément indisponible."); })
 			.finally(() => { if (!cancelled) setLoading(false); });
@@ -57,13 +70,11 @@ export default function RankedLeaderboardPage({
 		return () => {
 			cancelled = true;
 		};
-	}, [mode, page, search]);
+	}, [mode, page, search, tierKey, selectedTier]);
 
 	const entries = data?.entries ?? [];
 	const total = data?.total ?? 0;
 	const totalPages = Math.ceil(total / pageSize) || 1;
-
-	const filteredEntries = entries;
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
@@ -72,7 +83,7 @@ export default function RankedLeaderboardPage({
 				<div className="space-y-1">
 					<Link
 						href="/achillea/ranked"
-						className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition mb-1"
+						className="inline-flex items-center gap-1.5 text-lg text-muted-foreground hover:text-foreground transition mb-1"
 					>
 						<ArrowLeft className="w-3.5 h-3.5" />
 						Retour au hub classé
@@ -83,20 +94,23 @@ export default function RankedLeaderboardPage({
 						</span>
 						<h1 className="text-3xl font-bold tracking-tight">Classement Général (Leaderboard)</h1>
 					</div>
-					<p className="text-sm text-muted-foreground">
+					<p className="text-lg text-muted-foreground">
 						Les meilleurs joueurs classés de la saison active sur Inazuma Eleven: Victory Road.
 					</p>
 				</div>
 
 				{/* Mode switch */}
-				<div className="flex items-center p-1 bg-muted rounded-lg self-start sm:self-auto">
+				<div role="group" aria-label="Mode du classement" className="flex items-center p-1 bg-muted rounded-lg self-start sm:self-auto">
 					<button
 						type="button"
+						aria-pressed={mode === 2}
 						onClick={() => {
 							setMode(2);
 							setPage(0);
+							setTierKey("");
+							setTiers(null);
 						}}
-						className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
+						className={`px-4 py-1.5 text-lg font-semibold rounded-md transition-all ${
 							mode === 2
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
@@ -106,11 +120,14 @@ export default function RankedLeaderboardPage({
 					</button>
 					<button
 						type="button"
+						aria-pressed={mode === 4}
 						onClick={() => {
 							setMode(4);
 							setPage(0);
+							setTierKey("");
+							setTiers(null);
 						}}
-						className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
+						className={`px-4 py-1.5 text-lg font-semibold rounded-md transition-all ${
 							mode === 4
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
@@ -126,15 +143,27 @@ export default function RankedLeaderboardPage({
 				<div className="relative w-full sm:w-72">
 					<Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
 					<input
+						aria-label="Rechercher un joueur dans le classement"
 						type="text"
 						placeholder="Rechercher un joueur..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
-						className="w-full pl-9 pr-3 py-2 text-xs bg-card border border-border rounded-lg placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+						className="w-full pl-9 pr-3 py-2 text-lg bg-card border border-border rounded-lg placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
 					/>
-				</div>
+					</div>
+					<label className="flex w-full flex-col gap-1 text-lg sm:w-64">
+						<span className="font-semibold">Palier</span>
+						<select
+							value={tierKey}
+								onChange={(event) => { setTierKey(event.target.value); setPage(0); }}
+								className="rounded-lg border border-border bg-card px-3 py-2 text-lg text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+						>
+							<option value="">Tous les paliers</option>
+							{tiers?.map((tier) => <option key={tier.key} value={tier.key}>{tier.key} ({tier.playerCount})</option>)}
+						</select>
+					</label>
 
-				<div className="text-xs text-muted-foreground self-end sm:self-auto">
+					<div className="text-lg text-muted-foreground self-end sm:self-auto">
 					Total : <span className="font-semibold text-foreground">{total}</span> joueurs classés
 				</div>
 			</div>
@@ -144,29 +173,31 @@ export default function RankedLeaderboardPage({
 				{loading ? (
 					<div className="py-20 text-center space-y-3">
 						<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">Chargement du classement...</p>
+						<p className="text-lg text-muted-foreground">Chargement du classement...</p>
 					</div>
 				) : error && !data ? (
-					<div role="alert" className="py-16 text-center text-rose-400 text-sm">{error}</div>
-				) : filteredEntries.length === 0 ? (
-					<div className="py-16 text-center text-muted-foreground text-sm">
+					<div role="alert" className="py-16 text-center text-rose-400 text-lg">{error}</div>
+				) : entries.length === 0 ? (
+					<div className="py-16 text-center text-muted-foreground text-lg">
 						Aucun joueur trouvé.
 					</div>
 				) : (
 					<div className="overflow-x-auto">
-						<table className="w-full text-left text-xs">
+						<table className="w-full text-left text-lg">
+							<caption className="sr-only">Classement des joueurs en {mode === 2 ? "solo" : "duo"}, {total} joueurs classés</caption>
 							<thead>
-								<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-[10px] tracking-wider">
-									<th className="py-3 px-4 w-16 text-center">Rang</th>
-									<th className="py-3 px-4">Joueur</th>
-									<th className="py-3 px-4 text-center">Palier</th>
-									<th className="py-3 px-4 text-right">Points (AP)</th>
-									<th className="py-3 px-4 text-right">Parties</th>
-									<th className="py-3 px-4 text-right">Pic</th>
+								<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-lg tracking-wider">
+									<th scope="col" className="py-3 px-4 w-16 text-center">Rang</th>
+									<th scope="col" className="py-3 px-4">Joueur</th>
+									<th scope="col" className="py-3 px-4 text-center">Palier</th>
+									<th scope="col" className="py-3 px-4 text-right">Points (AP)</th>
+									<th scope="col" className="py-3 px-4 text-right">Parties</th>
+									<th scope="col" className="py-3 px-4 text-right">Pic</th>
+									<th scope="col" className="py-3 px-4">Historique</th>
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-border/60">
-								{filteredEntries.map((entry) => {
+								{entries.map((entry) => {
 								const actualRank = entry.rank;
 									return (
 										<tr
@@ -175,15 +206,15 @@ export default function RankedLeaderboardPage({
 										>
 											<td className="py-3 px-4 text-center font-bold">
 												{actualRank === 1 ? (
-													<span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-400 text-black text-xs font-extrabold">
+													<span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-400 text-black text-lg font-extrabold">
 														1
 													</span>
 												) : actualRank === 2 ? (
-													<span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-300 text-black text-xs font-extrabold">
+													<span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-300 text-black text-lg font-extrabold">
 														2
 													</span>
 												) : actualRank === 3 ? (
-													<span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-700 text-white text-xs font-extrabold">
+													<span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-700 text-white text-lg font-extrabold">
 														3
 													</span>
 												) : (
@@ -204,11 +235,11 @@ export default function RankedLeaderboardPage({
 												</Link>
 											</td>
 											<td className="py-3 px-4 text-center">
-												<span className="px-2 py-0.5 rounded-md bg-background border border-border text-[11px] font-medium">
+												<span className="px-2 py-0.5 rounded-md bg-background border border-border text-lg font-medium">
 												{tiers?.find((tier) => entry.elo >= tier.minElo && entry.elo <= tier.maxElo)?.key ?? "—"}
 												</span>
 											</td>
-											<td className="py-3 px-4 text-right font-bold text-amber-400 font-mono text-sm">
+											<td className="py-3 px-4 text-right font-bold text-amber-400 font-mono text-lg">
 												{entry.elo} AP
 											</td>
 											<td className="py-3 px-4 text-right text-muted-foreground">
@@ -217,6 +248,9 @@ export default function RankedLeaderboardPage({
 											<td className="py-3 px-4 text-right text-muted-foreground font-mono">
 												{entry.peakRating}
 											</td>
+											<td className="py-3 px-4">
+												<Link href={`/achillea/ranked/history?player=${encodeURIComponent(entry.userId)}`} className="text-primary underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">Voir les matchs de {entry.displayName}</Link>
+											</td>
 										</tr>
 									);
 								})}
@@ -224,7 +258,6 @@ export default function RankedLeaderboardPage({
 						</table>
 					</div>
 				)}
-				{error && data && <p role="status" className="px-4 py-2 border-t border-border text-center text-xs text-amber-400">{error} Les dernières données chargées restent affichées.</p>}
 
 				{/* Pagination */}
 				{totalPages > 1 && (
@@ -233,12 +266,12 @@ export default function RankedLeaderboardPage({
 							type="button"
 							onClick={() => setPage((p) => Math.max(0, p - 1))}
 							disabled={page === 0 || loading}
-							className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-md border border-border bg-card hover:bg-muted disabled:opacity-40 transition"
+							className="inline-flex items-center gap-1 px-3 py-1.5 text-lg font-semibold rounded-md border border-border bg-card hover:bg-muted disabled:opacity-40 transition"
 						>
 							<ChevronLeft className="w-3.5 h-3.5" />
 							Précédent
 						</button>
-						<span className="text-xs text-muted-foreground">
+						<span className="text-lg text-muted-foreground">
 							Page <span className="font-semibold text-foreground">{page + 1}</span> sur{" "}
 							<span className="font-semibold text-foreground">{totalPages}</span>
 						</span>
@@ -246,7 +279,7 @@ export default function RankedLeaderboardPage({
 							type="button"
 							onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
 							disabled={page >= totalPages - 1 || loading}
-							className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-md border border-border bg-card hover:bg-muted disabled:opacity-40 transition"
+							className="inline-flex items-center gap-1 px-3 py-1.5 text-lg font-semibold rounded-md border border-border bg-card hover:bg-muted disabled:opacity-40 transition"
 						>
 							Suivant
 							<ChevronRight className="w-3.5 h-3.5" />

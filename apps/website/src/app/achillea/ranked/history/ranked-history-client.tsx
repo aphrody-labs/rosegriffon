@@ -13,9 +13,6 @@ import {
 	History,
 	ArrowLeft,
 	Loader2,
-	TrendingUp,
-	TrendingDown,
-	Minus,
 	ShieldAlert,
 	Calendar,
 	CheckCircle2,
@@ -24,8 +21,8 @@ import {
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
-export default function RankedHistoryPage() {
-	const { user, isAuthenticated, isLoading: authLoading, login } = useAchilleaAuth();
+export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
+	const { isAuthenticated, isLoading: authLoading, login } = useAchilleaAuth();
 	const [mode, setMode] = useState<-1 | 2 | 4>(-1); // -1 = all, 2 = 1v1, 4 = 2v2
 	const [period, setPeriod] = useState<number>(0); // 0 = all, 7 = 7d, 30 = 30d
 	const [history, setHistory] = useState<RankedHistoryEntry[]>([]);
@@ -33,7 +30,7 @@ export default function RankedHistoryPage() {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		if (!isAuthenticated) {
+		if (!playerId && !isAuthenticated) {
 			setLoading(false);
 			return;
 		}
@@ -46,8 +43,10 @@ export default function RankedHistoryPage() {
 
 		const modeQuery = mode === -1 ? undefined : mode;
 
-		client.users
-			.myRankedHistory({ mode: modeQuery, limit: 100 })
+		const request = playerId
+			? client.users.rankedHistory(playerId, { mode: modeQuery, limit: 100 })
+			: client.users.myRankedHistory({ mode: modeQuery, limit: 100 });
+		request
 			.then((res) => {
 				if (cancelled) return;
 				if (res.ok && res.value) {
@@ -67,7 +66,7 @@ export default function RankedHistoryPage() {
 		return () => {
 			cancelled = true;
 		};
-	}, [isAuthenticated, mode]);
+	}, [isAuthenticated, mode, playerId]);
 
 	// Filter by period
 	const filteredHistory = useMemo(() => {
@@ -125,10 +124,10 @@ export default function RankedHistoryPage() {
 						<span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
 							<History className="w-5 h-5" />
 						</span>
-						<h1 className="text-3xl font-bold tracking-tight">Historique de Matchs</h1>
+						<h1 className="text-3xl font-bold tracking-tight">{playerId ? "Historique public des matchs" : "Historique de mes matchs"}</h1>
 					</div>
 					<p className="text-sm text-muted-foreground">
-						Consultez le bilan de vos rencontres classées, vos scores et vos variations d'AP.
+						{playerId ? "Consultez les résultats classés publics de ce joueur." : "Consultez le bilan de vos rencontres classées, vos scores et vos variations d'AP."}
 					</p>
 				</div>
 
@@ -201,11 +200,11 @@ export default function RankedHistoryPage() {
 			 * `GET /auth/me`, `isAuthenticated` vaut false et le mur s'affichait à
 			 * un joueur pourtant connecté.
 			 */}
-			{authLoading ? (
+			{authLoading && !playerId ? (
 				<div className="py-20 text-center text-sm text-muted-foreground">
 					Vérification de la session…
 				</div>
-			) : !isAuthenticated ? (
+			) : !isAuthenticated && !playerId ? (
 				<div className="p-8 border border-border bg-card rounded-2xl text-center space-y-4">
 					<ShieldAlert className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
 					<h2 className="text-xl font-bold">Connexion requise</h2>

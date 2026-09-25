@@ -18,13 +18,15 @@ export const rankedController = new Elysia({ prefix: "/ranked" })
 	.get("/leaderboard", async ({ db, query }) => {
 		const mode = Number(query.mode ?? 2);
 		if (mode !== 2 && mode !== 4) return status(400, { message: "Invalid mode" as const });
+		if (query.minElo !== undefined && query.maxElo !== undefined && query.minElo > query.maxElo)
+			return status(400, { message: "Invalid Elo range" as const });
 		const page = Math.max(0, Math.floor(Number(query.page ?? 0)) || 0);
 		const pageSize = Math.min(200, Math.max(1, Math.floor(Number(query.pageSize ?? 50)) || 50));
-		const pageData = await LeaderboardService.findActiveTop(db, mode, pageSize, page * pageSize, query.search ?? "");
+		const pageData = await LeaderboardService.findActiveTop(db, mode, pageSize, page * pageSize, query.search ?? "", query.minElo, query.maxElo);
 		return { mode, total: pageData.count, entries: pageData.data };
 	}, {
-		query: t.Object({ mode: t.Optional(t.Numeric()), page: t.Optional(t.Numeric()), pageSize: t.Optional(t.Numeric()), search: t.Optional(t.String({ maxLength: 80 })) }),
-		response: { 200: RankedModel.leaderboard, 400: t.Object({ message: t.Literal("Invalid mode") }) },
+		query: t.Object({ mode: t.Optional(t.Numeric()), page: t.Optional(t.Numeric()), pageSize: t.Optional(t.Numeric()), search: t.Optional(t.String({ maxLength: 80 })), minElo: t.Optional(t.Numeric()), maxElo: t.Optional(t.Numeric()) }),
+		response: { 200: RankedModel.leaderboard, 400: t.Object({ message: t.Union([t.Literal("Invalid mode"), t.Literal("Invalid Elo range")]) }) },
 	})
 	.get("/me", async ({ db, headers, query }) => {
 		const mode = Number(query.mode ?? 2);

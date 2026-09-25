@@ -30,7 +30,7 @@ export abstract class TournamentService {
 			statusReason: includeReasons ? participant.status_reason : null,
 		})), { stage: [], group: [], round: [], match: [] }] as const;
 	}
-	public static async findAll(db: Kysely<Database>, page = 1, pageSize = 50): Promise<{ data: TournamentDTO[]; count: number }> {
+	public static async findAll(db: Kysely<Database>, page = 1, pageSize = 25): Promise<{ data: TournamentDTO[]; meta: { page: number; limit: number; total: number; pageCount: number } }> {
 		const base = db
 			.selectFrom("event")
 			.selectAll()
@@ -50,7 +50,8 @@ export abstract class TournamentService {
 			updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
 		}));
 
-		return { data, count: Number(countRow?.count ?? data.length) };
+		const total = Number(countRow?.count ?? data.length);
+		return { data, meta: { page, limit: pageSize, total, pageCount: Math.ceil(total / pageSize) } };
 	}
 
 	public static async findById(db: Kysely<Database>, id: number): Promise<TournamentDTO | null> {

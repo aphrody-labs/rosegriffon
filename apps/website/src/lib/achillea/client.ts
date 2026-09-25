@@ -38,5 +38,11 @@ export function achilleaApiUrl(): string {
  * périmé. Les appelants qui veulent du cache passent leur propre `fetch`.
  */
 export function createAchilleaClient(options: AchilleaClientOptions = {}): AchilleaClient {
-	return new AchilleaClient({ baseUrl: achilleaApiUrl(), ...options });
+	return new AchilleaClient({
+		baseUrl: achilleaApiUrl(),
+		// Le cookie HttpOnly est posé sur .rosegriffon.fr et l'API est sur une
+		// autre origine : fetch ne l'envoie pas avec son mode same-origin implicite.
+		...(typeof window !== "undefined" ? { credentials: "include" as const } : {}),
+		...options,
+	});
 }

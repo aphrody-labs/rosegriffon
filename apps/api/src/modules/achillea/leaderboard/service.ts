@@ -1,6 +1,7 @@
 import type { Kysely } from "kysely";
 import { sql } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
+import { computePercentile, eloToTier } from "@rosegriffon/achillea-core";
 
 export abstract class LeaderboardService {
 	private static async activeSeason(db: Kysely<Database>) {
@@ -11,7 +12,7 @@ export abstract class LeaderboardService {
 			.executeTakeFirst();
 	}
 
-	static async findTop(db: Kysely<Database>, mode: number, seasonId: string | null, limit = 50, offset = 0, search = "") {
+	static async findTop(db: Kysely<Database>, mode: number, seasonId: string | null, limit = 50, offset = 0, search = "", minElo?: number, maxElo?: number) {
 		// Keep parity with the legacy ranked transport, which allowed 200 rows per page.
 		const safeLimit = Math.min(200, Math.max(1, limit));
 		const safeOffset = Math.max(0, offset);
@@ -31,6 +32,8 @@ export abstract class LeaderboardService {
 			eb("username", "ilike", `%${normalizedSearch}%`),
 			eb("display_name", "ilike", `%${normalizedSearch}%`),
 		]));
+		if (minElo !== undefined) query = query.where("elo", ">=", minElo);
+		if (maxElo !== undefined) query = query.where("elo", "<=", maxElo);
 		const rows = await query.orderBy("elo", "desc").orderBy("display_name", "asc").orderBy("user_id", "asc").limit(safeLimit).offset(safeOffset).execute();
 		let countQuery = db.selectFrom("user_elo as ue").leftJoin("user as u", "u.id", "ue.user_id").select(({ fn }) => fn.countAll<number>().as("count")).where("ue.mode", "=", mode).where("ue.games_played", ">", 0);
 		countQuery = seasonId === null ? countQuery.where("ue.season_id", "is", null) : countQuery.where("ue.season_id", "=", seasonId);
@@ -38,6 +41,8 @@ export abstract class LeaderboardService {
 			eb("u.username", "ilike", `%${normalizedSearch}%`),
 			eb("u.display_name", "ilike", `%${normalizedSearch}%`),
 		]));
+		if (minElo !== undefined) countQuery = countQuery.where("ue.elo", ">=", minElo);
+		if (maxElo !== undefined) countQuery = countQuery.where("ue.elo", "<=", maxElo);
 		const count = await countQuery.executeTakeFirst();
 		return {
 			data: rows.map((row) => {
@@ -50,9 +55,9 @@ export abstract class LeaderboardService {
 	}
 
 	/** Canonical public ranked ladder projection, including the active season. */
-	static async findActiveTop(db: Kysely<Database>, mode: number, limit = 50, offset = 0, search = "") {
+	static async findActiveTop(db: Kysely<Database>, mode: number, limit = 50, offset = 0, search = "", minElo?: number, maxElo?: number) {
 		const season = await this.activeSeason(db);
-		return this.findTop(db, mode, season?.id ?? null, limit, offset, search);
+		return this.findTop(db, mode, season?.id ?? null, limit, offset, search, minElo, maxElo);
 	}
 
 	/** Canonical 11-tier projection used by both the website and ranked client. */
@@ -109,7 +114,7 @@ export abstract class LeaderboardService {
 		if (!elo) return null;
 		const ranks = await db.selectFrom("rank").selectAll().orderBy("min_elo", "asc").execute();
 		const isRanked = Number(elo.games_played) > 0;
-		const tier = isRanked ? ranks.find((rank) => Number(elo.elo) >= rank.min_elo && Number(elo.elo) <= rank.max_elo) : null;
+		const tier = isRanked ? eloToTier(Number(elo.elo), ranks.map((rank) => ({ ...rank, minElo: rank.min_elo, maxElo: rank.max_elo }))) : null;
 		let rankQuery = db.selectFrom("user_elo as ranked").select(sql<number>`count(distinct ranked.elo)`.as("rank"))
 			.where("ranked.mode", "=", mode).where("ranked.elo", ">=", elo.elo).where("ranked.games_played", ">", 0);
 		let totalQuery = db.selectFrom("user_elo").select(({ fn }) => fn.countAll<number>().as("total")).where("mode", "=", mode).where("games_played", ">", 0);
@@ -127,7 +132,7 @@ export abstract class LeaderboardService {
 			userId: elo.user_id, mode: elo.mode, elo: Number(elo.elo), peakRating: Number(elo.peak_rating),
 			gamesPlayed: Number(elo.games_played), wins: Number(elo.wins), losses: Number(elo.losses), seasonId: elo.season_id,
 			globalRank, totalPlayers,
-			percentile: globalRank && totalPlayers > 0 ? Math.max(0.1, Math.round((globalRank / totalPlayers) * 1000) / 10) : null,
+			percentile: computePercentile(globalRank, totalPlayers),
 			tier: tier ? { key: tier.key, minElo: tier.min_elo, maxElo: tier.max_elo, emojiId: tier.emoji_id, emojiKey: tier.emoji_key, gradient: tier.gradient } : null,
 		};
 	}
