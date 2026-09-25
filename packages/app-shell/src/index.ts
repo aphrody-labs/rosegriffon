@@ -7,6 +7,7 @@ export {
 	construireMobileNavUnifiee,
 	construireNavigationItems,
 	construireNavigationUnifiee,
+	filtrerNavigation,
 	DOMAINES,
 	domaineDeLaRoute,
 	estItemActif,

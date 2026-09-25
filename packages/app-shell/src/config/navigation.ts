@@ -29,6 +29,18 @@ export interface NavItem {
 	groupOnly?: boolean;
 	/** Préfixes supplémentaires qui rendent l'item actif (navigation mobile). */
 	activePaths?: string[];
+	/**
+	 * Visibilité déclarative d'une destination. L'interface l'utilise seulement
+	 * pour ne pas proposer un écran auquel la session courante n'a pas accès ;
+	 * l'API reste l'autorité qui autorise ou refuse chaque opération.
+	 */
+	access?: {
+		requiresAuthentication?: boolean;
+		/** Rôle Achilléa: 1 modérateur, 2 administrateur, 3 super-administrateur. */
+		minimumAchilleaRole?: number;
+		/** Rôle de clan: 2 vice-président, 3 président. */
+		minimumClanRole?: number;
+	};
 }
 
 /**
@@ -69,6 +81,27 @@ export function estItemActif(pathname: string, item: NavItem): boolean {
 /** Parcourt un arbre de navigation en profondeur. */
 export function parcourirNav(items: NavItem[]): NavItem[] {
 	return items.flatMap((item) => [item, ...parcourirNav(item.children ?? [])]);
+}
+
+/**
+ * Conserve la structure du menu après avoir écarté les destinations que la
+ * session ne peut pas utiliser. Centraliser ce filtrage évite qu'une entrée
+ * protégée reste visible dans un accordéon alors qu'elle est absente d'une
+ * autre surface de navigation.
+ */
+export function filtrerNavigation(
+	items: NavItem[],
+	canView: (item: NavItem) => boolean,
+): NavItem[] {
+	return items.flatMap((item) => {
+		if (!canView(item)) return [];
+		const children = item.children
+			? filtrerNavigation(item.children, canView)
+			: undefined;
+		// Un groupe purement structurel ne doit pas devenir un accordéon vide.
+		if (item.groupOnly && item.children && children?.length === 0) return [];
+		return [{ ...item, ...(item.children ? { children } : {}) }];
+	});
 }
 
 /**
@@ -313,8 +346,18 @@ export function construireEsportItems(): NavItem[] {
 		{
 			children: [
 				{ icon: "groups", label: "nav.esport.clans.list", path: e("/clans") },
-				{ icon: "add_circle", label: "nav.esport.clans.create", path: e("/clans/create") },
-				{ icon: "shield", label: "nav.esport.clans.dashboard", path: e("/clans/dashboard") },
+				{
+					icon: "add_circle",
+					label: "nav.esport.clans.create",
+					path: e("/clans/create"),
+					access: { requiresAuthentication: true },
+				},
+				{
+					icon: "shield",
+					label: "nav.esport.clans.dashboard",
+					path: e("/clans/dashboard"),
+					access: { minimumClanRole: 2 },
+				},
 			],
 			icon: "groups",
 			label: "nav.esport.clans",
@@ -322,18 +365,28 @@ export function construireEsportItems(): NavItem[] {
 		},
 		{
 			children: [
-				{ icon: "swords", label: "nav.esport.ranked.play", path: e("/ranked") },
 				{
 					icon: "leaderboard",
 					label: "nav.esport.ranked.leaderboard",
 					path: e("/ranked/leaderboard"),
 				},
 				{ icon: "military_tech", label: "nav.esport.ranked.tiers", path: e("/ranked/tiers") },
-				{ icon: "history", label: "nav.esport.ranked.history", path: e("/ranked/history") },
+				{
+					icon: "swords",
+					label: "nav.esport.ranked.play",
+					path: e("/ranked"),
+					access: { requiresAuthentication: true },
+				},
+				{
+					icon: "history",
+					label: "nav.esport.ranked.history",
+					path: e("/ranked/history"),
+					access: { requiresAuthentication: true },
+				},
 			],
 			icon: "swords",
 			label: "nav.esport.ranked",
-			path: e("/ranked"),
+			path: e("/ranked/leaderboard"),
 		},
 		{
 			children: [
@@ -346,6 +399,7 @@ export function construireEsportItems(): NavItem[] {
 					icon: "add_circle",
 					label: "nav.esport.tournaments.create",
 					path: e("/tournaments/create"),
+					access: { requiresAuthentication: true },
 				},
 				{
 					icon: "trending_up",
@@ -364,10 +418,65 @@ export function construireEsportItems(): NavItem[] {
 			label: "nav.esport.leagues",
 			path: e("/leagues/astral"),
 		},
-		// « Casts », « Licence » et « Portefeuille » quittent le menu : ce sont des
-		// écrans de service, atteints depuis le contexte qui les motive (une
-		// rencontre à caster, une inscription, un achat), jamais depuis une barre
-		// latérale. Les pages existent toujours.
+		{ icon: "live_tv", label: "nav.esport.casts", path: e("/casts") },
+		{
+			children: [
+				{
+					icon: "badge",
+					label: "nav.esport.licence",
+					path: e("/licence"),
+					access: { requiresAuthentication: true },
+				},
+				{
+					icon: "account_balance_wallet",
+					label: "nav.esport.wallet",
+					path: e("/wallet"),
+					access: { requiresAuthentication: true },
+				},
+				{
+					icon: "deployed_code",
+					label: "nav.esport.organizations.create",
+					path: e("/organizations/create"),
+					access: { requiresAuthentication: true },
+				},
+			],
+			icon: "person",
+			label: "nav.esport.my_space",
+			path: e("/licence"),
+			access: { requiresAuthentication: true },
+		},
+		{
+			children: [
+				{
+					icon: "dashboard",
+					label: "nav.esport.admin.dashboard",
+					path: e("/admins/dashboard"),
+					access: { minimumAchilleaRole: 1 },
+				},
+				{
+					icon: "gavel",
+					label: "nav.esport.admin.disputes",
+					path: e("/admins/ranked-disputes"),
+					access: { minimumAchilleaRole: 2 },
+				},
+				{
+					icon: "warning",
+					label: "nav.esport.admin.sanctions",
+					path: e("/admins/sanctions"),
+					access: { minimumAchilleaRole: 2 },
+				},
+				{
+					icon: "verified",
+					label: "nav.esport.admin.organizations",
+					path: e("/organizations/validate"),
+					access: { minimumAchilleaRole: 2 },
+				},
+			],
+			icon: "dashboard",
+			label: "nav.esport.admin",
+			path: e("/admins/dashboard"),
+			access: { minimumAchilleaRole: 1 },
+		},
 		{ icon: "menu_book", label: "nav.esport.guide", path: e("/guide") },
 	];
 }
