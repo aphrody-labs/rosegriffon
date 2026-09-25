@@ -16,7 +16,7 @@ export function ClanCard({ clan, className }: ClanCardProps) {
 	const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
 
 	return (
-		<Link href={`/achillea/clans/${clan.id}`} className="block group">
+		<Link href={`/achillea/clans/${clan.id}`} className="block group rounded-2xl focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary">
 			<Card
 				className={`border border-outline/20 hover:border-primary/50 transition-colors bg-surface ${className ?? ""}`}
 			>
@@ -38,28 +38,28 @@ export function ClanCard({ clan, className }: ClanCardProps) {
 						)}
 					</div>
 					<div className="min-w-0 space-y-2">
-						<h3 className="text-base sm:text-lg font-black text-on-surface group-hover:text-primary">
+						<h3 className="text-lg font-black text-on-surface group-hover:text-primary">
 							<span className="text-primary mr-1">[{clan.shortName}]</span>
 							{clan.name}
 						</h3>
 						{clan.biography && (
-							<p className="text-sm text-on-surface-variant line-clamp-2">
+							<p className="text-lg text-on-surface-variant line-clamp-2">
 								{clan.biography}
 							</p>
 						)}
-						<p className="text-sm text-on-surface-variant">
+						<p className="text-lg text-on-surface-variant">
 							Notoriété : {clan.fame}
 						</p>
 						{clan.isRecruiting ? (
 							<Badge
 								variant="default"
-								className="gap-1 bg-green-600 text-white"
+								className="gap-1 bg-green-600 text-white text-lg"
 							>
 								<Check className="size-3" />
 								Recrute
 							</Badge>
 						) : (
-							<Badge variant="secondary" className="gap-1">
+							<Badge variant="secondary" className="gap-1 text-lg">
 								<X className="size-3" />
 								{clan.membersLimit ? "Complet" : "Recrutement fermé"}
 							</Badge>
