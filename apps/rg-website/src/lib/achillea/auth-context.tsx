@@ -111,10 +111,9 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 		const synchroniser = async () => {
 			setStatus("loading");
 			try {
-				if (await lireSession(() => !annule)) return;
-				if (annule) return;
-
-				// Pas de jeton e-sport : on le réclame. La passerelle répond `401`
+				// Toujours échanger l'identité RG avant de lire le cookie Achilléa :
+				// celui-ci peut encore appartenir au compte RG précédent.
+				// La passerelle répond `401`
 				// s'il n'y a pas de session Rose Griffon, `409` si aucun compte
 				// Discord n'y est lié — deux informations, pas des pannes. L'état
 				// reste `anonymous`.
@@ -126,7 +125,12 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 					credentials: "include",
 					cache: "no-store",
 				});
-				if (!reponse.ok || annule) return;
+				if (annule) return;
+				if (!reponse.ok) {
+					setUser(null);
+					setStatus(reponse.status === 401 || reponse.status === 409 ? "anonymous" : "error");
+					return;
+				}
 				await lireSession(() => !annule);
 			} catch {
 				if (!annule) {

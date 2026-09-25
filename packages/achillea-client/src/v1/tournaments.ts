@@ -525,6 +525,8 @@ export const seedBatchResultSchema = z.object({
 
 export type TournamentListQuery = {
 	page?: number;
+	/** Taille de page du contrôleur RG actuel (1 à 50). */
+	pageSize?: number;
 	/** Taille de page — le contrôleur l'attend sous le nom `pagination`. */
 	pagination?: number;
 	organization?: number;

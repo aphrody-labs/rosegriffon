@@ -258,6 +258,9 @@ export type RankedLeaderboardQuery = {
 	pageSize?: number;
 	/** Recherche globale par pseudo / nom affiché. */
 	search?: string;
+	/** Bornes Elo inclusives, notamment pour filtrer par palier public. */
+	minElo?: number;
+	maxElo?: number;
 }
 
 export type RankedTelemetryQuery = {

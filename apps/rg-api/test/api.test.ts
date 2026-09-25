@@ -58,7 +58,7 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 		expect(res.data).toBeDefined();
 		if (res.data) {
 			expect(Array.isArray(res.data.data)).toBe(true);
-			expect(typeof res.data.count).toBe("number");
+			expect(typeof res.data.meta.total).toBe("number");
 		}
 	});
 
@@ -527,6 +527,21 @@ describe("Rose Griffon Unified API (apps/api)", () => {
 			new Request("http://localhost/v1/achillea/users/me/ranked-history?limit=20")
 		);
 		expect(res.status).toBe(401);
+	});
+
+	it("GET /v1/achillea/users/:id/ranked-history exposes only that player's public results", async () => {
+		const leaderboard = await api.v1.achillea.users.leaderboard.get({ query: { mode: 2, limit: 1 } });
+		const userId = leaderboard.data?.entries[0]?.userId;
+		if (!userId) return;
+		const response = await app.handle(new Request(`http://localhost/v1/achillea/users/${encodeURIComponent(userId)}/ranked-history?limit=5`));
+		expect(response.status).toBe(200);
+		const history = (await response.json()) as Array<{ lobbyId: number; opponent: { userId: string } }>;
+		expect(Array.isArray(history)).toBe(true);
+		expect(history.length).toBeLessThanOrEqual(5);
+		for (const match of history) {
+			expect(typeof match.lobbyId).toBe("number");
+			expect(typeof match.opponent.userId).toBe("string");
+		}
 	});
 
 	it("GET /v1/achillea/users/me/ranked-trend is owned by the unified API", async () => {

@@ -32,7 +32,7 @@ export const TournamentModel = {
 				updatedAt: t.String()
 			})
 		),
-		count: t.Number()
+		meta: t.Object({ page: t.Number(), limit: t.Number(), total: t.Number(), pageCount: t.Number() })
 	}),
 	notFound: t.Object({
 		message: t.Literal("Tournament not found")

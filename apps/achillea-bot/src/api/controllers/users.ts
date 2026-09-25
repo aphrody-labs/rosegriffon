@@ -105,6 +105,23 @@ export class UsersController extends BaseController {
 		return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
 	}
 
+	@Get("/:id/ranked-history")
+	async rankedHistory(
+		@PathParams("id") id: string,
+		@Res() res: Response,
+		@QueryParams("mode") mode?: number,
+		@QueryParams("limit") limit: number = 20,
+		@QueryParams("offset") offset: number = 0,
+	) {
+		const query = new URLSearchParams({
+			limit: String(Math.max(1, Math.min(100, Number(limit) || 20))),
+			offset: String(Math.max(0, Number(offset) || 0)),
+		});
+		if (mode != null && Number.isFinite(Number(mode))) query.set("mode", String(mode));
+		const upstream = await fetch(`${process.env.UNIFIED_API_URL ?? "http://127.0.0.1:8800"}/v1/achillea/users/${encodeURIComponent(id)}/ranked-history?${query}`);
+		return res.status(upstream.status).json(await upstream.json().catch(() => ({ message: "Unified API unavailable" })));
+	}
+
 	@Get("/me/ranked-trend")
 	@UseBefore(CookieAuthorize)
 	async myRankedTrend(

@@ -112,11 +112,18 @@ export async function rebuildTournamentBracket(
 ): Promise<boolean> {
 	const tournament = await db
 		.selectFrom("event")
-		.select(["id", "name", "tournament_type", "participants_number", "seed_ordering"])
+		.select(["id", "name", "internal_state", "tournament_type", "participants_number", "seed_ordering"])
 		.where("id", "=", tournamentId)
 		.where("type", "=", "TOURNAMENT")
 		.executeTakeFirst();
-	if (!tournament || !tournament.participants_number || tournament.tournament_type === "league")
+	if (
+		!tournament ||
+		!tournament.participants_number ||
+		!(["Preregistering", "Preparing"] as const).includes(
+			tournament.internal_state as "Preregistering" | "Preparing"
+		) ||
+		tournament.tournament_type === "league"
+	)
 		return false;
 	const type = (tournament.tournament_type ?? "single_elimination") as
 		| "single_elimination"
@@ -130,6 +137,22 @@ export async function rebuildTournamentBracket(
 		.where("p.status", "=", "Active")
 		.orderBy("p.id", "asc")
 		.execute();
+	// A bracket with fewer than two actual entrants is not a competition. Never
+	// truncate the seed list to fit a stale capacity setting.
+	if (participants.length < 2 || participants.length > tournament.participants_number) return false;
+	const previous = await manager.get.currentStage(tournamentId);
+	if (previous) {
+		const matches = await manager.storage.select("match", { stage_id: previous.id });
+		// Rebuilding discards the stage. Once play or reporting has begun, retain
+		// the existing tree and its results even if the event state is stale.
+		if (!matches || matches.some((match) =>
+			match.status >= 4 ||
+			match.opponent1?.result !== undefined ||
+			match.opponent2?.result !== undefined ||
+			match.opponent1?.score !== undefined ||
+			match.opponent2?.score !== undefined
+		)) return false;
+	}
 	for (const participant of participants) {
 		if (participant.bracket_participant_id !== null) continue;
 		const bracketId = Number(
@@ -145,7 +168,6 @@ export async function rebuildTournamentBracket(
 			.execute();
 		participant.bracket_participant_id = bracketId;
 	}
-	const previous = await manager.get.currentStage(tournamentId);
 	if (previous) await manager.delete.stage(previous.id);
 	const seeding = participants
 		.slice()

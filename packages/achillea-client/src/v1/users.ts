@@ -111,6 +111,11 @@ export class UsersResource extends AchilleaResource {
 		});
 	}
 
+	/** `GET /users/:id/ranked-history` — résultats publics d'un joueur. */
+	rankedHistory(id: string, query: RankedHistoryQuery = {}): Promise<AchilleaClientResult<RankedHistoryEntry[]>> {
+		return this.http.get(`/users/${encodePathSegment(id)}/ranked-history`, z.array(rankedHistoryEntrySchema), { query });
+	}
+
 	/** `GET /users/me/ranked-trend` — sparkline Elo et bilan sur la période. */
 	myRankedTrend(query: RankedTrendQuery = {}): Promise<AchilleaClientResult<RankedTrend>> {
 		return this.http.get("/users/me/ranked-trend", rankedTrendSchema, {

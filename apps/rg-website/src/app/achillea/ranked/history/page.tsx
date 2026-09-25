@@ -13,6 +13,7 @@ export const metadata = metadonneesAchillea({
 	indexable: false,
 });
 
-export default function RankedHistoryPage() {
-	return <RankedHistoryClient />;
+export default async function RankedHistoryPage({ searchParams }: { searchParams: Promise<{ player?: string }> }) {
+	const { player } = await searchParams;
+	return <RankedHistoryClient playerId={player || undefined} />;
 }
