@@ -13,7 +13,7 @@ import {
 	syncStaffPhotos,
 } from "../lib/discord.js";
 import { sql } from "../lib/db.js";
-import { syncDiscordGuildSnapshot } from "@rosegriffon/discord-sync";
+import { syncDiscordGuildSnapshot, syncOAuthLinkMetadata } from "@rosegriffon/discord-sync";
 
 /**
  * Synchronisation Discord — TOUS les serveurs suivis.
@@ -111,6 +111,26 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
 			echecs.push(`${serveur.nom} : ${motif}`);
 			totalErreurs++;
 		}
+	}
+
+	// Better Auth owns credentials. The shared bot mirror gets only stable link
+	// identifiers and timestamps, including providers without a Discord guild.
+	try {
+		const links = await sql`SELECT id, user_id, provider_id, account_id, created_at, updated_at FROM account`;
+		const typedLinks = links as unknown as { id: string; user_id: string; provider_id: string;
+			account_id: string; created_at: Date | string | null; updated_at: Date | string | null }[];
+		const linked = await syncOAuthLinkMetadata(typedLinks.map((row) => ({
+			id: String(row.id), userId: String(row.user_id), providerId: String(row.provider_id),
+			providerAccountId: String(row.account_id),
+			linkedAt: row.created_at ? new Date(row.created_at).toISOString() : null,
+			updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : null,
+		})));
+		if (linked !== null) resume.push(`liens OAuth : ${linked}`);
+	} catch (error) {
+		const motif = error instanceof Error ? error.message : String(error);
+		console.error("[Cron Discord] liens OAuth :", motif);
+		echecs.push(`liens OAuth : ${motif}`);
+		totalErreurs++;
 	}
 
 	// Les avatars du staff ne dépendent pas d'un serveur : le service lit la
