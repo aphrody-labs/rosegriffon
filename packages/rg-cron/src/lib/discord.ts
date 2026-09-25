@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Client, IntentsBitField, Partials, ActivityType, type Guild, type GuildMember, type User } from "discord.js";
+import {
+	Client,
+	IntentsBitField,
+	Partials,
+	ActivityType,
+	type Guild,
+	type GuildMember,
+	type User,
+} from "discord.js";
 import { sql } from "./db.js";
 import { resolveGuildId } from "@rosegriffon/types/discord";
 
@@ -246,7 +254,7 @@ function connecterClient(
 				console.log("[Discord] Chargement initial des membres et présences...");
 				await guild.members.fetch();
 				console.log(`✓ ${guild.members.cache.size} membres chargés.`);
-				
+
 				// Première génération de la télémétrie
 				const telemetry = computeTelemetry(guild);
 				notifyTelemetryUpdate(telemetry);
@@ -276,7 +284,9 @@ function connecterClient(
 		client.on("guildMemberAdd", async (member) => {
 			if (member.guild.id !== GUILD_ID) return;
 			console.log(`[Discord] Membre rejoint : ${member.user.tag}`);
-			await syncOneMember(member).catch((err) => console.error("[guildMemberAdd] sync failed:", err));
+			await syncOneMember(member).catch((err) =>
+				console.error("[guildMemberAdd] sync failed:", err)
+			);
 			const guild = client.guilds.cache.get(GUILD_ID);
 			if (guild) notifyTelemetryUpdate(computeTelemetry(guild));
 		});
@@ -288,26 +298,33 @@ function connecterClient(
 			// l'historique de rôles, et surtout ne rattrapait jamais les départs
 			// survenus pendant une coupure du démon — 173 lignes fantômes constatées
 			// le 11/8/2026. Le profil pré-créé correspondant part avec.
-			await sql`UPDATE discord_members SET left_at = now(), updated_at = now() WHERE discord_id = ${member.id}`
-				.catch((err) => console.error("[guildMemberRemove] marquage du départ impossible:", err));
-			await sql`DELETE FROM profiles WHERE discord_id = ${member.id} AND claimed_at IS NULL`
-				.catch((err) => console.error("[guildMemberRemove] retrait du profil pré-créé impossible:", err));
+			await sql`UPDATE discord_members SET left_at = now(), updated_at = now() WHERE discord_id = ${member.id}`.catch(
+				(err) => console.error("[guildMemberRemove] marquage du départ impossible:", err)
+			);
+			await sql`DELETE FROM profiles WHERE discord_id = ${member.id} AND claimed_at IS NULL`.catch(
+				(err) => console.error("[guildMemberRemove] retrait du profil pré-créé impossible:", err)
+			);
 			const guild = client.guilds.cache.get(GUILD_ID);
 			if (guild) notifyTelemetryUpdate(computeTelemetry(guild));
 		});
 
 		client.on("guildMemberUpdate", async (oldMember, newMember) => {
 			if (newMember.guild.id !== GUILD_ID) return;
-			await syncOneMember(newMember).catch((err) => console.error("[guildMemberUpdate] sync failed:", err));
+			await syncOneMember(newMember).catch((err) =>
+				console.error("[guildMemberUpdate] sync failed:", err)
+			);
 		});
 
 		client.on("userUpdate", async (oldUser, newUser) => {
 			const guild = client.guilds.cache.get(GUILD_ID);
 			if (!guild) return;
-			await syncOneUser(newUser, guild).catch((err) => console.error("[userUpdate] sync failed:", err));
+			await syncOneUser(newUser, guild).catch((err) =>
+				console.error("[userUpdate] sync failed:", err)
+			);
 		});
 
-		client.login(DISCORD_TOKEN)
+		client
+			.login(DISCORD_TOKEN)
 			.then(() => {
 				discordClient = client;
 			})
@@ -448,18 +465,15 @@ export interface SyncReport {
 
 export async function syncAllMembers(guild: Guild): Promise<SyncReport> {
 	const start = Date.now();
-	let members = guild.members.cache;
-	if (members.size === 0) {
-		console.log("[Cron Discord] Cache vide, chargement des membres depuis l'API...");
-		try {
-			members = await guild.members.fetch();
-		} catch (err) {
-			console.warn("[Cron Discord] guild.members.fetch() failed (probably rate limited), falling back to cache:", err);
-			members = guild.members.cache;
-		}
-	} else {
-		console.log(`[Cron Discord] Utilisation de ${members.size} membres depuis le cache.`);
+	// Le cache peut contenir seulement les membres vus depuis le démarrage.
+	// Un inventaire incomplet ne doit jamais déclencher la purge des départs.
+	const members = await guild.members.fetch();
+	if (members.size === 0 && guild.memberCount > 0) {
+		throw new Error(
+			`Inventaire Discord vide pour ${guild.id} (${guild.memberCount} membres annoncés).`
+		);
 	}
+	console.log(`[Cron Discord] ${members.size} membres récupérés depuis Discord.`);
 	const errors: SyncReport["errors"] = [];
 	let upserted = 0;
 
@@ -497,33 +511,39 @@ export async function syncAllMembers(guild: Guild): Promise<SyncReport> {
 	// serveur. Sans cette étape, seuls les départs observés en direct étaient
 	// enregistrés, et le démon manque forcément ceux de ses coupures.
 	let partis = 0;
-	try {
-		const sortisGuilde = await sql`
+	if (errors.length === 0) {
+		try {
+			const sortisGuilde = await sql`
 			UPDATE discord_appartenances
 			   SET left_at = now()
 			 WHERE guild_id = ${guild.id}
 			   AND left_at IS NULL
 			   AND updated_at < ${new Date(start).toISOString()}::timestamptz
 			RETURNING discord_id`;
-		partis = sortisGuilde.length;
+			partis = sortisGuilde.length;
 
-		if (estServeurPrincipal) {
-			await sql`
+			if (estServeurPrincipal) {
+				await sql`
 				UPDATE discord_members
 				   SET left_at = now()
 				 WHERE left_at IS NULL
 				   AND updated_at < ${new Date(start).toISOString()}::timestamptz`;
-			if (partis > 0) {
-				await sql`
+				if (partis > 0) {
+					await sql`
 					DELETE FROM profiles
 					 WHERE claimed_at IS NULL
 					   AND discord_id IN (
 					       SELECT discord_id FROM discord_members WHERE left_at IS NOT NULL
 					   )`;
+				}
 			}
+		} catch (err) {
+			console.error("[discord] réconciliation des départs impossible:", err);
+			errors.push({
+				discordId: guild.id,
+				reason: `réconciliation: ${err instanceof Error ? err.message : String(err)}`,
+			});
 		}
-	} catch (err) {
-		console.error("[discord] réconciliation des départs impossible:", err);
 	}
 
 	// L'invariant « tout membre actuel a un profil » est maintenu ici plutôt que
@@ -704,15 +724,21 @@ export async function syncAllRoles(guild: Guild): Promise<RoleSyncReport> {
 	// Un rôle supprimé sur Discord restait en base indéfiniment : la table en
 	// comptait 95 pour 91 rôles réels, et la hiérarchie affichée inventait donc
 	// des échelons qui n'existent plus.
-	try {
-		const vivants = [...roles.keys()];
-		await sql`
+	if (errors.length === 0)
+		try {
+			const vivants = [...roles.keys()];
+			await sql`
 			DELETE FROM discord_roles
 			 WHERE guild_id = ${guild.id}
 			   AND role_id <> ALL (${toPgTextArray(vivants)}::text[])`;
-	} catch (err) {
-		console.error("[discord] purge des rôles disparus impossible:", err);
-	}
+		} catch (err) {
+			console.error("[discord] purge des rôles disparus impossible:", err);
+			errors.push({
+				roleId: guild.id,
+				name: guild.name,
+				reason: `purge: ${err instanceof Error ? err.message : String(err)}`,
+			});
+		}
 
 	return {
 		fetched: roles.size,

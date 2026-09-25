@@ -99,6 +99,12 @@ export async function syncGuild(guildId: string, client: Client) {
 	const guildData = await guildRepo.findOne({ id: guildId, deleted: false });
 
 	const fetchedGuild = await client.guilds.fetch(guildId).catch(() => null);
+	if (!fetchedGuild) {
+		// A failed fetch may mean an API outage, missing permission, or a leave.
+		// None of these proves that the shared guild should be inserted or deleted.
+		console.info(`[guild-sync] ${guildId} unavailable to this Discord profile`);
+		return;
+	}
 
 	// check if this guild exists in the database, if not it creates it (or recovers it from the deleted ones)
 	if (!guildData) {
@@ -122,14 +128,6 @@ export async function syncGuild(guildId: string, client: Client) {
 			stats.register("NEW_GUILD", guildId);
 			logger.logGuild("NEW_GUILD", guildId);
 		}
-	} else if (!fetchedGuild) {
-		// guild is deleted but still exists in the database
-
-		guildData.deleted = true;
-		await db.em.persist(guildData).flush();
-
-		stats.register("DELETE_GUILD", guildId);
-		logger.logGuild("DELETE_GUILD", guildId);
 	}
 }
 
@@ -138,14 +136,10 @@ export async function syncGuild(guildId: string, client: Client) {
  * @param client
  */
 export async function syncAllGuilds(client: Client) {
-	const db = await resolveDependency(Database);
-
-	// add missing guilds
+	// Each Discord profile sees only the guilds joined by its own application.
+	// Absence from this cache does not prove that a guild was deleted: the other
+	// Achillea profile (or RG bot) may still be present there. Guild removal is
+	// recorded separately by the per-profile Discord snapshot.
 	const guilds = client.guilds.cache;
 	for (const guild of guilds) await syncGuild(guild[1].id, client);
-
-	// remove deleted guilds
-	const guildRepo = db.get(Guild);
-	const guildsData = await guildRepo.getActiveGuilds();
-	for (const guildData of guildsData) await syncGuild(guildData.id, client);
 }

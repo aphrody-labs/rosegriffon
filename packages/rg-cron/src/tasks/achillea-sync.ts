@@ -49,17 +49,25 @@ export async function runAchilleaSync(): Promise<ResultatSyncAchillea> {
 		// « new row violates row-level security policy » sur le premier INSERT.
 		// On emprunte `service_role`, dont `rg` est membre, le temps de la
 		// projection : c'est le rôle de service déjà utilisé pour toute écriture
-		// qui doit traverser une RLS, et l'emprunt est annulé à la fermeture.
-		await sql`SET ROLE service_role`;
+		// qui doit traverser une RLS. SET LOCAL reste lié à cette transaction.
+		const resultat = await sql.begin(async (tx) => {
+			await tx`SET LOCAL ROLE service_role`;
+			const [source] = await tx`
+				SELECT count(*)::integer AS membres
+				  FROM public.discord_appartenances
+				 WHERE guild_id = ${GUILDE_ACHILLEA} AND left_at IS NULL`;
+			if (!source || Number(source.membres) === 0) {
+				throw new Error("Aucune appartenance Achilléa active en source : projection annulée.");
+			}
 
-		// La ligne de guilde doit exister avant ses rôles : `guild_role.guild_id`
-		// et `guild_member_meta.guild_id` la référencent en clé étrangère.
-		await sql`
+			// La ligne de guilde doit exister avant ses rôles : `guild_role.guild_id`
+			// et `guild_member_meta.guild_id` la référencent en clé étrangère.
+			await tx`
 			INSERT INTO achillea.guild (id, created_at, updated_at, last_interact, deleted)
 			VALUES (${GUILDE_ACHILLEA}, now(), now(), now(), false)
 			ON CONFLICT (id) DO NOTHING`;
 
-		const roles = await sql`
+			const roles = await tx`
 			INSERT INTO achillea.guild_role (
 				id, guild_id, name, color, position, permissions, hoist, mentionable, scanned_at
 			)
@@ -77,14 +85,14 @@ export async function runAchilleaSync(): Promise<ResultatSyncAchillea> {
 				scanned_at = now()
 			RETURNING id`;
 
-		// Un rôle supprimé sur Discord disparaît aussi côté Achilléa : le laisser
-		// ferait porter à des membres des rôles qui n'existent plus.
-		await sql`
+			// Un rôle supprimé sur Discord disparaît aussi côté Achilléa : le laisser
+			// ferait porter à des membres des rôles qui n'existent plus.
+			await tx`
 			DELETE FROM achillea.guild_role
 			 WHERE guild_id = ${GUILDE_ACHILLEA}
 			   AND id NOT IN (SELECT role_id FROM public.discord_roles WHERE guild_id = ${GUILDE_ACHILLEA})`;
 
-		const membres = await sql`
+			const membres = await tx`
 			INSERT INTO achillea.guild_member_meta (
 				guild_id, user_id, nick, joined_at, premium_since, roles, pending, scanned_at
 			)
@@ -101,7 +109,7 @@ export async function runAchilleaSync(): Promise<ResultatSyncAchillea> {
 				scanned_at = now()
 			RETURNING user_id`;
 
-		await sql`
+			await tx`
 			DELETE FROM achillea.guild_member_meta
 			 WHERE guild_id = ${GUILDE_ACHILLEA}
 			   AND user_id NOT IN (
@@ -109,9 +117,9 @@ export async function runAchilleaSync(): Promise<ResultatSyncAchillea> {
 			        WHERE guild_id = ${GUILDE_ACHILLEA} AND left_at IS NULL
 			   )`;
 
-		// Identité affichée seulement, et seulement si elle a changé : un UPDATE
-		// inconditionnel réécrirait 3 315 lignes toutes les demi-heures.
-		const comptes = await sql`
+			// Identité affichée seulement, et seulement si elle a changé : un UPDATE
+			// inconditionnel réécrirait 3 315 lignes toutes les demi-heures.
+			const comptes = await tx`
 			UPDATE achillea."user" u
 			   SET username = COALESCE(a.username, u.username),
 			       avatar = COALESCE(a.avatar_url, u.avatar),
@@ -123,23 +131,20 @@ export async function runAchilleaSync(): Promise<ResultatSyncAchillea> {
 			   AND (u.username IS DISTINCT FROM a.username OR u.avatar IS DISTINCT FROM a.avatar_url)
 			RETURNING u.id`;
 
+			return { comptes: comptes.length, membres: membres.length, roles: roles.length };
+		});
+
 		console.log(
-			`[achillea] projection Discord → Achilléa : ${roles.length} rôles, ${membres.length} membres, ${comptes.length} comptes rafraîchis`
+			`[achillea] projection Discord → Achilléa : ${resultat.roles} rôles, ${resultat.membres} membres, ${resultat.comptes} comptes rafraîchis`
 		);
 
 		return {
-			comptes: comptes.length,
-			membres: membres.length,
-			roles: roles.length,
+			...resultat,
 			success: true,
 		};
 	} catch (err) {
 		const motif = err instanceof Error ? err.message : String(err);
 		console.error("[achillea] projection impossible :", motif);
 		return { error: motif, success: false };
-	} finally {
-		// Le pool est partagé avec les autres tâches : une connexion rendue en
-		// `service_role` leur donnerait `BYPASSRLS` sans qu'elles l'aient demandé.
-		await sql`RESET ROLE`.catch(() => undefined);
 	}
 }

@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "@rosegriffon/db": "workspace:*",
+    "@rosegriffon/discord-sync": "workspace:*",
 		"kysely": "catalog:",
     "@rosegriffon/achillea-core": "workspace:*",
     "@rosegriffon/achillea-types": "workspace:*",

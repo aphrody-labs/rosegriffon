@@ -164,7 +164,7 @@ export default function RankedLeaderboardPage({
 					</label>
 
 					<div className="text-lg text-muted-foreground self-end sm:self-auto">
-					Total : <span className="font-semibold text-foreground">{total}</span> joueurs classés
+					Total : <span className="font-semibold text-foreground">{total}</span> joueur{total > 1 ? "s" : ""} classé{total > 1 ? "s" : ""}
 				</div>
 			</div>
 
@@ -184,7 +184,7 @@ export default function RankedLeaderboardPage({
 				) : (
 					<div className="overflow-x-auto">
 						<table className="w-full text-left text-lg">
-							<caption className="sr-only">Classement des joueurs en {mode === 2 ? "solo" : "duo"}, {total} joueurs classés</caption>
+							<caption className="sr-only">Classement des joueurs en {mode === 2 ? "solo" : "duo"}, {total} joueur{total > 1 ? "s" : ""} classé{total > 1 ? "s" : ""}</caption>
 							<thead>
 								<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-lg tracking-wider">
 									<th scope="col" className="py-3 px-4 w-16 text-center">Rang</th>

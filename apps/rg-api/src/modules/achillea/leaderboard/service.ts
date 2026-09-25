@@ -92,26 +92,19 @@ export abstract class LeaderboardService {
 		}));
 	}
 
-	/** Canonical authenticated profile projection. Creates the initial ladder row idempotently. */
+	/** Canonical authenticated profile projection. Reading a profile never mutates the ladder. */
 	static async findProfile(db: Kysely<Database>, userId: string, mode: number) {
 		const season = await this.activeSeason(db);
 		const seasonId = season?.id ?? null;
 		const baseRating = Number((season?.config as { baseRating?: number } | null)?.baseRating ?? 0);
-		await db.insertInto("user_elo").values({
-			user_id: userId,
-			mode,
-			season_id: seasonId,
-			elo: baseRating,
-			peak_rating: baseRating,
-			games_played: 0,
-			wins: 0,
-			losses: 0,
-		}).onConflict((oc) => oc.columns(["user_id", "mode"]).doNothing()).execute();
-		const elo = await db.selectFrom("user_elo")
+		const storedElo = await db.selectFrom("user_elo")
 			.select(["user_id", "mode", "season_id", "elo", "peak_rating", "games_played", "wins", "losses"])
 			.where("user_id", "=", userId).where("mode", "=", mode)
 			.executeTakeFirst();
-		if (!elo) return null;
+		const elo = storedElo ?? {
+			user_id: userId, mode, season_id: seasonId, elo: baseRating,
+			peak_rating: baseRating, games_played: 0, wins: 0, losses: 0,
+		};
 		const ranks = await db.selectFrom("rank").selectAll().orderBy("min_elo", "asc").execute();
 		const isRanked = Number(elo.games_played) > 0;
 		const tier = isRanked ? eloToTier(Number(elo.elo), ranks.map((rank) => ({ ...rank, minElo: rank.min_elo, maxElo: rank.max_elo }))) : null;

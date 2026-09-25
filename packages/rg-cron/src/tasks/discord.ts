@@ -12,6 +12,7 @@ import {
 	syncStaffPhotos,
 } from "../lib/discord.js";
 import { sql } from "../lib/db.js";
+import { syncDiscordGuildSnapshot } from "@rosegriffon/discord-sync";
 
 /**
  * Synchronisation Discord — TOUS les serveurs suivis.
@@ -67,6 +68,17 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
 
 			console.log(`[Cron Discord] ${serveur.nom} — membres...`);
 			const rapportMembres = await syncAllMembers(guild);
+			if (client.user) {
+				const instantane = await syncDiscordGuildSnapshot(guild, {
+					sourceBotId: client.user.id,
+					profile: "rg",
+				});
+				if (instantane) {
+					console.log(
+						`[Cron Discord] ${serveur.nom} — miroir SQLite : ${instantane.memberCount} membres, ${instantane.roleCount} rôles, ${instantane.channelCount} salons`
+					);
+				}
+			}
 			console.log(
 				`[Cron Discord] ${serveur.nom} — membres : ${rapportMembres.upserted}/${rapportMembres.fetched}, ${rapportMembres.partis} parti(s) en ${rapportMembres.durationMs} ms`
 			);
@@ -77,6 +89,11 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
 			totalMembres += rapportMembres.fetched;
 			totalMisAJour += rapportMembres.upserted;
 			totalErreurs += rapportMembres.errors.length + rapportRoles.errors.length;
+			if (rapportMembres.errors.length || rapportRoles.errors.length) {
+				echecs.push(
+					`${serveur.nom} : ${rapportMembres.errors.length} membre(s), ${rapportRoles.errors.length} rôle(s) en échec`
+				);
+			}
 			resume.push(
 				`${serveur.nom} : ${rapportMembres.upserted}/${rapportMembres.fetched} membres, ${rapportRoles.upserted} rôles`
 			);
@@ -113,13 +130,9 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
 		VALUES (${echecs.length === 0 ? "success" : "error"}, ${totalMembres}, ${totalMisAJour}, ${totalErreurs}, ${message}, NOW())
 	`.catch((err) => console.error("[Cron Discord] log de synchro non enregistré :", err));
 
-	console.log(
-		`[Cron Discord] terminé en ${Date.now() - debut.getTime()} ms — ${message}`
-	);
+	console.log(`[Cron Discord] terminé en ${Date.now() - debut.getTime()} ms — ${message}`);
 
-	return echecs.length === 0
-		? { success: true }
-		: { success: false, error: echecs.join(" | ") };
+	return totalErreurs === 0 ? { success: true } : { success: false, error: echecs.join(" | ") };
 }
 
 /**
@@ -160,9 +173,13 @@ interface ChannelScanResult {
  * Scanne en parallèle tous les salons textuels et fils actifs du serveur.
  * Analyse les derniers messages et écrit un rapport JSON sur disque via les APIs natives de Bun.
  */
-export async function runDiscordChannelScan(): Promise<{ success: boolean; error?: string; stats?: any }> {
+export async function runDiscordChannelScan(): Promise<{
+	success: boolean;
+	error?: string;
+	stats?: any;
+}> {
 	console.log("[Cron Discord] Démarrage du scan parallèle des salons...");
-	
+
 	const client = getDiscordClient();
 	if (!client) {
 		const msg = "Client Discord non initialisé.";
@@ -188,47 +205,48 @@ export async function runDiscordChannelScan(): Promise<{ success: boolean; error
 		const channels = await guild.channels.fetch();
 		const activeThreads = await guild.channels.fetchActiveThreads();
 
-		const allChannels = [
-			...channels.values(),
-			...activeThreads.threads.values()
-		];
+		const allChannels = [...channels.values(), ...activeThreads.threads.values()];
 
 		// Filtre uniquement les salons textuels
-		const textChannels = allChannels.filter(c => c && c.isTextBased());
+		const textChannels = allChannels.filter((c) => c && c.isTextBased());
 		console.log(`[Cron Discord] ${textChannels.length} salons textuels à scanner.`);
 
 		// Limite de concurrence à 5 pour éviter d'être banni par le rate limit Discord
-		const results = await runParallelWithLimit(textChannels, 5, async (chan): Promise<ChannelScanResult> => {
-			const channel = chan as any;
-			try {
-				// Récupère les 50 derniers messages du salon
-				const messages = await channel.messages.fetch({ limit: 50 });
-				
-				const scanData: MessageScanData[] = [...messages.values()].map(m => ({
-					id: m.id,
-					authorId: m.author.id,
-					authorTag: m.author.tag,
-					contentLength: m.content.length,
-					timestamp: m.createdAt.toISOString()
-				}));
+		const results = await runParallelWithLimit(
+			textChannels,
+			5,
+			async (chan): Promise<ChannelScanResult> => {
+				const channel = chan as any;
+				try {
+					// Récupère les 50 derniers messages du salon
+					const messages = await channel.messages.fetch({ limit: 50 });
 
-				return {
-					channelId: channel.id,
-					name: channel.name,
-					type: channel.type.toString(),
-					messageCount: messages.size,
-					messages: scanData
-				};
-			} catch (err: any) {
-				return {
-					channelId: channel.id,
-					name: channel.name,
-					type: channel.type.toString(),
-					messageCount: 0,
-					error: err.message || String(err)
-				};
+					const scanData: MessageScanData[] = [...messages.values()].map((m) => ({
+						id: m.id,
+						authorId: m.author.id,
+						authorTag: m.author.tag,
+						contentLength: m.content.length,
+						timestamp: m.createdAt.toISOString(),
+					}));
+
+					return {
+						channelId: channel.id,
+						name: channel.name,
+						type: channel.type.toString(),
+						messageCount: messages.size,
+						messages: scanData,
+					};
+				} catch (err: any) {
+					return {
+						channelId: channel.id,
+						name: channel.name,
+						type: channel.type.toString(),
+						messageCount: 0,
+						error: err.message || String(err),
+					};
+				}
 			}
-		});
+		);
 
 		// Calcul des statistiques globales
 		let totalMessages = 0;
@@ -265,13 +283,13 @@ export async function runDiscordChannelScan(): Promise<{ success: boolean; error
 			totalCharacters,
 			averageMessageLength: totalMessages > 0 ? Math.round(totalCharacters / totalMessages) : 0,
 			mostActiveAuthors,
-			mostActiveChannels
+			mostActiveChannels,
 		};
 
 		// Écriture du rapport sur le disque en utilisant Bun.write (API native rapide)
 		const reportPath = "/home/ubuntu/nie/data/discord-channels-scan.json";
 		const reportContent = JSON.stringify({ stats, channels: results }, null, 2);
-		
+
 		await Bun.write(reportPath, reportContent);
 		console.log(`✓ Scan terminé en ${stats.durationMs}ms. Rapport écrit sur : ${reportPath}`);
 
@@ -279,7 +297,7 @@ export async function runDiscordChannelScan(): Promise<{ success: boolean; error
 		await sql`
 			INSERT INTO discord_sync_logs (status, total_members, updated_count, error_count, message, created_at)
 			VALUES ('scan_success', ${guild.memberCount}, ${totalMessages}, 0, ${`Scan de ${textChannels.length} salons terminé. Total messages : ${totalMessages}`}, NOW())
-		`.catch(err => console.error("[Cron Discord] Échec log scan:", err));
+		`.catch((err) => console.error("[Cron Discord] Échec log scan:", err));
 
 		return { success: true, stats };
 	} catch (err: any) {
@@ -289,9 +307,8 @@ export async function runDiscordChannelScan(): Promise<{ success: boolean; error
 		await sql`
 			INSERT INTO discord_sync_logs (status, total_members, updated_count, error_count, message, created_at)
 			VALUES ('scan_error', 0, 0, 1, ${errMsg}, NOW())
-		`.catch(dbErr => console.error("[Cron Discord] Échec log d'erreur scan:", dbErr));
+		`.catch((dbErr) => console.error("[Cron Discord] Échec log d'erreur scan:", dbErr));
 
 		return { success: false, error: errMsg };
 	}
 }
-
