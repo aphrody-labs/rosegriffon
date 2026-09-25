@@ -211,3 +211,11 @@ Dans Chrome connecté, le circuit affiche 95 joueurs, 18 clans et 9 tournois ; l
 Le tableau `/admin`, qui affichait auparavant le digest React `2926058691`, rend maintenant « Tableau de bord » sans écran d'erreur. La correction normalise les dates PostgreSQL utilisées par le graphe d'inscriptions. Les pages `/achillea/tournaments` et `/achillea/tournaments/circuit/ranking` ont aussi rendu leurs titres et contenu réels dans cette session.
 
 La liste de tournois utilise la limite effective renvoyée par l'API lors de sa pagination, y compris sur le contrat legacy qui plafonne la limite demandée à 25. Les quatre tests ciblés de cette pagination et du graphe admin passent (0 échec) ainsi que le typecheck du site. La construction de release signale encore un appel Discord `401` pendant le rendu statique et trois valeurs `/admin/database` trop grandes pour le cache Next; l'artefact est assemblé et activé, mais ces avertissements restent à corriger avant de déclarer le build silencieux.
+
+## Validation de la release `4ad79bb`
+
+`/srv/rg/current` désigne `4ad79bbfd0a1e941590b4635b9568afc606902b9` ; les cinq services RG sont actifs, Nginx valide et le circuit répond HTTPS 200. Dans Chrome connecté, le champ du circuit « Rechercher un joueur ou un clan » est désormais exposé comme champ de recherche nommé ; la recherche `Ban` ramène 1 joueur sur 95. Le champ de recherche des clans porte aussi un nom accessible.
+
+Les cinq pages demandées répondent 200 sans cookie : circuit, tournois, hub classé, historique et leaderboard. Les lectures API publiques de tournois, circuit, paliers, leaderboard et historique d'un joueur répondent également 200 sans session ; l'historique personnel reste 401 sans session comme prévu. Les tests ciblés de parité/authentification passent (19/19).
+
+L'historique public sélectionne désormais un adversaire de l'équipe opposée et une ligne par lobby, pour ne plus afficher un coéquipier ou répéter une partie 2v2. Les trois tests `ranked-history` passent. La sonde live du joueur utilisé en mode duo ne retourne aucun match : elle ne constitue donc pas une preuve sur un dataset 2v2 rempli. Enfin, l'assemblage ne déclenche plus le `401` Discord observé précédemment ; les trois avertissements de cache Next `/admin/database` restent présents.
