@@ -1,5 +1,6 @@
 import { applyEloUpdate, DEFAULT_BASE_RATING, MatchMode, placementPrizeAp } from "@rosegriffon/achillea-core";
-import type { Kysely } from "kysely";
+import { Status } from "brackets-model";
+import { sql, type Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 import { finalTournamentStandings } from "./bracket";
 
@@ -26,7 +27,27 @@ export async function applyPlacementPrizes(
 	const alreadyApplied = await db.selectFrom("tournament_event").select("id")
 		.where("tournament_id", "=", tournamentId).where("type", "=", "TOURNAMENT_PLACEMENT_PRIZES_APPLIED").executeTakeFirst();
 	if (alreadyApplied) return { applied: false, reason: "deja_applique" };
-	const placements = await finalTournamentStandings(db, tournamentId);
+	// A finished event can still contain an unfinished migrated bracket. Never
+	// pay a partial finalStandings projection: its apparent podium may change.
+	const bracket = await sql<{ matches: string; unsettled: string }>`
+		SELECT count(m.id)::text AS matches,
+			count(m.id) FILTER (WHERE m.status NOT IN (${Status.Completed}, ${Status.Archived}))::text AS unsettled
+		FROM bm_stage s
+		LEFT JOIN bm_match m ON m.stage_id = s.id
+		WHERE s.id = (
+			SELECT id FROM bm_stage WHERE tournament_id = ${tournamentId}
+			ORDER BY id DESC LIMIT 1
+		)
+	`.execute(db);
+	if (!Number(bracket.rows[0]?.matches) || Number(bracket.rows[0]?.unsettled)) {
+		return { applied: false, reason: "classement_non_resolu" };
+	}
+	let placements: Awaited<ReturnType<typeof finalTournamentStandings>>;
+	try {
+		placements = await finalTournamentStandings(db, tournamentId);
+	} catch {
+		return { applied: false, reason: "classement_non_resolu" };
+	}
 	if (!placements.length) return { applied: false, reason: "classement_vide" };
 	const size = tournament.participants_number ?? 0;
 	if (size <= 0) return { applied: false, reason: "taille_invalide" };
