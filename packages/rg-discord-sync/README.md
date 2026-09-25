@@ -18,7 +18,9 @@ old row exists. Consumers should filter by the run timestamp when displaying
 current state.
 
 This is a metadata mirror, not an authentication database. Better Auth and
-PostgreSQL remain authoritative for accounts and OAuth links. OAuth access or
-refresh tokens, Discord message bodies, DMs, audit logs, attachments, and site
-telemetry are not copied into SQLite or Redis. Obtaining those requires
+PostgreSQL remain authoritative for accounts and OAuth links. The cron task
+mirrors account-link IDs, provider IDs and timestamps into
+`rg_oauth_account_links`, with a provider count in Redis. OAuth access,
+refresh and ID tokens, Discord message bodies, DMs, audit logs, attachments,
+and site telemetry are not copied into SQLite or Redis. Obtaining those requires
 separate consent, gateway intents or API permissions and retention rules.

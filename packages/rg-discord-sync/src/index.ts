@@ -85,8 +85,51 @@ export function openDiscordSnapshot(path = Bun.env.RG_DISCORD_SYNC_SQLITE_PATH):
 			present INTEGER NOT NULL, changed_at TEXT NOT NULL,
 			PRIMARY KEY (source_bot_id, guild_id)
 		);
+		CREATE TABLE IF NOT EXISTS rg_oauth_account_links (
+			account_id TEXT PRIMARY KEY, user_id TEXT NOT NULL, provider_id TEXT NOT NULL,
+			provider_account_id TEXT NOT NULL, linked_at TEXT, updated_at TEXT,
+			active INTEGER NOT NULL, seen_at TEXT NOT NULL
+		);
 	`);
 	return db;
+}
+
+/** Better Auth link metadata only. Credential columns are intentionally excluded. */
+export interface OAuthLinkMetadata {
+	id: string;
+	userId: string;
+	providerId: string;
+	providerAccountId: string;
+	linkedAt: string | null;
+	updatedAt: string | null;
+}
+
+export async function syncOAuthLinkMetadata(rows: readonly OAuthLinkMetadata[]): Promise<number | null> {
+	const db = openDiscordSnapshot();
+	if (!db) return null;
+	try {
+		const seenAt = new Date().toISOString();
+		const upsert = db.query(`INSERT INTO rg_oauth_account_links VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+			ON CONFLICT(account_id) DO UPDATE SET user_id=excluded.user_id,
+			provider_id=excluded.provider_id,provider_account_id=excluded.provider_account_id,
+			linked_at=excluded.linked_at,updated_at=excluded.updated_at,active=1,seen_at=excluded.seen_at`);
+		db.transaction(() => {
+			for (const row of rows) upsert.run(row.id, row.userId, row.providerId,
+				row.providerAccountId, row.linkedAt, row.updatedAt, seenAt);
+			db.query("UPDATE rg_oauth_account_links SET active=0 WHERE seen_at <> ?").run(seenAt);
+		})();
+		const url = Bun.env.RG_DISCORD_SYNC_REDIS_URL ?? Bun.env.REDIS_URL;
+		if (url) {
+			const redis = new RedisClient(url);
+			try {
+				const counts = db.query("SELECT provider_id, count(*) AS count FROM rg_oauth_account_links WHERE active=1 GROUP BY provider_id").all();
+				await redis.set("rg:oauth-link-summary", JSON.stringify({ total: rows.length, counts, syncedAt: seenAt }), "EX", 3600);
+			} catch (error) {
+				console.warn("[discord-sync] OAuth link summary cache unavailable:", error instanceof Error ? error.message : String(error));
+			} finally { redis.close(); }
+		}
+		return rows.length;
+	} finally { db.close(); }
 }
 
 async function cacheSummary(source: DiscordSnapshotSource, report: DiscordGuildSnapshotReport): Promise<void> {
