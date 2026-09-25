@@ -123,3 +123,8 @@ et télémétrie existaient dans Redis. Le miroir Discord portait `rg` : 2 guild
 5 115 membres complets ; `current` : 58 guildes, membres incomplets ; `legacy` :
 4 guildes, membres incomplets. Les cinq services et la release `6e7401c`
 étaient actifs sur le VPS.
+
+Dans `/admin/settings` connecté, l'onglet Achilléa a activé le bouton de
+sauvegarde après saisie temporaire de `javascript:alert(1)` dans « Lien du
+site ». Le serveur a répondu « URL HTTPS ou chemin local absolu requis » ; la
+valeur affichée a été rétablie sans écriture et le bouton est redevenu inactif.
