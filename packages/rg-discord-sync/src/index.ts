@@ -140,7 +140,19 @@ export async function syncDiscordGuildSnapshot(
 		]);
 		// A missing GuildMembers intent cannot be treated as a complete roster.
 		const hasMembersIntent = guild.client.options.intents.has(GUILD_MEMBERS_INTENT);
-		const members = options.members ?? (hasMembersIntent ? await guild.members.fetch() : guild.members.cache);
+		let members = options.members ?? guild.members.cache;
+		let membersComplete = false;
+		if (options.members) {
+			membersComplete = hasMembersIntent;
+		} else if (hasMembersIntent) {
+			try {
+				members = await guild.members.fetch();
+				membersComplete = true;
+			} catch (error) {
+				console.warn("[discord-sync] member roster unavailable for", guild.id,
+					error instanceof Error ? error.message : String(error));
+			}
+		}
 		const syncedAt = new Date().toISOString();
 		const insertGuild = db.query(`INSERT INTO rg_discord_guilds VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 			ON CONFLICT(source_bot_id,guild_id) DO UPDATE SET profile=excluded.profile,name=excluded.name,
@@ -176,7 +188,7 @@ export async function syncDiscordGuildSnapshot(
 			guildId: guild.id, memberCount: members.size, roleCount: roles.size,
 			channelCount: channels.size, emojiCount: emojiResult.value.size,
 			eventCount: eventResult.value.size, activeThreadCount: threadResult.value.size,
-			membersComplete: hasMembersIntent, emojisComplete: emojiResult.complete,
+			membersComplete, emojisComplete: emojiResult.complete,
 			eventsComplete: eventResult.complete, activeThreadsComplete: threadResult.complete, syncedAt,
 		};
 		db.transaction(() => {
