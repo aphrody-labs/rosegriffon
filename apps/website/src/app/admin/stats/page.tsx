@@ -93,10 +93,11 @@ export default async function StatsPage() {
 		lireAudienceDistante(),
 	]);
 
-	// Les domaines du second serveur rejoignent les locaux : la page ne fait plus
-	// de différence à l'affichage, seule la fraîcheur diffère (collecte toutes les
-	// quinze minutes contre lecture directe du journal ici).
-	const tousDomaines = [...audience.domaines, ...(distante?.domaines ?? [])];
+	// Le cache planifié sert de repli. Le journal local est prioritaire pour un
+	// même hôte afin de ne jamais additionner deux fois son trafic.
+	const uniques = new Map((distante?.domaines ?? []).map((d) => [d.host, d]));
+	for (const domaine of audience.domaines) uniques.set(domaine.host, domaine);
+	const tousDomaines = [...uniques.values()];
 	const parDomaine = new Map(tousDomaines.map((d) => [d.host, d]));
 	// Domaines vus dans le journal mais absents de l'inventaire : sous-domaines
 	// techniques (db., storage., realtime.) ou hôtes inattendus. On les montre
@@ -141,8 +142,8 @@ export default async function StatsPage() {
 						{new Date(audience.depuis).toLocaleString("fr-FR")}
 						{audience.tronque && " — lecture tronquée, le journal dépasse le plafond d'analyse"}.
 						{distante?.collecteLe
-							? ` Second serveur collecté le ${new Date(distante.collecteLe).toLocaleString("fr-FR")}.`
-							: " Le second serveur n'a pas encore été collecté."}
+							? ` Agrégat Achilléa actualisé le ${new Date(distante.collecteLe).toLocaleString("fr-FR")}.`
+							: " Aucun agrégat Achilléa planifié disponible."}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
