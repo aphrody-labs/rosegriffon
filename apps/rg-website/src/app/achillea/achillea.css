@@ -114,6 +114,207 @@
 	color-scheme: dark;
 }
 
+/* ----------------------------------------------------------------------
+ * Accueil Achilléa
+ *
+ * La page Angular d'origine plaçait un tournoi à la une puis quatre accès.
+ * Le portage avait empilé ce flux, un hub à onglets, les paliers et quatre
+ * cartes institutionnelles : une même information pouvait apparaître trois
+ * fois. Le flux redevient volontairement court, lisible et data-driven.
+ * -------------------------------------------------------------------- */
+.achillea-home-page {
+	padding-bottom: 4rem;
+}
+
+.achillea-home {
+	position: relative;
+	min-height: min(760px, calc(100dvh - 3.5rem));
+	overflow: clip;
+	border-bottom: 1px solid rgba(223, 255, 87, 0.22);
+}
+
+.achillea-home__backdrop {
+	position: absolute;
+	inset: 0;
+	background:
+		linear-gradient(90deg, rgba(13, 8, 20, 0.98) 0%, rgba(13, 8, 20, 0.9) 43%, rgba(13, 8, 20, 0.48) 100%),
+		url("/achillea/site_bg_dark_home.png") center / cover no-repeat;
+}
+
+.achillea-home__content,
+.achillea-vods {
+	position: relative;
+	width: min(100% - 2rem, 1160px);
+	margin-inline: auto;
+}
+
+.achillea-home__content {
+	display: grid;
+	grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+	gap: 2.5rem;
+	align-items: center;
+	min-height: inherit;
+	padding-block: 3rem;
+}
+
+.achillea-home__intro {
+	display: grid;
+	gap: 1.25rem;
+	align-content: center;
+}
+
+.achillea-home__wordmark {
+	width: min(100%, 35rem);
+	height: auto;
+	filter: drop-shadow(0 0 2rem rgba(223, 255, 87, 0.18));
+}
+
+.achillea-home__intro > p {
+	max-width: 32rem;
+	margin: 0;
+	font-size: 1.125rem;
+	line-height: 1.5;
+	color: #f3edf7;
+}
+
+.achillea-home__stats {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.75rem;
+	margin: 0;
+}
+
+.achillea-home__stats div {
+	min-width: 0;
+	padding: 0.875rem;
+	border: 1px solid rgba(243, 237, 247, 0.2);
+	border-radius: 0.75rem;
+	background: rgba(13, 8, 20, 0.72);
+}
+
+.achillea-home__stats dt,
+.achillea-home__stats dd { margin: 0; }
+.achillea-home__stats dt { font-size: 1rem; color: rgba(243, 237, 247, 0.82); }
+.achillea-home__stats dd { margin-top: 0.25rem; font-family: "Achillea Mono", monospace; font-size: 1.25rem; font-weight: 700; color: var(--achillea-lime); }
+
+.achillea-home__featured { min-width: 0; }
+.achillea-home__section-head,
+.achillea-vods__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.75rem;
+}
+.achillea-home__section-head p { margin: 0; font-size: 1.125rem; font-weight: 700; }
+.achillea-home__text-link,
+.achillea-vods__header > a,
+.achillea-home__empty > a {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	min-height: 44px;
+	padding-inline: 0.5rem;
+	font-size: 1rem;
+	font-weight: 700;
+	color: var(--achillea-lime);
+	text-decoration: none;
+}
+.achillea-home__text-link svg, .achillea-vods__header > a svg, .achillea-home__empty > a svg { width: 1.125rem; height: 1.125rem; }
+
+.achillea-home__featured-card {
+	position: relative;
+	display: block;
+	overflow: hidden;
+	min-height: 25rem;
+	border: 1px solid rgba(223, 255, 87, 0.46);
+	border-radius: 1.25rem;
+	background: #160d22;
+	color: #f3edf7;
+	text-decoration: none;
+	box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.35);
+}
+.achillea-home__featured-card:hover { border-color: var(--achillea-lime); }
+.achillea-home__featured-card:focus-visible,
+.achillea-home__actions a:focus-visible,
+.achillea-home__other-events a:focus-visible,
+.achillea-vods__card:focus-visible,
+.achillea-home__text-link:focus-visible,
+.achillea-vods__header > a:focus-visible,
+.achillea-home__empty > a:focus-visible { outline: 4px solid var(--achillea-lime); outline-offset: 4px; }
+.achillea-home__featured-scrim { position: absolute; inset: 0; background: linear-gradient(115deg, rgba(13, 8, 20, 0.98), rgba(13, 8, 20, 0.84) 52%, rgba(13, 8, 20, 0.42)); }
+.achillea-home__featured-body { position: relative; display: grid; align-content: end; gap: 1.25rem; min-height: inherit; padding: 2rem; }
+.achillea-home__featured-body h2 { max-width: 28rem; margin: 0; font-size: clamp(2.25rem, 5vw, 4rem); color: #fff; }
+.achillea-home__live { padding: 0.25rem 0.625rem; border-radius: 999px; background: #7f1d1d; color: #fecaca; font-size: 1rem; font-weight: 700; }
+.achillea-home__facts { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; padding: 0; margin: 0; list-style: none; font-size: 1.125rem; }
+.achillea-home__facts li { display: inline-flex; align-items: center; gap: 0.5rem; }
+.achillea-home__facts svg { width: 1.25rem; height: 1.25rem; color: var(--achillea-lime); }
+.achillea-home__progress { max-width: 27rem; font-size: 1rem; }
+.achillea-home__progress > div { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+.achillea-home__progress > span { display: block; height: 0.625rem; overflow: hidden; border-radius: 999px; background: rgba(243, 237, 247, 0.24); }
+.achillea-home__progress i { display: block; height: 100%; border-radius: inherit; background: var(--achillea-lime); }
+.achillea-home__cta { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 1.125rem; font-weight: 800; color: var(--achillea-lime); }
+.achillea-home__cta svg { width: 1.25rem; height: 1.25rem; }
+
+.achillea-home__other-events { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; padding: 0; margin: 0.75rem 0 0; list-style: none; }
+.achillea-home__other-events a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.25rem 0.75rem; align-items: center; min-height: 4.5rem; padding: 0.75rem; border: 1px solid rgba(243, 237, 247, 0.2); border-radius: 0.75rem; background: rgba(13, 8, 20, 0.78); color: #f3edf7; text-decoration: none; }
+.achillea-home__other-events span { overflow: hidden; font-size: 1rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.achillea-home__other-events small { font-size: 0.875rem; color: rgba(243, 237, 247, 0.8); }
+.achillea-home__other-events svg { grid-row: span 2; grid-column: 2; width: 1.125rem; height: 1.125rem; color: var(--achillea-lime); }
+
+.achillea-home__empty { display: flex; align-items: center; gap: 1rem; min-height: 10rem; padding: 1.5rem; border: 1px solid rgba(243, 237, 247, 0.24); border-radius: 1rem; background: rgba(13, 8, 20, 0.76); }
+.achillea-home__empty > svg { width: 2rem; height: 2rem; color: var(--achillea-lime); }
+.achillea-home__empty h2, .achillea-home__empty p { margin: 0; }
+.achillea-home__empty h2 { font-size: 1.75rem; }
+.achillea-home__empty p { margin-top: 0.25rem; font-size: 1rem; }
+.achillea-home__empty > a { margin-left: auto; }
+
+.achillea-home__actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; grid-column: 1 / -1; }
+.achillea-home__actions a { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; min-height: 5.5rem; padding: 1rem; border: 1px solid rgba(243, 237, 247, 0.24); border-radius: 1rem; background: rgba(13, 8, 20, 0.84); color: #f3edf7; text-decoration: none; }
+.achillea-home__actions a:hover { border-color: var(--achillea-lime); background: rgba(39, 21, 58, 0.95); }
+.achillea-home__actions > a > svg:first-child { width: 1.5rem; height: 1.5rem; color: var(--achillea-lime); }
+.achillea-home__actions > a > svg:last-child { width: 1.125rem; height: 1.125rem; color: var(--achillea-lime); }
+.achillea-home__actions span { display: grid; gap: 0.25rem; min-width: 0; }
+.achillea-home__actions strong { font-size: 1.125rem; }
+.achillea-home__actions small { font-size: 1rem; color: rgba(243, 237, 247, 0.8); }
+
+.achillea-vods { margin-top: 4rem; }
+.achillea-vods__header { padding-bottom: 1rem; border-bottom: 1px solid rgba(243, 237, 247, 0.2); }
+.achillea-vods__header > div { display: grid; gap: 0.25rem; }
+.achillea-vods__header span { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 700; color: #fca5a5; }
+.achillea-vods__header span svg { width: 1.25rem; height: 1.25rem; }
+.achillea-vods__header h2 { margin: 0; font-size: clamp(2rem, 4vw, 3rem); }
+.achillea-vods__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+.achillea-vods__card { overflow: hidden; border: 1px solid rgba(243, 237, 247, 0.2); border-radius: 1rem; background: #160d22; color: #f3edf7; text-decoration: none; }
+.achillea-vods__card > div { position: relative; aspect-ratio: 16 / 9; background: #0d0814; }
+.achillea-vods__card > div > svg { position: absolute; inset: 50% auto auto 50%; width: 3rem; height: 3rem; transform: translate(-50%, -50%); color: #fff; filter: drop-shadow(0 0 0.5rem #000); }
+.achillea-vods__card > div > span { position: absolute; right: 0.75rem; bottom: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 0.375rem; background: rgba(0, 0, 0, 0.86); font-size: 0.875rem; }
+.achillea-vods__card h3 { margin: 1rem 1rem 0; font-size: 1.125rem; }
+.achillea-vods__card p { display: -webkit-box; overflow: hidden; margin: 0.5rem 1rem 1rem; color: rgba(243, 237, 247, 0.82); font-size: 1rem; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+
+@media (max-width: 1199px) {
+	.achillea-home__content { grid-template-columns: 1fr; max-width: 52rem; }
+	.achillea-home__intro { text-align: center; justify-items: center; }
+	.achillea-home__stats { width: min(100%, 38rem); }
+}
+@media (max-width: 839px) {
+	.achillea-home { min-height: auto; }
+	.achillea-home__content, .achillea-vods { width: min(100% - 2rem, 44rem); }
+	.achillea-home__content { gap: 2rem; padding-block: 2rem; }
+	.achillea-home__featured-card { min-height: 22rem; }
+	.achillea-home__other-events, .achillea-home__actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.achillea-vods__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 599px) {
+	.achillea-home__stats, .achillea-home__other-events, .achillea-home__actions, .achillea-vods__grid { grid-template-columns: 1fr; }
+	.achillea-home__section-head, .achillea-vods__header { align-items: flex-start; flex-direction: column; }
+	.achillea-home__featured-body { padding: 1.25rem; }
+	.achillea-home__featured-body h2 { font-size: 2.5rem; }
+	.achillea-home__facts { font-size: 1rem; }
+	.achillea-home__empty { align-items: flex-start; flex-wrap: wrap; }
+	.achillea-home__empty > a { width: 100%; margin-left: 0; }
+}
+
 .achillea-shell {
 	width: 100%;
 	min-width: 0;
