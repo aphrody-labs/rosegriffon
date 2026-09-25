@@ -89,6 +89,7 @@ export default function TournamentsListPage({
 			return true;
 		});
 	}, [tournaments, selectedTab, searchQuery]);
+	const hasFilters = selectedTab !== "all" || searchQuery.trim().length > 0;
 
 	return (
 		<div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
@@ -106,17 +107,17 @@ export default function TournamentsListPage({
 					</p>
 				</div>
 
-				<div className="flex items-center gap-2">
+				<div className="flex flex-wrap items-center gap-2">
 					<Link
 						href="/achillea/tournaments/circuit/ranking"
-						className="inline-flex items-center gap-1.5 px-3.5 py-2 text-lg font-semibold rounded-xl border border-border bg-card hover:bg-muted transition"
+						className="inline-flex min-h-11 items-center gap-1.5 px-3.5 py-2 text-lg font-semibold rounded-xl border border-border bg-card hover:bg-muted transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary"
 					>
 						<Layers className="w-3.5 h-3.5 text-blue-400" />
 						Circuit & Classement
 					</Link>
 					<Link
 						href="/achillea/tournaments/create"
-						className="inline-flex items-center gap-1.5 px-4 py-2 text-lg font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition shadow-sm"
+						className="inline-flex min-h-11 items-center gap-1.5 px-4 py-2 text-lg font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition shadow-sm focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary"
 					>
 						<Plus className="w-4 h-4" />
 						Créer un tournoi
@@ -132,7 +133,7 @@ export default function TournamentsListPage({
 						type="button"
 						aria-pressed={selectedTab === "all"}
 						onClick={() => setSelectedTab("all")}
-						className={`px-3.5 py-1.5 text-lg font-semibold rounded-lg transition-all ${
+						className={`min-h-11 shrink-0 px-3.5 py-1.5 text-lg font-semibold rounded-lg transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-primary ${
 							selectedTab === "all"
 								? "bg-card text-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
@@ -144,7 +145,7 @@ export default function TournamentsListPage({
 						type="button"
 						aria-pressed={selectedTab === "open"}
 						onClick={() => setSelectedTab("open")}
-						className={`px-3.5 py-1.5 text-lg font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+						className={`min-h-11 shrink-0 px-3.5 py-1.5 text-lg font-semibold rounded-lg transition-all flex items-center gap-1.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-primary ${
 							selectedTab === "open"
 								? "bg-card text-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
@@ -157,7 +158,7 @@ export default function TournamentsListPage({
 						type="button"
 						aria-pressed={selectedTab === "ongoing"}
 						onClick={() => setSelectedTab("ongoing")}
-						className={`px-3.5 py-1.5 text-lg font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+						className={`min-h-11 shrink-0 px-3.5 py-1.5 text-lg font-semibold rounded-lg transition-all flex items-center gap-1.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-primary ${
 							selectedTab === "ongoing"
 								? "bg-card text-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
@@ -170,7 +171,7 @@ export default function TournamentsListPage({
 						type="button"
 						aria-pressed={selectedTab === "finished"}
 						onClick={() => setSelectedTab("finished")}
-						className={`px-3.5 py-1.5 text-lg font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+						className={`min-h-11 shrink-0 px-3.5 py-1.5 text-lg font-semibold rounded-lg transition-all flex items-center gap-1.5 focus-visible:outline focus-visible:outline-4 focus-visible:outline-primary ${
 							selectedTab === "finished"
 								? "bg-card text-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
@@ -190,9 +191,13 @@ export default function TournamentsListPage({
 						placeholder="Rechercher un tournoi..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
-						className="w-full pl-9 pr-3 py-2 text-lg bg-card border border-border rounded-xl placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+						className="min-h-11 w-full pl-9 pr-3 py-2 text-lg bg-card border border-border rounded-xl placeholder:text-muted-foreground focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary"
 					/>
 				</div>
+			</div>
+			<div role="status" className="flex flex-wrap items-center gap-3 text-lg text-muted-foreground">
+				<span>{loading ? "Chargement des tournois…" : `${filteredTournaments.length} tournoi${filteredTournaments.length > 1 ? "s" : ""} affiché${filteredTournaments.length > 1 ? "s" : ""} sur ${tournaments.length}`}</span>
+				{hasFilters && <button type="button" onClick={() => { setSelectedTab("all"); setSearchQuery(""); }} className="min-h-11 rounded-xl border border-border px-4 font-semibold text-foreground focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary">Effacer les filtres</button>}
 			</div>
 
 			{/* Tournaments Table */}

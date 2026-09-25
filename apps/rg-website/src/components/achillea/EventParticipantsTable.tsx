@@ -173,16 +173,16 @@ export function EventParticipantsTable({
 						<Users className="size-5 text-primary" />
 						<h2 className="text-lg font-bold text-on-surface">Participants</h2>
 					</div>
-					<Badge variant="default" className="text-xs font-semibold">
+					<Badge variant="default" className="text-lg font-semibold">
 						{active.length} / {participantsCount} inscrits
 					</Badge>
 					{waiting.length > 0 && (
-						<Badge variant="outline" className="text-xs font-semibold text-amber-400 border-amber-500/30">
+						<Badge variant="outline" className="text-lg font-semibold text-amber-400 border-amber-500/30">
 							{waiting.length} en attente
 						</Badge>
 					)}
 					{dqCount > 0 && (
-						<Badge variant="destructive" className="text-xs font-semibold">
+						<Badge variant="destructive" className="text-lg font-semibold">
 							{dqCount} disqualifié{dqCount > 1 ? "s" : ""}
 						</Badge>
 					)}
@@ -196,7 +196,7 @@ export function EventParticipantsTable({
 							size="sm"
 							onClick={() => setConfirmAction("seedRanked")}
 							disabled={bulkLoading || participants.length === 0}
-							className="text-xs gap-1.5"
+							className="min-h-11 text-lg gap-1.5"
 						>
 							<TrendingUp className="size-3.5 text-primary" />
 							Seed par ELO
@@ -206,7 +206,7 @@ export function EventParticipantsTable({
 							size="sm"
 							onClick={() => setConfirmAction("seedRandom")}
 							disabled={bulkLoading || participants.length === 0}
-							className="text-xs gap-1.5"
+							className="min-h-11 text-lg gap-1.5"
 						>
 							<Shuffle className="size-3.5 text-sky-400" />
 							Mélange aléatoire
@@ -216,7 +216,7 @@ export function EventParticipantsTable({
 							size="sm"
 							onClick={() => setConfirmAction("clearSeeds")}
 							disabled={bulkLoading}
-							className="text-xs gap-1 text-muted-foreground hover:text-rose-400"
+							className="min-h-11 text-lg gap-1 text-muted-foreground hover:text-rose-400"
 						>
 							<RotateCcw className="size-3.5" />
 							Effacer
@@ -227,13 +227,15 @@ export function EventParticipantsTable({
 
 			{/* Search filter */}
 			<div className="relative max-w-sm">
-				<Search className="absolute left-3 top-2.5 size-3.5 text-muted-foreground" />
+				<label htmlFor="participant-search" className="block mb-2 text-lg font-semibold">Rechercher un joueur</label>
+				<Search aria-hidden="true" className="absolute left-3 bottom-3 size-5 text-muted-foreground" />
 				<input
+					id="participant-search"
 					type="text"
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
 					placeholder="Rechercher un joueur..."
-					className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-border/60 bg-muted/20 focus:outline-none focus:border-primary"
+					className="w-full pl-9 pr-3 min-h-11 py-2 text-lg rounded-xl border border-border/60 bg-muted/20 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary"
 				/>
 			</div>
 
@@ -241,14 +243,14 @@ export function EventParticipantsTable({
 			{filteredParticipants.length === 0 ? (
 				<div className="p-12 text-center border border-border/60 rounded-2xl bg-card/40 space-y-2">
 					<Users className="size-8 text-muted-foreground mx-auto" />
-					<div className="font-semibold text-sm">Aucun participant trouvé</div>
-					<p className="text-xs text-muted-foreground">
+					<div className="font-semibold text-lg">Aucun participant trouvé</div>
+					<p className="text-lg text-muted-foreground">
 						{searchQuery ? "Modifie tes critères de recherche." : "Les inscriptions sont encore ouvertes."}
 					</p>
 				</div>
 			) : (
-				<div className="border border-border/60 rounded-2xl bg-card/40 overflow-x-auto">
-					<table className="w-full text-left text-xs">
+				<div role="region" aria-label="Liste des participants, défilement horizontal sur petit écran" tabIndex={0} className="border border-border/60 rounded-2xl bg-card/40 overflow-x-auto focus-visible:outline-4 focus-visible:outline-primary">
+					<table className="w-full text-left text-lg">
 						<thead>
 							<tr className="border-b border-border/60 bg-muted/30 text-muted-foreground">
 								<th className="p-3 font-semibold w-24">Seed</th>
@@ -275,15 +277,17 @@ export function EventParticipantsTable({
 														type="number"
 														min={1}
 														max={participantsCount}
-														value={editingSeedValue}
+																value={editingSeedValue}
+																aria-label={`Seed de ${p.user?.username ?? "ce participant"}`}
 														onChange={(e) => setEditingSeedValue(Number(e.target.value))}
-														className="w-14 p-1 text-xs font-mono font-bold rounded border border-primary bg-background text-center"
+														className="w-20 min-h-11 p-1 text-lg font-mono font-bold rounded border border-primary bg-background text-center"
 														autoFocus
 													/>
 													<Button
 														variant="ghost"
 														size="sm"
-														className="size-6 p-0 text-emerald-400"
+																className="min-h-11 min-w-11 p-0 text-emerald-400"
+																aria-label={`Enregistrer la seed de ${p.user?.username ?? "ce participant"}`}
 														onClick={() => handleSaveSeed(p)}
 														disabled={savingSeed}
 													>
@@ -292,7 +296,8 @@ export function EventParticipantsTable({
 													<Button
 														variant="ghost"
 														size="sm"
-														className="size-6 p-0 text-muted-foreground"
+																className="min-h-11 min-w-11 p-0 text-muted-foreground"
+																aria-label="Annuler la modification de la seed"
 														onClick={() => setEditingParticipantId(null)}
 													>
 														<X className="size-3.5" />
@@ -314,7 +319,8 @@ export function EventParticipantsTable({
 																setEditingParticipantId(p.id);
 																setEditingSeedValue(p.seed ?? 1);
 															}}
-															className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-opacity p-0.5"
+																	className="min-h-11 min-w-11 text-muted-foreground hover:text-primary focus-visible:outline-4 focus-visible:outline-primary"
+																	aria-label={`Modifier la seed de ${p.user?.username ?? "ce participant"}`}
 															title="Modifier la seed"
 														>
 															<Pencil className="size-3" />
@@ -347,10 +353,10 @@ export function EventParticipantsTable({
 										{/* ELO Column */}
 										<td className="p-3">
 											<div className="flex items-center gap-2">
-												<span className="font-mono font-bold text-xs">
+												<span className="font-mono font-bold text-lg">
 													{elo > 0 ? `${elo} ELO` : "Placement"}
 												</span>
-												<Badge variant="outline" className="text-xs font-normal">
+												<Badge variant="outline" className="text-lg font-normal">
 													{rankKey}
 												</Badge>
 											</div>
@@ -359,15 +365,15 @@ export function EventParticipantsTable({
 										{/* Status Column */}
 										<td className="p-3">
 											{st === ParticipantStatus.DISQUALIFIED ? (
-												<Badge variant="destructive" className="text-xs font-bold">
+												<Badge variant="destructive" className="text-lg font-bold">
 													Disqualifié
 												</Badge>
 											) : st === ParticipantStatus.WAITLISTED ? (
-												<Badge variant="outline" className="text-xs text-amber-400 border-amber-500/30">
+												<Badge variant="outline" className="text-lg text-amber-400 border-amber-500/30">
 													Attente #{p.waitlistPosition ?? "—"}
 												</Badge>
 											) : (
-												<Badge variant="secondary" className="text-xs font-semibold text-emerald-400">
+												<Badge variant="secondary" className="text-lg font-semibold text-emerald-400">
 													Inscrit
 												</Badge>
 											)}
@@ -381,7 +387,7 @@ export function EventParticipantsTable({
 														<Button
 															variant="outline"
 															size="sm"
-															className="text-xs h-7 px-2 text-emerald-400 border-emerald-500/30 gap-1"
+															className="text-lg min-h-11 px-2 text-emerald-400 border-emerald-500/30 gap-1"
 															onClick={() => {
 																setTargetParticipant(p);
 																setConfirmAction("promote");
@@ -396,7 +402,7 @@ export function EventParticipantsTable({
 														<Button
 															variant="outline"
 															size="sm"
-															className="text-xs h-7 px-2 text-sky-400 border-sky-500/30 gap-1"
+															className="text-lg min-h-11 px-2 text-sky-400 border-sky-500/30 gap-1"
 															onClick={() => {
 																setTargetParticipant(p);
 																setConfirmAction("reinstate");
@@ -411,12 +417,13 @@ export function EventParticipantsTable({
 														<Button
 															variant="ghost"
 															size="sm"
-															className="text-xs h-7 px-2 text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10"
+															className="text-lg min-h-11 px-2 text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10"
 															onClick={() => {
 																setTargetParticipant(p);
 																setConfirmAction("disqualify");
 															}}
-															title="Disqualifier"
+																		title="Disqualifier"
+																		aria-label={`Disqualifier ${p.user?.username ?? "ce participant"}`}
 														>
 															<UserX className="size-3.5" />
 														</Button>
@@ -426,12 +433,13 @@ export function EventParticipantsTable({
 														<Button
 															variant="ghost"
 															size="sm"
-															className="text-xs h-7 px-2 text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10"
+															className="text-lg min-h-11 px-2 text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10"
 															onClick={() => {
 																setTargetParticipant(p);
 																setConfirmAction("remove");
 															}}
-															title="Retirer"
+																		title="Retirer"
+																		aria-label={`Retirer ${p.user?.username ?? "ce participant"}`}
 														>
 															<Trash2 className="size-3.5" />
 														</Button>
@@ -480,19 +488,20 @@ export function EventParticipantsTable({
 
 					{confirmAction === "disqualify" && (
 						<div className="py-2 space-y-1.5">
-							<label className="text-xs font-semibold">Motif de disqualification (min. 3 caractères)</label>
-							<textarea
+								<label htmlFor="disqualify-reason" className="text-lg font-semibold">Motif de disqualification (min. 3 caractères)</label>
+								<textarea
+									id="disqualify-reason"
 								rows={3}
 								value={disqualifyReason}
 								onChange={(e) => setDisqualifyReason(e.target.value)}
 								placeholder="Ex: Absence répétée au check-in, triche avérée, forfait..."
-								className="w-full p-2.5 rounded-xl border border-border/60 bg-muted/20 text-xs focus:outline-none focus:border-destructive"
+								className="w-full p-2.5 rounded-xl border border-border/60 bg-muted/20 text-lg focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-destructive"
 							/>
 						</div>
 					)}
 
 					<DialogFooter>
-						<Button variant="ghost" onClick={() => setConfirmAction(null)} disabled={bulkLoading}>
+						<Button variant="ghost" className="min-h-11 text-lg" onClick={() => setConfirmAction(null)} disabled={bulkLoading}>
 							Annuler
 						</Button>
 						<Button
@@ -502,6 +511,7 @@ export function EventParticipantsTable({
 									: "default"
 							}
 							onClick={executeConfirmedAction}
+							className="min-h-11 text-lg"
 							disabled={
 								bulkLoading || (confirmAction === "disqualify" && disqualifyReason.trim().length < 3)
 							}

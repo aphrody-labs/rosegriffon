@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useMemo } from "react";
-import Image from "next/image";
 import { UserAvatar } from "./UserAvatar";
 import { Badge } from "@rosegriffon/ui";
-import { Trophy, Swords, Clock, CheckCircle2, ChevronRight } from "lucide-react";
+import { Trophy, Swords, Clock, ChevronRight } from "lucide-react";
 import type { WireParticipant } from "@rosegriffon/achillea-types/domain/tournament-ops";
 
 interface BracketParticipantData {
@@ -117,27 +116,27 @@ export function TournamentBracket({
 				<div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-muted/40 border border-border">
 					<div className="flex items-center gap-3">
 						<span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-							<Clock className="w-4 h-4" />
+							<Clock className="w-6 h-6" />
 						</span>
 						<div>
-							<h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
+							<h4 className="text-lg font-bold text-foreground uppercase tracking-wider">
 								Arbre de compétition prévisionnel
 							</h4>
-							<p className="text-xs text-muted-foreground mt-0.5">
+							<p className="text-lg text-muted-foreground mt-0.5">
 								L&apos;arbre officiel sera calculé et verrouillé par l&apos;arbitrage dès la clôture des inscriptions.
 							</p>
 						</div>
 					</div>
-					<Badge variant="outline" className="text-xs border-amber-500/40 text-amber-400">
+					<Badge variant="outline" className="text-lg border-amber-500/40 text-amber-400">
 						{participants.length} / {totalSlots} participants inscrits
 					</Badge>
 				</div>
 
 				<div className="overflow-x-auto pb-4 pt-2">
-					<div className="flex items-start gap-8 min-w-[720px]">
+					<div className="flex flex-col sm:flex-row items-stretch gap-6 sm:gap-8 min-w-0 sm:min-w-[720px]">
 						{simulatedRounds.map((r, rIdx) => (
 							<div key={rIdx} className="flex-1 space-y-4">
-								<div className="text-center font-bold text-xs uppercase tracking-wider py-1.5 px-3 rounded-lg bg-card border border-border text-foreground shadow-sm">
+								<div className="text-center font-bold text-lg uppercase tracking-wider py-1.5 px-3 rounded-lg bg-card border border-border text-foreground shadow-sm">
 									{r.title}
 								</div>
 
@@ -152,16 +151,16 @@ export function TournamentBracket({
 												key={mIdx}
 												className="p-3 rounded-xl bg-card border border-border/70 shadow-xs space-y-2 relative"
 											>
-												<div className="flex items-center justify-between gap-2 text-xs">
+												<div className="flex items-center justify-between gap-2 text-lg">
 													<div className="flex items-center gap-2 truncate">
 														{p1 ? (
 															<UserAvatar
 																avatar={p1.user?.avatar}
 																displayName={p1.user?.username || "Joueur"}
-																className="w-5 h-5 shrink-0"
+																className="w-8 h-8 shrink-0"
 															/>
 														) : (
-															<div className="w-5 h-5 rounded-full bg-muted border border-border/80 flex items-center justify-center text-xs text-muted-foreground font-mono">
+															<div className="w-8 h-8 rounded-full bg-muted border border-border/80 flex items-center justify-center text-lg text-muted-foreground font-mono">
 																{mIdx * 2 + 1}
 															</div>
 														)}
@@ -169,21 +168,21 @@ export function TournamentBracket({
 															{p1?.user?.username || "En attente"}
 														</span>
 													</div>
-													<span className="font-mono text-xs font-bold text-muted-foreground">-</span>
+													<span className="font-mono text-lg font-bold text-muted-foreground">-</span>
 												</div>
 
 												<div className="border-t border-border/40" />
 
-												<div className="flex items-center justify-between gap-2 text-xs">
+												<div className="flex items-center justify-between gap-2 text-lg">
 													<div className="flex items-center gap-2 truncate">
 														{p2 ? (
 															<UserAvatar
 																avatar={p2.user?.avatar}
 																displayName={p2.user?.username || "Joueur"}
-																className="w-5 h-5 shrink-0"
+																className="w-8 h-8 shrink-0"
 															/>
 														) : (
-															<div className="w-5 h-5 rounded-full bg-muted border border-border/80 flex items-center justify-center text-xs text-muted-foreground font-mono">
+															<div className="w-8 h-8 rounded-full bg-muted border border-border/80 flex items-center justify-center text-lg text-muted-foreground font-mono">
 																{mIdx * 2 + 2}
 															</div>
 														)}
@@ -191,7 +190,7 @@ export function TournamentBracket({
 															{p2?.user?.username || "En attente"}
 														</span>
 													</div>
-													<span className="font-mono text-xs font-bold text-muted-foreground">-</span>
+													<span className="font-mono text-lg font-bold text-muted-foreground">-</span>
 												</div>
 											</div>
 										);
@@ -211,38 +210,37 @@ export function TournamentBracket({
 			<div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border shadow-xs">
 				<div className="flex items-center gap-2">
 					<span className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
-						<Swords className="w-4 h-4" />
+						<Swords className="w-6 h-6" />
 					</span>
 					<div>
-						<h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-							Arbre Officiel en Direct
+							<h4 className="text-lg font-bold text-foreground uppercase tracking-wider">
+							Arbre de compétition enregistré
 						</h4>
-						<p className="text-xs text-muted-foreground">
-							Cliquez sur une rencontre pour voir les manches jouées ou soumettre les scores.
+						<p className="text-lg text-muted-foreground">
+							{onSelectMatch ? "Ouvrez une rencontre pour voir les manches et les actions disponibles." : "Résultats enregistrés pour ce tournoi."}
 						</p>
 					</div>
 				</div>
 
-				<Badge variant="outline" className="border-emerald-500/40 text-emerald-400 text-xs gap-1.5">
-					<span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-					Arbre synchronisé
+				<Badge variant="outline" className="border-emerald-500/40 text-emerald-400 text-lg gap-1.5">
+					Matchs enregistrés
 				</Badge>
 			</div>
 
 			<div className="overflow-x-auto pb-6 pt-2">
-				<div className="flex items-stretch gap-8 min-w-[850px]">
+				<div className="flex flex-col sm:flex-row items-stretch gap-6 sm:gap-8 min-w-0 sm:min-w-[850px]">
 					{rounds.map((round, rIdx) => {
 						const title = getRoundTitle(rIdx, rounds.length);
 						const isFinal = rIdx === rounds.length - 1;
 
 						return (
 							<div key={round.roundId} className="flex-1 flex flex-col space-y-4">
-								<div className={`text-center font-bold text-xs uppercase tracking-wider py-2 px-3 rounded-xl border shadow-xs flex items-center justify-center gap-1.5 ${
+								<div className={`text-center font-bold text-lg uppercase tracking-wider py-2 px-3 rounded-xl border shadow-xs flex items-center justify-center gap-1.5 ${
 									isFinal
 										? "bg-amber-500/10 border-amber-500/30 text-amber-400"
 										: "bg-card border-border text-foreground"
 								}`}>
-									{isFinal && <Trophy className="w-3.5 h-3.5 text-amber-400" />}
+									{isFinal && <Trophy className="w-5 h-5 text-amber-400" />}
 									{title}
 								</div>
 
@@ -262,29 +260,38 @@ export function TournamentBracket({
 										const score2 = m.opponent2?.score ?? "-";
 
 										return (
-											<div
-												key={m.id}
-												onClick={() => onSelectMatch?.(m.id)}
-												className={`p-3.5 rounded-2xl border transition-all duration-200 shadow-xs relative cursor-pointer group ${
-													onSelectMatch ? "hover:border-primary/60 hover:shadow-md" : ""
+														<div
+															key={m.id}
+															onClick={() => onSelectMatch?.(m.id)}
+															onKeyDown={(event) => {
+																if (onSelectMatch && (event.key === "Enter" || event.key === " ")) {
+																	event.preventDefault();
+																	onSelectMatch(m.id);
+																}
+															}}
+															role={onSelectMatch ? "button" : undefined}
+															tabIndex={onSelectMatch ? 0 : undefined}
+															aria-label={onSelectMatch ? `Voir le match ${m.number ?? m.id} : ${opp1Info?.username ?? "participant en attente"} contre ${opp2Info?.username ?? "participant en attente"}` : undefined}
+															className={`p-3.5 min-h-11 rounded-2xl border transition-all duration-200 shadow-xs relative group focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+																onSelectMatch ? "hover:border-primary/60 hover:shadow-md" : ""
 												} bg-card border-border/80`}
 											>
 												<div className="space-y-2.5">
 													{/* Opponent 1 */}
-													<div className={`flex items-center justify-between gap-2 text-xs p-1.5 rounded-lg transition ${
+													<div className={`flex items-center justify-between gap-2 text-lg p-1.5 rounded-lg transition ${
 														isWon1 ? "bg-emerald-500/10 text-emerald-400 font-bold" : "text-foreground font-medium"
 													}`}>
 														<div className="flex items-center gap-2 truncate">
 															<UserAvatar
 																avatar={opp1Info?.avatar}
 																displayName={opp1Info?.username || "Joueur 1"}
-																className="w-5 h-5 shrink-0"
+																className="w-8 h-8 shrink-0"
 															/>
 															<span className="truncate">
 																{opp1Info?.username || (m.opponent1?.id != null ? `Participant #${m.opponent1.id}` : "En attente")}
 															</span>
 														</div>
-														<span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-muted/60">
+														<span className="font-mono text-lg font-bold px-1.5 py-0.5 rounded bg-muted/60">
 															{score1}
 														</span>
 													</div>
@@ -292,20 +299,20 @@ export function TournamentBracket({
 													<div className="border-t border-border/40" />
 
 													{/* Opponent 2 */}
-													<div className={`flex items-center justify-between gap-2 text-xs p-1.5 rounded-lg transition ${
+													<div className={`flex items-center justify-between gap-2 text-lg p-1.5 rounded-lg transition ${
 														isWon2 ? "bg-emerald-500/10 text-emerald-400 font-bold" : "text-foreground font-medium"
 													}`}>
 														<div className="flex items-center gap-2 truncate">
 															<UserAvatar
 																avatar={opp2Info?.avatar}
 																displayName={opp2Info?.username || "Joueur 2"}
-																className="w-5 h-5 shrink-0"
+																className="w-8 h-8 shrink-0"
 															/>
 															<span className="truncate">
 																{opp2Info?.username || (m.opponent2?.id != null ? `Participant #${m.opponent2.id}` : "En attente")}
 															</span>
 														</div>
-														<span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-muted/60">
+														<span className="font-mono text-lg font-bold px-1.5 py-0.5 rounded bg-muted/60">
 															{score2}
 														</span>
 													</div>
@@ -313,7 +320,7 @@ export function TournamentBracket({
 
 												{onSelectMatch && (
 													<div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition">
-														<ChevronRight className="w-3.5 h-3.5 text-primary" />
+														<ChevronRight className="w-5 h-5 text-primary" />
 													</div>
 												)}
 											</div>
