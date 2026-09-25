@@ -53,6 +53,7 @@ dans `.gitignore`.
 | [achillea-services.md](achillea-services.md) | Topologie, secrets hors Git, ports, sondes et contrat d'upload Supabase d'Achillea. |
 | [achillea-storage-migration.md](achillea-storage-migration.md) | Runbook sûr et reprenable pour migrer les octets Storage Cloud d'Achillea vers sa pile locale isolée. |
 | [achillea-modulaire.md](achillea-modulaire.md) | Architecture portable d'Achilléa : contrat, métier, client isomorphe, export Rust/Swift/Kotlin — et ce qu'il reste à faire pour migrer le front. |
+| [achillea-bracket-validation.md](achillea-bracket-validation.md) | Contrat des brackets et preuves à relever en session réelle, sans inventer de résultats. |
 | [achillea-migration-next.md](achillea-migration-next.md) | Plan de migration du front Achilléa (Angular) vers `apps/website` (Next) : routes, phases, gardes et risques. |
 
 ## Écosystème
