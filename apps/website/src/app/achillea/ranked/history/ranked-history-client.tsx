@@ -2,10 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import {
-	useAchilleaAuth,
-	createAchilleaClient,
-} from "@/lib/achillea";
+import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import { Sparkline } from "@/components/achillea/Sparkline";
 import { type RankedHistoryEntry, MatchMode } from "@rosegriffon/achillea-types";
@@ -22,7 +19,7 @@ import {
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
-	const { isAuthenticated, isLoading: authLoading, login } = useAchilleaAuth();
+	const { isAuthenticated, isLoading: authLoading, status: authStatus, login } = useAchilleaAuth();
 	const [mode, setMode] = useState<-1 | 2 | 4>(-1); // -1 = all, 2 = 1v1, 4 = 2v2
 	const [period, setPeriod] = useState<number>(0); // 0 = all, 7 = 7d, 30 = 30d
 	const [history, setHistory] = useState<RankedHistoryEntry[]>([]);
@@ -82,11 +79,12 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 	const stats = useMemo(() => {
 		const wins = filteredHistory.filter((m) => m.result === "win").length;
 		const losses = filteredHistory.filter((m) => m.result === "loss").length;
+		const draws = filteredHistory.filter((m) => m.result === "draw").length;
 		const forfeits = filteredHistory.filter((m) => m.result === "forfeit").length;
 		const total = filteredHistory.length;
 		const totalDelta = filteredHistory.reduce((acc, m) => acc + (m.eloDelta ?? 0), 0);
 		const winrate = total > 0 ? Math.round((wins / total) * 100) : 0;
-		return { wins, losses, forfeits, total, totalDelta, winrate };
+		return { wins, losses, draws, forfeits, total, totalDelta, winrate };
 	}, [filteredHistory]);
 
 	// Sparkline data (in chronological order, so reversed from history DESC)
@@ -115,7 +113,7 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 				<div className="space-y-1">
 					<Link
 						href="/achillea/ranked"
-						className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition mb-1"
+						className="inline-flex items-center gap-1.5 text-lg text-muted-foreground hover:text-foreground transition mb-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 					>
 						<ArrowLeft className="w-3.5 h-3.5" />
 						Retour au hub classé
@@ -124,69 +122,99 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 						<span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
 							<History className="w-5 h-5" />
 						</span>
-						<h1 className="text-3xl font-bold tracking-tight">{playerId ? "Historique public des matchs" : "Historique de mes matchs"}</h1>
+						<h1 className="text-3xl font-bold tracking-tight">
+							{playerId ? "Historique public des matchs" : "Historique de mes matchs"}
+						</h1>
 					</div>
-					<p className="text-sm text-muted-foreground">
-						{playerId ? "Consultez les résultats classés publics de ce joueur." : "Consultez le bilan de vos rencontres classées, vos scores et vos variations d'AP."}
+					<p className="text-lg text-muted-foreground">
+						{playerId
+							? "Consultez les résultats classés publics de ce joueur."
+							: "Consultez le bilan de vos rencontres classées, vos scores et vos variations d'AP."}
 					</p>
 				</div>
 
 				{/* Filters */}
 				<div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
-					<div className="flex items-center p-1 bg-muted rounded-lg">
+					<div
+						role="group"
+						aria-label="Mode des matchs"
+						className="flex items-center p-1 bg-muted rounded-lg"
+					>
 						<button
 							type="button"
+							aria-pressed={mode === -1}
 							onClick={() => setMode(-1)}
-							className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-								mode === -1 ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+								mode === -1
+									? "bg-primary text-primary-foreground shadow-sm"
+									: "text-muted-foreground hover:text-foreground"
 							}`}
 						>
 							Tous
 						</button>
 						<button
 							type="button"
+							aria-pressed={mode === 2}
 							onClick={() => setMode(2)}
-							className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-								mode === 2 ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+								mode === 2
+									? "bg-primary text-primary-foreground shadow-sm"
+									: "text-muted-foreground hover:text-foreground"
 							}`}
 						>
 							1v1
 						</button>
 						<button
 							type="button"
+							aria-pressed={mode === 4}
 							onClick={() => setMode(4)}
-							className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-								mode === 4 ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+								mode === 4
+									? "bg-primary text-primary-foreground shadow-sm"
+									: "text-muted-foreground hover:text-foreground"
 							}`}
 						>
 							2v2
 						</button>
 					</div>
 
-					<div className="flex items-center p-1 bg-muted rounded-lg">
+					<div
+						role="group"
+						aria-label="Période des matchs"
+						className="flex items-center p-1 bg-muted rounded-lg"
+					>
 						<button
 							type="button"
+							aria-pressed={period === 7}
 							onClick={() => setPeriod(7)}
-							className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-								period === 7 ? "bg-secondary text-secondary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+								period === 7
+									? "bg-secondary text-secondary-foreground shadow-sm"
+									: "text-muted-foreground hover:text-foreground"
 							}`}
 						>
 							7 jours
 						</button>
 						<button
 							type="button"
+							aria-pressed={period === 30}
 							onClick={() => setPeriod(30)}
-							className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-								period === 30 ? "bg-secondary text-secondary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+								period === 30
+									? "bg-secondary text-secondary-foreground shadow-sm"
+									: "text-muted-foreground hover:text-foreground"
 							}`}
 						>
 							30 jours
 						</button>
 						<button
 							type="button"
+							aria-pressed={period === 0}
 							onClick={() => setPeriod(0)}
-							className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-								period === 0 ? "bg-secondary text-secondary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
+								period === 0
+									? "bg-secondary text-secondary-foreground shadow-sm"
+									: "text-muted-foreground hover:text-foreground"
 							}`}
 						>
 							Tout
@@ -201,14 +229,32 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 			 * un joueur pourtant connecté.
 			 */}
 			{authLoading && !playerId ? (
-				<div className="py-20 text-center text-sm text-muted-foreground">
+				<div className="py-20 text-center text-lg text-muted-foreground">
 					Vérification de la session…
+				</div>
+			) : authStatus === "error" && !playerId ? (
+				<div
+					role="alert"
+					className="p-8 border border-destructive bg-card rounded-2xl text-center space-y-4"
+				>
+					<h2 className="text-xl font-bold">Session momentanément indisponible</h2>
+					<p className="text-lg text-muted-foreground">
+						Le service de connexion ne répond pas. Réessayez pour consulter votre historique
+						personnel.
+					</p>
+					<button
+						type="button"
+						onClick={() => window.location.reload()}
+						className="px-6 py-2.5 bg-primary text-primary-foreground text-lg font-semibold rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+					>
+						Réessayer
+					</button>
 				</div>
 			) : !isAuthenticated && !playerId ? (
 				<div className="p-8 border border-border bg-card rounded-2xl text-center space-y-4">
 					<ShieldAlert className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
 					<h2 className="text-xl font-bold">Connexion requise</h2>
-					<p className="text-sm text-muted-foreground max-w-md mx-auto">
+					<p className="text-lg text-muted-foreground max-w-md mx-auto">
 						Connectez-vous pour consulter votre historique personnel de matchs classés.
 					</p>
 					<button
@@ -222,31 +268,37 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 			) : loading ? (
 				<div className="py-20 text-center space-y-3">
 					<Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
-					<p className="text-sm text-muted-foreground">Chargement de votre historique...</p>
+					<p className="text-lg text-muted-foreground">Chargement de votre historique...</p>
 				</div>
 			) : error ? (
-				<div role="alert" className="border border-rose-500/30 rounded-2xl p-8 text-center text-sm text-rose-400">{error}</div>
+				<div
+					role="alert"
+					className="border border-rose-500/30 rounded-2xl p-8 text-center text-lg text-rose-400"
+				>
+					{error}
+				</div>
 			) : (
 				<>
 					{/* Performance summary card */}
 					<div className="border border-border bg-card rounded-2xl p-6 shadow-sm space-y-4">
 						<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/60 pb-4">
 							<div className="space-y-1">
-								<h3 className="font-bold text-sm">Bilan de la période</h3>
-								<div className="text-xs text-muted-foreground">
-									{stats.total} match{stats.total > 1 ? "s" : ""} enregistré{stats.total > 1 ? "s" : ""}
+								<h3 className="font-bold text-lg">Bilan de la période</h3>
+								<div className="text-lg text-muted-foreground">
+									{stats.total} match{stats.total > 1 ? "s" : ""} enregistré
+									{stats.total > 1 ? "s" : ""}
 								</div>
 							</div>
 
 							<div className="flex items-center gap-2">
-								<span className="text-xs text-muted-foreground">Bilan AP :</span>
+								<span className="text-lg text-muted-foreground">Bilan AP :</span>
 								<span
-									className={`px-2.5 py-0.5 rounded-full font-mono font-bold text-xs ${
+									className={`px-2.5 py-0.5 rounded-full font-mono font-bold text-lg ${
 										stats.totalDelta > 0
 											? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
 											: stats.totalDelta < 0
-											? "bg-rose-500/10 text-rose-400 border border-rose-500/30"
-											: "bg-muted text-muted-foreground"
+												? "bg-rose-500/10 text-rose-400 border border-rose-500/30"
+												: "bg-muted text-muted-foreground"
 									}`}
 								>
 									{stats.totalDelta > 0 ? `+${stats.totalDelta}` : stats.totalDelta} AP
@@ -254,7 +306,7 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 							</div>
 						</div>
 
-						<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+						<div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-lg">
 							<div className="p-3 rounded-xl bg-background/60 border border-border">
 								<div className="text-muted-foreground">Victoires</div>
 								<div className="text-lg font-bold text-emerald-400">{stats.wins}</div>
@@ -262,6 +314,10 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 							<div className="p-3 rounded-xl bg-background/60 border border-border">
 								<div className="text-muted-foreground">Défaites</div>
 								<div className="text-lg font-bold text-rose-400">{stats.losses}</div>
+							</div>
+							<div className="p-3 rounded-xl bg-background/60 border border-border">
+								<div className="text-muted-foreground">Nuls</div>
+								<div className="text-lg font-bold text-sky-400">{stats.draws}</div>
 							</div>
 							<div className="p-3 rounded-xl bg-background/60 border border-border">
 								<div className="text-muted-foreground">Forfaits</div>
@@ -274,7 +330,7 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 						</div>
 
 						{sparklineData.length > 1 && (
-							<div className="pt-2 flex items-center justify-between border-t border-border/50 text-xs text-muted-foreground">
+							<div className="pt-2 flex items-center justify-between border-t border-border/50 text-lg text-muted-foreground">
 								<span>Évolution des deltas récents</span>
 								<Sparkline data={sparklineData} width={180} height={32} />
 							</div>
@@ -283,10 +339,10 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 
 					{/* History list */}
 					{filteredHistory.length === 0 ? (
-						<div className="border border-dashed border-border rounded-2xl p-12 text-center text-muted-foreground text-sm space-y-2">
+						<div className="border border-dashed border-border rounded-2xl p-12 text-center text-muted-foreground text-lg space-y-2">
 							<Calendar className="w-8 h-8 mx-auto opacity-50 mb-2" />
 							<p className="font-semibold">Aucun match joué sur cette période.</p>
-							<p className="text-xs">
+							<p className="text-lg">
 								Lancez une recherche classée depuis le hub pour commencer à marquer des points !
 							</p>
 						</div>
@@ -294,6 +350,7 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 						<div className="space-y-3">
 							{filteredHistory.map((match) => {
 								const isWin = match.result === "win";
+								const isDraw = match.result === "draw";
 								const isForfeit = match.result === "forfeit";
 								const delta = match.eloDelta ?? 0;
 
@@ -308,6 +365,10 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 												<div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
 													<CheckCircle2 className="w-5 h-5" />
 												</div>
+											) : isDraw ? (
+												<div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0">
+													<History className="w-5 h-5" />
+												</div>
 											) : isForfeit ? (
 												<div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
 													<AlertTriangle className="w-5 h-5" />
@@ -321,21 +382,29 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 											<div>
 												<div className="flex items-center gap-2">
 													<span
-														className={`text-xs font-bold uppercase ${
+														className={`text-lg font-bold uppercase ${
 															isWin
 																? "text-emerald-400"
-																: isForfeit
-																? "text-amber-400"
-																: "text-rose-400"
+																: isDraw
+																	? "text-sky-400"
+																	: isForfeit
+																		? "text-amber-400"
+																		: "text-rose-400"
 														}`}
 													>
-														{isWin ? "Victoire" : isForfeit ? "Forfait" : "Défaite"}
+														{isWin
+															? "Victoire"
+															: isDraw
+																? "Match nul"
+																: isForfeit
+																	? "Forfait"
+																	: "Défaite"}
 													</span>
-													<span className="px-1.5 py-0.5 rounded text-[10px] bg-muted text-muted-foreground font-mono">
+													<span className="px-1.5 py-0.5 rounded text-lg bg-muted text-muted-foreground font-mono">
 														{match.mode === MatchMode.ONE_VS_ONE ? "1v1" : "2v2"}
 													</span>
 												</div>
-												<div className="text-[11px] text-muted-foreground mt-0.5">
+												<div className="text-lg text-muted-foreground mt-0.5">
 													{formatDate(match.endedAt)}
 												</div>
 											</div>
@@ -344,33 +413,35 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 										{/* Opponent & Score */}
 										<div className="flex items-center justify-between sm:justify-end gap-6 flex-1">
 											<div className="flex items-center gap-2">
-												<span className="text-xs text-muted-foreground hidden sm:inline">vs</span>
+												<span className="text-lg text-muted-foreground hidden sm:inline">vs</span>
 												<Link
 													href={`/achillea/users/${match.opponent.userId}`}
-													className="flex items-center gap-2 text-xs font-semibold hover:text-primary transition"
+													className="flex items-center gap-2 text-lg font-semibold hover:text-primary transition"
 												>
 													<UserAvatar
 														avatar={match.opponent.avatar}
 														displayName={match.opponent.displayName}
 														className="w-6 h-6"
 													/>
-													<span className="truncate max-w-[120px]">{match.opponent.displayName}</span>
+													<span className="truncate max-w-[120px]">
+														{match.opponent.displayName}
+													</span>
 												</Link>
 											</div>
 
 											{/* Score */}
-											<div className="font-mono font-bold text-sm bg-background border border-border px-3 py-1 rounded-lg">
+											<div className="font-mono font-bold text-lg bg-background border border-border px-3 py-1 rounded-lg">
 												{match.myScore} - {match.opponentScore}
 											</div>
 
 											{/* Delta AP */}
 											<div
-												className={`w-20 text-right font-mono font-bold text-sm ${
+												className={`w-20 text-right font-mono font-bold text-lg ${
 													delta > 0
 														? "text-emerald-400"
 														: delta < 0
-														? "text-rose-400"
-														: "text-muted-foreground"
+															? "text-rose-400"
+															: "text-muted-foreground"
 												}`}
 											>
 												{delta > 0 ? `+${delta}` : delta} AP

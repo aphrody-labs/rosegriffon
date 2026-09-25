@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { safeReturnUrl } from "./auth-session";
+import { failedIdentityStatus } from "./auth-status";
 import { createAchilleaClient } from "./client";
 
 export type AchilleaAuthStatus =
@@ -78,7 +79,7 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 				return true;
 			}
 			setUser(null);
-			setStatus("anonymous");
+			setStatus(failedIdentityStatus(res));
 			return false;
 		},
 		[],

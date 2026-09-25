@@ -112,6 +112,17 @@ export async function tournamentSummary(db: Kysely<Database>, tournamentId: numb
 	const matches = await rawMatches(db, tournamentId);
 	const participants = await db.selectFrom("tournament_participant as p").innerJoin("user as u", "u.id", "p.user_id").select(["p.bracket_participant_id", "p.user_id", "u.display_name", "u.avatar"]).where("p.tournament_id", "=", tournamentId).execute();
 	const users = new Map(participants.filter((p) => p.bracket_participant_id != null).map((p) => [Number(p.bracket_participant_id), p]));
+	const goalsByUser = new Map<string, { scored: number; conceded: number }>();
+	for (const match of matches) {
+		for (const [participantId, scored, conceded] of [[match.opponent1Id, match.score1, match.score2], [match.opponent2Id, match.score2, match.score1]]) {
+			const userId = users.get(participantId)?.user_id;
+			if (!userId) continue;
+			const goals = goalsByUser.get(userId) ?? { scored: 0, conceded: 0 };
+			goals.scored += scored;
+			goals.conceded += conceded;
+			goalsByUser.set(userId, goals);
+		}
+	}
 	const stats = matches.length ? (() => {
 		const goals = matches.reduce((n, m) => n + m.score1 + m.score2, 0); const margins = matches.map((m) => Math.abs(m.score1 - m.score2));
 		const matchup = (m: RawMatch | undefined, max = false) => { if (!m) return null; const a = m.score1 >= m.score2 ? [m.opponent1Id, m.score1, m.score2, m.opponent2Id] : [m.opponent2Id, m.score2, m.score1, m.opponent1Id]; const w = users.get(a[0] as number); const l = users.get(a[3] as number); return w && l ? { winnerDisplayName: w.display_name, winnerAvatar: w.avatar ?? "", loserDisplayName: l.display_name, loserAvatar: l.avatar ?? "", scoreWinner: a[1], scoreLoser: a[2] } : null; };
@@ -121,7 +132,7 @@ export async function tournamentSummary(db: Kysely<Database>, tournamentId: numb
 	try {
 		const standings = await finalTournamentStandings(db, tournamentId); const ids = standings.map((s) => s.userId);
 		const rows = ids.length ? await db.selectFrom("user").select(["id", "display_name", "avatar"]).where("id", "in", ids).execute() : []; const byId = new Map(rows.map((u) => [u.id, u]));
-		top10 = standings.filter((s) => s.rank <= 10).map((s) => { const u = byId.get(s.userId); if (!u) return null; const points = circuitPointsForRank(Number(tournament.participants_number ?? 0), s.rank); return { rank: s.rank, rankLabel: denseRankToTier(s.rank).label, userId: u.id, displayName: u.display_name, avatar: u.avatar ?? "", clan: null, points, tier: circuitPointsToTier(points).key, goalsScored: 0, goalsConceded: 0, goalAverage: 0 }; }).filter(Boolean);
+		top10 = standings.filter((s) => s.rank <= 10).map((s) => { const u = byId.get(s.userId); if (!u) return null; const points = circuitPointsForRank(Number(tournament.participants_number ?? 0), s.rank); const goals = goalsByUser.get(u.id) ?? { scored: 0, conceded: 0 }; return { rank: s.rank, rankLabel: denseRankToTier(s.rank).label, userId: u.id, displayName: u.display_name, avatar: u.avatar ?? "", clan: null, points, tier: circuitPointsToTier(points).key, goalsScored: goals.scored, goalsConceded: goals.conceded, goalAverage: goals.conceded ? Math.round(goals.scored / goals.conceded * 100) / 100 : goals.scored }; }).filter(Boolean);
 	} catch { /* unfinished bracket */ }
 	return { top10, stats };
 }
@@ -134,7 +145,7 @@ export async function playerCircuitProfile(db: Kysely<Database>, userId: string)
 	const history: unknown[] = [];
 	for (const p of participations) {
 		let rank: number | null = null; let tournamentPoints = 0; let rankLabel = "—";
-		try { const standing = (await finalTournamentStandings(db, p.tournament_id)).find((s) => s.userId === userId); if (standing) { rank = standing.rank; rankLabel = denseRankToTier(rank).label; tournamentPoints = circuitPointsForRank(Number(p.participants_number ?? 0), rank); points += tournamentPoints; bestRank = Math.min(bestRank, rank); if (rank === 1) wins++; if (rank <= 2) podiums++; if (rank <= 4) top4++; if (rank <= 8) top8++; } } catch {}
+		try { const standing = (await finalTournamentStandings(db, p.tournament_id)).find((s) => s.userId === userId); if (standing) { rank = standing.rank; const rankTier = denseRankToTier(rank); rankLabel = rankTier.label; tournamentPoints = circuitPointsForRank(Number(p.participants_number ?? 0), rank); points += tournamentPoints; bestRank = Math.min(bestRank, rank); if (rank === 1) wins++; if (rank <= 2) podiums++; if (rankTier.hi <= 4) top4++; if (rankTier.hi <= 8) top8++; } } catch {}
 		const matches = await rawMatches(db, p.tournament_id); let streak = 0; let gs = 0, gc = 0;
 		for (const m of matches) { const side = Number(p.bracket_participant_id) === m.opponent1Id ? [m.score1, m.score2] : Number(p.bracket_participant_id) === m.opponent2Id ? [m.score2, m.score1] : null; if (!side) continue; gs += side[0]; gc += side[1]; if (side[0] > side[1]) { streak++; bestStreak = Math.max(bestStreak, streak); } else if (side[0] !== side[1]) streak = 0; }
 		goalsScored += gs; goalsConceded += gc; history.push({ tournamentId: p.tournament_id, tournamentName: p.name, grandFinalAt: p.grand_final_at, size: Number(p.participants_number ?? 0), rank, rankLabel, points: tournamentPoints, tier: circuitPointsToTier(tournamentPoints).key, goalsScored: gs, goalsConceded: gc });
