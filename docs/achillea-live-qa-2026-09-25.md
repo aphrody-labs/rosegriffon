@@ -99,3 +99,27 @@ service a écrit 7 agrégats horaires couvrant 7 hôtes et 1 112 requêtes,
 Le clic admin sur la tâche `stats:achillea` répondait encore 400 car son nom
 encodé (`%3A`) n'était pas décodé par le routeur cron. Ce défaut a été corrigé
 en source mais doit être retesté après déploiement de la prochaine release.
+
+### Parcours complémentaire en session connectée
+
+29 routes statiques Achilléa distinctes ont été ouvertes dans Chrome connecté
+après `cc06f11` : accueil ; trois pages `admins` ; `casts` ; `clans`, création
+et dashboard ; création/liste des événements ; guide et brand kit ; les quatre
+routes Astral/Asytral ; licence ; création/validation d'organisation ; hub,
+historique, leaderboard, match et paliers ranked ; liste, création et classement
+des tournois ; portefeuille et page d'accès refusé. Chaque navigation a rendu
+un titre de page et aucun écran d'erreur inattendue n'a été détecté dans
+l'arbre DOM. Ce balayage vérifie seulement le chargement initial : les routes
+dynamiques, permissions par rôle, actions de formulaire, mutations et états
+ réseau de ces pages restent dans la matrice « à tester ».
+
+## Validation de la release `6e7401c`
+
+Le bouton « Audience des sites RG » de `/admin/cron` a répondu « démarrée »
+en session administrateur, et le journal du démon confirme la fin de
+`stats:achillea` en 27 ms sans erreur. Le SQLite partagé contenait ensuite
+7 agrégats horaires, 2 475 requêtes et `complete=1`; les deux résumés OAuth
+et télémétrie existaient dans Redis. Le miroir Discord portait `rg` : 2 guildes,
+5 115 membres complets ; `current` : 58 guildes, membres incomplets ; `legacy` :
+4 guildes, membres incomplets. Les cinq services et la release `6e7401c`
+étaient actifs sur le VPS.
