@@ -58,7 +58,7 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
 				<div className="space-y-1">
 					<Link
 						href="/achillea/ranked"
-						className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition mb-1"
+						className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-lg text-muted-foreground hover:text-foreground transition mb-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 					>
 						<ArrowLeft className="w-3.5 h-3.5" />
 						Retour au hub classé
@@ -69,7 +69,7 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
 						</span>
 						<h1 className="text-3xl font-bold tracking-tight">Paliers Compétitifs</h1>
 					</div>
-					<p className="text-sm text-muted-foreground">
+					<p className="text-lg text-muted-foreground">
 						Découvrez les 11 échelons du classement Achilléa, les seuils d'AP et la répartition des compétiteurs.
 					</p>
 				</div>
@@ -78,8 +78,9 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
 				<div className="flex items-center p-1 bg-muted rounded-lg self-start sm:self-auto">
 					<button
 						type="button"
+						aria-pressed={mode === 2}
 						onClick={() => setMode(2)}
-						className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
+						className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 							mode === 2
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
@@ -89,8 +90,9 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
 					</button>
 					<button
 						type="button"
+						aria-pressed={mode === 4}
 						onClick={() => setMode(4)}
-						className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
+						className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
 							mode === 4
 								? "bg-primary text-primary-foreground shadow-sm"
 								: "text-muted-foreground hover:text-foreground"
@@ -106,14 +108,14 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<TrendingUp className="w-4 h-4 text-primary" />
-						<h3 className="font-semibold text-sm">Répartition globale des joueurs</h3>
+						<h3 className="font-semibold text-lg">Répartition globale des joueurs</h3>
 					</div>
-					<span className="text-xs text-muted-foreground">
+					<span className="text-lg text-muted-foreground">
 						{totalPlayers > 0 ? `${totalPlayers} compétiteurs actifs` : "Saison active"}
 					</span>
 				</div>
-				{loading && tiers.length === 0 ? <p className="text-sm text-muted-foreground">Chargement des paliers…</p> : error && tiers.length === 0 ? <p role="alert" className="text-sm text-rose-400">{error}</p> : <TierDistribution tiers={tiers} />}
-				{error && tiers.length > 0 && <p role="status" className="text-xs text-amber-400">{error} Les dernières données chargées restent affichées.</p>}
+				{loading && tiers.length === 0 ? <p role="status" className="text-lg text-muted-foreground">Chargement des paliers…</p> : error && tiers.length === 0 ? <p role="alert" className="text-lg text-rose-400">{error}</p> : <TierDistribution tiers={tiers} />}
+				{error && tiers.length > 0 && <p role="status" className="text-lg text-amber-400">{error} Les dernières données chargées restent affichées.</p>}
 			</div>
 
 			{/* Tiers Grid */}
@@ -155,16 +157,16 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
 								<div className="space-y-1 flex-1 min-w-0">
 									<div className="flex items-center justify-between gap-2">
 										<h4 className="font-bold text-base truncate">{tier.key}</h4>
-										<span className="text-xs font-mono font-bold text-amber-400">
+										<span className="text-lg font-mono font-bold text-amber-400">
 											{tier.minElo} {tier.maxElo < 9000 ? `- ${tier.maxElo}` : "+"} AP
 										</span>
 									</div>
 
-									<p className="text-xs text-muted-foreground">
+									<p className="text-lg text-muted-foreground">
 										Palier {idx + 1} sur 11
 									</p>
 
-									<div className="flex items-center justify-between text-[11px] pt-2 border-t border-border/60 text-muted-foreground">
+									<div className="flex items-center justify-between gap-3 text-lg pt-2 border-t border-border/60 text-muted-foreground">
 										<span>{tier.playerCount} joueurs</span>
 										<span className="font-semibold text-foreground">{pct}% de l'effectif</span>
 									</div>
@@ -176,8 +178,8 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
 			</div>}
 
 			{/* Progression note */}
-			<div className="p-6 rounded-2xl bg-muted/30 border border-border space-y-2 text-xs text-muted-foreground">
-				<h4 className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+			<div className="p-6 rounded-2xl bg-muted/30 border border-border space-y-2 text-lg text-muted-foreground">
+				<h4 className="font-semibold text-foreground text-lg flex items-center gap-1.5">
 					<Sparkles className="w-4 h-4 text-amber-400" />
 					Règles du système d'AP (Achilléa Points)
 				</h4>

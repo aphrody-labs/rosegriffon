@@ -16,10 +16,11 @@ export function TierDistribution({
 	const total = tiers.reduce((acc, t) => acc + (t.playerCount ?? 0), 0);
 	const maxCount = Math.max(1, ...tiers.map((t) => t.playerCount ?? 0));
 
-	if (!tiers.length || total === 0) return null;
+	if (!tiers.length) return <p role="status" className="text-lg text-on-surface-variant">Répartition des paliers indisponible.</p>;
 
 	const percent = (count: number) => {
 		if (maxCount === 0) return 0;
+		if (count === 0) return 0;
 		return Math.max(2, Math.round((count / maxCount) * 100));
 	};
 
@@ -36,21 +37,24 @@ export function TierDistribution({
 	};
 
 	return (
-		<div className={`flex flex-col gap-1.5 ${className ?? ""}`}>
+		<div className={`flex flex-col gap-3 ${className ?? ""}`} role="list" aria-label="Répartition des joueurs par palier">
+			{total === 0 && <p role="status" className="text-lg text-on-surface-variant">Aucun joueur classé dans ces paliers pour le moment.</p>}
 			{tiers.map((t) => {
 				const isMine = t.key === highlightKey;
 				return (
 					<div
 						key={t.key}
-						className={`flex items-center gap-2 transition-all ${
+						role="listitem"
+						aria-label={`${t.key} : ${t.playerCount ?? 0} joueur${(t.playerCount ?? 0) > 1 ? "s" : ""}, ${percentLabel(t.playerCount ?? 0)} %`}
+						className={`flex items-center gap-3 transition-all text-lg ${
 							isMine ? "font-bold text-primary" : "text-on-surface"
 						}`}
 					>
-						<div className="w-24 md:w-28 text-xs md:text-sm text-right truncate">
+						<div className="w-28 md:w-36 text-right break-words">
 							{t.key}
 						</div>
 						<div
-							className={`flex-1 relative h-5 rounded-full overflow-hidden bg-surface-variant ${
+							className={`flex-1 relative h-7 rounded-full overflow-hidden bg-surface-variant ${
 								isMine ? "ring-2 ring-primary ring-offset-1" : ""
 							}`}
 						>
@@ -62,7 +66,7 @@ export function TierDistribution({
 								}}
 							/>
 						</div>
-						<div className="text-xs font-mono w-20 md:w-24 text-right tabular-nums opacity-80">
+						<div className="font-mono w-28 md:w-32 text-right tabular-nums">
 							{t.playerCount ?? 0}
 							<span className="opacity-60 ml-1">
 								({percentLabel(t.playerCount ?? 0)}%)
