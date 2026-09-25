@@ -55,7 +55,7 @@ export default function AchilleaLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="achillea-scope min-h-full">
+		<div className="achillea-scope min-h-full w-full min-w-0">
 			{/*
 			 * PLUS DE SECONDE BARRE.
 			 *
@@ -68,7 +68,7 @@ export default function AchilleaLayout({
 			 * Le menu latéral ouvre son groupe « E-sport » dès qu'on est sous
 			 * `/achillea/**` : la navigation du domaine est là, une seule fois.
 			 */}
-			{children}
+			<div className="achillea-shell">{children}</div>
 		</div>
 	);
 }
