@@ -7,6 +7,7 @@ import {
 	construireNavigationUnifiee,
 	estItemActif,
 	estRouteActive,
+	filtrerNavigation,
 	itemsDeNavigation,
 	parcourirNav,
 	type NavItem,
@@ -120,6 +121,35 @@ describe("cheminsCliquables", () => {
 				expect(chemin.startsWith("/")).toBe(true);
 			}
 		}
+	});
+});
+
+describe("visibilité des destinations Achilléa", () => {
+	test("retire récursivement les espaces réservés sans cacher les lectures publiques", () => {
+		const esport = construireNavigationUnifiee().find((groupe) => groupe.domaine === "esport")?.item;
+		expect(esport).toBeDefined();
+
+		const publicNav = filtrerNavigation([esport!], (item) => !item.access);
+		const paths = cheminsCliquables(publicNav);
+		expect(paths).toContain("/achillea/ranked/leaderboard");
+		expect(paths).toContain("/achillea/ranked/tiers");
+		expect(paths).toContain("/achillea/tournaments");
+		expect(paths).toContain("/achillea/tournaments/circuit/ranking");
+		expect(paths).not.toContain("/achillea/ranked/history");
+		expect(paths).not.toContain("/achillea/admins/dashboard");
+		expect(paths).not.toContain("/achillea/clans/dashboard");
+	});
+
+	test("conserve les destinations d'un modérateur sans exposer celles d'un administrateur", () => {
+		const esport = construireNavigationUnifiee().find((groupe) => groupe.domaine === "esport")?.item;
+		const moderatorNav = filtrerNavigation([esport!], (item) => {
+			const access = item.access;
+			return !access || (access.minimumAchilleaRole ?? 0) <= 1;
+		});
+		const paths = cheminsCliquables(moderatorNav);
+		expect(paths).toContain("/achillea/admins/dashboard");
+		expect(paths).not.toContain("/achillea/admins/sanctions");
+		expect(paths).not.toContain("/achillea/organizations/validate");
 	});
 });
 

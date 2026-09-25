@@ -22,6 +22,7 @@ import {
 } from "@rosegriffon/ui";
 import {
 	domaineDeLaRoute,
+	filtrerNavigation,
 	itemsDeNavigation,
 	estItemActif,
 	type Domaine,
@@ -33,6 +34,8 @@ import { traduireNav } from "../lib/translations";
 export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 	items?: NavItem[];
 	isAdmin?: boolean;
+	/** Filtre récursif des destinations selon la session de l'application hôte. */
+	canView?: (item: NavItem) => boolean;
 	t?: (key: string) => string;
 	renderIcon?: (item: NavItem) => React.ReactNode;
 	headerSlot?: React.ReactNode;
@@ -432,6 +435,7 @@ function RecursiveNavItem({
 export function AppSidebar({
 	items,
 	isAdmin = false,
+	canView,
 	t,
 	renderIcon,
 	headerSlot,
@@ -449,9 +453,10 @@ export function AppSidebar({
 		setMounted(true);
 	}, []);
 
-	const filteredNavItems = resolvedNavItems.filter(
-		(item) => !item.adminOnly || (mounted && isAdmin)
-	);
+	const filteredNavItems = filtrerNavigation(resolvedNavItems, (item) => {
+		if (item.adminOnly && !(mounted && isAdmin)) return false;
+		return canView?.(item) ?? true;
+	});
 
 	const defaultHeader = <SidebarUniverseHeader pathname={pathname} isCollapsed={isCollapsed} />;
 

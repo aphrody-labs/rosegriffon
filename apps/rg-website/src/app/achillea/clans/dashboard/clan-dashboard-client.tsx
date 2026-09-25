@@ -27,6 +27,8 @@ import { signalerException } from "@/lib/achillea/signaler";
 
 export default function ClanDashboardPage() {
 	const { user, isAuthenticated, login, isLoading: authLoading } = useAchilleaAuth();
+	const [clanRole, setClanRole] = useState<number | null>(null);
+	const [roleLoading, setRoleLoading] = useState<boolean>(true);
 
 	const [clan, setClan] = useState<ClanDTO | null>(null);
 	const [members, setMembers] = useState<ClanMemberDTO[]>([]);
@@ -48,6 +50,36 @@ export default function ClanDashboardPage() {
 
 	useEffect(() => {
 		if (!isAuthenticated) {
+			setClanRole(null);
+			setRoleLoading(false);
+			return;
+		}
+
+		let cancelled = false;
+		setRoleLoading(true);
+		void createAchilleaClient({ credentials: "include" }).clans
+			.myRole()
+			.then((result) => {
+				if (!cancelled) {
+					setClanRole(result.ok ? result.value.role : null);
+					setRoleLoading(false);
+				}
+			})
+			.catch(() => {
+				if (!cancelled) {
+					setClanRole(null);
+					setRoleLoading(false);
+				}
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [isAuthenticated, user?.id]);
+
+	const canManageClan = clanRole !== null && clanRole >= 2;
+
+	useEffect(() => {
+		if (!isAuthenticated || !canManageClan || !user?.clanId) {
 			setLoading(false);
 			return;
 		}
@@ -56,13 +88,14 @@ export default function ClanDashboardPage() {
 		setLoading(true);
 		const client = createAchilleaClient({ credentials: "include" });
 
-		// Fetch user clan and data
+		// Le tableau de bord doit charger le clan de la session, jamais le premier
+		// résultat de l'annuaire public (qui pouvait montrer le mauvais clan).
 		client.clans
-			.list({ page: 1, pagination: 1 })
+			.get(user.clanId)
 			.then(async (res) => {
 				if (cancelled) return;
-				if (res.ok && res.value.data.length > 0) {
-					const myClan = res.value.data[0];
+				if (res.ok) {
+					const myClan = res.value;
 					setClan(myClan);
 					setBio(myClan.clanBiography || "");
 					setIsRecruiting(myClan.isRecruiting);
@@ -89,7 +122,7 @@ export default function ClanDashboardPage() {
 		return () => {
 			cancelled = true;
 		};
-	}, [isAuthenticated]);
+	}, [canManageClan, isAuthenticated, user?.clanId]);
 
 	const handleSaveSettings = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -169,7 +202,7 @@ export default function ClanDashboardPage() {
 	 * chargement — c'est ce qui donne l'impression qu'Achilléa refuse l'accès.
 	 * Les pages d'administration attendaient déjà, celles-ci non.
 	 */
-	if (authLoading) {
+	if (authLoading || roleLoading) {
 		return (
 			<div className="max-w-md mx-auto px-4 py-20 text-center text-sm text-muted-foreground">
 				Vérification de la session…
@@ -192,6 +225,24 @@ export default function ClanDashboardPage() {
 				>
 					Se connecter
 				</button>
+			</div>
+		);
+	}
+
+	if (!canManageClan) {
+		return (
+			<div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
+				<ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+				<h2 className="text-xl font-bold">Accès réservé aux officiers</h2>
+				<p className="text-sm text-muted-foreground">
+					Seuls les vice-présidents et présidents de clan peuvent gérer cet espace.
+				</p>
+				<Link
+					href="/achillea/clans"
+					className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition shadow-sm text-xs"
+				>
+					Voir l&apos;annuaire des clans
+				</Link>
 			</div>
 		);
 	}

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarInset, SidebarProvider, Toaster, useBreakpoint } from "@rosegriffon/ui";
-import { ThemeToggle, domaineDeLaRoute } from "@rosegriffon/app-shell";
+import { ThemeToggle, domaineDeLaRoute, type NavItem } from "@rosegriffon/app-shell";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
 
 /** Largeur de la sidebar desktop — source unique (CSS var + décalage du bouton). */
@@ -28,7 +28,7 @@ import {
 } from "@/components/providers/language-provider";
 import { ProfileProvider, useProfile } from "@/contexts/profile-context";
 import { ThemeProvider } from "@/contexts/theme-context";
-import { AchilleaAuthProvider } from "@/lib/achillea";
+import { AchilleaAuthProvider, createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
 import { Providers } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar-store";
@@ -141,9 +141,62 @@ function RoutedHeader({
 	);
 }
 
+/**
+ * Le menu est une aide de parcours, jamais un contrôle d'accès : les routes et
+ * mutations Achilléa conservent leur vérification côté API. Cette lecture de
+ * `/clans/role` sert uniquement à proposer le tableau de bord aux officiers
+ * réellement reconnus par la base, sans confondre « joueur connecté » et
+ * « chef de clan ».
+ */
+function useAchilleaNavigationVisibility(pathname: string) {
+	const { user, isAuthenticated } = useAchilleaAuth();
+	const [clanRole, setClanRole] = useState<number | null>(null);
+	const isEsport = domaineDeLaRoute(pathname) === "esport";
+
+	useEffect(() => {
+		if (!isEsport || !isAuthenticated) {
+			setClanRole(null);
+			return;
+		}
+
+		let cancelled = false;
+		setClanRole(null);
+		void createAchilleaClient({ credentials: "include" }).clans.myRole().then((result) => {
+			if (!cancelled && result.ok) setClanRole(result.value.role);
+		});
+		return () => {
+			cancelled = true;
+		};
+	}, [isAuthenticated, isEsport, user?.id]);
+
+	return (item: NavItem): boolean => {
+		const access = item.access;
+		if (!access) return true;
+		if (access.requiresAuthentication && !isAuthenticated) return false;
+		const achilleaRole = Number(user?.role ?? 0);
+		if (
+			access.minimumAchilleaRole !== undefined &&
+			(!isAuthenticated || achilleaRole < access.minimumAchilleaRole)
+		) {
+			return false;
+		}
+		if (
+			access.minimumClanRole !== undefined &&
+			(!isAuthenticated ||
+				clanRole === null ||
+				clanRole < access.minimumClanRole)
+		) {
+			return false;
+		}
+		return true;
+	};
+}
+
 function RoutedSidebar() {
 	const { t } = useLanguage();
-	return <AppSidebar renderIcon={NavIcone} headerSlot={null} t={t} />;
+	const pathname = usePathname() || "/";
+	const canView = useAchilleaNavigationVisibility(pathname);
+	return <AppSidebar canView={canView} renderIcon={NavIcone} headerSlot={null} t={t} />;
 }
 
 function RoutedNavigationRail() {
