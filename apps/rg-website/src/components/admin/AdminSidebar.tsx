@@ -64,7 +64,7 @@ const adminNavItems: NavItem[] = [
 		href: "/admin/achillea",
 		icon: Trophy,
 		submenu: [
-			{ title: "Rapprochement & FDW", href: "/admin/achillea" },
+			{ title: "Comptes & données Achilléa", href: "/admin/achillea" },
 			{ title: "Backoffice Achilléa", href: "/achillea/admins/dashboard" },
 			{ title: "Litiges Ranked", href: "/achillea/admins/ranked-disputes" },
 			{ title: "Sanctions", href: "/achillea/admins/sanctions" },
@@ -113,7 +113,7 @@ export default function AdminSidebar({ showPatreon = false }: { showPatreon?: bo
 			footer={
 				<Link
 					href="/settings"
-					className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+					className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-lg text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
 				>
 					<Home className="size-4" />
 					<span>Mon compte</span>

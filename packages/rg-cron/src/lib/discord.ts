@@ -51,6 +51,11 @@ export interface DiscordTelemetry {
 }
 
 let discordClient: Client | null = null;
+const verifiedRosterGuilds = new Set<string>();
+
+export function hasVerifiedDiscordRoster(guildId: string): boolean {
+	return verifiedRosterGuilds.has(guildId);
+}
 let latestTelemetry: DiscordTelemetry | null = null;
 let telemetryCallbacks: ((telemetry: DiscordTelemetry) => void)[] = [];
 
@@ -225,6 +230,7 @@ export async function initDiscord(): Promise<Client | null> {
 function connecterClient(
 	avecVeilleMessages: boolean
 ): Promise<{ client: Client | null; intentsRefuses: boolean }> {
+	verifiedRosterGuilds.clear();
 	const client = new Client({
 		intents: avecVeilleMessages
 			? [...INTENTS_HISTORIQUES, ...INTENTS_VEILLE_MESSAGES]
@@ -253,6 +259,7 @@ function connecterClient(
 			try {
 				console.log("[Discord] Chargement initial des membres et présences...");
 				await guild.members.fetch();
+				verifiedRosterGuilds.add(guild.id);
 				console.log(`✓ ${guild.members.cache.size} membres chargés.`);
 
 				// Première génération de la télémétrie

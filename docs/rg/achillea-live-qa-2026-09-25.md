@@ -46,3 +46,25 @@ une exécution réelle de synchronisation. Le bot Achilléa courant a signalé
 58 guildes rejointes, mais ses intents privilégiés `GuildMembers`,
 `GuildPresences` et `MessageContent` sont refusés par Discord : l'inventaire
 des membres de ce profil ne peut pas être complet dans cet état.
+
+## Vérification Discord et administration
+
+La release `b29edd8` a activé le miroir et un lancement ponctuel du jeton
+Achilléa legacy a terminé avec `guilds=4 succeeded=4 failed=0`. La base SQLite
+partagée contenait ensuite 58 guildes pour `current`, 4 pour `legacy` et 2 pour
+`rg`; le cache Redis portait 64 résumés. Les inventaires de membres Achilléa
+sont incomplets car ces sessions ne disposent pas de l'intent membres.
+
+Depuis `/admin/cron` en session administrateur réelle, le bouton de collecte
+Discord a d'abord révélé `CRON_SECRET` absent du démon. Son provisionnement a
+été corrigé, puis le même bouton a bien déclenché la tâche. La projection de
+la guilde Achilléa a réussi avec 3 261 membres et 105 rôles sur la release
+`381b639`. La guilde RG a été limitée par Discord (`opcode 8`) lors de cet
+essai ; son miroir reste présent, mais la projection métier n'est pas déclarée
+réussie. Les échecs ont été consignés sans réconciliation destructive.
+
+`/admin/stats` a été ouvert en session admin : l'audience affichait zéro
+requête malgré des accès au site. Le journal `/var/log/nginx/rg-stats.log`
+était vide et la configuration Nginx active ne définissait pas `rg_stats`.
+Une correction infra est préparée, mais elle n'est pas validée dans cette
+release ; l'audience ne doit pas être présentée comme complète.

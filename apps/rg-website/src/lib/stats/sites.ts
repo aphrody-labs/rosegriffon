@@ -130,14 +130,11 @@ export async function lireSites(): Promise<Site[]> {
 		},
 		{
 			domaine: "achillea.rosegriffon.fr",
-			// Second VPS (51.255.162.6). Son journal nginx est désormais rapatrié par
-			// la tâche `stats:achillea` (SSH, toutes les 15 minutes) : l'audience est
-			// donc réelle, seule sa fraîcheur diffère. Sa base, elle, reste hors de
-			// portée — d'où l'absence de métriques de contenu.
-			local: false,
+			// Servi par la passerelle RG unifiée et son journal d'audience local.
+			local: true,
 			metriques: [],
 			nom: "Achillea",
-			role: "Hébergé sur un second serveur — audience collectée par SSH toutes les 15 minutes",
+			role: "E-sport Achilléa — audience de la passerelle RG",
 			statut: statutAchillea,
 		},
 		{

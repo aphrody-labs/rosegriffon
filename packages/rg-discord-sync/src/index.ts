@@ -127,7 +127,7 @@ function memberValues(member: GuildMember, sourceBotId: string, syncedAt: string
 export async function syncDiscordGuildSnapshot(
 	guild: Guild,
 	source: DiscordSnapshotSource,
-	options: { members?: ReadonlyMap<string, GuildMember> } = {},
+	options: { members?: ReadonlyMap<string, GuildMember>; membersComplete?: boolean } = {},
 ): Promise<DiscordGuildSnapshotReport | null> {
 	const db = openDiscordSnapshot();
 	if (!db) return null;
@@ -143,7 +143,7 @@ export async function syncDiscordGuildSnapshot(
 		let members = options.members ?? guild.members.cache;
 		let membersComplete = false;
 		if (options.members) {
-			membersComplete = hasMembersIntent;
+			membersComplete = hasMembersIntent && options.membersComplete === true;
 		} else if (hasMembersIntent) {
 			try {
 				members = await guild.members.fetch();

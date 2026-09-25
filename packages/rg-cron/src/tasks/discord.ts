@@ -5,6 +5,7 @@
 
 import {
 	getDiscordClient,
+	hasVerifiedDiscordRoster,
 	GUILD_ID,
 	GUILDES_SUIVIES,
 	syncAllMembers,
@@ -63,10 +64,14 @@ export async function runDiscordSync(): Promise<{ success: boolean; error?: stri
 			console.log(`[Cron Discord] ${serveur.nom} (${guild.id}) — rôles...`);
 			let snapshotMembersComplete = false;
 			if (client.user) {
+				const cachedRosterVerified = hasVerifiedDiscordRoster(guild.id);
 				const instantane = await syncDiscordGuildSnapshot(guild, {
 					sourceBotId: client.user.id,
 					profile: "rg",
-				});
+				}, cachedRosterVerified ? {
+					members: guild.members.cache,
+					membersComplete: true,
+				} : {});
 				if (instantane) {
 					snapshotMembersComplete = instantane.membersComplete;
 					console.log(`[Cron Discord] ${serveur.nom} — miroir SQLite : ${instantane.memberCount} membres, complétude=${instantane.membersComplete}`);
