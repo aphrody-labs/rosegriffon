@@ -528,7 +528,7 @@ export type TournamentListQuery = {
 	page?: number;
 	/** Taille de page du contrôleur RG actuel (1 à 50). */
 	pageSize?: number;
-	/** Taille de page — le contrôleur l'attend sous le nom `pagination`. */
+	/** Alias de taille de page accepté par le contrôleur (1 à 50). */
 	pagination?: number;
 	organization?: number;
 	/** Répété une fois par état (`states=Ongoing&states=Finished`). */
