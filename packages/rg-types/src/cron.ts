@@ -364,8 +364,8 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
 	},
 	{
 		nom: "stats:achillea",
-		titre: "Audience du second serveur",
-		role: "rapatrie l'audience d'achillea et ranked depuis l'autre VPS",
+		titre: "Audience des sites RG",
+		role: "agrège le journal Nginx local dans le miroir SQLite et le cache Redis",
 		planification: "8,23,38,53 * * * *",
 		famille: "stats",
 		niveau: "admin",
