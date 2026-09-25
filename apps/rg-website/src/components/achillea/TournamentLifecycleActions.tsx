@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createAchilleaClient } from "@/lib/achillea";
 import { Button, Badge } from "@rosegriffon/ui";
 import {
@@ -32,6 +32,22 @@ export function TournamentLifecycleActions({
 	const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 	const [cancelReason, setCancelReason] = useState<string>("");
 	const [showCancelPrompt, setShowCancelPrompt] = useState<boolean>(false);
+	const [payoutReadiness, setPayoutReadiness] = useState<"checking" | "ready" | "unresolved" | "unavailable">("checking");
+
+	useEffect(() => {
+		if (tournament.internalState !== TournamentState.FINISHED) return;
+		let cancelled = false;
+		setPayoutReadiness("checking");
+		createAchilleaClient().tournaments.summary(tournament.id).then((result) => {
+			if (cancelled) return;
+			setPayoutReadiness(result.ok && result.value
+				? result.value.top10.some((standing) => standing.rank === 1) ? "ready" : "unresolved"
+				: "unavailable");
+		}).catch(() => {
+			if (!cancelled) setPayoutReadiness("unavailable");
+		});
+		return () => { cancelled = true; };
+	}, [tournament.id, tournament.internalState]);
 
 	const executeAction = async (actionKey: string, fn: () => Promise<{ ok: boolean; error?: { message: string } }>) => {
 		setLoadingAction(actionKey);
@@ -237,10 +253,11 @@ export function TournamentLifecycleActions({
 				)}
 
 				{tournament.internalState === TournamentState.FINISHED && (
+					<div className="space-y-2">
 					<Button
 						size="sm"
 						variant="outline"
-						disabled={loadingAction !== null}
+						disabled={loadingAction !== null || payoutReadiness !== "ready"}
 						onClick={() =>
 							executeAction("applyPlacementPrizes", () =>
 								client.tournaments.applyPlacementPrizes(tournament.id)
@@ -255,6 +272,10 @@ export function TournamentLifecycleActions({
 						)}
 						Distribuer les AP Podium
 					</Button>
+					{payoutReadiness !== "ready" && <p role="status" className="max-w-sm text-lg text-muted-foreground">
+						{payoutReadiness === "checking" ? "Vérification du classement final…" : payoutReadiness === "unresolved" ? "Récompenses indisponibles : le bracket historique ne fournit pas de champion vérifié." : "Récompenses indisponibles : le classement final n’a pas pu être vérifié."}
+					</p>}
+					</div>
 				)}
 
 				{/* Annuler */}

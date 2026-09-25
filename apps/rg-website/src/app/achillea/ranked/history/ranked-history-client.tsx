@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
@@ -18,17 +18,47 @@ import {
 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
-export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
+type ResultFilter = "all" | "win" | "loss" | "draw" | "forfeit";
+
+export default function RankedHistoryPage({ playerId, initialMode = -1, initialPeriod = 0, initialResult = "all" }: { playerId?: string; initialMode?: -1 | 2 | 4; initialPeriod?: number; initialResult?: ResultFilter }) {
 	const { isAuthenticated, isLoading: authLoading, status: authStatus, login } = useAchilleaAuth();
-	const [mode, setMode] = useState<-1 | 2 | 4>(-1); // -1 = all, 2 = 1v1, 4 = 2v2
-	const [period, setPeriod] = useState<number>(0); // 0 = all, 7 = 7d, 30 = 30d
+	const [mode, setMode] = useState<-1 | 2 | 4>(initialMode);
+	const [period, setPeriod] = useState<number>(initialPeriod);
+	const [resultFilter, setResultFilter] = useState<ResultFilter>(initialResult);
 	const [history, setHistory] = useState<RankedHistoryEntry[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [loadingMore, setLoadingMore] = useState(false);
+	const [hasMore, setHasMore] = useState(false);
+	const [nextOffset, setNextOffset] = useState(0);
+	const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const requestGeneration = useRef(0);
+	const changeFilter = (key: "mode" | "period" | "result", value: string) => {
+		const url = new URL(window.location.href);
+		if (value === "all" || value === "0") url.searchParams.delete(key);
+		else url.searchParams.set(key, value);
+		window.history.pushState(null, "", url);
+		if (key === "mode") setMode(value === "2" ? 2 : value === "4" ? 4 : -1);
+		if (key === "period") setPeriod(Number(value));
+		if (key === "result") setResultFilter(value as ResultFilter);
+	};
+	useEffect(() => {
+		const restore = () => {
+			const params = new URLSearchParams(window.location.search);
+			setMode(params.get("mode") === "2" ? 2 : params.get("mode") === "4" ? 4 : -1);
+			setPeriod(params.get("period") === "7" ? 7 : params.get("period") === "30" ? 30 : 0);
+			const result = params.get("result");
+			setResultFilter(result === "win" || result === "loss" || result === "draw" || result === "forfeit" ? result : "all");
+		};
+		window.addEventListener("popstate", restore);
+		return () => window.removeEventListener("popstate", restore);
+	}, []);
 
 	useEffect(() => {
+		requestGeneration.current += 1;
 		if (!playerId && !isAuthenticated) {
 			setLoading(false);
+			setHasMore(false);
 			return;
 		}
 
@@ -36,6 +66,10 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 		setLoading(true);
 		setError(null);
 		setHistory([]);
+		setHasMore(false);
+		setLoadingMore(false);
+		setNextOffset(0);
+		setLoadMoreError(null);
 		const client = createAchilleaClient();
 
 		const modeQuery = mode === -1 ? undefined : mode;
@@ -48,6 +82,8 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 				if (cancelled) return;
 				if (res.ok && res.value) {
 					setHistory(res.value);
+					setHasMore(res.value.length === 100);
+					setNextOffset(res.value.length);
 				} else {
 					setError("Impossible de charger votre historique de matchs.");
 				}
@@ -65,15 +101,43 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 		};
 	}, [isAuthenticated, mode, playerId]);
 
+	const loadMore = async () => {
+		if (loading || loadingMore || !hasMore) return;
+		const generation = requestGeneration.current;
+		setLoadingMore(true);
+		setLoadMoreError(null);
+		try {
+			const query = { mode: mode === -1 ? undefined : mode, limit: 100, offset: nextOffset };
+			const client = createAchilleaClient();
+			const response = playerId
+				? await client.users.rankedHistory(playerId, query)
+				: await client.users.myRankedHistory(query);
+			if (generation !== requestGeneration.current) return;
+			if (!response.ok) { setLoadMoreError("Impossible de charger la suite des matchs."); return; }
+			setHistory((previous) => {
+				const seen = new Set(previous.map((match) => match.lobbyId));
+				return [...previous, ...response.value.filter((match) => !seen.has(match.lobbyId))];
+			});
+			setHasMore(response.value.length === 100);
+			setNextOffset((previous) => previous + response.value.length);
+		} catch (cause) {
+			signalerException("ranked/history/load-more", cause);
+			if (generation === requestGeneration.current) setLoadMoreError("Impossible de charger la suite des matchs.");
+		} finally {
+			if (generation === requestGeneration.current) setLoadingMore(false);
+		}
+	};
+
 	// Filter by period
 	const filteredHistory = useMemo(() => {
-		if (period === 0) return history;
-		const cutoff = Date.now() - period * 24 * 3600 * 1000;
+		const cutoff = period === 0 ? 0 : Date.now() - period * 24 * 3600 * 1000;
 		return history.filter((m) => {
+			if (resultFilter !== "all" && m.result !== resultFilter) return false;
+			if (period === 0) return true;
 			const t = new Date(m.endedAt).getTime();
 			return Number.isFinite(t) && t >= cutoff;
 		});
-	}, [history, period]);
+	}, [history, period, resultFilter]);
 
 	// Calculate stats
 	const stats = useMemo(() => {
@@ -143,7 +207,7 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 						<button
 							type="button"
 							aria-pressed={mode === -1}
-							onClick={() => setMode(-1)}
+							onClick={() => changeFilter("mode", "all")}
 							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
 								mode === -1
 									? "bg-primary text-primary-foreground shadow-sm"
@@ -155,7 +219,7 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 						<button
 							type="button"
 							aria-pressed={mode === 2}
-							onClick={() => setMode(2)}
+							onClick={() => changeFilter("mode", "2")}
 							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
 								mode === 2
 									? "bg-primary text-primary-foreground shadow-sm"
@@ -167,7 +231,7 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 						<button
 							type="button"
 							aria-pressed={mode === 4}
-							onClick={() => setMode(4)}
+							onClick={() => changeFilter("mode", "4")}
 							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
 								mode === 4
 									? "bg-primary text-primary-foreground shadow-sm"
@@ -186,7 +250,7 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 						<button
 							type="button"
 							aria-pressed={period === 7}
-							onClick={() => setPeriod(7)}
+							onClick={() => changeFilter("period", "7")}
 							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
 								period === 7
 									? "bg-secondary text-secondary-foreground shadow-sm"
@@ -198,7 +262,7 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 						<button
 							type="button"
 							aria-pressed={period === 30}
-							onClick={() => setPeriod(30)}
+							onClick={() => changeFilter("period", "30")}
 							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
 								period === 30
 									? "bg-secondary text-secondary-foreground shadow-sm"
@@ -210,7 +274,7 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 						<button
 							type="button"
 							aria-pressed={period === 0}
-							onClick={() => setPeriod(0)}
+							onClick={() => changeFilter("period", "0")}
 							className={`px-3 py-1 text-lg font-semibold rounded-md transition-all ${
 								period === 0
 									? "bg-secondary text-secondary-foreground shadow-sm"
@@ -220,6 +284,16 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 							Tout
 						</button>
 					</div>
+					<label className="flex flex-col gap-1 text-lg font-semibold">
+						Résultat
+						<select value={resultFilter} onChange={(event) => changeFilter("result", event.target.value)} className="rounded-lg border border-border bg-card px-3 py-2 text-lg text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+							<option value="all">Tous les résultats</option>
+							<option value="win">Victoires</option>
+							<option value="loss">Défaites</option>
+							<option value="draw">Nuls</option>
+							<option value="forfeit">Forfaits</option>
+						</select>
+					</label>
 				</div>
 			</div>
 
@@ -289,11 +363,12 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 					<div className="border border-border bg-card rounded-2xl p-6 shadow-sm space-y-4">
 						<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/60 pb-4">
 							<div className="space-y-1">
-								<h3 className="font-bold text-lg">Bilan de la période</h3>
+								<h3 className="font-bold text-lg">Bilan des matchs filtrés</h3>
 								<div className="text-lg text-muted-foreground">
 									{stats.total} match{stats.total > 1 ? "s" : ""} enregistré
 									{stats.total > 1 ? "s" : ""}
 								</div>
+								{hasMore && <p className="text-lg text-muted-foreground">Bilan provisoire : d’autres matchs sont disponibles.</p>}
 							</div>
 
 							<div className="flex items-center gap-2">
@@ -347,9 +422,9 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 					{filteredHistory.length === 0 ? (
 						<div className="border border-dashed border-border rounded-2xl p-12 text-center text-muted-foreground text-lg space-y-2">
 							<Calendar className="w-8 h-8 mx-auto opacity-50 mb-2" />
-							<p className="font-semibold">Aucun match joué sur cette période.</p>
+							<p className="font-semibold">Aucun match chargé ne correspond aux filtres.</p>
 							<p className="text-lg">
-								Lancez une recherche classée depuis le hub pour commencer à marquer des points !
+								{hasMore ? "Chargez les matchs suivants pour poursuivre la recherche." : "Essayez un autre mode, une autre période ou un autre résultat."}
 							</p>
 						</div>
 					) : (
@@ -456,6 +531,14 @@ export default function RankedHistoryPage({ playerId }: { playerId?: string }) {
 									</div>
 								);
 							})}
+						</div>
+					)}
+					{hasMore && (
+						<div className="flex flex-col items-center gap-2">
+							<button type="button" onClick={loadMore} disabled={loadingMore} className="rounded-lg border border-border bg-card px-5 py-2 text-lg font-semibold hover:bg-muted disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+								{loadingMore ? "Chargement…" : "Charger 100 matchs supplémentaires"}
+							</button>
+							{loadMoreError && <p role="alert" className="text-lg text-rose-400">{loadMoreError}</p>}
 						</div>
 					)}
 				</>

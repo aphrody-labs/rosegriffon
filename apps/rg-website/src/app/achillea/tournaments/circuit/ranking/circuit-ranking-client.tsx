@@ -24,6 +24,8 @@ export default function CircuitRankingPage() {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 	const [activeTab, setActiveTab] = useState<"players" | "clans" | "tournaments">("players");
+	const [playerQuery, setPlayerQuery] = useState("");
+	const [minimumTournaments, setMinimumTournaments] = useState(0);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -59,6 +61,11 @@ export default function CircuitRankingPage() {
 	const tournaments = data?.tournaments ?? [];
 
 	const top3 = leaderboard.slice(0, 3);
+	const visiblePlayers = leaderboard.filter((player) => {
+		const query = playerQuery.trim().toLocaleLowerCase("fr-FR");
+		return player.tournamentsPlayed >= minimumTournaments &&
+			(!query || `${player.displayName} ${player.username} ${player.clan?.name ?? ""} ${player.clan?.shortName ?? ""}`.toLocaleLowerCase("fr-FR").includes(query));
+	});
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
@@ -223,8 +230,21 @@ export default function CircuitRankingPage() {
 					{/* Players Tab */}
 					{activeTab === "players" && (
 						leaderboard.length === 0 ? <p className="rounded-xl border border-border p-5 text-lg">Aucun résultat de bracket homologué pour le moment.</p> :
+						<div className="space-y-4">
+							<div className="flex flex-wrap gap-4 rounded-xl border border-border bg-card p-4 text-lg">
+								<label className="flex flex-col gap-1">Rechercher un joueur ou un clan
+									<input type="search" value={playerQuery} onChange={(event) => setPlayerQuery(event.target.value)} className="rounded-md border border-border bg-background px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
+								</label>
+								<label className="flex flex-col gap-1">Tournois minimum
+									<select value={minimumTournaments} onChange={(event) => setMinimumTournaments(Number(event.target.value))} className="rounded-md border border-border bg-background px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+										<option value={0}>Tous</option><option value={2}>2 ou plus</option><option value={3}>3 ou plus</option><option value={5}>5 ou plus</option>
+									</select>
+								</label>
+								<p aria-live="polite" className="self-end text-muted-foreground">{visiblePlayers.length} joueur{visiblePlayers.length > 1 ? "s" : ""} sur {leaderboard.length}</p>
+							</div>
+							{visiblePlayers.length === 0 ? <p className="rounded-xl border border-border p-5 text-lg">Aucun joueur ne correspond aux filtres.</p> :
 						<div className="border border-border rounded-2xl bg-card overflow-x-auto">
-							<table className="w-full min-w-[850px] text-left text-lg">
+							<table className="w-full min-w-[1000px] text-left text-lg">
 								<thead>
 									<tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-lg tracking-wider">
 										<th className="py-3 px-4 w-16 text-center">Rang</th>
@@ -232,14 +252,17 @@ export default function CircuitRankingPage() {
 										<th className="py-3 px-4 text-center">Clan</th>
 										<th className="py-3 px-4 text-right">Points Circuit</th>
 										<th className="py-3 px-4 text-right">Titres</th>
+										<th className="py-3 px-4 text-right">Podiums</th>
+										<th className="py-3 px-4 text-right">Meilleur rang</th>
+										<th className="py-3 px-4 text-right">Palier</th>
 										<th className="py-3 px-4 text-right">Tournois</th>
 									</tr>
 								</thead>
 								<tbody className="divide-y divide-border/60">
-									{leaderboard.map((player, idx) => (
+									{visiblePlayers.map((player) => (
 										<tr key={player.userId} className="hover:bg-muted/30 transition">
 											<td className="py-3 px-4 text-center font-bold text-muted-foreground font-mono">
-												#{idx + 1}
+												#{leaderboard.indexOf(player) + 1}
 											</td>
 											<td className="py-3 px-4">
 												<Link
@@ -269,6 +292,9 @@ export default function CircuitRankingPage() {
 											<td className="py-3 px-4 text-right font-semibold text-emerald-400">
 												{player.wins > 0 ? `🏆 ${player.wins}` : "0"}
 											</td>
+											<td className="py-3 px-4 text-right font-mono">{player.podiums}</td>
+											<td className="py-3 px-4 text-right">{player.bestRankLabel || `#${player.bestRank}`}</td>
+											<td className="py-3 px-4 text-right capitalize">{player.tier}</td>
 											<td className="py-3 px-4 text-right text-muted-foreground font-mono">
 												{player.tournamentsPlayed}
 											</td>
@@ -276,6 +302,8 @@ export default function CircuitRankingPage() {
 									))}
 								</tbody>
 							</table>
+						</div>
+							}
 						</div>
 					)}
 
