@@ -463,11 +463,14 @@ export interface SyncReport {
 	durationMs: number;
 }
 
-export async function syncAllMembers(guild: Guild): Promise<SyncReport> {
+export async function syncAllMembers(
+	guild: Guild,
+	verifiedMembers?: ReadonlyMap<string, GuildMember>
+): Promise<SyncReport> {
 	const start = Date.now();
 	// Le cache peut contenir seulement les membres vus depuis le démarrage.
 	// Un inventaire incomplet ne doit jamais déclencher la purge des départs.
-	const members = await guild.members.fetch();
+	const members = verifiedMembers ?? await guild.members.fetch();
 	if (members.size === 0 && guild.memberCount > 0) {
 		throw new Error(
 			`Inventaire Discord vide pour ${guild.id} (${guild.memberCount} membres annoncés).`
