@@ -199,7 +199,7 @@ export default function RankedLeaderboardPage({
 									<th scope="col" className="py-3 px-4 w-16 text-center">Rang</th>
 									<th scope="col" className="py-3 px-4">Joueur</th>
 									<th scope="col" className="py-3 px-4 text-center">Palier</th>
-									<th scope="col" className="py-3 px-4 text-right">Points (AP)</th>
+									<th scope="col" className="py-3 px-4 text-right">Points classés (AP)</th>
 									<th scope="col" className="py-3 px-4 text-right">Parties</th>
 									<th scope="col" className="py-3 px-4 text-right">Pic</th>
 									<th scope="col" className="py-3 px-4">Historique</th>
@@ -277,7 +277,7 @@ export default function RankedLeaderboardPage({
 									</Link>
 								</div>
 								<dl className="grid grid-cols-2 gap-2 text-muted-foreground">
-									<div><dt>Points</dt><dd className="font-bold text-amber-400">{entry.elo} AP</dd></div>
+									<div><dt>Points classés</dt><dd className="font-bold text-amber-400">{entry.elo} AP</dd></div>
 									<div><dt>Palier</dt><dd className="font-semibold text-foreground">{tiers?.find((tier) => entry.elo >= tier.minElo && entry.elo <= tier.maxElo)?.key ?? "—"}</dd></div>
 									<div><dt>Parties</dt><dd className="text-foreground">{entry.gamesPlayed}</dd></div>
 									<div><dt>Pic</dt><dd className="text-foreground">{entry.peakRating}</dd></div>
