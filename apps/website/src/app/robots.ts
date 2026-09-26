@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+import { SITE_URL } from "@/lib/site-url";
+
 /**
  * Chemins sans valeur d'index, communs à tous les robots :
  * espaces d'administration, espace membre, parcours d'authentification,
@@ -30,11 +32,10 @@ const PRIVE = [
 export default function robots(): MetadataRoute.Robots {
 	// Host canonique (apex, sans www) — cohérent avec le `metadataBase` du layout et
 	// la redirection 301 www → apex de next.config. Évite que la directive Sitemap
-	// pointe vers une URL redirigée.
-	const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "https://rosegriffon.fr").replace(
-		"://www.",
-		"://",
-	);
+	// pointe vers une URL redirigée. `SITE_URL` (lib/site-url.ts) applique la même
+	// normalisation ; ce fichier, `app/sitemap.ts` et `app/wiki/sitemap.ts` la
+	// recopiaient chacun séparément.
+	const baseUrl = SITE_URL;
 	return {
 		rules: [
 			{
