@@ -138,10 +138,9 @@ await loadManifestCache();
 // croire au backend qu'il est appelé via l'un de ces vhosts (X-Forwarded-Host).
 // On retourne dynamiquement l'URL publique selon le Host reçu :
 //   - upload via cdn.rosegriffon.fr  → URL retournée = https://cdn.rosegriffon.fr/<id>
-//   - upload via cdn.rpbey.fr        → URL retournée = https://cdn.rpbey.fr/<id>
-// Achillea + RG continuent de pointer cdn.rosegriffon.fr ; gacha + RPB pointent
-// cdn.rpbey.fr — chacun récupère l'URL canonique pour son propre domaine.
-const ALLOWED_PUBLIC_HOSTS = new Set(["cdn.rosegriffon.fr", "cdn.rpbey.fr"]);
+// rpbey.fr a été vendu (domaine hors périmètre depuis, voir aphrody-infra
+// docs/PLAN.md) ; cdn.rpbey.fr n'est plus un hôte public whitelisté.
+const ALLOWED_PUBLIC_HOSTS = new Set(["cdn.rosegriffon.fr"]);
 
 function publicBaseFor(req: Request): string {
   const xfh = req.headers.get("x-forwarded-host");
