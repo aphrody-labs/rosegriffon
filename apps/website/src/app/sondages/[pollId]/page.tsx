@@ -36,6 +36,7 @@ import {
 	resumeQuestion,
 	varianteBadgeEtat,
 } from "@/lib/discord/polls-types";
+import { absoluteUrl } from "@/lib/site-url";
 
 import { ResultatsSondage } from "../_components/ResultatsSondage";
 
@@ -65,7 +66,7 @@ export async function generateMetadata({
 	// Un `<title>` ne doit contenir ni `**gras**`, ni `<:emote:id>`, ni `<@&rôle>`.
 	const titre = resumeQuestion(sondage.question, 80);
 	const description = `Résultats du sondage « ${titre} » posé à la communauté Rose Griffon sur Discord.`;
-	const url = `https://rosegriffon.fr/sondages/${sondage.poll_id}`;
+	const url = absoluteUrl(`/sondages/${sondage.poll_id}`);
 
 	return {
 		alternates: { canonical: url },

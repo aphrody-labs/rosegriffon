@@ -5,6 +5,7 @@ import { cookies, headers } from "next/headers";
 
 import { lato, notoSans, poppins, roboto } from "@/lib/fonts";
 import { NETWORK_SAME_AS } from "@/lib/social-links";
+import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 import { Geist } from "next/font/google";
 
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -70,7 +71,7 @@ export const metadata: Metadata = {
 	// `apple-touch-icon` en WebP, format qu'iOS n'accepte pas pour cette balise.
 	keywords:
 		"Rose Griffon, Inazuma Eleven, association, communauté, gaming, France, Azalée, Achilléa, Roy, Gaëlle, Inazuma Eleven France, Inazuma Eleven France Association, Inazuma Eleven France Association Rose Griffon",
-	metadataBase: new URL("https://rosegriffon.fr"),
+	metadataBase: new URL(SITE_URL),
 	// Balise de propriété AdSense. C'est ce que la vérification du tableau de bord
 	// cherche dans le HTML servi ; le script seul ne suffit pas à valider le site.
 	other: {
@@ -83,7 +84,7 @@ export const metadata: Metadata = {
 		siteName: "Rose Griffon",
 		title: "Rose Griffon | Association Inazuma Eleven France",
 		type: "website",
-		url: "https://rosegriffon.fr",
+		url: SITE_URL,
 	},
 	publisher: "Association Rose Griffon",
 	robots: {
@@ -145,23 +146,23 @@ export default async function RootLayout({
 							"@graph": [
 								{
 									"@type": "Person",
-									"@id": "https://rosegriffon.fr/#yoyo",
+									"@id": absoluteUrl("/#yoyo"),
 									name: "yoyo",
 									alternateName: "yoyo",
 									jobTitle: "Développeur & fondateur",
 									url: "https://x.com/yoyo__goat",
 									sameAs: ["https://x.com/yoyo__goat"],
-									worksFor: { "@id": "https://rosegriffon.fr/#organization" },
+									worksFor: { "@id": absoluteUrl("/#organization") },
 								},
 								{
 									"@type": "Organization",
-									"@id": "https://rosegriffon.fr/#organization",
+									"@id": absoluteUrl("/#organization"),
 									name: "Rose Griffon",
 									alternateName: "Association Rose Griffon",
-									url: "https://rosegriffon.fr",
-									logo: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
+									url: SITE_URL,
+									logo: absoluteUrl("/RG_Logo_V2.5.webp"),
 									description: "Association rassemblant la communauté Inazuma Eleven en France.",
-									founder: { "@id": "https://rosegriffon.fr/#yoyo" },
+									founder: { "@id": absoluteUrl("/#yoyo") },
 									// Réseau Rose Griffon : 3 domaines siblings + tous les réseaux sociaux
 									// (X/YouTube/Twitch/Instagram/Discord). sameAs partagé à l'identique
 									// sur website / azalee / achillea pour une entité Organization cohérente.
@@ -173,12 +174,12 @@ export default async function RootLayout({
 								},
 								{
 									"@type": "WebSite",
-									"@id": "https://rosegriffon.fr/#website",
-									url: "https://rosegriffon.fr",
+									"@id": absoluteUrl("/#website"),
+									url: SITE_URL,
 									name: "Rose Griffon",
 									inLanguage: "fr-FR",
-									publisher: { "@id": "https://rosegriffon.fr/#organization" },
-									creator: { "@id": "https://rosegriffon.fr/#yoyo" },
+									publisher: { "@id": absoluteUrl("/#organization") },
+									creator: { "@id": absoluteUrl("/#yoyo") },
 								},
 							],
 						}),

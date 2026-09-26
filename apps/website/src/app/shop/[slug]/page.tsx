@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { CATEGORY_LABELS, PRODUCTS, formatEuros, getProduct } from "@/lib/shop/products";
+import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 import { PatreonDiscountBanner } from "../_components/patreon-discount-banner";
 import { ProductCard } from "../_components/product-card";
 import { VariantPickerWithCta } from "../_components/variant-picker";
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 		return { title: "Produit introuvable · Rose Griffon" };
 	}
 	return {
-		alternates: { canonical: `https://rosegriffon.fr/shop/${product.slug}` },
+		alternates: { canonical: absoluteUrl(`/shop/${product.slug}`) },
 		description: product.tagline,
 		openGraph: {
 			description: product.tagline,
@@ -63,7 +64,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 		}
 	};
 
-	const baseUrl = "https://rosegriffon.fr";
+	const baseUrl = SITE_URL;
 	const allImages = [
 		`${baseUrl}${product.image}`,
 		...(product.gallery ?? [])

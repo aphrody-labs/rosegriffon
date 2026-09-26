@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { SITE_URL } from "@/lib/site-url";
+
 /**
  * Fabrique des métadonnées des pages Achilléa.
  *
@@ -24,7 +26,7 @@ import type { Metadata } from "next";
  */
 
 /** Origine publique du site. `alternates.canonical` doit être absolu. */
-const ORIGINE = "https://rosegriffon.fr";
+const ORIGINE = SITE_URL;
 
 /** Bannière Open Graph par défaut du domaine compétitif. */
 const BANNIERE = "/achillea/achillea-banner.png";

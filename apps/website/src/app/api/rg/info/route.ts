@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { SITE_URL } from "@/lib/site-url";
+
 // Données 100% statiques (mascots, socials).
 export const revalidate = 86_400;
 
@@ -35,7 +37,7 @@ export async function GET() {
 			azalee: "Média / Actualités",
 			rose_griffon: "Cœur / Communauté / Art",
 		},
-		website: "https://www.rosegriffon.fr",
+		website: SITE_URL,
 	};
 
 	return NextResponse.json({

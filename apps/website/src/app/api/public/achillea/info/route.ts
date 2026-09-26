@@ -1,4 +1,5 @@
 import { getPgPoolOrNull } from "@/lib/db/pg";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +30,8 @@ export async function GET() {
 			"Le carrefour de l'esport Inazuma Eleven ! Gestion de clans, tournois, matchs classés, ranking communautaire et bot officiel.",
 		home_achillea_discord:
 			"https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055",
-		home_achillea_image: "https://rosegriffon.fr/achillea/banniere.webp",
-		home_achillea_link: "https://rosegriffon.fr/achillea",
+		home_achillea_image: absoluteUrl("/achillea/banniere.webp"),
+		home_achillea_link: absoluteUrl("/achillea"),
 	};
 
 	const getVal = (key: string) =>

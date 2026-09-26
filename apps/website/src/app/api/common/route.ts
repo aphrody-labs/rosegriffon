@@ -1,6 +1,7 @@
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth-helpers";
+import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 
 export async function GET() {
 	const session = await getServerSession();
@@ -24,8 +25,8 @@ export async function GET() {
 		network: {
 			achillea: "https://achillea.rosegriffon.fr",
 			azalee: "https://azalee.rosegriffon.fr",
-			rgtv: "https://rosegriffon.fr/rose-griffon-tv",
-			rosegriffon: "https://rosegriffon.fr",
+			rgtv: absoluteUrl("/rose-griffon-tv"),
+			rosegriffon: SITE_URL,
 		},
 		user: user
 			? {

@@ -8,6 +8,8 @@
  */
 import { z } from "zod";
 
+import { SITE_URL } from "@/lib/site-url";
+
 import { IDS_EQUIPES, libelleEquipe } from "./teams";
 
 /** Bucket Storage qui héberge les photos du staff. */
@@ -244,7 +246,7 @@ export function construireCheminImage(typeMime: string, graine: string): string 
 	return `${DOSSIER_IMAGES}/${jeton}.${extension}`;
 }
 
-const ORIGINE_PUBLIQUE_PAR_DEFAUT = "https://rosegriffon.fr";
+const ORIGINE_PUBLIQUE_PAR_DEFAUT = SITE_URL;
 
 /** Une origine de boucle locale ou privée n'est jamais joignable par un navigateur. */
 function estOrigineJoignable(valeur: string | undefined | null): valeur is string {

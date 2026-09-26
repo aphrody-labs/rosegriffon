@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 import { addWatermarkAndDownload, createCollageCanvas } from "@/lib/nostalgie-utils";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const useNostalgieCollage = () => {
 	const [finalImage, setFinalImage] = useState<string | null>(null);
@@ -71,7 +72,7 @@ export const useNostalgieCollage = () => {
 	}, []);
 
 	const handleShareTwitter = useCallback(() => {
-		const pageUrl = encodeURIComponent("https://www.rosegriffon.fr/projets/nostalgie");
+		const pageUrl = encodeURIComponent(absoluteUrl("/projets/nostalgie"));
 		const text = encodeURIComponent("J'ai créé mon montage Nostalgie ! 🎨⚽");
 
 		window.open(
@@ -100,7 +101,7 @@ export const useNostalgieCollage = () => {
 	}, []);
 
 	const handleCopyLink = useCallback(() => {
-		const pageUrl = "https://www.rosegriffon.fr/projets/nostalgie";
+		const pageUrl = absoluteUrl("/projets/nostalgie");
 		navigator.clipboard.writeText(pageUrl);
 		toast.success("Lien copié dans le presse-papiers !");
 	}, []);

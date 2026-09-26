@@ -11,6 +11,7 @@ import {
 	listerSondages,
 	normaliserStatut,
 } from "@/lib/discord/polls";
+import { absoluteUrl } from "@/lib/site-url";
 import { parseSearchParams } from "@/lib/validations";
 
 import { CarteSondage } from "./_components/CarteSondage";
@@ -21,7 +22,7 @@ import { FiltresSondages } from "./_components/FiltresSondages";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/sondages" },
+	alternates: { canonical: absoluteUrl("/sondages") },
 	description:
 		"Les sondages posés à la communauté Rose Griffon sur Discord : questions, choix, résultats détaillés et participation.",
 	openGraph: {
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
 			"Questions, choix et résultats des sondages de la communauté Rose Griffon sur Discord.",
 		title: "Sondages de la communauté · Rose Griffon",
 		type: "website",
-		url: "https://rosegriffon.fr/sondages",
+		url: absoluteUrl("/sondages"),
 	},
 	title: "Sondages de la communauté · Rose Griffon",
 };

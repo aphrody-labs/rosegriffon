@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { updateSetting } from "@/app/admin/settings/actions";
 import FusionBlock from "@/components/shared/FusionBlock";
+import { absoluteUrl } from "@/lib/site-url";
 
 export interface Setting { key: string; value: string; description?: string }
 const getVal = (settings: Setting[], key: string, fallback: string) => settings.find((setting) => setting.key === key)?.value ?? fallback;
@@ -59,8 +60,8 @@ export function VisualSettingsEditor({ settings: initialSettings }: { settings: 
 		<TabsContent value="achillea"><Card className="max-w-3xl"><CardHeader><CardTitle>Informations publiques Achilléa</CardTitle><CardDescription>Valeurs exposées par l'API publique Achilléa.</CardDescription></CardHeader><CardContent className="space-y-5">
 			<Field {...fieldProps} label="Description" settingKey="home_achillea_description" fallback="Le carrefour de l'esport Inazuma Eleven ! Gestion de clans, tournois, matchs classés, ranking communautaire et bot officiel." multiline />
 			<Field {...fieldProps} label="Invitation Discord" settingKey="home_achillea_discord" fallback="https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055" />
-			<Field {...fieldProps} label="Bannière" settingKey="home_achillea_image" fallback="https://rosegriffon.fr/achillea/banniere.webp" />
-			<Field {...fieldProps} label="Lien du site" settingKey="home_achillea_link" fallback="https://rosegriffon.fr/achillea" />
+			<Field {...fieldProps} label="Bannière" settingKey="home_achillea_image" fallback={absoluteUrl("/achillea/banniere.webp")} />
+			<Field {...fieldProps} label="Lien du site" settingKey="home_achillea_link" fallback={absoluteUrl("/achillea")} />
 		</CardContent></Card></TabsContent>
 	</Tabs>;
 }

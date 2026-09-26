@@ -20,10 +20,11 @@ import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
 import { TeamStructuredData } from "@/components/shared/StructuredData";
 import { getPgPool } from "@/lib/db/pg";
 import { getEnv } from "@/lib/env";
+import { absoluteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/notre-equipe" },
+	alternates: { canonical: absoluteUrl("/notre-equipe") },
 	description:
 		"Découvrez l'organigramme officiel de l'association Rose Griffon : le bureau, les équipes de création Azalée et Achilléa, les dessinateurs, le lore, la production et l'ensemble de nos membres.",
 	openGraph: {
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
 		],
 		title: "Notre Équipe | Rose Griffon",
 		type: "website",
-		url: "https://rosegriffon.fr/notre-equipe",
+		url: absoluteUrl("/notre-equipe"),
 	},
 	title: "Notre Équipe | Rose Griffon",
 };
@@ -354,7 +355,7 @@ export default async function NotreEquipePage() {
 		<div className="min-h-screen">
 			<TeamStructuredData
 				pageName="Notre Équipe — Rose Griffon"
-				url="https://rosegriffon.fr/notre-equipe"
+				url={absoluteUrl("/notre-equipe")}
 				members={tousLesMembresPourSchema}
 			/>
 

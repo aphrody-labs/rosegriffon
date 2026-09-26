@@ -5,6 +5,7 @@ import { requirePatreonCreator } from "@/lib/auth-helpers";
 import { PatreonApiError, patreonFetch } from "@/lib/patreon/client";
 import { decryptToken } from "@/lib/patreon/encryption";
 import { ALL_TRIGGERS } from "@/lib/patreon/webhooks";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -43,8 +44,7 @@ export async function POST(req: Request) {
 
 	const url = new URL(req.url);
 	const targetUri =
-		url.searchParams.get("uri") ??
-		`${process.env.NEXT_PUBLIC_BASE_URL ?? "https://rosegriffon.fr"}/api/auth/patreon/webhook`;
+		url.searchParams.get("uri") ?? absoluteUrl("/api/auth/patreon/webhook");
 
 	// 1. Récupère le creator token (déchiffré)
 	const { data: tokenRow } = await supabase

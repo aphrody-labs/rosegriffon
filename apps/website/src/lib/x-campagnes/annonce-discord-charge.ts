@@ -12,6 +12,8 @@ import {
 	RANGEES_PAR_MESSAGE,
 } from "@rosegriffon/types/discord";
 
+import { SITE_URL } from "@/lib/site-url";
+
 import type { PoidsMode, SourceTirage } from "./tirage";
 import { urlImageAsset } from "./types";
 
@@ -73,7 +75,7 @@ const EMOTES = emotesRoseGriffon(process.env);
 
 /** Origine publique du site, sans barre oblique finale. */
 export function origine(): string {
-	const brut = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://rosegriffon.fr";
+	const brut = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
 	return brut.replace(/\/+$/, "");
 }
 

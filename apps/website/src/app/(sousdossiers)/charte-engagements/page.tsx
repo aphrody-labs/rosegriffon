@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { PageContainer, PageHero, SectionCard, SectionHeading } from "@/components/shared/PageShell";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { Award, Eye, Handshake, Palette, Scale, Users } from "@/lib/icons-config";
+import { absoluteUrl } from "@/lib/site-url";
 
 // Page statique avec ISR - Revalidate toutes les semaines (charte rarement modifiée)
 export const revalidate = 604_800; // 1 semaine
@@ -13,13 +14,13 @@ export const metadata: Metadata = {
 	description:
 		"Les cinq engagements que Rose Griffon, Achilléa et Azalée tiennent dans toutes leurs activités : crédit des créateurs, transparence, refus de l'IA générative, respect inconditionnel, réinvestissement dans la communauté.",
 	alternates: {
-		canonical: "https://rosegriffon.fr/charte-engagements",
+		canonical: absoluteUrl("/charte-engagements"),
 	},
 	openGraph: {
 		title: "Charte d'engagements · Rose Griffon",
 		description:
 			"Les cinq engagements que Rose Griffon, Achilléa et Azalée tiennent dans toutes leurs activités.",
-		url: "https://rosegriffon.fr/charte-engagements",
+		url: absoluteUrl("/charte-engagements"),
 		type: "website",
 	},
 };

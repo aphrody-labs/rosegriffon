@@ -26,6 +26,7 @@ import {
 	UserPlus,
 	Users,
 } from "@/lib/icons-config";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
@@ -34,13 +35,13 @@ export const metadata: Metadata = {
 	description:
 		"Rose Griffon recrute : staff convention, artistes, développeurs, rédacteurs et community managers pour Azalée, modérateurs Discord. Conditions, postes ouverts et processus de candidature.",
 	alternates: {
-		canonical: "https://rosegriffon.fr/a-propos/rejoindre-rg",
+		canonical: absoluteUrl("/a-propos/rejoindre-rg"),
 	},
 	openGraph: {
 		title: "Rejoindre Rose Griffon · Recrutement",
 		description:
 			"Contribuez à l'essor de la communauté Inazuma Eleven en France selon vos disponibilités.",
-		url: "https://rosegriffon.fr/a-propos/rejoindre-rg",
+		url: absoluteUrl("/a-propos/rejoindre-rg"),
 		type: "website",
 	},
 };

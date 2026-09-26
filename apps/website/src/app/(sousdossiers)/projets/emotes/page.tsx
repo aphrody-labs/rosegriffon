@@ -24,6 +24,7 @@ import { BreadcrumbSchema, ImageObjectSchema } from "@/components/shared/Structu
 import { EMOTES } from "@/lib/emotes";
 import type { Emote } from "@/lib/emotes";
 import { Copy, Smile } from "@/lib/icons-config";
+import { absoluteUrl } from "@/lib/site-url";
 
 export default function EmotesPage() {
 	const [activeTab, setActiveTab] = useState("all");
@@ -108,7 +109,7 @@ export default function EmotesPage() {
 			{Object.values(EMOTES).map((emote) => (
 				<ImageObjectSchema
 					key={emote.name}
-					url={`https://rosegriffon.fr${emote.path}`}
+					url={absoluteUrl(emote.path)}
 					name={`Emote ${emote.name}`}
 					description={emote.alt}
 					author={emote.author || "Rose Griffon"}

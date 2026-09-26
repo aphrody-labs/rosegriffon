@@ -7,9 +7,10 @@ import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 
 import { Palette } from "@/lib/icons-config";
 import { PROJETS } from "@/lib/projets";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/projets" },
+	alternates: { canonical: absoluteUrl("/projets") },
 	description: "Découvrez les outils et initiatives créatives de la communauté Rose Griffon.",
 	title: "Projets | Rose Griffon",
 };

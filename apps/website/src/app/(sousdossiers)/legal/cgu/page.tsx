@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { absoluteUrl, SITE_URL } from "@/lib/site-url";
+
 export const metadata: Metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/legal/cgu" },
+	alternates: { canonical: absoluteUrl("/legal/cgu") },
 	description:
 		"Conditions générales d'utilisation des services de l'association Rose Griffon, conformes aux lois françaises.",
 	title: "Conditions Générales d'Utilisation | Rose Griffon",
@@ -22,7 +24,7 @@ export default function TermsOfServicePage() {
 					<p>
 						Les présentes Conditions Générales d'Utilisation (ci-après « CGU ») régissent l'accès et
 						l'utilisation du site web{" "}
-						<Link href="https://rosegriffon.fr" className="text-[#344E8C] hover:underline">
+						<Link href={SITE_URL} className="text-[#344E8C] hover:underline">
 							rosegriffon.fr
 						</Link>{" "}
 						et de l'ensemble des services associés fournis par l'association Rose Griffon,

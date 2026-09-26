@@ -3,10 +3,11 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { getCart } from "@/lib/shop/cart";
+import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 import { CartIconButton } from "./_components/cart-icon-button";
 
 export const metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/shop" },
+	alternates: { canonical: absoluteUrl("/shop") },
 	description:
 		"Stickers, prints, badges, t-shirts et packs personnage édition limitée illustrés par les artistes de la communauté Rose Griffon.",
 	openGraph: {
@@ -27,7 +28,7 @@ const organizationSchema = {
 		contactType: "Customer Service",
 		email: "contact@rose-griffon.fr",
 	},
-	logo: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
+	logo: absoluteUrl("/RG_Logo_V2.5.webp"),
 	name: "Association Rose Griffon",
 	sameAs: [
 		"https://twitter.com/rosegriffon_fr",
@@ -35,7 +36,7 @@ const organizationSchema = {
 		"https://discord.gg/rosegriffon",
 		"https://www.patreon.com/rosegriffon",
 	],
-	url: "https://rosegriffon.fr",
+	url: SITE_URL,
 };
 
 export default async function ShopLayout({ children }: { children: ReactNode }) {

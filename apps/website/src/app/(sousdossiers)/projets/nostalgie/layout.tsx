@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import { absoluteUrl } from "@/lib/site-url";
+
 // Page client : voir `../../evenements/layout.tsx` pour la raison d'être de ce layout.
 export const metadata: Metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/projets/nostalgie" },
+	alternates: { canonical: absoluteUrl("/projets/nostalgie") },
 	description:
 		"Le projet Nostalgie de Rose Griffon : retrouver et remettre en valeur la mémoire visuelle d'Inazuma Eleven en France.",
 	openGraph: {
@@ -11,7 +13,7 @@ export const metadata: Metadata = {
 			"Le projet Nostalgie de Rose Griffon : retrouver et remettre en valeur la mémoire visuelle d'Inazuma Eleven en France.",
 		title: "Projet Nostalgie | Rose Griffon",
 		type: "website",
-		url: "https://rosegriffon.fr/projets/nostalgie",
+		url: absoluteUrl("/projets/nostalgie"),
 	},
 	title: "Projet Nostalgie | Rose Griffon",
 };

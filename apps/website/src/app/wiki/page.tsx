@@ -8,16 +8,17 @@ import { NetworkSection } from "@/components/home/NetworkSection";
 import { WikiCarousel } from "@/components/home/WikiCarousel";
 import type { WikiSectionStats } from "@/components/home/WikiCarousel";
 import { getPgPool } from "@/lib/db/pg";
+import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/wiki" },
+	alternates: { canonical: absoluteUrl("/wiki") },
 	description:
 		"L'information la plus précise autour d'Inazuma Eleven. Stats, techniques, et actualités en français.",
 	openGraph: {
 		title: "Azalée - Inazuma Eleven: Victory Road",
 		description:
 			"L'information la plus précise autour d'Inazuma Eleven. Stats, techniques, et actualités en français.",
-		url: "https://rosegriffon.fr/wiki",
+		url: absoluteUrl("/wiki"),
 		siteName: "Azalée",
 		locale: "fr_FR",
 		type: "website",
@@ -113,7 +114,7 @@ export default async function HomePage() {
 				"query-input": "required name=search_term_string",
 				target: {
 					"@type": "EntryPoint",
-					urlTemplate: "https://rosegriffon.fr/search?q={search_term_string}",
+					urlTemplate: absoluteUrl("/search?q={search_term_string}"),
 				},
 			},
 			publisher: {
@@ -123,7 +124,7 @@ export default async function HomePage() {
 					url: "https://azalee.rosegriffon.fr/icon.webp",
 				},
 				name: "Rose Griffon",
-				url: "https://rosegriffon.fr",
+				url: SITE_URL,
 				founder: {
 					"@type": "Person",
 					name: "yoyo",
@@ -132,7 +133,7 @@ export default async function HomePage() {
 					sameAs: ["https://x.com/yoyo__goat"],
 				},
 			},
-			url: "https://rosegriffon.fr/wiki",
+			url: absoluteUrl("/wiki"),
 		},
 		{
 			"@context": "https://schema.org",

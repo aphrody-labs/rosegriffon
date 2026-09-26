@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
+import { absoluteUrl } from "@/lib/site-url";
 import {
 	StageType,
 	MatchFormat,
@@ -220,7 +221,7 @@ export default function TournamentCreationPage() {
 				seedOrdering: seedOrdering,
 				groupStageEnabled: false,
 				affiche: affiche.trim() || null,
-				logo: logo.trim() || "https://rosegriffon.fr/achillea/achillea.png",
+				logo: logo.trim() || absoluteUrl("/achillea/achillea.png"),
 				ruleset: ruleset.trim() || "Règlement officiel des tournois Inazuma Eleven: Victory Road.",
 				planning: planningUrl.trim(),
 				startsAt: starts,

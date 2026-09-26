@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { absoluteUrl } from "@/lib/site-url";
+
 /**
  * La page de contact est un composant client (react-hook-form + TanStack
  * Query) : elle ne peut pas exporter `metadata`. Ce layout porte donc les
@@ -11,13 +13,13 @@ export const metadata: Metadata = {
 	description:
 		"Une question, une suggestion, un projet de collaboration ou une demande de presse ? Écrivez à l'association Rose Griffon via le formulaire de contact.",
 	alternates: {
-		canonical: "https://rosegriffon.fr/a-propos/contact",
+		canonical: absoluteUrl("/a-propos/contact"),
 	},
 	openGraph: {
 		title: "Nous contacter · Rose Griffon",
 		description:
 			"Une question, une suggestion ou un projet de collaboration ? Écrivez à l'association Rose Griffon.",
-		url: "https://rosegriffon.fr/a-propos/contact",
+		url: absoluteUrl("/a-propos/contact"),
 		type: "website",
 	},
 };

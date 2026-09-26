@@ -10,6 +10,7 @@ import { OrganizationSchema, WebsiteSchema } from "@/components/shared/Structure
 import { getCalendarEvents } from "@/lib/api/events";
 import { getPublicSetting } from "@/lib/api/settings";
 import { SERVEURS_DISCORD } from "@/lib/discord";
+import { SITE_URL } from "@/lib/site-url";
 
 const ProjectsSection = dynamicImport(() => import("@/components/shared/ProjectsSection"));
 const DiscordSection = dynamicImport(() => import("@/components/shared/DiscordSection"));
@@ -18,7 +19,7 @@ const DiscordSection = dynamicImport(() => import("@/components/shared/DiscordSe
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-	alternates: { canonical: "https://rosegriffon.fr" },
+	alternates: { canonical: SITE_URL },
 	description:
 		"Rose Griffon — Association et hub communautaire Inazuma Eleven en France : base de données et wiki Victory Road, ladder et tournois e-sport, actualités et communauté.",
 	keywords: [
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
 		siteName: "Rose Griffon",
 		title: "Rose Griffon - Association Inazuma Eleven France",
 		type: "website",
-		url: "https://rosegriffon.fr",
+		url: SITE_URL,
 	},
 	robots: {
 		follow: true,

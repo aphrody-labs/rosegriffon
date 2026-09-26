@@ -1,4 +1,5 @@
 import { getPgPool } from "@/lib/db/pg";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
@@ -77,7 +78,7 @@ export async function GET(request: Request) {
 				image: article.featured_image_url,
 				slug: article.slug,
 				title: article.title,
-				url: `https://rosegriffon.fr/news/${article.slug}`,
+				url: absoluteUrl(`/news/${article.slug}`),
 			};
 		});
 

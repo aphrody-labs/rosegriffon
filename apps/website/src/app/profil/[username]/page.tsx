@@ -13,6 +13,7 @@ import {
 } from "@/components/shared/StructuredData";
 import { getServerUser } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
+import { absoluteUrl } from "@/lib/site-url";
 import { ProfileAbout } from "./_components/profile-about";
 import { ProfileActivity } from "./_components/profile-activity";
 import { ProfileIdentity } from "./_components/profile-identity";
@@ -69,14 +70,14 @@ export async function generateMetadata({
 	const image = profile.avatar_url || "/opengraph-image.png";
 
 	return {
-		alternates: { canonical: `https://rosegriffon.fr${profilePath}` },
+		alternates: { canonical: absoluteUrl(profilePath) },
 		description,
 		openGraph: {
 			description,
 			images: [{ url: image }],
 			title,
 			type: "profile",
-			url: `https://rosegriffon.fr${profilePath}`,
+			url: absoluteUrl(profilePath),
 		},
 		// Même politique que sur le wiki Azalée : la fiche publie la biographie
 		// d'un membre sans que son indexation ait jamais été demandée.
@@ -357,7 +358,7 @@ export default async function UserProfilePage({
 				username={profile.username ?? username}
 				image={profile.avatar_url || undefined}
 				description={profile.bio || undefined}
-				url={`https://rosegriffon.fr/profil/${encodeURIComponent(profile.username ?? username)}`}
+				url={absoluteUrl(`/profil/${encodeURIComponent(profile.username ?? username)}`)}
 				sameAs={
 					profile.twitter_handle
 						? [`https://twitter.com/${profile.twitter_handle.replace("@", "")}`]

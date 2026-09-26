@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { absoluteUrl } from "@/lib/site-url";
+
 export const metadata: Metadata = {
 	title: {
 		default: "Azalée — Le Wiki Inazuma Eleven: Victory Road | Rose Griffon",
@@ -16,7 +18,7 @@ export const metadata: Metadata = {
 		title: "Azalée — Le Wiki Inazuma Eleven: Victory Road",
 		description:
 			"Base de données complète Inazuma Eleven: Victory Road. Personnages, techniques, objets, quêtes et wiki communautaire.",
-		url: "https://rosegriffon.fr/wiki",
+		url: absoluteUrl("/wiki"),
 		siteName: "Azalée Wiki",
 		locale: "fr_FR",
 		type: "website",

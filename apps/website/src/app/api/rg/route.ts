@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 
+import { SITE_URL } from "@/lib/site-url";
+
 // Réponse 100% statique, change avec NEXT_PUBLIC_SITE_URL build time.
 export const revalidate = 86_400;
 
 export async function GET() {
-	const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.rosegriffon.fr";
+	const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
 
 	return NextResponse.json({
 		documentation:

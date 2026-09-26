@@ -3,6 +3,7 @@ import "server-only";
 import { RG_GUILD_ID } from "@rosegriffon/types/discord";
 
 import { getPgPool } from "@/lib/db/pg";
+import { SITE_URL } from "@/lib/site-url";
 
 import { API_DISCORD, type GagnantAnnonce, imageAbsolue, origine } from "./annonce-discord-charge";
 import type { SourceTirage } from "./tirage";
@@ -73,7 +74,7 @@ export async function posterAnnonce(
 			headers: {
 				Authorization: `Bot ${jeton}`,
 				"Content-Type": "application/json",
-				"User-Agent": "RoseGriffonSite (https://rosegriffon.fr, 1.0)",
+				"User-Agent": `RoseGriffonSite (${SITE_URL}, 1.0)`,
 			},
 			method: "POST",
 			signal: AbortSignal.timeout(8000),

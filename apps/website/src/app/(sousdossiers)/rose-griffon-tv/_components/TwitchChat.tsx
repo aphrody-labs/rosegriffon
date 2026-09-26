@@ -18,6 +18,9 @@ import { useTheme } from "@/contexts/theme-context";
 import { authClient } from "@/lib/auth-client";
 import type { ClientSession } from "@/lib/auth-client";
 import { Bell, BellOff, LogIn, LogOut, MessageSquare } from "@/lib/icons-config";
+import { SITE_URL } from "@/lib/site-url";
+
+const SITE_HOSTNAME = new URL(SITE_URL).hostname;
 
 type SessionUser = ClientSession["user"];
 
@@ -334,7 +337,7 @@ export function TwitchChat({ channelName = "rose_griffontv" }: TwitchChatProps) 
 							)}
 
 							<iframe
-								src={`https://www.twitch.tv/embed/${channelName}/chat?parent=${typeof window !== "undefined" ? window.location.hostname : "rosegriffon.fr"}`}
+								src={`https://www.twitch.tv/embed/${channelName}/chat?parent=${typeof window !== "undefined" ? window.location.hostname : SITE_HOSTNAME}`}
 								width="100%"
 								height="100%"
 								className="border-0 flex-1"

@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { rechercherPartout } from "@rosegriffon/search";
 
 import { getPgPool } from "@/lib/db/pg";
+import { absoluteUrl } from "@/lib/site-url";
 import { SearchPageContent } from "./search-page";
 
 export const metadata: Metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/search" },
+	alternates: { canonical: absoluteUrl("/search") },
 	description:
 		"Recherche unifiée dans tout le réseau Rose Griffon : Association, Wiki Azalée et E-Sport Achilléa.",
 	robots: { follow: true, index: false },

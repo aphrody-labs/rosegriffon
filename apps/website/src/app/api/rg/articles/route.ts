@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getPgPool } from "@/lib/db/pg";
+import { SITE_URL } from "@/lib/site-url";
 
 // Articles publiés — re-fetch toutes les 5 min (compromis fraîcheur/CDN hit).
 export const revalidate = 300;
@@ -46,7 +47,7 @@ export async function GET(request: Request) {
 		);
 
 		// Ajouter l'URL complète pour les images et les liens
-		const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.rosegriffon.fr";
+		const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
 
 		const formattedArticles = articles.map((article) => ({
 			...article,

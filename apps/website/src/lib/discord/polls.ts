@@ -21,6 +21,7 @@ import "server-only";
 // ────────────────────────────────────────────────────────────────────────────
 
 import { getPgPool } from "@/lib/db/pg";
+import { SITE_URL } from "@/lib/site-url";
 
 import { CONTEXTE_MENTIONS_VIDE, type ContexteMentions } from "./markdown-ast";
 import type { OptionSondage, Sondage, VisuelSondage } from "./polls-types";
@@ -80,7 +81,7 @@ export function estIdentifiantSondage(valeur: string): boolean {
 const ORIGINE_STOCKAGE = (() => {
 	const brut = process.env.NEXT_PUBLIC_SUPABASE_URL;
 	if (!brut || brut.startsWith("eyJ2Ijo") || brut.startsWith("http://127.")) {
-		return "https://rosegriffon.fr";
+		return SITE_URL;
 	}
 	return brut.replace(/\/+$/, "");
 })();
