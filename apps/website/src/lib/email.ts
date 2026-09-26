@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 
+import { absoluteUrl } from "@/lib/site-url";
+
 interface OrderConfirmationData {
 	orderId: string;
 	customerEmail: string;
@@ -24,11 +26,11 @@ interface OrderConfirmationData {
 const transporter = nodemailer.createTransport({
 	auth: {
 		pass: process.env.SMTP_PASSWORD,
-		user: process.env.SMTP_USER,
+		user: process.env.SMTP_USER || "contact@aphrody.com",
 	},
-	host: process.env.SMTP_HOST || "smtp.gmail.com",
-	port: parseInt(process.env.SMTP_PORT || "587", 10),
-	secure: process.env.SMTP_SECURE === "true", // true pour 465, false pour 587,
+	host: process.env.SMTP_HOST || "ssl0.ovh.net",
+	port: parseInt(process.env.SMTP_PORT || "465", 10),
+	secure: process.env.SMTP_SECURE === "true" || process.env.SMTP_PORT === "465" || !process.env.SMTP_PORT, // true pour 465 (OVH), false pour 587
 	connectionTimeout: 5000,
 	greetingTimeout: 5000,
 	socketTimeout: 5000,
@@ -86,14 +88,22 @@ export async function sendEmail({
 		};
 	}
 	try {
+		const defaultFrom =
+			process.env.SMTP_FROM ||
+			process.env.MAIL_FROM ||
+			(process.env.NEXT_PUBLIC_APP_NAME === "Rose Griffon"
+				? '"Rose Griffon" <contact@rosegriffon.fr>'
+				: '"Aphrody" <contact@aphrody.com>');
+		const defaultReplyTo =
+			replyTo || process.env.SMTP_REPLY_TO || process.env.MAIL_REPLY_TO || "contact@aphrody.com";
 		const info = await transporter.sendMail({
-			from: from || process.env.SMTP_FROM || '"Rose Griffon" <contact@rosegriffon.fr>',
+			from: from || defaultFrom,
 			html,
 			subject,
 			// Repli texte brut : certains clients refusent un message sans partie texte.
 			text: text ?? html.replaceAll(/<[^>]*>/g, " ").replaceAll(/\s+/g, " ").trim(),
 			to,
-			replyTo,
+			replyTo: defaultReplyTo,
 			cc,
 			bcc,
 			attachments,
@@ -508,7 +518,7 @@ export async function sendTournamentNotificationEmail(data: {
 	};
 
 	const title = titles[data.type] || "Information tournoi";
-	const url = data.tournamentUrl || "https://rosegriffon.fr/achillea/tournaments";
+	const url = data.tournamentUrl || absoluteUrl("/achillea/tournaments");
 
 	const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1a1a1a">
