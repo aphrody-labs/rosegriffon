@@ -286,6 +286,16 @@ export const googleProvider = {
 } as const;
 
 /**
+ * Provider GitHub partagé pour l'authentification OAuth GitHub.
+ */
+export const githubProvider = {
+	github: {
+		clientId: process.env.GITHUB_CLIENT_ID ?? process.env.AUTH_GITHUB_ID ?? "",
+		clientSecret: process.env.GITHUB_CLIENT_SECRET ?? process.env.AUTH_GITHUB_SECRET ?? "",
+	},
+} as const;
+
+/**
  * Common field mappings for Better Auth tables.
  * Ensures consistent column names across all apps.
  */

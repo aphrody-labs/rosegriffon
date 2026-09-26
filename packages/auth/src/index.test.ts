@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { commonAuthOptions, deuxFacteurs, isAdmin, isStaff, resolveProfile } from "./index";
+import { commonAuthOptions, deuxFacteurs, githubProvider, isAdmin, isStaff, resolveProfile } from "./index";
 
 describe("resolveProfile", () => {
 	const mockSupabase = {
@@ -114,5 +114,14 @@ describe("deuxFacteurs", () => {
 		const plugin = deuxFacteurs("Azalée");
 		const champ = plugin.schema?.user?.fields.twoFactorEnabled as { fieldName?: string };
 		expect(champ.fieldName).toBe("two_factor_enabled");
+	});
+});
+
+describe("githubProvider", () => {
+	it("exposes properly structured github provider configuration", () => {
+		expect(githubProvider).toBeDefined();
+		expect(githubProvider.github).toBeDefined();
+		expect(typeof githubProvider.github.clientId).toBe("string");
+		expect(typeof githubProvider.github.clientSecret).toBe("string");
 	});
 });
