@@ -180,13 +180,13 @@ describe("auth x-api-key sur écritures", () => {
       headers: {
         "content-type": "image/png",
         "x-api-key": API_KEY,
-        "x-forwarded-host": "cdn.rpbey.fr",
+        "x-forwarded-host": "cdn.rosegriffon.fr",
       },
       body: new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
     });
     const body = await res.json();
     expect(res.status).toBe(200);
-    expect(body.url).toBe(`https://cdn.rpbey.fr/${body.id}`);
+    expect(body.url).toBe(`https://cdn.rosegriffon.fr/${body.id}`);
   });
 
   test("DELETE /images/:id mauvais id → 400", async () => {

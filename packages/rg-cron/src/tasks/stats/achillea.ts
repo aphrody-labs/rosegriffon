@@ -128,8 +128,7 @@ export async function collecterAudienceAchillea(): Promise<{
 		}
 		const [horodatage, host, , uri, statut, octets, duree, , , , , ip] = champs;
 		const instantSite = Date.parse(horodatage ?? "");
-		if (host && (host === "rosegriffon.fr" || host.endsWith(".rosegriffon.fr") ||
-			host === "rpbey.fr" || host.endsWith(".rpbey.fr")) &&
+		if (host && (host === "rosegriffon.fr" || host.endsWith(".rosegriffon.fr")) &&
 			Number.isFinite(instantSite) && instantSite >= debut) {
 			const windowStart = new Date(Math.floor(instantSite / 3600_000) * 3600_000).toISOString();
 			const key = `${host}\t${windowStart}`;
