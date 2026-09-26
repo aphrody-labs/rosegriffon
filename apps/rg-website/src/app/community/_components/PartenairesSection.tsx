@@ -6,6 +6,7 @@ import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
 import { TeamStructuredData } from "@/components/shared/StructuredData";
 import getTeamMembers from "@/lib/get-team-members";
 import { ArrowUpRight } from "@/lib/icons-config";
+import { absoluteUrl } from "@/lib/site-url";
 
 /**
  * Section serveur (RSC) : les partenaires sont récupérés côté serveur et rendus
@@ -29,7 +30,7 @@ export default async function PartenairesSection() {
 			{collaborateurs.length > 0 && (
 				<TeamStructuredData
 					pageName="Nos Partenaires"
-					url="https://rosegriffon.fr/community"
+					url={absoluteUrl("/community")}
 					members={collaborateurs.map((member) => ({
 						name: member.name,
 						role: member.role || undefined,

@@ -6,19 +6,20 @@ import Link from "next/link";
 import { PageContainer, PageHero, SectionCard } from "@/components/shared/PageShell";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { Mail, MessageCircle, Scale, Shield, Users } from "@/lib/icons-config";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
 	title: "Cellule de médiation · Rose Griffon",
 	description:
 		"Un espace neutre, confidentiel et indépendant du staff dirigeant : missions de la cellule de médiation Rose Griffon et comment la contacter.",
 	alternates: {
-		canonical: "https://rosegriffon.fr/cellule-de-mediation",
+		canonical: absoluteUrl("/cellule-de-mediation"),
 	},
 	openGraph: {
 		title: "Cellule de médiation · Rose Griffon",
 		description:
 			"Un espace neutre, confidentiel et indépendant pour le bien-être de tous les membres de Rose Griffon.",
-		url: "https://rosegriffon.fr/cellule-de-mediation",
+		url: absoluteUrl("/cellule-de-mediation"),
 		type: "website",
 	},
 };

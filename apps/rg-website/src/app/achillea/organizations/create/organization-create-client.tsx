@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
+import { absoluteUrl } from "@/lib/site-url";
 import { normalizeNames } from "@rosegriffon/achillea-core/names";
 import { SocialMedia, type SocialMediaDTO } from "@rosegriffon/achillea-types/domain/common";
 import {
@@ -124,7 +125,7 @@ export default function OrganizationCreationPage() {
 				name: name.trim(),
 				normalizedName: normalizedName.trim(),
 				description: description.trim() || "Organisation esport officielle Achilléa.",
-				logo: logo.trim() || "https://rosegriffon.fr/achillea/achillea.png",
+				logo: logo.trim() || absoluteUrl("/achillea/achillea.png"),
 				origin: origin,
 				orgManagers: [],
 				socialMedias,

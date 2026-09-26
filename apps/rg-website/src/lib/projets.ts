@@ -4,6 +4,7 @@ import { PfpIcon } from "@/components/icons/PfpIcon";
 
 import type { EMOTES } from "@/lib/emotes";
 import { Hash, Palette, Smile, Tv, Users } from "@/lib/icons-config";
+import { absoluteUrl } from "@/lib/site-url";
 
 /**
  * Source unique des projets Rose Griffon.
@@ -47,7 +48,7 @@ export const PROJETS: Projet[] = [
 		emote: "roy-coeur",
 		href: "/iergday",
 		icone: Hash,
-		image: "https://rosegriffon.fr/storage/v1/object/public/assets/campagnes/iergday/affiche-v2.webp",
+		image: absoluteUrl("/storage/v1/object/public/assets/campagnes/iergday/affiche-v2.webp"),
 		slug: "iergday",
 		surAccueil: true,
 		titre: "IERG Day",

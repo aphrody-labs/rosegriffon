@@ -5,6 +5,8 @@
  */
 import Stripe from "stripe";
 
+import { SITE_URL } from "@/lib/site-url";
+
 let cached: Stripe | null = null;
 
 export function getStripe(): Stripe {
@@ -25,7 +27,7 @@ export function getStripe(): Stripe {
 		timeout: 20_000,
 		appInfo: {
 			name: "rosegriffon.fr",
-			url: "https://rosegriffon.fr",
+			url: SITE_URL,
 		},
 	});
 	return cached;

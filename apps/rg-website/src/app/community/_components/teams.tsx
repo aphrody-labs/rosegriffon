@@ -3,6 +3,7 @@ import Link from "next/link";
 import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
 import { TeamStructuredData } from "@/components/shared/StructuredData";
 import getTeamMembers from "@/lib/get-team-members";
+import { absoluteUrl } from "@/lib/site-url";
 
 // Rôle générique inséré par le sync Discord en attendant un libellé précis :
 // On l'affiche en "Membre" pour ne pas exposer le placeholder technique.
@@ -56,7 +57,7 @@ async function TeamsSection() {
 		<section className="flex flex-col gap-10 lg:gap-12">
 			<TeamStructuredData
 				pageName="Le Staff RG"
-				url="https://rosegriffon.fr/community"
+				url={absoluteUrl("/community")}
 				members={allMembers}
 			/>
 			{/* Header Section */}

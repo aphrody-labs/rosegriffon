@@ -10,18 +10,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Heart, Mail, Users } from "@/lib/icons-config";
+import { absoluteUrl } from "@/lib/site-url";
 import { BreadcrumbSchema, OrganizationSchema } from "@/components/shared/StructuredData";
 
 export const metadata: Metadata = {
 	title: "À propos | Rose Griffon",
 	description: "À propos de l'association Rose Griffon, la communauté Inazuma Eleven en France. Découvrez comment nous rejoindre, nous soutenir ou nous contacter.",
 	alternates: {
-		canonical: "https://rosegriffon.fr/a-propos",
+		canonical: absoluteUrl("/a-propos"),
 	},
 	openGraph: {
 		title: "À propos | Rose Griffon",
 		description: "À propos de l'association Rose Griffon, la communauté Inazuma Eleven en France.",
-		url: "https://rosegriffon.fr/a-propos",
+		url: absoluteUrl("/a-propos"),
 		type: "website",
 		images: [
 			{

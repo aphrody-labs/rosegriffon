@@ -6,11 +6,12 @@ import RgEmote from "@/components/shared/emotes/RgEmote";
 import { BreadcrumbSchema, ImageObjectSchema } from "@/components/shared/StructuredData";
 
 import { ExternalLink, Info, Users } from "@/lib/icons-config";
+import { absoluteUrl } from "@/lib/site-url";
 
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/projets/muraux" },
+	alternates: { canonical: absoluteUrl("/projets/muraux") },
 	description:
 		"Les fresques murales Inazuma Eleven réalisées par la communauté Rose Griffon : genèse, lieux et coulisses.",
 	title: "Fresques murales | Rose Griffon",
@@ -49,7 +50,7 @@ export default function MurauxPage() {
 			{murals.map((mural, index) => (
 				<ImageObjectSchema
 					key={index}
-					url={`https://rosegriffon.fr${mural.image}`}
+					url={absoluteUrl(mural.image)}
 					name={mural.title}
 					description={mural.description}
 					author="Communauté Rose Griffon"

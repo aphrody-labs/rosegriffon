@@ -20,6 +20,7 @@ import { PatreonConnectButton } from "@/components/patreon/PatreonConnectButton"
 
 import { requirePatreonCreator } from "@/lib/auth-helpers";
 import { fetchLiveCampaignSnapshot } from "@/lib/patreon/live";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -74,7 +75,7 @@ export default async function AdminPatreonPage() {
 		? [...new Set(live.members.flatMap((m) => m.tier_titles))].toSorted()
 		: [];
 
-	const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL ?? "https://rosegriffon.fr"}/api/auth/oauth2/callback/patreon`;
+	const redirectUri = absoluteUrl("/api/auth/oauth2/callback/patreon");
 	const clientId = process.env.PATREON_CLIENT_ID;
 	const clientIdMasked = clientId ? `${clientId.slice(0, 8)}…${clientId.slice(-4)}` : null;
 

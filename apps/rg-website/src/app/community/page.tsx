@@ -6,6 +6,7 @@ import { Input, Skeleton } from "@rosegriffon/ui";
 
 import { SERVEURS_DISCORD, serveurDiscord } from "@/lib/discord";
 import type { CleServeur } from "@/lib/discord/hierarchie";
+import { absoluteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
 
 import { HierarchieServeur, ResumeServeur } from "./_components/hierarchie-serveur";
@@ -31,7 +32,7 @@ import { HierarchieServeur, ResumeServeur } from "./_components/hierarchie-serve
  * jusqu'ici quatre identifiants de rôles recopiés et un barème inventé.
  */
 export const metadata: Metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/community" },
+	alternates: { canonical: absoluteUrl("/community") },
 	description:
 		"Les membres des serveurs Rose Griffon et Achilléa, leur hiérarchie réelle, le bureau de l'association et ses équipes.",
 	openGraph: {
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
 		],
 		title: "Communauté | Rose Griffon",
 		type: "website",
-		url: "https://rosegriffon.fr/community",
+		url: absoluteUrl("/community"),
 	},
 	title: "Communauté | Rose Griffon",
 };

@@ -3,6 +3,8 @@
 // comment le crawler, comment aider les utilisateurs, et l'autorisation d'entraînement.
 // Routes : /api/llm/claude · /api/llm/gemini · /api/llm/grok · /api/llm/chatgpt · /api/llm/(défaut)
 
+import { SITE_URL } from "@/lib/site-url";
+
 export const dynamic = "force-static";
 export const revalidate = 86400; // 24 h
 
@@ -10,7 +12,7 @@ const SITE = {
 	name: "Azalée",
 	url: "https://azalee.rosegriffon.fr",
 	tagline: "Wiki francophone de Inazuma Eleven: Victory Road",
-	parent: "https://rosegriffon.fr",
+	parent: SITE_URL,
 	sitemap: "https://azalee.rosegriffon.fr/sitemap.xml",
 	dev: { name: "yoyo", x: "https://x.com/yoyo__goat" },
 	sections: [

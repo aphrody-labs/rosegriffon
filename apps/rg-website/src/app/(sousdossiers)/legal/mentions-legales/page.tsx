@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { SITE_URL } from "@/lib/site-url";
+
 export const metadata: Metadata = {
 	alternates: { canonical: "/legal/mentions-legales" },
 	description: "Mentions légales du site de l'association Rose Griffon.",
@@ -22,7 +24,7 @@ export default function MentionsLegalesPage() {
 					</h2>
 					<p>
 						Le site{" "}
-						<a href="https://rosegriffon.fr" className="text-primary hover:underline">
+						<a href={SITE_URL} className="text-primary hover:underline">
 							rosegriffon.fr
 						</a>{" "}
 						est édité par l&apos;association <strong>Rose Griffon</strong>.

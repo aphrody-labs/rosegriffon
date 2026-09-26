@@ -1,4 +1,6 @@
-const SITE_AUTH_URL = "https://rosegriffon.fr";
+import { SITE_URL } from "@/lib/site-url";
+
+const SITE_HOSTNAME = new URL(SITE_URL).hostname;
 
 function isLoopback(hostname: string): boolean {
 	return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
@@ -14,8 +16,8 @@ export function resolveAuthBaseURL(input: {
 	if (origin) {
 		try {
 			const parsed = new URL(origin);
-			const rosegriffonHost = parsed.hostname === "rosegriffon.fr" || parsed.hostname.endsWith(".rosegriffon.fr");
-			if (parsed.protocol === "https:" && rosegriffonHost) return SITE_AUTH_URL;
+			const rosegriffonHost = parsed.hostname === SITE_HOSTNAME || parsed.hostname.endsWith(`.${SITE_HOSTNAME}`);
+			if (parsed.protocol === "https:" && rosegriffonHost) return SITE_URL;
 			if (!input.production && /^https?:$/.test(parsed.protocol) && isLoopback(parsed.hostname)) {
 				return parsed.origin;
 			}
@@ -35,5 +37,5 @@ export function resolveAuthBaseURL(input: {
 			// Fall through to the canonical public site.
 		}
 	}
-	return SITE_AUTH_URL;
+	return SITE_URL;
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
+import { absoluteUrl } from "@/lib/site-url";
 import type { Country } from "@rosegriffon/achillea-types/domain/common";
 import {
 	Button,
@@ -70,7 +71,7 @@ export default function CreateClanPage() {
 
 			const res = await client.clans.create({
 				founders,
-				logo: "https://rosegriffon.fr/achillea/achillea.png",
+				logo: absoluteUrl("/achillea/achillea.png"),
 				name: clanName,
 				normalizedName: clanName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
 				shortName: clanTag,

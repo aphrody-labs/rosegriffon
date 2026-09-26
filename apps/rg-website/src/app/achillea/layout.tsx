@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./achillea.css";
 import "./primeicons.css";
 
+import { absoluteUrl } from "@/lib/site-url";
+
 export const metadata: Metadata = {
 	title: {
 		default: "Achilléa — E-Sport & Compétition Inazuma Eleven | Rose Griffon",
@@ -27,7 +29,7 @@ export const metadata: Metadata = {
 		title: "Achilléa — E-Sport & Compétition Inazuma Eleven",
 		description:
 			"La scène compétitive officielle Inazuma Eleven: Victory Road. Tournois, clans, ranked et championnats.",
-		url: "https://rosegriffon.fr/achillea",
+		url: absoluteUrl("/achillea"),
 		siteName: "Achilléa Rose Griffon",
 		locale: "fr_FR",
 		type: "website",

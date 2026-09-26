@@ -24,19 +24,20 @@ import {
 	Users,
 	Video,
 } from "@/lib/icons-config";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
 	description:
 		"Rose Griffon est porté par sa communauté. Soutenez l'association via Patreon (mensuel) ou PayPal (don ponctuel). Transparence garantie.",
 	title: "Nous soutenir · Rose Griffon",
 	alternates: {
-		canonical: "https://rosegriffon.fr/nous-soutenir",
+		canonical: absoluteUrl("/nous-soutenir"),
 	},
 	openGraph: {
 		title: "Nous soutenir · Rose Griffon",
 		description:
 			"Rose Griffon est porté par sa communauté. Soutenez l'association via Patreon (mensuel) ou PayPal (don ponctuel). Transparence garantie.",
-		url: "https://rosegriffon.fr/nous-soutenir",
+		url: absoluteUrl("/nous-soutenir"),
 		type: "website",
 		images: [
 			{

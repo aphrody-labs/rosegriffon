@@ -7,6 +7,7 @@ import { sendEmail } from "@/lib/email";
 import { fetchIdentity, parseIdentityWithMemberships } from "@/lib/patreon/client";
 import { encryptToken } from "@/lib/patreon/encryption";
 import { SCOPES_CREATOR, SCOPES_PATRON } from "@/lib/patreon/types";
+import { SITE_URL } from "@/lib/site-url";
 
 const pool = getPgPool();
 let postgresAdmin: ReturnType<typeof createPostgresClient> | undefined;
@@ -72,7 +73,7 @@ export const auth = createRoseGriffonAuth({
 
 function getBetterAuthURL(): string {
 	const configured = process.env.BETTER_AUTH_URL?.trim();
-	if (configured?.startsWith("eyJ2Ijo")) return "https://rosegriffon.fr";
+	if (configured?.startsWith("eyJ2Ijo")) return SITE_URL;
 	return resolveAuthBaseURL({ configured, production: process.env.NODE_ENV === "production" });
 }
 

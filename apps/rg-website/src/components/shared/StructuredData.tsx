@@ -9,6 +9,7 @@ import type {
 	WithContext,
 } from "schema-dts";
 import { NETWORK_SAME_AS } from "@/lib/social-links";
+import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 
 // ... existing imports ...
 
@@ -30,12 +31,12 @@ export function ImageObjectSchema({
 	const schema: WithContext<ImageObject> = {
 		"@context": "https://schema.org",
 		"@type": "ImageObject",
-		acquireLicensePage: "https://rosegriffon.fr/legal/cgu",
+		acquireLicensePage: absoluteUrl("/legal/cgu"),
 		author: author ? { "@type": "Person", name: author } : undefined,
 		contentUrl: url,
 		datePublished: datePublished,
 		description: description,
-		license: "https://rosegriffon.fr/legal/cgu",
+		license: absoluteUrl("/legal/cgu"),
 		name: name,
 	};
 
@@ -52,7 +53,7 @@ export function OrganizationSchema() {
 		"@context": "https://schema.org",
 		"@type": "Organization",
 		// Même `@id` que le `@graph` du layout → Google fusionne les deux nœuds.
-		"@id": "https://rosegriffon.fr/#organization",
+		"@id": absoluteUrl("/#organization"),
 		address: {
 			"@type": "PostalAddress",
 			addressCountry: "FR",
@@ -60,12 +61,12 @@ export function OrganizationSchema() {
 		description:
 			"Association française Inazuma Eleven. Rassemble la communauté, organise des événements et produit du contenu.",
 		foundingDate: "2019",
-		logo: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
+		logo: absoluteUrl("/RG_Logo_V2.5.webp"),
 		name: "Rose Griffon",
 		// Réseau Rose Griffon : 3 domaines siblings + tous les réseaux sociaux.
 		// Liste identique sur website / azalee / achillea (entité cohérente).
 		sameAs: NETWORK_SAME_AS,
-		url: "https://rosegriffon.fr",
+		url: SITE_URL,
 	};
 
 	return (
@@ -86,11 +87,11 @@ export function WebsiteSchema() {
 			"@type": "SearchAction",
 			target: {
 				"@type": "EntryPoint",
-				urlTemplate: "https://rosegriffon.fr/search?q={search_term_string}",
+				urlTemplate: absoluteUrl("/search?q={search_term_string}"),
 			},
 			"query-input": "required name=search_term_string",
 		} as any /* eslint-enable @typescript-eslint/no-explicit-any */,
-		url: "https://rosegriffon.fr",
+		url: SITE_URL,
 	};
 
 	return (
@@ -160,7 +161,7 @@ export function ArticleSchema({
 			"@type": "Organization",
 			logo: {
 				"@type": "ImageObject",
-				url: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
+				url: absoluteUrl("/RG_Logo_V2.5.webp"),
 			},
 			name: "Rose Griffon",
 		},
@@ -184,7 +185,7 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
 		"@type": "BreadcrumbList",
 		itemListElement: items.map((item, index) => ({
 			"@type": "ListItem",
-			item: item.item.startsWith("http") ? item.item : `https://rosegriffon.fr${item.item}`,
+			item: item.item.startsWith("http") ? item.item : absoluteUrl(item.item),
 			name: item.name,
 			position: index + 1,
 		})),
@@ -264,8 +265,8 @@ export function TeamStructuredData({ pageName, url, members }: TeamStructuredDat
 		"@type": "CollectionPage",
 		name: pageName,
 		url,
-		isPartOf: { "@id": "https://rosegriffon.fr/#website" },
-		about: { "@id": "https://rosegriffon.fr/#organization" },
+		isPartOf: { "@id": absoluteUrl("/#website") },
+		about: { "@id": absoluteUrl("/#organization") },
 		mainEntity: {
 			"@type": "ItemList",
 			numberOfItems: members.length,
@@ -278,7 +279,7 @@ export function TeamStructuredData({ pageName, url, members }: TeamStructuredDat
 					...(member.role ? { jobTitle: member.role } : {}),
 					...(member.image ? { image: member.image } : {}),
 					...(member.sameAs && member.sameAs.length > 0 ? { sameAs: member.sameAs } : {}),
-					memberOf: { "@id": "https://rosegriffon.fr/#organization" },
+					memberOf: { "@id": absoluteUrl("/#organization") },
 				},
 			})),
 		},
@@ -334,7 +335,7 @@ export function EventSchema({
 		organizer: {
 			"@type": "Organization",
 			name: "Rose Griffon",
-			url: "https://rosegriffon.fr",
+			url: SITE_URL,
 		},
 		startDate: startDate,
 		url: url,

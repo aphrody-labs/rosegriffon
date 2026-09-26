@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 
 import { createPostgresClient } from "@rosegriffon/db/service";
+import { absoluteUrl } from "@/lib/site-url";
 
 export type ReminderStage = "announce" | "reminder1" | "reminder2" | "lastcall";
 
@@ -23,8 +24,7 @@ interface MailContent {
 }
 
 function migrationLink(): string {
-	const base = process.env.NEXT_PUBLIC_BASE_URL ?? "https://rosegriffon.fr";
-	return `${base}/patreon-migration`;
+	return absoluteUrl("/patreon-migration");
 }
 
 function buildContent(stage: ReminderStage, fullName?: string): MailContent {

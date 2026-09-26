@@ -6,6 +6,7 @@ import { getStripeCouponForUser } from "@/lib/patreon/discount";
 import { getStripe } from "@/lib/shop/stripe";
 import { getCart } from "@/lib/shop/cart";
 import { getServerUser } from "@/lib/auth-helpers";
+import { SITE_URL } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
 		const couponId = userId ? await getStripeCouponForUser(userId) : null;
 
 		const origin =
-			req.headers.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://rosegriffon.fr";
+			req.headers.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? SITE_URL;
 
 		// Idempotency key par requête — protège contre double-clic / retry réseau.
 		// Inclut l'identifiant user + signature du panier pour différencier des

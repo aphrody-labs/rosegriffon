@@ -1,3 +1,5 @@
+import { SITE_URL } from "@/lib/site-url";
+
 /**
  * Liens publics canoniques du réseau Rose Griffon.
  *
@@ -41,7 +43,7 @@ export const NETWORK_SOCIAL_LINKS = [
 ] as const;
 
 export const NETWORK_SITES = [
-	"https://rosegriffon.fr",
+	SITE_URL,
 	"https://azalee.rosegriffon.fr",
 	"https://achillea.rosegriffon.fr",
 ] as const;

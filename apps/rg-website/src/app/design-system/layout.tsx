@@ -2,6 +2,8 @@ import { Fraunces, JetBrains_Mono, Poppins } from "next/font/google";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
 
+import { absoluteUrl } from "@/lib/site-url";
+
 const fraunces = Fraunces({
 	axes: ["opsz", "SOFT", "WONK"],
 	display: "swap",
@@ -29,7 +31,7 @@ const superCartoon = localFont({
 });
 
 export const metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/design-system" },
+	alternates: { canonical: absoluteUrl("/design-system") },
 	description:
 		"Showcase du design system @rosegriffon/ui : 4 thèmes, tokens MD3, composants — DA Rose Griffon (manga / gaming / Inazuma).",
 	title: "Design System — Rose Griffon",

@@ -13,6 +13,14 @@ import { okResponseSchema, userDtoSchema } from "./common";
 import { AchilleaResource, type AchilleaClientResult } from "./http";
 import type { RealtimeTokenResponse } from "./pending-contracts";
 
+/**
+ * Origine publique du site Rose Griffon. Ce paquet est consommé côté navigateur
+ * (client Achilléa) autant que côté serveur : pas d'accès à `@/lib/site-url`
+ * (interne à `apps/website`), donc un repli local au même schéma
+ * (`process.env.NEXT_PUBLIC_BASE_URL` puis l'apex de production).
+ */
+const RG_ORIGIN = process.env.NEXT_PUBLIC_BASE_URL || "https://rosegriffon.fr";
+
 export const sessionUserSchema = userDtoSchema satisfies z.ZodType<SessionUserDTO>;
 
 export const realtimeTokenResponseSchema = z.object({
@@ -48,14 +56,14 @@ export class AuthResource extends AchilleaResource {
 	 * propriétaire de l'autorisation et du callback Discord.
 	 */
 	discordLoginUrl(state?: string): string {
-		const url = new URL("https://rosegriffon.fr/login");
+		const url = new URL(`${RG_ORIGIN}/login`);
 		if (state) url.searchParams.set("redirect", state);
 		return url.toString();
 	}
 
 	/** Callback Discord canonique enregistré dans le portail développeur. */
 	callbackUrl(): string {
-		return "https://rosegriffon.fr/api/auth/callback/discord";
+		return `${RG_ORIGIN}/api/auth/callback/discord`;
 	}
 
 	/** URL de `GET /auth/challonge` — liaison du compte Challonge (session requise). */

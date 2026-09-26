@@ -1,6 +1,7 @@
 import "server-only";
 
 import { pgQuery } from "@/lib/db/platform";
+import { SITE_URL } from "@/lib/site-url";
 
 /**
  * Inventaire de contenu et disponibilité, site par site.
@@ -78,7 +79,7 @@ export async function lireSites(): Promise<Site[]> {
 		actualites,
 		tweets,
 	] = await Promise.all([
-		sonder("https://rosegriffon.fr/"),
+		sonder(SITE_URL),
 		sonder("https://azalee.rosegriffon.fr/"),
 		sonder("https://achillea.rosegriffon.fr/"),
 		sonder("https://api.rosegriffon.fr/health"),

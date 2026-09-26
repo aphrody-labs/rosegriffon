@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 
+import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-	alternates: { canonical: "https://rosegriffon.fr/rose-griffon-tv" },
+	alternates: { canonical: absoluteUrl("/rose-griffon-tv") },
 	description:
 		"Votre rendez-vous quotidien 100% Inazuma Eleven sur Twitch et YouTube avec Rose Griffon TV.",
 	openGraph: {
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 		],
 		title: "Rose Griffon TV | 100% Inazuma Eleven",
 		type: "website",
-		url: "https://rosegriffon.fr/rose-griffon-tv",
+		url: absoluteUrl("/rose-griffon-tv"),
 	},
 	title: "Rose Griffon TV | 100% Inazuma Eleven",
 	twitter: {

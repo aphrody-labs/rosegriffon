@@ -23,6 +23,7 @@ import {
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { WikiPagination } from "@/components/shared/WikiPagination";
 import { dimensionsImage } from "@/lib/images/dimensions";
+import { SITE_URL } from "@/lib/site-url";
 import { parseSearchParams } from "@/lib/validations";
 import {
 	chargerCampagne,
@@ -86,7 +87,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const POSTS_PAR_PAGE = 24;
-const ORIGINE = "https://rosegriffon.fr";
+const ORIGINE = SITE_URL;
 
 /** Lit `?campagne=` sans toucher au schéma partagé `parseSearchParams`. */
 function lireSlug(params: Record<string, string | string[] | undefined>): string | undefined {
