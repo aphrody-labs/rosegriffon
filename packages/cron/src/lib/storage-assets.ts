@@ -22,9 +22,15 @@
 
 import { resignerPiecesJointes } from "./discord-rest.js";
 
-/** Base du service Storage self-host — JAMAIS l'origine publique côté serveur. */
+/**
+ * Base du service Storage self-host — JAMAIS l'origine publique côté serveur.
+ *
+ * Repli sur rg-api:8800 (2026-09-26, aphrody-infra docs/PORTS-AND-DOMAINS.md item 13) :
+ * rg-api absorbe le storage en-process et c'est la seule cible que la conf nginx live
+ * route réellement ; `:8811` n'est jamais écouté en production.
+ */
 export function baseStorage(): string {
-	const brut = Bun.env.SUPABASE_INTERNAL_URL || "http://127.0.0.1:8811";
+	const brut = Bun.env.SUPABASE_INTERNAL_URL || "http://127.0.0.1:8800";
 	return brut.replace(/\/+$/, "");
 }
 
