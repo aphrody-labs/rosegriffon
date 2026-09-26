@@ -97,7 +97,7 @@ if (import.meta.main) {
 	void startRealtimeListener();
 	app.listen({ port: PORT, hostname: HOST }, () => {
 		console.info(`[rg-api] Rose Griffon Unified API listening on http://${HOST}:${PORT}`);
-		console.info(`[rg-api] Unified services active: API (:8800), Storage (/storage/v1), Realtime (/realtime/v1), CDN (/upload, /images)`);
+		console.info(`[rg-api] Unified services active: API (:${PORT}), Storage (/storage/v1), Realtime (/realtime/v1), CDN (/upload, /images)`);
 		console.info(`[rg-api] OpenAPI documentation available on http://${HOST}:${PORT}/docs`);
 	});
 }

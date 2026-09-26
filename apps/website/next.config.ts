@@ -295,14 +295,15 @@ const nextConfig: NextConfig = {
 		// Storage self-host : nginx intercepte déjà /storage/v1/ et le route vers
 		// rg-storage.service (127.0.0.1:8810). Ce rewrite reste le filet de repli
 		// quand l'app est servie sans nginx devant (dev local, healthcheck direct).
+		const FALLBACK_STORAGE_URL = "http://127.0.0.1:8811";
 		const storageUrl =
 			process.env.SUPABASE_INTERNAL_URL ||
 			process.env.NEXT_PUBLIC_SUPABASE_URL ||
-			"http://127.0.0.1:8811";
+			FALLBACK_STORAGE_URL;
 
 		const destination = storageUrl.startsWith("http")
 			? `${storageUrl}/storage/v1/:path*`
-			: `http://127.0.0.1:8811/storage/v1/:path*`;
+			: `${FALLBACK_STORAGE_URL}/storage/v1/:path*`;
 
 		return [
 			{
