@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { getPgPool } from "@/lib/db/pg";
+import { SITE_URL } from "@/lib/site-url";
 import { wikiService } from "@/lib/wiki-service";
 
 /**
@@ -351,11 +352,9 @@ async function passifs(baseUrl: string): Promise<MetadataRoute.Sitemap> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-	// Host canonique (apex, sans www) — même normalisation que `app/sitemap.ts`.
-	const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "https://rosegriffon.fr").replace(
-		"://www.",
-		"://"
-	);
+	// Host canonique (apex, sans www) — même normalisation que `app/sitemap.ts`,
+	// désormais partagée via `SITE_URL` (lib/site-url.ts).
+	const baseUrl = SITE_URL;
 	const lastModified = new Date();
 
 	const [personnagesUrls, techniquesUrls, objetsUrls, aurasUrls, tactiquesUrls, famillesUrls, passifsUrls] =

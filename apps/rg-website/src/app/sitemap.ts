@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { getPgPool } from "@/lib/db/pg";
+import { SITE_URL } from "@/lib/site-url";
 
 // Le plan de site doit refléter les chroniques publiées, qui changent sans
 // redéploiement. Généré à la demande par le service, pas au build : figé au
@@ -97,11 +98,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	// Host canonique (apex, sans www) : doit correspondre au `metadataBase`
 	// (https://rosegriffon.fr) du layout. next.config redirige www → apex en 301,
 	// donc émettre des URLs www imposerait un saut de redirection aux crawlers et
-	// brouillerait le signal canonique. On normalise vers l'apex.
-	const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "https://rosegriffon.fr").replace(
-		"://www.",
-		"://",
-	);
+	// brouillerait le signal canonique. `SITE_URL` (lib/site-url.ts) applique la
+	// même normalisation ; ce fichier, `app/robots.ts` et `app/wiki/sitemap.ts`
+	// la recopiaient chacun séparément.
+	const baseUrl = SITE_URL;
 	const lastModified = new Date();
 	return [
 		...ROUTES.map(({ path, priority, changeFrequency }) => ({

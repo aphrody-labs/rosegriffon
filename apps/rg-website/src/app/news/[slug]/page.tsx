@@ -40,6 +40,7 @@ import { Badge } from "@rosegriffon/ui";
 import { isRemoteAvatar } from "@/lib/avatar";
 import { getPgPoolOrNull } from "@/lib/db/pg";
 import { extractTableOfContents } from "@/lib/lexical-utils";
+import { absoluteUrl } from "@/lib/site-url";
 
 interface ArticlePageProps {
 	params: Promise<{ slug: string }>;
@@ -291,7 +292,12 @@ export async function generateMetadata({ params, searchParams }: ArticlePageProp
 		`${news.title} - Actualites Inazuma Eleven Victory Road`;
 	const publishedDate = news.published_at || news.created_at;
 	const modifiedDate = news.updated_at || publishedDate;
-	const canonicalUrl = `https://azalee.rosegriffon.fr/news/${slug}`;
+	// Pas `azalee.rosegriffon.fr` : cette route est servie par `apps/website` sous
+	// `rosegriffon.fr/news/<slug>` (voir la fonction `articlesPublies()` d'
+	// `app/sitemap.ts`) ; azalee.rosegriffon.fr ne sert plus /news depuis la
+	// fusion de l'app Azalée. Un canonical vers un autre domaine que celui qui
+	// répond demande explicitement à Google de désindexer la page réelle.
+	const canonicalUrl = absoluteUrl(`/news/${slug}`);
 
 	return {
 		alternates: { canonical: canonicalUrl },
