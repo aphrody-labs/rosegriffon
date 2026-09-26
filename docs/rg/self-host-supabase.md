@@ -42,6 +42,15 @@ Inclus dans les vhosts `azalee.rosegriffon.fr`, `rosegriffon.fr` et
 routes sur `127.0.0.1:8811`, point d'entrée des scripts serveur
 (`SUPABASE_INTERNAL_URL`).
 
+> **Mise à jour (2026-09-26, aphrody-infra `docs/PORTS-AND-DOMAINS.md` item 13)** : la conf nginx
+> réellement déployée (`rg-production.conf`) n'écoute jamais sur `:8811` et n'inclut pas
+> `supabase-internal.conf` — `rg-api:8800` absorbe storage/realtime en-process et sert
+> `/storage/v1/`/`/realtime/v1/` en pratique. Les replis codés en dur de
+> `packages/db/src/env.ts`, `packages/cron/src/lib/storage-assets.ts` et
+> `apps/website/next.config.ts` pointent donc désormais vers `127.0.0.1:8800`, pas `:8811` ; ne
+> définissez `SUPABASE_INTERNAL_URL` sur `:8811` que si `supabase-internal.conf` est effectivement
+> redéployé.
+
 ### Sous-domaines dédiés
 
 `infra/nginx/supabase.rosegriffon.conf` ajoute quatre noms publics, un seul

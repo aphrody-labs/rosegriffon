@@ -293,9 +293,11 @@ const nextConfig: NextConfig = {
 
 	async rewrites() {
 		// Storage self-host : nginx intercepte déjà /storage/v1/ et le route vers
-		// rg-storage.service (127.0.0.1:8810). Ce rewrite reste le filet de repli
-		// quand l'app est servie sans nginx devant (dev local, healthcheck direct).
-		const FALLBACK_STORAGE_URL = "http://127.0.0.1:8811";
+		// rg-api (127.0.0.1:8800), qui absorbe rg-storage en-process. Ce rewrite reste
+		// le filet de repli quand l'app est servie sans nginx devant (dev local,
+		// healthcheck direct). Repointé depuis :8811 le 2026-09-26 (aphrody-infra
+		// docs/PORTS-AND-DOMAINS.md item 13) : ce port n'est jamais écouté en production.
+		const FALLBACK_STORAGE_URL = "http://127.0.0.1:8800";
 		const storageUrl =
 			process.env.SUPABASE_INTERNAL_URL ||
 			process.env.NEXT_PUBLIC_SUPABASE_URL ||
