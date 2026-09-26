@@ -57,6 +57,8 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
 	const discordClientSecret = process.env.DISCORD_CLIENT_SECRET ?? "";
 	const twitchClientId = process.env.TWITCH_AUTH_CLIENT_ID ?? process.env.TWITCH_CLIENT_ID ?? "";
 	const twitchClientSecret = process.env.TWITCH_AUTH_CLIENT_SECRET ?? process.env.TWITCH_CLIENT_SECRET ?? "";
+	const githubClientId = process.env.GITHUB_CLIENT_ID ?? process.env.AUTH_GITHUB_ID ?? "";
+	const githubClientSecret = process.env.GITHUB_CLIENT_SECRET ?? process.env.AUTH_GITHUB_SECRET ?? "";
 	const configuredSocialProviders = {
 		...(discordClientId && discordClientSecret
 			? {
@@ -74,6 +76,14 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
 						clientId: twitchClientId,
 						clientSecret: twitchClientSecret,
 						scope: ["user:read:email", "user:read:follows", "user:read:subscriptions"],
+					},
+				}
+			: {}),
+		...(githubClientId && githubClientSecret
+			? {
+					github: {
+						clientId: githubClientId,
+						clientSecret: githubClientSecret,
 					},
 				}
 			: {}),
@@ -185,9 +195,15 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
 			"https://achillea.rosegriffon.fr",
 			"https://ranked.rosegriffon.fr",
 			"https://azalee.rosegriffon.fr",
+			"https://dragonballfr.com",
+			"https://www.dragonballfr.com",
+			"tauri://localhost",
+			"http://tauri.localhost",
 			options.baseURL,
 			"http://localhost:3000",
 			"http://localhost:3001",
+			"http://localhost:5011",
+			"http://127.0.0.1:5011",
 		].filter((value, index, values) => value && values.indexOf(value) === index),
 		advanced: {
 			...commonAuthOptions.advanced,

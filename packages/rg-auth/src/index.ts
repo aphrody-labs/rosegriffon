@@ -13,6 +13,7 @@ export {
 export {
 	commonAuthOptions,
 	ensureUserProfile,
+	githubProvider,
 	googleProvider,
 	isAdmin,
 	isStaff,
