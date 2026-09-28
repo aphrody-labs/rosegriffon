@@ -92,10 +92,11 @@ la base source est déjà locale.
 ### B. Sauvegarde Postgres complète
 
 La base `rg` (PostgreSQL 18 local, y compris le schéma `achillea` depuis sa
-fusion) est sauvegardée par [`scripts/ops/sauvegarde.ts`](../scripts/ops/sauvegarde.ts) :
+fusion) est sauvegardée par le [script Infra
+`scripts/rg/sauvegarde.ts`](https://github.com/aphrody-code/aphrody-infra/blob/main/scripts/rg/sauvegarde.ts) :
 
 ```bash
-bun scripts/ops/sauvegarde.ts
+bun --cwd ../aphrody-infra scripts/rg/sauvegarde.ts
 ```
 
 Les dumps vérifiés sont conservés sous `/var/backups/postgres`. Il n'existe
