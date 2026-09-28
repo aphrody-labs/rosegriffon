@@ -6,14 +6,9 @@ Cette fiche décrit la configuration déclarative du portage Achillea. Elle ne c
 une activation de production : aucune unité systemd, configuration Nginx, migration ou
 politique Supabase n'est appliquée automatiquement.
 
-La source de vérité machine-readable est
-[`infra/achillea/services.json`](../infra/achillea/services.json). Sa cohérence avec le code,
-les vhosts et l'unité systemd se vérifie sans réseau ni secret :
-
-```bash
-bun scripts/achillea/check-services-config.ts
-bun test scripts/achillea/check-services-config.test.ts
-```
+La source de vérité machine-readable est le [catalogue de services
+Infra](https://github.com/aphrody-code/aphrody-infra/blob/main/config/service-catalog.json).
+Les routes et unités sont contrôlées avec le dépôt Infra, sans réseau ni secret.
 
 ## Topologie
 
@@ -31,7 +26,8 @@ ranked. `rg-api.service` porte l'API unifiée Elysia/Kysely sur le même schéma
 `KillMode=control-group` garantit que ranked s'arrête avec son parent. Le front de production
 est rendu par `apps/website`; `achillea.rosegriffon.fr` redirige vers cette route.
 
-L'unité candidate est [`infra/systemd/achillea-bot.service`](../infra/systemd/achillea-bot.service).
+L'unité candidate est
+[`systemd/rg-achillea-bot.service`](https://github.com/aphrody-code/aphrody-infra/blob/main/systemd/rg-achillea-bot.service).
 Elle n'est ni copiée ni démarrée par les tests de configuration.
 
 ## Secrets
@@ -151,10 +147,11 @@ usages publics des preuves privées.
 | Images Discord        | `images/discord/`      | URL publique                           | validation backend                          | PNG, JPEG, WebP, GIF                     |
 | Preuves ranked        | `ranked-proofs/proof/` | privé, URL signée (3 600 s par défaut) | 5 Mio décodés, transport texte base64 8 Mio | PNG, JPEG, WebP détectés par magic bytes |
 
-[`infra/achillea/supabase-storage.sql`](../infra/achillea/supabase-storage.sql) décrit le bucket
-attendu et supprime d'éventuelles politiques d'écriture navigateur portant les noms Achillea.
-Il ne s'exécute pas seul. Il faut d'abord obtenir un dump valide de la base Achillea, relire
-la cible et appliquer le SQL sur ce projet uniquement.
+Le stockage est désormais décrit dans le [catalogue de services
+Infra](https://github.com/aphrody-code/aphrody-infra/blob/main/config/service-catalog.json)
+et le script de migration versionné. Il ne s'exécute pas seul. Il faut d'abord
+obtenir un dump valide de la base Achillea, relire la cible et appliquer la migration
+sur ce projet uniquement.
 
 Les références persistées pour les nouvelles preuves sont opaques (`supabase-private:…`) ;
 le backend génère l'URL signée seulement à la lecture. Les anciennes URL publiques et les
