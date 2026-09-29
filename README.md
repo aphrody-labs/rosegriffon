@@ -69,3 +69,7 @@ d’exploitation. Les secrets, journaux et notes locales restent hors Git.
 ## Licence
 
 Privé — tous droits réservés Rose Griffon.
+
+## Automatisation transversale
+
+`bun run docs:check-links` délègue la vérification documentaire à `aphrody-ops docs-links`.
