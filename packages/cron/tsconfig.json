@@ -10,8 +10,6 @@
 		"noImplicitAny": true,
 		"noImplicitOverride": true,
 		"skipLibCheck": true,
-		"ignoreDeprecations": "6.0",
-		"baseUrl": ".",
 		"rootDir": "..",
 		"paths": {
 			"@rosegriffon/assets": ["../assets/src/index.ts"],

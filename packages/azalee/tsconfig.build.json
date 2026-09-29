@@ -3,7 +3,6 @@
 	"compilerOptions": {
 		"outDir": "dist",
 		"rootDir": "src",
-		"baseUrl": ".",
 		"noEmit": false,
 		"declaration": true,
 		"noUncheckedIndexedAccess": false,

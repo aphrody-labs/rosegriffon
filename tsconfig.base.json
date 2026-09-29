@@ -20,8 +20,6 @@
 		"allowJs": false,
 		"jsx": "preserve",
 		"jsxImportSource": "react",
-		"baseUrl": ".",
-		"ignoreDeprecations": "6.0",
 		"paths": {
 			"@rosegriffon/ui": ["./packages/ui/src/index.ts"],
 			"@rosegriffon/ui/*": ["./packages/ui/src/*"],

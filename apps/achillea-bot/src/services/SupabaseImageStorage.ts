@@ -3,8 +3,6 @@ import "reflect-metadata";
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
 
-// @ts-expect-error Bun resolves workspace subpath exports; legacy CommonJS
-// module resolution cannot follow the source export map.
 import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { Service } from "../utils/decorators/Service";
