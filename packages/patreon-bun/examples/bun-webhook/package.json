@@ -14,7 +14,7 @@
 		"@rosegriffon/patreon-bun": "workspace:*"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.3.14",
-		"typescript": "^6.0.3"
+		"@types/bun": "catalog:",
+		"typescript": "catalog:"
 	}
 }
