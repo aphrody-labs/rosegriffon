@@ -1,11 +1,8 @@
 {
 	"compilerOptions": {
-		// TS 6 transforme moduleResolution=node10 + baseUrl en erreurs dépréciées ;
-		// on garde ce résolveur (requis par les bridges enums @rosegriffon/achillea-types) et on silence.
-		"ignoreDeprecations": "6.0",
 		"target": "ES2022",
-		"module": "CommonJS",
-		"moduleResolution": "Node",
+		"module": "Preserve",
+		"moduleResolution": "Bundler",
 
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
@@ -26,7 +23,6 @@
 
 		"types": ["bun"],
 
-		"baseUrl": "./",
 		"paths": {
 			"@/auth": ["./src/auth"],
 			"@/auth/*": ["./src/auth/*"],

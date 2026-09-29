@@ -13,7 +13,6 @@
 			"DOM.Iterable"
 		],
 		"allowImportingTsExtensions": true,
-		"baseUrl": ".",
 		"moduleDetection": "force"
 	},
 	"include": [

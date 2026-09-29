@@ -15,7 +15,6 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "baseUrl": ".",
     "paths": {
       "@rosegriffon/assets": ["../../packages/assets/src/index.ts"],
       "@rosegriffon/assets/*": ["../../packages/assets/src/*"]

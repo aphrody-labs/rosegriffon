@@ -1,7 +1,6 @@
 {
 	"extends": "@rosegriffon/config/tsconfig-bun.json",
 	"compilerOptions": {
-		"baseUrl": ".",
 		"noUncheckedIndexedAccess": false,
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,

@@ -11,7 +11,7 @@
 
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 
-import ts from "typescript";
+import ts from "@typescript/typescript6";
 
 import type {
 	IrContract,
@@ -71,7 +71,9 @@ function nameOf(node: ts.PropertyName | ts.BindingName): string {
 
 /** Nom qualifié d'une référence de type (`A`, `A.B`). */
 function entityNameOf(node: ts.EntityName): string {
-	return ts.isIdentifier(node) ? ts.idText(node) : `${entityNameOf(node.left)}.${ts.idText(node.right)}`;
+	return ts.isIdentifier(node)
+		? ts.idText(node)
+		: `${entityNameOf(node.left)}.${ts.idText(node.right)}`;
 }
 
 /** `Record<K, V>` et `Readonly<T>` sont les seuls utilitaires tolérés. */
@@ -106,7 +108,8 @@ function toIrType(node: ts.TypeNode, scope: Scope): IrType {
 	}
 
 	if (ts.isArrayTypeNode(node)) return { kind: "array", of: toIrType(node.elementType, scope) };
-	if (ts.isTupleTypeNode(node)) return { kind: "tuple", of: node.elements.map((element) => toIrType(element, scope)) };
+	if (ts.isTupleTypeNode(node))
+		return { kind: "tuple", of: node.elements.map((element) => toIrType(element, scope)) };
 
 	if (ts.isTypeOperatorNode(node) && node.operator === ts.SyntaxKind.ReadonlyKeyword) {
 		return toIrType(node.type, scope);
@@ -252,7 +255,10 @@ function enumToIr(node: ts.EnumDeclaration): IrEnum {
 	};
 }
 
-function interfaceToIr(node: ts.InterfaceDeclaration, literalUnions: Map<string, IrType[]>): IrInterface {
+function interfaceToIr(
+	node: ts.InterfaceDeclaration,
+	literalUnions: Map<string, IrType[]>
+): IrInterface {
 	const typeParams = node.typeParameters?.map((param) => param.name.text) ?? [];
 	const scope: Scope = { typeParams: new Set(typeParams), literalUnions };
 
