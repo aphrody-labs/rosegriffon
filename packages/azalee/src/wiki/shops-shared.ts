@@ -7,33 +7,7 @@
  * (sous-chemin serveur de la lib).
  */
 
-export interface ShopItem {
-  /** id objet (= inagle_items.id / item_db_id) — sert de slug vers /item/[id] */
-  id: string;
-  name: string;
-  category: string | null;
-  /** chemin icône (image_url depuis inagle_items, sinon null → carte affiche fallback) */
-  icon: string | null;
-  internalCode: string | null;
-  slotIndex: number;
-  /** true si l'objet est résolu dans inagle_items (nom/catégorie/icône fiables) */
-  resolved: boolean;
-}
-
-export interface ShopSummary {
-  shopId: number;
-  name: string;
-  nameEn: string | null;
-  nameJa: string | null;
-  /** nombre total d'objets vendus */
-  itemCount: number;
-  /** répartition par catégorie (catégorie → nombre), triée desc */
-  categories: { category: string; count: number }[];
-}
-
-export interface ShopDetail extends ShopSummary {
-  items: ShopItem[];
-}
+export type { ShopDetail, ShopItem, ShopSummary } from "@rosegriffon/inagle/wiki";
 
 /** Libellés FR de catégories d'objets (réutilisés par la carte). */
 export const SHOP_CATEGORY_FR: Record<string, string> = {

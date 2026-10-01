@@ -33,27 +33,8 @@ interface StadiumDatabase {
 
 const sql = createAchilleaSql<StadiumDatabase>();
 
-/** Stade normalisé pour l'UI (aucune donnée inventée). */
-export interface Stadium {
-  /** Hash de champ in-game (`0x…`), identifiant stable et clé de route. */
-  id: string;
-  /** Code interne du terrain (`img_room_s19g001`), dérivé de `image_path`. */
-  code: string;
-  /** Index d'ordre in-game (`field_index`), `null` si absent. */
-  index: number | null;
-  /**
-   * Libellé générique HONNÊTE (« Terrain N »). La DB ne contient AUCUN nom
-   * localisé ni lien d'équipe : on n'invente pas de nom — on numérote le terrain
-   * d'après son ordre in-game (`field_index`), avec repli sur le code interne.
-   */
-  title: string;
-  /** PNG plein cadre d'origine (téléchargement / fond haute résolution). */
-  image: string;
-  /** Variante WebP w=400 pour la vignette de carte (~quelques Ko vs ~Mo). */
-  thumb: string | null;
-  /** Variante WebP w=1600 pour l'affichage détail plein écran. */
-  full: string | null;
-}
+import type { Stadium } from "@rosegriffon/inagle/wiki";
+export type { Stadium };
 
 /**
  * Extrait le code terrain (`img_room_s19g001`) depuis l'`image_path`

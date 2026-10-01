@@ -18,29 +18,8 @@
 
 import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 
-/** Catégorie dérivée du `phase` (pas une colonne DB). */
-export type QuestKind = "main" | "side";
-
-/** Quête normalisée pour le rendu wiki (champs RÉELS du miroir uniquement). */
-export interface Quest {
-  /** ID hex unique (ex. `0x103AF791`). */
-  id: string;
-  /** Titre localisé FR (fallback EN/JA), nettoyé des retours-ligne. */
-  title: string;
-  /** Titres bruts par langue (déjà présents dans `data.titles`). */
-  titles: { fr: string; en: string; ja: string };
-  /** Type in-game (0-45). 1=MAIN, 2=SUB, 3=DAILY selon l'enum inagle ; le reste
-   *  est une granularité d'étape non documentée → exposé tel quel. */
-  type: number;
-  /** Numéro de phase/chapitre (ordre dans l'histoire ou code de zone annexe). */
-  phase: number;
-  /** Nom d'asset image in-game (non résolu sur le CDN → pas rendu, conservé pour info). */
-  image: string | null;
-  /** Catégorie dérivée : histoire principale vs quête annexe. */
-  kind: QuestKind;
-  /** Numéro de zone annexe (`floor(phase/10000)`) si `kind === "side"`, sinon null. */
-  area: number | null;
-}
+import type { Quest, QuestKind } from "@rosegriffon/inagle/wiki";
+export type { Quest, QuestKind };
 
 /** Forme brute attendue dans la colonne `data` (parsée en objet par le client SQLite). */
 interface QuestData {
