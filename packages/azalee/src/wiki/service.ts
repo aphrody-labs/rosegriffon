@@ -2449,7 +2449,7 @@ export const wikiService = {
           seenVariants.add(vKey);
           dedupedVariants.push(v);
         } else {
-          const idx = dedupedVariants.findIndex((x) => variantKey(x) === vKey);
+          const idx = dedupedVariants.findIndex((x: any) => variantKey(x) === vKey);
           if (idx === -1) {
             continue;
           }

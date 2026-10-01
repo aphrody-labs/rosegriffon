@@ -277,15 +277,20 @@ export function registerTestCommand(program: Command): void {
           console.log(
             `${colors.cyan}Aucune origine saine parmi ${ORIGINES_CANDIDATES.join(", ")}. Démarrage de 'bun run dev'...${colors.reset}`,
           );
-          const homeBun = path.join(process.env.HOME || "/home/ubuntu", ".bun/bin/bun");
-          const bunPath = existsSync(homeBun) ? homeBun : "bun";
+          const homeBun = path.join(
+            process.env.HOME || process.env.USERPROFILE || "",
+            ".bun",
+            "bin",
+            process.platform === "win32" ? "bun.exe" : "bun",
+          );
+          const bunPath = homeBun && existsSync(homeBun) ? homeBun : "bun";
           const monorepoRoot = (() => {
             let d = process.cwd();
             while (d !== path.dirname(d)) {
-              if (existsSync(path.join(d, "turbo.json"))) return d;
+              if (existsSync(path.join(d, "package.json"))) return d;
               d = path.dirname(d);
             }
-            return "/home/ubuntu/rg";
+            return process.cwd();
           })();
           devServerProcess = Bun.spawn([bunPath, "run", "dev"], {
             cwd: path.resolve(monorepoRoot, "apps/website"),
