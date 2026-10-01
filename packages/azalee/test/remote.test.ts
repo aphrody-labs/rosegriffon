@@ -9,9 +9,29 @@
  */
 
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
-
-const rendreReseauNatif = () => {};
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+
+const PRIMITIVES_RESEAU = [
+  "fetch",
+  "Headers",
+  "Request",
+  "Response",
+  "AbortController",
+  "AbortSignal",
+] as const;
+
+// Descripteurs natifs capturés avant toute inscription happy-dom du fichier.
+const descripteursNatifs = new Map<string, PropertyDescriptor>();
+for (const nom of PRIMITIVES_RESEAU) {
+  const descripteur = Object.getOwnPropertyDescriptor(globalThis, nom);
+  if (descripteur) descripteursNatifs.set(nom, descripteur);
+}
+
+function rendreReseauNatif(): void {
+  for (const [nom, descripteur] of descripteursNatifs) {
+    Object.defineProperty(globalThis, nom, { ...descripteur, configurable: true });
+  }
+}
 
 import {
   AZALEE_DEFAULT_API_URL,

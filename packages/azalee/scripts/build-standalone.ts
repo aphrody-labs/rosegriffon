@@ -14,6 +14,7 @@
 import { $ } from "bun";
 import path from "node:path";
 import { mkdir } from "node:fs/promises";
+import { homedir } from "node:os";
 
 const pkgRoot = path.resolve(import.meta.dir, "..");
 const entry = path.join(pkgRoot, "src/cli.ts");
@@ -31,7 +32,7 @@ console.log(
 );
 
 if (process.argv.includes("--install")) {
-  const target = path.join(process.env.HOME ?? "/home/ubuntu", ".local/bin/azalee");
+  const target = path.join(process.env.HOME || homedir(), ".local/bin/azalee");
   await $`install -m 755 ${outFile} ${target}`;
   console.log(`installed=${target}`);
 }

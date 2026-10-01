@@ -12,17 +12,28 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import type { Command } from "commander";
 
 import { colors } from "../context";
+import { iecodeDataRoot, iecodeRoot, rgRoot, rgWebsiteRoot } from "../roots";
 import type { DataMigrateOptions, DataSyncOptions } from "../types";
 import { resolveMirrorPath } from "../../config";
 
-/** Racine du monorepo (les scripts orchestrés y sont ancrés). */
-const REPO_ROOT = "/home/ubuntu/rg";
+/** Racine du dépôt Rose Griffon (les commandes orchestrées y sont lancées). */
+const REPO_ROOT = rgRoot();
+/** Racine du site Rose Griffon (`apps/rg/website` dans Aphrody). */
+const WEBSITE_ROOT = rgWebsiteRoot();
 /** Fichier d'environnement chargé par le pousseur inagle. */
-const AZALEE_ENV = `${REPO_ROOT}/apps/website/.env`;
-/** Racine des dumps de jeu. */
-const DATA_ROOT_DEFAULT = process.env.DATA_ROOT || process.env.DATA_PATH || "/home/ubuntu/nie/data";
-const NIERS_ROOT = process.env.NIERS_ROOT || "/home/ubuntu/nie";
+const AZALEE_ENV = `${WEBSITE_ROOT}/.env`;
+/** Racine des dumps de jeu (IECODE `data/`). */
+const DATA_ROOT_DEFAULT = iecodeDataRoot();
+const NIERS_ROOT = iecodeRoot();
 const NIERS_MIRROR_PUBLISHER = `${NIERS_ROOT}/scripts/donnees/miroir-inagle.sh`;
+/** CLI canoniques, servies par IECODE. */
+const INAGLE_CLI = `${NIERS_ROOT}/packages/inagle/src/cli.ts`;
+const AZALEE_CLI = `${NIERS_ROOT}/packages/azalee/src/cli.ts`;
+
+/** Premier chemin existant, sinon le premier candidat (pour un message explicite). */
+function firstExisting(candidates: string[]): string {
+  return candidates.find((candidate) => existsSync(candidate)) ?? candidates[0]!;
+}
 /** Âge maximal toléré pour le miroir SQLite, en heures. */
 const MIRROR_MAX_AGE_H = 48;
 
@@ -69,7 +80,7 @@ export function registerDataCommand(program: Command): void {
     .action(() => {
       const ok = runDataStep(
         "data push (inagle → Supabase)",
-        `bun packages/inagle/src/cli.ts push --env ${AZALEE_ENV}`,
+        `bun ${INAGLE_CLI} push --env ${AZALEE_ENV}`,
         { DATA_ROOT: DATA_ROOT_DEFAULT, DATA_PATH: DATA_ROOT_DEFAULT },
       );
       process.exit(ok ? 0 : 1);
@@ -82,7 +93,10 @@ export function registerDataCommand(program: Command): void {
     )
     .option("--apply", "Applique les migrations via psql (rose_griffon local)")
     .action((opts: DataMigrateOptions) => {
-      const dir = `${REPO_ROOT}/apps/website/supabase/migrations`;
+      const dir = firstExisting([
+        `${WEBSITE_ROOT}/supabase/migrations`,
+        `${WEBSITE_ROOT}/sql/migrations`,
+      ]);
       let files: string[] = [];
       try {
         files = readdirSync(dir)
@@ -178,10 +192,16 @@ export function registerDataCommand(program: Command): void {
           process.env.RG_DATABASE_URL,
         ),
       );
-      check("snapshot schéma DB", existsSync(`${REPO_ROOT}/apps/website/data/schema-snapshot`));
+      check("snapshot schéma DB", existsSync(`${WEBSITE_ROOT}/data/schema-snapshot`));
       check(
         "standalone embarque un miroir",
-        existsSync(`${REPO_ROOT}/apps/website/.next/standalone/apps/website/data/backups`),
+        existsSync(
+          firstExisting([
+            `${WEBSITE_ROOT}/.next/standalone/apps/rg/website/data/backups`,
+            `${WEBSITE_ROOT}/.next/standalone/aphrody/apps/rg/website/data/backups`,
+            `${WEBSITE_ROOT}/.next/standalone/apps/website/data/backups`,
+          ]),
+        ),
       );
       console.log(
         ok
@@ -198,7 +218,7 @@ export function registerDataCommand(program: Command): void {
       const steps: Array<[string, string, Record<string, string>]> = [
         [
           "push",
-          `bun packages/inagle/src/cli.ts push --env ${AZALEE_ENV}`,
+          `bun ${INAGLE_CLI} push --env ${AZALEE_ENV}`,
           { DATA_ROOT: DATA_ROOT_DEFAULT, DATA_PATH: DATA_ROOT_DEFAULT },
         ],
         ["load", mirrorRefreshCommand(), {}],
@@ -211,7 +231,7 @@ export function registerDataCommand(program: Command): void {
           process.exit(1);
         }
       }
-      runDataStep("verify", `bun ${REPO_ROOT}/packages/azalee/src/cli.ts data verify`);
+      runDataStep("verify", `bun ${AZALEE_CLI} data verify`);
       console.log(`${colors.green}✓ pipeline data complet${colors.reset}`);
     });
 }

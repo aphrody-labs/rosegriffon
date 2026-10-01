@@ -18,6 +18,7 @@ import type { Command } from "commander";
 
 import { colors, errorMessage, getSqlitePath, openReadonlyDatabase, runCapture } from "../context";
 import { exitUnlessRepl } from "../repl-state";
+import { rgWebsiteRoot, userHome } from "../roots";
 import type { TestOptions } from "../types";
 
 /**
@@ -278,22 +279,14 @@ export function registerTestCommand(program: Command): void {
             `${colors.cyan}Aucune origine saine parmi ${ORIGINES_CANDIDATES.join(", ")}. Démarrage de 'bun run dev'...${colors.reset}`,
           );
           const homeBun = path.join(
-            process.env.HOME || process.env.USERPROFILE || "",
+            userHome(),
             ".bun",
             "bin",
             process.platform === "win32" ? "bun.exe" : "bun",
           );
           const bunPath = homeBun && existsSync(homeBun) ? homeBun : "bun";
-          const monorepoRoot = (() => {
-            let d = process.cwd();
-            while (d !== path.dirname(d)) {
-              if (existsSync(path.join(d, "package.json"))) return d;
-              d = path.dirname(d);
-            }
-            return process.cwd();
-          })();
           devServerProcess = Bun.spawn([bunPath, "run", "dev"], {
-            cwd: path.resolve(monorepoRoot, "apps/website"),
+            cwd: rgWebsiteRoot(),
             stdout: "ignore",
             stderr: "ignore",
             env: { ...process.env, PORT: "3000" },

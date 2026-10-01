@@ -1,5 +1,5 @@
 import { createPostgresClient } from "@rosegriffon/db/postgres-client";
-import { createSqliteClient } from "./sqlite-client.js";
+import { createSqliteClient } from "./sqlite-client";
 
 export type DatabaseClient = { from(table: string): any };
 export type DatabaseClientFactory = () => DatabaseClient | Promise<DatabaseClient>;
