@@ -1,4 +1,5 @@
 import { createPostgresClient } from "@rosegriffon/db/postgres-client";
+import { createSqliteClient } from "./sqlite-client.js";
 
 export type DatabaseClient = { from(table: string): any };
 export type DatabaseClientFactory = () => DatabaseClient | Promise<DatabaseClient>;
@@ -15,5 +16,8 @@ export async function createClient(): Promise<DatabaseClient> {
     process.env.DATABASE_URL ??
     process.env.ROSE_GRIFFON_DATABASE_URL ??
     process.env.RG_DATABASE_URL;
-  return createPostgresClient(connectionString);
+  if (connectionString) {
+    return createPostgresClient(connectionString);
+  }
+  return createSqliteClient() as unknown as DatabaseClient;
 }

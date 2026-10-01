@@ -13,9 +13,7 @@
  * de rendre au lieu de casser.
  */
 
-import type { CpkDir, CpkFile } from "./shared";
-
-const CDN_BASE = "https://cdn.rosegriffon.fr";
+import { CDN_BASE, type CpkDir, type CpkFile } from "./shared";
 
 /**
  * Un fichier du VFS live.

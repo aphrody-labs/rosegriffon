@@ -21,8 +21,7 @@
  */
 
 import { exportUrl } from "./live";
-
-const CDN_BASE = "https://cdn.rosegriffon.fr";
+import { CDN_BASE } from "./shared";
 
 /** Une piste sonore portée par le conteneur du film lui-même — 2 films sur 97. */
 export interface FilmPisteInterne {

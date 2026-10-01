@@ -14,7 +14,7 @@
  * miroir SQLite et vit donc côté serveur.
  */
 
-const CDN_BASE = "https://cdn.rosegriffon.fr";
+import { CDN_BASE } from "./shared";
 
 /** Un cue d'une banque, résolu jusqu'à sa forme d'onde. */
 export interface AudioCue {

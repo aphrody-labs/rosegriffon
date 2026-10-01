@@ -50,7 +50,9 @@ export interface CpkListing {
 /** Type de contenu CDN dérivé de l'extension. */
 export type CpkAssetKind = "image" | "model" | "raw";
 
-const CDN_BASE = DEFAULT_CDN_ORIGIN;
+export const CDN_BASE =
+  (typeof process !== "undefined" && (process.env.NIE_CDN_BASE || process.env.MODEL_SERVE_URL)) ||
+  DEFAULT_CDN_ORIGIN;
 
 /** Extensions décodées en image (g4tx → png live par le CDN). */
 const IMAGE_EXTS = new Set(["g4tx"]);

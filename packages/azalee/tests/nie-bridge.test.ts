@@ -4,7 +4,19 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { CPK_MAGIC, SECTOR_SIZE, UTF_MAGIC, verifyCpkBuffer } from "../src/cpk/nie-bridge.js";
+import {
+  CPK_MAGIC,
+  SECTOR_SIZE,
+  UTF_MAGIC,
+  VIOLA_FIXED_KEY,
+  computeLevel5Crc32,
+  computeNieCrc32,
+  decompressCrilayla,
+  decryptCpkBlock,
+  deriveCpkKeyFromFilename,
+  isCrilayla,
+  verifyCpkBuffer,
+} from "../src/cpk/nie-bridge.js";
 
 describe("azalee cpk nie-bridge", () => {
   it("detects valid CPK archive header with @UTF descriptor", () => {
@@ -29,5 +41,18 @@ describe("azalee cpk nie-bridge", () => {
 
     const invalidBuf = new Uint8Array(SECTOR_SIZE);
     expect(verifyCpkBuffer(invalidBuf).isValid).toBe(false);
+  });
+
+  it("re-exports authoritative CRILAYLA and CRI crypto utilities from NIE", () => {
+    expect(VIOLA_FIXED_KEY).toBe(0x1717e18e);
+    expect(typeof isCrilayla).toBe("function");
+    expect(typeof decompressCrilayla).toBe("function");
+    expect(typeof decryptCpkBlock).toBe("function");
+    expect(typeof deriveCpkKeyFromFilename).toBe("function");
+    expect(typeof computeLevel5Crc32).toBe("function");
+    expect(typeof computeNieCrc32).toBe("function");
+
+    // Reference CPK key verification
+    expect(deriveCpkKeyFromFilename("1d08dda99e8549431c6c7b459ed8deab.cpk")).toBe(0xbd281847);
   });
 });

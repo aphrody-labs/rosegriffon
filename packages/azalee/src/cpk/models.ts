@@ -14,7 +14,7 @@
  * ⚠ Module **client-safe** : constantes et construction d'URL, rien d'autre.
  */
 
-const CDN_BASE = "https://cdn.rosegriffon.fr";
+import { CDN_BASE } from "./shared";
 
 /** Identifiant d'une famille de modèles. */
 export type ModelFamily = "chara" | "waza" | "item" | "keshin" | "armd" | "animal";
