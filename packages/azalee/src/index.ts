@@ -25,6 +25,12 @@ export * from "./images";
 export * from "./search";
 export * from "./text";
 
+// --- News, éditorial, blog et Discord bot (non-IEVR) ----------------------
+export * as news from "./news";
+export * from "./news";
+export * as bot from "./bot";
+export * from "./bot";
+
 // --- Types et helpers partagés des modules serveur ------------------------
 export * from "./cpk/shared";
 export * from "./cross/assets-shared";

@@ -1,13 +1,8 @@
 /**
- * Texte : glossaire de traduction FR, mise en forme des descriptions du jeu,
- * romanisation japonaise, glyphes gaiji. 100 % pur — utilisable en navigateur
- * (webview Tauri) comme en CLI.
+ * @file text/index.ts
+ * Translations, gaiji, formatting, and romaji.
+ * Authoritative implementation belongs to @rosegriffon/inagle/text.
+ * Re-exported here for full backward compatibility.
  */
 
-export * from "./aura-translations";
-export * from "./download-filename";
-export * from "./format-description";
-export * from "./gaiji";
-export * from "./japanese-detect";
-export * from "./japanese-romaji";
-export * from "./translations";
+export * from "@rosegriffon/inagle/text";

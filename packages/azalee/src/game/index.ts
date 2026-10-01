@@ -1,17 +1,8 @@
 /**
- * Règles de jeu pures : formations (83 réelles + 8 legacy), recalcul de stats
- * de membre, synergies d'élément, genre, cut-ins, emblèmes d'équipe.
- * Aucun I/O — utilisable en navigateur comme en CLI.
+ * @file game/index.ts
+ * Pure game rules, formations, roster logic, stats interpolation and mechanics.
+ * Authoritative implementation belongs to @rosegriffon/inagle/game.
+ * Re-exported here for full backward compatibility with web clients and tools.
  */
 
-export * from "./formations";
-export * from "./gender";
-export * from "./item-categories";
-export * from "./personality";
-export * from "./roster-resolver";
-export * from "./skills-cutin";
-export * from "./stats-interpolation";
-export * from "./team-code";
-export * from "./team-emblem-map";
-export * from "./team-rules";
-export * from "./team-types";
+export * from "@rosegriffon/inagle/game";
