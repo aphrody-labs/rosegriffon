@@ -1,6 +1,7 @@
 {
   "name": "@rosegriffon/azalee",
   "version": "1.0.5",
+  "private": true,
   "description": "Bibliothèque Bun du wiki Azalée (Inazuma Eleven: Victory Road) — accès PostgreSQL, index CPK, recherche et CLI.",
   "keywords": [
     "azalee",
@@ -16,7 +17,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rose-griffon/rg.git",
+    "url": "https://github.com/aphrody-labs/iecode.git",
     "directory": "packages/azalee"
   },
   "bin": {
@@ -59,10 +60,6 @@
     "./server": "./src/server/index.ts",
     "./server/*": "./src/server/*.ts",
     "./package.json": "./package.json"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org"
   },
   "scripts": {
     "build": "bun --bun tsc -p tsconfig.build.json",
