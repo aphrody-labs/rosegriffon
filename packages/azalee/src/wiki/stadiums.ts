@@ -1,4 +1,3 @@
-
 import { galleryVariantUrl } from "../images";
 import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
 
@@ -22,38 +21,38 @@ const STADIUM_CDN_BASE = "https://cdn.rosegriffon.fr/dx11/menu/220_img/stadium";
 
 /** Ligne brute `inagle_stadiums` telle que stockée dans le miroir. */
 interface StadiumRow {
-	id: string;
-	field_index: number | null;
-	image_path: string | null;
-	condition: string | null;
+  id: string;
+  field_index: number | null;
+  image_path: string | null;
+  condition: string | null;
 }
 
 interface StadiumDatabase {
-	inagle_stadiums: StadiumRow;
+  inagle_stadiums: StadiumRow;
 }
 
 const sql = createAchilleaSql<StadiumDatabase>();
 
 /** Stade normalisé pour l'UI (aucune donnée inventée). */
 export interface Stadium {
-	/** Hash de champ in-game (`0x…`), identifiant stable et clé de route. */
-	id: string;
-	/** Code interne du terrain (`img_room_s19g001`), dérivé de `image_path`. */
-	code: string;
-	/** Index d'ordre in-game (`field_index`), `null` si absent. */
-	index: number | null;
-	/**
-	 * Libellé générique HONNÊTE (« Terrain N »). La DB ne contient AUCUN nom
-	 * localisé ni lien d'équipe : on n'invente pas de nom — on numérote le terrain
-	 * d'après son ordre in-game (`field_index`), avec repli sur le code interne.
-	 */
-	title: string;
-	/** PNG plein cadre d'origine (téléchargement / fond haute résolution). */
-	image: string;
-	/** Variante WebP w=400 pour la vignette de carte (~quelques Ko vs ~Mo). */
-	thumb: string | null;
-	/** Variante WebP w=1600 pour l'affichage détail plein écran. */
-	full: string | null;
+  /** Hash de champ in-game (`0x…`), identifiant stable et clé de route. */
+  id: string;
+  /** Code interne du terrain (`img_room_s19g001`), dérivé de `image_path`. */
+  code: string;
+  /** Index d'ordre in-game (`field_index`), `null` si absent. */
+  index: number | null;
+  /**
+   * Libellé générique HONNÊTE (« Terrain N »). La DB ne contient AUCUN nom
+   * localisé ni lien d'équipe : on n'invente pas de nom — on numérote le terrain
+   * d'après son ordre in-game (`field_index`), avec repli sur le code interne.
+   */
+  title: string;
+  /** PNG plein cadre d'origine (téléchargement / fond haute résolution). */
+  image: string;
+  /** Variante WebP w=400 pour la vignette de carte (~quelques Ko vs ~Mo). */
+  thumb: string | null;
+  /** Variante WebP w=1600 pour l'affichage détail plein écran. */
+  full: string | null;
 }
 
 /**
@@ -61,11 +60,11 @@ export interface Stadium {
  * (`stadium/img_room_s19g001`). Repli sur le path complet si le préfixe manque.
  */
 function codeFromPath(imagePath: string | null): string {
-	if (!imagePath) {
-		return "";
-	}
-	const slash = imagePath.lastIndexOf("/");
-	return slash >= 0 ? imagePath.slice(slash + 1) : imagePath;
+  if (!imagePath) {
+    return "";
+  }
+  const slash = imagePath.lastIndexOf("/");
+  return slash >= 0 ? imagePath.slice(slash + 1) : imagePath;
 }
 
 /**
@@ -77,10 +76,10 @@ function codeFromPath(imagePath: string | null): string {
  * l'index est absent.
  */
 function genericTitle(index: number | null, code: string): string {
-	if (typeof index === "number") {
-		return `Terrain ${index + 1}`;
-	}
-	return code || "Terrain";
+  if (typeof index === "number") {
+    return `Terrain ${index + 1}`;
+  }
+  return code || "Terrain";
 }
 
 /**
@@ -93,25 +92,25 @@ function genericTitle(index: number | null, code: string): string {
  * ⚠ Le doublage `<code>_<code>.png` était le nommage du dump archivé : 404 partout.
  */
 function stadiumImageUrl(code: string): string {
-	return `${STADIUM_CDN_BASE}/${code}.png`;
+  return `${STADIUM_CDN_BASE}/${code}.png`;
 }
 
 function rowToStadium(row: StadiumRow): Stadium {
-	const code = codeFromPath(row.image_path);
-	const image = stadiumImageUrl(code);
-	return {
-		id: row.id,
-		code,
-		index: row.field_index,
-		title: genericTitle(row.field_index, code),
-		image,
-		// Même traitement que la galerie : les visuels de stade n'ont pas de bandes
-		// aujourd'hui (vérifié), mais le service ne coupe que ce qui est
-		// effectivement noir — l'option est sans risque et couvre le jour où un
-		// visuel arrivera en letterbox.
-		thumb: galleryVariantUrl(image, 400, { recadrerBandes: true }),
-		full: galleryVariantUrl(image, 1600, { recadrerBandes: true }),
-	};
+  const code = codeFromPath(row.image_path);
+  const image = stadiumImageUrl(code);
+  return {
+    id: row.id,
+    code,
+    index: row.field_index,
+    title: genericTitle(row.field_index, code),
+    image,
+    // Même traitement que la galerie : les visuels de stade n'ont pas de bandes
+    // aujourd'hui (vérifié), mais le service ne coupe que ce qui est
+    // effectivement noir — l'option est sans risque et couvre le jour où un
+    // visuel arrivera en letterbox.
+    thumb: galleryVariantUrl(image, 400, { recadrerBandes: true }),
+    full: galleryVariantUrl(image, 1600, { recadrerBandes: true }),
+  };
 }
 
 /**
@@ -120,47 +119,47 @@ function rowToStadium(row: StadiumRow): Stadium {
  * Pas de pagination : 81 entrées tiennent sur une grille unique.
  */
 export async function getStadiumsList(params: { q?: string } = {}): Promise<{
-	data: Stadium[];
-	total: number;
+  data: Stadium[];
+  total: number;
 }> {
-	let data: StadiumRow[];
-	try {
-		data = await sql
-			.selectFrom("inagle_stadiums")
-			.select(["id", "field_index", "image_path", "condition"])
-			.execute();
-	} catch {
-		return { data: [], total: 0 };
-	}
+  let data: StadiumRow[];
+  try {
+    data = await sql
+      .selectFrom("inagle_stadiums")
+      .select(["id", "field_index", "image_path", "condition"])
+      .execute();
+  } catch {
+    return { data: [], total: 0 };
+  }
 
-	let stadiums = data.map(rowToStadium);
+  let stadiums = data.map(rowToStadium);
 
-	const q = params.q?.trim().toLowerCase();
-	if (q) {
-		stadiums = stadiums.filter(
-			(s) => s.code.toLowerCase().includes(q) || s.title.toLowerCase().includes(q)
-		);
-	}
+  const q = params.q?.trim().toLowerCase();
+  if (q) {
+    stadiums = stadiums.filter(
+      (s) => s.code.toLowerCase().includes(q) || s.title.toLowerCase().includes(q),
+    );
+  }
 
-	stadiums.sort((a, b) => {
-		const ai = a.index ?? Number.MAX_SAFE_INTEGER;
-		const bi = b.index ?? Number.MAX_SAFE_INTEGER;
-		return ai !== bi ? ai - bi : a.id.localeCompare(b.id);
-	});
+  stadiums.sort((a, b) => {
+    const ai = a.index ?? Number.MAX_SAFE_INTEGER;
+    const bi = b.index ?? Number.MAX_SAFE_INTEGER;
+    return ai !== bi ? ai - bi : a.id.localeCompare(b.id);
+  });
 
-	return { data: stadiums, total: stadiums.length };
+  return { data: stadiums, total: stadiums.length };
 }
 
 /** Récupère un stade par son `id` (hash de champ), ou `null` si introuvable. */
 export async function getStadium(id: string): Promise<Stadium | null> {
-	try {
-		const data = await sql
-			.selectFrom("inagle_stadiums")
-			.select(["id", "field_index", "image_path", "condition"])
-			.where("id", "=", id)
-			.executeTakeFirst();
-		return data ? rowToStadium(data) : null;
-	} catch {
-		return null;
-	}
+  try {
+    const data = await sql
+      .selectFrom("inagle_stadiums")
+      .select(["id", "field_index", "image_path", "condition"])
+      .where("id", "=", id)
+      .executeTakeFirst();
+    return data ? rowToStadium(data) : null;
+  } catch {
+    return null;
+  }
 }

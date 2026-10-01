@@ -39,3 +39,4 @@ export * from "./wiki/invocation-shared";
 export * from "./wiki/shops-shared";
 export * from "./wiki/teams-shared";
 export * from "./wiki/trophies-shared";
+export * from "./cpk/nie-bridge";

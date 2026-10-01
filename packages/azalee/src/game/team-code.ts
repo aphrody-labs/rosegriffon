@@ -13,30 +13,30 @@
 
 /** Encode une chaîne UTF-8 en base64 (équivalent Web de `Buffer.from`). */
 export function utf8ToBase64(text: string): string {
-	const bytes = new TextEncoder().encode(text);
-	let binary = "";
-	for (const byte of bytes) binary += String.fromCharCode(byte);
-	return btoa(binary);
+  const bytes = new TextEncoder().encode(text);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
 }
 
 /** Décode une base64 vers la chaîne UTF-8 correspondante. */
 export function base64ToUtf8(encoded: string): string {
-	const binary = atob(encoded);
-	const bytes = new Uint8Array(binary.length);
-	for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-	return new TextDecoder().decode(bytes);
+  const binary = atob(encoded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
 
 /** Emplacement occupé dans une composition (`field-0`, `reserve-2`…). */
 export interface TeamCodeSlot {
-	slot: string;
-	charaId: string;
+  slot: string;
+  charaId: string;
 }
 
 /** Contenu décodé d'un code de partage d'équipe. */
 export interface DecodedTeamCode {
-	formationId: string;
-	slots: TeamCodeSlot[];
+  formationId: string;
+  slots: TeamCodeSlot[];
 }
 
 /**
@@ -44,8 +44,8 @@ export interface DecodedTeamCode {
  * occupés. L'ordre des emplacements est conservé tel quel.
  */
 export function encodeTeamCode(formationId: string, slots: readonly TeamCodeSlot[]): string {
-	const parts = [formationId, ...slots.map((s) => `${s.slot}:${s.charaId}`)];
-	return utf8ToBase64(parts.join("|"));
+  const parts = [formationId, ...slots.map((s) => `${s.slot}:${s.charaId}`)];
+  return utf8ToBase64(parts.join("|"));
 }
 
 /**
@@ -53,11 +53,11 @@ export function encodeTeamCode(formationId: string, slots: readonly TeamCodeSlot
  * comme le fait le wiki : un code tronqué reste exploitable partiellement.
  */
 export function decodeTeamCode(encoded: string): DecodedTeamCode {
-	const parts = base64ToUtf8(encoded).split("|");
-	const slots: TeamCodeSlot[] = [];
-	for (let i = 1; i < parts.length; i++) {
-		const [slot, charaId] = parts[i].split(":");
-		if (slot && charaId) slots.push({ slot, charaId });
-	}
-	return { formationId: parts[0] ?? "", slots };
+  const parts = base64ToUtf8(encoded).split("|");
+  const slots: TeamCodeSlot[] = [];
+  for (let i = 1; i < parts.length; i++) {
+    const [slot, charaId] = parts[i].split(":");
+    if (slot && charaId) slots.push({ slot, charaId });
+  }
+  return { formationId: parts[0] ?? "", slots };
 }

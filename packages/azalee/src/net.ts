@@ -9,18 +9,18 @@
  */
 
 interface CacheEntry {
-	at: number;
-	value: unknown;
+  at: number;
+  value: unknown;
 }
 
 const memo = new Map<string, CacheEntry>();
 
 /** Options de récupération. */
 export interface FetchJsonOptions {
-	/** Durée de fraîcheur du cache, en secondes (0 = pas de cache). */
-	revalidate?: number;
-	/** Signal d'annulation. */
-	signal?: AbortSignal;
+  /** Durée de fraîcheur du cache, en secondes (0 = pas de cache). */
+  revalidate?: number;
+  /** Signal d'annulation. */
+  signal?: AbortSignal;
 }
 
 /**
@@ -29,30 +29,30 @@ export interface FetchJsonOptions {
  * proprement (liste vide, stats non résolues) plutôt que de propager.
  */
 export async function fetchJson<T>(url: string, options: FetchJsonOptions = {}): Promise<T | null> {
-	const { revalidate = 0, signal } = options;
-	const now = Date.now();
+  const { revalidate = 0, signal } = options;
+  const now = Date.now();
 
-	if (revalidate > 0) {
-		const hit = memo.get(url);
-		if (hit && now - hit.at < revalidate * 1000) return hit.value as T;
-	}
+  if (revalidate > 0) {
+    const hit = memo.get(url);
+    if (hit && now - hit.at < revalidate * 1000) return hit.value as T;
+  }
 
-	try {
-		// The decoder can remain connected while its CPK cache is under memory
-		// pressure. Bound every request so static generation and live pages finish.
-		const timeout = AbortSignal.timeout(8_000);
-		const requestSignal = signal ? AbortSignal.any([signal, timeout]) : timeout;
-		const res = await fetch(url, { signal: requestSignal });
-		if (!res.ok) return null;
-		const value = (await res.json()) as T;
-		if (revalidate > 0) memo.set(url, { at: now, value });
-		return value;
-	} catch {
-		return null;
-	}
+  try {
+    // The decoder can remain connected while its CPK cache is under memory
+    // pressure. Bound every request so static generation and live pages finish.
+    const timeout = AbortSignal.timeout(8_000);
+    const requestSignal = signal ? AbortSignal.any([signal, timeout]) : timeout;
+    const res = await fetch(url, { signal: requestSignal });
+    if (!res.ok) return null;
+    const value = (await res.json()) as T;
+    if (revalidate > 0) memo.set(url, { at: now, value });
+    return value;
+  } catch {
+    return null;
+  }
 }
 
 /** Vide le cache HTTP process-local (tests, rafraîchissement forcé). */
 export function clearFetchCache(): void {
-	memo.clear();
+  memo.clear();
 }

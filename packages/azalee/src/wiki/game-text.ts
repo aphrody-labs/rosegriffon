@@ -13,12 +13,12 @@ import type { GameTextLocale, GameTextLocalized } from "../game-text/shared";
 // --- Réexports de la couche index (un seul point d'entrée « game-text » wiki) ---
 
 export {
-	categoryStats,
-	getText,
-	getTextLocale,
-	getTexts,
-	listCategory,
-	searchText,
+  categoryStats,
+  getText,
+  getTextLocale,
+  getTexts,
+  listCategory,
+  searchText,
 } from "../game-text/index";
 export type { GameText, GameTextLocalized } from "../game-text/shared";
 
@@ -30,20 +30,22 @@ export type { GameText, GameTextLocalized } from "../game-text/shared";
  * demandé par les pages wiki (sucre sur `getTextLocale`).
  */
 export async function resolveText(
-	hashId: string | number,
-	locale: GameTextLocale = "fr",
+  hashId: string | number,
+  locale: GameTextLocale = "fr",
 ): Promise<string | undefined> {
-	return await getTextLocale(hashId, locale);
+  return await getTextLocale(hashId, locale);
 }
 
 /** Résout un `hashId` dans les 3 langues (+ catégorie). `undefined` si inconnu. */
-export async function resolveTextAll(hashId: string | number): Promise<GameTextLocalized | undefined> {
-	return await getText(hashId);
+export async function resolveTextAll(
+  hashId: string | number,
+): Promise<GameTextLocalized | undefined> {
+  return await getText(hashId);
 }
 
 /** Résout un lot de `hashId` d'un coup (lookup groupé, repli par langue côté caller). */
 export async function resolveTexts(
-	hashIds: Array<string | number>,
+  hashIds: Array<string | number>,
 ): Promise<Map<string, GameTextLocalized>> {
-	return await getTexts(hashIds);
+  return await getTexts(hashIds);
 }

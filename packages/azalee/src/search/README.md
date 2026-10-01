@@ -1,18 +1,18 @@
 # Recherche du wiki
 
-Recherche floue multilingue sur les entités d'*Inazuma Eleven: Victory Road*.
+Recherche floue multilingue sur les entités d'_Inazuma Eleven: Victory Road_.
 Les noms existent en français, anglais et japonais : une requête doit trouver
 « Mark Evans », « 円堂 守 » et une faute de frappe sur l'un des deux.
 
 ## Modules
 
-| Fichier | Rôle |
-| --- | --- |
-| `fuzzy-match.ts` | distance de Levenshtein, score de similarité, normalisation (accents, casse), variations de nom, détection de la langue qui a matché, surlignage |
-| `smart-search.ts` | `smartSearch()` : recherche contextuelle sur toutes les collections, cache de résultats, suggestions « vouliez-vous dire » |
-| `utils.ts` | normalisation de texte partagée |
-| `search-ui-config.ts` | libellés de type et styles de badge de langue (client-safe) |
-| projection SQL | index durable des données recherchables |
+| Fichier               | Rôle                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `fuzzy-match.ts`      | distance de Levenshtein, score de similarité, normalisation (accents, casse), variations de nom, détection de la langue qui a matché, surlignage |
+| `smart-search.ts`     | `smartSearch()` : recherche contextuelle sur toutes les collections, cache de résultats, suggestions « vouliez-vous dire »                       |
+| `utils.ts`            | normalisation de texte partagée                                                                                                                  |
+| `search-ui-config.ts` | libellés de type et styles de badge de langue (client-safe)                                                                                      |
+| projection SQL        | index durable des données recherchables                                                                                                          |
 
 ## Utilisation
 

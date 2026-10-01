@@ -37,8 +37,8 @@ import { ASSET_MANIFEST } from "@rosegriffon/inagle/asset-manifest";
  * `20_icon_deco`, les `nm*` dans `25_icon_nameplate`).
  */
 const ITEM_IMAGE_MANIFEST = ASSET_MANIFEST.itemImage as unknown as {
-	containers: string[];
-	items: Record<string, number | [number, string]>;
+  containers: string[];
+  items: Record<string, number | [number, string]>;
 };
 
 /**
@@ -48,10 +48,10 @@ const ITEM_IMAGE_MANIFEST = ASSET_MANIFEST.itemImage as unknown as {
  * forgée en 404.
  */
 const MENU_ASSETS = ASSET_MANIFEST.menuAsset as unknown as {
-	emblems: string[];
-	telop: { en: string[]; fr: string[] };
-	aura: { armed: string[]; fs: string[]; mixi: string[]; soul: string[] };
-	uniformsPersonal: string[];
+  emblems: string[];
+  telop: { en: string[]; fr: string[] };
+  aura: { armed: string[]; fs: string[]; mixi: string[]; soul: string[] };
+  uniformsPersonal: string[];
 };
 
 const EMBLEM_NAMES = new Set(MENU_ASSETS.emblems);
@@ -104,10 +104,10 @@ const CHARACTER_MODEL_CODES = new Set(ASSET_MANIFEST.characterModel as readonly 
  * bouton 3D mort). Régénérer le manifeste quand la couche serving gagne le support g4mg.
  */
 const KESHIN_MODEL_CODES = new Set(
-	(ASSET_MANIFEST.keshinModel as { keshin: readonly string[] }).keshin
+  (ASSET_MANIFEST.keshinModel as { keshin: readonly string[] }).keshin,
 );
 const ARMURE_MODEL_CODES = new Set(
-	(ASSET_MANIFEST.keshinModel as { armures: readonly string[] }).armures
+  (ASSET_MANIFEST.keshinModel as { armures: readonly string[] }).armures,
 );
 
 /**
@@ -141,7 +141,7 @@ const ICON_CHR_BASE = "200_icon/10_icon_chr";
  * de la texture principale est sans ambiguïté.
  */
 function menuFileUrl(relativePath: string): string {
-	return `${MENU_CDN_BASE}/${relativePath}.png`;
+  return `${MENU_CDN_BASE}/${relativePath}.png`;
 }
 
 /**
@@ -151,9 +151,9 @@ function menuFileUrl(relativePath: string): string {
  * grande par aire et sert une image arbitraire.
  */
 function menuTextureUrl(g4txPath: string, textureName: string): string {
-	// Le chemin est accepté avec ou sans son extension (le manifeste objets la porte).
-	const base = g4txPath.endsWith(".g4tx") ? g4txPath.slice(0, -".g4tx".length) : g4txPath;
-	return `${MENU_CDN_BASE}/${base}.g4tx/${textureName}.png`;
+  // Le chemin est accepté avec ou sans son extension (le manifeste objets la porte).
+  const base = g4txPath.endsWith(".g4tx") ? g4txPath.slice(0, -".g4tx".length) : g4txPath;
+  return `${MENU_CDN_BASE}/${base}.g4tx/${textureName}.png`;
 }
 
 // Prefixe Supabase Storage legacy stocke en DB (cf. inagle_skills.image_url
@@ -171,15 +171,15 @@ const LEGACY_STORAGE_PREFIX = "/storage/v1/object/public/menu/";
  * dump et un dossier — tous deux faux.
  */
 export function resolveItemIcon(
-	internalCode: string
+  internalCode: string,
 ): { g4txPath: string; textureName: string } | null {
-	const entry = ITEM_IMAGE_MANIFEST.items[internalCode];
-	if (entry === undefined) {
-		return null;
-	}
-	const [index, name] = typeof entry === "number" ? [entry, internalCode] : entry;
-	const g4txPath = ITEM_IMAGE_MANIFEST.containers[index];
-	return g4txPath ? { g4txPath, textureName: name } : null;
+  const entry = ITEM_IMAGE_MANIFEST.items[internalCode];
+  if (entry === undefined) {
+    return null;
+  }
+  const [index, name] = typeof entry === "number" ? [entry, internalCode] : entry;
+  const g4txPath = ITEM_IMAGE_MANIFEST.containers[index];
+  return g4txPath ? { g4txPath, textureName: name } : null;
 }
 
 /**
@@ -188,7 +188,7 @@ export function resolveItemIcon(
  * 542 emblèmes du CPK (gate anti-404).
  */
 function emblemFileUrl(name: string): string | null {
-	return EMBLEM_NAMES.has(name) ? menuFileUrl(`200_icon/01_icon_emblem/${name}`) : null;
+  return EMBLEM_NAMES.has(name) ? menuFileUrl(`200_icon/01_icon_emblem/${name}`) : null;
 }
 
 /**
@@ -197,9 +197,9 @@ function emblemFileUrl(name: string): string | null {
  * retombe sur `en`. `null` si le code n'a aucun telop (144 techniques sur 1002).
  */
 function telopUrl(code: string): string | null {
-	if (TELOP_FR.has(code)) return menuFileUrl(`220_img/telop_waza/fr/${code}`);
-	if (TELOP_EN.has(code)) return menuFileUrl(`220_img/telop_waza/en/${code}`);
-	return null;
+  if (TELOP_FR.has(code)) return menuFileUrl(`220_img/telop_waza/fr/${code}`);
+  if (TELOP_EN.has(code)) return menuFileUrl(`220_img/telop_waza/en/${code}`);
+  return null;
 }
 
 /** Dossiers d'icônes d'aura de `200_icon/10_icon_chr/` adressables par code. */
@@ -212,14 +212,14 @@ type AuraFolder = "aura_fs" | "aura_soul" | "aura_mixi";
  * service. `null` si le code n'existe pas (gate anti-404).
  */
 const AURA_GATES: Record<AuraFolder, Set<string>> = {
-	aura_fs: AURA_FS_CODES,
-	aura_mixi: AURA_MIXI_CODES,
-	aura_soul: AURA_SOUL_CODES,
+  aura_fs: AURA_FS_CODES,
+  aura_mixi: AURA_MIXI_CODES,
+  aura_soul: AURA_SOUL_CODES,
 };
 
 function auraIconUrl(folder: AuraFolder, base: string): string | null {
-	if (!AURA_GATES[folder].has(base)) return null;
-	return menuTextureUrl(`${ICON_CHR_BASE}/${folder}/${base}_l`, `${base}_l00`);
+  if (!AURA_GATES[folder].has(base)) return null;
+  return menuTextureUrl(`${ICON_CHR_BASE}/${folder}/${base}_l`, `${base}_l00`);
 }
 
 /**
@@ -228,60 +228,60 @@ function auraIconUrl(folder: AuraFolder, base: string): string | null {
  * réelle n'existe : mieux vaut un placeholder qu'une URL forgée en 404.
  */
 function mapLegacyMenuPath(menuPath: string): string | null {
-	const chrMatch = menuPath.match(/^200_icon\/10_icon_chr\/([^/]+)\/([^/]+?)_l(?:_[^.]+)?\.webp$/);
-	if (chrMatch) {
-		const folder = chrMatch[1] as string;
-		const base = chrMatch[2] as string;
-		if (folder === "aura_fs" || folder === "aura_soul" || folder === "aura_mixi") {
-			// Même contrainte que getAuraImageUrl : le jeu n'a que les icônes « famille »
-			// (numéro multiple de 10). On arrondit (`k000721` → `k000720`), sinon les
-			// formes évoluées (…721/…2025) n'ont aucun fichier.
-			const auraBase = base.replace(/^([ka])(\d+)$/, (_m, p, n) => `${p}${auraFamilyBase(n)}`);
-			return auraIconUrl(folder, auraBase);
-		}
-		if (folder === "face") {
-			return CHARACTER_FACE_CODES.has(base) ? characterFaceUrl(base) : null;
-		}
-		if (folder === "uniform") {
-			return CHARACTER_UNIFORM_CODES.has(base) ? uniformIconUrl(base) : null;
-		}
-		return null;
-	}
-	const emMatch = menuPath.match(/^200_icon\/01_icon_emblem\/(em[0-9a-z_]+)\.webp$/i);
-	if (emMatch) {
-		// Les `emblem_url` en `0x<CRC>.webp` ne correspondent à AUCUN
-		// nom d'emblème : ce CRC est celui de l'identifiant d'équipe, pas d'un fichier
-		// Ils tombent donc en `null` — trou de données
-		// réel, pas un problème d'adressage.
-		return emblemFileUrl(emMatch[1] as string);
-	}
-	// Plaques de nom : `inagle_nameplates.image_path` stocke le chemin SANS extension
-	// (`200_icon/25_icon_nameplate/nm04201`). Le conteneur porte deux textures de même
-	// taille (`_01`/`_02`) → forme nommée obligatoire, résolue par le manifeste.
-	const plateMatch = menuPath.match(/^200_icon\/25_icon_nameplate\/([^/.]+)$/);
-	if (plateMatch) {
-		const ref = resolveItemIcon(plateMatch[1] as string);
-		return ref ? menuTextureUrl(ref.g4txPath, ref.textureName) : null;
-	}
-	const itemMatch = menuPath.match(/^200_icon\/02_icon_item\/(.+)\.webp$/);
-	if (itemMatch) {
-		// Le dossier écrit en base est FAUX pour 40 % du catalogue : on passe par le
-		// manifeste (conteneur + texture réels), jamais par le chemin stocké.
-		const ref = resolveItemIcon(itemMatch[1] as string);
-		return ref ? menuTextureUrl(ref.g4txPath, ref.textureName) : null;
-	}
-	const telopMatch = menuPath.match(/^220_img\/telop_waza\/[a-z_]+\/([^/]+)\.webp$/);
-	if (telopMatch) {
-		// Le nom stocké porte un suffixe de variante du dump (`whd00030_0`) et parfois le
-		// doublage (`x_x`) : on revient au code nu avant de consulter le gate. Les formes
-		// dérivées (`whd00390_or`, `whd00900_mm`) n'ont pas de telop propre mais réutilisent
-		// celui de leur technique de base — d'où le second essai (65 lignes récupérées).
-		const raw = telopMatch[1] as string;
-		const dupMatch = raw.match(/^(.+)_\1$/);
-		const code = dupMatch ? (dupMatch[1] as string) : raw.replace(/_0$/, "");
-		return telopUrl(code) ?? telopUrl(code.replace(/_[a-z]+$/i, ""));
-	}
-	return null;
+  const chrMatch = menuPath.match(/^200_icon\/10_icon_chr\/([^/]+)\/([^/]+?)_l(?:_[^.]+)?\.webp$/);
+  if (chrMatch) {
+    const folder = chrMatch[1] as string;
+    const base = chrMatch[2] as string;
+    if (folder === "aura_fs" || folder === "aura_soul" || folder === "aura_mixi") {
+      // Même contrainte que getAuraImageUrl : le jeu n'a que les icônes « famille »
+      // (numéro multiple de 10). On arrondit (`k000721` → `k000720`), sinon les
+      // formes évoluées (…721/…2025) n'ont aucun fichier.
+      const auraBase = base.replace(/^([ka])(\d+)$/, (_m, p, n) => `${p}${auraFamilyBase(n)}`);
+      return auraIconUrl(folder, auraBase);
+    }
+    if (folder === "face") {
+      return CHARACTER_FACE_CODES.has(base) ? characterFaceUrl(base) : null;
+    }
+    if (folder === "uniform") {
+      return CHARACTER_UNIFORM_CODES.has(base) ? uniformIconUrl(base) : null;
+    }
+    return null;
+  }
+  const emMatch = menuPath.match(/^200_icon\/01_icon_emblem\/(em[0-9a-z_]+)\.webp$/i);
+  if (emMatch) {
+    // Les `emblem_url` en `0x<CRC>.webp` ne correspondent à AUCUN
+    // nom d'emblème : ce CRC est celui de l'identifiant d'équipe, pas d'un fichier
+    // Ils tombent donc en `null` — trou de données
+    // réel, pas un problème d'adressage.
+    return emblemFileUrl(emMatch[1] as string);
+  }
+  // Plaques de nom : `inagle_nameplates.image_path` stocke le chemin SANS extension
+  // (`200_icon/25_icon_nameplate/nm04201`). Le conteneur porte deux textures de même
+  // taille (`_01`/`_02`) → forme nommée obligatoire, résolue par le manifeste.
+  const plateMatch = menuPath.match(/^200_icon\/25_icon_nameplate\/([^/.]+)$/);
+  if (plateMatch) {
+    const ref = resolveItemIcon(plateMatch[1] as string);
+    return ref ? menuTextureUrl(ref.g4txPath, ref.textureName) : null;
+  }
+  const itemMatch = menuPath.match(/^200_icon\/02_icon_item\/(.+)\.webp$/);
+  if (itemMatch) {
+    // Le dossier écrit en base est FAUX pour 40 % du catalogue : on passe par le
+    // manifeste (conteneur + texture réels), jamais par le chemin stocké.
+    const ref = resolveItemIcon(itemMatch[1] as string);
+    return ref ? menuTextureUrl(ref.g4txPath, ref.textureName) : null;
+  }
+  const telopMatch = menuPath.match(/^220_img\/telop_waza\/[a-z_]+\/([^/]+)\.webp$/);
+  if (telopMatch) {
+    // Le nom stocké porte un suffixe de variante du dump (`whd00030_0`) et parfois le
+    // doublage (`x_x`) : on revient au code nu avant de consulter le gate. Les formes
+    // dérivées (`whd00390_or`, `whd00900_mm`) n'ont pas de telop propre mais réutilisent
+    // celui de leur technique de base — d'où le second essai (65 lignes récupérées).
+    const raw = telopMatch[1] as string;
+    const dupMatch = raw.match(/^(.+)_\1$/);
+    const code = dupMatch ? (dupMatch[1] as string) : raw.replace(/_0$/, "");
+    return telopUrl(code) ?? telopUrl(code.replace(/_[a-z]+$/i, ""));
+  }
+  return null;
 }
 
 /**
@@ -293,16 +293,16 @@ function mapLegacyMenuPath(menuPath: string): string | null {
  * `.webp` non résolu est un vestige du dump.
  */
 function mapStrippedMenuPath(stripped: string): string {
-	const mapped = mapLegacyMenuPath(stripped);
-	if (mapped) {
-		return mapped;
-	}
-	// Seul un `.png` déjà correct peut passer tel quel : tout le reste (`.webp` du bucket
-	// disparu, chemin de dossier, chemin sans extension non reconnu) serait un 404.
-	if (!stripped.endsWith(".png")) {
-		return PLACEHOLDERS.item;
-	}
-	return `${MENU_CDN_BASE}/${stripped}`;
+  const mapped = mapLegacyMenuPath(stripped);
+  if (mapped) {
+    return mapped;
+  }
+  // Seul un `.png` déjà correct peut passer tel quel : tout le reste (`.webp` du bucket
+  // disparu, chemin de dossier, chemin sans extension non reconnu) serait un 404.
+  if (!stripped.endsWith(".png")) {
+    return PLACEHOLDERS.item;
+  }
+  return `${MENU_CDN_BASE}/${stripped}`;
 }
 
 /**
@@ -313,39 +313,39 @@ function mapStrippedMenuPath(stripped: string): string {
  * is returned unchanged.
  */
 export function resolveLegacyMenuAsset(path: string | null | undefined): string | null {
-	if (!path) {
-		return null;
-	}
-	const legacyAt = path.indexOf(LEGACY_STORAGE_PREFIX);
-	if (legacyAt >= 0) {
-		return mapLegacyMenuPath(path.slice(legacyAt + LEGACY_STORAGE_PREFIX.length));
-	}
-	if (path.startsWith("/menu/")) {
-		return mapLegacyMenuPath(path.slice("/menu/".length));
-	}
-	return path;
+  if (!path) {
+    return null;
+  }
+  const legacyAt = path.indexOf(LEGACY_STORAGE_PREFIX);
+  if (legacyAt >= 0) {
+    return mapLegacyMenuPath(path.slice(legacyAt + LEGACY_STORAGE_PREFIX.length));
+  }
+  if (path.startsWith("/menu/")) {
+    return mapLegacyMenuPath(path.slice("/menu/".length));
+  }
+  return path;
 }
 
 /** Resolve a potentially relative asset path to a full URL. */
 export function resolveAssetUrl(path: string | null | undefined): string | null {
-	if (!path) {
-		return null;
-	}
-	if (path.startsWith(LEGACY_STORAGE_PREFIX)) {
-		return mapStrippedMenuPath(path.slice(LEGACY_STORAGE_PREFIX.length));
-	}
-	// Forme legacy DB raccourcie `/menu/200_icon/…​.webp` (sans le préfixe storage
-	// complet) : c'est un chemin d'asset, pas une route locale. On retire `/menu/`
-	// et on route vers le mapper legacy comme les autres webp — sinon le `startsWith("/")`
-	// ci-dessous le renverrait tel quel vers une route azalee inexistante (404).
-	// Cas réel : 42 keshins sans `asset_code` pointant vers les emblèmes em0001-em0004.
-	if (path.startsWith("/menu/")) {
-		return mapStrippedMenuPath(path.slice("/menu/".length));
-	}
-	if (path.startsWith("http") || path.startsWith("/")) {
-		return path;
-	}
-	return mapStrippedMenuPath(path);
+  if (!path) {
+    return null;
+  }
+  if (path.startsWith(LEGACY_STORAGE_PREFIX)) {
+    return mapStrippedMenuPath(path.slice(LEGACY_STORAGE_PREFIX.length));
+  }
+  // Forme legacy DB raccourcie `/menu/200_icon/…​.webp` (sans le préfixe storage
+  // complet) : c'est un chemin d'asset, pas une route locale. On retire `/menu/`
+  // et on route vers le mapper legacy comme les autres webp — sinon le `startsWith("/")`
+  // ci-dessous le renverrait tel quel vers une route azalee inexistante (404).
+  // Cas réel : 42 keshins sans `asset_code` pointant vers les emblèmes em0001-em0004.
+  if (path.startsWith("/menu/")) {
+    return mapStrippedMenuPath(path.slice("/menu/".length));
+  }
+  if (path.startsWith("http") || path.startsWith("/")) {
+    return path;
+  }
+  return mapStrippedMenuPath(path);
 }
 
 /**
@@ -359,10 +359,10 @@ export function resolveAssetUrl(path: string | null | undefined): string | null 
  * Renvoie `null` pour un `img_path` vide → le caller bascule sur le placeholder.
  */
 export function getGalleryImageUrl(imgPath: string | undefined | null): string | null {
-	if (!imgPath) {
-		return null;
-	}
-	return menuFileUrl(`220_img/gallery_img2/${imgPath}`);
+  if (!imgPath) {
+    return null;
+  }
+  return menuFileUrl(`220_img/gallery_img2/${imgPath}`);
 }
 
 /**
@@ -392,26 +392,26 @@ export type GalleryVariantWidth = (typeof GALLERY_VARIANT_WIDTHS)[number];
  * illustration sans bande ressort inchangée.
  */
 export function galleryVariantUrl(
-	url: string | null | undefined,
-	width: GalleryVariantWidth,
-	options: { recadrerBandes?: boolean } = {}
+  url: string | null | undefined,
+  width: GalleryVariantWidth,
+  options: { recadrerBandes?: boolean } = {},
 ): string | null {
-	if (!url) {
-		return null;
-	}
-	// Seules les sources CDN dx11/g4tx ont un décodeur de variantes derrière nginx.
-	// On match sur le chemin (host implicite ou explicite) pour rester robuste.
-	if (!/\/(dx11|g4tx)\//.test(url)) {
-		return url;
-	}
-	// Ne resize que des sources raster lourdes (png/jpg/jpeg). Un webp est déjà léger.
-	if (!/\.(png|jpe?g)(\?|$)/i.test(url)) {
-		return url;
-	}
-	// Si une query existe déjà (improbable ici), on évite de doubler `?`.
-	const sep = url.includes("?") ? "&" : "?";
-	const recadrage = options.recadrerBandes ? "&crop=bandes" : "";
-	return `${url}${sep}w=${width}&format=webp${recadrage}`;
+  if (!url) {
+    return null;
+  }
+  // Seules les sources CDN dx11/g4tx ont un décodeur de variantes derrière nginx.
+  // On match sur le chemin (host implicite ou explicite) pour rester robuste.
+  if (!/\/(dx11|g4tx)\//.test(url)) {
+    return url;
+  }
+  // Ne resize que des sources raster lourdes (png/jpg/jpeg). Un webp est déjà léger.
+  if (!/\.(png|jpe?g)(\?|$)/i.test(url)) {
+    return url;
+  }
+  // Si une query existe déjà (improbable ici), on évite de doubler `?`.
+  const sep = url.includes("?") ? "&" : "?";
+  const recadrage = options.recadrerBandes ? "&crop=bandes" : "";
+  return `${url}${sep}w=${width}&format=webp${recadrage}`;
 }
 
 /**
@@ -423,7 +423,7 @@ export function galleryVariantUrl(
  * taille, et il sert `_2_l00` — le mauvais portrait (md5 différents, mesuré).
  */
 function characterFaceUrl(baseCode: string): string {
-	return menuTextureUrl(`${ICON_CHR_BASE}/face/${baseCode}_l`, `${baseCode}_1_l00`);
+  return menuTextureUrl(`${ICON_CHR_BASE}/face/${baseCode}_l`, `${baseCode}_1_l00`);
 }
 
 /**
@@ -432,18 +432,18 @@ function characterFaceUrl(baseCode: string): string {
  * au lieu d'une URL qui déclencherait un 404 silencieux côté `<Image onError>`.
  */
 export function getCharacterFaceUrl(
-	charaId: string | undefined | null,
-	_unused?: string | null
+  charaId: string | undefined | null,
+  _unused?: string | null,
 ): string {
-	if (!charaId) {
-		return PLACEHOLDERS.character;
-	}
-	// Strip _5000/_5100/etc. suffix — seuls les codes de base ont un visage.
-	const baseCode = charaId.replace(/_\d{4}$/, "");
-	if (!CHARACTER_FACE_CODES.has(baseCode)) {
-		return PLACEHOLDERS.character;
-	}
-	return characterFaceUrl(baseCode);
+  if (!charaId) {
+    return PLACEHOLDERS.character;
+  }
+  // Strip _5000/_5100/etc. suffix — seuls les codes de base ont un visage.
+  const baseCode = charaId.replace(/_\d{4}$/, "");
+  if (!CHARACTER_FACE_CODES.has(baseCode)) {
+    return PLACEHOLDERS.character;
+  }
+  return characterFaceUrl(baseCode);
 }
 // Alias pour compatibilité
 export const getCharacterImageUrl = getCharacterFaceUrl;
@@ -454,13 +454,13 @@ export const getCharacterImageUrl = getCharacterFaceUrl;
  * tente pas d'URL. Le code uniforme = code perso, préfixe `c` → `u`.
  */
 function resolveUniformCode(charaId: string | undefined | null): string | null {
-	if (!charaId) {
-		return null;
-	}
-	// Strip suffixe de variante (_5000/_5100…) — seul le code de base a un uniforme.
-	const baseCode = charaId.replace(/_\d{4}$/, "");
-	const uniformCode = baseCode.startsWith("c") ? `u${baseCode.slice(1)}` : baseCode;
-	return CHARACTER_UNIFORM_CODES.has(uniformCode) ? uniformCode : null;
+  if (!charaId) {
+    return null;
+  }
+  // Strip suffixe de variante (_5000/_5100…) — seul le code de base a un uniforme.
+  const baseCode = charaId.replace(/_\d{4}$/, "");
+  const uniformCode = baseCode.startsWith("c") ? `u${baseCode.slice(1)}` : baseCode;
+  return CHARACTER_UNIFORM_CODES.has(uniformCode) ? uniformCode : null;
 }
 
 /**
@@ -476,7 +476,7 @@ function resolveUniformCode(charaId: string | undefined | null): string | null {
  * aire sert `_2` (le masque), prouvé au pixel près.
  */
 function uniformIconUrl(code: string): string {
-	return menuTextureUrl(`${ICON_CHR_BASE}/uniform/${code}_l`, `${code}_1`);
+  return menuTextureUrl(`${ICON_CHR_BASE}/uniform/${code}_l`, `${code}_1`);
 }
 
 /**
@@ -488,11 +488,11 @@ function uniformIconUrl(code: string): string {
  * `inagle_uniforms` → manifeste modèle) : ce chemin-là n'est pas encore câblé.
  */
 export function getCharacterUniformUrl(charaId: string | undefined | null): string {
-	const uniformCode = resolveUniformCode(charaId);
-	if (!uniformCode) {
-		return "";
-	}
-	return uniformIconUrl(uniformCode);
+  const uniformCode = resolveUniformCode(charaId);
+  if (!uniformCode) {
+    return "";
+  }
+  return uniformIconUrl(uniformCode);
 }
 
 /**
@@ -510,15 +510,15 @@ export function getCharacterUniformUrl(charaId: string | undefined | null): stri
  * établie sur un dump partiel (310 PNG) et privait 842 techniques de leur bandeau.
  */
 export function getSkillImageUrl(
-	skillId: string | undefined | null,
-	_unused?: string | null
+  skillId: string | undefined | null,
+  _unused?: string | null,
 ): string {
-	if (!skillId) {
-		return "";
-	}
-	// Le code peut porter un suffixe de variante (`who00060_or`, `whd00900_mm`) qui
-	// existe parfois comme fichier à part entière : on tente le code tel quel d'abord.
-	return telopUrl(skillId) ?? telopUrl(skillId.replace(/_[a-z]+$/i, "")) ?? PLACEHOLDERS.skill;
+  if (!skillId) {
+    return "";
+  }
+  // Le code peut porter un suffixe de variante (`who00060_or`, `whd00900_mm`) qui
+  // existe parfois comme fichier à part entière : on tente le code tel quel d'abord.
+  return telopUrl(skillId) ?? telopUrl(skillId.replace(/_[a-z]+$/i, "")) ?? PLACEHOLDERS.skill;
 }
 
 /**
@@ -532,14 +532,14 @@ export function getSkillImageUrl(
  * de `image_url` via `resolveAssetUrl`).
  */
 export function getItemImageUrl(itemId: string): string {
-	if (!itemId) {
-		return "";
-	}
-	const ref = resolveItemIcon(itemId);
-	if (ref) {
-		return menuTextureUrl(ref.g4txPath, ref.textureName);
-	}
-	return emblemFileUrl(itemId) ?? PLACEHOLDERS.item;
+  if (!itemId) {
+    return "";
+  }
+  const ref = resolveItemIcon(itemId);
+  if (ref) {
+    return menuTextureUrl(ref.g4txPath, ref.textureName);
+  }
+  return emblemFileUrl(itemId) ?? PLACEHOLDERS.item;
 }
 // Alias
 export const getItemIconUrl = getItemImageUrl;
@@ -554,23 +554,23 @@ export const getItemIconUrl = getItemImageUrl;
  * vide si l'emblème n'existe pas, jamais une URL 404.
  */
 export function getEmblemImageUrl(emblemId: string | number | undefined | null): string {
-	if (!emblemId && emblemId !== 0) {
-		return "";
-	}
-	const s = emblemId.toString();
-	let emCode: string | null = null;
-	if (s.startsWith("em")) {
-		emCode = s;
-	} else {
-		const num = Number.parseInt(s, 10);
-		if (!Number.isNaN(num) && num > 0) {
-			emCode = `em${String(num).padStart(4, "0")}`;
-		}
-	}
-	if (!emCode) {
-		return "";
-	}
-	return emblemFileUrl(emCode) ?? "";
+  if (!emblemId && emblemId !== 0) {
+    return "";
+  }
+  const s = emblemId.toString();
+  let emCode: string | null = null;
+  if (s.startsWith("em")) {
+    emCode = s;
+  } else {
+    const num = Number.parseInt(s, 10);
+    if (!Number.isNaN(num) && num > 0) {
+      emCode = `em${String(num).padStart(4, "0")}`;
+    }
+  }
+  if (!emCode) {
+    return "";
+  }
+  return emblemFileUrl(emCode) ?? "";
 }
 // Alias
 export const getTeamEmblemUrl = getEmblemImageUrl;
@@ -580,110 +580,110 @@ export const getTeamEmblemUrl = getEmblemImageUrl;
  */
 
 export function getGenderIconUrl(gender: number | string | undefined | null): string {
-	if (gender === undefined || gender === null) {
-		return "";
-	}
-	const g = gender.toString().toLowerCase();
-	const isFemale = g === "1" || g === "2" || g === "f" || g === "female";
-	return isFemale ? "/move/girl.webp" : "/move/boy.webp";
+  if (gender === undefined || gender === null) {
+    return "";
+  }
+  const g = gender.toString().toLowerCase();
+  const isFemale = g === "1" || g === "2" || g === "f" || g === "female";
+  return isFemale ? "/move/girl.webp" : "/move/boy.webp";
 }
 
 export function getSkillElementIconUrl(element: string | number): string {
-	if (!element) {
-		return "";
-	}
-	const el = element.toString().toLowerCase();
-	const map: Record<string, string> = {
-		"1": "fire",
-		"2": "wind",
-		"3": "forest",
-		"4": "mountain",
-		air: "wind",
-		bois: "forest",
-		earth: "mountain",
-		feu: "fire",
-		fire: "fire",
-		forest: "forest",
-		foret: "forest",
-		forêt: "forest",
-		montagne: "mountain",
-		mountain: "mountain",
-		vent: "wind",
-		wind: "wind",
-		wood: "forest",
-	};
-	const filename = map[el];
-	if (!filename) {
-		return "";
-	}
-	return `/spirit_type/${filename}.webp`;
+  if (!element) {
+    return "";
+  }
+  const el = element.toString().toLowerCase();
+  const map: Record<string, string> = {
+    "1": "fire",
+    "2": "wind",
+    "3": "forest",
+    "4": "mountain",
+    air: "wind",
+    bois: "forest",
+    earth: "mountain",
+    feu: "fire",
+    fire: "fire",
+    forest: "forest",
+    foret: "forest",
+    forêt: "forest",
+    montagne: "mountain",
+    mountain: "mountain",
+    vent: "wind",
+    wind: "wind",
+    wood: "forest",
+  };
+  const filename = map[el];
+  if (!filename) {
+    return "";
+  }
+  return `/spirit_type/${filename}.webp`;
 }
 // Parfois appelé getSkillIconUrl pour l'élément (contexte dépendant)
 // Dans le doute, on alias vers l'élément si c'est utilisé pour des petites icônes
 export const getSkillIconUrl = getSkillElementIconUrl;
 
 export function getSkillCategoryIconUrl(category: string | number): string {
-	if (!category) {
-		return "";
-	}
-	const cat = category.toString().toLowerCase();
-	const map: Record<string, string> = {
-		"1": "tir",
-		"2": "dribble",
-		"3": "defense",
-		"4": "gardien",
-		arret: "gardien",
-		arrêt: "gardien",
-		block: "defense",
-		catch: "gardien",
-		def: "defense",
-		defense: "defense",
-		dribble: "dribble",
-		défense: "defense",
-		gardien: "gardien",
-		gk: "gardien",
-		keeper: "gardien",
-		save: "gardien",
-		shoot: "tir",
-		shot: "tir",
-		tir: "tir",
-	};
-	const filename = map[cat];
-	if (!filename) {
-		return "";
-	}
-	return `/move/${filename}.webp`;
+  if (!category) {
+    return "";
+  }
+  const cat = category.toString().toLowerCase();
+  const map: Record<string, string> = {
+    "1": "tir",
+    "2": "dribble",
+    "3": "defense",
+    "4": "gardien",
+    arret: "gardien",
+    arrêt: "gardien",
+    block: "defense",
+    catch: "gardien",
+    def: "defense",
+    defense: "defense",
+    dribble: "dribble",
+    défense: "defense",
+    gardien: "gardien",
+    gk: "gardien",
+    keeper: "gardien",
+    save: "gardien",
+    shoot: "tir",
+    shot: "tir",
+    tir: "tir",
+  };
+  const filename = map[cat];
+  if (!filename) {
+    return "";
+  }
+  return `/move/${filename}.webp`;
 }
 
 export function getRarityIconUrl(rarity: string | number | undefined | null): string {
-	if (rarity === undefined || rarity === null) {
-		return "";
-	}
-	const r = rarity.toString().toLowerCase();
-	const map: Record<string, string> = {
-		"1": "normal.webp",
-		"2": "experimente.webp",
-		"20": "basara.webp",
-		"3": "emerite.webp",
-		"4": "heros.webp",
-		"5": "legendaire.webp",
-		basara: "basara.webp",
-		legendaire: "legendaire.webp",
-		légendaire: "legendaire.webp",
-		n: "normal.webp",
-		normal: "normal.webp",
-		r: "experimente.webp",
-		rare: "experimente.webp",
-		sr: "emerite.webp",
-		ssr: "heros.webp",
-		super: "emerite.webp",
-		ur: "legendaire.webp",
-	};
-	const file = map[r];
-	if (!file) {
-		return "";
-	}
-	return `/rarity/${file}`;
+  if (rarity === undefined || rarity === null) {
+    return "";
+  }
+  const r = rarity.toString().toLowerCase();
+  const map: Record<string, string> = {
+    "1": "normal.webp",
+    "2": "experimente.webp",
+    "20": "basara.webp",
+    "3": "emerite.webp",
+    "4": "heros.webp",
+    "5": "legendaire.webp",
+    basara: "basara.webp",
+    legendaire: "legendaire.webp",
+    légendaire: "legendaire.webp",
+    n: "normal.webp",
+    normal: "normal.webp",
+    r: "experimente.webp",
+    rare: "experimente.webp",
+    sr: "emerite.webp",
+    ssr: "heros.webp",
+    super: "emerite.webp",
+    ur: "legendaire.webp",
+  };
+  const file = map[r];
+  if (!file) {
+    return "";
+  }
+  return `/rarity/${file}`;
 }
 
 /**
@@ -702,10 +702,10 @@ export const ZUKAN_3D_MIRROR_AVAILABLE = false;
  * miroir est absent, ce qui évite un `<video src>` en 404.
  */
 export function getSkillVideoUrl(skillId: string | undefined | null): string {
-	if (!skillId || !ZUKAN_3D_MIRROR_AVAILABLE) {
-		return "";
-	}
-	return `${CDN_URL}/zukan-assets-mirror/movies/${skillId}.mp4`;
+  if (!skillId || !ZUKAN_3D_MIRROR_AVAILABLE) {
+    return "";
+  }
+  return `${CDN_URL}/zukan-assets-mirror/movies/${skillId}.mp4`;
 }
 
 /**
@@ -729,8 +729,8 @@ export function getSkillVideoUrl(skillId: string | undefined | null): string {
  * Cohérent avec db-1.
  */
 function auraBaseNum(assetCode: string, prefix: RegExp): string | null {
-	const m = assetCode.replace(prefix, "").match(/^\d+/);
-	return m ? m[0] : null;
+  const m = assetCode.replace(prefix, "").match(/^\d+/);
+  return m ? m[0] : null;
 }
 
 /**
@@ -743,40 +743,40 @@ function auraBaseNum(assetCode: string, prefix: RegExp): string | null {
  * de la plage 700-725/2025 dont l'`image_url` DB `.webp` est elle aussi morte).
  */
 function auraFamilyBase(num: string): string {
-	const n = Number.parseInt(num, 10);
-	const family = Number.isFinite(n) ? Math.floor(n / 10) * 10 : 0;
-	return String(family).padStart(6, "0");
+  const n = Number.parseInt(num, 10);
+  const family = Number.isFinite(n) ? Math.floor(n / 10) * 10 : 0;
+  return String(family).padStart(6, "0");
 }
 
 export function getAuraImageUrl(assetCode: string | undefined | null, _subType?: string): string {
-	if (!assetCode) {
-		return "";
-	}
+  if (!assetCode) {
+    return "";
+  }
 
-	// Keshins : tous les `wk*` (wks/wkk/wkd/wko/wkt) + les variantes Keshin-armé
-	// `wak/wao/wad` vivent dans `aura_fs/k{N}` ; seuls les Souls `ws*` vivent dans
-	// `aura_soul/a{N}`. Couverture mesurée : 174/174 keshins et 56/56 souls dotés
-	// d'un `asset_code` exploitable trouvent leur icône (gate `AURA_*_CODES`).
-	if (assetCode.startsWith("wk") || /^wa[kod]/.test(assetCode)) {
-		const num = auraBaseNum(assetCode, /^w[ka][a-z]/);
-		if (num) {
-			return auraIconUrl("aura_fs", `k${auraFamilyBase(num)}`) ?? "";
-		}
-	}
-	// Souls `ws*` (wss/wso/wsd/wsk) → aura_soul/a{N} (cohérent sur tout le dossier).
-	// MAIS les Soul-armé `was*` (Warrior Armed Spirit, 66 keshins) sont répartis sans
-	// règle dérivable entre aura_fs/k{N} (12 codes) et aura_soul/a{N} (18 codes) : on
-	// NE dérive donc PAS `was*` ici — on renvoie "" pour laisser `image_url` (DB,
-	// chemin vérifié HTTP 200 par le backfill) faire foi. L'ancienne dérivation
-	// `was*` → aura_soul produisait un 404 pour ~40% des formes armées (db-1).
-	if (assetCode.startsWith("ws")) {
-		const num = auraBaseNum(assetCode, /^ws[a-z]/);
-		if (num) {
-			return auraIconUrl("aura_soul", `a${auraFamilyBase(num)}`) ?? "";
-		}
-	}
+  // Keshins : tous les `wk*` (wks/wkk/wkd/wko/wkt) + les variantes Keshin-armé
+  // `wak/wao/wad` vivent dans `aura_fs/k{N}` ; seuls les Souls `ws*` vivent dans
+  // `aura_soul/a{N}`. Couverture mesurée : 174/174 keshins et 56/56 souls dotés
+  // d'un `asset_code` exploitable trouvent leur icône (gate `AURA_*_CODES`).
+  if (assetCode.startsWith("wk") || /^wa[kod]/.test(assetCode)) {
+    const num = auraBaseNum(assetCode, /^w[ka][a-z]/);
+    if (num) {
+      return auraIconUrl("aura_fs", `k${auraFamilyBase(num)}`) ?? "";
+    }
+  }
+  // Souls `ws*` (wss/wso/wsd/wsk) → aura_soul/a{N} (cohérent sur tout le dossier).
+  // MAIS les Soul-armé `was*` (Warrior Armed Spirit, 66 keshins) sont répartis sans
+  // règle dérivable entre aura_fs/k{N} (12 codes) et aura_soul/a{N} (18 codes) : on
+  // NE dérive donc PAS `was*` ici — on renvoie "" pour laisser `image_url` (DB,
+  // chemin vérifié HTTP 200 par le backfill) faire foi. L'ancienne dérivation
+  // `was*` → aura_soul produisait un 404 pour ~40% des formes armées (db-1).
+  if (assetCode.startsWith("ws")) {
+    const num = auraBaseNum(assetCode, /^ws[a-z]/);
+    if (num) {
+      return auraIconUrl("aura_soul", `a${auraFamilyBase(num)}`) ?? "";
+    }
+  }
 
-	return "";
+  return "";
 }
 
 /**
@@ -792,16 +792,16 @@ export function getAuraImageUrl(assetCode: string | undefined | null, _subType?:
  * le placeholder), jamais un 404 forgé.
  */
 export function getMiximaxIconUrl(iconCode: string | undefined | null): string {
-	if (!iconCode) {
-		return "";
-	}
-	// Normalise l'asset_code en retirant un éventuel suffixe de variante (`_h1`/`_b1`…).
-	const key = iconCode.replace(/_[a-z0-9]+$/i, "");
-	const realIcon = MIXIMAX_ICON_MANIFEST[iconCode] ?? MIXIMAX_ICON_MANIFEST[key];
-	if (!realIcon) {
-		return "";
-	}
-	return auraIconUrl("aura_mixi", realIcon) ?? "";
+  if (!iconCode) {
+    return "";
+  }
+  // Normalise l'asset_code en retirant un éventuel suffixe de variante (`_h1`/`_b1`…).
+  const key = iconCode.replace(/_[a-z0-9]+$/i, "");
+  const realIcon = MIXIMAX_ICON_MANIFEST[iconCode] ?? MIXIMAX_ICON_MANIFEST[key];
+  if (!realIcon) {
+    return "";
+  }
+  return auraIconUrl("aura_mixi", realIcon) ?? "";
 }
 
 /**
@@ -813,10 +813,10 @@ export function getMiximaxIconUrl(iconCode: string | undefined | null): string {
  * de l'icône manifeste correcte) plutôt que d'afficher un faux nom. Cf. bug Arthur.
  */
 function isStaleMiximaxTelopUrl(imageUrl: string | undefined | null): boolean {
-	if (!imageUrl) {
-		return false;
-	}
-	return /(?:^|\/)220_img\/telop_waza\/[a-z]+\/aura_mixi_c\d/.test(imageUrl);
+  if (!imageUrl) {
+    return false;
+  }
+  return /(?:^|\/)220_img\/telop_waza\/[a-z]+\/aura_mixi_c\d/.test(imageUrl);
 }
 
 /**
@@ -830,26 +830,26 @@ function isStaleMiximaxTelopUrl(imageUrl: string | undefined | null): boolean {
  * (bandeau, supprimé pour les wmm car aucun n'est valide).
  */
 export function getMiximaxImageUrl(
-	iconCode: string | undefined | null,
-	assetCode: string | undefined | null,
-	dbImageUrl: string | undefined | null
+  iconCode: string | undefined | null,
+  assetCode: string | undefined | null,
+  dbImageUrl: string | undefined | null,
 ): string {
-	const fromIcon = getMiximaxIconUrl(iconCode);
-	if (fromIcon) {
-		return fromIcon;
-	}
-	const fromAsset = getMiximaxIconUrl(assetCode);
-	if (fromAsset) {
-		return fromAsset;
-	}
-	// L'image_url DB n'est utilisable QUE si ce n'est pas un telop miximax périmé.
-	if (dbImageUrl && !isStaleMiximaxTelopUrl(dbImageUrl)) {
-		const resolved = resolveAssetUrl(dbImageUrl);
-		if (resolved) {
-			return resolved;
-		}
-	}
-	return PLACEHOLDERS.character;
+  const fromIcon = getMiximaxIconUrl(iconCode);
+  if (fromIcon) {
+    return fromIcon;
+  }
+  const fromAsset = getMiximaxIconUrl(assetCode);
+  if (fromAsset) {
+    return fromAsset;
+  }
+  // L'image_url DB n'est utilisable QUE si ce n'est pas un telop miximax périmé.
+  if (dbImageUrl && !isStaleMiximaxTelopUrl(dbImageUrl)) {
+    const resolved = resolveAssetUrl(dbImageUrl);
+    if (resolved) {
+      return resolved;
+    }
+  }
+  return PLACEHOLDERS.character;
 }
 
 /**
@@ -873,46 +873,46 @@ export function getMiximaxImageUrl(
  * l'icône miximax correcte vient du manifeste (`getMiximaxIconUrl`).
  */
 export function resolveAuraTelopUrl(assetCode: string | undefined | null): string | null {
-	if (!assetCode) {
-		return null;
-	}
+  if (!assetCode) {
+    return null;
+  }
 
-	let bucketCode: string | null = null;
+  let bucketCode: string | null = null;
 
-	if (assetCode.startsWith("wmm")) {
-		// Miximax : pas de telop fiable (cf. note) — jamais de bandeau d'un autre perso.
-		return null;
-	}
-	if (assetCode.startsWith("wk")) {
-		// All Keshins: wks/wkk/wkd/wko/wkt -> k{N padded 6}
-		// Strip variant suffix (_b1/_h2/_st0701/_1…) → base only (cf. auraBaseNum).
-		const num = auraBaseNum(assetCode, /^wk[a-z]/);
-		bucketCode = num ? `k${num.padStart(6, "0")}` : null;
-	} else if (assetCode.startsWith("ws") || assetCode.startsWith("wa")) {
-		// Souls (ws*) and Armed (wa*) -> a{N padded 6}
-		// Except wap which has special mapping
-		if (assetCode.startsWith("wap")) {
-			bucketCode = `aura_power_${assetCode}`;
-		} else {
-			// Strip variant suffix (_b1/_h2/_st0701/_1…) → base only (cf. auraBaseNum).
-			const num = auraBaseNum(assetCode, /^w[sa][a-z]/);
-			bucketCode = num ? `a${num.padStart(6, "0")}` : null;
-		}
-	} else if (assetCode.startsWith("mode_change_")) {
-		bucketCode = assetCode;
-	} else if (assetCode.includes("awakening")) {
-		// Awakenings : pas de telop dédié dans le jeu → placeholder `aura_power01`.
-		bucketCode = "aura_power01";
-	}
+  if (assetCode.startsWith("wmm")) {
+    // Miximax : pas de telop fiable (cf. note) — jamais de bandeau d'un autre perso.
+    return null;
+  }
+  if (assetCode.startsWith("wk")) {
+    // All Keshins: wks/wkk/wkd/wko/wkt -> k{N padded 6}
+    // Strip variant suffix (_b1/_h2/_st0701/_1…) → base only (cf. auraBaseNum).
+    const num = auraBaseNum(assetCode, /^wk[a-z]/);
+    bucketCode = num ? `k${num.padStart(6, "0")}` : null;
+  } else if (assetCode.startsWith("ws") || assetCode.startsWith("wa")) {
+    // Souls (ws*) and Armed (wa*) -> a{N padded 6}
+    // Except wap which has special mapping
+    if (assetCode.startsWith("wap")) {
+      bucketCode = `aura_power_${assetCode}`;
+    } else {
+      // Strip variant suffix (_b1/_h2/_st0701/_1…) → base only (cf. auraBaseNum).
+      const num = auraBaseNum(assetCode, /^w[sa][a-z]/);
+      bucketCode = num ? `a${num.padStart(6, "0")}` : null;
+    }
+  } else if (assetCode.startsWith("mode_change_")) {
+    bucketCode = assetCode;
+  } else if (assetCode.includes("awakening")) {
+    // Awakenings : pas de telop dédié dans le jeu → placeholder `aura_power01`.
+    bucketCode = "aura_power01";
+  }
 
-	if (!bucketCode) {
-		return null;
-	}
+  if (!bucketCode) {
+    return null;
+  }
 
-	// Forme 1:1 du contrat CPK : `220_img/telop_waza/<lang>/<code>.g4tx` → `<code>.png`.
-	// Gate sur les fichiers réels (98 `k*`, 56 `a*`, 9 `mode_change_*`, 9 `aura_power*`
-	// en `fr`) : un code sans telop rend `null` au lieu d'une URL 404.
-	return telopUrl(bucketCode);
+  // Forme 1:1 du contrat CPK : `220_img/telop_waza/<lang>/<code>.g4tx` → `<code>.png`.
+  // Gate sur les fichiers réels (98 `k*`, 56 `a*`, 9 `mode_change_*`, 9 `aura_power*`
+  // en `fr`) : un code sans telop rend `null` au lieu d'une URL 404.
+  return telopUrl(bucketCode);
 }
 
 /**
@@ -923,18 +923,18 @@ export function resolveAuraTelopUrl(assetCode: string | undefined | null): strin
  * en prod, mais le garde-fou évite tout 404 si quelqu'un l'invoque directement.
  */
 export function getCharacterModel360Url(
-	hash: string,
-	frame: number,
-	full: boolean = false
+  hash: string,
+  frame: number,
+  full: boolean = false,
 ): string {
-	if (!ZUKAN_3D_MIRROR_AVAILABLE) {
-		return PLACEHOLDERS.character;
-	}
-	// Format Zukan: https://zukan.inazuma.jp/3d/{hash}/{type}/{frame}.webp
-	// Notre miroir: /zukan-assets-mirror/3d/{hash}/{type}/{frame}.webp
-	// Frame est souvent 0-7 ou 0-15
-	const type = full ? "full" : "face";
-	return `${CDN_URL}/zukan-assets-mirror/3d/${hash}/${type}/${frame}.webp`;
+  if (!ZUKAN_3D_MIRROR_AVAILABLE) {
+    return PLACEHOLDERS.character;
+  }
+  // Format Zukan: https://zukan.inazuma.jp/3d/{hash}/{type}/{frame}.webp
+  // Notre miroir: /zukan-assets-mirror/3d/{hash}/{type}/{frame}.webp
+  // Frame est souvent 0-7 ou 0-15
+  const type = full ? "full" : "face";
+  return `${CDN_URL}/zukan-assets-mirror/3d/${hash}/${type}/${frame}.webp`;
 }
 
 /**
@@ -952,20 +952,20 @@ const MODEL_GLB_BASE = "https://cdn.rosegriffon.fr/model";
  * fallback image et ne monte pas le viewer 3D (évite tout 404).
  */
 export function getCharacterModelGlbUrl(code: string | undefined | null): string | null {
-	if (!code) {
-		return null;
-	}
-	// Strip suffixe de variante éventuel (_5000/_5100…) — seul le code de base a un modèle.
-	const base = code.replace(/_\d{4}$/, "");
-	if (!CHARACTER_MODEL_CODES.has(base)) {
-		return null;
-	}
-	return `${MODEL_GLB_BASE}/${base}.glb`;
+  if (!code) {
+    return null;
+  }
+  // Strip suffixe de variante éventuel (_5000/_5100…) — seul le code de base a un modèle.
+  const base = code.replace(/_\d{4}$/, "");
+  if (!CHARACTER_MODEL_CODES.has(base)) {
+    return null;
+  }
+  return `${MODEL_GLB_BASE}/${base}.glb`;
 }
 
 /** Indique si un personnage possède un modèle 3D GLB servi (gate viewer). */
 export function hasCharacterModelGlb(code: string | undefined | null): boolean {
-	return getCharacterModelGlbUrl(code) !== null;
+  return getCharacterModelGlbUrl(code) !== null;
 }
 
 /**
@@ -989,15 +989,15 @@ const MODEL_FULL_VERSION = "5";
  * (le service renvoie 404 proprement si le code est inconnu).
  */
 export function getCharacterModelFullGlbUrl(code: string | undefined | null): string | null {
-	if (!code) {
-		return null;
-	}
-	const base = code.replace(/_\d{4}$/, "");
-	// Pour les personnages c*, on gate sur le manifeste face (évite les 404 assurés).
-	if (base.startsWith("c") && !CHARACTER_MODEL_CODES.has(base)) {
-		return null;
-	}
-	return `${MODEL_FULL_GLB_BASE}/${base}.glb?v=${MODEL_FULL_VERSION}`;
+  if (!code) {
+    return null;
+  }
+  const base = code.replace(/_\d{4}$/, "");
+  // Pour les personnages c*, on gate sur le manifeste face (évite les 404 assurés).
+  if (base.startsWith("c") && !CHARACTER_MODEL_CODES.has(base)) {
+    return null;
+  }
+  return `${MODEL_FULL_GLB_BASE}/${base}.glb?v=${MODEL_FULL_VERSION}`;
 }
 
 /**
@@ -1006,16 +1006,16 @@ export function getCharacterModelFullGlbUrl(code: string | undefined | null): st
  * Renvoie `null` si aucun `k<6 chiffres>` n'est trouvé.
  */
 export function extractKeshinModelCode(
-	...sources: Array<string | null | undefined>
+  ...sources: Array<string | null | undefined>
 ): string | null {
-	for (const s of sources) {
-		if (!s) continue;
-		// `k` suivi d'exactement 6 chiffres, NON précédé d'un chiffre et NON suivi d'un
-		// chiffre (un `_`/`/` après est OK : `aura_fs/k000010_l_…` doit matcher `k000010`).
-		const m = s.match(/(?<![0-9])(k\d{6})(?![0-9])/);
-		if (m?.[1]) return m[1];
-	}
-	return null;
+  for (const s of sources) {
+    if (!s) continue;
+    // `k` suivi d'exactement 6 chiffres, NON précédé d'un chiffre et NON suivi d'un
+    // chiffre (un `_`/`/` après est OK : `aura_fs/k000010_l_…` doit matcher `k000010`).
+    const m = s.match(/(?<![0-9])(k\d{6})(?![0-9])/);
+    if (m?.[1]) return m[1];
+  }
+  return null;
 }
 
 /**
@@ -1024,10 +1024,10 @@ export function extractKeshinModelCode(
  * (keshin `.g4mg`-seul pas encore assemblable) → pas de bouton 3D mort.
  */
 export function getKeshinModelGlbUrl(code: string | undefined | null): string | null {
-	if (!code) return null;
-	const base = code.replace(/_\d+$/, "");
-	if (!KESHIN_MODEL_CODES.has(base)) return null;
-	return `${MODEL_FULL_GLB_BASE}/${base}.glb?v=${MODEL_FULL_VERSION}`;
+  if (!code) return null;
+  const base = code.replace(/_\d+$/, "");
+  if (!KESHIN_MODEL_CODES.has(base)) return null;
+  return `${MODEL_FULL_GLB_BASE}/${base}.glb?v=${MODEL_FULL_VERSION}`;
 }
 
 /**
@@ -1035,19 +1035,19 @@ export function getKeshinModelGlbUrl(code: string | undefined | null): string | 
  * des armures réellement servies (`ARMURE_MODEL_CODES`). Renvoie `null` si inconnue.
  */
 export function getArmureModelGlbUrl(code: string | undefined | null): string | null {
-	if (!code) return null;
-	if (!ARMURE_MODEL_CODES.has(code)) return null;
-	return `${MODEL_FULL_GLB_BASE}/${code}.glb?v=${MODEL_FULL_VERSION}`;
+  if (!code) return null;
+  if (!ARMURE_MODEL_CODES.has(code)) return null;
+  return `${MODEL_FULL_GLB_BASE}/${code}.glb?v=${MODEL_FULL_VERSION}`;
 }
 
 /** Liste triée des codes keshin servis (gate des fiches/galeries 3D). */
 export function listServedKeshinCodes(): string[] {
-	return [...KESHIN_MODEL_CODES].sort();
+  return [...KESHIN_MODEL_CODES].sort();
 }
 
 /** Liste triée des codes armure servis (gate de la galerie 3D armures). */
 export function listServedArmureCodes(): string[] {
-	return [...ARMURE_MODEL_CODES].sort();
+  return [...ARMURE_MODEL_CODES].sort();
 }
 
 /**
@@ -1061,14 +1061,14 @@ const MODEL_CHR_GLB_BASE = "https://cdn.rosegriffon.fr/model-chr";
 export type ChrModelSub = "waza" | "item" | "animal";
 
 const CHR_MODEL_CODES: Record<ChrModelSub, Set<string>> = {
-	animal: new Set((ASSET_MANIFEST.chrModel as { animal: readonly string[] }).animal),
-	item: new Set((ASSET_MANIFEST.chrModel as { item: readonly string[] }).item),
-	waza: new Set((ASSET_MANIFEST.chrModel as { waza: readonly string[] }).waza),
+  animal: new Set((ASSET_MANIFEST.chrModel as { animal: readonly string[] }).animal),
+  item: new Set((ASSET_MANIFEST.chrModel as { item: readonly string[] }).item),
+  waza: new Set((ASSET_MANIFEST.chrModel as { waza: readonly string[] }).waza),
 };
 
 /** Basename RÉEL du `.g4tx` de texture par code (relevé sur l'index CPK, cf. `getChrModelTextureUrl`). */
 const CHR_MODEL_TEXTURES =
-	(ASSET_MANIFEST.chrModel as { textures?: Record<string, Record<string, string>> }).textures ?? {};
+  (ASSET_MANIFEST.chrModel as { textures?: Record<string, Record<string, string>> }).textures ?? {};
 
 /**
  * Résout l'URL du modèle 3D générique d'un sous-domaine chr (`/model-chr/<sub>/<code>.glb`),
@@ -1076,17 +1076,17 @@ const CHR_MODEL_TEXTURES =
  * code n'a pas de paire g4md+g4mg assemblable.
  */
 export function getChrModelGlbUrl(
-	sub: ChrModelSub,
-	code: string | undefined | null
+  sub: ChrModelSub,
+  code: string | undefined | null,
 ): string | null {
-	if (!code) return null;
-	if (!CHR_MODEL_CODES[sub]?.has(code)) return null;
-	return `${MODEL_CHR_GLB_BASE}/${sub}/${code}.glb?v=${MODEL_FULL_VERSION}`;
+  if (!code) return null;
+  if (!CHR_MODEL_CODES[sub]?.has(code)) return null;
+  return `${MODEL_CHR_GLB_BASE}/${sub}/${code}.glb?v=${MODEL_FULL_VERSION}`;
 }
 
 /** Liste triée des codes servis pour un sous-domaine chr (gate de la galerie 3D). */
 export function listServedChrModelCodes(sub: ChrModelSub): string[] {
-	return [...(CHR_MODEL_CODES[sub] ?? [])].sort();
+  return [...(CHR_MODEL_CODES[sub] ?? [])].sort();
 }
 
 /**
@@ -1102,13 +1102,13 @@ export function listServedChrModelCodes(sub: ChrModelSub): string[] {
  * Variantes redimensionnées via `?w=&format=webp` (cdn-variants).
  */
 export function getChrModelTextureUrl(
-	sub: ChrModelSub,
-	code: string | undefined | null
+  sub: ChrModelSub,
+  code: string | undefined | null,
 ): string | null {
-	if (!code || !CHR_MODEL_CODES[sub]?.has(code)) return null;
-	const base = CHR_MODEL_TEXTURES[sub]?.[code];
-	if (!base) return null;
-	return `https://cdn.rosegriffon.fr/dx11/chr/_${sub}/${code}/${base}.png`;
+  if (!code || !CHR_MODEL_CODES[sub]?.has(code)) return null;
+  const base = CHR_MODEL_TEXTURES[sub]?.[code];
+  if (!base) return null;
+  return `https://cdn.rosegriffon.fr/dx11/chr/_${sub}/${code}/${base}.png`;
 }
 
 /**
@@ -1117,9 +1117,9 @@ export function getChrModelTextureUrl(
  * étaient des 404 silencieux dans les Image fallbacks de characters/skills/items.)
  */
 export const PLACEHOLDERS = {
-	character: "/ievr.webp",
-	item: "/ievr.webp",
-	skill: "/ievr.webp",
+  character: "/ievr.webp",
+  item: "/ievr.webp",
+  skill: "/ievr.webp",
 } as const;
 
 /**
@@ -1127,17 +1127,17 @@ export const PLACEHOLDERS = {
  * Uses Next.js optimization endpoint
  */
 export function getOptimizedImageUrl(
-	url: string | null | undefined,
-	width = 640,
-	quality = 80
+  url: string | null | undefined,
+  width = 640,
+  quality = 80,
 ): string {
-	if (!url) {
-		return "";
-	}
-	if (url.startsWith("data:")) {
-		return url;
-	}
+  if (!url) {
+    return "";
+  }
+  if (url.startsWith("data:")) {
+    return url;
+  }
 
-	// Use Next.js image optimization endpoint
-	return `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`;
+  // Use Next.js image optimization endpoint
+  return `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`;
 }

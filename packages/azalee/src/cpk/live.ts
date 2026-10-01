@@ -24,101 +24,101 @@ const CDN_BASE = "https://cdn.rosegriffon.fr";
  * à une galerie de trier par poids et d'annoncer le volume d'un dossier sans le télécharger.
  */
 export interface VfsFile extends CpkFile {
-	/** Taille décompressée, en octets. */
-	size: number;
+  /** Taille décompressée, en octets. */
+  size: number;
 }
 
 /** Rôle catalogué d'un dossier du VFS (table `nie_explore::folder_roles`). */
 export interface VfsRole {
-	/** Ce à quoi le dossier sert, en clair. */
-	role: string;
-	/** État de l'exploitation de ce dossier par le moteur Rust. */
-	status: string;
+  /** Ce à quoi le dossier sert, en clair. */
+  role: string;
+  /** État de l'exploitation de ce dossier par le moteur Rust. */
+  status: string;
 }
 
 /** Vue « dossier » paginée du VFS live. */
 export interface VfsListing {
-	/** Répertoire listé, normalisé (sans slash final). */
-	dir: string;
-	/** Sous-dossiers directs, triés par nom. Jamais paginés. */
-	dirs: CpkDir[];
-	/** Fichiers directs, tranche `[fileOffset, fileOffset + limit)`. */
-	files: VfsFile[];
-	/** Nombre total de fichiers directs, AVANT pagination. */
-	fileTotal: number;
-	/** Décalage appliqué. */
-	fileOffset: number;
-	/** Rôle catalogué du dossier, `null` s'il n'en a pas — jamais un rôle deviné. */
-	role: VfsRole | null;
+  /** Répertoire listé, normalisé (sans slash final). */
+  dir: string;
+  /** Sous-dossiers directs, triés par nom. Jamais paginés. */
+  dirs: CpkDir[];
+  /** Fichiers directs, tranche `[fileOffset, fileOffset + limit)`. */
+  files: VfsFile[];
+  /** Nombre total de fichiers directs, AVANT pagination. */
+  fileTotal: number;
+  /** Décalage appliqué. */
+  fileOffset: number;
+  /** Rôle catalogué du dossier, `null` s'il n'en a pas — jamais un rôle deviné. */
+  role: VfsRole | null;
 }
 
 /** Résultat d'une recherche dans le VFS live. */
 export interface VfsSearch {
-	/** La requête telle qu'elle a été comprise. */
-	query: string;
-	/** Taille de CETTE page. */
-	count: number;
-	/** Nombre total de correspondances dans tout le VFS. */
-	total: number;
-	/** Décalage appliqué. */
-	offset: number;
-	/** Les correspondances de la page, triées par chemin. */
-	files: VfsFile[];
+  /** La requête telle qu'elle a été comprise. */
+  query: string;
+  /** Taille de CETTE page. */
+  count: number;
+  /** Nombre total de correspondances dans tout le VFS. */
+  total: number;
+  /** Décalage appliqué. */
+  offset: number;
+  /** Les correspondances de la page, triées par chemin. */
+  files: VfsFile[];
 }
 
 /** Compteurs globaux du VFS monté. */
 export interface VfsStats {
-	/** Nombre total de fichiers indexés. */
-	total: number;
-	/** Nombre d'archives CPK montées. */
-	cpkCount: number;
-	/** Fichiers issus des paquets additionnels. */
-	extraCount: number;
-	/** Fichiers présents en clair sur le disque, hors CPK. */
-	looseCount: number;
+  /** Nombre total de fichiers indexés. */
+  total: number;
+  /** Nombre d'archives CPK montées. */
+  cpkCount: number;
+  /** Fichiers issus des paquets additionnels. */
+  extraCount: number;
+  /** Fichiers présents en clair sur le disque, hors CPK. */
+  looseCount: number;
 }
 
 /** Un fichier du VFS, enrichi de ce que le moteur sait en faire. */
 export interface VfsFileMeta extends VfsFile {
-	/** Formats d'export que les crates savent produire pour ce fichier. */
-	formats: {
-		/** Identifiant du format (`raw`, `wav`, `glb`…). */
-		id: string;
-		/** Extension produite. */
-		ext: string;
-		/** Libellé humain. */
-		label: string;
-		/** Le format rend les octets d'origine, sans conversion. */
-		brut: boolean;
-		/** La conversion ne perd aucune information. */
-		sansPerte: boolean;
-	}[];
-	/** Lignes de description issues de l'inspection réelle des octets, `null` si non reconnu. */
-	describe: string[] | null;
+  /** Formats d'export que les crates savent produire pour ce fichier. */
+  formats: {
+    /** Identifiant du format (`raw`, `wav`, `glb`…). */
+    id: string;
+    /** Extension produite. */
+    ext: string;
+    /** Libellé humain. */
+    label: string;
+    /** Le format rend les octets d'origine, sans conversion. */
+    brut: boolean;
+    /** La conversion ne perd aucune information. */
+    sansPerte: boolean;
+  }[];
+  /** Lignes de description issues de l'inspection réelle des octets, `null` si non reconnu. */
+  describe: string[] | null;
 }
 
 /** Erreur de transport du pont VFS, avec le code HTTP quand il y en a un. */
 export class VfsError extends Error {
-	constructor(
-		message: string,
-		/** Code HTTP de la réponse, ou `0` si la requête n'a pas abouti. */
-		readonly status: number,
-	) {
-		super(message);
-		this.name = "VfsError";
-	}
+  constructor(
+    message: string,
+    /** Code HTTP de la réponse, ou `0` si la requête n'a pas abouti. */
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "VfsError";
+  }
 }
 
 async function getJson<T>(chemin: string): Promise<T> {
-	let res: Response;
-	try {
-		res = await fetch(`${CDN_BASE}${chemin}`);
-	} catch {
-		// Statut 0 = la requête n'a pas abouti (DNS, TLS, réseau) : distinct d'un 404 du pont.
-		throw new VfsError(`pont VFS injoignable (${chemin})`, 0);
-	}
-	if (!res.ok) throw new VfsError(`pont VFS ${res.status} sur ${chemin}`, res.status);
-	return (await res.json()) as T;
+  let res: Response;
+  try {
+    res = await fetch(`${CDN_BASE}${chemin}`);
+  } catch {
+    // Statut 0 = la requête n'a pas abouti (DNS, TLS, réseau) : distinct d'un 404 du pont.
+    throw new VfsError(`pont VFS injoignable (${chemin})`, 0);
+  }
+  if (!res.ok) throw new VfsError(`pont VFS ${res.status} sur ${chemin}`, res.status);
+  return (await res.json()) as T;
 }
 
 /**
@@ -128,8 +128,8 @@ async function getJson<T>(chemin: string): Promise<T> {
  * que la structure, sans payer le transfert des fichiers.
  */
 export function vfsLs(dir: string, limit = 1000, offset = 0): Promise<VfsListing> {
-	const q = new URLSearchParams({ path: dir, limit: String(limit), offset: String(offset) });
-	return getJson<VfsListing>(`/vfs/ls?${q}`);
+  const q = new URLSearchParams({ path: dir, limit: String(limit), offset: String(offset) });
+  return getJson<VfsListing>(`/vfs/ls?${q}`);
 }
 
 /**
@@ -139,26 +139,26 @@ export function vfsLs(dir: string, limit = 1000, offset = 0): Promise<VfsListing
  * l'ancien `count` tronqué à la limite ne permettait pas.
  */
 export function vfsFind(
-	query: string,
-	options: { ext?: string; limit?: number; offset?: number } = {},
+  query: string,
+  options: { ext?: string; limit?: number; offset?: number } = {},
 ): Promise<VfsSearch> {
-	const q = new URLSearchParams({
-		q: query,
-		limit: String(options.limit ?? 200),
-		offset: String(options.offset ?? 0),
-	});
-	if (options.ext) q.set("ext", options.ext);
-	return getJson<VfsSearch>(`/vfs/find?${q}`);
+  const q = new URLSearchParams({
+    q: query,
+    limit: String(options.limit ?? 200),
+    offset: String(options.offset ?? 0),
+  });
+  if (options.ext) q.set("ext", options.ext);
+  return getJson<VfsSearch>(`/vfs/find?${q}`);
 }
 
 /** Métadonnées d'un fichier précis, avec ses formats d'export et sa description. */
 export function vfsStat(path: string): Promise<VfsFileMeta> {
-	return getJson<VfsFileMeta>(`/vfs/stat?${new URLSearchParams({ path })}`);
+  return getJson<VfsFileMeta>(`/vfs/stat?${new URLSearchParams({ path })}`);
 }
 
 /** Compteurs globaux du VFS monté. */
 export function vfsStats(): Promise<VfsStats> {
-	return getJson<VfsStats>("/vfs/stats");
+  return getJson<VfsStats>("/vfs/stats");
 }
 
 /**
@@ -168,11 +168,11 @@ export function vfsStats(): Promise<VfsStats> {
  * doit rendre son cadre et dire que la source est indisponible.
  */
 export async function lsOrNull(dir: string, limit = 1000, offset = 0): Promise<VfsListing | null> {
-	try {
-		return await vfsLs(dir, limit, offset);
-	} catch {
-		return null;
-	}
+  try {
+    return await vfsLs(dir, limit, offset);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -188,13 +188,13 @@ export async function lsOrNull(dir: string, limit = 1000, offset = 0): Promise<V
  * @param options `awbId` exporte un cue précis d'une banque audio.
  */
 export function exportUrl(
-	path: string,
-	format: string,
-	options: { awbId?: number | null } = {},
+  path: string,
+  format: string,
+  options: { awbId?: number | null } = {},
 ): string {
-	const q = new URLSearchParams({ format });
-	if (options.awbId != null) q.set("id", String(options.awbId));
-	return `${CDN_BASE}/export/${path}?${q}`;
+  const q = new URLSearchParams({ format });
+  if (options.awbId != null) q.set("id", String(options.awbId));
+  return `${CDN_BASE}/export/${path}?${q}`;
 }
 
 /**
@@ -204,37 +204,37 @@ export function exportUrl(
  * archive CPK, sa taille, ses formats. Le lien manquait dans les deux sens.
  */
 export function cpkExplorerHref(path: string): string {
-	return `/cpk/${path.replace(/^data\//, "")}`;
+  return `/cpk/${path.replace(/^data\//, "")}`;
 }
 
 /** Une texture nommée à l'intérieur d'un conteneur G4TX. */
 export interface TexEntry {
-	/** Identifiant dans la table d'ids du conteneur. */
-	id: number;
-	/** Nom résolu, ex. `performance_type_01`. */
-	name: string;
-	/** Largeur en pixels. */
-	width: number;
-	/** Hauteur en pixels. */
-	height: number;
-	/** Le payload est un DDS. */
-	dds: boolean;
-	/** Taille du payload, en octets. */
-	size: number;
-	/** Chemin CDN de CETTE texture (forme nommée de `/tex`), à préfixer de l'origine. */
-	path: string;
-	/** Nombre de régions d'atlas rattachées. */
-	regions: number;
+  /** Identifiant dans la table d'ids du conteneur. */
+  id: number;
+  /** Nom résolu, ex. `performance_type_01`. */
+  name: string;
+  /** Largeur en pixels. */
+  width: number;
+  /** Hauteur en pixels. */
+  height: number;
+  /** Le payload est un DDS. */
+  dds: boolean;
+  /** Taille du payload, en octets. */
+  size: number;
+  /** Chemin CDN de CETTE texture (forme nommée de `/tex`), à préfixer de l'origine. */
+  path: string;
+  /** Nombre de régions d'atlas rattachées. */
+  regions: number;
 }
 
 /** Catalogue d'un conteneur G4TX. */
 export interface TexContainer {
-	/** Chemin VFS du conteneur. */
-	path: string;
-	/** Nombre de textures. */
-	count: number;
-	/** Les textures, dans l'ordre du fichier. */
-	textures: TexEntry[];
+  /** Chemin VFS du conteneur. */
+  path: string;
+  /** Nombre de textures. */
+  count: number;
+  /** Les textures, dans l'ordre du fichier. */
+  textures: TexEntry[];
 }
 
 /**
@@ -247,29 +247,29 @@ export interface TexContainer {
  * @param rel chemin SANS le préfixe `data/` ni l'extension, ex. `dx11/menu/…/icon_item01`.
  */
 export async function texContainer(rel: string): Promise<TexContainer | null> {
-	try {
-		const res = await fetch(`${CDN_BASE}/tex-info/${rel}.g4tx`);
-		if (!res.ok) return null;
-		return (await res.json()) as TexContainer;
-	} catch {
-		return null;
-	}
+  try {
+    const res = await fetch(`${CDN_BASE}/tex-info/${rel}.g4tx`);
+    if (!res.ok) return null;
+    return (await res.json()) as TexContainer;
+  } catch {
+    return null;
+  }
 }
 
 /** URL absolue d'une texture du catalogue (le champ `path` est relatif au CDN). */
 export function texUrl(path: string, width?: number): string {
-	const url = `${CDN_BASE}${path}`;
-	return width ? `${url}?w=${width}&format=webp` : url;
+  const url = `${CDN_BASE}${path}`;
+  return width ? `${url}?w=${width}&format=webp` : url;
 }
 
 /** Variante tolérante de [`vfsFind`]. */
 export async function findOrNull(
-	query: string,
-	options: { ext?: string; limit?: number; offset?: number } = {},
+  query: string,
+  options: { ext?: string; limit?: number; offset?: number } = {},
 ): Promise<VfsSearch | null> {
-	try {
-		return await vfsFind(query, options);
-	} catch {
-		return null;
-	}
+  try {
+    return await vfsFind(query, options);
+  } catch {
+    return null;
+  }
 }

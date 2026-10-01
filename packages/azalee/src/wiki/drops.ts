@@ -28,65 +28,59 @@
  */
 
 import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
-import type {
-	DropEntry,
-	DropsPageData,
-	SpiritGroup,
-	SpiritTier,
-	TeamBean,
-} from "./drops-shared";
+import type { DropEntry, DropsPageData, SpiritGroup, SpiritTier, TeamBean } from "./drops-shared";
 
 // Ré-export des types + helpers purs depuis le module client-safe (compat imports existants).
 export type {
-	DropEntry,
-	DropsCounts,
-	DropsPageData,
-	SpiritGroup,
-	SpiritTier,
-	TeamBean,
+  DropEntry,
+  DropsCounts,
+  DropsPageData,
+  SpiritGroup,
+  SpiritTier,
+  TeamBean,
 } from "./drops-shared";
 export { dropCategoryLabel, dropSourceLabel } from "./drops-shared";
 
 /** Une ligne brute de `inagle_drop_rates`. */
 interface DropRateRow {
-	id: string;
-	source: string;
-	source_id: string | null;
-	item_id: string | null;
-	rarity: number | null;
-	drop_rarity: number | null;
-	weight: number | null;
+  id: string;
+  source: string;
+  source_id: string | null;
+  item_id: string | null;
+  rarity: number | null;
+  drop_rarity: number | null;
+  weight: number | null;
 }
 
 /** Une ligne brute de `inagle_items` (colonnes utiles seulement). */
 interface ItemRow {
-	id: string;
-	name_fr: string | null;
-	name_en: string | null;
-	category: string | null;
-	rarity: number | null;
-	internal_code: string | null;
-	image_url: string | null;
+  id: string;
+  name_fr: string | null;
+  name_en: string | null;
+  category: string | null;
+  rarity: number | null;
+  internal_code: string | null;
+  image_url: string | null;
 }
 
 /** Une ligne brute de `inagle_drops` (bonus « Fèves »). */
 interface BeanRow {
-	id: number;
-	team: string | null;
-	game: string | null;
-	fixed_beans: string | null;
-	passive_type: string | null;
-	no: number | null;
-	requirement: string | null;
-	stat: string | null;
-	value: string | null;
+  id: number;
+  team: string | null;
+  game: string | null;
+  fixed_beans: string | null;
+  passive_type: string | null;
+  no: number | null;
+  requirement: string | null;
+  stat: string | null;
+  value: string | null;
 }
 
 interface DropsDatabase {
-	inagle_drop_rates: DropRateRow;
-	inagle_items: ItemRow;
-	inagle_drops_battles: { battle_group_id: number; item_table_id: number | null };
-	inagle_drops: BeanRow;
+  inagle_drop_rates: DropRateRow;
+  inagle_items: ItemRow;
+  inagle_drops_battles: { battle_group_id: number; item_table_id: number | null };
+  inagle_drops: BeanRow;
 }
 
 const sql = createAchilleaSql<DropsDatabase>();
@@ -95,174 +89,174 @@ const SUPPORTED_CONCRETE_SOURCES = ["win_treasure", "item_emission"] as const;
 
 /** Récupère et résout toutes les sources de drops concrets (objet nommé + taux). */
 async function fetchConcreteDrops(): Promise<DropEntry[]> {
-	const rows = await sql
-		.selectFrom("inagle_drop_rates")
-		.selectAll()
-		.where("source", "in", [...SUPPORTED_CONCRETE_SOURCES])
-		.execute();
-	const withItem = rows.filter((r) => !!r.item_id);
+  const rows = await sql
+    .selectFrom("inagle_drop_rates")
+    .selectAll()
+    .where("source", "in", [...SUPPORTED_CONCRETE_SOURCES])
+    .execute();
+  const withItem = rows.filter((r) => !!r.item_id);
 
-	// Résolution des objets en un seul `in` (les hash sont distincts et peu nombreux).
-	const itemIds = [...new Set(withItem.map((r) => r.item_id as string))];
-	const itemMap = new Map<string, ItemRow>();
-	if (itemIds.length > 0) {
-		const itemData = await sql
-			.selectFrom("inagle_items")
-			.select(["id", "name_fr", "name_en", "category", "rarity", "internal_code", "image_url"])
-			.where("id", "in", itemIds)
-			.execute();
-		for (const it of itemData) {
-			itemMap.set(it.id, it);
-		}
-	}
+  // Résolution des objets en un seul `in` (les hash sont distincts et peu nombreux).
+  const itemIds = [...new Set(withItem.map((r) => r.item_id as string))];
+  const itemMap = new Map<string, ItemRow>();
+  if (itemIds.length > 0) {
+    const itemData = await sql
+      .selectFrom("inagle_items")
+      .select(["id", "name_fr", "name_en", "category", "rarity", "internal_code", "image_url"])
+      .where("id", "in", itemIds)
+      .execute();
+    for (const it of itemData) {
+      itemMap.set(it.id, it);
+    }
+  }
 
-	// Somme des poids par groupe source (= dénominateur du pourcentage).
-	const groupTotals = new Map<string, number>();
-	for (const r of withItem) {
-		const key = `${r.source}:${r.source_id ?? ""}`;
-		groupTotals.set(key, (groupTotals.get(key) ?? 0) + (r.weight ?? 0));
-	}
+  // Somme des poids par groupe source (= dénominateur du pourcentage).
+  const groupTotals = new Map<string, number>();
+  for (const r of withItem) {
+    const key = `${r.source}:${r.source_id ?? ""}`;
+    groupTotals.set(key, (groupTotals.get(key) ?? 0) + (r.weight ?? 0));
+  }
 
-	return withItem.map((r): DropEntry => {
-		const item = r.item_id ? itemMap.get(r.item_id) : undefined;
-		const key = `${r.source}:${r.source_id ?? ""}`;
-		const total = groupTotals.get(key) ?? 0;
-		const weight = r.weight ?? 0;
-		return {
-			id: r.id,
-			source: r.source as DropEntry["source"],
-			sourceId: r.source_id ?? "",
-			itemId: r.item_id ?? "",
-			itemName: item?.name_fr || item?.name_en || r.item_id || "Inconnu",
-			itemCategory: item?.category ?? null,
-			itemRarity: item?.rarity ?? null,
-			itemInternalCode: item?.internal_code ?? null,
-			itemImageUrl: item?.image_url ?? null,
-			weight,
-			chance: total > 0 ? (weight / total) * 100 : 0,
-		};
-	});
+  return withItem.map((r): DropEntry => {
+    const item = r.item_id ? itemMap.get(r.item_id) : undefined;
+    const key = `${r.source}:${r.source_id ?? ""}`;
+    const total = groupTotals.get(key) ?? 0;
+    const weight = r.weight ?? 0;
+    return {
+      id: r.id,
+      source: r.source as DropEntry["source"],
+      sourceId: r.source_id ?? "",
+      itemId: r.item_id ?? "",
+      itemName: item?.name_fr || item?.name_en || r.item_id || "Inconnu",
+      itemCategory: item?.category ?? null,
+      itemRarity: item?.rarity ?? null,
+      itemInternalCode: item?.internal_code ?? null,
+      itemImageUrl: item?.image_url ?? null,
+      weight,
+      chance: total > 0 ? (weight / total) * 100 : 0,
+    };
+  });
 }
 
 /** Récupère les groupes d'esprit (paliers de rareté) + leurs combats associés. */
 async function fetchSpiritGroups(): Promise<SpiritGroup[]> {
-	const rows = await sql
-		.selectFrom("inagle_drop_rates")
-		.selectAll()
-		.where("source", "=", "spirit_drop")
-		.execute();
+  const rows = await sql
+    .selectFrom("inagle_drop_rates")
+    .selectAll()
+    .where("source", "=", "spirit_drop")
+    .execute();
 
-	// Lien combat → table (item_table_id stocké en INTEGER, reconverti en hash).
-	const battleData = await sql.selectFrom("inagle_drops_battles").selectAll().execute();
-	const battleByTable = new Map<string, number[]>();
-	for (const b of battleData) {
-		if (b.item_table_id === null) continue;
-		const hex = `0x${(b.item_table_id >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
-		const list = battleByTable.get(hex) ?? [];
-		list.push(b.battle_group_id);
-		battleByTable.set(hex, list);
-	}
+  // Lien combat → table (item_table_id stocké en INTEGER, reconverti en hash).
+  const battleData = await sql.selectFrom("inagle_drops_battles").selectAll().execute();
+  const battleByTable = new Map<string, number[]>();
+  for (const b of battleData) {
+    if (b.item_table_id === null) continue;
+    const hex = `0x${(b.item_table_id >>> 0).toString(16).toUpperCase().padStart(8, "0")}`;
+    const list = battleByTable.get(hex) ?? [];
+    list.push(b.battle_group_id);
+    battleByTable.set(hex, list);
+  }
 
-	// Regroupement par source_id.
-	const bySource = new Map<string, DropRateRow[]>();
-	for (const r of rows) {
-		const key = r.source_id ?? "";
-		const list = bySource.get(key) ?? [];
-		list.push(r);
-		bySource.set(key, list);
-	}
+  // Regroupement par source_id.
+  const bySource = new Map<string, DropRateRow[]>();
+  for (const r of rows) {
+    const key = r.source_id ?? "";
+    const list = bySource.get(key) ?? [];
+    list.push(r);
+    bySource.set(key, list);
+  }
 
-	const groups: SpiritGroup[] = [];
-	for (const [sourceId, groupRows] of bySource) {
-		// Pour spirit_drop, `weight` EST DÉJÀ un pourcentage absolu réel (0.05..83.8),
-		// PAS un poids de loterie : on ne normalise donc PAS par la somme (contrairement
-		// aux coffres). La somme des paliers peut être < 100 → le reste = chance de ne
-		// rien obtenir (intentionnel). `anyChance` = total = proba d'obtenir un esprit.
-		const total = groupRows.reduce((acc, r) => acc + (r.weight ?? 0), 0);
-		const tiers = groupRows
-			.map((r): SpiritTier => {
-				const weight = r.weight ?? 0;
-				return {
-					id: r.id,
-					rarity: r.rarity,
-					dropRarity: r.drop_rarity,
-					weight,
-					chance: weight,
-				};
-			})
-			.sort((a, b) => (a.rarity ?? 0) - (b.rarity ?? 0));
-		groups.push({
-			sourceId,
-			tiers,
-			anyChance: total,
-			battleGroupIds: battleByTable.get(sourceId) ?? [],
-		});
-	}
+  const groups: SpiritGroup[] = [];
+  for (const [sourceId, groupRows] of bySource) {
+    // Pour spirit_drop, `weight` EST DÉJÀ un pourcentage absolu réel (0.05..83.8),
+    // PAS un poids de loterie : on ne normalise donc PAS par la somme (contrairement
+    // aux coffres). La somme des paliers peut être < 100 → le reste = chance de ne
+    // rien obtenir (intentionnel). `anyChance` = total = proba d'obtenir un esprit.
+    const total = groupRows.reduce((acc, r) => acc + (r.weight ?? 0), 0);
+    const tiers = groupRows
+      .map((r): SpiritTier => {
+        const weight = r.weight ?? 0;
+        return {
+          id: r.id,
+          rarity: r.rarity,
+          dropRarity: r.drop_rarity,
+          weight,
+          chance: weight,
+        };
+      })
+      .sort((a, b) => (a.rarity ?? 0) - (b.rarity ?? 0));
+    groups.push({
+      sourceId,
+      tiers,
+      anyChance: total,
+      battleGroupIds: battleByTable.get(sourceId) ?? [],
+    });
+  }
 
-	// Tri stable : groupes avec combats associés d'abord, puis par hash.
-	groups.sort((a, b) => {
-		const byBattle = b.battleGroupIds.length - a.battleGroupIds.length;
-		if (byBattle !== 0) {
-			return byBattle;
-		}
-		return a.sourceId.localeCompare(b.sourceId);
-	});
-	return groups;
+  // Tri stable : groupes avec combats associés d'abord, puis par hash.
+  groups.sort((a, b) => {
+    const byBattle = b.battleGroupIds.length - a.battleGroupIds.length;
+    if (byBattle !== 0) {
+      return byBattle;
+    }
+    return a.sourceId.localeCompare(b.sourceId);
+  });
+  return groups;
 }
 
 /** Récupère les bonus « Fèves » d'équipe (mécanique distincte du drop d'objet). */
 async function fetchTeamBeans(): Promise<TeamBean[]> {
-	const rows = await sql.selectFrom("inagle_drops").selectAll().orderBy("id", "asc").execute();
-	return rows.map(
-		(r): TeamBean => ({
-			id: r.id,
-			team: r.team ?? "—",
-			game: r.game ?? "—",
-			fixedBeans: r.fixed_beans || null,
-			passiveType: r.passive_type || null,
-			no: r.no,
-			requirement: r.requirement || null,
-			stat: r.stat || null,
-			value: r.value || null,
-		})
-	);
+  const rows = await sql.selectFrom("inagle_drops").selectAll().orderBy("id", "asc").execute();
+  return rows.map((r): TeamBean => ({
+    id: r.id,
+    team: r.team ?? "—",
+    game: r.game ?? "—",
+    fixedBeans: r.fixed_beans || null,
+    passiveType: r.passive_type || null,
+    no: r.no,
+    requirement: r.requirement || null,
+    stat: r.stat || null,
+    value: r.value || null,
+  }));
 }
 
 /** Charge l'intégralité des données de la page `/drops` (3 sous-jeux de données réels). */
 export async function getDropsData(): Promise<DropsPageData> {
-	const [drops, spiritGroups, beans] = await Promise.all([
-		fetchConcreteDrops(),
-		fetchSpiritGroups(),
-		fetchTeamBeans(),
-	]);
+  const [drops, spiritGroups, beans] = await Promise.all([
+    fetchConcreteDrops(),
+    fetchSpiritGroups(),
+    fetchTeamBeans(),
+  ]);
 
-	// Tri des drops : par source puis taux décroissant.
-	drops.sort((a, b) => {
-		if (a.source !== b.source) {
-			return a.source.localeCompare(b.source);
-		}
-		if (a.sourceId !== b.sourceId) {
-			return a.sourceId.localeCompare(b.sourceId);
-		}
-		return b.chance - a.chance;
-	});
+  // Tri des drops : par source puis taux décroissant.
+  drops.sort((a, b) => {
+    if (a.source !== b.source) {
+      return a.source.localeCompare(b.source);
+    }
+    if (a.sourceId !== b.sourceId) {
+      return a.sourceId.localeCompare(b.sourceId);
+    }
+    return b.chance - a.chance;
+  });
 
-	const categories = [...new Set(drops.map((d) => d.itemCategory).filter((c): c is string => !!c))].sort();
-	const beanGames = [...new Set(beans.map((b) => b.game).filter((g) => g && g !== "—"))].sort();
+  const categories = [
+    ...new Set(drops.map((d) => d.itemCategory).filter((c): c is string => !!c)),
+  ].sort();
+  const beanGames = [...new Set(beans.map((b) => b.game).filter((g) => g && g !== "—"))].sort();
 
-	const dropSources = new Set(drops.map((d) => `${d.source}:${d.sourceId}`)).size;
+  const dropSources = new Set(drops.map((d) => `${d.source}:${d.sourceId}`)).size;
 
-	return {
-		drops,
-		spiritGroups,
-		beans,
-		counts: {
-			concreteDrops: drops.length,
-			dropSources,
-			spiritGroups: spiritGroups.length,
-			beans: beans.length,
-		},
-		categories,
-		beanGames,
-	};
+  return {
+    drops,
+    spiritGroups,
+    beans,
+    counts: {
+      concreteDrops: drops.length,
+      dropSources,
+      spiritGroups: spiritGroups.length,
+      beans: beans.length,
+    },
+    categories,
+    beanGames,
+  };
 }

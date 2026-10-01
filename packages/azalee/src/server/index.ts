@@ -13,11 +13,11 @@ export * from "../cross";
 export * from "../game-text";
 export { createAzaleeServer, handleAzaleeRequest, type AzaleeServerOptions } from "./serve";
 export {
-	createAzaleeData,
-	inspectLocalData,
-	type AzaleeData,
-	type AzaleeDataOptions,
-	type AzaleeLocalAvailability,
-	type AzaleeSourceKind,
-	type AzaleeSourceMode,
+  createAzaleeData,
+  inspectLocalData,
+  type AzaleeData,
+  type AzaleeDataOptions,
+  type AzaleeLocalAvailability,
+  type AzaleeSourceKind,
+  type AzaleeSourceMode,
 } from "./source";

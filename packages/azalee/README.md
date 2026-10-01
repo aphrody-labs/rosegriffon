@@ -5,15 +5,15 @@ de l'encyclopédie, extrait de l'application Next et utilisable **sans aucun fra
 
 Un seul socle de données alimente les cibles actives :
 
-| Cible | Ce qu'elle importe |
-|-------|--------------------|
-| Wiki web (`apps/website`, Next 16) | la lib entière, derrière des façades `server-only` |
-| CLI `azalee` (`src/cli.ts`) | la surface serveur, en Bun pur |
-| GUI Tauri (sidecar Bun + webview) | la racine client-safe côté webview, `azalee serve` côté sidecar |
+| Cible                                 | Ce qu'elle importe                                              |
+| ------------------------------------- | --------------------------------------------------------------- |
+| Wiki web (`apps/rg/website`, Next 16) | la lib entière, derrière des façades `server-only`              |
+| CLI `azalee` (`src/cli.ts`)           | la surface serveur, en Bun pur                                  |
+| GUI Tauri (sidecar Bun + webview)     | la racine client-safe côté webview, `azalee serve` côté sidecar |
 
 Avant l'extraction, toute cette logique vivait dans `apps/azalee/lib/**` : elle était
 inaccessible hors de Next (`server-only`, `@/…`, `next/…`, `fetch({ next })`). La lib
-supprime cette dépendance — voir la note d'architecture [`docs/azalee-lib.md`](../../docs/azalee-lib.md).
+supprime cette dépendance — voir la note d'architecture [`azalee-lib.md`](../../../docs/rg/azalee-lib.md).
 
 ## Installation
 
@@ -23,8 +23,8 @@ Dans le monorepo, c'est une dépendance workspace :
 // apps/<app>/package.json
 {
   "dependencies": {
-    "@rosegriffon/azalee": "workspace:*"
-  }
+    "@rosegriffon/azalee": "workspace:*",
+  },
 }
 ```
 
@@ -56,8 +56,8 @@ import {
   getCharacterModelFullGlbUrl,
 } from "@rosegriffon/azalee";
 
-FORMATIONS.length;                            // 8 layouts legacy (les formations du jeu viennent de PostgreSQL)
-translateEffect("Shot AT +10%");              // "Tir ATT +10%"
+FORMATIONS.length; // 8 layouts legacy (les formations du jeu viennent de PostgreSQL)
+translateEffect("Shot AT +10%"); // "Tir ATT +10%"
 getCharacterFaceUrl("c01000010");
 // https://cdn.rosegriffon.fr/dx11/menu/icon_chr/face/c01000010_l_c01000010_1_l00.png
 getCharacterModelFullGlbUrl("c01000010");
@@ -79,12 +79,12 @@ texte, et expose l'API HTTP headless. Runtime Bun (ou Node ≥ 22).
 import { wikiService, resolveMirrorPath, resolveDataDir } from "@rosegriffon/azalee/server";
 
 resolveMirrorPath(); // /home/ubuntu/nie/var/mirror.sqlite
-resolveDataDir();    // /home/ubuntu/rg/apps/website/data
+resolveDataDir(); // /home/ubuntu/rg/apps/website/data
 
 const { data, total } = await wikiService.getCharactersList({ q: "Mark", page: 1, limit: 2 });
-total;                 // 5130 personnages au total dans le miroir courant
-data[0]?.slug;         // "mark-evans-0x3055CF22"
-data[0]?.names.fr;     // "Mark Evans"
+total; // 5130 personnages au total dans le miroir courant
+data[0]?.slug; // "mark-evans-0x3055CF22"
+data[0]?.names.fr; // "Mark Evans"
 ```
 
 Les listes du wiki renvoient toutes la même enveloppe `{ data, total, page, limit }`.
@@ -94,42 +94,41 @@ import { getTeamsList, getTeamDetail } from "@rosegriffon/azalee/wiki/teams";
 import { listDirPaged, searchFiles, totalFiles } from "@rosegriffon/azalee/cpk";
 import { searchText, categoryStats } from "@rosegriffon/azalee/game-text";
 
-totalFiles();                          // 250800 fichiers indexés dans les CPK
+totalFiles(); // 250800 fichiers indexés dans les CPK
 listDirPaged("data/dx11/menu", 50, 0); // pagination d'un dossier CPK
-searchText("Raimon", "fr", 20);        // index de texte de jeu (fr/en/ja)
+searchText("Raimon", "fr", 20); // index de texte de jeu (fr/en/ja)
 ```
 
 ## Sous-chemins d'export
 
 Table exacte du champ `exports` de `package.json`.
 
-| Sous-chemin | Cible | Nature |
-|-------------|-------|--------|
-| `@rosegriffon/azalee` | `src/index.ts` | **client-safe** — jeu, images, recherche, texte, types `*-shared` |
-| `@rosegriffon/azalee/images` | `src/images/index.ts` | client-safe — résolution d'URLs CDN (visages, modèles, icônes, vidéos) |
-| `@rosegriffon/azalee/search` | `src/search/index.ts` | client-safe — fuzzy match + recherche intelligente |
-| `@rosegriffon/azalee/search/*` | `src/search/*.ts` | client-safe — `utils`, `fuzzy-match`, `smart-search`, `search-ui-config` |
-| `@rosegriffon/azalee/text` | `src/text/index.ts` | client-safe — glossaire FR, descriptions, romaji, gaiji |
-| `@rosegriffon/azalee/text/*` | `src/text/*.ts` | client-safe — `translations`, `format-description`, `japanese-romaji`, `download-filename`, `aura-translations`, `gaiji` |
-| `@rosegriffon/azalee/game` | `src/game/index.ts` | client-safe — formations, genre, règles d'équipe, cut-ins, emblèmes |
-| `@rosegriffon/azalee/game/*` | `src/game/*.ts` | client-safe — `formations`, `team-rules`, `team-types`, `skills-cutin`, … |
-| `@rosegriffon/azalee/data/*` | `src/data/*` | artefacts d’extraction/build uniquement — aucune donnée métier runtime |
-| `@rosegriffon/azalee/remote` | `src/remote/index.ts` | **client-safe** — client HTTP typé de l'API (41 routes), erreurs typées, sonde `/health` |
-| `@rosegriffon/azalee/remote/*` | `src/remote/*.ts` | client-safe — `client`, `transport`, `errors`, `types` |
-| `@rosegriffon/azalee/config` | `src/config.ts` | serveur — résolution des artefacts runtime |
-| `@rosegriffon/azalee/db` | `src/db/index.ts` | serveur — client SQLite + injection de fournisseur |
-| `@rosegriffon/azalee/db/*` | `src/db/*.ts` | serveur — `provider`, `sqlite-client` |
-| `@rosegriffon/azalee/wiki` | `src/wiki/index.ts` | serveur — toutes les sections du wiki |
-| `@rosegriffon/azalee/wiki/*` | `src/wiki/*.ts` | serveur (ou client pour les `*-shared`) — `service`, `teams`, `shops`, `quests`, `coaches`, `stadiums`, `drops`, `gacha`, `trophies`, `invocation`, `chara-stats`, `game-text` |
-| `@rosegriffon/azalee/cpk` | `src/cpk/index.ts` | serveur — index des 250 800 fichiers CPK |
-| `@rosegriffon/azalee/cpk/*` | `src/cpk/*.ts` | serveur / client (`shared`, `tree`) |
-| `@rosegriffon/azalee/game-text` | `src/game-text/index.ts` | serveur — index du texte de jeu |
-| `@rosegriffon/azalee/game-text/*` | `src/game-text/*.ts` | serveur / client (`shared`, `format`) |
-| `@rosegriffon/azalee/cross` | `src/cross/index.ts` | serveur — Inazuma Eleven Cross (Unity/Addressables) |
-| `@rosegriffon/azalee/cross/*` | `src/cross/*.ts` | serveur / client (`data-shared`, `assets-shared`) |
-| `@rosegriffon/azalee/server` | `src/server/index.ts` | serveur — surface agrégée + API HTTP + résolution de source |
-| `@rosegriffon/azalee/server/*` | `src/server/*.ts` | serveur — `serve`, `source` |
-| `@rosegriffon/azalee/package.json` | `package.json` | métadonnées |
+| Sous-chemin                        | Cible                    | Nature                                                                                                                                                                         |
+| ---------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@rosegriffon/azalee`              | `src/index.ts`           | **client-safe** — jeu, images, recherche, texte, types `*-shared`                                                                                                              |
+| `@rosegriffon/azalee/images`       | `src/images/index.ts`    | client-safe — résolution d'URLs CDN (visages, modèles, icônes, vidéos)                                                                                                         |
+| `@rosegriffon/azalee/search`       | `src/search/index.ts`    | client-safe — fuzzy match + recherche intelligente                                                                                                                             |
+| `@rosegriffon/azalee/search/*`     | `src/search/*.ts`        | client-safe — `utils`, `fuzzy-match`, `smart-search`, `search-ui-config`                                                                                                       |
+| `@rosegriffon/azalee/text`         | `src/text/index.ts`      | client-safe — glossaire FR, descriptions, romaji, gaiji                                                                                                                        |
+| `@rosegriffon/azalee/text/*`       | `src/text/*.ts`          | client-safe — `translations`, `format-description`, `japanese-romaji`, `download-filename`, `aura-translations`, `gaiji`                                                       |
+| `@rosegriffon/azalee/game`         | `src/game/index.ts`      | client-safe — formations, genre, règles d'équipe, cut-ins, emblèmes                                                                                                            |
+| `@rosegriffon/azalee/game/*`       | `src/game/*.ts`          | client-safe — `formations`, `team-rules`, `team-types`, `skills-cutin`, …                                                                                                      |
+| `@rosegriffon/azalee/remote`       | `src/remote/index.ts`    | **client-safe** — client HTTP typé de l'API (41 routes), erreurs typées, sonde `/health`                                                                                       |
+| `@rosegriffon/azalee/remote/*`     | `src/remote/*.ts`        | client-safe — `client`, `transport`, `errors`, `types`                                                                                                                         |
+| `@rosegriffon/azalee/config`       | `src/config.ts`          | serveur — résolution des artefacts runtime                                                                                                                                     |
+| `@rosegriffon/azalee/db`           | `src/db/index.ts`        | serveur — client SQLite + injection de fournisseur                                                                                                                             |
+| `@rosegriffon/azalee/db/*`         | `src/db/*.ts`            | serveur — `provider`, `sqlite-client`                                                                                                                                          |
+| `@rosegriffon/azalee/wiki`         | `src/wiki/index.ts`      | serveur — toutes les sections du wiki                                                                                                                                          |
+| `@rosegriffon/azalee/wiki/*`       | `src/wiki/*.ts`          | serveur (ou client pour les `*-shared`) — `service`, `teams`, `shops`, `quests`, `coaches`, `stadiums`, `drops`, `gacha`, `trophies`, `invocation`, `chara-stats`, `game-text` |
+| `@rosegriffon/azalee/cpk`          | `src/cpk/index.ts`       | serveur — index des 250 800 fichiers CPK                                                                                                                                       |
+| `@rosegriffon/azalee/cpk/*`        | `src/cpk/*.ts`           | serveur / client (`shared`, `tree`)                                                                                                                                            |
+| `@rosegriffon/azalee/game-text`    | `src/game-text/index.ts` | serveur — index du texte de jeu                                                                                                                                                |
+| `@rosegriffon/azalee/game-text/*`  | `src/game-text/*.ts`     | serveur / client (`shared`, `format`)                                                                                                                                          |
+| `@rosegriffon/azalee/cross`        | `src/cross/index.ts`     | serveur — Inazuma Eleven Cross (Unity/Addressables)                                                                                                                            |
+| `@rosegriffon/azalee/cross/*`      | `src/cross/*.ts`         | serveur / client (`data-shared`, `assets-shared`)                                                                                                                              |
+| `@rosegriffon/azalee/server`       | `src/server/index.ts`    | serveur — surface agrégée + API HTTP + résolution de source                                                                                                                    |
+| `@rosegriffon/azalee/server/*`     | `src/server/*.ts`        | serveur — `serve`, `source`                                                                                                                                                    |
+| `@rosegriffon/azalee/package.json` | `package.json`           | métadonnées                                                                                                                                                                    |
 
 Règle : un fichier `<x>.ts` qui touche `bun:sqlite`/`node:fs` a toujours son
 jumeau pur `<x>-shared.ts`. **Ce sont les `-shared` qu'un composant client importe.**
@@ -148,24 +147,24 @@ La lib distingue deux familles de données.
    Les textes et l’index CPK sont importés dans PostgreSQL et ne sont plus matérialisés
    en fichiers locaux.
 
-Sur cette machine, les artefacts web vivent dans `apps/website/data/` :
+Dans l'arborescence Aphrody, les artefacts web vivent sous `apps/rg/website/data/` :
 
 ```text
-apps/website/data/
+apps/rg/website/data/
 ├── backups/mirror.sqlite            # fallback local ; la prod lit le miroir niers
 └── backups/mirror.sqlite            # miroir local de développement uniquement
 ```
 
 ### Variables d'environnement
 
-| Variable | Lue par | Effet |
-|----------|---------|-------|
-| `SQLITE_DB_PATH` | `src/config.ts` | Chemin explicite du miroir SQLite. **Épinglé en production** (drop-in systemd) : sans lui, le repli essaie le miroir canonique niers puis, à défaut, le snapshot `supabase-*.sqlite` au nom le plus grand. |
-| `NIERS_MIRROR` | `src/config.ts` | Chemin du miroir canonique niers utilisé par le fallback CLI/tests quand `SQLITE_DB_PATH` n'est pas défini. |
-| `AZALEE_DATA_DIR` | `src/config.ts` | Dossier des artefacts runtime, testé avant les chemins conventionnels (`<cwd>/data`, `<cwd>/apps/website/data`, `<pkg>/../../apps/website/data`). |
-| `AZALEE_PORT` / `AZALEE_HOST` | `src/server/serve.ts` | Défauts de l'API headless (`3010` / `127.0.0.1`). |
-| `DATABASE_URL` | `src/cli.ts` | PostgreSQL pour les commandes CLI qui ne passent pas par le miroir (`db`, `data push`…). |
-| `DATA_ROOT` / `DATA_PATH` | `src/cli.ts` | Racine du dump de jeu pour `azalee data` (défaut `/home/ubuntu/nie/data`). |
+| Variable                      | Lue par               | Effet                                                                                                                                                                                                      |
+| ----------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SQLITE_DB_PATH`              | `src/config.ts`       | Chemin explicite du miroir SQLite. **Épinglé en production** (drop-in systemd) : sans lui, le repli essaie le miroir canonique niers puis, à défaut, le snapshot `supabase-*.sqlite` au nom le plus grand. |
+| `NIERS_MIRROR`                | `src/config.ts`       | Chemin du miroir canonique niers utilisé par le fallback CLI/tests quand `SQLITE_DB_PATH` n'est pas défini.                                                                                                |
+| `AZALEE_DATA_DIR`             | `src/config.ts`       | Dossier des artefacts runtime, testé avant les chemins conventionnels (`<cwd>/data`, `<cwd>/apps/rg/website/data`, `<pkg>/../../../apps/rg/website/data`).                                                 |
+| `AZALEE_PORT` / `AZALEE_HOST` | `src/server/serve.ts` | Défauts de l'API headless (`3010` / `127.0.0.1`).                                                                                                                                                          |
+| `DATABASE_URL`                | `src/cli.ts`          | PostgreSQL pour les commandes CLI qui ne passent pas par le miroir (`db`, `data push`…).                                                                                                                   |
+| `DATA_ROOT` / `DATA_PATH`     | `src/cli.ts`          | Racine du dump de jeu pour `azalee data` (défaut `/home/ubuntu/nie/data`).                                                                                                                                 |
 
 Note : `AZALEE_DATA_DIR` couvre uniquement la découverte du miroir local de développement ;
 les modules `cpk` et `game-text` interrogent directement les projections PostgreSQL.
@@ -195,8 +194,8 @@ import { setDatabaseProvider, hasDatabaseProvider } from "@rosegriffon/azalee/db
 import { createPostgresClient } from "@rosegriffon/db/service";
 
 setDatabaseProvider(createPostgresClient);
-hasDatabaseProvider();             // true
-setDatabaseProvider(null);         // retour à la fabrique PostgreSQL par défaut
+hasDatabaseProvider(); // true
+setDatabaseProvider(null); // retour à la fabrique PostgreSQL par défaut
 ```
 
 Les modules `wiki/*` n'utilisent que la surface SQL `.from(table).select(...)` ;
@@ -209,10 +208,10 @@ Même socle de données que le wiki web, exposé en JSON pur, sans Next.
 n'importe quel routeur ; `createAzaleeServer` l'attache à `Bun.serve`.
 
 ```bash
-bun packages/azalee/src/cli.ts serve --port 3010
+bun packages/rg/azalee/src/cli.ts serve --port 3010
 # azalee serve url=http://127.0.0.1:3010 routes=41
 
-bun packages/azalee/src/cli.ts serve --json   # table de routage en JSON, puis quitte
+bun packages/rg/azalee/src/cli.ts serve --json   # table de routage en JSON, puis quitte
 ```
 
 Options : `-p, --port` (défaut `3010`), `-H, --host` (défaut `127.0.0.1`),
@@ -234,49 +233,49 @@ table de routage complète.
 
 ### Routes (41)
 
-| Route | Contenu |
-|-------|---------|
-| `GET /` | Nom du package + table de routage |
-| `GET /health` | `{ ok, mirror, dataDir, cpkFiles }` — sonde de démarrage du sidecar |
-| `GET /api/characters` | Liste paginée (`q`, `element`, `position`, `rarity`, `team`, `series`, `gender`, `playstyle`, `sort`, `page`, `limit`…) |
-| `GET /api/characters/:slug` | Fiche personnage complète |
-| `GET /api/coordinators` | Coachs et managers jouables |
-| `GET /api/skills` | Liste des techniques |
-| `GET /api/skills/:id` | Détail d'une technique |
-| `GET /api/items` | Liste des objets |
-| `GET /api/items/:id` | Détail d'un objet |
-| `GET /api/auras/:type` | Liste d'auras d'un type (keshin, soul, awakening, miximax, mode change…) |
-| `GET /api/auras/:type/:id` | Détail d'une aura |
-| `GET /api/tactics` | Liste des tactiques |
-| `GET /api/tactics/:slug` | Détail d'une tactique |
-| `GET /api/teams` | Les 208 équipes (emblème, saisons) |
-| `GET /api/teams/:id` | Effectif, uniformes, détail d'équipe |
-| `GET /api/shops` | Liste des boutiques |
-| `GET /api/shops/:id` | Inventaire d'une boutique (`id` numérique) |
-| `GET /api/quests` | Quêtes (`q`, `kind`) |
-| `GET /api/quests/:id` | Détail d'une quête |
-| `GET /api/coaches` | Coachs (`q`) |
-| `GET /api/coaches/:id` | Détail d'un coach (`id` numérique) |
-| `GET /api/stadiums` | Les 81 stades (`q`) |
-| `GET /api/stadiums/:id` | Détail d'un stade |
-| `GET /api/trophies` | Succès/trophées (`q`, `category`) |
-| `GET /api/trophies/:id` | Détail d'un succès |
-| `GET /api/passives` | Passives (`q`, `category`, `page`, `limit` ≤ 500) |
-| `GET /api/passives/:id` | Détail d'une passive |
-| `GET /api/gallery` | Illustrations (`category`, `q`, `page`, `limit` ≤ 300) |
-| `GET /api/drops` | Taux de drop |
-| `GET /api/capsules` | Capsules gacha (`q`) |
-| `GET /api/costumes` | Costumes (`q`) |
-| `GET /api/invocation` | Taux d'invocation par signe |
-| `GET /api/cpk` | Listing paginé d'un dossier CPK (`path`, `limit` ≤ 1000, `offset`) |
-| `GET /api/cpk/search` | Recherche de fichiers CPK (`q`, `limit` ≤ 1000) |
-| `GET /api/cpk/file` | Métadonnées d'un fichier (`path`) + URL CDN décodée |
-| `GET /api/text` | Recherche dans le texte de jeu (`q`, `locale`, `limit` ≤ 500) |
-| `GET /api/text/:hash` | Résolution d'un `hashId` dans les 3 langues |
-| `GET /api/text/stats` | Décompte par catégorie de texte |
-| `GET /api/cross/tables` | Tables masterdata d'Inazuma Eleven Cross |
-| `GET /api/cross/stats` | Statistiques du catalogue Addressables Cross |
-| `GET /api/search` | Recherche transverse : personnages + techniques + objets (`q` ≥ 2, `limit` ≤ 50) |
+| Route                       | Contenu                                                                                                                 |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `GET /`                     | Nom du package + table de routage                                                                                       |
+| `GET /health`               | `{ ok, mirror, dataDir, cpkFiles }` — sonde de démarrage du sidecar                                                     |
+| `GET /api/characters`       | Liste paginée (`q`, `element`, `position`, `rarity`, `team`, `series`, `gender`, `playstyle`, `sort`, `page`, `limit`…) |
+| `GET /api/characters/:slug` | Fiche personnage complète                                                                                               |
+| `GET /api/coordinators`     | Coachs et managers jouables                                                                                             |
+| `GET /api/skills`           | Liste des techniques                                                                                                    |
+| `GET /api/skills/:id`       | Détail d'une technique                                                                                                  |
+| `GET /api/items`            | Liste des objets                                                                                                        |
+| `GET /api/items/:id`        | Détail d'un objet                                                                                                       |
+| `GET /api/auras/:type`      | Liste d'auras d'un type (keshin, soul, awakening, miximax, mode change…)                                                |
+| `GET /api/auras/:type/:id`  | Détail d'une aura                                                                                                       |
+| `GET /api/tactics`          | Liste des tactiques                                                                                                     |
+| `GET /api/tactics/:slug`    | Détail d'une tactique                                                                                                   |
+| `GET /api/teams`            | Les 208 équipes (emblème, saisons)                                                                                      |
+| `GET /api/teams/:id`        | Effectif, uniformes, détail d'équipe                                                                                    |
+| `GET /api/shops`            | Liste des boutiques                                                                                                     |
+| `GET /api/shops/:id`        | Inventaire d'une boutique (`id` numérique)                                                                              |
+| `GET /api/quests`           | Quêtes (`q`, `kind`)                                                                                                    |
+| `GET /api/quests/:id`       | Détail d'une quête                                                                                                      |
+| `GET /api/coaches`          | Coachs (`q`)                                                                                                            |
+| `GET /api/coaches/:id`      | Détail d'un coach (`id` numérique)                                                                                      |
+| `GET /api/stadiums`         | Les 81 stades (`q`)                                                                                                     |
+| `GET /api/stadiums/:id`     | Détail d'un stade                                                                                                       |
+| `GET /api/trophies`         | Succès/trophées (`q`, `category`)                                                                                       |
+| `GET /api/trophies/:id`     | Détail d'un succès                                                                                                      |
+| `GET /api/passives`         | Passives (`q`, `category`, `page`, `limit` ≤ 500)                                                                       |
+| `GET /api/passives/:id`     | Détail d'une passive                                                                                                    |
+| `GET /api/gallery`          | Illustrations (`category`, `q`, `page`, `limit` ≤ 300)                                                                  |
+| `GET /api/drops`            | Taux de drop                                                                                                            |
+| `GET /api/capsules`         | Capsules gacha (`q`)                                                                                                    |
+| `GET /api/costumes`         | Costumes (`q`)                                                                                                          |
+| `GET /api/invocation`       | Taux d'invocation par signe                                                                                             |
+| `GET /api/cpk`              | Listing paginé d'un dossier CPK (`path`, `limit` ≤ 1000, `offset`)                                                      |
+| `GET /api/cpk/search`       | Recherche de fichiers CPK (`q`, `limit` ≤ 1000)                                                                         |
+| `GET /api/cpk/file`         | Métadonnées d'un fichier (`path`) + URL CDN décodée                                                                     |
+| `GET /api/text`             | Recherche dans le texte de jeu (`q`, `locale`, `limit` ≤ 500)                                                           |
+| `GET /api/text/:hash`       | Résolution d'un `hashId` dans les 3 langues                                                                             |
+| `GET /api/text/stats`       | Décompte par catégorie de texte                                                                                         |
+| `GET /api/cross/tables`     | Tables masterdata d'Inazuma Eleven Cross                                                                                |
+| `GET /api/cross/stats`      | Statistiques du catalogue Addressables Cross                                                                            |
+| `GET /api/search`           | Recherche transverse : personnages + techniques + objets (`q` ≥ 2, `limit` ≤ 50)                                        |
 
 ```bash
 curl -s localhost:3010/health
@@ -291,8 +290,8 @@ Le CLI se compile en binaire autonome embarquant le runtime Bun : il tourne sans
 `node_modules`, ce qui en fait le sidecar naturel d'une application Tauri.
 
 ```bash
-bun run --cwd packages/azalee compile          # → packages/azalee/bin/azalee
-bun packages/azalee/scripts/build-standalone.ts --install   # + copie dans ~/.local/bin
+bun run --cwd packages/rg/azalee compile          # → packages/rg/azalee/bin/azalee
+bun packages/rg/azalee/scripts/build-standalone.ts --install   # + copie dans ~/.local/bin
 ```
 
 Côté application (patron Tauri v2 — pas encore de projet Tauri dans ce dépôt) :
@@ -348,18 +347,18 @@ Côté serveur, `createAzaleeData` choisit seul la source :
 ```ts
 import { createAzaleeData } from "@rosegriffon/azalee/server";
 
-const data = createAzaleeData();          // "auto"
+const data = createAzaleeData(); // "auto"
 console.log(data.source, "|", data.reason);
 // local | source locale retenue : miroir SQLite présent (…/niers/var/mirror.sqlite)
 
-const teams = await data.teams();         // 208 — depuis le disque, zéro socket
+const teams = await data.teams(); // 208 — depuis le disque, zéro socket
 ```
 
-| Mode | Comportement |
-|------|--------------|
+| Mode            | Comportement                                                                                                   |
+| --------------- | -------------------------------------------------------------------------------------------------------------- |
 | `auto` (défaut) | local si le miroir (ou un client injecté) est là, sinon distant ; bascule à chaud si une lecture locale échoue |
-| `local` | `handleAzaleeRequest` en appel direct — aucun socket |
-| `remote` | `fetch` vers `baseUrl` |
+| `local`         | `handleAzaleeRequest` en appel direct — aucun socket                                                           |
+| `remote`        | `fetch` vers `baseUrl`                                                                                         |
 
 Le mode local passe par le **même** routeur que l'API HTTP : aucune logique de
 lecture n'est dupliquée entre les deux sources. Un `404` ne déclenche jamais de
@@ -379,38 +378,38 @@ const picked = await resolveAzaleeBaseUrl(["http://127.0.0.1:3010", AZALEE_DEFAU
 ## CLI `azalee`
 
 ```bash
-bun packages/azalee/src/cli.ts <commande>      # depuis la racine du dépôt
-bun run --cwd packages/azalee cli <commande>   # via le script du package
+bun packages/rg/azalee/src/cli.ts <commande>      # depuis la racine du dépôt
+bun run --cwd packages/rg/azalee cli <commande>   # via le script du package
 bun --filter @rosegriffon/azalee cli          # via le filtre workspace
 ```
 
 Le champ `bin` déclare `azalee` → `src/cli.ts` ; `publishConfig` le bascule sur
 `dist/cli.js` pour la version publiée. Commandes :
 
-| Commande | Rôle |
-|----------|------|
-| `translate [texte]` | Traduit en français via le glossaire consolidé |
-| `search [requête]` | Fuzzy search sur toutes les entités du jeu |
-| `db [sql]` | Requête SQL (PostgreSQL par défaut, `--sqlite` pour le miroir) |
-| `redis <cmd> <key> [val]` | Cache Redis (`get`, `set`, `del`) |
-| `audit` | Diagnostics d'intégrité (traductions, base) |
-| `test-variants` | Cohérence des personnages et de leurs variantes |
-| `status` | Santé des services locaux (SQLite, Redis, système) |
-| `wave` | Vague d'enrichissement/analyse (zukan, glossaire, xref assets) |
-| `repair` | Diagnostique et répare la base locale (RLS, privilèges) |
-| `sync` | Synchronise les fichiers locaux avec PostgreSQL |
-| `compare <chara1> <chara2>` | Comparaison de deux joueurs |
-| `chara [requête]` | Fiche joueur (profil, stats, moveset, variantes) |
-| `dialogue [requête]` | Recherche dans les dialogues du jeu |
-| `skill [requête]` | Fiche technique / compétence / passive |
-| `item [requête]` | Fiche objet |
-| `team [requête]` | Fiche équipe |
-| `random-team` | Équipe aléatoire complète (11 joueurs + staff) |
-| `team-builder <action>` | Compositions : `list`, `show`, `delete`, `save`, `generate` |
-| `test` | Suite de vérifications du wiki (native ou Playwright) |
-| `shell` / `repl` | Terminal interactif |
-| `data <sous-commande>` | Pipeline de données unifié |
-| `serve` | API HTTP headless (voir plus haut) |
+| Commande                    | Rôle                                                           |
+| --------------------------- | -------------------------------------------------------------- |
+| `translate [texte]`         | Traduit en français via le glossaire consolidé                 |
+| `search [requête]`          | Fuzzy search sur toutes les entités du jeu                     |
+| `db [sql]`                  | Requête SQL (PostgreSQL par défaut, `--sqlite` pour le miroir) |
+| `redis <cmd> <key> [val]`   | Cache Redis (`get`, `set`, `del`)                              |
+| `audit`                     | Diagnostics d'intégrité (traductions, base)                    |
+| `test-variants`             | Cohérence des personnages et de leurs variantes                |
+| `status`                    | Santé des services locaux (SQLite, Redis, système)             |
+| `wave`                      | Vague d'enrichissement/analyse (zukan, glossaire, xref assets) |
+| `repair`                    | Diagnostique et répare la base locale (RLS, privilèges)        |
+| `sync`                      | Synchronise les fichiers locaux avec PostgreSQL                |
+| `compare <chara1> <chara2>` | Comparaison de deux joueurs                                    |
+| `chara [requête]`           | Fiche joueur (profil, stats, moveset, variantes)               |
+| `dialogue [requête]`        | Recherche dans les dialogues du jeu                            |
+| `skill [requête]`           | Fiche technique / compétence / passive                         |
+| `item [requête]`            | Fiche objet                                                    |
+| `team [requête]`            | Fiche équipe                                                   |
+| `random-team`               | Équipe aléatoire complète (11 joueurs + staff)                 |
+| `team-builder <action>`     | Compositions : `list`, `show`, `delete`, `save`, `generate`    |
+| `test`                      | Suite de vérifications du wiki (native ou Playwright)          |
+| `shell` / `repl`            | Terminal interactif                                            |
+| `data <sous-commande>`      | Pipeline de données unifié                                     |
+| `serve`                     | API HTTP headless (voir plus haut)                             |
 
 Sous-commandes de `data` : `push` (inagle → Supabase), `migrate` (`--apply`),
 `load` (régénère le miroir SQLite), `sync` (`--full`), `typecheck`, `verify`,
@@ -419,8 +418,8 @@ Sous-commandes de `data` : `push` (inagle → Supabase), `migrate` (`--apply`),
 La plupart des commandes acceptent `--json` pour une sortie machine :
 
 ```bash
-bun packages/azalee/src/cli.ts chara "Mark Evans" --json
-bun packages/azalee/src/cli.ts search "tornade" --json
+bun packages/rg/azalee/src/cli.ts chara "Mark Evans" --json
+bun packages/rg/azalee/src/cli.ts search "tornade" --json
 ```
 
 ## Données embarquées et régénération
@@ -428,11 +427,11 @@ bun packages/azalee/src/cli.ts search "tornade" --json
 Les projections durables suivent PostgreSQL. Les artefacts d'extraction ne sont
 plus des sources runtime :
 
-| Fichier | Régénération |
-|---------|--------------|
-| `inagle_asset_manifests` | import SQL des extractions CPK |
-| `@rosegriffon/inagle/asset-manifest` | projection TypeScript générée depuis `inagle_asset_manifests` |
-| `cross` | paquet partagé de types et règles d'extraction, sans données wiki runtime |
+| Fichier                              | Régénération                                                              |
+| ------------------------------------ | ------------------------------------------------------------------------- |
+| `inagle_asset_manifests`             | import SQL des extractions CPK                                            |
+| `@rosegriffon/inagle/asset-manifest` | projection TypeScript générée depuis `inagle_asset_manifests`             |
+| `cross`                              | paquet partagé de types et règles d'extraction, sans données wiki runtime |
 
 Les scripts de projection se lancent depuis la racine du dépôt
 (`bun packages/azalee/scripts/<script>.ts`) ou depuis le package.
@@ -447,7 +446,7 @@ au mode extraction/offline explicite.
 ## Tests, build, publication
 
 ```bash
-bun test                    # depuis packages/azalee
+bun test                    # depuis packages/rg/azalee
 bun run type-check          # tsc --noEmit (vrais types workspace)
 bun run lint                # oxlint
 bun run build               # tsc -p tsconfig.build.json + copie de src/data → dist/data
@@ -455,7 +454,7 @@ bun run compile             # binaire autonome → bin/azalee
 ```
 
 Les tests (`test/`) s'appuient sur les **vrais artefacts** de la machine
-(`apps/azalee/data/`) : résolution de configuration et URLs CDN. Ils restaurent
+(`apps/rg/website/data/`) : résolution de configuration et URLs CDN. Ils restaurent
 systématiquement la configuration explicite et les variables d'environnement
 touchées — le miroir SQLite est un singleton de processus, une fuite de
 configuration casserait les fichiers de test suivants.

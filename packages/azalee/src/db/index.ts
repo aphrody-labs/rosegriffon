@@ -7,8 +7,9 @@
 
 export { createPostgresClient, PostgresQueryBuilder } from "@rosegriffon/db/postgres-client";
 export {
-	createClient,
-	hasDatabaseProvider,
-	setDatabaseProvider,
-	type DatabaseClient, type DatabaseClientFactory,
+  createClient,
+  hasDatabaseProvider,
+  setDatabaseProvider,
+  type DatabaseClient,
+  type DatabaseClientFactory,
 } from "./provider";

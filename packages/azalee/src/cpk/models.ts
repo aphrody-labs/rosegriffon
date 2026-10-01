@@ -21,19 +21,19 @@ export type ModelFamily = "chara" | "waza" | "item" | "keshin" | "armd" | "anima
 
 /** Ce qui définit une famille : son nom, sa source, sa route d'assemblage. */
 export interface ModelFamilyDef {
-	/** Identifiant d'URL. */
-	id: ModelFamily;
-	/** Libellé humain. */
-	label: string;
-	/** Une phrase sur ce que la famille contient. */
-	hint: string;
-	/**
-	 * Dossier VFS qui énumère les codes, ou `null` pour les personnages — ceux-là viennent du
-	 * miroir SQLite, parce qu'eux seuls ont un nom affichable.
-	 */
-	vfsDir: string | null;
-	/** Nombre de codes mesuré le 14 août 2026 sur le VFS complet (indicatif, pour l'aperçu). */
-	count: number;
+  /** Identifiant d'URL. */
+  id: ModelFamily;
+  /** Libellé humain. */
+  label: string;
+  /** Une phrase sur ce que la famille contient. */
+  hint: string;
+  /**
+   * Dossier VFS qui énumère les codes, ou `null` pour les personnages — ceux-là viennent du
+   * miroir SQLite, parce qu'eux seuls ont un nom affichable.
+   */
+  vfsDir: string | null;
+  /** Nombre de codes mesuré le 14 août 2026 sur le VFS complet (indicatif, pour l'aperçu). */
+  count: number;
 }
 
 /**
@@ -44,35 +44,53 @@ export interface ModelFamilyDef {
  * `/model-chr/uniform/<code>` répond 404.
  */
 export const MODEL_FAMILIES: ModelFamilyDef[] = [
-	{
-		id: "chara",
-		label: "Personnages",
-		hint: "corps + visage + uniforme assemblés",
-		vfsDir: null,
-		count: 5526,
-	},
-	{
-		id: "waza",
-		label: "Techniques",
-		hint: "modèles d'effets de tir et de dribble",
-		vfsDir: "data/common/chr/_waza",
-		count: 272,
-	},
-	{ id: "item", label: "Objets", hint: "ballons, accessoires, décors", vfsDir: "data/common/chr/_item", count: 247 },
-	{
-		id: "keshin",
-		label: "Esprits Guerriers",
-		hint: "keshin invocables",
-		vfsDir: "data/common/chr/_keshin",
-		count: 100,
-	},
-	{ id: "armd", label: "Armures", hint: "armures d'esprit", vfsDir: "data/common/chr/_armd", count: 89 },
-	{ id: "animal", label: "Animaux", hint: "créatures", vfsDir: "data/common/chr/_animal", count: 2 },
+  {
+    id: "chara",
+    label: "Personnages",
+    hint: "corps + visage + uniforme assemblés",
+    vfsDir: null,
+    count: 5526,
+  },
+  {
+    id: "waza",
+    label: "Techniques",
+    hint: "modèles d'effets de tir et de dribble",
+    vfsDir: "data/common/chr/_waza",
+    count: 272,
+  },
+  {
+    id: "item",
+    label: "Objets",
+    hint: "ballons, accessoires, décors",
+    vfsDir: "data/common/chr/_item",
+    count: 247,
+  },
+  {
+    id: "keshin",
+    label: "Esprits Guerriers",
+    hint: "keshin invocables",
+    vfsDir: "data/common/chr/_keshin",
+    count: 100,
+  },
+  {
+    id: "armd",
+    label: "Armures",
+    hint: "armures d'esprit",
+    vfsDir: "data/common/chr/_armd",
+    count: 89,
+  },
+  {
+    id: "animal",
+    label: "Animaux",
+    hint: "créatures",
+    vfsDir: "data/common/chr/_animal",
+    count: 2,
+  },
 ];
 
 /** La définition d'une famille, ou `undefined` si l'identifiant est inconnu. */
 export function modelFamily(id: string): ModelFamilyDef | undefined {
-	return MODEL_FAMILIES.find((f) => f.id === id);
+  return MODEL_FAMILIES.find((f) => f.id === id);
 }
 
 /**
@@ -84,9 +102,9 @@ export function modelFamily(id: string): ModelFamilyDef | undefined {
  * autrement rend un 404 « sous-domaine chr non servable ».
  */
 export function modelGlbUrl(famille: ModelFamily, code: string): string {
-	return famille === "chara"
-		? `${CDN_BASE}/model-full/${code}.glb`
-		: `${CDN_BASE}/model-chr/${famille}/${code}.glb`;
+  return famille === "chara"
+    ? `${CDN_BASE}/model-full/${code}.glb`
+    : `${CDN_BASE}/model-chr/${famille}/${code}.glb`;
 }
 
 /**
@@ -94,10 +112,10 @@ export function modelGlbUrl(famille: ModelFamily, code: string): string {
  * textures sont éclatées entre visage, uniforme et corps, et n'ont pas de dossier unique.
  */
 export function modelTextureDir(famille: ModelFamily, code: string): string | null {
-	return famille === "chara" ? null : `data/dx11/chr/_${famille}/${code}`;
+  return famille === "chara" ? null : `data/dx11/chr/_${famille}/${code}`;
 }
 
 /** Chemin de la fiche d'un modèle. */
 export function modelHref(famille: ModelFamily, code: string): string {
-	return `/modeles/${famille}/${code}`;
+  return `/modeles/${famille}/${code}`;
 }

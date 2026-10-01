@@ -13,7 +13,7 @@ const JAPANESE_RANGES = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\u
 
 /** Vrai si le texte contient au moins un caractère japonais. */
 export function containsJapanese(text: string): boolean {
-	return JAPANESE_RANGES.test(text);
+  return JAPANESE_RANGES.test(text);
 }
 
 /**
@@ -22,10 +22,10 @@ export function containsJapanese(text: string): boolean {
  * pour la ruby ; le glossaire ne doit indexer que la base.
  */
 export function stripRubyAnnotations(text: string): string {
-	return text.replace(/\[([^/\]]+)\/[^\]]+\]/g, "$1").trim();
+  return text.replace(/\[([^/\]]+)\/[^\]]+\]/g, "$1").trim();
 }
 
 /** Échappe les métacaractères d'une expression régulière. */
 export function escapeRegExp(str: string): string {
-	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

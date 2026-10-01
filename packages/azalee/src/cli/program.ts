@@ -46,44 +46,44 @@ export const CLI_NAME = "azalee";
 
 /** Assemble le programme complet sans l'exécuter. */
 export function createAzaleeProgram(): Command {
-	const program = new Command();
+  const program = new Command();
 
-	program
-		.name(CLI_NAME)
-		.description("CLI d'Azalée pour Inazuma Eleven: Victory Road")
-		.version(CLI_VERSION);
+  program
+    .name(CLI_NAME)
+    .description("CLI d'Azalée pour Inazuma Eleven: Victory Road")
+    .version(CLI_VERSION);
 
-	// Données & traduction
-	registerTranslateCommand(program);
-	registerSearchCommand(program);
-	registerDbCommand(program);
-	registerRedisCommand(program);
+  // Données & traduction
+  registerTranslateCommand(program);
+  registerSearchCommand(program);
+  registerDbCommand(program);
+  registerRedisCommand(program);
 
-	// Diagnostics
-	registerAuditCommand(program);
-	registerTestVariantsCommand(program);
-	registerStatusCommand(program);
+  // Diagnostics
+  registerAuditCommand(program);
+  registerTestVariantsCommand(program);
+  registerStatusCommand(program);
 
-	// Opérations
-	registerWaveCommand(program);
-	registerRepairCommand(program);
-	registerSyncCommand(program);
+  // Opérations
+  registerWaveCommand(program);
+  registerRepairCommand(program);
+  registerSyncCommand(program);
 
-	// Encyclopédie
-	registerCompareCommand(program);
-	registerCharaCommand(program);
-	registerDialogueCommand(program);
-	registerSkillCommand(program);
-	registerItemCommand(program);
-	registerTeamCommand(program);
-	registerRandomTeamCommand(program);
-	registerTeamBuilderCommand(program);
+  // Encyclopédie
+  registerCompareCommand(program);
+  registerCharaCommand(program);
+  registerDialogueCommand(program);
+  registerSkillCommand(program);
+  registerItemCommand(program);
+  registerTeamCommand(program);
+  registerRandomTeamCommand(program);
+  registerTeamBuilderCommand(program);
 
-	// Vérification, shell, pipeline, API
-	registerTestCommand(program);
-	registerShellCommand(program);
-	registerDataCommand(program);
-	registerServeCommand(program);
+  // Vérification, shell, pipeline, API
+  registerTestCommand(program);
+  registerShellCommand(program);
+  registerDataCommand(program);
+  registerServeCommand(program);
 
-	return program;
+  return program;
 }

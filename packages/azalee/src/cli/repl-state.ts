@@ -20,9 +20,9 @@ export type PendingSelectionType = "chara" | "skill" | "item" | "team";
 
 /** Candidats en attente d'un choix numéroté dans le shell. */
 export interface PendingSelection {
-	type: PendingSelectionType;
-	// Formes hétérogènes issues d'inagle (personnage, technique, objet, équipe).
-	matches: any[];
+  type: PendingSelectionType;
+  // Formes hétérogènes issues d'inagle (personnage, technique, objet, équipe).
+  matches: any[];
 }
 
 let replMode = false;
@@ -31,11 +31,11 @@ let activeReadline: ReadlineInterface | null = null;
 
 /** Vrai lorsqu'une commande s'exécute depuis `azalee shell`. */
 export function isReplMode(): boolean {
-	return replMode;
+  return replMode;
 }
 
 export function setReplMode(value: boolean): void {
-	replMode = value;
+  replMode = value;
 }
 
 /**
@@ -43,22 +43,22 @@ export function setReplMode(value: boolean): void {
  * simplement la main au shell. Remplace tous les `if (!isReplMode) process.exit()`.
  */
 export function exitUnlessRepl(code = 0): void {
-	if (!replMode) process.exit(code);
+  if (!replMode) process.exit(code);
 }
 
 export function getPendingSelection(): PendingSelection | null {
-	return pendingSelection;
+  return pendingSelection;
 }
 
 export function setPendingSelection(selection: PendingSelection | null): void {
-	pendingSelection = selection;
+  pendingSelection = selection;
 }
 
 /** Interface readline du shell, ou `null` hors shell. */
 export function getActiveReadline(): ReadlineInterface | null {
-	return activeReadline;
+  return activeReadline;
 }
 
 export function setActiveReadline(rl: ReadlineInterface | null): void {
-	activeReadline = rl;
+  activeReadline = rl;
 }

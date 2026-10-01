@@ -12,7 +12,7 @@
 
 /** Socle commun : sortie JSON brute au lieu du rendu humain. */
 export interface JsonOption {
-	json?: boolean;
+  json?: boolean;
 }
 
 /** `azalee translate [text] [-j]` */
@@ -23,8 +23,8 @@ export type SearchOptions = JsonOption;
 
 /** `azalee db [sql] [-s] [-j]` */
 export interface DbOptions extends JsonOption {
-	/** Interroge le miroir SQLite local au lieu de PostgreSQL. */
-	sqlite?: boolean;
+  /** Interroge le miroir SQLite local au lieu de PostgreSQL. */
+  sqlite?: boolean;
 }
 
 /** `azalee redis <cmd> <key> [val] [-j]` */
@@ -41,22 +41,22 @@ export type StatusOptions = JsonOption;
 
 /** `azalee wave [-c] [-l]` */
 export interface WaveOptions {
-	/** Runner de cycle complet (sync + build + restart) au lieu d'une passe. */
-	cycle?: boolean;
-	/** Boucle infinie, une vague toutes les 30 secondes. */
-	loop?: boolean;
+  /** Runner de cycle complet (sync + build + restart) au lieu d'une passe. */
+  cycle?: boolean;
+  /** Boucle infinie, une vague toutes les 30 secondes. */
+  loop?: boolean;
 }
 
 /** `azalee sync [-p]` */
 export interface SyncOptions {
-	/** Pousse les données inagle locales vers PostgreSQL. */
-	push?: boolean;
+  /** Pousse les données inagle locales vers PostgreSQL. */
+  push?: boolean;
 }
 
 /** `azalee compare <chara1> <chara2> [-l <level>] [-j]` */
 export interface CompareOptions extends JsonOption {
-	/** Niveau de comparaison, 1 à 99 (chaîne : valeur brute commander). */
-	level: string;
+  /** Niveau de comparaison, 1 à 99 (chaîne : valeur brute commander). */
+  level: string;
 }
 
 /** `azalee chara [query] [-j]` */
@@ -64,10 +64,10 @@ export type CharaOptions = JsonOption;
 
 /** `azalee dialogue [query] [-s <speaker>] [-j] [-l <limit>]` */
 export interface DialogueOptions extends JsonOption {
-	/** Filtre par locuteur (nom FR/EN/JA ou `charaId`). */
-	speaker?: string;
-	/** Nombre de répliques renvoyées (chaîne : valeur brute commander). */
-	limit: string;
+  /** Filtre par locuteur (nom FR/EN/JA ou `charaId`). */
+  speaker?: string;
+  /** Nombre de répliques renvoyées (chaîne : valeur brute commander). */
+  limit: string;
 }
 
 /** `azalee skill [query] [-j]` */
@@ -81,12 +81,12 @@ export type TeamOptions = JsonOption;
 
 /** `azalee random-team [-f <formation>] [-e <element>] [-p <playstyle>] [-j]` */
 export interface RandomTeamOptions extends JsonOption {
-	/** Disposition demandée (`4-4-2`, `4-3-3`…). */
-	formation: string;
-	/** Élément privilégié (FR ou EN). */
-	element?: string;
-	/** Style de jeu privilégié (FR ou EN). */
-	playstyle?: string;
+  /** Disposition demandée (`4-4-2`, `4-3-3`…). */
+  formation: string;
+  /** Élément privilégié (FR ou EN). */
+  element?: string;
+  /** Style de jeu privilégié (FR ou EN). */
+  playstyle?: string;
 }
 
 /** Actions acceptées par `azalee team-builder`. */
@@ -94,36 +94,36 @@ export type TeamBuilderAction = "list" | "show" | "delete" | "save" | "generate"
 
 /** `azalee team-builder <action> [args...] [-j] [-f <formation>]` */
 export interface TeamBuilderOptions extends JsonOption {
-	/** Formation imposée à l'action `generate`. */
-	formation?: string;
+  /** Formation imposée à l'action `generate`. */
+  formation?: string;
 }
 
 /** `azalee test [-p]` */
 export interface TestOptions {
-	/** Délègue la suite à Playwright (E2E) au lieu du runner natif. */
-	playwright?: boolean;
+  /** Délègue la suite à Playwright (E2E) au lieu du runner natif. */
+  playwright?: boolean;
 }
 
 /** `azalee data migrate [--apply]` */
 export interface DataMigrateOptions {
-	/** Exécute réellement les migrations (sinon : liste en dry-run). */
-	apply?: boolean;
+  /** Exécute réellement les migrations (sinon : liste en dry-run). */
+  apply?: boolean;
 }
 
 /** `azalee data sync [--full] [--deletes]` */
 export interface DataSyncOptions {
-	/** Resynchronisation complète au lieu d'incrémentale. */
-	full?: boolean;
-	/** Propage aussi les suppressions. */
-	deletes?: boolean;
+  /** Resynchronisation complète au lieu d'incrémentale. */
+  full?: boolean;
+  /** Propage aussi les suppressions. */
+  deletes?: boolean;
 }
 
 /** `azalee serve [-p <port>] [-H <host>] [--cors <origin>] [-j]` */
 export interface ServeOptions extends JsonOption {
-	/** Port d'écoute (chaîne : valeur brute commander). */
-	port: string;
-	/** Interface d'écoute. */
-	host: string;
-	/** Origine CORS autorisée. */
-	cors?: string;
+  /** Port d'écoute (chaîne : valeur brute commander). */
+  port: string;
+  /** Interface d'écoute. */
+  host: string;
+  /** Origine CORS autorisée. */
+  cors?: string;
 }

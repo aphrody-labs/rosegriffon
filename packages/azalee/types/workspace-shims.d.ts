@@ -12,35 +12,20 @@
  */
 
 declare module "@rosegriffon/db" {
-	/** Schéma Supabase généré — dégradé dans le build de publication. */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export type Database = any;
+  /** Schéma Supabase généré — dégradé dans le build de publication. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export type Database = any;
+  export const sql: any;
+  export function createAchilleaSql<T = any>(): any;
 }
 
-declare module "@rosegriffon/db/redis" {
-	export const cache: {
-		get<T>(key: string): Promise<T | null>;
-		set<T>(key: string, value: T, ttl?: number): Promise<void>;
-		del(key: string): Promise<void>;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		[extra: string]: any;
-	};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	export function getRedisClient(): any;
-	export function getEmbedding(text: string): Promise<number[]>;
-	export const vectorStore: {
-		search(
-			collection: string,
-			embedding: number[],
-			limit: number,
-			query?: string,
-		): Promise<
-			Array<{
-				document: { id: string; text: string; metadata: Record<string, unknown> };
-				score: number;
-			}>
-		>;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		[extra: string]: any;
-	};
+declare module "@rosegriffon/db/*" {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export type Database = any;
+  export const sql: any;
+  export function createAchilleaSql<T = any>(): any;
+  export const cache: any;
+  export function getRedisClient(): any;
+  export function getEmbedding(text: string): Promise<number[]>;
+  export const vectorStore: any;
 }

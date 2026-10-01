@@ -52,20 +52,20 @@ const RE_OPEN_KEYWORD = new RegExp(`\\[${C_KEYWORD}`, "g"); // scramble : `[CG2`
 
 /** Remplace les glyphes de position par des sentinelles inviolables. */
 function protectGlyphs(input: string): string {
-	let out = input;
-	POSITION_GLYPHS.forEach((g, i) => {
-		out = out.split(`[${g}]`).join(String.fromCodePoint(GLYPH_SENTINEL_BASE + i));
-	});
-	return out;
+  let out = input;
+  POSITION_GLYPHS.forEach((g, i) => {
+    out = out.split(`[${g}]`).join(String.fromCodePoint(GLYPH_SENTINEL_BASE + i));
+  });
+  return out;
 }
 
 /** Restaure les glyphes de position depuis leurs sentinelles. */
 function restoreGlyphs(input: string): string {
-	let out = input;
-	POSITION_GLYPHS.forEach((g, i) => {
-		out = out.split(String.fromCodePoint(GLYPH_SENTINEL_BASE + i)).join(`[${g}]`);
-	});
-	return out;
+  let out = input;
+  POSITION_GLYPHS.forEach((g, i) => {
+    out = out.split(String.fromCodePoint(GLYPH_SENTINEL_BASE + i)).join(`[${g}]`);
+  });
+  return out;
 }
 
 /**
@@ -73,17 +73,17 @@ function restoreGlyphs(input: string): string {
  * un retrait peut en révéler un autre (codes adjacents/imbriqués).
  */
 function stripControlCodes(input: string): string {
-	let prev: string;
-	let out = input;
-	let guard = 0;
-	do {
-		prev = out;
-		out = out.replace(RE_WELL_FORMED, "");
-		out = out.replace(RE_KEYWORD_CLOSE, "");
-		out = out.replace(RE_OPEN_KEYWORD, "");
-		guard++;
-	} while (out !== prev && guard < 8);
-	return out;
+  let prev: string;
+  let out = input;
+  let guard = 0;
+  do {
+    prev = out;
+    out = out.replace(RE_WELL_FORMED, "");
+    out = out.replace(RE_KEYWORD_CLOSE, "");
+    out = out.replace(RE_OPEN_KEYWORD, "");
+    guard++;
+  } while (out !== prev && guard < 8);
+  return out;
 }
 
 /**
@@ -92,22 +92,22 @@ function stripControlCodes(input: string): string {
  * via une pile : tout `[` sans `]` correspondant et tout `]` sans `[` est retiré.
  */
 function stripOrphanBrackets(input: string): string {
-	if (!input.includes("[") && !input.includes("]")) return input;
-	const chars = [...input];
-	const stack: number[] = [];
-	const drop = new Set<number>();
-	for (let i = 0; i < chars.length; i++) {
-		const c = chars[i];
-		if (c === "[") {
-			stack.push(i);
-		} else if (c === "]") {
-			if (stack.length > 0) stack.pop();
-			else drop.add(i); // `]` orphelin
-		}
-	}
-	for (const i of stack) drop.add(i); // `[` orphelins restants
-	if (drop.size === 0) return input;
-	return chars.filter((_, i) => !drop.has(i)).join("");
+  if (!input.includes("[") && !input.includes("]")) return input;
+  const chars = [...input];
+  const stack: number[] = [];
+  const drop = new Set<number>();
+  for (let i = 0; i < chars.length; i++) {
+    const c = chars[i];
+    if (c === "[") {
+      stack.push(i);
+    } else if (c === "]") {
+      if (stack.length > 0) stack.pop();
+      else drop.add(i); // `]` orphelin
+    }
+  }
+  for (const i of stack) drop.add(i); // `[` orphelins restants
+  if (drop.size === 0) return input;
+  return chars.filter((_, i) => !drop.has(i)).join("");
 }
 
 /**
@@ -116,12 +116,12 @@ function stripOrphanBrackets(input: string): string {
  * pleine-chasse CJK (U+3000). N'ajoute aucune ligne vide.
  */
 function normalizeWhitespace(input: string): string {
-	let out = input.replace(/ {2,}/g, " ");
-	out = out
-		.split("\n")
-		.map((line) => line.replace(/ +$/, ""))
-		.join("\n");
-	return out;
+  let out = input.replace(/ {2,}/g, " ");
+  out = out
+    .split("\n")
+    .map((line) => line.replace(/ +$/, ""))
+    .join("\n");
+  return out;
 }
 
 /**
@@ -129,12 +129,12 @@ function normalizeWhitespace(input: string): string {
  * NFC -> retrait codes `[C...]` -> retrait crochets orphelins -> espaces.
  */
 export function formatGameText(raw: string): string {
-	if (!raw) return raw;
-	let s = raw.normalize("NFC");
-	s = protectGlyphs(s);
-	s = stripControlCodes(s);
-	s = stripOrphanBrackets(s);
-	s = restoreGlyphs(s);
-	s = normalizeWhitespace(s);
-	return s;
+  if (!raw) return raw;
+  let s = raw.normalize("NFC");
+  s = protectGlyphs(s);
+  s = stripControlCodes(s);
+  s = stripOrphanBrackets(s);
+  s = restoreGlyphs(s);
+  s = normalizeWhitespace(s);
+  return s;
 }

@@ -23,46 +23,46 @@ export type QuestKind = "main" | "side";
 
 /** Quête normalisée pour le rendu wiki (champs RÉELS du miroir uniquement). */
 export interface Quest {
-	/** ID hex unique (ex. `0x103AF791`). */
-	id: string;
-	/** Titre localisé FR (fallback EN/JA), nettoyé des retours-ligne. */
-	title: string;
-	/** Titres bruts par langue (déjà présents dans `data.titles`). */
-	titles: { fr: string; en: string; ja: string };
-	/** Type in-game (0-45). 1=MAIN, 2=SUB, 3=DAILY selon l'enum inagle ; le reste
-	 *  est une granularité d'étape non documentée → exposé tel quel. */
-	type: number;
-	/** Numéro de phase/chapitre (ordre dans l'histoire ou code de zone annexe). */
-	phase: number;
-	/** Nom d'asset image in-game (non résolu sur le CDN → pas rendu, conservé pour info). */
-	image: string | null;
-	/** Catégorie dérivée : histoire principale vs quête annexe. */
-	kind: QuestKind;
-	/** Numéro de zone annexe (`floor(phase/10000)`) si `kind === "side"`, sinon null. */
-	area: number | null;
+  /** ID hex unique (ex. `0x103AF791`). */
+  id: string;
+  /** Titre localisé FR (fallback EN/JA), nettoyé des retours-ligne. */
+  title: string;
+  /** Titres bruts par langue (déjà présents dans `data.titles`). */
+  titles: { fr: string; en: string; ja: string };
+  /** Type in-game (0-45). 1=MAIN, 2=SUB, 3=DAILY selon l'enum inagle ; le reste
+   *  est une granularité d'étape non documentée → exposé tel quel. */
+  type: number;
+  /** Numéro de phase/chapitre (ordre dans l'histoire ou code de zone annexe). */
+  phase: number;
+  /** Nom d'asset image in-game (non résolu sur le CDN → pas rendu, conservé pour info). */
+  image: string | null;
+  /** Catégorie dérivée : histoire principale vs quête annexe. */
+  kind: QuestKind;
+  /** Numéro de zone annexe (`floor(phase/10000)`) si `kind === "side"`, sinon null. */
+  area: number | null;
 }
 
 /** Forme brute attendue dans la colonne `data` (parsée en objet par le client SQLite). */
 interface QuestData {
-	id?: string;
-	questId?: string;
-	type?: number;
-	phase?: number;
-	image?: string | null;
-	titles?: { en?: string; fr?: string; ja?: string };
-	explain_EN?: string;
-	explain_FR?: string;
-	explain_JA?: string;
-	displayText?: string;
+  id?: string;
+  questId?: string;
+  type?: number;
+  phase?: number;
+  image?: string | null;
+  titles?: { en?: string; fr?: string; ja?: string };
+  explain_EN?: string;
+  explain_FR?: string;
+  explain_JA?: string;
+  displayText?: string;
 }
 
 interface QuestRow {
-	id: string;
-	data: QuestData | string | null;
+  id: string;
+  data: QuestData | string | null;
 }
 
 interface QuestDatabase {
-	inagle_quests: QuestRow;
+  inagle_quests: QuestRow;
 }
 
 const sql = createAchilleaSql<QuestDatabase>();
@@ -72,78 +72,74 @@ const SIDE_PHASE_THRESHOLD = 1000;
 
 /** Normalise un titre multi-ligne (les consignes d'histoire ont des `\n` internes). */
 function cleanTitle(raw: string | undefined | null): string {
-	if (!raw) return "";
-	return raw.replace(/\s+/g, " ").trim();
+  if (!raw) return "";
+  return raw.replace(/\s+/g, " ").trim();
 }
 
 /** Le client SQLite parse déjà le JSON ; on tolère aussi une string par sûreté. */
 function asData(data: QuestData | string | null): QuestData {
-	if (!data) return {};
-	if (typeof data === "string") {
-		try {
-			return JSON.parse(data) as QuestData;
-		} catch {
-			return {};
-		}
-	}
-	return data;
+  if (!data) return {};
+  if (typeof data === "string") {
+    try {
+      return JSON.parse(data) as QuestData;
+    } catch {
+      return {};
+    }
+  }
+  return data;
 }
 
 /** Convertit une ligne brute en `Quest` normalisée (champs réels uniquement). */
 function toQuest(row: QuestRow): Quest {
-	const d = asData(row.data);
-	const t = d.titles ?? {};
-	const titles = {
-		fr: cleanTitle(t.fr ?? d.explain_FR ?? t.en ?? ""),
-		en: cleanTitle(t.en ?? d.explain_EN ?? ""),
-		ja: cleanTitle(t.ja ?? d.explain_JA ?? ""),
-	};
-	const phase = typeof d.phase === "number" ? d.phase : 0;
-	const kind: QuestKind = phase >= SIDE_PHASE_THRESHOLD ? "side" : "main";
-	return {
-		id: row.id,
-		title: titles.fr || titles.en || titles.ja || row.id,
-		titles,
-		type: typeof d.type === "number" ? d.type : 0,
-		phase,
-		image: d.image ?? null,
-		kind,
-		area: kind === "side" ? Math.floor(phase / 10000) : null,
-	};
+  const d = asData(row.data);
+  const t = d.titles ?? {};
+  const titles = {
+    fr: cleanTitle(t.fr ?? d.explain_FR ?? t.en ?? ""),
+    en: cleanTitle(t.en ?? d.explain_EN ?? ""),
+    ja: cleanTitle(t.ja ?? d.explain_JA ?? ""),
+  };
+  const phase = typeof d.phase === "number" ? d.phase : 0;
+  const kind: QuestKind = phase >= SIDE_PHASE_THRESHOLD ? "side" : "main";
+  return {
+    id: row.id,
+    title: titles.fr || titles.en || titles.ja || row.id,
+    titles,
+    type: typeof d.type === "number" ? d.type : 0,
+    phase,
+    image: d.image ?? null,
+    kind,
+    area: kind === "side" ? Math.floor(phase / 10000) : null,
+  };
 }
 
 /** Tri stable par phase croissante (= ordre narratif / regroupement de zone). */
 function byPhase(a: Quest, b: Quest): number {
-	if (a.phase !== b.phase) return a.phase - b.phase;
-	return a.id.localeCompare(b.id);
+  if (a.phase !== b.phase) return a.phase - b.phase;
+  return a.id.localeCompare(b.id);
 }
 
 let _cache: Quest[] | null = null;
 
 /** Charge et normalise toutes les quêtes (182) depuis le miroir. Cache process-local. */
 export async function getAllQuests(): Promise<Quest[]> {
-	if (_cache) return _cache;
-	let data: QuestRow[];
-	try {
-		data = await sql
-			.selectFrom("inagle_quests")
-			.select(["id", "data"])
-			.limit(2000)
-			.execute();
-	} catch {
-		return [];
-	}
+  if (_cache) return _cache;
+  let data: QuestRow[];
+  try {
+    data = await sql.selectFrom("inagle_quests").select(["id", "data"]).limit(2000).execute();
+  } catch {
+    return [];
+  }
 
-	const quests = data.map(toQuest).sort(byPhase);
-	_cache = quests;
-	return quests;
+  const quests = data.map(toQuest).sort(byPhase);
+  _cache = quests;
+  return quests;
 }
 
 export interface QuestListResult {
-	quests: Quest[];
-	total: number;
-	main: number;
-	side: number;
+  quests: Quest[];
+  total: number;
+  main: number;
+  side: number;
 }
 
 /**
@@ -151,49 +147,49 @@ export interface QuestListResult {
  * Filtrage côté serveur en mémoire — 182 lignes, pas de pagination nécessaire.
  */
 export async function getQuestsList(params?: {
-	q?: string;
-	kind?: QuestKind | "all";
+  q?: string;
+  kind?: QuestKind | "all";
 }): Promise<QuestListResult> {
-	const all = await getAllQuests();
-	const main = all.filter((x) => x.kind === "main").length;
-	const side = all.length - main;
+  const all = await getAllQuests();
+  const main = all.filter((x) => x.kind === "main").length;
+  const side = all.length - main;
 
-	let quests = all;
-	const kind = params?.kind ?? "all";
-	if (kind === "main" || kind === "side") {
-		quests = quests.filter((x) => x.kind === kind);
-	}
+  let quests = all;
+  const kind = params?.kind ?? "all";
+  if (kind === "main" || kind === "side") {
+    quests = quests.filter((x) => x.kind === kind);
+  }
 
-	const q = params?.q?.trim().toLowerCase();
-	if (q) {
-		quests = quests.filter(
-			(x) =>
-				x.titles.fr.toLowerCase().includes(q) ||
-				x.titles.en.toLowerCase().includes(q) ||
-				x.titles.ja.toLowerCase().includes(q) ||
-				x.id.toLowerCase().includes(q)
-		);
-	}
+  const q = params?.q?.trim().toLowerCase();
+  if (q) {
+    quests = quests.filter(
+      (x) =>
+        x.titles.fr.toLowerCase().includes(q) ||
+        x.titles.en.toLowerCase().includes(q) ||
+        x.titles.ja.toLowerCase().includes(q) ||
+        x.id.toLowerCase().includes(q),
+    );
+  }
 
-	return { quests, total: all.length, main, side };
+  return { quests, total: all.length, main, side };
 }
 
 /** Récupère une quête par ID hex (normalisé en minuscule, tolère `0X`/`0x`). */
 export async function getQuest(id: string): Promise<Quest | null> {
-	const all = await getAllQuests();
-	const norm = id.trim().toLowerCase();
-	return all.find((x) => x.id.toLowerCase() === norm) ?? null;
+  const all = await getAllQuests();
+  const norm = id.trim().toLowerCase();
+  return all.find((x) => x.id.toLowerCase() === norm) ?? null;
 }
 
 /** Quêtes adjacentes (précédente/suivante par phase) pour la navigation du détail. */
 export async function getQuestNeighbors(
-	id: string
+  id: string,
 ): Promise<{ prev: Quest | null; next: Quest | null }> {
-	const all = await getAllQuests();
-	const idx = all.findIndex((x) => x.id.toLowerCase() === id.trim().toLowerCase());
-	if (idx === -1) return { prev: null, next: null };
-	return {
-		prev: idx > 0 ? all[idx - 1] : null,
-		next: idx < all.length - 1 ? all[idx + 1] : null,
-	};
+  const all = await getAllQuests();
+  const idx = all.findIndex((x) => x.id.toLowerCase() === id.trim().toLowerCase());
+  if (idx === -1) return { prev: null, next: null };
+  return {
+    prev: idx > 0 ? all[idx - 1] : null,
+    next: idx < all.length - 1 ? all[idx + 1] : null,
+  };
 }

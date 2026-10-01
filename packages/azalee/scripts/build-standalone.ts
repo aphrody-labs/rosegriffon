@@ -26,10 +26,12 @@ const started = Date.now();
 await $`bun build --compile --minify --sourcemap ${entry} --outfile ${outFile}`.cwd(pkgRoot);
 
 const size = Bun.file(outFile).size;
-console.log(`built=${outFile} size=${(size / 1024 / 1024).toFixed(1)}Mo ms=${Date.now() - started}`);
+console.log(
+  `built=${outFile} size=${(size / 1024 / 1024).toFixed(1)}Mo ms=${Date.now() - started}`,
+);
 
 if (process.argv.includes("--install")) {
-	const target = path.join(process.env.HOME ?? "/home/ubuntu", ".local/bin/azalee");
-	await $`install -m 755 ${outFile} ${target}`;
-	console.log(`installed=${target}`);
+  const target = path.join(process.env.HOME ?? "/home/ubuntu", ".local/bin/azalee");
+  await $`install -m 755 ${outFile} ${target}`;
+  console.log(`installed=${target}`);
 }

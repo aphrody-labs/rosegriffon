@@ -9,34 +9,34 @@
  */
 /** Chemins VFS des assets de cut-in d'un hissatsu. */
 export interface SkillCutin {
-	event_id_name: string;
-	model_g4mg: string;
-	model_g4md: string;
-	texture_g4tx: string;
-	sound_cfg: string;
-	effects_dir: string;
-	/** `[langue, chemin .g4tx du telop]` par langue disponible (8 avec la MAJ du 2026-08-15 :
-	 * de/en/es/fr/it/pt/zh_hans/zh_hant). `string[][]`, pas un tuple : un import JSON brut
-	 * n'inférerait jamais `[string,string]` (TS widen systématiquement en `string[]`), et le
-	 * cast `as SkillsCutinFile` échouait le type-check de déploiement pour cette seule raison. */
-	telop_by_lang: string[][];
+  event_id_name: string;
+  model_g4mg: string;
+  model_g4md: string;
+  texture_g4tx: string;
+  sound_cfg: string;
+  effects_dir: string;
+  /** `[langue, chemin .g4tx du telop]` par langue disponible (8 avec la MAJ du 2026-08-15 :
+   * de/en/es/fr/it/pt/zh_hans/zh_hant). `string[][]`, pas un tuple : un import JSON brut
+   * n'inférerait jamais `[string,string]` (TS widen systématiquement en `string[]`), et le
+   * cast `as SkillsCutinFile` échouait le type-check de déploiement pour cette seule raison. */
+  telop_by_lang: string[][];
 }
 
 /** Une entrée skill enrichie (identité + cut-in). */
 export interface SkillCutinEntry {
-	skill_id_str: string;
-	skill_id: string;
-	event_id_name: string;
-	element: number;
-	element_name: { fr: string; en: string; ja: string };
-	category: number;
-	category_name: { fr: string; en: string; ja: string };
-	power_min: number;
-	power_max: number;
-	consume_tp: number;
-	foul_rate: number;
-	growth_type: number;
-	recast_time: number;
-	partner_type: number;
-	cutin: SkillCutin | null;
+  skill_id_str: string;
+  skill_id: string;
+  event_id_name: string;
+  element: number;
+  element_name: { fr: string; en: string; ja: string };
+  category: number;
+  category_name: { fr: string; en: string; ja: string };
+  power_min: number;
+  power_max: number;
+  consume_tp: number;
+  foul_rate: number;
+  growth_type: number;
+  recast_time: number;
+  partner_type: number;
+  cutin: SkillCutin | null;
 }
