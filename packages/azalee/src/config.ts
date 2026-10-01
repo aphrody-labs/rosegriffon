@@ -68,6 +68,8 @@ function dataDirCandidates(): string[] {
   return [
     explicit.dataDir,
     process.env.AZALEE_DATA_DIR,
+    process.env.IECODE_DATA_DIR,
+    process.env.DATA_ROOT,
     // Serveur standalone Next (cwd = `.next/standalone/apps/website`) et
     // `next build` (cwd = `apps/website`).
     path.resolve(process.cwd(), "data"),
@@ -106,16 +108,24 @@ export function resolveDataDir(): string | null {
  * Résout le miroir SQLite des tables `inagle_*`.
  *
  * `SQLITE_DB_PATH` est épinglé en production (drop-in systemd) sur le miroir
- * canonique publié par niers. Les anciennes sauvegardes locales ne sont plus
- * alimentées et ne doivent jamais être choisies silencieusement.
+ * canonique.
  */
 export function resolveMirrorPath(): string | null {
   if (explicit.mirrorPath) return explicit.mirrorPath;
   if (process.env.SQLITE_DB_PATH) return path.resolve(process.env.SQLITE_DB_PATH);
 
-  // Le miroir est publié dans `niers` par `nie-miroir.timer`. Sans miroir canonique,
-  // signaler l'absence plutôt que de servir un snapshot local figé.
-  const miroirDuJeu = process.env.NIERS_MIRROR ?? "/home/ubuntu/nie/var/mirror.sqlite";
-  if (existsSync(miroirDuJeu)) return miroirDuJeu;
+  const root = packageRoot();
+  const repoRoot = path.resolve(root, "../..");
+  const candidates = [
+    process.env.NIERS_MIRROR,
+    path.resolve(repoRoot, "var/mirror.sqlite"),
+    process.env.IECODE_DATA_DIR
+      ? path.resolve(process.env.IECODE_DATA_DIR, "../var/mirror.sqlite")
+      : undefined,
+  ].filter((p): p is string => Boolean(p));
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
   return null;
 }
