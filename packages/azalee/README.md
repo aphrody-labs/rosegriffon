@@ -168,7 +168,7 @@ apps/rg/website/data/
 | `AZALEE_DATA_DIR`             | `src/config.ts`       | Dossier des artefacts runtime, testé avant les chemins conventionnels (`<cwd>/data`, `<cwd>/apps/rg/website/data`, `<pkg>/../../../apps/rg/website/data`).                                                 |
 | `AZALEE_PORT` / `AZALEE_HOST` | `src/server/serve.ts` | Défauts de l'API headless (`3010` / `127.0.0.1`).                                                                                                                                                          |
 | `DATABASE_URL`                | `src/cli.ts`          | PostgreSQL pour les commandes CLI qui ne passent pas par le miroir (`db`, `data push`…).                                                                                                                   |
-| `DATA_ROOT` / `DATA_PATH`     | `src/cli.ts`          | Racine du dump de jeu pour `azalee data` (défaut `<iecode>/data`).                                                                                                                                 |
+| `DATA_ROOT` / `DATA_PATH`     | `src/cli.ts`          | Racine du dump de jeu pour `azalee data` (défaut `<iecode>/data`).                                                                                                                                         |
 
 Note : `AZALEE_DATA_DIR` couvre uniquement la découverte du miroir local de développement ;
 les modules `cpk` et `game-text` interrogent directement les projections PostgreSQL.

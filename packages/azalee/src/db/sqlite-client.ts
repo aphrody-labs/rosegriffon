@@ -509,6 +509,7 @@ export class SqliteQueryBuilder {
   }
 
   // Make the class then-able (Promise-like)
+  // oxlint-disable-next-line unicorn/no-thenable -- Supabase-compatible query builders intentionally support await.
   async then<TResult1 = unknown>(
     onfulfilled?:
       | ((value: {

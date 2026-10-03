@@ -9,13 +9,13 @@
 
 import { describe, expect, test } from "bun:test";
 
-import { resolveMirrorPath } from "../src/config";
+import { hasPostgresConfiguration } from "../src/config";
 import { wikiService } from "../src/wiki/service";
 import { getShop, getShopsList } from "../src/wiki/shops";
 import { getTeamDetail, getTeamsList } from "../src/wiki/teams";
 
-const hasMirror = resolveMirrorPath() !== null;
-const suite = describe.skipIf(!hasMirror);
+const hasPostgres = hasPostgresConfiguration();
+const suite = describe.skipIf(!hasPostgres);
 
 /** Accès souple aux entités du wiki (typage inagle non exhaustif côté test). */
 type Loose = Record<string, any>;

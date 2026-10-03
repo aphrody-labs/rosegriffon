@@ -28,6 +28,7 @@ import {
  */
 export function getVisibleLength(str: string): number {
   // Retire les codes d'échappement ANSI.
+  // oxlint-disable-next-line eslint/no-control-regex -- ANSI terminal escapes begin with ESC (U+001B).
   const stripped = str.replace(/\x1b\[[0-9;]*m/g, "");
   // Les caractères pleine chasse (CJK) occupent 2 cellules.
   let len = 0;

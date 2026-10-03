@@ -26,7 +26,7 @@
 import { existsSync } from "node:fs";
 
 import { hasDatabaseProvider } from "../db/provider";
-import { resolveDataDir, resolveMirrorPath } from "../config";
+import { hasPostgresConfiguration, resolveDataDir, resolveMirrorPath } from "../config";
 import {
   type AzaleeClient,
   type AzaleeClientOptions,
@@ -70,13 +70,13 @@ export function inspectLocalData(): AzaleeLocalAvailability {
   const mirror = rawMirror !== null && existsSync(rawMirror) ? rawMirror : null;
   const dataDir = resolveDataDir();
   const injectedProvider = hasDatabaseProvider();
-  const available = injectedProvider || mirror !== null;
+  const available = injectedProvider || hasPostgresConfiguration();
 
   const reason = injectedProvider
     ? "client de base injecté par l'application hôte"
-    : mirror !== null
-      ? `miroir SQLite présent (${mirror})`
-      : "aucun miroir SQLite ni client injecté sur cette machine";
+    : hasPostgresConfiguration()
+      ? "PostgreSQL projection configured"
+      : "No PostgreSQL projection or injected database client configured";
 
   return { mirror, dataDir, injectedProvider, available, reason };
 }

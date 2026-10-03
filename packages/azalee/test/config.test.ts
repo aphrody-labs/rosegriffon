@@ -95,6 +95,9 @@ describe("configureAzalee / getAzaleeConfig / resetAzaleeConfig", () => {
 describe("resolveMirrorPath — miroir SQLite des tables inagle_*", () => {
   test("ignore les sauvegardes locales périmées quand le miroir canonique manque", () => {
     const root = mkdtempSync(path.join(tmpdir(), "azalee-old-mirror-"));
+    if (path.dirname(root) !== path.resolve(tmpdir())) {
+      throw new Error("Refus de supprimer un dossier temporaire hors du répertoire prévu");
+    }
     try {
       const backups = path.join(root, "backups");
       mkdirSync(backups);
@@ -107,9 +110,6 @@ describe("resolveMirrorPath — miroir SQLite des tables inagle_*", () => {
       expect(resolveDataDir()).toBe(root);
       expect(resolveMirrorPath()).toBeNull();
     } finally {
-      if (path.dirname(root) !== path.resolve(tmpdir())) {
-        throw new Error("Refus de supprimer un dossier temporaire hors du répertoire prévu");
-      }
       rmSync(root, { recursive: true, force: true });
     }
   });

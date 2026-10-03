@@ -288,14 +288,6 @@ route("", () => ({ name: "@rosegriffon/azalee", routes: listRoutes() }));
 
 // --- Résolution ------------------------------------------------------------
 
-function safe<T>(fn: () => T, fallback: T): T {
-  try {
-    return fn();
-  } catch {
-    return fallback;
-  }
-}
-
 async function safeAsync<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
   try {
     return await fn();

@@ -16,7 +16,7 @@ import path from "node:path";
 
 import type { Command } from "commander";
 
-import { colors, errorMessage, getSqlitePath, openReadonlyDatabase, runCapture } from "../context";
+import { colors, errorMessage, getSqlitePath, openReadonlyDatabase } from "../context";
 import { exitUnlessRepl } from "../repl-state";
 import { rgWebsiteRoot, userHome } from "../roots";
 import type { TestOptions } from "../types";
@@ -102,7 +102,7 @@ export function registerTestCommand(program: Command): void {
     .command("test")
     .description("Exécute l'intégralité des tests natifs (filtres, API, pages et boutons)")
     .option("-p, --playwright", "Délègue la suite à Playwright")
-    .action(async (options: TestOptions) => {
+    .action(async (_options: TestOptions) => {
       console.log(
         `${colors.bold}${colors.magenta}=== RUNNING NATIVE VERIFICATION SUITE ===${colors.reset}\n`,
       );

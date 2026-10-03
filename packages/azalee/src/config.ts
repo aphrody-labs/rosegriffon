@@ -29,6 +29,16 @@ export interface AzaleeConfig {
 
 const explicit: AzaleeConfig = {};
 
+/** Whether the PostgreSQL projection used by wiki queries is configured. */
+export function hasPostgresConfiguration(): boolean {
+  return Boolean(
+    process.env.DATABASE_URL ||
+    process.env.ROSE_GRIFFON_DATABASE_URL ||
+    process.env.RG_DATABASE_URL ||
+    process.env.ACHILLEA_DATABASE_URL,
+  );
+}
+
 /**
  * Fixe la configuration runtime. Appelable plusieurs fois (fusion), typiquement
  * une seule fois au démarrage de l'application hôte ou du CLI.
@@ -113,6 +123,10 @@ export function resolveDataDir(): string | null {
 export function resolveMirrorPath(): string | null {
   if (explicit.mirrorPath) return explicit.mirrorPath;
   if (process.env.SQLITE_DB_PATH) return path.resolve(process.env.SQLITE_DB_PATH);
+  if (process.env.NIERS_MIRROR) {
+    const configured = path.resolve(process.env.NIERS_MIRROR);
+    return existsSync(configured) ? configured : null;
+  }
 
   const root = packageRoot();
   const repoRoot = path.resolve(root, "../..");

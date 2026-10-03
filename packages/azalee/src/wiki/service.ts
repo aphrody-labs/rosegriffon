@@ -2093,7 +2093,7 @@ export const wikiService = {
       // La surface complète inagle (shops, foulRate, tags, recastTime…) vit dans la
       // colonne `data` ; `sheet_data` ne porte que les overrides communautaires (souvent
       // vide pour les hissatsu wh*/rh*). On fusionne les deux, sheet_data prioritaire.
-      const sd = { ...(((h as any).data as any) || {}), ...((h.sheet_data as any) || {}) } as any;
+      const sd = { ...((h as any).data as any), ...(h.sheet_data as any) } as any;
 
       return {
         // Spread all inagle fields from data + sheet_data (foulRate, tags, shops, etc.)

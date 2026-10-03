@@ -334,7 +334,7 @@ export function resolveAssetUrl(path: string | null | undefined): string | null 
   if (path.startsWith(LEGACY_STORAGE_PREFIX)) {
     return mapStrippedMenuPath(path.slice(LEGACY_STORAGE_PREFIX.length));
   }
-  // Forme legacy DB raccourcie `/menu/200_icon/…​.webp` (sans le préfixe storage
+  // Forme legacy DB raccourcie `/menu/200_icon/….webp` (sans le préfixe storage
   // complet) : c'est un chemin d'asset, pas une route locale. On retire `/menu/`
   // et on route vers le mapper legacy comme les autres webp — sinon le `startsWith("/")`
   // ci-dessous le renverrait tel quel vers une route azalee inexistante (404).

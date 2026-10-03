@@ -49,7 +49,7 @@ import {
   type AzaleeClient,
 } from "../src/remote/index";
 import { handleAzaleeRequest, listRoutes } from "../src/server/serve";
-import { resolveMirrorPath } from "../src/config";
+import { hasPostgresConfiguration } from "../src/config";
 
 // --- Serveur de test : le vrai routeur, sur un port éphémère ---------------
 
@@ -99,7 +99,7 @@ afterAll(async () => {
 });
 
 /** Les routes de données ne répondent que si le miroir SQLite existe sur la machine. */
-const hasMirror = resolveMirrorPath() !== null;
+const hasPostgres = hasPostgresConfiguration();
 
 // --- Résolution de la base d'URL ------------------------------------------
 
@@ -271,7 +271,7 @@ describe("bout en bout — Bun.serve + handleAzaleeRequest", () => {
     expect(typeof health.cpkFiles).toBe("number");
   });
 
-  test.skipIf(!hasMirror)("liste de personnages typée et paginée", async () => {
+  test.skipIf(!hasPostgres)("liste de personnages typée et paginée", async () => {
     const list = await client.characters({ q: "Mark", limit: 3, page: 1 });
     expect(list.page).toBe(1);
     expect(list.limit).toBe(3);
@@ -280,7 +280,7 @@ describe("bout en bout — Bun.serve + handleAzaleeRequest", () => {
     expect(typeof list.data[0]?.charaId).toBe("string");
   });
 
-  test.skipIf(!hasMirror)(
+  test.skipIf(!hasPostgres)(
     "fiche personnage résolue depuis le baseSlug publié par la liste",
     async () => {
       const list = await client.characters({ q: "Mark", limit: 1 });
@@ -291,26 +291,29 @@ describe("bout en bout — Bun.serve + handleAzaleeRequest", () => {
     },
   );
 
-  test.skipIf(!hasMirror)("les 208 équipes remontent en un appel", async () => {
+  test.skipIf(!hasPostgres)("les 208 équipes remontent en un appel", async () => {
     const teams = await client.teams();
     expect(teams.length).toBeGreaterThan(100);
     expect(teams[0]?.id).toBeString();
   });
 
-  test.skipIf(!hasMirror)("recherche transverse : personnages + techniques + objets", async () => {
-    const result = await client.search({ q: "ma", limit: 3 });
-    expect(result.q).toBe("ma");
-    expect(Array.isArray(result.characters)).toBe(true);
-    expect(Array.isArray(result.skills)).toBe(true);
-    expect(Array.isArray(result.items)).toBe(true);
-  });
+  test.skipIf(!hasPostgres)(
+    "recherche transverse : personnages + techniques + objets",
+    async () => {
+      const result = await client.search({ q: "ma", limit: 3 });
+      expect(result.q).toBe("ma");
+      expect(Array.isArray(result.characters)).toBe(true);
+      expect(Array.isArray(result.skills)).toBe(true);
+      expect(Array.isArray(result.items)).toBe(true);
+    },
+  );
 
-  test.skipIf(!hasMirror)("statistiques de l'index de texte", async () => {
+  test.skipIf(!hasPostgres)("statistiques de l'index de texte", async () => {
     const stats = await client.textStats();
     expect(Array.isArray(stats)).toBe(true);
   });
 
-  test.skipIf(!hasMirror)("un identifiant inconnu remonte une erreur 404 typée", async () => {
+  test.skipIf(!hasPostgres)("un identifiant inconnu remonte une erreur 404 typée", async () => {
     expect.assertions(4);
     try {
       await client.character("ce-personnage-n-existe-pas");

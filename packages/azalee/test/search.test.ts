@@ -9,7 +9,7 @@
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-import { resolveMirrorPath } from "../src/config";
+import { hasPostgresConfiguration } from "../src/config";
 import {
   clearSearchCache,
   detectMatchedLanguage,
@@ -26,7 +26,7 @@ import {
 } from "../src/search/index";
 import { wikiService } from "../src/wiki/service";
 
-const hasMirror = resolveMirrorPath() !== null;
+const hasPostgres = hasPostgresConfiguration();
 
 describe("fuzzy-match — distance et normalisation", () => {
   test("levenshteinDistance : identité, insertion, substitution", () => {
@@ -200,7 +200,7 @@ describe("smart-search — priorisation, cache et suggestions", () => {
   });
 });
 
-describe.skipIf(!hasMirror)("smart-search sur de VRAIS personnages du miroir", () => {
+describe.skipIf(!hasPostgres)("smart-search sur de VRAIS personnages du miroir", () => {
   beforeEach(() => clearSearchCache());
 
   test("les noms réels du wiki sont annotés dans la bonne langue", async () => {

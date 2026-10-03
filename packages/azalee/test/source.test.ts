@@ -15,7 +15,12 @@
 
 import { afterEach, describe, expect, test } from "bun:test";
 
-import { configureAzalee, resetAzaleeConfig, resolveMirrorPath } from "../src/config";
+import {
+  configureAzalee,
+  hasPostgresConfiguration,
+  resetAzaleeConfig,
+  resolveMirrorPath,
+} from "../src/config";
 import { createAzaleeData, inspectLocalData } from "../src/server/source";
 import { setDatabaseProvider } from "../src/db/provider";
 import type { AzaleeTeamList } from "../src/remote/index";
@@ -49,7 +54,7 @@ afterEach(() => {
   setDatabaseProvider(null);
 });
 
-const hasMirror = resolveMirrorPath() !== null;
+const hasPostgres = hasPostgresConfiguration();
 
 describe("inspectLocalData — état des sources locales", () => {
   test("décrit le miroir, le dossier d'artefacts et le motif du choix", () => {
@@ -57,7 +62,7 @@ describe("inspectLocalData — état des sources locales", () => {
     expect(typeof local.available).toBe("boolean");
     expect(local.reason).toBeString();
     expect(local.mirror === null || local.mirror.endsWith(".sqlite")).toBe(true);
-    expect(local.available).toBe(local.injectedProvider || local.mirror !== null);
+    expect(local.available).toBe(local.injectedProvider || hasPostgres);
   });
 
   test("un chemin de miroir épinglé mais inexistant n'est PAS considéré disponible", () => {
@@ -65,7 +70,7 @@ describe("inspectLocalData — état des sources locales", () => {
     const local = inspectLocalData();
     expect(local.mirror).toBeNull();
     expect(local.available).toBe(false);
-    expect(local.reason).toContain("aucun miroir SQLite");
+    expect(local.reason).toContain("No PostgreSQL");
   });
 
   test("un client injecté par l'hôte rend la source locale disponible", () => {
@@ -79,7 +84,7 @@ describe("inspectLocalData — état des sources locales", () => {
 });
 
 describe("createAzaleeData — données locales présentes", () => {
-  test.skipIf(!hasMirror)("mode auto : source locale, zéro appel réseau", async () => {
+  test.skipIf(!hasPostgres)("mode auto : source locale, zéro appel réseau", async () => {
     const data = createAzaleeData({
       baseUrl: REMOTE,
       fetch: forbiddenFetch,
@@ -93,7 +98,7 @@ describe("createAzaleeData — données locales présentes", () => {
     expect(data.isDegraded()).toBe(false);
   });
 
-  test.skipIf(!hasMirror)(
+  test.skipIf(!hasPostgres)(
     "le préfixe de chemin de la base distante est retiré côté local",
     async () => {
       // `https://api.example.test/azalee` → la passerelle retire `/azalee` ;
@@ -105,7 +110,7 @@ describe("createAzaleeData — données locales présentes", () => {
     },
   );
 
-  test.skipIf(!hasMirror)("la surface de lecture est celle du client distant", () => {
+  test.skipIf(!hasPostgres)("la surface de lecture est celle du client distant", () => {
     const data = createAzaleeData({ mode: "local" });
     for (const method of [
       "characters",

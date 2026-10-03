@@ -30,13 +30,13 @@ import { getPersonalityName, PERSONALITY_NAMES } from "../src/game/personality";
 import { interpolateVariantStats } from "../src/game/stats-interpolation";
 import { base64ToUtf8, decodeTeamCode, encodeTeamCode, utf8ToBase64 } from "../src/game/team-code";
 import { containsJapanese, escapeRegExp, stripRubyAnnotations } from "../src/text/japanese-detect";
-import { resolveMirrorPath } from "../src/config";
+import { hasPostgresConfiguration } from "../src/config";
 
 /** Chemin du binaire CLI (exécuté tel quel par Bun). */
 const CLI_ENTRY = path.resolve(import.meta.dir, "../src/cli.ts");
 /** Racine du monorepo : cwd attendu par les commandes qui lisent des données. */
 const REPO_ROOT = path.resolve(import.meta.dir, "../../..");
-const hasMirror = resolveMirrorPath() !== null;
+const hasPostgres = hasPostgresConfiguration();
 
 /**
  * Ordre d'enregistrement attendu. C'est un test de contrat : réordonner une
@@ -294,7 +294,7 @@ describe("--help", () => {
 });
 
 describe("exécution réelle", () => {
-  test.skipIf(!hasMirror)(
+  test.skipIf(!hasPostgres)(
     "`db --sqlite --json` renvoie un tableau JSON depuis le miroir",
     async () => {
       const { code, stdout } = await runCli([
@@ -311,7 +311,7 @@ describe("exécution réelle", () => {
     30_000,
   );
 
-  test.skipIf(!hasMirror)(
+  test.skipIf(!hasPostgres)(
     "`db --sqlite` sans --json rend une table ASCII",
     async () => {
       const { code, stdout } = await runCli([
@@ -335,7 +335,7 @@ describe("exécution réelle", () => {
     expect(payload.routes).toContain("/api/characters");
   }, 30_000);
 
-  test.skipIf(!hasMirror)(
+  test.skipIf(!hasPostgres)(
     "`search --json` renvoie des entités du jeu",
     async () => {
       const { code, stdout } = await runCli(["search", "mark", "--json"]);
