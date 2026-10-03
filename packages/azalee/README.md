@@ -450,10 +450,10 @@ au mode extraction/offline explicite.
 ## Tests, build, publication
 
 ```bash
-bun test                    # depuis packages/rg/azalee
+bun test                    # from packages/azalee
 bun run type-check          # tsc --noEmit (vrais types workspace)
 bun run lint                # oxlint
-bun run build               # tsc -p tsconfig.build.json + copie de src/data → dist/data
+bun run build               # tsc -p tsconfig.build.json
 bun run compile             # binaire autonome → bin/azalee
 ```
 
@@ -463,19 +463,16 @@ systématiquement la configuration explicite et les variables d'environnement
 touchées — le miroir SQLite est un singleton de processus, une fuite de
 configuration casserait les fichiers de test suivants.
 
-Le build de publication substitue les types de `@rosegriffon/db` par les shims de
-`types/workspace-shims.d.ts` : ce package workspace exporte ses **sources TS** (pas
-de `dist`), et `tsc` refuse alors d'émettre des déclarations pour des fichiers hors
-`rootDir` (TS6059). Conséquence assumée : dans les `.d.ts` publiés, les types venant
-de `@rosegriffon/db` sont dégradés ; le comportement runtime est identique. Le
-type-check de développement, lui, utilise les vrais types.
+The publication build uses the actual `@rosegriffon/db` package types rather than
+ambient `any` shims. Both producer libraries emit declarations with their TypeScript
+build projects; relative TypeScript imports are rewritten for emitted JavaScript.
+The root development dependencies provide PostgreSQL declarations for source-first
+external packages.
 
-Publication : registre `npm.pkg.github.com`, `prepublishOnly` déclenche le build,
-et `publishConfig.exports` bascule les points d'entrée de `src/*.ts` vers `dist/*.js`.
-
-```bash
-bun publish
-```
+Aphrody consumes private archives built from the IECODE revision pinned in its
+`config/sibling-checkouts.json`. These packages keep source-first exports and are
+not published by the archive preparation command. Registry publication requires an
+explicit owner decision.
 
 Rappel de discipline, valable pour toute contribution :
 **la racine du package doit rester client-safe.** Tout ce qui touche `bun:sqlite`,

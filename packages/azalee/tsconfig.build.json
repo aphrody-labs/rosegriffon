@@ -10,12 +10,9 @@
     "types": ["bun"],
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "allowImportingTsExtensions": false,
-    "paths": {
-      "@rosegriffon/db": ["./types/workspace-shims.d.ts"],
-      "@rosegriffon/db/*": ["./types/workspace-shims.d.ts"]
-    },
-    "moduleDetection": "force"
+    "moduleDetection": "force",
+    "rewriteRelativeImportExtensions": true
   },
-  "include": ["src/**/*.ts", "types/**/*.d.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
 }

@@ -136,6 +136,7 @@ describe("createAzaleeProgram", () => {
     expect(program.name()).toBe("azalee");
     expect(program.description()).toBe("CLI d'Azalée pour Inazuma Eleven: Victory Road");
     expect(program.version()).toBe(CLI_VERSION);
+    expect(CLI_VERSION).toBe(require("../package.json").version);
   });
 
   test("enregistre exactement les 22 commandes attendues, dans l'ordre", () => {

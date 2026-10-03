@@ -35,11 +35,9 @@ import { registerTestCommand } from "./commands/test";
 import { registerTranslateCommand } from "./commands/translate";
 import { registerWaveCommand } from "./commands/wave";
 
-/**
- * Version publiée du CLI. Constante et non lue depuis `package.json` : le
- * binaire compilé (`bun build --compile`) ne charge pas `package.json`.
- */
-export const CLI_VERSION = "1.0.0";
+// Static require embeds package metadata in Bun standalone builds.
+const packageMetadata: { version: string } = require("../../package.json");
+export const CLI_VERSION = packageMetadata.version;
 
 /** Nom du binaire, tel qu'affiché dans l'aide et les messages d'erreur. */
 export const CLI_NAME = "azalee";
