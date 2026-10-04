@@ -10,7 +10,7 @@
 // Repointé sur rg-api:8800 (2026-09-26, aphrody-infra docs/PORTS-AND-DOMAINS.md item 13) :
 // `rg-api` absorbe storage/realtime en-process (`apps/api/src/index.ts`,
 // commentaires « remplace rg-storage:8810 »/« remplace rg-realtime:8812 ») et c'est
-// l'unique cible que la conf nginx live (`rg-production.conf`) route réellement pour
+// l'unique cible que la conf nginx live (`rg.conf` (scripts/rg/nginx-gen.ts)) route réellement pour
 // `/storage/v1/` et `/realtime/v1/` ; `:8811` (`supabase-internal.conf`) n'est jamais
 // écouté par cette conf et est marqué superseded dans le catalogue.
 import { isUsableEnvValue } from "@aphrody/sql/env";
