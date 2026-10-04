@@ -2,7 +2,7 @@
 import { expect, test } from "bun:test";
 
 test("Cron package import exposes contracts without launching its daemon", async () => {
-  const entry = new URL("./index.ts", import.meta.url).pathname;
+  const entry = Bun.fileURLToPath(new URL("./index.ts", import.meta.url));
   const child = Bun.spawn(
     [
       process.execPath,
