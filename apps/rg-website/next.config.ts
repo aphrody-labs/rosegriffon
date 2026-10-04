@@ -45,6 +45,7 @@ const nextConfig: NextConfig = {
     "@rosegriffon/achillea-client",
     // Mécanique SQL/Redis/env partagée sous @rosegriffon/db (ADR sql-convergence D7).
     "@aphrody/sql",
+    "@aphrody/paths",
   ],
 
   typescript: {
