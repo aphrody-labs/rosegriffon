@@ -77,8 +77,8 @@
     "typecheck": "bun --bun tsc --noEmit"
   },
   "dependencies": {
-    "@rosegriffon/assets": "catalog:",
-    "@rosegriffon/db": "catalog:",
+    "@rosegriffon/assets": "workspace:*",
+    "@rosegriffon/db": "workspace:*",
     "@rosegriffon/inagle": "workspace:*",
     "@rosegriffon/inagle-cross": "workspace:*",
     "commander": "catalog:",

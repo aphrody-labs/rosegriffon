@@ -1,0 +1,34 @@
+{
+  "name": "@rosegriffon/preferences",
+  "version": "1.0.3",
+  "private": true,
+  "description": "Pure cross-runtime resolution of Rose Griffon presentation preferences",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rose-griffon/rg.git",
+    "directory": "packages/preferences"
+  },
+  "files": [
+    "src"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "lint": "bunx oxlint -c ../config/oxlintrc.json src",
+    "type-check": "bun --bun tsc --noEmit",
+    "test": "bun test test",
+    "typecheck": "bun --bun tsc --noEmit"
+  },
+  "engines": {
+    "bun": ">=1.4.2"
+  }
+}
