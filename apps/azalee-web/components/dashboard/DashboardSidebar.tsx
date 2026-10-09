@@ -2,16 +2,16 @@
 
 import { AdminSidebar, type NavItem } from "@rosegriffon/ui";
 import {
-	Database,
-	FileSpreadsheet,
-	FileText,
-	Home,
-	LayoutDashboard,
-	Newspaper,
-	Settings,
-	ShieldCheck,
-	Tag,
-	Users,
+  Database,
+  FileSpreadsheet,
+  FileText,
+  Home,
+  LayoutDashboard,
+  Newspaper,
+  Settings,
+  ShieldCheck,
+  Tag,
+  Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -32,64 +32,62 @@ import Link from "next/link";
  * vérifiée côté serveur dans le layout, donc la barre est toujours rendue.
  */
 const ITEMS: NavItem[] = [
-	{ href: "/dashboard", icon: LayoutDashboard, title: "Vue d'ensemble", exact: true },
-	{
-		href: "/dashboard/news",
-		icon: Newspaper,
-		title: "Actualités",
-		submenu: [
-			{ href: "/dashboard/news", title: "Toutes les actualités" },
-			{ href: "/dashboard/news/new", title: "Nouvelle actualité" },
-			{ href: "/dashboard/news/stats", title: "Statistiques" },
-		],
-	},
-	{
-		href: "/dashboard/database",
-		icon: Database,
-		title: "Base de données",
-		submenu: [
-			{ href: "/dashboard/database", title: "Tables" },
-			{ href: "/dashboard/database/images", title: "Images" },
-			{ href: "/dashboard/database/verification", title: "Vérification" },
-		],
-	},
-	{ href: "/dashboard/tweets", icon: Tag, title: "Tweets" },
-	{ href: "/dashboard/zukan-review", icon: FileText, title: "Revue zukan" },
-	{
-		href: "/dashboard/import-google-doc",
-		icon: FileSpreadsheet,
-		title: "Imports",
-		submenu: [
-			{ href: "/dashboard/import-google-doc", title: "Document Google" },
-			{ href: "/dashboard/import-sheet", title: "Feuille de calcul" },
-		],
-	},
-	{ href: "/dashboard/audit", icon: ShieldCheck, title: "Journal d'audit" },
-	{ href: "/dashboard/users", icon: Users, title: "Utilisateurs" },
-	{ href: "/dashboard/settings", icon: Settings, title: "Paramètres" },
+  { href: "/dashboard", icon: LayoutDashboard, title: "Vue d'ensemble", exact: true },
+  {
+    href: "/dashboard/news",
+    icon: Newspaper,
+    title: "Actualités",
+    submenu: [
+      { href: "/dashboard/news", title: "Toutes les actualités" },
+      { href: "/dashboard/news/new", title: "Nouvelle actualité" },
+      { href: "/dashboard/news/stats", title: "Statistiques" },
+    ],
+  },
+  {
+    href: "/dashboard/database",
+    icon: Database,
+    title: "Base de données",
+    submenu: [
+      { href: "/dashboard/database", title: "Tables" },
+      { href: "/dashboard/database/images", title: "Images" },
+      { href: "/dashboard/database/verification", title: "Vérification" },
+    ],
+  },
+  { href: "/dashboard/tweets", icon: Tag, title: "Tweets" },
+  { href: "/dashboard/zukan-review", icon: FileText, title: "Revue zukan" },
+  {
+    href: "/dashboard/import-google-doc",
+    icon: FileSpreadsheet,
+    title: "Imports",
+    submenu: [
+      { href: "/dashboard/import-google-doc", title: "Document Google" },
+      { href: "/dashboard/import-sheet", title: "Feuille de calcul" },
+    ],
+  },
+  { href: "/dashboard/audit", icon: ShieldCheck, title: "Journal d'audit" },
+  { href: "/dashboard/users", icon: Users, title: "Utilisateurs" },
+  { href: "/dashboard/settings", icon: Settings, title: "Paramètres" },
 ];
 
 export function DashboardSidebar() {
-	return (
-		<AdminSidebar
-			items={ITEMS}
-			baseHref="/dashboard"
-			title="Administration"
-			subtitle="Azalée"
-			logo={
-				<Image src="/logo.webp" alt="" width={28} height={28} className="object-contain" />
-			}
-			footer={
-				// `Link` et non `<a>` : la navigation interne restait un rechargement
-				// complet du document (perte du cache routeur et du prefetch).
-				<Link
-					href="/"
-					className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface"
-				>
-					<Home className="size-4 shrink-0" aria-hidden />
-					Retour au wiki
-				</Link>
-			}
-		/>
-	);
+  return (
+    <AdminSidebar
+      items={ITEMS}
+      baseHref="/dashboard"
+      title="Administration"
+      subtitle="Azalée"
+      logo={<Image src="/logo.webp" alt="" width={28} height={28} className="object-contain" />}
+      footer={
+        // `Link` et non `<a>` : la navigation interne restait un rechargement
+        // complet du document (perte du cache routeur et du prefetch).
+        <Link
+          href="/"
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface"
+        >
+          <Home className="size-4 shrink-0" aria-hidden />
+          Retour au wiki
+        </Link>
+      }
+    />
+  );
 }

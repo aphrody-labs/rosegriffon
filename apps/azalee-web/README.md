@@ -45,7 +45,7 @@
 | UI              | **[React 19](https://react.dev)**, [Tailwind CSS v4](https://tailwindcss.com/docs), **Material Design 3** (Shadcn/ui + Radix) |
 | Auth            | **[Better Auth 1.4](https://www.better-auth.com/docs)** (OAuth Google + Discord, pont JWT Supabase)                           |
 | Base de données | **[Supabase](https://supabase.com/docs)** (PostgreSQL, 23 tables, RLS 23/23)                                                  |
-| Données jeu     | `@rosegriffon/inagle` (parser binaire Victory Road)                                                                          |
+| Données jeu     | `@rosegriffon/inagle` (parser binaire Victory Road)                                                                           |
 | Éditeur         | **[Lexical](https://lexical.dev/docs/intro)** (articles, patch notes)                                                         |
 | Canvas          | **[Konva](https://konvajs.org/docs/)** + React-Konva (outils visuels)                                                         |
 | Recherche       | **[uFuzzy](https://github.com/leeoniya/uFuzzy)** + **[cmdk](https://cmdk.paco.me/)** (palette de commandes)                   |
@@ -126,15 +126,15 @@ VAPID_PRIVATE_KEY=
 
 Toutes en **Bun** — jamais `npm`, `pnpm` ni `yarn`.
 
-| Commande | Description |
-| --- | --- |
-| `bun run dev` | serveur de développement (Turbopack) |
-| `bun run build` | build de production (standalone) |
-| `bun run lint` | oxlint puis eslint |
-| `bun run type-check` | `tsc --noEmit` |
-| `bun test src tests` | tests de l'app |
-| `bun run sync:inagle` | synchronise les données inagle vers Supabase |
-| `bun run backup:supabase` | dump Supabase → SQLite |
+| Commande                  | Description                                  |
+| ------------------------- | -------------------------------------------- |
+| `bun run dev`             | serveur de développement (Turbopack)         |
+| `bun run build`           | build de production (standalone)             |
+| `bun run lint`            | oxlint puis eslint                           |
+| `bun run type-check`      | `tsc --noEmit`                               |
+| `bun test src tests`      | tests de l'app                               |
+| `bun run sync:inagle`     | synchronise les données inagle vers Supabase |
+| `bun run backup:supabase` | dump Supabase → SQLite                       |
 
 Les données du jeu s'interrogent par le CLI de la bibliothèque :
 `bun packages/azalee/src/cli.ts --help`.

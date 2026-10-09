@@ -21,50 +21,50 @@ export const dynamic = "force-dynamic";
  * Ici la décision est prise une fois la session lisible, sans race.
  */
 function sanitizeReturnTo(returnTo: string | null): string {
-	if (!returnTo || !returnTo.startsWith("/") || returnTo.startsWith("//")) {
-		return "/";
-	}
-	return returnTo;
+  if (!returnTo || !returnTo.startsWith("/") || returnTo.startsWith("//")) {
+    return "/";
+  }
+  return returnTo;
 }
 
 export async function GET(request: NextRequest) {
-	const returnTo = sanitizeReturnTo(request.nextUrl.searchParams.get("returnTo"));
+  const returnTo = sanitizeReturnTo(request.nextUrl.searchParams.get("returnTo"));
 
-	let session: Awaited<ReturnType<typeof auth.api.getSession>>;
-	try {
-		const reqHeaders = await headers();
-		session = await auth.api.getSession({ headers: reqHeaders });
-	} catch {
-		session = null;
-	}
+  let session: Awaited<ReturnType<typeof auth.api.getSession>>;
+  try {
+    const reqHeaders = await headers();
+    session = await auth.api.getSession({ headers: reqHeaders });
+  } catch {
+    session = null;
+  }
 
-	if (!session?.user) {
-		const dest = `/login?returnTo=${encodeURIComponent(returnTo)}`;
-		return NextResponse.redirect(absoluteUrl(dest));
-	}
+  if (!session?.user) {
+    const dest = `/login?returnTo=${encodeURIComponent(returnTo)}`;
+    return NextResponse.redirect(absoluteUrl(dest));
+  }
 
-	let role: string | null;
-	try {
-		const supabase = await createClient();
-		const { data } = await supabase
-			.from("profiles")
-			.select("role")
-			.eq("id", session.user.id)
-			.maybeSingle();
-		role = (data as { role?: string | null } | null)?.role ?? null;
-	} catch {
-		role = null;
-	}
+  let role: string | null;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .maybeSingle();
+    role = (data as { role?: string | null } | null)?.role ?? null;
+  } catch {
+    role = null;
+  }
 
-	const isAdmin = ADMIN_ROLES.includes(role as (typeof ADMIN_ROLES)[number]);
+  const isAdmin = ADMIN_ROLES.includes(role as (typeof ADMIN_ROLES)[number]);
 
-	if (isAdmin) {
-		// Honore un returnTo déjà dans le dashboard, sinon l'accueil admin.
-		const dest = returnTo.startsWith("/dashboard") ? returnTo : "/dashboard";
-		return NextResponse.redirect(absoluteUrl(dest));
-	}
+  if (isAdmin) {
+    // Honore un returnTo déjà dans le dashboard, sinon l'accueil admin.
+    const dest = returnTo.startsWith("/dashboard") ? returnTo : "/dashboard";
+    return NextResponse.redirect(absoluteUrl(dest));
+  }
 
-	// Non-admin : ne jamais renvoyer vers une page admin (boucle middleware → /login).
-	const dest = returnTo.startsWith("/dashboard") ? "/" : returnTo;
-	return NextResponse.redirect(absoluteUrl(dest));
+  // Non-admin : ne jamais renvoyer vers une page admin (boucle middleware → /login).
+  const dest = returnTo.startsWith("/dashboard") ? "/" : returnTo;
+  return NextResponse.redirect(absoluteUrl(dest));
 }

@@ -26,35 +26,35 @@ import { createAdminClient } from "@/lib/supabase/admin";
 const profileSchema = SchemaProfilPublic;
 
 export async function updateProfile(
-	values: z.input<typeof profileSchema>
+  values: z.input<typeof profileSchema>,
 ): Promise<{ error?: string }> {
-	const session = await getServerSession();
-	if (!session?.user) {
-		return { error: "Session expirée — reconnecte-toi." };
-	}
+  const session = await getServerSession();
+  if (!session?.user) {
+    return { error: "Session expirée — reconnecte-toi." };
+  }
 
-	const parsed = profileSchema.safeParse(values);
-	if (!parsed.success) {
-		return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
-	}
+  const parsed = profileSchema.safeParse(values);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
 
-	const { error } = await createAdminClient()
-		.from("profiles")
-		.update({ ...parsed.data, updated_at: new Date().toISOString() })
-		.eq("id", session.user.id);
+  const { error } = await createAdminClient()
+    .from("profiles")
+    .update({ ...parsed.data, updated_at: new Date().toISOString() })
+    .eq("id", session.user.id);
 
-	if (error) {
-		if (error.code === "23505") {
-			return { error: "Ce nom d'utilisateur est déjà pris." };
-		}
-		console.error("[compte] mise à jour du profil impossible", error);
-		return { error: "Erreur lors de la mise à jour du profil." };
-	}
+  if (error) {
+    if (error.code === "23505") {
+      return { error: "Ce nom d'utilisateur est déjà pris." };
+    }
+    console.error("[compte] mise à jour du profil impossible", error);
+    return { error: "Erreur lors de la mise à jour du profil." };
+  }
 
-	await logAudit(session.user.id, "profile_update", { fields: Object.keys(parsed.data) });
-	revalidatePath("/settings");
-	revalidatePath(`/profil/${parsed.data.username}`);
-	return {};
+  await logAudit(session.user.id, "profile_update", { fields: Object.keys(parsed.data) });
+  revalidatePath("/settings");
+  revalidatePath(`/profil/${parsed.data.username}`);
+  return {};
 }
 
 /**
@@ -64,21 +64,21 @@ export async function updateProfile(
  * quel appelant pourrait réécrire l'avatar d'un autre compte.
  */
 export async function updateAvatarUrl(avatarUrl: string): Promise<{ error?: string }> {
-	const session = await getServerSession();
-	if (!session?.user) {
-		return { error: "Session expirée — reconnecte-toi." };
-	}
+  const session = await getServerSession();
+  if (!session?.user) {
+    return { error: "Session expirée — reconnecte-toi." };
+  }
 
-	const { error } = await createAdminClient()
-		.from("profiles")
-		.update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
-		.eq("id", session.user.id);
+  const { error } = await createAdminClient()
+    .from("profiles")
+    .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+    .eq("id", session.user.id);
 
-	if (error) {
-		console.error("[compte] mise à jour de l'avatar impossible", error);
-		return { error: "Impossible d'enregistrer le nouvel avatar." };
-	}
+  if (error) {
+    console.error("[compte] mise à jour de l'avatar impossible", error);
+    return { error: "Impossible d'enregistrer le nouvel avatar." };
+  }
 
-	revalidatePath("/settings");
-	return {};
+  revalidatePath("/settings");
+  return {};
 }

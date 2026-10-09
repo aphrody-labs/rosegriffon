@@ -14,17 +14,19 @@ import { chromium } from "@playwright/test";
 
 const [url, sortie, largeur, hauteur] = process.argv.slice(2);
 if (!url || !sortie) {
-	console.error("usage: bun --bun apps/azalee/scripts/shot.ts <url> <sortie.png> [largeur] [hauteur]");
-	process.exit(1);
+  console.error(
+    "usage: bun --bun apps/azalee/scripts/shot.ts <url> <sortie.png> [largeur] [hauteur]",
+  );
+  process.exit(1);
 }
 
 const navigateur = await chromium.launch({
-	executablePath: process.env.CHROMIUM_PATH ?? "/usr/local/bin/chromium",
-	args: ["--no-sandbox", "--disable-dev-shm-usage"],
+  executablePath: process.env.CHROMIUM_PATH ?? "/usr/local/bin/chromium",
+  args: ["--no-sandbox", "--disable-dev-shm-usage"],
 });
 const page = await navigateur.newPage({
-	viewport: { width: Number(largeur ?? 1920), height: Number(hauteur ?? 1080) },
-	deviceScaleFactor: 1,
+  viewport: { width: Number(largeur ?? 1920), height: Number(hauteur ?? 1080) },
+  deviceScaleFactor: 1,
 });
 await page.goto(url, { waitUntil: "networkidle", timeout: 120_000 });
 // Le modèle 3D et les sprites arrivent après `networkidle` : sans cette pause, la capture montre

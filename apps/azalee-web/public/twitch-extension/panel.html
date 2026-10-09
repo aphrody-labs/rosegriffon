@@ -38,12 +38,7 @@
         left: 0;
         width: 100%;
         height: 2px;
-        background: linear-gradient(
-          to right,
-          transparent,
-          var(--primary),
-          transparent
-        );
+        background: linear-gradient(to right, transparent, var(--primary), transparent);
         z-index: 50;
         opacity: 0.8;
       }
@@ -96,11 +91,7 @@
 
       .schedule-item.active {
         border-left: 3px solid var(--primary);
-        background: linear-gradient(
-          90deg,
-          rgba(214, 57, 1, 0.1) 0%,
-          rgba(52, 81, 130, 0.05) 100%
-        );
+        background: linear-gradient(90deg, rgba(214, 57, 1, 0.1) 0%, rgba(52, 81, 130, 0.05) 100%);
       }
 
       .schedule-meta {
@@ -207,11 +198,7 @@
     <div class="energy-line"></div>
     <header>
       <h1>
-        <svg
-          class="icon logo-icon"
-          viewBox="0 0 24 24"
-          style="width: 20px; height: 20px"
-        >
+        <svg class="icon logo-icon" viewBox="0 0 24 24" style="width: 20px; height: 20px">
           <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
           <line x1="8" y1="21" x2="16" y2="21"></line>
           <line x1="12" y1="17" x2="12" y2="21"></line>
@@ -246,17 +233,14 @@
           const segments = json.data?.segments || [];
 
           if (segments.length === 0) {
-            container.innerHTML =
-              '<div class="state-msg">Aucun stream prévu prochainement.</div>';
+            container.innerHTML = '<div class="state-msg">Aucun stream prévu prochainement.</div>';
             return;
           }
 
           // Transformer les données pour l'affichage
           const scheduleData = segments.map((segment) => {
             const startDate = new Date(segment.start_time);
-            const endDate = segment.end_time
-              ? new Date(segment.end_time)
-              : null;
+            const endDate = segment.end_time ? new Date(segment.end_time) : null;
             const now = new Date();
 
             // Vérifier si c'est en cours
@@ -300,12 +284,8 @@
           const el = document.createElement("div");
           el.className = `schedule-item ${item.isLive ? "active" : ""}`;
 
-          const timeDisplay = item.endTime
-            ? `${item.startTime} - ${item.endTime}`
-            : item.startTime;
-          const liveBadge = item.isLive
-            ? '<span class="badge-live">EN DIRECT</span>'
-            : "";
+          const timeDisplay = item.endTime ? `${item.startTime} - ${item.endTime}` : item.startTime;
+          const liveBadge = item.isLive ? '<span class="badge-live">EN DIRECT</span>' : "";
 
           // Icons SVG
           const calendarIcon = `<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;

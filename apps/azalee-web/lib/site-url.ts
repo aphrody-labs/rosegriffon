@@ -18,19 +18,19 @@
 const FALLBACK_ORIGIN = "https://azalee.rosegriffon.fr";
 
 function normalizeOrigin(value: string | undefined | null): string | null {
-	if (!value || value === "undefined" || value === "null") {
-		return null;
-	}
-	const trimmed = value.trim();
-	if (!trimmed.startsWith("http")) {
-		return null;
-	}
-	try {
-		// Conserve uniquement le scheme + host (+ port éventuel), pas le path.
-		return new URL(trimmed).origin;
-	} catch {
-		return null;
-	}
+  if (!value || value === "undefined" || value === "null") {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed.startsWith("http")) {
+    return null;
+  }
+  try {
+    // Conserve uniquement le scheme + host (+ port éventuel), pas le path.
+    return new URL(trimmed).origin;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -44,11 +44,11 @@ function normalizeOrigin(value: string | undefined | null): string | null {
  * Ne dérive JAMAIS du host de la requête (= `0.0.0.0:3003` en self-host).
  */
 export function getPublicOrigin(): string {
-	return (
-		normalizeOrigin(process.env.NEXT_PUBLIC_SITE_URL) ??
-		normalizeOrigin(process.env.BETTER_AUTH_URL) ??
-		FALLBACK_ORIGIN
-	);
+  return (
+    normalizeOrigin(process.env.NEXT_PUBLIC_SITE_URL) ??
+    normalizeOrigin(process.env.BETTER_AUTH_URL) ??
+    FALLBACK_ORIGIN
+  );
 }
 
 /**
@@ -57,13 +57,13 @@ export function getPublicOrigin(): string {
  * pointe sur l'origin public, sinon réécrit sur l'origin public).
  */
 export function absoluteUrl(path: string): URL {
-	const origin = getPublicOrigin();
-	// `new URL(path, origin)` : si `path` est déjà absolu il prime, sinon il est
-	// résolu contre l'origin public. On force toujours l'origin public pour ne
-	// jamais laisser fuiter `0.0.0.0:3003`.
-	const resolved = new URL(path, origin);
-	const base = new URL(origin);
-	resolved.protocol = base.protocol;
-	resolved.host = base.host;
-	return resolved;
+  const origin = getPublicOrigin();
+  // `new URL(path, origin)` : si `path` est déjà absolu il prime, sinon il est
+  // résolu contre l'origin public. On force toujours l'origin public pour ne
+  // jamais laisser fuiter `0.0.0.0:3003`.
+  const resolved = new URL(path, origin);
+  const base = new URL(origin);
+  resolved.protocol = base.protocol;
+  resolved.host = base.host;
+  return resolved;
 }

@@ -6,31 +6,31 @@ import { createClient } from "@supabase/supabase-js";
 // I'll skip strict typing for DB for now to speed up, or copy the type file if needed.
 
 function isValidHttpUrl(v: string | undefined | null): v is string {
-	return Boolean(
-		v && v !== "undefined" && v !== "null" && v.startsWith("http") && !v.startsWith("eyJ2Ijo")
-	);
+  return Boolean(
+    v && v !== "undefined" && v !== "null" && v.startsWith("http") && !v.startsWith("eyJ2Ijo"),
+  );
 }
 
 function isValidKey(v: string | undefined | null): v is string {
-	return Boolean(
-		v && v !== "undefined" && v !== "null" && !v.startsWith("{") && !v.startsWith("eyJ2Ijo")
-	);
+  return Boolean(
+    v && v !== "undefined" && v !== "null" && !v.startsWith("{") && !v.startsWith("eyJ2Ijo"),
+  );
 }
 
-const PLACEHOLDER_URL = (typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin);
-const PLACEHOLDER_SERVICE_KEY =
-	"***REDACTED-SERVICE-ROLE***";
+const PLACEHOLDER_URL =
+  typeof window === "undefined" ? "http://127.0.0.1:8811" : window.location.origin;
+const PLACEHOLDER_SERVICE_KEY = "***REDACTED-SERVICE-ROLE***";
 
 export function getSupabaseClient() {
-	let supabaseUrl = process.env.SUPABASE_INTERNAL_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-	let supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  let supabaseUrl = process.env.SUPABASE_INTERNAL_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  let supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-	if (!isValidHttpUrl(supabaseUrl)) {
-		supabaseUrl = PLACEHOLDER_URL;
-	}
-	if (!isValidKey(supabaseServiceKey)) {
-		supabaseServiceKey = PLACEHOLDER_SERVICE_KEY;
-	}
+  if (!isValidHttpUrl(supabaseUrl)) {
+    supabaseUrl = PLACEHOLDER_URL;
+  }
+  if (!isValidKey(supabaseServiceKey)) {
+    supabaseServiceKey = PLACEHOLDER_SERVICE_KEY;
+  }
 
-	return createClient(supabaseUrl, supabaseServiceKey);
+  return createClient(supabaseUrl, supabaseServiceKey);
 }

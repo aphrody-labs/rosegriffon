@@ -12,11 +12,11 @@ import { getIPIntelligence } from "@/lib/ip-intelligence";
 import { getPublicOrigin } from "@/lib/site-url";
 import { sendEmail } from "@/src/lib/email";
 import {
-	commonAuthOptions,
-	createAccountOptions,
-	deuxFacteurs,
-	ensureUserProfile,
-	googleProvider,
+  commonAuthOptions,
+  createAccountOptions,
+  deuxFacteurs,
+  ensureUserProfile,
+  googleProvider,
 } from "@rosegriffon/auth";
 
 export { ensureUserProfile } from "@rosegriffon/auth";
@@ -27,56 +27,56 @@ const pool = getPgPool();
 const supabaseAdmin = createSupabaseServiceClient();
 
 const getBetterAuthURL = () => {
-	const url = process.env.BETTER_AUTH_URL;
-	if (!url || url === "undefined" || url === "null" || !url.startsWith("http")) {
-		// Origin public canonique (jamais le host interne 0.0.0.0:3003 du self-host).
-		return getPublicOrigin();
-	}
-	return url;
+  const url = process.env.BETTER_AUTH_URL;
+  if (!url || url === "undefined" || url === "null" || !url.startsWith("http")) {
+    // Origin public canonique (jamais le host interne 0.0.0.0:3003 du self-host).
+    return getPublicOrigin();
+  }
+  return url;
 };
 
 function createAuth() {
-	return betterAuth({
-		database: pool,
-		baseURL: getBetterAuthURL(),
-		secret:
-			process.env.BETTER_AUTH_SECRET ||
-			"build-placeholder-secret-not-used-at-runtime-only-prevents-prerender-throw",
+  return betterAuth({
+    database: pool,
+    baseURL: getBetterAuthURL(),
+    secret:
+      process.env.BETTER_AUTH_SECRET ||
+      "build-placeholder-secret-not-used-at-runtime-only-prevents-prerender-throw",
 
-		...commonAuthOptions,
+    ...commonAuthOptions,
 
-		// Le spread ci-dessus apporte la correspondance des colonnes ; il faut la
-		// réétaler ici, sinon redéfinir `user` l'emporterait entièrement.
-		// `createAccountOptions` active le changement d'adresse et la suppression
-		// de compte, désactivés par défaut dans Better Auth : les boutons
-		// correspondants de `/settings` échouaient donc systématiquement.
-		user: {
-			...commonAuthOptions.user,
-			...createAccountOptions({
-				appName: "Azalée",
-				// Même pool que Better Auth : `profiles` et `auth.users` ne sont
-				// atteignables que par SQL direct (cf. `beforeDelete`).
-				executerSql: (requete, parametres) => pool.query(requete, parametres as unknown[]),
-				sendEmail,
-			}),
-		},
+    // Le spread ci-dessus apporte la correspondance des colonnes ; il faut la
+    // réétaler ici, sinon redéfinir `user` l'emporterait entièrement.
+    // `createAccountOptions` active le changement d'adresse et la suppression
+    // de compte, désactivés par défaut dans Better Auth : les boutons
+    // correspondants de `/settings` échouaient donc systématiquement.
+    user: {
+      ...commonAuthOptions.user,
+      ...createAccountOptions({
+        appName: "Azalée",
+        // Même pool que Better Auth : `profiles` et `auth.users` ne sont
+        // atteignables que par SQL direct (cf. `beforeDelete`).
+        executerSql: (requete, parametres) => pool.query(requete, parametres as unknown[]),
+        sendEmail,
+      }),
+    },
 
-		trustedOrigins: [
-			getPublicOrigin(),
-			"https://azalee.rosegriffon.fr",
-			process.env.BETTER_AUTH_URL ?? "https://azalee.rosegriffon.fr",
-			"http://localhost:3000",
-			"http://localhost:3001",
-		].filter((v, i, a) => v && a.indexOf(v) === i),
+    trustedOrigins: [
+      getPublicOrigin(),
+      "https://azalee.rosegriffon.fr",
+      process.env.BETTER_AUTH_URL ?? "https://azalee.rosegriffon.fr",
+      "http://localhost:3000",
+      "http://localhost:3001",
+    ].filter((v, i, a) => v && a.indexOf(v) === i),
 
-		emailVerification: {
-			autoSignInAfterVerification: true,
-			sendOnSignUp: true,
-			sendVerificationEmail: async ({ user, url }) => {
-				void sendEmail({
-					to: user.email,
-					subject: "Vérifie ton adresse email — Azalée",
-					html: `<!DOCTYPE html>
+    emailVerification: {
+      autoSignInAfterVerification: true,
+      sendOnSignUp: true,
+      sendVerificationEmail: async ({ user, url }) => {
+        void sendEmail({
+          to: user.email,
+          subject: "Vérifie ton adresse email — Azalée",
+          html: `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#1A120D;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
@@ -105,32 +105,32 @@ function createAuth() {
   </table>
 </body>
 </html>`,
-				}).catch((error: unknown) => {
-					console.warn(
-						"[auth] email de vérification non envoyé :",
-						error instanceof Error ? error.message : error
-					);
-				});
-			},
-		},
+        }).catch((error: unknown) => {
+          console.warn(
+            "[auth] email de vérification non envoyé :",
+            error instanceof Error ? error.message : error,
+          );
+        });
+      },
+    },
 
-		emailAndPassword: {
-			enabled: true,
-			password: {
-				verify: async ({ hash, password }) => {
-					if (hash.startsWith("$2a$") || hash.startsWith("$2b$")) {
-						return bcrypt.compare(password, hash);
-					}
-					const { verifyPassword } = await import("better-auth/crypto");
-					return verifyPassword({ hash, password });
-				},
-			},
-			requireEmailVerification: false,
-			sendResetPassword: async ({ user, url }) => {
-				void sendEmail({
-					to: user.email,
-					subject: "Réinitialisation de ton mot de passe — Azalée",
-					html: `<!DOCTYPE html>
+    emailAndPassword: {
+      enabled: true,
+      password: {
+        verify: async ({ hash, password }) => {
+          if (hash.startsWith("$2a$") || hash.startsWith("$2b$")) {
+            return bcrypt.compare(password, hash);
+          }
+          const { verifyPassword } = await import("better-auth/crypto");
+          return verifyPassword({ hash, password });
+        },
+      },
+      requireEmailVerification: false,
+      sendResetPassword: async ({ user, url }) => {
+        void sendEmail({
+          to: user.email,
+          subject: "Réinitialisation de ton mot de passe — Azalée",
+          html: `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#1A120D;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
@@ -164,212 +164,212 @@ function createAuth() {
   </table>
 </body>
 </html>`,
-				}).catch((error: unknown) => {
-					console.warn(
-						"[auth] email de réinitialisation non envoyé :",
-						error instanceof Error ? error.message : error
-					);
-				});
-			},
-		},
+        }).catch((error: unknown) => {
+          console.warn(
+            "[auth] email de réinitialisation non envoyé :",
+            error instanceof Error ? error.message : error,
+          );
+        });
+      },
+    },
 
-		socialProviders: {
-			discord: {
-				clientId: process.env.DISCORD_CLIENT_ID!,
-				clientSecret: process.env.DISCORD_CLIENT_SECRET!,
-				// Better Auth force `prompt=none` par défaut sur Discord → tout user non
-				// déjà autorisé est rejeté (consent_required) avant le callback. `consent`
-				// affiche l'écran d'autorisation et marche pour tout le monde.
-				prompt: "consent",
-			},
-			...googleProvider,
-		},
+    socialProviders: {
+      discord: {
+        clientId: process.env.DISCORD_CLIENT_ID!,
+        clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+        // Better Auth force `prompt=none` par défaut sur Discord → tout user non
+        // déjà autorisé est rejeté (consent_required) avant le callback. `consent`
+        // affiche l'écran d'autorisation et marche pour tout le monde.
+        prompt: "consent",
+      },
+      ...googleProvider,
+    },
 
-		rateLimit: {
-			...commonAuthOptions.rateLimit,
-			customRules: {
-				"/forget-password": { max: 3, window: 60 },
-				"/sign-in/email": { max: 10, window: 60 },
-				"/sign-up/email": { max: 5, window: 60 },
-			},
-		},
+    rateLimit: {
+      ...commonAuthOptions.rateLimit,
+      customRules: {
+        "/forget-password": { max: 3, window: 60 },
+        "/sign-in/email": { max: 10, window: 60 },
+        "/sign-up/email": { max: 5, window: 60 },
+      },
+    },
 
-		account: {
-			...commonAuthOptions.account,
-			accountLinking: {
-				enabled: true,
-				trustedProviders: ["google", "discord"],
-			},
-		},
+    account: {
+      ...commonAuthOptions.account,
+      accountLinking: {
+        enabled: true,
+        trustedProviders: ["google", "discord"],
+      },
+    },
 
-		advanced: {
-			...commonAuthOptions.advanced,
-			database: {
-				generateId: () => crypto.randomUUID(),
-			},
-		},
+    advanced: {
+      ...commonAuthOptions.advanced,
+      database: {
+        generateId: () => crypto.randomUUID(),
+      },
+    },
 
-		databaseHooks: {
-			session: {
-				create: {
-					after: async (session) => {
-						const ip = session.ipAddress || "unknown";
-						const ipInfo = await getIPIntelligence(ip);
+    databaseHooks: {
+      session: {
+        create: {
+          after: async (session) => {
+            const ip = session.ipAddress || "unknown";
+            const ipInfo = await getIPIntelligence(ip);
 
-						await logAudit(
-							session.userId,
-							"login",
-							{
-								geo: ipInfo
-									? {
-											city: ipInfo.city,
-											country: ipInfo.country,
-											privacy: ipInfo.privacy,
-											org: ipInfo.org,
-										}
-									: undefined,
-							},
-							{ ipAddress: ip }
-						);
-					},
-					before: async (session) => {
-						try {
-							const { data: profile } = await supabaseAdmin
-								.from("profiles")
-								.select("role")
-								.eq("id", session.userId)
-								.maybeSingle();
+            await logAudit(
+              session.userId,
+              "login",
+              {
+                geo: ipInfo
+                  ? {
+                      city: ipInfo.city,
+                      country: ipInfo.country,
+                      privacy: ipInfo.privacy,
+                      org: ipInfo.org,
+                    }
+                  : undefined,
+              },
+              { ipAddress: ip },
+            );
+          },
+          before: async (session) => {
+            try {
+              const { data: profile } = await supabaseAdmin
+                .from("profiles")
+                .select("role")
+                .eq("id", session.userId)
+                .maybeSingle();
 
-							if (profile && ADMIN_ROLES.includes(profile.role as (typeof ADMIN_ROLES)[number])) {
-								const tenYears = new Date();
-								tenYears.setFullYear(tenYears.getFullYear() + 10);
-								return { data: { ...session, expiresAt: tenYears } };
-							}
-						} catch {
-							// ignore
-						}
-						return { data: session };
-					},
-				},
-			},
-			user: {
-				create: {
-					after: async (user, ctx) => {
-						await ensureUserProfile(user, supabaseAdmin);
+              if (profile && ADMIN_ROLES.includes(profile.role as (typeof ADMIN_ROLES)[number])) {
+                const tenYears = new Date();
+                tenYears.setFullYear(tenYears.getFullYear() + 10);
+                return { data: { ...session, expiresAt: tenYears } };
+              }
+            } catch {
+              // ignore
+            }
+            return { data: session };
+          },
+        },
+      },
+      user: {
+        create: {
+          after: async (user, ctx) => {
+            await ensureUserProfile(user, supabaseAdmin);
 
-						const ip = ctx?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-						const ipInfo = await getIPIntelligence(ip);
+            const ip = ctx?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+            const ipInfo = await getIPIntelligence(ip);
 
-						await logAudit(
-							user.id,
-							"signup",
-							{
-								email: user.email,
-								name: user.name,
-								geo: ipInfo
-									? {
-											city: ipInfo.city,
-											country: ipInfo.country,
-											privacy: ipInfo.privacy,
-										}
-									: undefined,
-							},
-							{ ipAddress: ip }
-						);
-					},
-				},
-			},
-		},
+            await logAudit(
+              user.id,
+              "signup",
+              {
+                email: user.email,
+                name: user.name,
+                geo: ipInfo
+                  ? {
+                      city: ipInfo.city,
+                      country: ipInfo.country,
+                      privacy: ipInfo.privacy,
+                    }
+                  : undefined,
+              },
+              { ipAddress: ip },
+            );
+          },
+        },
+      },
+    },
 
-		plugins: [
-			agentAuth({
-				providerName: "Azalée",
-				providerDescription: "Azalée project and wiki APIs for AI agents.",
-				modes: ["delegated", "autonomous"],
-				capabilities: [
-					{
-						name: "list_articles",
-						description: "List news and wiki articles from Azalée.",
-						input: {
-							type: "object",
-							properties: {
-								limit: { type: "integer", minimum: 1, maximum: 100 },
-							},
-						},
-					},
-					{
-						name: "get_article",
-						description: "Get the content of a specific news or wiki article.",
-						input: {
-							type: "object",
-							properties: {
-								slug: { type: "string" },
-							},
-							required: ["slug"],
-						},
-					},
-				],
-				async onExecute({ capability, arguments: args }) {
-					const supabase = createSupabaseServiceClient();
+    plugins: [
+      agentAuth({
+        providerName: "Azalée",
+        providerDescription: "Azalée project and wiki APIs for AI agents.",
+        modes: ["delegated", "autonomous"],
+        capabilities: [
+          {
+            name: "list_articles",
+            description: "List news and wiki articles from Azalée.",
+            input: {
+              type: "object",
+              properties: {
+                limit: { type: "integer", minimum: 1, maximum: 100 },
+              },
+            },
+          },
+          {
+            name: "get_article",
+            description: "Get the content of a specific news or wiki article.",
+            input: {
+              type: "object",
+              properties: {
+                slug: { type: "string" },
+              },
+              required: ["slug"],
+            },
+          },
+        ],
+        async onExecute({ capability, arguments: args }) {
+          const supabase = createSupabaseServiceClient();
 
-					switch (capability) {
-						case "list_articles": {
-							const limit = (args?.limit as number) || 20;
-							const { data, error } = await supabase
-								.from("articles")
-								.select("id, title, slug, excerpt, status, published_at")
-								.eq("app", "azalee")
-								.eq("status", "published")
-								.order("published_at", { ascending: false })
-								.limit(limit);
-							if (error) throw new Error(error.message);
-							return data;
-						}
-						case "get_article": {
-							const { data, error } = await supabase
-								.from("articles")
-								.select("id, title, slug, content_html, published_at")
-								.eq("app", "azalee")
-								.eq("slug", args?.slug as string)
-								.maybeSingle();
-							if (error) throw new Error(error.message);
-							if (!data) throw new Error("Article not found");
-							return data;
-						}
-						default:
-							throw new Error(`Unsupported capability: ${capability}`);
-					}
-				},
-			}),
-			deuxFacteurs("Azalée"),
-			bearer(),
-			nextCookies(),
-		],
-	});
+          switch (capability) {
+            case "list_articles": {
+              const limit = (args?.limit as number) || 20;
+              const { data, error } = await supabase
+                .from("articles")
+                .select("id, title, slug, excerpt, status, published_at")
+                .eq("app", "azalee")
+                .eq("status", "published")
+                .order("published_at", { ascending: false })
+                .limit(limit);
+              if (error) throw new Error(error.message);
+              return data;
+            }
+            case "get_article": {
+              const { data, error } = await supabase
+                .from("articles")
+                .select("id, title, slug, content_html, published_at")
+                .eq("app", "azalee")
+                .eq("slug", args?.slug as string)
+                .maybeSingle();
+              if (error) throw new Error(error.message);
+              if (!data) throw new Error("Article not found");
+              return data;
+            }
+            default:
+              throw new Error(`Unsupported capability: ${capability}`);
+          }
+        },
+      }),
+      deuxFacteurs("Azalée"),
+      bearer(),
+      nextCookies(),
+    ],
+  });
 }
 
 type Auth = ReturnType<typeof createAuth>;
 
 function createAuthMock(): Auth {
-	const noSession = async () => null;
-	return {
-		$ERROR_CODES: {} as never,
-		$context: undefined as never,
-		api: { getSession: noSession },
-		handler: async () => new Response(null, { status: 503 }),
-		options: {} as never,
-	} as unknown as Auth;
+  const noSession = async () => null;
+  return {
+    $ERROR_CODES: {} as never,
+    $context: undefined as never,
+    api: { getSession: noSession },
+    handler: async () => new Response(null, { status: 503 }),
+    options: {} as never,
+  } as unknown as Auth;
 }
 
 let _auth: Auth;
 try {
-	_auth = createAuth();
+  _auth = createAuth();
 } catch (error) {
-	console.error(
-		"[auth] betterAuth() init failed — falling back to mock:",
-		error instanceof Error ? error.message : String(error)
-	);
-	_auth = createAuthMock();
+  console.error(
+    "[auth] betterAuth() init failed — falling back to mock:",
+    error instanceof Error ? error.message : String(error),
+  );
+  _auth = createAuthMock();
 }
 
 export const auth: Auth = _auth;

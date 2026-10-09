@@ -10,13 +10,13 @@ import { Pool } from "pg";
 // Miroir de apps/website/src/lib/db/pg.ts (même pattern, adapté azalee).
 
 export const getDatabaseURL = (): string => {
-	const url = process.env.DATABASE_URL;
-	if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
-		throw new Error(
-			"DATABASE_URL absent ou corrompu : une chaîne de connexion Postgres valide est requise."
-		);
-	}
-	return url;
+  const url = process.env.DATABASE_URL;
+  if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
+    throw new Error(
+      "DATABASE_URL absent ou corrompu : une chaîne de connexion Postgres valide est requise.",
+    );
+  }
+  return url;
 };
 
 let _pgPool: Pool | null = null;
@@ -26,14 +26,14 @@ const poolMax = configuredPoolMax > 0 ? Math.min(configuredPoolMax, 4) : 4;
 
 /** Pool Postgres direct partagé (singleton lazy) — réutiliser ce pool, ne jamais en créer un par requête. */
 export function getPgPool(): Pool {
-	if (!_pgPool) {
-		_pgPool = new Pool({
-			connectionString: getDatabaseURL(),
-			application_name: "azalee-web",
-			connectionTimeoutMillis: 5_000,
-			idleTimeoutMillis: 30_000,
-			max: poolMax,
-		});
-	}
-	return _pgPool;
+  if (!_pgPool) {
+    _pgPool = new Pool({
+      connectionString: getDatabaseURL(),
+      application_name: "azalee-web",
+      connectionTimeoutMillis: 5_000,
+      idleTimeoutMillis: 30_000,
+      max: poolMax,
+    });
+  }
+  return _pgPool;
 }

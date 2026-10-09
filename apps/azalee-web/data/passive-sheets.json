@@ -2575,13 +2575,6 @@
       "managerLegendary": "6%"
     }
   ],
-  "playstyles": [
-    "Breach",
-    "Tension",
-    "Counter",
-    "Bond",
-    "Rough Play",
-    "Justice"
-  ],
+  "playstyles": ["Breach", "Tension", "Counter", "Bond", "Rough Play", "Justice"],
   "extractedAt": "2026-02-08T05:24:52.461Z"
 }

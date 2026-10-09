@@ -37,10 +37,7 @@
     "pricing": "アイテム課金型(基本プレイ無料)",
     "pricingFr": "Free-to-play, achats intégrés (基本プレイ無料 — jeu de base gratuit)",
     "releaseDate": "2026/6/9(火)",
-    "developers": [
-      "LEVEL5 Inc.",
-      "Aiming Inc."
-    ],
+    "developers": ["LEVEL5 Inc.", "Aiming Inc."],
     "copyright": "©LEVEL5 Inc. ©Aiming Inc.",
     "collabCopyright": "©2026 adidas Japan K.K. ©Japan Football Association"
   },
@@ -139,14 +136,8 @@
         "tagFr": "[Équipe Nationale 2026]",
         "nameJa": "円堂 守",
         "nameFr": "Mark Evans (Mamoru Endou)",
-        "skillsJa": [
-          "サムライショット",
-          "サムライフェイント"
-        ],
-        "skillsFr": [
-          "Samurai Shot",
-          "Samurai Feint"
-        ],
+        "skillsJa": ["サムライショット", "サムライフェイント"],
+        "skillsFr": ["Samurai Shot", "Samurai Feint"],
         "image": "/inazuma-cross/sb-chara-endo.webp",
         "icon": "/inazuma-cross/sb-icon-endo.webp",
         "hissatsuImages": [
@@ -160,14 +151,8 @@
         "tagFr": "[Équipe Nationale 2026]",
         "nameJa": "鬼道 有人",
         "nameFr": "Jude Sharp (Yuuto Kidou)",
-        "skillsJa": [
-          "サムライペンギン2号",
-          "ブルーサイクロン"
-        ],
-        "skillsFr": [
-          "Samurai Penguin n°2",
-          "Blue Cyclone"
-        ],
+        "skillsJa": ["サムライペンギン2号", "ブルーサイクロン"],
+        "skillsFr": ["Samurai Penguin n°2", "Blue Cyclone"],
         "image": "/inazuma-cross/sb-chara-kido.webp",
         "icon": "/inazuma-cross/sb-icon-kido.webp",
         "hissatsuImages": [
@@ -383,14 +368,8 @@
       "/inazuma-cross/sb-slide2.webp",
       "/inazuma-cross/sb-slide3.webp"
     ],
-    "samuraiBlueWear": [
-      "/inazuma-cross/sb-wear-away.webp",
-      "/inazuma-cross/sb-wear-gk.webp"
-    ],
-    "samuraiBlueAds": [
-      "/inazuma-cross/sb-ad-image1.webp",
-      "/inazuma-cross/sb-ad-image2.webp"
-    ],
+    "samuraiBlueWear": ["/inazuma-cross/sb-wear-away.webp", "/inazuma-cross/sb-wear-gk.webp"],
+    "samuraiBlueAds": ["/inazuma-cross/sb-ad-image1.webp", "/inazuma-cross/sb-ad-image2.webp"],
     "samuraiBlueAdChars": [
       "/inazuma-cross/sb-ad-chara1.webp",
       "/inazuma-cross/sb-ad-chara2.webp",

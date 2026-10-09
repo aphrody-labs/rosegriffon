@@ -112,17 +112,17 @@ Les imports, génération d’index, envoi de notifications, publication planifi
 
 ## Matrice de déploiement
 
-| Élément | Vercel | Self-host | Portable |
-|---|---|---|---|
-| Web | Next.js Node runtime | Next standalone dans Docker/systemd | Oui |
-| DB | PostgreSQL managé | PostgreSQL Docker ou externe | Oui |
-| Auth | Better Auth + DB | Better Auth + DB | Oui |
-| Fichiers | S3/Supabase Storage | S3/MinIO/Supabase | Oui |
-| Jobs | Cron Vercel + worker externe | worker Docker/systemd | Via `JobQueue` |
-| Cache | Redis/Upstash ou DB | Valkey/Redis ou DB | Via `Cache` |
-| CDN | Vercel/CDN externe | nginx/CDN externe | URL dérivée de config |
-| Logs | stdout + Sentry | stdout/journald + Sentry | Oui |
-| Secrets | variables Vercel | `.env` injecté/secrets manager | Oui |
+| Élément  | Vercel                       | Self-host                           | Portable              |
+| -------- | ---------------------------- | ----------------------------------- | --------------------- |
+| Web      | Next.js Node runtime         | Next standalone dans Docker/systemd | Oui                   |
+| DB       | PostgreSQL managé            | PostgreSQL Docker ou externe        | Oui                   |
+| Auth     | Better Auth + DB             | Better Auth + DB                    | Oui                   |
+| Fichiers | S3/Supabase Storage          | S3/MinIO/Supabase                   | Oui                   |
+| Jobs     | Cron Vercel + worker externe | worker Docker/systemd               | Via `JobQueue`        |
+| Cache    | Redis/Upstash ou DB          | Valkey/Redis ou DB                  | Via `Cache`           |
+| CDN      | Vercel/CDN externe           | nginx/CDN externe                   | URL dérivée de config |
+| Logs     | stdout + Sentry              | stdout/journald + Sentry            | Oui                   |
+| Secrets  | variables Vercel             | `.env` injecté/secrets manager      | Oui                   |
 
 ## Plan d’exécution par phases
 

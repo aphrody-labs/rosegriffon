@@ -10,5 +10,5 @@ import { redirect } from "next/navigation";
  * principal ; ce chemin est conservé pour ne pas casser les liens existants.
  */
 export default function DashboardSettingsPage() {
-	redirect("/settings");
+  redirect("/settings");
 }

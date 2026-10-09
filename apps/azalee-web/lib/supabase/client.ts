@@ -9,4 +9,4 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * For authenticated requests, use the SupabaseProvider context instead.
  */
 export const createClient = (): SupabaseClient =>
-	createSupabaseBrowserClient() as unknown as SupabaseClient;
+  createSupabaseBrowserClient() as unknown as SupabaseClient;

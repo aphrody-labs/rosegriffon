@@ -933,9 +933,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "era_mismatch",
-      "problems": [
-        "ERA: db=OG (Inazuma Eleven 2) vs zukan=Modern (Victory Road)"
-      ],
+      "problems": ["ERA: db=OG (Inazuma Eleven 2) vs zukan=Modern (Victory Road)"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/h/0/h0bicnax9q8.png"
     },
     {
@@ -2220,9 +2218,7 @@
       "statsCorrelation": 0.9910714285714286,
       "severity": "medium",
       "category": "era_mismatch",
-      "problems": [
-        "ERA: db=OG (Inazuma Eleven 3) vs zukan=Modern (Victory Road)"
-      ],
+      "problems": ["ERA: db=OG (Inazuma Eleven 3) vs zukan=Modern (Victory Road)"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/q/x/qx3jjjzojqs.png"
     },
     {
@@ -2247,9 +2243,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "era_mismatch",
-      "problems": [
-        "ERA: db=OG (Inazuma Eleven 3) vs zukan=Modern (Victory Road)"
-      ],
+      "problems": ["ERA: db=OG (Inazuma Eleven 3) vs zukan=Modern (Victory Road)"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/q/c/qcwdxymtqzu.png"
     },
     {
@@ -2402,9 +2396,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04000080_5300, c05028130, c06037460"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04000080_5300, c05028130, c06037460"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/o/o/ooxd-ldeoym.png"
     },
     {
@@ -2454,9 +2446,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04000080, c05028130, c06037460"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04000080, c05028130, c06037460"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/o/o/ooxd-ldeoym.png"
     },
     {
@@ -2931,9 +2921,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04001420_5000, c04001420_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04001420_5000, c04001420_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/t/d/tdvsh-o1ffc.png"
     },
     {
@@ -3408,9 +3396,7 @@
       "statsCorrelation": 0.9910714285714286,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04002300_5000, c04002300_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04002300_5000, c04002300_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/3/h/3huibjiupd8.png"
     },
     {
@@ -3585,9 +3571,7 @@
       "statsCorrelation": 0.9910714285714286,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04002500_5000, c04002500_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04002500_5000, c04002500_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/l/3/l3z-inytjis.png"
     },
     {
@@ -4012,9 +3996,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04003220_5000, c04003220_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04003220_5000, c04003220_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/f/6/f657-kzt2z8.png"
     },
     {
@@ -4089,9 +4071,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04003230_5000, c04003230_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04003230_5000, c04003230_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/u/s/usiatb_pbqu.png"
     },
     {
@@ -4266,9 +4246,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04003260_5000, c04003260_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04003260_5000, c04003260_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/9/0/90dsdg-3g_m.png"
     },
     {
@@ -4343,9 +4321,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04003290_5000, c04003290_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04003290_5000, c04003290_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/j/e/jeikyt9vhak.png"
     },
     {
@@ -4470,9 +4446,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04003500_5000, c04003500_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04003500_5000, c04003500_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/1/g/1g0broofgtu.png"
     },
     {
@@ -4572,9 +4546,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04003660_5000, c04003660_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04003660_5000, c04003660_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/p/i/pieiosni45u.png"
     },
     {
@@ -4649,9 +4621,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04003690_5000, c04003690_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04003690_5000, c04003690_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/7/i/7i7q_hkqfg8.png"
     },
     {
@@ -4726,9 +4696,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04003700_5000, c04003700_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04003700_5000, c04003700_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/v/g/vggdlgtj-qc.png"
     },
     {
@@ -4803,9 +4771,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04003710_5000, c04003710_5100"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04003710_5000, c04003710_5100"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/k/i/kir8iflztz0.png"
     },
     {
@@ -5667,9 +5633,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05021820_5000, c05028420_5000"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05021820_5000, c05028420_5000"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/4/w/4wxullzb3hm.png"
     },
     {
@@ -5794,9 +5758,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05021850_5000, c05028450_5000"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05021850_5000, c05028450_5000"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/6/3/632ylsltybm.png"
     },
     {
@@ -6146,9 +6108,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05021940_5000, c05028540_5000"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05021940_5000, c05028540_5000"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/i/u/iuv7ohtqxue.png"
     },
     {
@@ -6948,9 +6908,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05023300_5000, c05028620, c06039340"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05023300_5000, c05028620, c06039340"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/w/p/wp98eqxvzq0.png"
     },
     {
@@ -6975,9 +6933,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05023300, c05028620, c06039340"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05023300, c05028620, c06039340"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/w/p/wp98eqxvzq0.png"
     },
     {
@@ -8301,9 +8257,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04000080, c04000080_5300, c06037460"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04000080, c04000080_5300, c06037460"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/o/o/ooxd-ldeoym.png"
     },
     {
@@ -8484,9 +8438,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05021830_5000, c05028430_5000"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05021830_5000, c05028430_5000"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/j/-/j-api0_7a0k.png"
     },
     {
@@ -8611,9 +8563,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05021870_5000, c05028470_5000"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05021870_5000, c05028470_5000"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/r/w/rwkm1wyfqsu.png"
     },
     {
@@ -8713,9 +8663,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05021900_5000, c05028500_5000"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05021900_5000, c05028500_5000"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/a/a/aaxszd0oby0.png"
     },
     {
@@ -8765,9 +8713,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05021910_5000, c05028510_5000"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05021910_5000, c05028510_5000"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/x/y/xyaze8s0sbc.png"
     },
     {
@@ -8817,9 +8763,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05021920_5000, c05028520_5000"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05021920_5000, c05028520_5000"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/r/d/rdjgnhn8zhs.png"
     },
     {
@@ -8919,9 +8863,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05021950_5000, c05028550_5000"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05021950_5000, c05028550_5000"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/t/8/t8kaj41qcns.png"
     },
     {
@@ -9021,9 +8963,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05023300, c05023300_5000, c06039340"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05023300, c05023300_5000, c06039340"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/w/p/wp98eqxvzq0.png"
     },
     {
@@ -9598,9 +9538,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c04000080, c04000080_5300, c05028130"
-      ],
+      "problems": ["DUPLICATE: hash shared with c04000080, c04000080_5300, c05028130"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/o/o/ooxd-ldeoym.png"
     },
     {
@@ -9934,9 +9872,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c05023300, c05023300_5000, c05028620"
-      ],
+      "problems": ["DUPLICATE: hash shared with c05023300, c05023300_5000, c05028620"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/w/p/wp98eqxvzq0.png"
     },
     {
@@ -10136,9 +10072,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "duplicate_hash",
-      "problems": [
-        "DUPLICATE: hash shared with c01000100, c05024710, c06039320, c06039330"
-      ],
+      "problems": ["DUPLICATE: hash shared with c01000100, c05024710, c06039320, c06039330"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/5/h/5h_rz2fvtjm.png"
     },
     {
@@ -11086,9 +11020,7 @@
       "statsCorrelation": 1,
       "severity": "medium",
       "category": "era_mismatch",
-      "problems": [
-        "ERA: db=Modern (Victory Road) vs zukan=OG (Inazuma Eleven 2)"
-      ],
+      "problems": ["ERA: db=Modern (Victory Road) vs zukan=OG (Inazuma Eleven 2)"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/s/x/sxyalpxpni8.png"
     },
     {
@@ -11269,9 +11201,7 @@
       "statsCorrelation": 0.9910714285714286,
       "severity": "medium",
       "category": "era_mismatch",
-      "problems": [
-        "ERA: db=Modern (Victory Road) vs zukan=OG (Inazuma Eleven 3)"
-      ],
+      "problems": ["ERA: db=Modern (Victory Road) vs zukan=OG (Inazuma Eleven 3)"],
       "imageUrl": "https://dxi4wb638ujep.cloudfront.net/1/k/k/x/kxu09blm2_m.png"
     },
     {

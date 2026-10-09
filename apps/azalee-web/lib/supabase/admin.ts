@@ -4,5 +4,5 @@ import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export function createAdminClient(): SupabaseClient {
-	return createSupabaseServiceClient() as unknown as SupabaseClient;
+  return createSupabaseServiceClient() as unknown as SupabaseClient;
 }

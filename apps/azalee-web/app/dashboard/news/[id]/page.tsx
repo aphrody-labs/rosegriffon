@@ -3,23 +3,23 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { NewsEditorLoader } from "../NewsEditorLoader";
 
 interface EditNewsPageProps {
-	params: Promise<{ id: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default async function EditNewsPage({ params }: EditNewsPageProps) {
-	const { id } = await params;
-	const supabase = createAdminClient();
+  const { id } = await params;
+  const supabase = createAdminClient();
 
-	const { data: news, error } = await supabase
-		.from("articles")
-		.select("*")
-		.eq("id", id)
-		.eq("app", "azalee")
-		.maybeSingle();
+  const { data: news, error } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("id", id)
+    .eq("app", "azalee")
+    .maybeSingle();
 
-	if (error || !news) {
-		notFound();
-	}
+  if (error || !news) {
+    notFound();
+  }
 
-	return <NewsEditorLoader initialData={news} />;
+  return <NewsEditorLoader initialData={news} />;
 }

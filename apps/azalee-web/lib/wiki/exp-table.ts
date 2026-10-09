@@ -26,8 +26,8 @@ import { buildExpTableData, type ExpLevelEntry, type ExpTableData } from "./exp-
 
 /** Ligne brute `inagle_exp_table` telle que stockée dans le miroir. */
 interface ExpTableRow {
-	level: number | null;
-	need_exp: number | null;
+  level: number | null;
+  need_exp: number | null;
 }
 
 /**
@@ -37,20 +37,20 @@ interface ExpTableRow {
  * état vide honnête plutôt qu'une courbe fabriquée.
  */
 export async function getExpTable(): Promise<ExpTableData> {
-	const supabase = await createClient();
-	const { data, error } = await supabase.from("inagle_exp_table").select("level, need_exp");
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("inagle_exp_table").select("level, need_exp");
 
-	if (error || !data) {
-		return buildExpTableData([]);
-	}
+  if (error || !data) {
+    return buildExpTableData([]);
+  }
 
-	const entries: ExpLevelEntry[] = [];
-	for (const row of data as ExpTableRow[]) {
-		if (typeof row.level !== "number" || typeof row.need_exp !== "number") {
-			continue;
-		}
-		entries.push({ level: row.level, needExp: row.need_exp });
-	}
+  const entries: ExpLevelEntry[] = [];
+  for (const row of data as ExpTableRow[]) {
+    if (typeof row.level !== "number" || typeof row.need_exp !== "number") {
+      continue;
+    }
+    entries.push({ level: row.level, needExp: row.need_exp });
+  }
 
-	return buildExpTableData(entries);
+  return buildExpTableData(entries);
 }
