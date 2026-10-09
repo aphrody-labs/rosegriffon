@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/assets",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": false,
   "description": "Shared static assets for Rose Griffon apps",
   "type": "module",
@@ -13,7 +13,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "engines": {
-    "bun": ">=1.4.2"
+    "bun": ">=1.4.3"
   },
   "license": "UNLICENSED",
   "files": [

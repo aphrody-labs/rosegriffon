@@ -1,5 +1,5 @@
 // Contrat Achilléa — FICHIER GÉNÉRÉ, ne pas éditer à la main.
-// Source : @rosegriffon/achillea-types@1.0.2
+// Source : @rosegriffon/achillea-types@1.0.3
 // Régénérer : bun --filter @rosegriffon/achillea-contract generate
 
 import Foundation

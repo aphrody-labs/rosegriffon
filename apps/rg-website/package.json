@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/website",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": false,
   "license": "UNLICENSED",
   "files": [
@@ -227,6 +227,6 @@
     "vitest": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.2"
+    "bun": ">=1.4.3"
   }
 }

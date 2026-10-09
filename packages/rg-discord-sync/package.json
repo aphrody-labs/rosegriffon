@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/discord-sync",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "type": "module",
   "main": "./src/index.ts",
@@ -15,7 +15,7 @@
     "discord.js": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.2"
+    "bun": ">=1.4.3"
   },
   "license": "UNLICENSED",
   "files": [
