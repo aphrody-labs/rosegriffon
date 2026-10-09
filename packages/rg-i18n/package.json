@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/i18n",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": false,
   "description": "Noyau i18n pur Rose Griffon : locales BCP-47, négociation, replis et formatage Intl",
   "type": "module",
@@ -18,7 +18,7 @@
     "typecheck": "bun --bun tsc --noEmit"
   },
   "engines": {
-    "bun": ">=1.4.3"
+    "bun": ">=1.4.3-aphrody.4"
   },
   "license": "UNLICENSED",
   "files": [

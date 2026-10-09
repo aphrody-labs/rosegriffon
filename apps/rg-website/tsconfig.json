@@ -17,8 +17,6 @@
       "@rosegriffon/types/*": ["../../../packages/rg/types/src/*"],
       "@rosegriffon/auth": ["../../../packages/rg/auth/src/index.ts"],
       "@rosegriffon/auth/*": ["../../../packages/rg/auth/src/*"],
-      "@rosegriffon/ui": ["../../../design/aphrody-m3/packages/rg-ui/src/index.ts"],
-      "@rosegriffon/ui/*": ["../../../design/aphrody-m3/packages/rg-ui/src/*"],
       "@rosegriffon/app-shell": ["../../../packages/rg/app-shell/src/index.ts"],
       "@rosegriffon/app-shell/*": ["../../../packages/rg/app-shell/src/*"]
     }

@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/auth",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": false,
   "description": "Shared authentication logic and guards for Rose Griffon apps",
   "type": "module",
@@ -43,7 +43,7 @@
     "vitest": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.3"
+    "bun": ">=1.4.3-aphrody.4"
   },
   "license": "UNLICENSED",
   "files": [

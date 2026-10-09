@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/config",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": false,
   "description": "Configs partagées : TypeScript, Oxc et Tailwind preset",
   "repository": {
@@ -14,6 +14,7 @@
     "eslint-nextjs.mjs",
     "oxlintrc.json",
     "tailwind-preset.ts",
+    "rg-m3.json",
     "tsconfig-base.json",
     "tsconfig-bun.json",
     "tsconfig-nextjs.json",
@@ -36,7 +37,7 @@
     "typecheck": "tsc --noEmit"
   },
   "engines": {
-    "bun": ">=1.4.3"
+    "bun": ">=1.4.3-aphrody.4"
   },
   "license": "UNLICENSED"
 }

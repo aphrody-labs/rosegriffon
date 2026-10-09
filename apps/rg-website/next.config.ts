@@ -1,4 +1,5 @@
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { withBun } from "@aphrody/next-bun";
 import type { NextConfig } from "next";
 import path from "node:path";
 
@@ -21,6 +22,16 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: buildRoot,
   turbopack: {
     root: buildRoot,
+  },
+  webpack(config) {
+    config.resolve ??= {};
+    config.resolve.extensionAlias = {
+      ".js": [".js", ".ts", ".tsx"],
+      ".mjs": [".mjs", ".mts"],
+      ".cjs": [".cjs", ".cts"],
+      ...config.resolve.extensionAlias,
+    };
+    return config;
   },
 
   compress: false,
@@ -98,7 +109,6 @@ const nextConfig: NextConfig = {
       "react-icons",
       "recharts",
       "cmdk",
-      "vaul",
       "embla-carousel-react",
       "input-otp",
       "react-day-picker",
@@ -453,4 +463,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default bundleAnalyzer(nextConfig);
+export default withBun(bundleAnalyzer(nextConfig), {
+  projectDir: process.cwd(),
+  bundler: "turbopack",
+});

@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/db",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": false,
   "description": "Accès PostgreSQL partagé, façades SQL et types Database générés (site + bot)",
   "type": "module",
@@ -48,7 +48,7 @@
     "vitest": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.3"
+    "bun": ">=1.4.3-aphrody.4"
   },
   "license": "UNLICENSED",
   "files": [

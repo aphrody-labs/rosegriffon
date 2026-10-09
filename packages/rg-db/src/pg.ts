@@ -1,4 +1,5 @@
 import { Client, Pool } from "pg";
+import { PostgresDialect } from "kysely";
 
 export type { PoolClient, QueryResultRow } from "pg";
 
@@ -13,7 +14,9 @@ export interface PgPoolOptions {
 export function getDatabaseURL(): string {
 	const url = process.env.DATABASE_URL;
 	if (!url || url.startsWith("eyJ2Ijo") || url === "undefined" || url === "null") {
-		throw new Error("DATABASE_URL absent ou corrompu : une chaîne Postgres valide est requise.");
+		throw new Error(
+			"DATABASE_URL absent ou corrompu : une chaîne Postgres valide est requise.",
+		);
 	}
 	return url;
 }
@@ -26,7 +29,10 @@ export function isDatabaseConfigured(): boolean {
 let sharedPool: Pool | null = null;
 
 /** Crée un pool PostgreSQL isolé pour les CLI/imports qui fournissent leur URL. */
-export function createPgPool(connectionString = getDatabaseURL(), options: PgPoolOptions = {}): Pool {
+export function createPgPool(
+	connectionString = getDatabaseURL(),
+	options: PgPoolOptions = {},
+): Pool {
 	const configuredMax = Number.parseInt(process.env.DATABASE_POOL_MAX ?? "", 10);
 	const max = options.max ?? (configuredMax > 0 ? Math.min(configuredMax, 4) : 4);
 	const pool = new Pool({
@@ -39,7 +45,9 @@ export function createPgPool(connectionString = getDatabaseURL(), options: PgPoo
 		options: options.searchPath ? `-c search_path=${options.searchPath}` : undefined,
 		ssl: options.ssl,
 	});
-	pool.on("error", (error) => console.error("[pg] Erreur inattendue sur le pool partagé :", error));
+	pool.on("error", (error) =>
+		console.error("[pg] Erreur inattendue sur le pool partagé :", error),
+	);
 	return pool;
 }
 
@@ -50,7 +58,9 @@ export function createPgClient(connectionString = getDatabaseURL()): Client {
 		connectionString,
 		connectionTimeoutMillis: 5_000,
 	});
-	client.on("error", (error) => console.error("[pg] Erreur inattendue sur la connexion :", error));
+	client.on("error", (error) =>
+		console.error("[pg] Erreur inattendue sur la connexion :", error),
+	);
 	return client;
 }
 
@@ -60,6 +70,10 @@ export function getPgPool(options: PgPoolOptions = {}): Pool {
 		sharedPool = createPgPool(getDatabaseURL(), options);
 	}
 	return sharedPool;
+}
+
+export function createPgDialect(options: PgPoolOptions = {}): PostgresDialect {
+	return new PostgresDialect({ pool: async () => getPgPool(options) });
 }
 
 export function getPgPoolOrNull(): Pool | null {
