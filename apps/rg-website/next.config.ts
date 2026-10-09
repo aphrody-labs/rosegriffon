@@ -87,6 +87,7 @@ const nextConfig: NextConfig = {
   ],
 
   experimental: {
+    cpus: 2,
     /**
      * Production runs from an immutable release (/srv/rg/releases/<id>,
      * ProtectSystem=strict): regenerated ISR pages must not be written back
