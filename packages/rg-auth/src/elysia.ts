@@ -5,6 +5,9 @@ import { admin, jwt, openAPI } from "better-auth/plugins";
 import nodemailer from "nodemailer";
 import { getPgPool } from "@rosegriffon/db/pg";
 import { commonAuthOptions } from "./core";
+import { resolveAuthSecret, resolveTrustedOrigins } from "./runtime-config";
+
+const secret = resolveAuthSecret();
 
 const baseURL =
 	process.env.BETTER_AUTH_API_URL ||
@@ -50,9 +53,8 @@ export const elysiaAuth = betterAuth({
 	database: getPgPool({ applicationName: "rosegriffon-better-auth" }),
 	baseURL,
 	basePath: "/v1/auth",
-	secret:
-		process.env.BETTER_AUTH_SECRET ||
-		"build-placeholder-secret-not-used-at-runtime-only-prevents-prerender-throw",
+	secret,
+	trustedOrigins: resolveTrustedOrigins(baseURL),
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: true,

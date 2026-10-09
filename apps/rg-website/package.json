@@ -60,7 +60,7 @@
     "@aphrody/next-bun": "catalog:",
     "@aphrody/paths": "catalog:",
     "@base-ui/react": "catalog:",
-    "@better-auth/passkey": "1.7.6",
+    "@better-auth/passkey": "catalog:",
     "@colyseus/sdk": "^0.18.4",
     "@dnd-kit/core": "catalog:",
     "@dnd-kit/sortable": "catalog:",

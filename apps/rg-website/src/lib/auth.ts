@@ -30,9 +30,7 @@ function detectCreatorScopes(scope: string | null | undefined): boolean {
 export const auth = createRoseGriffonAuth({
   database: { dialect: createPgDialect(), type: "postgres" },
   baseURL: getBetterAuthURL(),
-  secret:
-    process.env.BETTER_AUTH_SECRET ||
-    "build-placeholder-secret-not-used-at-runtime-only-prevents-prerender-throw",
+  secret: process.env.BETTER_AUTH_SECRET,
   sendEmail,
   executerSql: (query, parameters) => getPgPool().query(query, parameters as unknown[]),
   nextCookiesPlugin: nextCookies(),
