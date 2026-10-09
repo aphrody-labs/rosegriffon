@@ -1,7 +1,7 @@
 {
   "name": "@rosegriffon/assets",
-  "version": "1.0.3",
-  "private": true,
+  "version": "1.0.4",
+  "private": false,
   "description": "Shared static assets for Rose Griffon apps",
   "type": "module",
   "exports": {
@@ -14,5 +14,12 @@
   },
   "engines": {
     "bun": ">=1.4.2"
-  }
+  },
+  "license": "UNLICENSED",
+  "files": [
+    "public",
+    "scripts",
+    "src",
+    "website-public.json"
+  ]
 }

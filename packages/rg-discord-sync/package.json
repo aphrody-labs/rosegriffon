@@ -1,7 +1,7 @@
 {
   "name": "@rosegriffon/discord-sync",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.1.1",
+  "private": false,
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -16,5 +16,14 @@
   },
   "engines": {
     "bun": ">=1.4.2"
+  },
+  "license": "UNLICENSED",
+  "files": [
+    "README.md",
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }

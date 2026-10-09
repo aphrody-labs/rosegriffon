@@ -1,7 +1,7 @@
 {
   "name": "@rosegriffon/auth",
-  "version": "1.0.3",
-  "private": true,
+  "version": "1.0.5",
+  "private": false,
   "description": "Shared authentication logic and guards for Rose Griffon apps",
   "type": "module",
   "main": "./src/index.ts",
@@ -19,7 +19,7 @@
   "scripts": {
     "type-check": "bun --bun tsc --noEmit",
     "test": "bun test src",
-    "lint": "bunx oxlint -c ../config/oxlintrc.json src",
+    "lint": "oxlint -c ../config/oxlintrc.json src",
     "typecheck": "bun --bun tsc --noEmit"
   },
   "dependencies": {
@@ -44,5 +44,12 @@
   },
   "engines": {
     "bun": ">=1.4.2"
-  }
+  },
+  "license": "UNLICENSED",
+  "files": [
+    "README.md",
+    "src",
+    "tsconfig.json",
+    "vitest.config.ts"
+  ]
 }

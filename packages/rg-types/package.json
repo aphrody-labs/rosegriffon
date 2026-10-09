@@ -1,7 +1,7 @@
 {
   "name": "@rosegriffon/types",
-  "version": "1.0.3",
-  "private": true,
+  "version": "1.0.4",
+  "private": false,
   "description": "Types métier partagés (roles, user, discord) — source unique de vérité bot/azalee/website",
   "type": "module",
   "exports": {
@@ -30,7 +30,7 @@
   },
   "scripts": {
     "test": "bun test src",
-    "lint": "bunx oxlint -c ../config/oxlintrc.json src",
+    "lint": "oxlint -c ../config/oxlintrc.json src",
     "type-check": "bun --bun tsc --noEmit",
     "typecheck": "bun --bun tsc --noEmit"
   },
@@ -47,5 +47,10 @@
   },
   "engines": {
     "bun": ">=1.4.2"
-  }
+  },
+  "license": "UNLICENSED",
+  "files": [
+    "src",
+    "tsconfig.json"
+  ]
 }

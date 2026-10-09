@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/azalee",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "private": false,
   "description": "Bibliothèque Bun du wiki Azalée (Inazuma Eleven: Victory Road) — accès PostgreSQL, index CPK, recherche et CLI.",
   "keywords": [
@@ -24,8 +24,15 @@
     "azalee": "./src/cli.ts"
   },
   "files": [
+    ".gitignore",
+    "README.md",
+    "scripts",
     "src",
-    "README.md"
+    "test",
+    "tests",
+    "tsconfig.build.json",
+    "tsconfig.json",
+    "types"
   ],
   "type": "module",
   "main": "./src/index.ts",
@@ -61,7 +68,8 @@
     "./package.json": "./package.json"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   },
   "scripts": {
     "build": "bun --bun tsc -p tsconfig.build.json",
@@ -69,8 +77,8 @@
     "compile": "bun scripts/build-standalone.ts",
     "serve": "bun src/cli.ts serve",
     "test": "bun test",
-    "lint": "bunx oxlint -A style -A pedantic -A restriction src",
-    "lint:fix": "bunx oxlint -A style -A pedantic -A restriction --fix src",
+    "lint": "oxlint -A style -A pedantic -A restriction src",
+    "lint:fix": "oxlint -A style -A pedantic -A restriction --fix src",
     "type-check": "bun --bun tsc --noEmit",
     "clean": "rm -rf dist *.tsbuildinfo",
     "prepublishOnly": "bun run build",

@@ -1,7 +1,7 @@
 {
   "name": "@rosegriffon/cdn",
-  "version": "1.0.1",
-  "private": true,
+  "version": "1.0.2",
+  "private": false,
   "type": "module",
   "main": "server.ts",
   "exports": {
@@ -24,5 +24,15 @@
   },
   "engines": {
     "bun": ">=1.4.2"
+  },
+  "license": "UNLICENSED",
+  "files": [
+    "server.test.ts",
+    "server.ts",
+    "tsconfig.json"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }

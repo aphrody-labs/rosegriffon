@@ -1,7 +1,7 @@
 {
   "name": "@rosegriffon/i18n",
-  "version": "1.0.1",
-  "private": true,
+  "version": "1.0.2",
+  "private": false,
   "description": "Noyau i18n pur Rose Griffon : locales BCP-47, négociation, replis et formatage Intl",
   "type": "module",
   "sideEffects": false,
@@ -12,12 +12,22 @@
     }
   },
   "scripts": {
-    "lint": "bunx oxlint -c ../config/oxlintrc.json -A style -A pedantic -A restriction src test",
+    "lint": "oxlint -c ../config/oxlintrc.json -A style -A pedantic -A restriction src test",
     "type-check": "bun --bun tsc --noEmit",
     "test": "bun test test",
     "typecheck": "bun --bun tsc --noEmit"
   },
   "engines": {
     "bun": ">=1.4.2"
+  },
+  "license": "UNLICENSED",
+  "files": [
+    "src",
+    "test",
+    "tsconfig.json"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }

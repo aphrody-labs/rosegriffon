@@ -1,7 +1,43 @@
 {
   "name": "@rosegriffon/website",
-  "version": "1.0.1",
-  "private": true,
+  "version": "1.0.2",
+  "private": false,
+  "license": "UNLICENSED",
+  "files": [
+    ".gitignore",
+    ".oxlintrc.json",
+    "README.md",
+    "bunfig.toml",
+    "cdn-loader.ts",
+    "components.json",
+    "data",
+    "eslint.config.mjs",
+    "happydom.ts",
+    "middleware.ts",
+    "next.config.ts",
+    "postcss.config.ts",
+    "public",
+    "scripts",
+    "sentry.client.config.ts",
+    "sentry.edge.config.ts",
+    "sentry.server.config.ts",
+    "sql",
+    "src",
+    "supabase",
+    "tests",
+    "tsconfig.json",
+    "vercel.json",
+    "vitest.config.ts",
+    "vitest.setup.ts",
+    "vitest.shims.d.ts"
+  ],
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "scripts": {
     "predev": "bun ../../../packages/rg/assets/scripts/sync-website-public.ts --to public",
     "dev": "bun run --bun next dev",
@@ -88,7 +124,7 @@
     "@rosegriffon/preferences": "workspace:*",
     "@rosegriffon/search": "workspace:*",
     "@rosegriffon/types": "workspace:*",
-    "@rosegriffon/ui": "workspace:*",
+    "@rosegriffon/ui": "catalog:",
     "@sentry/nextjs": "catalog:",
     "@spacedrive/primitives": "catalog:",
     "@spacedrive/tokens": "catalog:",
@@ -148,6 +184,7 @@
     "react-twitch-embed": "catalog:",
     "recharts": "catalog:",
     "schema-dts": "catalog:",
+    "server-only": "catalog:",
     "sonner": "catalog:",
     "stripe": "catalog:",
     "swr": "catalog:",
@@ -162,6 +199,7 @@
     "zustand": "catalog:"
   },
   "devDependencies": {
+    "@happy-dom/global-registrator": "catalog:",
     "@next/bundle-analyzer": "catalog:",
     "@rosegriffon/config": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
