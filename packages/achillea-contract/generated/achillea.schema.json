@@ -2,7 +2,7 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"$id": "https://achillea.rosegriffon.fr/contract/achillea.schema.json",
 	"title": "Contrat Achilléa",
-	"description": "Généré depuis @rosegriffon/achillea-types@1.0.1 — ne pas éditer à la main.",
+	"description": "Généré depuis @rosegriffon/achillea-types@1.0.2 — ne pas éditer à la main.",
 	"$defs": {
 		"AdminAuditRow": {
 			"type": "object",
