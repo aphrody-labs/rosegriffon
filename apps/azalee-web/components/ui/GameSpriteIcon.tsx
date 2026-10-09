@@ -4,17 +4,17 @@ import type { GameIconKey } from "@/config/game-icons";
 import { cn } from "@/lib/utils";
 
 interface GameSpriteIconProps extends React.HTMLAttributes<HTMLSpanElement> {
-	/** Cle de l'icone dans GAME_ICONS. */
-	name: GameIconKey;
-	/**
-	 * Hauteur cible en px (prioritaire). L'icone est mise a l'echelle pour
-	 * occuper cette hauteur quelle que soit la cellule native -> toutes les
-	 * icones rendent a la meme taille meme si les atlas ont des cellules de
-	 * dimensions differentes (256x200 vs 192x120).
-	 */
-	size?: number;
-	/** Echelle directe de la cellule native (ignore si `size` est fourni). */
-	scale?: number;
+  /** Cle de l'icone dans GAME_ICONS. */
+  name: GameIconKey;
+  /**
+   * Hauteur cible en px (prioritaire). L'icone est mise a l'echelle pour
+   * occuper cette hauteur quelle que soit la cellule native -> toutes les
+   * icones rendent a la meme taille meme si les atlas ont des cellules de
+   * dimensions differentes (256x200 vs 192x120).
+   */
+  size?: number;
+  /** Echelle directe de la cellule native (ignore si `size` est fourni). */
+  scale?: number;
 }
 
 /**
@@ -30,47 +30,48 @@ interface GameSpriteIconProps extends React.HTMLAttributes<HTMLSpanElement> {
  *   width/height  = w x h a l'echelle (fenetre = cellule)
  */
 export const GameSpriteIcon = ({
-	name,
-	size,
-	scale = 1,
-	className,
-	style,
-	...props
+  name,
+  size,
+  scale = 1,
+  className,
+  style,
+  ...props
 }: GameSpriteIconProps) => {
-	const icon = GAME_ICONS[name];
+  const icon = GAME_ICONS[name];
 
-	if (!icon) {
-		return null;
-	}
+  if (!icon) {
+    return null;
+  }
 
-	const atlas = GAME_ICON_ATLASES[icon.atlas];
-	// `size` (hauteur cible) prime : echelle = size / hauteur de cellule.
-	const effScale = size != null ? size / icon.h : scale;
-	const displayW = icon.w * effScale;
-	const displayH = icon.h * effScale;
-	const maskImage = `url(${atlas.src})`;
-	const maskPosition = `-${icon.x * effScale}px -${icon.y * effScale}px`;
-	const maskSize = `${atlas.sheetW * effScale}px ${atlas.sheetH * effScale}px`;
+  const atlas = GAME_ICON_ATLASES[icon.atlas];
+  // `size` (hauteur cible) prime : echelle = size / hauteur de cellule.
+  const effScale = size != null ? size / icon.h : scale;
+  const displayW = icon.w * effScale;
+  const displayH = icon.h * effScale;
+  const maskImage = `url(${atlas.src})`;
+  const maskPosition = `-${icon.x * effScale}px -${icon.y * effScale}px`;
+  const maskSize = `${atlas.sheetW * effScale}px ${atlas.sheetH * effScale}px`;
 
-	return (
-		<span
-			className={cn("inline-block shrink-0 bg-current", className)}
-			role="img"
-			aria-label={icon.nameFr}
-			style={{
-				height: `${displayH}px`,
-				maskImage,
-				maskPosition,
-				maskRepeat: "no-repeat",
-				maskSize,
-				WebkitMaskImage: maskImage,
-				WebkitMaskPosition: maskPosition,
-				WebkitMaskRepeat: "no-repeat",
-				WebkitMaskSize: maskSize,
-				width: `${displayW}px`,
-				...style,
-			}}
-			{...props}
-		/>
-	);
+  return (
+    <span
+      className={cn("inline-block shrink-0 bg-current", className)}
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- CSS mask sprite has no image source, so an img element is not applicable
+      role="img"
+      aria-label={icon.nameFr}
+      style={{
+        height: `${displayH}px`,
+        maskImage,
+        maskPosition,
+        maskRepeat: "no-repeat",
+        maskSize,
+        WebkitMaskImage: maskImage,
+        WebkitMaskPosition: maskPosition,
+        WebkitMaskRepeat: "no-repeat",
+        WebkitMaskSize: maskSize,
+        width: `${displayW}px`,
+        ...style,
+      }}
+      {...props}
+    />
+  );
 };

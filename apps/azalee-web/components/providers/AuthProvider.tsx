@@ -16,132 +16,139 @@ export type AzaleeProfile = PublicProfile;
 
 // Better Auth user type
 export interface BetterAuthUser {
-	id: string;
-	name: string;
-	email: string;
-	emailVerified: boolean;
-	image?: string | null;
-	createdAt: Date;
-	updatedAt: Date;
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  image?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface AuthContextType {
-	user: BetterAuthUser | null;
-	profile: AzaleeProfile | null;
-	loading: boolean;
-	signOut: () => Promise<void>;
-	isAdmin: boolean;
-	refreshProfile: () => Promise<void>;
+  user: BetterAuthUser | null;
+  profile: AzaleeProfile | null;
+  loading: boolean;
+  signOut: () => Promise<void>;
+  isAdmin: boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({
-	children,
-	initialUser = null,
-	initialProfile = null,
+  children,
+  initialUser = null,
+  initialProfile = null,
 }: {
-	children: ReactNode;
-	initialUser?: BetterAuthUser | null;
-	initialProfile?: AzaleeProfile | null;
+  children: ReactNode;
+  initialUser?: BetterAuthUser | null;
+  initialProfile?: AzaleeProfile | null;
 }) {
-	const [user, setUser] = useState<BetterAuthUser | null>(initialUser);
-	const [profile, setProfile] = useState<AzaleeProfile | null>(initialProfile);
-	const [loading, setLoading] = useState(!initialUser);
-	const supabase = useSupabase();
-	const router = useRouter();
+  const [user, setUser] = useState<BetterAuthUser | null>(initialUser);
+  const [profile, setProfile] = useState<AzaleeProfile | null>(initialProfile);
+  const [loading, setLoading] = useState(!initialUser);
+  const [previousInitialUser, setPreviousInitialUser] = useState(initialUser);
+  const supabase = useSupabase();
+  const router = useRouter();
 
-	const fetchProfile = useCallback(
-		async (userId: string) => {
-			try {
-				const { data, error } = await supabase
-					.from("profiles")
-					// Depuis la fermeture PII, un `select("*")` en clé anon échoue
-					// entièrement (42501) : profile restait null, donc avatar générique
-					// pour tous et `isAdmin` toujours faux (bouton Admin jamais affiché).
-					.select(PUBLIC_PROFILE_COLUMNS)
-					.eq("id", userId)
-					.maybeSingle();
+  // SSR data arriving after mount ends the loading state without an effect.
+  if (initialUser !== previousInitialUser) {
+    setPreviousInitialUser(initialUser);
+    if (initialUser) {
+      setLoading(false);
+    }
+  }
 
-				if (error && error.code !== "PGRST116") {
-					console.error("Error fetching profile:", error);
-					return null;
-				}
-				return data;
-			} catch (error) {
-				console.error("Profile catch error:", error);
-				return null;
-			}
-		},
-		[supabase]
-	);
+  const fetchProfile = useCallback(
+    async (userId: string) => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          // Depuis la fermeture PII, un `select("*")` en clé anon échoue
+          // entièrement (42501) : profile restait null, donc avatar générique
+          // pour tous et `isAdmin` toujours faux (bouton Admin jamais affiché).
+          .select(PUBLIC_PROFILE_COLUMNS)
+          .eq("id", userId)
+          .maybeSingle();
 
-	const refreshProfile = useCallback(async () => {
-		if (user) {
-			const data = await fetchProfile(user.id);
-			setProfile(data);
-		}
-	}, [user, fetchProfile]);
+        if (error && error.code !== "PGRST116") {
+          console.error("Error fetching profile:", error);
+          return null;
+        }
+        return data;
+      } catch (error) {
+        console.error("Profile catch error:", error);
+        return null;
+      }
+    },
+    [supabase],
+  );
 
-	// Initialize session from Better Auth
-	useEffect(() => {
-		let actif = true;
-		const initialize = async () => {
-			try {
-				const { data: session } = await authClient.getSession();
-				if (actif && session?.user) {
-					setUser(session.user as BetterAuthUser);
-					const profileData = await fetchProfile(session.user.id);
-					if (actif) setProfile(profileData);
-				}
-			} catch (error) {
-				// Une navigation de document annule normalement cette requête d'initialisation.
-				// Ne pas transformer ce démontage en erreur console du nouveau parcours.
-				const requeteAnnulee = error instanceof TypeError && error.message === "Failed to fetch";
-				if (actif && !requeteAnnulee) console.error("Auth init error:", error);
-			} finally {
-				if (actif) setLoading(false);
-			}
-		};
+  const refreshProfile = useCallback(async () => {
+    if (user) {
+      const data = await fetchProfile(user.id);
+      setProfile(data);
+    }
+  }, [user, fetchProfile]);
 
-		// Only initialize if we don't have SSR data
-		if (!initialUser) {
-			initialize();
-		} else {
-			setLoading(false);
-		}
-		return () => {
-			actif = false;
-		};
-	}, [fetchProfile, initialUser]);
+  // Initialize session from Better Auth
+  useEffect(() => {
+    let actif = true;
+    const initialize = async () => {
+      try {
+        const { data: session } = await authClient.getSession();
+        if (actif && session?.user) {
+          setUser(session.user as BetterAuthUser);
+          const profileData = await fetchProfile(session.user.id);
+          if (actif) setProfile(profileData);
+        }
+      } catch (error) {
+        // Une navigation de document annule normalement cette requête d'initialisation.
+        // Ne pas transformer ce démontage en erreur console du nouveau parcours.
+        const requeteAnnulee = error instanceof TypeError && error.message === "Failed to fetch";
+        if (actif && !requeteAnnulee) console.error("Auth init error:", error);
+      } finally {
+        if (actif) setLoading(false);
+      }
+    };
 
-	const signOut = async () => {
-		setLoading(true);
-		setUser(null);
-		setProfile(null);
-		try {
-			// Use server action to log audit + invalidate session + redirect
-			await signOutAction();
-		} catch {
-			// SignOutAction calls redirect() which throws in Next.js - expected
-		}
-		setLoading(false);
-		router.refresh();
-	};
+    // Only initialize if we don't have SSR data
+    if (!initialUser) {
+      initialize();
+    }
+    return () => {
+      actif = false;
+    };
+  }, [fetchProfile, initialUser]);
 
-	const isAdmin = ADMIN_ROLES.includes(profile?.role as (typeof ADMIN_ROLES)[number]);
+  const signOut = async () => {
+    setLoading(true);
+    setUser(null);
+    setProfile(null);
+    try {
+      // Use server action to log audit + invalidate session + redirect
+      await signOutAction();
+    } catch {
+      // SignOutAction calls redirect() which throws in Next.js - expected
+    }
+    setLoading(false);
+    router.refresh();
+  };
 
-	return (
-		<AuthContext.Provider value={{ isAdmin, loading, profile, refreshProfile, signOut, user }}>
-			{children}
-		</AuthContext.Provider>
-	);
+  const isAdmin = ADMIN_ROLES.includes(profile?.role as (typeof ADMIN_ROLES)[number]);
+
+  return (
+    <AuthContext.Provider value={{ isAdmin, loading, profile, refreshProfile, signOut, user }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-	const context = useContext(AuthContext);
-	if (context === undefined) {
-		throw new Error("useAuth must be used within an AuthProvider");
-	}
-	return context;
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }
