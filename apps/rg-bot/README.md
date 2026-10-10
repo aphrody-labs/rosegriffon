@@ -47,8 +47,8 @@ est éphémère) : [`docs/bot-format.md`](../../docs/bot-format.md).
 
 ```bash
 bun install              # depuis la racine du monorepo
-cd apps/bot
-cp .env.example .env     # remplir DISCORD_BOT_TOKEN + DATABASE_URL + SUPABASE_*
+cd apps/rg/bot
+cp .env.example .env     # remplir les secrets Discord/Supabase et les deux URLs PostgreSQL
 
 bun dev                  # bun --watch
 bun start                # one-shot
@@ -122,12 +122,11 @@ Le bot utilise **deux** chemins d'accès selon le contexte de la requête :
 - **`supabase`** (de `@rosegriffon/db/service`) : client service-role typé.
   Préférer pour les requêtes simples (`from().select()`, `.insert()`, `.rpc()`)
   — bénéficie du type-checking sur les colonnes via `Database`.
-- **`sql`** (de `bun`) : connexion Postgres directe via `DATABASE_URL`. Préférer
-  pour le SQL complexe (CTE, fenêtres, jointures multi-niveaux) où le query
-  builder serait verbeux ou impossible.
+- **`sql`** (de `bun`) : `RG_DATABASE_URL` vers Supabase RG; `inagleSql`
+  utilise `INAGLE_DATABASE_URL` vers Neon gameplay. Aucun fallback croisé.
+  Préférer le SQL direct pour les CTE, fenêtres et jointures complexes.
 
-Les deux pointent sur la **même** base : le PostgreSQL 18 auto-hébergé du VPS
-(le projet Supabase Cloud a été abandonné, cf.
-[`docs/self-host-supabase.md`](../../docs/self-host-supabase.md)). Le client
-`supabase` passe par PostgREST, `sql` attaque Postgres directement. Voir
-`src/lib/db.ts`.
+Les tables `inagle_*` vont sur Neon; les comptes, les données RG et Achillea
+restent dans le projet Supabase Cloud `rg`. Les deux clients gardent ces URLs
+séparées. `DATABASE_URL` reste un alias de compatibilité RG pour les scripts
+anciens. Voir `src/lib/db.ts`.
