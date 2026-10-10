@@ -15,7 +15,7 @@
     "typecheck": "bun --bun tsc --noEmit"
   },
   "dependencies": {
-    "@rosegriffon/ui": "catalog:",
+    "@rosegriffon/ui": "npm:@aphrody/rg-ui@1.0.4",
     "lucide-react": "catalog:",
     "next-themes": "catalog:"
   },

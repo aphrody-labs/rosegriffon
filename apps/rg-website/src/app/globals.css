@@ -97,8 +97,8 @@
  * `@source`, les utilitaires employés uniquement par les composants partagés
  * (page « Mon compte », largeurs de sidebar en variables CSS…) ne sont jamais
  * générés. Azalée déclare la même source. */
-@source "../../../../packages/ui/src";
-@source "../../../../packages/app-shell/src";
+@source "../../node_modules/@rosegriffon/ui/src";
+@source "../../../../../packages/rg/app-shell/src";
 
 /* Font Faces from Supabase Assets */
 @font-face {

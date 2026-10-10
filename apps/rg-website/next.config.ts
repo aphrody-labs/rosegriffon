@@ -1,4 +1,5 @@
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { withBun } from "@aphrody/next-bun";
 import type { NextConfig } from "next";
 import path from "node:path";
 
@@ -453,4 +454,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default bundleAnalyzer(nextConfig);
+export default withBun(bundleAnalyzer(nextConfig), { projectDir: process.cwd(), bundler: "turbopack" });

@@ -1,6 +1,6 @@
 "use client";
 
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { useCallback, useMemo, useState } from "react";
 import type { JSX } from "react";
 
@@ -9,8 +9,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Editor modal hook that renders Dialogs above the editor's z-[100] wrapper.
- * Uses Radix primitives directly to control z-index (z-[150]) instead of
- * the shadcn DialogContent which is hardcoded to z-50.
+ * Uses the canonical Base UI dialog primitive to retain the editor stacking level.
  */
 export function useEditorModal(): [
 	JSX.Element | null,
@@ -30,19 +29,19 @@ export function useEditorModal(): [
 		if (modalContent === null) {
 			return null;
 		}
-		const { title, content } = modalContent;
+		const { title, content, closeOnClickOutside } = modalContent;
 		return (
-			<DialogPrimitive.Root open onOpenChange={onClose}>
+			<DialogPrimitive.Root open disablePointerDismissal={!closeOnClickOutside} onOpenChange={(open) => { if (!open) onClose(); }}>
 				<DialogPrimitive.Portal>
-					<DialogPrimitive.Overlay className="fixed inset-0 z-[150] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-					<DialogPrimitive.Content
+					<DialogPrimitive.Backdrop className="fixed inset-0 z-[150] bg-black/80 data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0" />
+					<DialogPrimitive.Popup
 						aria-describedby={undefined}
 						className={cn(
 							"fixed left-[50%] top-[50%] z-[150] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200",
-							"data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-							"data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-							"data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
-							"data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
+							"data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0",
+							"data-closed:zoom-out-95 data-open:zoom-in-95",
+							"data-closed:slide-out-to-left-1/2 data-closed:slide-out-to-top-[48%]",
+							"data-open:slide-in-from-left-1/2 data-open:slide-in-from-top-[48%]",
 							"sm:rounded-lg"
 						)}
 					>
@@ -52,11 +51,11 @@ export function useEditorModal(): [
 							</DialogPrimitive.Title>
 						</div>
 						{content}
-						<DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+						<DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-open:bg-accent data-open:text-muted-foreground">
 							<X className="size-4" />
 							<span className="sr-only">Close</span>
 						</DialogPrimitive.Close>
-					</DialogPrimitive.Content>
+					</DialogPrimitive.Popup>
 				</DialogPrimitive.Portal>
 			</DialogPrimitive.Root>
 		);

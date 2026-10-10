@@ -304,12 +304,7 @@ export function Visionneuse({
          * dans l'arbre d'accessibilité, où il ressortait « superseded »).
          * Inutile d'en poser un second, qui laisserait croire le contraire.
          */
-        onCloseAutoFocus={(evenement) => {
-          if (declencheur.current?.isConnected) {
-            evenement.preventDefault();
-            declencheur.current.focus();
-          }
-        }}
+        finalFocus={() => declencheur.current?.isConnected ? declencheur.current : true}
         className="max-h-[95dvh] max-w-[96vw] gap-0 overflow-y-auto rounded-[24px] border-2 border-rg-or/40 bg-surface-container-lowest p-0 sm:max-w-4xl lg:max-w-5xl"
       >
         <DialogTitle className="sr-only">
