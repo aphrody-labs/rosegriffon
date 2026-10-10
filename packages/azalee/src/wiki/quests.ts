@@ -16,7 +16,7 @@
  * - `phase >= 1000` → QUÊTE ANNEXE nommée, regroupée par zone (`floor(phase/10000)`).
  */
 
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createInagleSql } from "@rosegriffon/db/inagle-sql";
 
 import type { Quest, QuestKind } from "@rosegriffon/inagle/wiki";
 export type { Quest, QuestKind };
@@ -44,7 +44,7 @@ interface QuestDatabase {
   inagle_quests: QuestRow;
 }
 
-const sql = createAchilleaSql<QuestDatabase>();
+const sql = createInagleSql<QuestDatabase>();
 
 /** Seuil au-delà duquel un `phase` code une quête annexe (et non un chapitre d'histoire). */
 const SIDE_PHASE_THRESHOLD = 1000;

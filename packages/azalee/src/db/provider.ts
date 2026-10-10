@@ -1,4 +1,5 @@
 import { createPostgresClient } from "@rosegriffon/db/postgres-client";
+import { isDatabaseConfigured, isInagleDatabaseConfigured } from "@rosegriffon/db/pg";
 import { createSqliteClient } from "./sqlite-client";
 
 export type DatabaseClient = { from(table: string): any };
@@ -12,12 +13,8 @@ export function hasDatabaseProvider(): boolean {
 }
 export async function createClient(): Promise<DatabaseClient> {
   if (factory) return await factory();
-  const connectionString =
-    process.env.DATABASE_URL ??
-    process.env.ROSE_GRIFFON_DATABASE_URL ??
-    process.env.RG_DATABASE_URL;
-  if (connectionString) {
-    return createPostgresClient(connectionString);
+  if (isInagleDatabaseConfigured() || isDatabaseConfigured()) {
+    return createPostgresClient();
   }
   return createSqliteClient() as unknown as DatabaseClient;
 }

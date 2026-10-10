@@ -1,3 +1,4 @@
+import { getInagleDatabaseURL, isInagleDatabaseConfigured } from "@rosegriffon/db/pg";
 /** `azalee db` — requête SQL ad hoc sur PostgreSQL ou sur le miroir SQLite. */
 
 import type { Command } from "commander";
@@ -66,12 +67,12 @@ export function registerDbCommand(program: Command): void {
           db.close();
         } else {
           // PostgreSQL par défaut.
-          const dbUrl = process.env.DATABASE_URL;
+          const dbUrl = isInagleDatabaseConfigured() ? getInagleDatabaseURL() : undefined;
           if (!dbUrl) {
             reportError(
               options.json,
-              "DATABASE_URL non définie dans l'environnement",
-              `${colors.red}Erreur: DATABASE_URL non définie dans l'environnement.${colors.reset}`,
+              "INAGLE_DATABASE_URL non définie dans l'environnement",
+              `${colors.red}Erreur: INAGLE_DATABASE_URL non définie dans l'environnement.${colors.reset}`,
             );
             return;
           }

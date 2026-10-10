@@ -1,6 +1,7 @@
 import { resolvePoolSize } from "@aphrody/sql/env";
 import { createSql } from "@aphrody/sql/postgres";
 import type { SQL } from "bun";
+import { getDatabaseURL, getInagleDatabaseURL } from "./pg";
 
 export interface BunSqlOptions {
 	url?: string;
@@ -17,16 +18,19 @@ export interface BunPgQueryResult<Row = Record<string, unknown>> {
 
 export interface BunPgClient {
 	connect(): Promise<void>;
-	query<Row = Record<string, unknown>>(text: string, params?: unknown[]): Promise<BunPgQueryResult<Row>>;
+	query<Row = Record<string, unknown>>(
+		text: string,
+		params?: unknown[],
+	): Promise<BunPgQueryResult<Row>>;
 	end(): Promise<void>;
 }
 
 /** Build the canonical Bun PostgreSQL client used by Bun workers and bots. */
 export function createBunSql(options: BunSqlOptions = {}): SQL {
-	const url = options.url ?? Bun.env.DATABASE_URL;
-	if (!url) throw new Error("DATABASE_URL is required for the Bun PostgreSQL client");
+	const url = options.url ?? getDatabaseURL();
 
-	const max = options.max ?? resolvePoolSize(Bun.env.DATABASE_POOL_MAX, { fallback: 4, ceiling: 4 });
+	const max =
+		options.max ?? resolvePoolSize(Bun.env.DATABASE_POOL_MAX, { fallback: 4, ceiling: 4 });
 	// TLS and prepare stay with the URL and Bun's defaults (historical contract).
 	return createSql(url, {
 		max,
@@ -38,6 +42,10 @@ export function createBunSql(options: BunSqlOptions = {}): SQL {
 	});
 }
 
+export function createInagleBunSql(options: Omit<BunSqlOptions, "url"> = {}): SQL {
+	return createBunSql({ ...options, url: getInagleDatabaseURL() });
+}
+
 /** Adaptateur client minimal pour les scripts historiques connect/query/end. */
 export function createBunPgClient(connectionString: string): BunPgClient {
 	const sql = createBunSql({ url: connectionString, max: 1 });
@@ -45,7 +53,7 @@ export function createBunPgClient(connectionString: string): BunPgClient {
 		async connect(): Promise<void> {},
 		async query<Row = Record<string, unknown>>(
 			text: string,
-			params: unknown[] = []
+			params: unknown[] = [],
 		): Promise<BunPgQueryResult<Row>> {
 			const rows = (await sql.unsafe(text, params)) as Row[];
 			return { rows, rowCount: rows.length };

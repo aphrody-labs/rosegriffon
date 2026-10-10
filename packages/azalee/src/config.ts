@@ -18,6 +18,7 @@
 
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { isInagleDatabaseConfigured } from "@rosegriffon/db/pg";
 
 /** Options de configuration explicites (priorité maximale). */
 export interface AzaleeConfig {
@@ -31,12 +32,7 @@ const explicit: AzaleeConfig = {};
 
 /** Whether the PostgreSQL projection used by wiki queries is configured. */
 export function hasPostgresConfiguration(): boolean {
-  return Boolean(
-    process.env.DATABASE_URL ||
-    process.env.ROSE_GRIFFON_DATABASE_URL ||
-    process.env.RG_DATABASE_URL ||
-    process.env.ACHILLEA_DATABASE_URL,
-  );
+  return isInagleDatabaseConfigured();
 }
 
 /**

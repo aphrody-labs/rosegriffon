@@ -1,7 +1,7 @@
 import { createPostgresClient } from "@rosegriffon/db/service";
 import type { Tables } from "@rosegriffon/db";
 import { grokChat } from "./grok-oidc";
-import { sql } from "../../lib/db.js";
+import { sql, inagleSql } from "../../lib/db.js";
 
 interface MediaItem {
   url: string;
@@ -182,7 +182,7 @@ export async function processTweets() {
 
   // Load names directly from the canonical SQL projections; no generated file is
   // needed and the same source is shared by the website and Azalée CLI.
-  const glossaryRows = await sql<
+  const glossaryRows = await inagleSql<
     Array<{
       name_fr: string | null;
       name_en: string | null;

@@ -19,7 +19,7 @@
  * AUCUNE donnée inventée : tout dérive des colonnes réelles ci-dessus.
  */
 
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createInagleSql } from "@rosegriffon/db/inagle-sql";
 import { createClient, hasDatabaseProvider } from "../db/provider";
 import { TEAM_EMBLEM_MAP } from "../game/team-emblem-map";
 import { getCharacterFaceUrl, getEmblemImageUrl, resolveLegacyMenuAsset } from "../images";
@@ -82,7 +82,7 @@ interface TeamsDatabase {
   inagle_characters: RawCharaRow & { team_id: string | null };
 }
 
-const sql = createAchilleaSql<TeamsDatabase>();
+const sql = createInagleSql<TeamsDatabase>();
 
 /**
  * Le provider reste un point d'injection de santé pour les hôtes historiques.

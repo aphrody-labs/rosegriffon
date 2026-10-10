@@ -2,7 +2,7 @@ import type { BaseCharacter, Item } from "@rosegriffon/inagle";
 import type { Skill, Team } from "@rosegriffon/inagle";
 import { ELEMENT_NAMES as ElementNames } from "@rosegriffon/inagle/core/game-codes";
 import type { Database } from "@rosegriffon/db";
-import { createAchilleaSql, sql } from "@rosegriffon/db/achillea-sql";
+import { createInagleSql, sql } from "@rosegriffon/db/inagle-sql";
 import type { Database as SqlDatabase } from "@rosegriffon/db/schema";
 import {
   extractKeshinModelCode,
@@ -510,7 +510,7 @@ export const wikiService = {
   /** Cut-in canonique, lu depuis la projection PostgreSQL importée. */
   async getSkillCutin(codeOrId: string): Promise<SkillCutinEntry | null> {
     try {
-      const db = createAchilleaSql<SqlDatabase>();
+      const db = createInagleSql<SqlDatabase>();
       const row = await db
         .selectFrom("inagle_skill_cutins")
         .select("data")
@@ -526,7 +526,7 @@ export const wikiService = {
   async getSkillCutins(codes: string[]): Promise<SkillCutinEntry[]> {
     if (codes.length === 0) return [];
     try {
-      const db = createAchilleaSql<SqlDatabase>();
+      const db = createInagleSql<SqlDatabase>();
       const rows = await db
         .selectFrom("inagle_skill_cutins")
         .select("data")
@@ -542,7 +542,7 @@ export const wikiService = {
   async hasSkillCutinAssets(eventIdName: string | null | undefined): Promise<boolean> {
     if (!eventIdName) return false;
     try {
-      const db = createAchilleaSql<SqlDatabase>();
+      const db = createInagleSql<SqlDatabase>();
       const row = await db
         .selectFrom("inagle_skill_cutin_assets")
         .select("event_id_name")
@@ -557,7 +557,7 @@ export const wikiService = {
   async getSkillCutinAssets(eventIds: string[]): Promise<Set<string>> {
     if (eventIds.length === 0) return new Set();
     try {
-      const db = createAchilleaSql<SqlDatabase>();
+      const db = createInagleSql<SqlDatabase>();
       const rows = await db
         .selectFrom("inagle_skill_cutin_assets")
         .select("event_id_name")
@@ -576,7 +576,7 @@ export const wikiService = {
    */
   async getFormations(): Promise<Formation[]> {
     try {
-      const db = createAchilleaSql<SqlDatabase>();
+      const db = createInagleSql<SqlDatabase>();
       const rows = await db
         .selectFrom("inagle_formations")
         .selectAll()
@@ -595,7 +595,7 @@ export const wikiService = {
   async _getHeroConstellations(row: any): Promise<Array<{ name: string; index: number }>> {
     const name = row?.name_en;
     if (!name) return [];
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     const data = await db
       .selectFrom("inagle_characters")
       .select(["constellation", "constellation_index"])
@@ -620,7 +620,7 @@ export const wikiService = {
   /** If character has no constellation (e.g. BASARA/Hero), inherit from counterpart via chara_id or name */
   async _inheritConstellation(base: BaseCharacter, row: any): Promise<void> {
     if ((base as any).constellation) return;
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
 
     // Try 1: inherit from sibling with same chara_id
     if (row?.chara_id) {
@@ -667,7 +667,7 @@ export const wikiService = {
     sub_type?: string;
     categorySlug?: string;
   } | null> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
     // Clean the search name (remove common prefixes)
     const cleanName = name
       .replace(/^Mix 'n' Match: /i, "")
@@ -718,7 +718,7 @@ export const wikiService = {
 
   /** Get all distinct base_slugs for generateStaticParams */
   async getAllBaseSlugParams(): Promise<Array<{ id: string }>> {
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     const data = await db
       .selectFrom("inagle_characters")
       .select("base_slug")
@@ -762,7 +762,7 @@ export const wikiService = {
       hissatsuName?: string;
     }>
   > {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
     const supabaseHexIds = new Set<string>();
 
     // 1. Get from database: inagle_characters (data->'auras')
@@ -866,7 +866,7 @@ export const wikiService = {
   },
 
   async getAura(id: string, typeSlug: string): Promise<any | undefined> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
 
     // Map slug to the actual table (not view) for detail lookups
     const tableMap: Record<string, string> = {
@@ -1059,7 +1059,7 @@ export const wikiService = {
     keshin: Array<{ code: string; name: string; glbUrl: string }>;
     armures: Array<{ code: string; name: string; glbUrl: string }>;
   }> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
     const rows = await db
       .selectFrom("inagle_keshins")
       .select(["name_fr", "name_en", "image_url", "data"])
@@ -1093,7 +1093,7 @@ export const wikiService = {
   },
 
   async getAurasList(params: ListParams & { typeSlug: string }): Promise<ListResult<any>> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
     const page = params.page || 1;
     const limit = params.limit || 50;
     const from = (page - 1) * limit;
@@ -1275,7 +1275,7 @@ export const wikiService = {
   },
 
   async getCharacter(id: string): Promise<BaseCharacter | undefined> {
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     const row = await db
       .selectFrom("inagle_characters")
       .selectAll()
@@ -1307,7 +1307,7 @@ export const wikiService = {
 
   /** Fetch character by base_slug (name_en + internal_code) — returns best variant as BaseCharacter */
   async getCharacterByBaseSlug(baseSlug: string): Promise<BaseCharacter | undefined> {
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     // Fetch all variants sharing this base_slug, ordered by age ASC (youngest first)
     const rows = await db
       .selectFrom("inagle_characters")
@@ -1332,7 +1332,7 @@ export const wikiService = {
   },
 
   async getCharacterBySlug(slug: string): Promise<BaseCharacter | undefined> {
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     const row = await db
       .selectFrom("inagle_characters")
       .selectAll()
@@ -1384,7 +1384,7 @@ export const wikiService = {
       zukanOrder?: number;
     }>
   > {
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     const fields = [
       "id",
       "slug",
@@ -1481,7 +1481,7 @@ export const wikiService = {
       return this.getCoordinatorsList(params);
     }
 
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     const page = params.page || 1;
     const limit = params.limit || 50;
     const from = (page - 1) * limit;
@@ -1630,7 +1630,7 @@ export const wikiService = {
   },
 
   async getCoordinatorPools(): Promise<{ coaches: any[]; managers: any[] }> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
     const rows = await db
       .selectFrom("inagle_coordinators")
       .selectAll()
@@ -1644,7 +1644,7 @@ export const wikiService = {
   },
 
   async getCoordinatorsList(params: ListParams): Promise<ListResult<BaseCharacter>> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
     const page = params.page || 1;
     const limit = params.limit || 50;
     const from = (page - 1) * limit;
@@ -1818,7 +1818,7 @@ export const wikiService = {
   },
   async getItem(id: string): Promise<Item | undefined> {
     // ... existing getItem ...
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     // Try exact match on ID first (hex), then internal_code/name if needed
     let row = await db
       .selectFrom("inagle_items")
@@ -1894,7 +1894,7 @@ export const wikiService = {
       return this.getTacticsList(params);
     }
 
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     const page = params.page || 1;
     const limit = params.limit || 50;
     const from = (page - 1) * limit;
@@ -1955,7 +1955,7 @@ export const wikiService = {
   },
 
   async getOverrideSkillsForSkill(skillId: string): Promise<any[]> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
 
     // Two cases:
     // A) This skill IS the override result → query by id
@@ -2013,7 +2013,7 @@ export const wikiService = {
     mf: BaseCharacter[];
     fw: BaseCharacter[];
   }> {
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     const positionMap: Record<string, string> = {
       GK: "Gardien",
       DF: "Défenseur",
@@ -2049,7 +2049,7 @@ export const wikiService = {
   },
 
   async getSkill(id: string): Promise<Skill | undefined> {
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     const row = await db
       .selectFrom("inagle_skills")
       .selectAll()
@@ -2138,7 +2138,7 @@ export const wikiService = {
   },
 
   async getSkillsList(params: ListParams): Promise<ListResult<Skill>> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
     const page = params.page || 1;
     const limit = params.limit || 50;
     const from = (page - 1) * limit;
@@ -2289,7 +2289,7 @@ export const wikiService = {
   },
 
   async getTactic(slug: string): Promise<any | null> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
     // Fast path: query by internal_code directly (avoids full table scan)
     const direct = await db
       .selectFrom("inagle_tactics")
@@ -2334,7 +2334,7 @@ export const wikiService = {
   },
 
   async getTacticsList(params: ListParams): Promise<ListResult<Item>> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
     const page = params.page || 1;
     const limit = params.limit || 50;
     const from = (page - 1) * limit;
@@ -2677,7 +2677,7 @@ export const wikiService = {
     const page = params.page || 1;
     const limit = params.limit || 48;
     const from = (page - 1) * limit;
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     let query = db.selectFrom("inagle_gallery");
     let countQuery = db.selectFrom("inagle_gallery");
 
@@ -2708,7 +2708,7 @@ export const wikiService = {
 
   /** Compte les illustrations par catégorie (pour les chips de filtre). */
   async getGalleryCategoryCounts(): Promise<Record<string, number>> {
-    const db = createAchilleaSql<SqlDatabase>();
+    const db = createInagleSql<SqlDatabase>();
     const data = await db.selectFrom("inagle_gallery").select("img_path").execute();
     const counts: Record<string, number> = { all: 0 };
     for (const row of data) {
@@ -2720,7 +2720,7 @@ export const wikiService = {
   },
 
   async getTweets(limit: number = 20): Promise<any[]> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
     return db
       .selectFrom("tweets")
       .selectAll()
@@ -2732,7 +2732,7 @@ export const wikiService = {
   },
 
   async getTweetById(id: string): Promise<any | null> {
-    const db = createAchilleaSql<WikiSqlDatabase>();
+    const db = createInagleSql<WikiSqlDatabase>();
     return (
       (await db
         .selectFrom("tweets")
@@ -2809,7 +2809,7 @@ export const wikiService = {
 
     let imageUrl: string | null = null;
     try {
-      const db = createAchilleaSql<SqlDatabase>();
+      const db = createInagleSql<SqlDatabase>();
       const row = await db
         .selectFrom("inagle_passives")
         .select("image_url")
@@ -2833,7 +2833,7 @@ export const wikiService = {
   /** Les 21 passifs d'équipe (soccer_team_passive_config). */
   async getTeamPassives(): Promise<PassiveTeamItem[]> {
     try {
-      const db = createAchilleaSql<WikiSqlDatabase>();
+      const db = createInagleSql<WikiSqlDatabase>();
       const data = await db.selectFrom("inagle_manager_passives").selectAll().execute();
       return data.map((row) => {
         const raw: any = row.data && typeof row.data === "object" ? row.data : row;
@@ -2858,7 +2858,7 @@ export const wikiService = {
   /** Passive sheets historiques normalisées dans la projection SQL canonique. */
   async getPassiveSheets(): Promise<PassiveSheets> {
     try {
-      const db = createAchilleaSql<SqlDatabase>();
+      const db = createInagleSql<SqlDatabase>();
       const data = await db
         .selectFrom("inagle_passive_sheets")
         .select(["kind", "data"])
@@ -3005,7 +3005,7 @@ async function loadPassiveRows(): Promise<PassiveListItem[]> {
   if (!passiveCache) {
     passiveCache = (async () => {
       try {
-        const db = createAchilleaSql<SqlDatabase>();
+        const db = createInagleSql<SqlDatabase>();
         const data = await db.selectFrom("inagle_passives").selectAll().execute();
         return data.map(passiveRowToItem);
       } catch {

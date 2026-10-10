@@ -8,9 +8,12 @@ describe("GET /api/recherche", () => {
 		try {
 			const response = await respondreRecherche(
 				new Request("http://localhost/api/recherche?q=axel"),
-				async () => {
-					throw new Error("database unavailable");
-				}
+				{
+					rg: async () => {
+						throw new Error("database unavailable");
+					},
+					inagle: async () => [],
+				},
 			);
 			expect(response.status).toBe(503);
 			expect(await response.json()).toMatchObject({
@@ -23,10 +26,10 @@ describe("GET /api/recherche", () => {
 
 	test("une requête trop courte retourne une liste vide sans interroger la base", async () => {
 		const executer = mock(async () => []);
-		const response = await respondreRecherche(
-			new Request("http://localhost/api/recherche?q=a"),
-			executer
-		);
+		const response = await respondreRecherche(new Request("http://localhost/api/recherche?q=a"), {
+			rg: executer,
+			inagle: executer,
+		});
 		expect(response.status).toBe(200);
 		expect(await response.json()).toMatchObject({ resultats: [] });
 		expect(executer).not.toHaveBeenCalled();

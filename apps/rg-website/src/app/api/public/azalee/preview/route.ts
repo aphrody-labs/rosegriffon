@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPgPool } from "@/lib/db/pg";
+import { getInaglePgPool } from "@rosegriffon/db/pg";
 
 export const dynamic = "force-dynamic";
 
@@ -59,54 +59,54 @@ export async function GET(request: Request) {
 	const type = searchParams.get("type"); // "characters" | "skills" | "items" | "teams" | null
 
 	try {
-		const pool = getPgPool();
+		const pool = getInaglePgPool();
 
 		// Requêtes parallèles directes en base
 		const [charactersRes, skillsRes, itemsRes, teamsRes] = await Promise.all([
 			pool.query<PreviewCharacter>(
-				`SELECT id, slug, base_slug, name_fr, name_en, name_ja, element, position, rarity, internal_code 
-				 FROM inagle_characters 
-				 WHERE is_primary = true 
+				`SELECT id, slug, base_slug, name_fr, name_en, name_ja, element, position, rarity, internal_code
+				 FROM inagle_characters
+				 WHERE is_primary = true
 				   AND internal_code IN ('c01000010', 'c05024710', 'c01010970', 'c01000020')
-				 ORDER BY CASE internal_code 
+				 ORDER BY CASE internal_code
 				   WHEN 'c01000010' THEN 1
 				   WHEN 'c05024710' THEN 2
 				   WHEN 'c01010970' THEN 3
 				   WHEN 'c01000020' THEN 4
-				   ELSE 5 END`
+				   ELSE 5 END`,
 			),
 			pool.query<PreviewSkill>(
 				`SELECT id, name_fr, name_en, name_ja, category, element, power_max, tension_cost, image_url
-				 FROM inagle_skills 
+				 FROM inagle_skills
 				 WHERE id IN ('whs02160_or', 'whk00010', 'whd01400', 'who01352')
-				 ORDER BY CASE id 
+				 ORDER BY CASE id
 				   WHEN 'whs02160_or' THEN 1
 				   WHEN 'whk00010' THEN 2
 				   WHEN 'who01352' THEN 3
 				   WHEN 'whd01400' THEN 4
-				   ELSE 5 END`
+				   ELSE 5 END`,
 			),
 			pool.query<PreviewItem>(
 				`SELECT id, name_fr, name_en, category, rarity, internal_code, stat_boost_1, stat_boost_2
-				 FROM inagle_items 
+				 FROM inagle_items
 				 WHERE internal_code IN ('eq_sh010101', 'eq_sh010201', 'eq_sh021201', 'eq_sh080101')
-				 ORDER BY CASE internal_code 
+				 ORDER BY CASE internal_code
 				   WHEN 'eq_sh010101' THEN 1
 				   WHEN 'eq_sh010201' THEN 2
 				   WHEN 'eq_sh021201' THEN 3
 				   WHEN 'eq_sh080101' THEN 4
-				   ELSE 5 END`
+				   ELSE 5 END`,
 			),
 			pool.query<PreviewTeam>(
 				`SELECT id, name_fr, name_en, name_ja, emblem_url
-				 FROM inagle_teams 
+				 FROM inagle_teams
 				 WHERE name_fr IN ('Raimon', 'Royal Academy', 'Nouvelle Royal Ac.', 'Inazuma KFT')
-				 ORDER BY CASE name_fr 
+				 ORDER BY CASE name_fr
 				   WHEN 'Raimon' THEN 1
 				   WHEN 'Royal Academy' THEN 2
 				   WHEN 'Nouvelle Royal Ac.' THEN 3
 				   WHEN 'Inazuma KFT' THEN 4
-				   ELSE 5 END`
+				   ELSE 5 END`,
 			),
 		]);
 
@@ -118,9 +118,12 @@ export async function GET(request: Request) {
 		};
 
 		if (type && type in result) {
-			return NextResponse.json({ [type]: result[type as keyof AzaleePreviewData] }, {
-				headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
-			});
+			return NextResponse.json(
+				{ [type]: result[type as keyof AzaleePreviewData] },
+				{
+					headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
+				},
+			);
 		}
 
 		return NextResponse.json(result, {
@@ -136,7 +139,7 @@ export async function GET(request: Request) {
 				teams: [],
 				source: "offline-fallback",
 			},
-			{ status: 200 }
+			{ status: 200 },
 		);
 	}
 }

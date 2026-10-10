@@ -1,4 +1,4 @@
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createInagleSql } from "@rosegriffon/db/inagle-sql";
 import { type ShopDetail, type ShopItem, type ShopSummary } from "./shops-shared";
 
 // Ré-export des types + constante depuis le module client-safe (compat imports existants).
@@ -67,7 +67,7 @@ interface ShopDatabase {
   inagle_items: RawItemRow;
 }
 
-const sql = createAchilleaSql<ShopDatabase>();
+const sql = createInagleSql<ShopDatabase>();
 
 /** Charge toutes les lignes `inagle_shops` (pagination interne pour dépasser la limite 1000). */
 async function fetchAllShopRows(): Promise<RawShopRow[]> {

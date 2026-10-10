@@ -4,8 +4,9 @@
  */
 
 import type { Command } from "commander";
+import { getInagleDatabaseURL } from "@rosegriffon/db/pg";
 
-import { colors, createPgClient, errorMessage, runCapture } from "../context";
+import { colors, createPgClient, errorMessage } from "../context";
 
 export function registerRepairCommand(program: Command): void {
   program
@@ -15,17 +16,25 @@ export function registerRepairCommand(program: Command): void {
       console.log(
         `${colors.cyan}Diagnostics et réparation de la base de données...${colors.reset}`,
       );
-      const dbUrl = process.env.DATABASE_URL;
-      if (!dbUrl) {
+      let dbUrl: string;
+      try {
+        dbUrl = getInagleDatabaseURL();
+      } catch {
         console.error(
-          `${colors.red}Erreur: DATABASE_URL non définie dans l'environnement.${colors.reset}`,
+          `${colors.red}INAGLE_DATABASE_URL is required for the local database repair.${colors.reset}`,
+        );
+        return;
+      }
+      if (!["localhost", "127.0.0.1", "[::1]"].includes(new URL(dbUrl).hostname)) {
+        console.error(
+          "Database repair is restricted to a loopback PostgreSQL host; managed database privileges are owned by deployment migrations.",
         );
         return;
       }
 
-      console.log(`Connexion à la base via : ${dbUrl}`);
+      console.log("Connecting to the explicitly configured local gameplay database.");
+      const client = createPgClient(dbUrl);
       try {
-        const client = createPgClient(dbUrl);
         await client.connect();
 
         const { rows: tables } = await client.query<{ table_name: string }>(
@@ -44,42 +53,10 @@ export function registerRepairCommand(program: Command): void {
             await client.query(`GRANT ALL PRIVILEGES ON TABLE "${tableName}" TO ubuntu;`);
             console.log(`  ✓ Table "${tableName}" réparée.`);
           } catch (e) {
-            console.log(
-              `  ⚠ Impossible de réparer "${tableName}" directement: ${errorMessage(e)}. Tentative via sudo...`,
-            );
-            runCapture([
-              "sudo",
-              "-u",
-              "postgres",
-              "psql",
-              "-d",
-              "rose_griffon",
-              "-c",
-              `ALTER TABLE "${tableName}" DISABLE ROW LEVEL SECURITY; GRANT ALL PRIVILEGES ON TABLE "${tableName}" TO ubuntu;`,
-            ]);
-            console.log(`  ✓ Table "${tableName}" réparée via sudo postgres.`);
+            throw new Error(`Unable to repair gameplay table ${tableName}: ${errorMessage(e)}`);
           }
         }
 
-        try {
-          await client.query(`ALTER TABLE patch_notes DISABLE ROW LEVEL SECURITY;`);
-          await client.query(`GRANT ALL PRIVILEGES ON TABLE patch_notes TO ubuntu;`);
-          console.log(`  ✓ Table "patch_notes" réparée.`);
-        } catch {
-          runCapture([
-            "sudo",
-            "-u",
-            "postgres",
-            "psql",
-            "-d",
-            "rose_griffon",
-            "-c",
-            "ALTER TABLE patch_notes DISABLE ROW LEVEL SECURITY; GRANT ALL PRIVILEGES ON TABLE patch_notes TO ubuntu;",
-          ]);
-          console.log(`  ✓ Table "patch_notes" réparée via sudo postgres.`);
-        }
-
-        await client.end();
         console.log(
           `\n${colors.bold}${colors.green}Base de données locale réparée avec succès !${colors.reset}`,
         );
@@ -87,6 +64,8 @@ export function registerRepairCommand(program: Command): void {
         console.error(
           `${colors.red}Erreur de connexion / privilèges : ${errorMessage(e)}${colors.reset}`,
         );
+      } finally {
+        await client.end();
       }
     });
 }

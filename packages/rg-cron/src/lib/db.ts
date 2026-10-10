@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createBunSql } from "@rosegriffon/db/bun-sql";
+import { createBunSql, createInagleBunSql } from "@rosegriffon/db/bun-sql";
 
 export const sql = createBunSql();
+export const inagleSql = createInagleBunSql();

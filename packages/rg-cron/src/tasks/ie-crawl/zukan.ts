@@ -7,7 +7,7 @@
 import { cache } from "@rosegriffon/db/redis";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { buildOrderMap, crawlZukanOrderPages } from "@rosegriffon/inagle/zukan/order";
-import { sql } from "../../lib/db.js";
+import { inagleSql } from "../../lib/db.js";
 
 // Le scraper d'ordre (navigation CDP + parsing cheerio des pages chara_param) est
 // désormais unifié dans `@rosegriffon/inagle/zukan/order` (leaf, hors barrel car
@@ -35,7 +35,7 @@ export async function crawlZukanOrder(): Promise<{
 		// lecture, il ne peut plus lui faire perdre sa connexion Postgres directe
 		// (`ERR_POSTGRES_CONNECTION_CLOSED` constaté le 1/9/2026 quand la requête
 		// n'était exécutée qu'après le crawl).
-		const dbChars = await sql<
+		const dbChars = await inagleSql<
 			{ id: string; zukan_hash: string | null; name_en: string | null }[]
 		>`SELECT id, zukan_hash, name_en FROM inagle_characters`;
 
@@ -46,7 +46,7 @@ export async function crawlZukanOrder(): Promise<{
 		}
 
 		console.log(
-			`[Crawl Zukan] Fin du crawl. ${allCharacters.length} personnages trouvés. Vérification des changements via Redis...`
+			`[Crawl Zukan] Fin du crawl. ${allCharacters.length} personnages trouvés. Vérification des changements via Redis...`,
 		);
 
 		const orderMapObj = buildOrderMap(allCharacters);
@@ -54,8 +54,7 @@ export async function crawlZukanOrder(): Promise<{
 		// propre signature — sinon un ordre inchangé masquerait un age_group/nickname
 		// corrigé sur zukan (ou simplement pas encore synchronisé, cf. déploiement du
 		// 1/9/2026) puisque la comparaison ci-dessous décide SEULE si on écrit en base.
-		const bioMapObj: Record<string, { a: string | null; s: string | null; n: string | null }> =
-			{};
+		const bioMapObj: Record<string, { a: string | null; s: string | null; n: string | null }> = {};
 		for (const c of allCharacters) {
 			if (c.zukanHash) bioMapObj[c.zukanHash] = { a: c.ageGroup, s: c.schoolYear, n: c.nickname };
 		}
@@ -69,13 +68,13 @@ export async function crawlZukanOrder(): Promise<{
 
 		if (!hasChanged) {
 			console.log(
-				"[Crawl Zukan] L'ordre des personnages n'a pas changé par rapport au dernier crawl. Synchronisation sautée."
+				"[Crawl Zukan] L'ordre des personnages n'a pas changé par rapport au dernier crawl. Synchronisation sautée.",
 			);
 			return { success: true, count: allCharacters.length };
 		}
 
 		console.log(
-			"[Crawl Zukan] Des changements ont été détectés (ordre et/ou biographie). Mise à jour de Supabase..."
+			"[Crawl Zukan] Des changements ont été détectés (ordre et/ou biographie). Mise à jour de Supabase...",
 		);
 
 		// Mise à jour de la table inagle_characters dans Supabase
@@ -117,7 +116,7 @@ export async function crawlZukanOrder(): Promise<{
 						if (updateError) {
 							console.error(
 								`[Crawl Zukan] Erreur de mise à jour pour ${char.name_en} :`,
-								updateError.message
+								updateError.message,
 							);
 						} else {
 							updatedCount++;
@@ -131,7 +130,7 @@ export async function crawlZukanOrder(): Promise<{
 		await cache.set(cacheKey, snapshot, 86400 * 7); // Expiration de 7 jours
 
 		console.log(
-			`[Crawl Zukan] Base de données mise à jour. ${updatedCount} personnages synchronisés.`
+			`[Crawl Zukan] Base de données mise à jour. ${updatedCount} personnages synchronisés.`,
 		);
 		return { success: true, count: allCharacters.length };
 	} catch (err: any) {

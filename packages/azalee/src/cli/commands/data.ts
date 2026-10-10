@@ -1,3 +1,4 @@
+import { isInagleDatabaseConfigured } from "@rosegriffon/db/pg";
 /**
  * `azalee data` — pipeline de données unifié.
  *
@@ -184,14 +185,7 @@ export function registerDataCommand(program: Command): void {
         "dump chara_param présent",
         existsSync(`${DATA_ROOT_DEFAULT}/common/gamedata/character`),
       );
-      check(
-        "DATABASE_URL configurée",
-        Boolean(
-          process.env.DATABASE_URL ||
-          process.env.ROSE_GRIFFON_DATABASE_URL ||
-          process.env.RG_DATABASE_URL,
-        ),
-      );
+      check("INAGLE_DATABASE_URL configured", Boolean(isInagleDatabaseConfigured()));
       check("snapshot schéma DB", existsSync(`${WEBSITE_ROOT}/data/schema-snapshot`));
       check(
         "standalone embarque un miroir",

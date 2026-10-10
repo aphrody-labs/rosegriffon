@@ -1,3 +1,4 @@
+import { getInagleDatabaseURL, isInagleDatabaseConfigured } from "@rosegriffon/db/pg";
 /**
  * Recherche d'entités et traduction assistée par glossaire, pour la commande
  * `azalee translate`.
@@ -62,7 +63,7 @@ export async function searchDatabaseTranslate(query: string): Promise<TranslateM
   const isValidKata = kata.length > 0 && [...kata].every((c) => isKana(c) || c === "ー");
 
   // PostgreSQL en premier.
-  const dbUrl = process.env.DATABASE_URL;
+  const dbUrl = isInagleDatabaseConfigured() ? getInagleDatabaseURL() : undefined;
   if (dbUrl) {
     try {
       const client = createPgClient(dbUrl);
@@ -292,7 +293,7 @@ async function loadGlossaryRows(): Promise<GlossaryRow[]> {
 			FROM inagle_items
 			WHERE category <> 'special_tactics'
 		`;
-    const dbUrl = process.env.DATABASE_URL;
+    const dbUrl = isInagleDatabaseConfigured() ? getInagleDatabaseURL() : undefined;
     if (dbUrl) {
       try {
         const client = createPgClient(dbUrl);

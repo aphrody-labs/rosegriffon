@@ -11,11 +11,13 @@ import {
 import { SearchPageContent } from "./search-page";
 
 function sourceFor(table: string): string {
-	const index = construireRequete()
+	const branch = [construireRequete("rg"), construireRequete("inagle")]
+		.join("\nUNION ALL\n")
 		.split("\nUNION ALL\n")
-		.findIndex((branch) => branch.includes(`FROM ${table}`));
-	if (index < 0) throw new Error(`Missing search source ${table}`);
-	return String(index);
+		.find((candidate) => candidate.includes(`FROM ${table}`));
+	const index = branch?.match(/(\d+)::int AS source/)?.[1];
+	if (index === undefined) throw new Error(`Missing search source ${table}`);
+	return index;
 }
 
 const rows: LigneBrute[] = [
@@ -52,7 +54,7 @@ describe("/search", () => {
 			await SearchPageContent({
 				searchParams: Promise.resolve({ q: "axel" }),
 				search: searchFixture,
-			})
+			}),
 		);
 		expect(html).toContain("Article Axel");
 		expect(html).toContain("Chronique Wiki Axel");
@@ -69,7 +71,7 @@ describe("/search", () => {
 			await SearchPageContent({
 				searchParams: Promise.resolve({ q: "axel", tab: "wiki" }),
 				search: searchFixture,
-			})
+			}),
 		);
 		expect(html).toContain("Axel Blaze");
 		expect(html).toContain("Chronique Wiki Axel");
@@ -88,7 +90,7 @@ describe("/search", () => {
 					search: async () => {
 						throw new Error("database unavailable");
 					},
-				})
+				}),
 			);
 			expect(html).toContain("temporairement indisponible");
 			expect(html).not.toContain("Aucun résultat trouvé");

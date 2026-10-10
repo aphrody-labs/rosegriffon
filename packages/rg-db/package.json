@@ -3,6 +3,13 @@
   "version": "1.0.7",
   "private": false,
   "description": "Accès PostgreSQL partagé, façades SQL et types Database générés (site + bot)",
+  "license": "UNLICENSED",
+  "files": [
+    "README.md",
+    "scripts",
+    "src",
+    "tsconfig.json"
+  ],
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -16,6 +23,7 @@
     "./achillea": "./src/achillea.ts",
     "./achillea-sql": "./src/achillea-sql.ts",
     "./inagle": "./src/inagle.ts",
+    "./inagle-sql": "./src/inagle-sql.ts",
     "./pg": "./src/pg.ts",
     "./bun-sql": "./src/bun-sql.ts",
     "./postgres-client": "./src/postgres-client.ts",
@@ -49,12 +57,5 @@
   },
   "engines": {
     "bun": ">=1.4.3-aphrody.4"
-  },
-  "license": "UNLICENSED",
-  "files": [
-    "README.md",
-    "scripts",
-    "src",
-    "tsconfig.json"
-  ]
+  }
 }

@@ -16,7 +16,7 @@
  * Anti-hallucination : aucune valeur inventée. Si le décodage CDN échoue, on renvoie `[]`.
  */
 
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createInagleSql } from "@rosegriffon/db/inagle-sql";
 import { fetchJson } from "../net";
 import type { InvocationSign, InvocationTier } from "./invocation-shared";
 import { rarityLabel } from "./invocation-shared";
@@ -46,7 +46,7 @@ interface InvocationDatabase {
   };
 }
 
-const sql = createAchilleaSql<InvocationDatabase>();
+const sql = createInagleSql<InvocationDatabase>();
 
 /** Décode les taux d'invocation et les joint aux noms de constellations. */
 export async function getInvocationRates(): Promise<InvocationSign[]> {

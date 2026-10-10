@@ -28,7 +28,7 @@
  *     (client-safe) ; les 18 NPC sans match gardent le fallback icône.
  */
 
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createInagleSql } from "@rosegriffon/db/inagle-sql";
 
 /** Marqueur d'erreur tableur figé dans certaines cellules (stat/buff). */
 const VLOOKUP_ERROR_PREFIX = "#N/A";
@@ -222,7 +222,7 @@ interface CoachesDatabase {
   inagle_characters: RawCharacterRef;
 }
 
-const sql = createAchilleaSql<CoachesDatabase>();
+const sql = createInagleSql<CoachesDatabase>();
 
 /**
  * Construit l'index `name_en` → `internal_code` depuis `inagle_characters`.

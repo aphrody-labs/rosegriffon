@@ -9,10 +9,8 @@
  * avec sa requête et son format de résultat. Chercher « Axel » depuis l'accueil
  * ne trouvait rien alors que le wiki a la fiche.
  *
- * Une seule requête couvre désormais les trois domaines. C'est possible parce
- * que les données d'Achilléa vivent dans le schéma `achillea` de la base `rg`
- * (`scripts/ops/achillea-merge.ts`) : sans cette fusion, il faudrait trois
- * allers-retours et un tri en mémoire.
+ * RG and Achillea share Supabase PostgreSQL; gameplay lives in Neon.
+ * Each store receives its own SQL union, then results share one presentation sort.
  *
  * ── MODULE PUR ──────────────────────────────────────────────────────────────
  * Aucune dépendance, aucune E/S : l'exécuteur SQL est INJECTÉ. Le paquet ne
@@ -79,6 +77,7 @@ export interface ResultatRecherche {
 
 /** Une source = une table, sa colonne de libellé, et comment en faire une URL. */
 interface Source {
+	store?: "inagle";
 	domaine: DomaineRecherche;
 	type: TypeResultat;
 	/** Expression SQL de la table, schéma compris. */
@@ -141,6 +140,7 @@ const SOURCES: readonly Source[] = [
 		domaine: "wiki",
 		href: (cle, bases) => `${bases.wiki}/chara/${cle}`,
 		table: "public.inagle_characters",
+		store: "inagle",
 		type: "personnage",
 		typePourLigne: (detail) => (detail === "BASARA" ? "basara" : "personnage"),
 	},
@@ -151,6 +151,7 @@ const SOURCES: readonly Source[] = [
 		domaine: "wiki",
 		href: (cle, bases) => `${bases.wiki}/skill/${cle}`,
 		table: "public.inagle_skills",
+		store: "inagle",
 		type: "technique",
 	},
 	{
@@ -163,6 +164,7 @@ const SOURCES: readonly Source[] = [
 		href: (cle, bases, detail) =>
 			detail === "special_tactics" ? `${bases.wiki}/tactic/${cle}` : `${bases.wiki}/item/${cle}`,
 		table: "public.inagle_items",
+		store: "inagle",
 		type: "objet",
 		typePourLigne: (detail) => (detail === "special_tactics" ? "tactique" : "objet"),
 	},
@@ -208,6 +210,7 @@ const SOURCES: readonly Source[] = [
 		domaine: "wiki" as const,
 		href: (cle: string, bases: BasesRecherche) => `${bases.wiki}/aura/${categorie}/${cle}`,
 		table: `public.${table}`,
+		store: "inagle" as const,
 		type,
 	})),
 	{
@@ -217,6 +220,7 @@ const SOURCES: readonly Source[] = [
 		domaine: "wiki",
 		href: (cle, bases) => `${bases.wiki}/equipe/${cle}`,
 		table: "public.inagle_teams",
+		store: "inagle",
 		type: "equipe",
 	},
 	{
@@ -251,8 +255,9 @@ export interface LigneBrute {
  * jamais interpolées : seuls des noms de tables et de colonnes constants, issus
  * de `SOURCES`, entrent dans le texte.
  */
-export function construireRequete(sources: readonly Source[] = SOURCES): string {
-	const branches = sources.map((source, index) => {
+export function construireRequete(store: "rg" | "inagle" = "rg"): string {
+	const branches = SOURCES.flatMap((source, index) => {
+		if ((source.store ?? "rg") !== store) return [];
 		const detail = source.colonneDetail ? `${source.colonneDetail}::text` : "NULL::text";
 		const filtre = source.filtre ? ` AND ${source.filtre}` : "";
 		const recherche = (source.colonnesRecherche ?? [source.colonneTitre])
@@ -277,7 +282,7 @@ export function motifIlike(requete: string): string {
 export function formaterLigne(
 	ligne: LigneBrute,
 	bases: BasesRecherche,
-	sources: readonly Source[] = SOURCES
+	sources: readonly Source[] = SOURCES,
 ): ResultatRecherche | null {
 	const source = sources[Number(ligne.source)];
 	if (!source) return null;
@@ -298,6 +303,10 @@ export function formaterLigne(
 
 /** Exécuteur SQL injecté : c'est l'appelant qui fournit sa connexion. */
 export type ExecuteurSql = (sql: string, params: unknown[]) => Promise<LigneBrute[]>;
+export interface ExecuteursSql {
+	rg: ExecuteurSql;
+	inagle: ExecuteurSql;
+}
 
 export interface OptionsRecherche {
 	bases?: BasesRecherche;
@@ -314,9 +323,9 @@ export interface OptionsRecherche {
  * recherche sans résultat. La route HTTP peut alors répondre 503.
  */
 export async function rechercherPartout(
-	executer: ExecuteurSql,
+	executer: ExecuteursSql,
 	requete: string,
-	options: OptionsRecherche = {}
+	options: OptionsRecherche = {},
 ): Promise<ResultatRecherche[]> {
 	const terme = requete.trim();
 	if (terme.length < LONGUEUR_MINIMALE) return [];
@@ -325,7 +334,12 @@ export async function rechercherPartout(
 	const limiteParSource = options.limiteParSource ?? 5;
 	const limiteTotale = options.limiteTotale ?? 20;
 
-	const lignes = await executer(construireRequete(), [motifIlike(terme), limiteParSource]);
+	const lignes = (
+		await Promise.all([
+			executer.rg(construireRequete("rg"), [motifIlike(terme), limiteParSource]),
+			executer.inagle(construireRequete("inagle"), [motifIlike(terme), limiteParSource]),
+		])
+	).flat();
 
 	const resultats = lignes
 		.map((ligne) => formaterLigne(ligne, bases))
@@ -345,7 +359,7 @@ export async function rechercherPartout(
 
 /** Regroupe par domaine, pour un rendu en sections. */
 export function grouperParDomaine(
-	resultats: ResultatRecherche[]
+	resultats: ResultatRecherche[],
 ): { domaine: DomaineRecherche; resultats: ResultatRecherche[] }[] {
 	return DOMAINES_RECHERCHE.map((domaine) => ({
 		domaine,

@@ -1,13 +1,23 @@
-import { db } from "../../plugins/db";
+import { inagleDb } from "../../plugins/db";
 import { WikiSqlRepository } from "./repository";
 
-const sqlWiki = new WikiSqlRepository(db);
+const sqlWiki = new WikiSqlRepository(inagleDb);
 
 export abstract class WikiService {
 	public static async getCharacters(params: Record<string, unknown>) {
-		return (await sqlWiki.characters(String(params.q ?? "") || undefined, Number(params.limit ?? 24), Number(params.page ?? 1))) ?? {
-			data: [], count: 0, page: Number(params.page ?? 1), limit: Number(params.limit ?? 24), source: "postgres" as const,
-		};
+		return (
+			(await sqlWiki.characters(
+				String(params.q ?? "") || undefined,
+				Number(params.limit ?? 24),
+				Number(params.page ?? 1),
+			)) ?? {
+				data: [],
+				count: 0,
+				page: Number(params.page ?? 1),
+				limit: Number(params.limit ?? 24),
+				source: "postgres" as const,
+			}
+		);
 	}
 
 	public static async getCharacter(idOrSlug: string) {
@@ -15,15 +25,35 @@ export abstract class WikiService {
 	}
 
 	public static async getSkills(params: Record<string, unknown>) {
-		return (await sqlWiki.skills(String(params.q ?? "") || undefined, Number(params.limit ?? 24), Number(params.page ?? 1))) ?? {
-			data: [], count: 0, page: Number(params.page ?? 1), limit: Number(params.limit ?? 24), source: "postgres" as const,
-		};
+		return (
+			(await sqlWiki.skills(
+				String(params.q ?? "") || undefined,
+				Number(params.limit ?? 24),
+				Number(params.page ?? 1),
+			)) ?? {
+				data: [],
+				count: 0,
+				page: Number(params.page ?? 1),
+				limit: Number(params.limit ?? 24),
+				source: "postgres" as const,
+			}
+		);
 	}
 
 	public static async getItems(params: Record<string, unknown>) {
-		return (await sqlWiki.items(String(params.q ?? "") || undefined, Number(params.limit ?? 24), Number(params.page ?? 1))) ?? {
-			data: [], count: 0, page: Number(params.page ?? 1), limit: Number(params.limit ?? 24), source: "postgres" as const,
-		};
+		return (
+			(await sqlWiki.items(
+				String(params.q ?? "") || undefined,
+				Number(params.limit ?? 24),
+				Number(params.page ?? 1),
+			)) ?? {
+				data: [],
+				count: 0,
+				page: Number(params.page ?? 1),
+				limit: Number(params.limit ?? 24),
+				source: "postgres" as const,
+			}
+		);
 	}
 
 	public static async getItem(id: string) {
@@ -31,9 +61,19 @@ export abstract class WikiService {
 	}
 
 	public static async getQuests(params: Record<string, unknown>) {
-		return (await sqlWiki.quests(String(params.q ?? "") || undefined, Number(params.limit ?? 24), Number(params.page ?? 1))) ?? {
-			data: [], count: 0, page: Number(params.page ?? 1), limit: Number(params.limit ?? 24), source: "postgres" as const,
-		};
+		return (
+			(await sqlWiki.quests(
+				String(params.q ?? "") || undefined,
+				Number(params.limit ?? 24),
+				Number(params.page ?? 1),
+			)) ?? {
+				data: [],
+				count: 0,
+				page: Number(params.page ?? 1),
+				limit: Number(params.limit ?? 24),
+				source: "postgres" as const,
+			}
+		);
 	}
 
 	public static async getQuest(id: string) {
@@ -41,9 +81,19 @@ export abstract class WikiService {
 	}
 
 	public static async getPassives(params: Record<string, unknown>) {
-		return (await sqlWiki.passives(String(params.q ?? "") || undefined, Number(params.limit ?? 24), Number(params.page ?? 1))) ?? {
-			data: [], count: 0, page: Number(params.page ?? 1), limit: Number(params.limit ?? 24), source: "postgres" as const,
-		};
+		return (
+			(await sqlWiki.passives(
+				String(params.q ?? "") || undefined,
+				Number(params.limit ?? 24),
+				Number(params.page ?? 1),
+			)) ?? {
+				data: [],
+				count: 0,
+				page: Number(params.page ?? 1),
+				limit: Number(params.limit ?? 24),
+				source: "postgres" as const,
+			}
+		);
 	}
 
 	public static async getPassive(id: string) {
@@ -67,12 +117,20 @@ export abstract class WikiService {
 	}
 
 	public static async getCrossCatalog(params: Record<string, unknown>) {
-		return (await sqlWiki.crossCatalog(
-			String(params.q ?? "") || undefined,
-			String(params.type ?? "") || undefined,
-			Number(params.limit ?? 50),
-			Number(params.page ?? 1),
-		)) ?? { data: [], count: 0, page: Number(params.page ?? 1), limit: Number(params.limit ?? 50), source: "postgres" as const };
+		return (
+			(await sqlWiki.crossCatalog(
+				String(params.q ?? "") || undefined,
+				String(params.type ?? "") || undefined,
+				Number(params.limit ?? 50),
+				Number(params.page ?? 1),
+			)) ?? {
+				data: [],
+				count: 0,
+				page: Number(params.page ?? 1),
+				limit: Number(params.limit ?? 50),
+				source: "postgres" as const,
+			}
+		);
 	}
 
 	public static async getCrossAsset(guid: string) {
@@ -88,7 +146,13 @@ export abstract class WikiService {
 	}
 
 	public static async searchText(q: string, locale = "fr", limit = 50) {
-		return { data: await sqlWiki.gameTextSearch(q, locale as "fr" | "en" | "ja", limit), query: q, locale, limit, source: "postgres" as const };
+		return {
+			data: await sqlWiki.gameTextSearch(q, locale as "fr" | "en" | "ja", limit),
+			query: q,
+			locale,
+			limit,
+			source: "postgres" as const,
+		};
 	}
 
 	public static async resolveText(hash: string) {
@@ -96,7 +160,9 @@ export abstract class WikiService {
 		if (rows.length === 0) return null;
 		const first = rows[0];
 		const out: Record<string, unknown> = { hashId: first?.hash_id, category: first?.category };
-		for (const row of rows) if (row.locale === "fr" || row.locale === "en" || row.locale === "ja") out[row.locale] = row.value;
+		for (const row of rows)
+			if (row.locale === "fr" || row.locale === "en" || row.locale === "ja")
+				out[row.locale] = row.value;
 		return out;
 	}
 
