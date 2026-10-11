@@ -3,6 +3,8 @@ declare module "bun" {
     CRON_SECRET: string;
     AZALEE_URL: string;
     WEBSITE_URL: string;
+    RG_DATABASE_URL: string;
+    INAGLE_DATABASE_URL: string;
     DATABASE_URL: string;
     SUPABASE_SERVICE_ROLE_KEY: string;
     NEXT_PUBLIC_SUPABASE_URL: string;
