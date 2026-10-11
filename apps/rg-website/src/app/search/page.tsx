@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { rechercherPartout } from "@rosegriffon/search";
 
-import { getPgPool } from "@/lib/db/pg";
+import { searchExecutors } from "@/lib/db/search";
 import { absoluteUrl } from "@/lib/site-url";
 import { SearchPageContent } from "./search-page";
 
@@ -24,15 +24,7 @@ export default function SearchPage({
 		<SearchPageContent
 			searchParams={searchParams}
 			search={async (query) => {
-				const pool = getPgPool();
-				return rechercherPartout(
-					async (sql, values) => {
-						const { rows } = await pool.query(sql, values);
-						return rows as never;
-					},
-					query,
-					{ limiteParSource: 5, limiteTotale: 100 }
-				);
+				return rechercherPartout(searchExecutors, query, { limiteParSource: 5, limiteTotale: 100 });
 			}}
 		/>
 	);

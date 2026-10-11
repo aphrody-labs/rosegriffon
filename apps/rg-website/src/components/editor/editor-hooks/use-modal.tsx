@@ -12,69 +12,77 @@ import { cn } from "@/lib/utils";
  * Uses the canonical Base UI dialog primitive to retain the editor stacking level.
  */
 export function useEditorModal(): [
-	JSX.Element | null,
-	(title: string, showModal: (onClose: () => void) => JSX.Element) => void,
+  JSX.Element | null,
+  (title: string, showModal: (onClose: () => void) => JSX.Element) => void,
 ] {
-	const [modalContent, setModalContent] = useState<null | {
-		closeOnClickOutside: boolean;
-		content: JSX.Element;
-		title: string;
-	}>(null);
+  const [modalContent, setModalContent] = useState<null | {
+    closeOnClickOutside: boolean;
+    content: JSX.Element;
+    title: string;
+  }>(null);
 
-	const onClose = useCallback(() => {
-		setModalContent(null);
-	}, []);
+  const onClose = useCallback(() => {
+    setModalContent(null);
+  }, []);
 
-	const modal = useMemo(() => {
-		if (modalContent === null) {
-			return null;
-		}
-		const { title, content, closeOnClickOutside } = modalContent;
-		return (
-			<DialogPrimitive.Root open disablePointerDismissal={!closeOnClickOutside} onOpenChange={(open) => { if (!open) onClose(); }}>
-				<DialogPrimitive.Portal>
-					<DialogPrimitive.Backdrop className="fixed inset-0 z-[150] bg-black/80 data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0" />
-					<DialogPrimitive.Popup
-						aria-describedby={undefined}
-						className={cn(
-							"fixed left-[50%] top-[50%] z-[150] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200",
-							"data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0",
-							"data-closed:zoom-out-95 data-open:zoom-in-95",
-							"data-closed:slide-out-to-left-1/2 data-closed:slide-out-to-top-[48%]",
-							"data-open:slide-in-from-left-1/2 data-open:slide-in-from-top-[48%]",
-							"sm:rounded-lg"
-						)}
-					>
-						<div className="flex flex-col space-y-1.5 text-center sm:text-left">
-							<DialogPrimitive.Title className="text-lg font-semibold leading-none tracking-tight">
-								{title}
-							</DialogPrimitive.Title>
-						</div>
-						{content}
-						<DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-open:bg-accent data-open:text-muted-foreground">
-							<X className="size-4" />
-							<span className="sr-only">Close</span>
-						</DialogPrimitive.Close>
-					</DialogPrimitive.Popup>
-				</DialogPrimitive.Portal>
-			</DialogPrimitive.Root>
-		);
-	}, [modalContent, onClose]);
+  const onOpenChange = useCallback((open: boolean) => {
+    if (!open) setModalContent(null);
+  }, []);
 
-	const showModal = useCallback(
-		(
-			title: string,
-			getContent: (onClose: () => void) => JSX.Element,
-			closeOnClickOutside = false
-		) => {
-			setModalContent({
-				closeOnClickOutside,
-				content: getContent(onClose),
-				title,
-			});
-		},
-		[onClose]
-	);
+  const modal = useMemo(() => {
+    if (modalContent === null) {
+      return null;
+    }
+    const { title, content, closeOnClickOutside } = modalContent;
+    return (
+      <DialogPrimitive.Root
+        open
+        disablePointerDismissal={!closeOnClickOutside}
+        onOpenChange={onOpenChange}
+      >
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Backdrop className="fixed inset-0 z-[150] bg-black/80 data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0" />
+          <DialogPrimitive.Popup
+            aria-describedby={undefined}
+            className={cn(
+              "fixed left-[50%] top-[50%] z-[150] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200",
+              "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0",
+              "data-closed:zoom-out-95 data-open:zoom-in-95",
+              "data-closed:slide-out-to-left-1/2 data-closed:slide-out-to-top-[48%]",
+              "data-open:slide-in-from-left-1/2 data-open:slide-in-from-top-[48%]",
+              "sm:rounded-lg",
+            )}
+          >
+            <div className="flex flex-col space-y-1.5 text-center sm:text-left">
+              <DialogPrimitive.Title className="text-lg font-semibold leading-none tracking-tight">
+                {title}
+              </DialogPrimitive.Title>
+            </div>
+            {content}
+            <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-open:bg-accent data-open:text-muted-foreground">
+              <X className="size-4" />
+              <span className="sr-only">Close</span>
+            </DialogPrimitive.Close>
+          </DialogPrimitive.Popup>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
+    );
+  }, [modalContent, onOpenChange]);
 
-	return [modal, showModal];
+  const showModal = useCallback(
+    (
+      title: string,
+      getContent: (onClose: () => void) => JSX.Element,
+      closeOnClickOutside = false,
+    ) => {
+      setModalContent({
+        closeOnClickOutside,
+        content: getContent(onClose),
+        title,
+      });
+    },
+    [onClose],
+  );
+
+  return [modal, showModal];
 }

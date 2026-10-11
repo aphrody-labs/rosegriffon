@@ -83,34 +83,24 @@ function estJwt(value: string | undefined | null): value is string {
 	return isValidKey(value) && value.split(".").length === 3;
 }
 
-/**
- * Clé publique du client navigateur.
- *
- * ── POURQUOI DEUX VARIABLES, ET DANS CET ORDRE ─────────────────────────────
- * `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` porte le format récent, mais l'env de
- * ce dépôt y met une clé `sb_publishable_…` que notre PostgREST auto-hébergé
- * refuse (cf. `estJwt`). `NEXT_PUBLIC_SUPABASE_ANON_KEY` porte le JWT anon
- * historique, signé par `SUPABASE_JWT_SECRET` — celui qui marche.
- *
- * On prend donc la première qui est un VRAI JWT, en gardant la publishable en
- * tête : le jour où elle en contiendra un (ou si la pile change), rien à
- * réécrire. Une clé au mauvais format n'est plus utilisée, elle est ignorée.
- *
- * Constaté en production le 1/9/2026 : le profil ne se chargeait pas et le
- * téléversement d'avatar échouait, avec `PGRST301` dans la console.
- */
+/** Cloud opaque keys require the Cloud gateway; the retained PostgREST gateway uses anon JWTs. */
 export function getSupabasePublishableKey(): string {
 	const publiable = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+	if (isValidKey(publiable) && publiable.startsWith("sb_publishable_")) {
+		const endpoint = new URL(getSupabaseUrl());
+		if (endpoint.protocol === "https:" && endpoint.hostname.endsWith(".supabase.co"))
+			return publiable;
+	}
 	if (estJwt(publiable)) return publiable;
 
 	const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 	if (estJwt(anon)) return anon;
 
-	throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY doit contenir un JWT RG valide");
+	throw new Error("A Supabase Cloud publishable key or legacy RG anon JWT is required");
 }
 
 export function getSupabaseServiceRoleKey(): string | null {
-	const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+	const key = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
 	if (isValidKey(key)) return key;
 
 	return null;

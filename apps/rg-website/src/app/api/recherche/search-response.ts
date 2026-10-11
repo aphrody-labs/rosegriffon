@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { grouperParDomaine, rechercherPartout, type ExecuteurSql } from "@rosegriffon/search";
+import { grouperParDomaine, rechercherPartout, type ExecuteursSql } from "@rosegriffon/search";
 
 /** Réponse HTTP de la recherche unifiée, avec exécuteur SQL injecté. */
-export async function respondreRecherche(requete: Request, executer: ExecuteurSql) {
+export async function respondreRecherche(requete: Request, executer: ExecuteursSql) {
 	const terme = (new URL(requete.url).searchParams.get("q") ?? "").trim();
 	if (terme.length < 2) return NextResponse.json({ groupes: [], resultats: [] });
 
@@ -16,7 +16,7 @@ export async function respondreRecherche(requete: Request, executer: ExecuteurSq
 		console.error("Erreur API recherche unifiée:", erreur);
 		return NextResponse.json(
 			{ erreur: "Recherche temporairement indisponible", groupes: [], resultats: [] },
-			{ status: 503 }
+			{ status: 503 },
 		);
 	}
 }

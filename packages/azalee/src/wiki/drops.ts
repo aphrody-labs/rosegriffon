@@ -27,7 +27,7 @@
  * (les `inagle_items` sont des hash `0x…`). Aucune résolution fiable → on ne forge rien.
  */
 
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createInagleSql } from "@rosegriffon/db/inagle-sql";
 import type { DropEntry, DropsPageData, SpiritGroup, SpiritTier, TeamBean } from "./drops-shared";
 
 // Ré-export des types + helpers purs depuis le module client-safe (compat imports existants).
@@ -83,7 +83,7 @@ interface DropsDatabase {
   inagle_drops: BeanRow;
 }
 
-const sql = createAchilleaSql<DropsDatabase>();
+const sql = createInagleSql<DropsDatabase>();
 
 const SUPPORTED_CONCRETE_SOURCES = ["win_treasure", "item_emission"] as const;
 

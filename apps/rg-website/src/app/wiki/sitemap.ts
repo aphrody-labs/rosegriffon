@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { getPgPool } from "@/lib/db/pg";
+import { getInaglePgPool } from "@rosegriffon/db/pg";
 import { SITE_URL } from "@/lib/site-url";
 import { wikiService } from "@/lib/wiki-service";
 
@@ -33,7 +33,7 @@ import { wikiService } from "@/lib/wiki-service";
  * par famille (personnages / techniques-objets / reste) avec
  * `generateSitemaps()` redevient pertinent — pas avant.
  *
- * Lecture Postgres DIRECTE (`getPgPool`, cf. `app/sitemap.ts`) plutôt que le
+ * Lecture Postgres DIRECTE (`getInaglePgPool`, cf. `app/sitemap.ts`) plutôt que le
  * client Supabase/PostgREST utilisé par les pages via `wikiService` : ce
  * plan de site ne doit pas dépendre de la disponibilité du Data API, et
  * n'a besoin que d'identifiants + horodatages — pas des enrichissements
@@ -98,7 +98,7 @@ const STATIC_PAGES: Array<{
 /** Exécute une requête `SELECT ... AS id` et renvoie la liste d'identifiants (non vides). */
 async function idsDepuisSql(sql: string): Promise<string[]> {
 	try {
-		const pool = getPgPool();
+		const pool = getInaglePgPool();
 		const { rows } = await pool.query<{ id: string | null }>(sql);
 		return rows.map((r) => r.id).filter((id): id is string => Boolean(id));
 	} catch (error) {
@@ -120,9 +120,9 @@ async function idsDepuisSql(sql: string): Promise<string[]> {
  */
 async function personnages(baseUrl: string): Promise<MetadataRoute.Sitemap> {
 	try {
-		const pool = getPgPool();
+		const pool = getInaglePgPool();
 		const { rows } = await pool.query<{ base_slug: string | null; updated_at: string | null }>(
-			"SELECT base_slug, updated_at FROM inagle_characters WHERE base_slug IS NOT NULL ORDER BY updated_at DESC NULLS LAST"
+			"SELECT base_slug, updated_at FROM inagle_characters WHERE base_slug IS NOT NULL ORDER BY updated_at DESC NULLS LAST",
 		);
 		const vus = new Set<string>();
 		const entries: MetadataRoute.Sitemap = [];
@@ -150,13 +150,13 @@ async function personnages(baseUrl: string): Promise<MetadataRoute.Sitemap> {
  */
 async function techniques(baseUrl: string): Promise<MetadataRoute.Sitemap> {
 	try {
-		const pool = getPgPool();
+		const pool = getInaglePgPool();
 		const { rows } = await pool.query<{
 			id: string;
 			updated_at: string | null;
 			created_at: string | null;
 		}>(
-			"SELECT id, updated_at, created_at FROM inagle_skills WHERE id NOT LIKE '%\\_or' ESCAPE '\\' ORDER BY created_at DESC NULLS LAST"
+			"SELECT id, updated_at, created_at FROM inagle_skills WHERE id NOT LIKE '%\\_or' ESCAPE '\\' ORDER BY created_at DESC NULLS LAST",
 		);
 		return rows.map((row) => ({
 			changeFrequency: "monthly" as const,
@@ -173,7 +173,7 @@ async function techniques(baseUrl: string): Promise<MetadataRoute.Sitemap> {
 /** Objets — toutes les lignes, sans filtre (parité avec l'ancien générateur). */
 async function objets(baseUrl: string): Promise<MetadataRoute.Sitemap> {
 	try {
-		const pool = getPgPool();
+		const pool = getInaglePgPool();
 		const { rows } = await pool.query<{
 			id: string;
 			updated_at: string | null;
@@ -244,19 +244,21 @@ async function auras(baseUrl: string): Promise<MetadataRoute.Sitemap> {
  */
 async function tactiques(baseUrl: string): Promise<MetadataRoute.Sitemap> {
 	try {
-		const pool = getPgPool();
+		const pool = getInaglePgPool();
 		const [base, special] = await Promise.all([
 			pool.query<{ internal_code: string | null }>(
-				"SELECT internal_code FROM inagle_tactics WHERE internal_code IS NOT NULL"
+				"SELECT internal_code FROM inagle_tactics WHERE internal_code IS NOT NULL",
 			),
 			pool.query<{ internal_code: string | null; name_fr: string | null; name_en: string | null }>(
-				"SELECT internal_code, name_fr, name_en FROM inagle_special_tactics WHERE internal_code IS NOT NULL"
+				"SELECT internal_code, name_fr, name_en FROM inagle_special_tactics WHERE internal_code IS NOT NULL",
 			),
 		]);
 
 		const isPlaceholder = (code: string, nameFr: string | null, nameEn: string | null): boolean => {
 			if (!code || code.startsWith("test_")) return true;
-			return (nameFr ?? "").includes("必殺タクティクス") || (nameEn ?? "").includes("必殺タクティクス");
+			return (
+				(nameFr ?? "").includes("必殺タクティクス") || (nameEn ?? "").includes("必殺タクティクス")
+			);
 		};
 
 		const connus = new Set(base.rows.map((r) => r.internal_code).filter(Boolean));
@@ -357,16 +359,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const baseUrl = SITE_URL;
 	const lastModified = new Date();
 
-	const [personnagesUrls, techniquesUrls, objetsUrls, aurasUrls, tactiquesUrls, famillesUrls, passifsUrls] =
-		await Promise.all([
-			personnages(baseUrl),
-			techniques(baseUrl),
-			objets(baseUrl),
-			auras(baseUrl),
-			tactiques(baseUrl),
-			famillesSimples(baseUrl),
-			passifs(baseUrl),
-		]);
+	const [
+		personnagesUrls,
+		techniquesUrls,
+		objetsUrls,
+		aurasUrls,
+		tactiquesUrls,
+		famillesUrls,
+		passifsUrls,
+	] = await Promise.all([
+		personnages(baseUrl),
+		techniques(baseUrl),
+		objets(baseUrl),
+		auras(baseUrl),
+		tactiques(baseUrl),
+		famillesSimples(baseUrl),
+		passifs(baseUrl),
+	]);
 
 	return [
 		...STATIC_PAGES.map(({ path, priority, changeFrequency }) => ({

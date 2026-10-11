@@ -1,7 +1,7 @@
 /** `azalee dialogue` — recherche SQL dans les dialogues narratifs et de chronique. */
 
 import type { Command } from "commander";
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createInagleSql } from "@rosegriffon/db/inagle-sql";
 import type { Database } from "@rosegriffon/db/schema";
 
 import {
@@ -40,7 +40,7 @@ export function registerDialogueCommand(program: Command): void {
 
         const textQ = inputQuery.toLowerCase().trim();
         const speakerQ = speakerQuery?.toLowerCase().trim();
-        const db = createAchilleaSql<Database>();
+        const db = createInagleSql<Database>();
         const dialogueRows = await db
           .selectFrom("inagle_game_text")
           .select(["hash_id", "locale", "category", "value"])

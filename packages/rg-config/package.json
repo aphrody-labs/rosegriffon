@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/config",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": false,
   "description": "Configs partagées : TypeScript, Oxc et Tailwind preset",
   "repository": {
@@ -37,7 +37,7 @@
     "typecheck": "tsc --noEmit"
   },
   "engines": {
-    "bun": ">=1.4.3"
+    "bun": ">=1.4.3-aphrody.4"
   },
   "license": "UNLICENSED"
 }

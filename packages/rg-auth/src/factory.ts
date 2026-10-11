@@ -8,6 +8,7 @@ import { admin, bearer, genericOAuth, jwt } from "better-auth/plugins";
 import { type AccountEmailSender, createAccountOptions } from "./account-options";
 import { commonAuthOptions, ensureUserProfile, googleProvider } from "./core";
 import { deuxFacteurs } from "./two-factor";
+import { resolveAuthSecret, resolveTrustedOrigins } from "./runtime-config";
 
 type BetterAuthDatabase = Parameters<typeof betterAuth>[0]["database"];
 
@@ -38,7 +39,7 @@ export interface PatreonAuthIntegration {
 export interface RoseGriffonAuthOptions {
 	database: BetterAuthDatabase;
 	baseURL: string;
-	secret: string;
+	secret?: string;
 	sendEmail: AccountEmailSender;
 	executerSql?: (requete: string, parametres: unknown[]) => Promise<unknown>;
 	nextCookiesPlugin?: unknown;
@@ -52,13 +53,16 @@ export interface RoseGriffonAuthOptions {
  * Next.js path aliases and of the Patreon client implementation.
  */
 export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
+	const secret = resolveAuthSecret(process.env, options.secret);
 	const patreon = options.patreon;
 	const discordClientId = process.env.DISCORD_CLIENT_ID ?? "";
 	const discordClientSecret = process.env.DISCORD_CLIENT_SECRET ?? "";
 	const twitchClientId = process.env.TWITCH_AUTH_CLIENT_ID ?? process.env.TWITCH_CLIENT_ID ?? "";
-	const twitchClientSecret = process.env.TWITCH_AUTH_CLIENT_SECRET ?? process.env.TWITCH_CLIENT_SECRET ?? "";
+	const twitchClientSecret =
+		process.env.TWITCH_AUTH_CLIENT_SECRET ?? process.env.TWITCH_CLIENT_SECRET ?? "";
 	const githubClientId = process.env.GITHUB_CLIENT_ID ?? process.env.AUTH_GITHUB_ID ?? "";
-	const githubClientSecret = process.env.GITHUB_CLIENT_SECRET ?? process.env.AUTH_GITHUB_SECRET ?? "";
+	const githubClientSecret =
+		process.env.GITHUB_CLIENT_SECRET ?? process.env.AUTH_GITHUB_SECRET ?? "";
 	const configuredSocialProviders = {
 		...(discordClientId && discordClientSecret
 			? {
@@ -149,7 +153,7 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
 		...commonAuthOptions,
 		database: options.database,
 		baseURL: options.baseURL,
-		secret: options.secret,
+		secret,
 		user: {
 			...commonAuthOptions.user,
 			...createAccountOptions({
@@ -189,22 +193,7 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
 				trustedProviders: [...trustedSocialProviders, ...(patreon ? ["patreon"] : [])],
 			},
 		},
-		trustedOrigins: [
-			"https://rosegriffon.fr",
-			"https://www.rosegriffon.fr",
-			"https://achillea.rosegriffon.fr",
-			"https://ranked.rosegriffon.fr",
-			"https://azalee.rosegriffon.fr",
-			"https://dragonballfr.com",
-			"https://www.dragonballfr.com",
-			"tauri://localhost",
-			"http://tauri.localhost",
-			options.baseURL,
-			"http://localhost:3000",
-			"http://localhost:3001",
-			"http://localhost:5011",
-			"http://127.0.0.1:5011",
-		].filter((value, index, values) => value && values.indexOf(value) === index),
+		trustedOrigins: resolveTrustedOrigins(options.baseURL),
 		advanced: {
 			...commonAuthOptions.advanced,
 			database: { generateId: () => crypto.randomUUID() },
@@ -214,14 +203,31 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
 		},
 		databaseHooks: {
 			account: {
-				create: { after: async (account) => { await patreon?.onAccountChanged?.(account); } },
-				update: { after: async (account) => { await patreon?.onAccountChanged?.(account); } },
+				create: {
+					after: async (account) => {
+						await patreon?.onAccountChanged?.(account);
+					},
+				},
+				update: {
+					after: async (account) => {
+						await patreon?.onAccountChanged?.(account);
+					},
+				},
 			},
 			session: {
 				create: {
 					after: async (session) => {
 						try {
-							await ensureUserProfile(session.user as { id: string; name?: string | null; email?: string | null; image?: string | null }, undefined, { appName: "Rose Griffon" });
+							await ensureUserProfile(
+								session.user as {
+									id: string;
+									name?: string | null;
+									email?: string | null;
+									image?: string | null;
+								},
+								undefined,
+								{ appName: "Rose Griffon" },
+							);
 						} catch (error) {
 							console.error("[auth] session profile sync failed", error);
 						}

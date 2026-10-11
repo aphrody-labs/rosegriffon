@@ -29,7 +29,7 @@
  * ces valeurs telles quelles (en hexadécimal), sans leur inventer de nom.
  */
 
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createInagleSql } from "@rosegriffon/db/inagle-sql";
 import {
   type CapsuleListResult,
   type CapsulePool,
@@ -105,7 +105,7 @@ interface GachaDatabase {
   inagle_costumes: CostumeRow;
 }
 
-const sql = createAchilleaSql<GachaDatabase>();
+const sql = createInagleSql<GachaDatabase>();
 
 function mapCapsuleRow(row: CapsuleRow): CapsulePrize {
   const vars = parseVars(row.prize_data);

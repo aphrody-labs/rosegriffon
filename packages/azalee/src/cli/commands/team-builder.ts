@@ -1,3 +1,4 @@
+import { getDatabaseURL } from "@rosegriffon/db/pg";
 /**
  * `azalee team-builder` — gestion et génération de compositions d'équipe.
  *
@@ -61,9 +62,9 @@ export function registerTeamBuilderCommand(program: Command): void {
     .action(async (action: string, args: string[], options: TeamBuilderOptions) => {
       suppressLogs(!!options.json);
       try {
-        const dbUrl = process.env.DATABASE_URL;
+        const dbUrl = getDatabaseURL();
         if (!dbUrl) {
-          throw new Error("DATABASE_URL non définie dans l'environnement");
+          throw new Error("RG_DATABASE_URL non définie dans l'environnement");
         }
         const client = createPgClient(dbUrl);
 

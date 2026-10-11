@@ -7,7 +7,7 @@ import { LatestNewsSection } from "@/components/home/LatestNewsSection";
 import { NetworkSection } from "@/components/home/NetworkSection";
 import { WikiCarousel } from "@/components/home/WikiCarousel";
 import type { WikiSectionStats } from "@/components/home/WikiCarousel";
-import { getPgPool } from "@/lib/db/pg";
+import { getInaglePgPool, getPgPool } from "@rosegriffon/db/pg";
 import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -43,7 +43,7 @@ export default async function HomePage() {
 
 	// Fetch pinned articles, latest articles, tweets, and wiki counts in parallel
 	// Lecture `articles` + `tweets` Postgres DIRECTE (bypass le Data API PostgREST
-	// — cf. lib/db/pg.ts) ; les projections `inagle_*` utilisent la même connexion.
+	// Gameplay counts are read separately from the Neon projection.
 	const [
 		{ rows: pinnedArticles },
 		{ rows: latestArticles },
@@ -55,14 +55,14 @@ export default async function HomePage() {
 			 WHERE status = $1 AND app = $2
 			 ORDER BY published_at DESC
 			 LIMIT 1`,
-			["published", "azalee"]
+			["published", "azalee"],
 		),
 		pool.query(
 			`SELECT * FROM articles
 			 WHERE status = $1 AND app = $2
 			 ORDER BY published_at DESC
 			 LIMIT 3 OFFSET 1`,
-			["published", "azalee"]
+			["published", "azalee"],
 		),
 		pool.query(
 			`SELECT id, text, translation, created_at, author_username, author_name, media
@@ -70,9 +70,9 @@ export default async function HomePage() {
 			 WHERE author_username = $1
 			 ORDER BY created_at DESC
 			 LIMIT 6`,
-			["Azalee_IE"]
+			["Azalee_IE"],
 		),
-		pool.query<WikiCountRow>(`
+		getInaglePgPool().query<WikiCountRow>(`
 			SELECT 'characters'::text AS key, COUNT(*)::int AS count FROM public.inagle_characters
 			UNION ALL SELECT 'skills', COUNT(*)::int FROM public.inagle_skills
 			UNION ALL SELECT 'items', COUNT(*)::int FROM public.inagle_items

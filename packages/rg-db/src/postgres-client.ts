@@ -1,4 +1,5 @@
 import { createAchilleaSql } from "./achillea-sql";
+import { createInagleSql } from "./inagle-sql";
 import { getSupabaseServiceRoleKey, getSupabaseUrl } from "./env";
 import type { Database } from "./schema";
 
@@ -42,7 +43,7 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
 
 	constructor(
 		private readonly db: SqlExecutor,
-		private readonly table: string
+		private readonly table: string,
 	) {}
 
 	select(fields = "*", options?: { count?: string; head?: boolean }) {
@@ -79,7 +80,7 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
 		this.where.push(
 			value === null
 				? `${col} IS ${operator === "=" ? "" : "NOT "}NULL`
-				: `${col} ${operator} ${this.value(value)}`
+				: `${col} ${operator} ${this.value(value)}`,
 		);
 		return this;
 	}
@@ -114,7 +115,9 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
 	textSearch(column: string, query: string, options?: { config?: string }) {
 		const config = options?.config ?? "simple";
 		if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(config)) throw new Error("Invalid text search config");
-		this.where.push(`${identifier(column)} @@ to_tsquery(${this.value(config)}, ${this.value(query)})`);
+		this.where.push(
+			`${identifier(column)} @@ to_tsquery(${this.value(config)}, ${this.value(query)})`,
+		);
 		return this;
 	}
 	like(column: string, value: string) {
@@ -125,13 +128,15 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
 		this.where.push(
 			values.length
 				? `${identifier(column)} IN (${values.map((value) => this.value(value)).join(", ")})`
-				: "FALSE"
+				: "FALSE",
 		);
 		return this;
 	}
 	not(column: string, operator: "is" | "like" | "ilike", value: unknown) {
 		if (operator === "is") {
-			this.where.push(`${identifier(column)} IS ${value === null ? "NOT NULL" : "NOT " + String(value).toUpperCase()}`);
+			this.where.push(
+				`${identifier(column)} IS ${value === null ? "NOT NULL" : "NOT " + String(value).toUpperCase()}`,
+			);
 			return this;
 		}
 		this.where.push(`${identifier(column)} NOT ${operator.toUpperCase()} ${this.value(value)}`);
@@ -157,7 +162,7 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
 	}
 	order(column: string, options?: { ascending?: boolean; nullsFirst?: boolean }) {
 		this.ordering.push(
-			`${identifier(column)} ${options?.ascending === false ? "DESC" : "ASC"}${options?.nullsFirst === undefined ? "" : options.nullsFirst ? " NULLS FIRST" : " NULLS LAST"}`
+			`${identifier(column)} ${options?.ascending === false ? "DESC" : "ASC"}${options?.nullsFirst === undefined ? "" : options.nullsFirst ? " NULLS FIRST" : " NULLS LAST"}`,
 		);
 		return this;
 	}
@@ -221,7 +226,7 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
 			this.params.push(...whereParams);
 			const where = this.whereSql().replace(
 				/\$(\d+)/g,
-				(_match, index: string) => `$${Number(index) + offsetWhere}`
+				(_match, index: string) => `$${Number(index) + offsetWhere}`,
 			);
 			return `UPDATE ${identifier(this.table)} SET ${assignments}${where} RETURNING ${this.projectionSql}`;
 		}
@@ -257,19 +262,21 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
 	}
 	then<TResult1 = Result, TResult2 = never>(
 		ok?: ((value: Result) => TResult1 | PromiseLike<TResult1>) | null,
-		fail?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
+		fail?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
 	) {
 		return this.execute().then(ok, fail);
 	}
 }
 
 export function createPostgresClient(connectionString?: string) {
-	const db = createAchilleaSql<Database>(connectionString ? { url: connectionString } : {});
+	const rg = () => createAchilleaSql<Database>(connectionString ? { url: connectionString } : {});
+	const inagle = () => createInagleSql<Database>();
+	const dbFor = (table: string) => (table.startsWith("inagle_") ? inagle() : rg());
 	const baseUrl = getSupabaseUrl(true).replace(/\/$/, "");
 	const serviceKey = getSupabaseServiceRoleKey();
 	const headers = () => ({
 		apikey: serviceKey ?? "",
-		Authorization: `Bearer ${serviceKey ?? ""}`,
+		...(serviceKey?.split(".").length === 3 ? { Authorization: `Bearer ${serviceKey}` } : {}),
 	});
 	const storage = {
 		from: (bucket: string) => ({
@@ -289,7 +296,7 @@ export function createPostgresClient(connectionString?: string) {
 							method: "POST",
 							headers: { ...headers(), "content-type": "application/json" },
 							body: JSON.stringify({ prefix: prefix ?? "", ...options }),
-						}
+						},
 					);
 					return response.ok
 						? { data: await response.json(), error: null }
@@ -309,7 +316,7 @@ export function createPostgresClient(connectionString?: string) {
 							method: "POST",
 							headers: { ...headers(), "content-type": "application/json" },
 							body: JSON.stringify({ expiresIn }),
-						}
+						},
 					);
 					if (!response.ok) return { data: null, error: new Error(await response.text()) };
 					const payload = (await response.json()) as { signedURL?: string; signedUrl?: string };
@@ -333,7 +340,7 @@ export function createPostgresClient(connectionString?: string) {
 					paths.map(async (path) => ({
 						path,
 						...(await storage.from(bucket).createSignedUrl(path, expiresIn)),
-					}))
+					})),
 				);
 				const failed = results.find((result) => result.error);
 				return failed
@@ -346,7 +353,7 @@ export function createPostgresClient(connectionString?: string) {
 			upload: async (
 				path: string,
 				body: unknown,
-				options?: { contentType?: string; cacheControl?: string; upsert?: boolean }
+				options?: { contentType?: string; cacheControl?: string; upsert?: boolean },
 			) => {
 				if (!baseUrl || !serviceKey)
 					return { data: null, error: new Error("Storage credentials are not configured") };
@@ -365,7 +372,7 @@ export function createPostgresClient(connectionString?: string) {
 								...(options?.upsert ? { "x-upsert": "true" } : {}),
 							},
 							body: body as any,
-						}
+						},
 					);
 					if (!response.ok) return { data: null, error: new Error(await response.text()) };
 					return { data: await response.json(), error: null };
@@ -384,7 +391,7 @@ export function createPostgresClient(connectionString?: string) {
 							{
 								method: "DELETE",
 								headers: headers(),
-							}
+							},
 						);
 						if (!response.ok) return { error: new Error(await response.text()) };
 					}
@@ -399,7 +406,7 @@ export function createPostgresClient(connectionString?: string) {
 		admin: {
 			deleteUser: async (userId: string) => {
 				try {
-					await (db as unknown as SqlExecutor).executeQuery({
+					await (rg() as unknown as SqlExecutor).executeQuery({
 						sql: "DELETE FROM auth.users WHERE id = $1",
 						parameters: [userId],
 					});
@@ -414,11 +421,15 @@ export function createPostgresClient(connectionString?: string) {
 		},
 	};
 	return {
-		from: (table: string): any => new PostgresQueryBuilder(db as unknown as SqlExecutor, table),
+		from: (table: string): any =>
+			new PostgresQueryBuilder(
+				{ executeQuery: (query) => (dbFor(table) as unknown as SqlExecutor).executeQuery(query) },
+				table,
+			),
 		rpc: async (name: string, args: Record<string, unknown> = {}) => {
 			const fn = identifier(name);
 			const keys: string[] = Object.keys(args);
-			const result = await (db as unknown as SqlExecutor).executeQuery({
+			const result = await (dbFor(name) as unknown as SqlExecutor).executeQuery({
 				sql: `SELECT * FROM ${fn}(${keys.map((key: string) => `"${key.replace(/"/g, '""')}" => $${keys.indexOf(key) + 1}`).join(", ")})`,
 				parameters: keys.map((key) => args[key]),
 			});

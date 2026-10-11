@@ -13,7 +13,7 @@
  * PostgreSQL canonique via Kysely.
  */
 
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createInagleSql } from "@rosegriffon/db/inagle-sql";
 import {
   type Trophy,
   type TrophyCategory,
@@ -38,7 +38,7 @@ interface TrophyDatabase {
   inagle_trophies: TrophyRow;
 }
 
-const sql = createAchilleaSql<TrophyDatabase>();
+const sql = createInagleSql<TrophyDatabase>();
 
 /** Nettoie une cellule texte (trim, null → ""). */
 function clean(v: string | null | undefined): string {

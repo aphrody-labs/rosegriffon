@@ -1,8 +1,11 @@
 import type { BaseCharacter, CharacterVariant, MultiLevelStats, Skill } from "@rosegriffon/inagle";
 import { unstable_cache } from "next/cache";
-import { getPgPool } from "@/lib/db/pg";
-import { getMiximaxImageUrl, resolveAssetUrl, resolveAuraTelopUrl } from "@rosegriffon/azalee/images";
-
+import { getInaglePgPool, getPgPool } from "@rosegriffon/db/pg";
+import {
+	getMiximaxImageUrl,
+	resolveAssetUrl,
+	resolveAuraTelopUrl,
+} from "@rosegriffon/azalee/images";
 
 const CACHE_TTL = 3600 * 24;
 
@@ -135,14 +138,25 @@ function mapToBaseCharacter(row: any): BaseCharacter {
 // --- Generic Fetcher ---
 async function fetchTable<T>(table: string): Promise<T[]> {
 	const allowed = new Set([
-		"inagle_characters", "inagle_items", "inagle_teams", "inagle_formations", "inagle_passives",
-		"inagle_tactics", "inagle_drops", "inagle_kizuna_items", "inagle_skills", "inagle_auras",
-		"inagle_keshins_clean", "inagle_souls_clean", "inagle_miximax_clean", "inagle_awakenings_clean",
+		"inagle_characters",
+		"inagle_items",
+		"inagle_teams",
+		"inagle_formations",
+		"inagle_passives",
+		"inagle_tactics",
+		"inagle_drops",
+		"inagle_kizuna_items",
+		"inagle_skills",
+		"inagle_auras",
+		"inagle_keshins_clean",
+		"inagle_souls_clean",
+		"inagle_miximax_clean",
+		"inagle_awakenings_clean",
 		"inagle_mode_changes_clean",
 	]);
 	if (!allowed.has(table)) return [];
 	try {
-		const { rows } = await getPgPool().query(`select * from public."${table}"`);
+		const { rows } = await getInaglePgPool().query(`select * from public."${table}"`);
 		return rows as T[];
 	} catch {
 		return [];
@@ -159,7 +173,10 @@ const getRawCharacters = unstable_cache(
 		let finished = false;
 
 		while (!finished) {
-			const { rows: data } = await getPgPool().query(`select * from public.inagle_characters order by id asc limit $1 offset $2`, [batchSize, from]);
+			const { rows: data } = await getInaglePgPool().query(
+				`select * from public.inagle_characters order by id asc limit $1 offset $2`,
+				[batchSize, from],
+			);
 			if (!data || data.length === 0) {
 				finished = true;
 			} else {
@@ -174,7 +191,7 @@ const getRawCharacters = unstable_cache(
 		return allData;
 	},
 	["all-raw-characters"],
-	{ revalidate: CACHE_TTL, tags: ["characters"] }
+	{ revalidate: CACHE_TTL, tags: ["characters"] },
 );
 
 const getCharacters = async (): Promise<BaseCharacter[]> => {
@@ -185,7 +202,7 @@ const getCharacters = async (): Promise<BaseCharacter[]> => {
 const getItems = unstable_cache(
 	async (): Promise<InagleItem[]> => fetchTable<InagleItem>("inagle_items"),
 	["all-items"],
-	{ revalidate: CACHE_TTL, tags: ["items"] }
+	{ revalidate: CACHE_TTL, tags: ["items"] },
 );
 
 // Map raw aura DB row → EnrichedAuraSkill format
@@ -278,8 +295,13 @@ const getAuras = unstable_cache(
 			{ video_url: string | null; internal_code: string | null }
 		>();
 		if (skillIds.length > 0) {
-			const { rows: skills } = await getPgPool().query<{ id: string; video_url: string | null; internal_code: string | null }>(
-				"select id, video_url, internal_code from public.inagle_skills where id = any($1::text[])", [skillIds],
+			const { rows: skills } = await getInaglePgPool().query<{
+				id: string;
+				video_url: string | null;
+				internal_code: string | null;
+			}>(
+				"select id, video_url, internal_code from public.inagle_skills where id = any($1::text[])",
+				[skillIds],
 			);
 			if (skills) {
 				for (const s of skills) {
@@ -303,7 +325,7 @@ const getAuras = unstable_cache(
 		});
 	},
 	["all-auras"],
-	{ revalidate: CACHE_TTL, tags: ["auras"] }
+	{ revalidate: CACHE_TTL, tags: ["auras"] },
 );
 
 // Les "hissatsu" (techniques) vivent dans `inagle_skills` ; la table/vue
@@ -314,7 +336,7 @@ const getRawSkills = unstable_cache(
 	async (): Promise<Array<Record<string, unknown>>> =>
 		fetchTable<Record<string, unknown>>("inagle_skills"),
 	["all-skills"],
-	{ revalidate: CACHE_TTL, tags: ["skills"] }
+	{ revalidate: CACHE_TTL, tags: ["skills"] },
 );
 
 const getSkills = async (): Promise<Skill[]> => {
@@ -338,7 +360,7 @@ const getSkills = async (): Promise<Skill[]> => {
 				skillId: r.id?.toString() || "0",
 				tpCost: r.tp_cost ?? r.tension_cost,
 				type: 1,
-			}) as any
+			}) as any,
 	);
 };
 
@@ -396,7 +418,7 @@ function mapPassiveRow(row: any): any {
 	const boostType = boostTypeMap[row.boost_type] || "unknown";
 	return {
 		_file: "inagle_passives",
-	_source: "postgres",
+		_source: "postgres",
 		boostType,
 		boostTypeName: {
 			en: boostType.charAt(0).toUpperCase() + boostType.slice(1),
@@ -439,7 +461,7 @@ async function getMerchProducts(): Promise<MerchProductRow[]> {
 	try {
 		const pool = getPgPool();
 		const { rows } = await pool.query<MerchProductRow>(
-			"SELECT * FROM merch_products WHERE is_active = true"
+			"SELECT * FROM merch_products WHERE is_active = true",
 		);
 		return rows.map((row) => ({
 			...row,
@@ -476,7 +498,7 @@ export const apiClient = {
 			const q = query.toLowerCase();
 			return chars
 				.filter(
-					(c) => c.names.fr?.toLowerCase().includes(q) || c.names.ja?.toLowerCase().includes(q)
+					(c) => c.names.fr?.toLowerCase().includes(q) || c.names.ja?.toLowerCase().includes(q),
 				)
 				.slice(0, limit);
 		},

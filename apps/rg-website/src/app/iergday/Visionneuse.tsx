@@ -16,9 +16,9 @@ import { TexteDiscord } from "./TexteDiscord";
  * LA visionneuse plein écran de la page — il n'y en a qu'une, et il ne doit y en
  * avoir qu'une.
  *
- * Bâtie sur le `Dialog` partagé (Radix) : l'overlay, le piège de focus, la
+ * Bâtie sur le `Dialog` partagé (Base UI) : l'overlay, le piège de focus, la
  * fermeture par Échap et le verrou de défilement viennent gratuitement du
- * composant. Il ne reste ici que ce que Radix ne fournit pas : la navigation
+ * composant. Il ne reste ici que ce que Base UI ne fournit pas : la navigation
  * ←/→ entre documents, le passage d'une image à l'autre au sein d'un même
  * document, et le téléchargement.
  *
@@ -186,6 +186,10 @@ export function Visionneuse({
   const [telechargement, setTelechargement] = useState(false);
   /** Élément à re-focaliser à la fermeture (la vignette qui a ouvert la vue). */
   const declencheur = useRef<HTMLElement | null>(null);
+  const finalFocus = useCallback(
+    () => (declencheur.current?.isConnected ? declencheur.current : true),
+    [],
+  );
 
   const ouverte = index !== null;
   const documentOuvert = ouverte ? documents[index] : undefined;
@@ -203,7 +207,7 @@ export function Visionneuse({
    * Tant que la visionneuse est FERMÉE, on suit le dernier élément focalisé : au
    * moment de l'ouverture, c'est la vignette qui vient d'être activée (clic ou
    * clavier). L'écoute s'arrête à l'ouverture, donc la référence ne bouge plus
-   * pendant que Radix promène le focus à l'intérieur de la boîte de dialogue.
+   * pendant que Base UI promène le focus à l'intérieur de la boîte de dialogue.
    * `<body>` est ignoré : il ne se focalise pas, et il écraserait la référence
    * pendant la fermeture.
    */
@@ -234,7 +238,7 @@ export function Visionneuse({
     }
   }, [index, onNaviguer, documents.length]);
 
-  // Radix gère Échap ; les flèches restent à notre charge.
+  // Base UI gère Échap ; les flèches restent à notre charge.
   useEffect(() => {
     if (!ouverte) {
       return;
@@ -304,7 +308,7 @@ export function Visionneuse({
          * dans l'arbre d'accessibilité, où il ressortait « superseded »).
          * Inutile d'en poser un second, qui laisserait croire le contraire.
          */
-        finalFocus={() => declencheur.current?.isConnected ? declencheur.current : true}
+        finalFocus={finalFocus}
         className="max-h-[95dvh] max-w-[96vw] gap-0 overflow-y-auto rounded-[24px] border-2 border-rg-or/40 bg-surface-container-lowest p-0 sm:max-w-4xl lg:max-w-5xl"
       >
         <DialogTitle className="sr-only">

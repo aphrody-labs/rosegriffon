@@ -23,6 +23,16 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: buildRoot,
   },
+  webpack(config) {
+    config.resolve ??= {};
+    config.resolve.extensionAlias = {
+      ".js": [".js", ".ts", ".tsx"],
+      ".mjs": [".mjs", ".mts"],
+      ".cjs": [".cjs", ".cts"],
+      ...config.resolve.extensionAlias,
+    };
+    return config;
+  },
 
   compress: false,
   ...(CDN_URL && { assetPrefix: CDN_URL }),
@@ -77,6 +87,7 @@ const nextConfig: NextConfig = {
   ],
 
   experimental: {
+    cpus: 2,
     /**
      * Production runs from an immutable release (/srv/rg/releases/<id>,
      * ProtectSystem=strict): regenerated ISR pages must not be written back
@@ -99,7 +110,6 @@ const nextConfig: NextConfig = {
       "react-icons",
       "recharts",
       "cmdk",
-      "vaul",
       "embla-carousel-react",
       "input-otp",
       "react-day-picker",
@@ -454,4 +464,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBun(bundleAnalyzer(nextConfig), { projectDir: process.cwd(), bundler: "turbopack" });
+export default withBun(bundleAnalyzer(nextConfig), {
+  projectDir: process.cwd(),
+  bundler: "turbopack",
+});

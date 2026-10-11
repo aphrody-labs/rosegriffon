@@ -1,5 +1,5 @@
 import { galleryVariantUrl } from "../images";
-import { createAchilleaSql } from "@rosegriffon/db/achillea-sql";
+import { createInagleSql } from "@rosegriffon/db/inagle-sql";
 
 /**
  * Accès data dédié à la section « Stades » (terrains/salles de match IEVR).
@@ -31,7 +31,7 @@ interface StadiumDatabase {
   inagle_stadiums: StadiumRow;
 }
 
-const sql = createAchilleaSql<StadiumDatabase>();
+const sql = createInagleSql<StadiumDatabase>();
 
 import type { Stadium } from "@rosegriffon/inagle/wiki";
 export type { Stadium };

@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/website",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": false,
   "license": "UNLICENSED",
   "files": [
@@ -40,7 +40,7 @@
   },
   "scripts": {
     "predev": "bun ../../../packages/rg/assets/scripts/sync-website-public.ts --to public",
-    "dev": "next-bun dev",
+    "dev": "next-bun dev --webpack",
     "test": "bun test src",
     "test:ui": "bun --bun vitest --ui",
     "test:run": "bun --bun vitest run",
@@ -57,9 +57,10 @@
     "typecheck": "bun --bun tsc --noEmit"
   },
   "dependencies": {
-    "@aphrody/next-bun": "0.2.0-aphrody.2",
+    "@aphrody/next-bun": "catalog:",
     "@aphrody/paths": "catalog:",
-    "@better-auth/passkey": "1.7.6",
+    "@base-ui/react": "catalog:",
+    "@better-auth/passkey": "catalog:",
     "@colyseus/sdk": "^0.18.4",
     "@dnd-kit/core": "catalog:",
     "@dnd-kit/sortable": "catalog:",
@@ -99,7 +100,7 @@
     "@rosegriffon/preferences": "workspace:*",
     "@rosegriffon/search": "workspace:*",
     "@rosegriffon/types": "workspace:*",
-    "@rosegriffon/ui": "npm:@aphrody/rg-ui@1.0.4",
+    "@rosegriffon/ui": "catalog:",
     "@sentry/nextjs": "catalog:",
     "@spacedrive/primitives": "catalog:",
     "@spacedrive/tokens": "catalog:",
@@ -169,11 +170,10 @@
     "wanakana": "catalog:",
     "web-push": "catalog:",
     "zod": "catalog:",
-    "zustand": "catalog:",
-    "@base-ui/react": "npm:@aphrody/base-ui@1.8.0-aphrody.1"
+    "zustand": "catalog:"
   },
   "devDependencies": {
-    "@aphrody/bun-plugin-tailwind": "0.1.0-aphrody.4",
+    "@aphrody/bun-plugin-tailwind": "catalog:",
     "@happy-dom/global-registrator": "catalog:",
     "@next/bundle-analyzer": "catalog:",
     "@rosegriffon/config": "workspace:*",
@@ -188,6 +188,7 @@
     "@types/react-dom": "catalog:",
     "@types/three": "catalog:",
     "@types/web-push": "catalog:",
+    "@typescript/typescript6": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "@webgpu/types": "catalog:",
     "babel-plugin-react-compiler": "catalog:",
@@ -198,10 +199,9 @@
     "tailwindcss": "catalog:",
     "tailwindcss-animate": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "@typescript/typescript6": "catalog:"
+    "vitest": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.3"
+    "bun": ">=1.4.3-aphrody.4"
   }
 }

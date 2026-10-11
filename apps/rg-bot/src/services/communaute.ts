@@ -24,15 +24,9 @@
  *
  * (zéro ligne = tout va bien.)
  */
-import { sql } from "../lib/db";
+import { sql, inagleSql } from "../lib/db";
 import { cached, invalidate } from "../lib/cache";
-import {
-	DON,
-	etatQuotidien,
-	jourCivil,
-	verifierDepense,
-	type Motif,
-} from "../lib/kizuna";
+import { DON, etatQuotidien, jourCivil, verifierDepense, type Motif } from "../lib/kizuna";
 import {
 	garantieAuTirage,
 	prixDePlaque,
@@ -41,12 +35,7 @@ import {
 	TARIFS,
 	type Categorie,
 } from "../lib/collection";
-import {
-	GAIN_DEFAUT,
-	niveauPour,
-	niveauxFranchis,
-	jetonsDeMontee,
-} from "../lib/experience";
+import { GAIN_DEFAUT, niveauPour, niveauxFranchis, jetonsDeMontee } from "../lib/experience";
 import { lireReglages, type ReglagesCommunaute } from "../lib/reglages-communaute";
 
 // ─── Réglages ───────────────────────────────────────────────────────────────
@@ -76,7 +65,7 @@ export async function reglagesDe(guildId: string): Promise<ReglagesCommunaute> {
 /** Écrit les réglages et invalide le cache — dans cet ordre. */
 export async function enregistrerReglages(
 	guildId: string,
-	reglages: ReglagesCommunaute
+	reglages: ReglagesCommunaute,
 ): Promise<void> {
 	// ⚠ NE PAS `JSON.stringify(reglages)` ici : Bun.SQL encode déjà en JSON
 	// toute valeur liée à un paramètre casté `::jsonb`. Stringifier avant coup
@@ -212,7 +201,7 @@ export async function profilDe(guildId: string, discordId: string): Promise<Prof
 export async function rangClassement(
 	guildId: string,
 	discordId: string,
-	critere: "xp" | "jetons_gagnes" = "xp"
+	critere: "xp" | "jetons_gagnes" = "xp",
 ): Promise<{ rang: number; total: number } | null> {
 	// Deux requêtes plutôt qu'une fenêtre sur toute la table : le rang d'un seul
 	// membre se compte, il ne se numérote pas.
@@ -253,7 +242,7 @@ export interface LigneClassement {
 /** Une page de classement, du plus haut au plus bas. */
 export async function classement(
 	guildId: string,
-	options: { critere?: "xp" | "jetons_gagnes"; limite?: number; decalage?: number } = {}
+	options: { critere?: "xp" | "jetons_gagnes"; limite?: number; decalage?: number } = {},
 ): Promise<LigneClassement[]> {
 	const limite = Math.min(100, Math.max(1, Math.floor(options.limite ?? 10)));
 	const decalage = Math.max(0, Math.floor(options.decalage ?? 0));
@@ -321,7 +310,7 @@ export async function ajouterExperience(
 	guildId: string,
 	discordId: string,
 	gain: number,
-	options: { jetonsParNiveau?: number } = {}
+	options: { jetonsParNiveau?: number } = {},
 ): Promise<GainExperience> {
 	const montant = Math.max(0, Math.floor(gain));
 	return await sql.begin(async (tx) => {
@@ -346,7 +335,7 @@ export async function ajouterExperience(
 			jetonsOfferts = franchis.reduce(
 				(total, niveau) =>
 					total + jetonsDeMontee(niveau, options.jetonsParNiveau ?? GAIN_DEFAUT.jetonsParNiveau),
-				0
+				0,
 			);
 			await tx`
 				UPDATE bot_profils
@@ -395,7 +384,7 @@ export async function ajouterExperience(
 export async function consommerDelai(
 	guildId: string,
 	discordId: string,
-	delaiSecondes: number
+	delaiSecondes: number,
 ): Promise<boolean> {
 	const delai = Math.max(0, Math.floor(delaiSecondes));
 	if (delai === 0) {
@@ -405,7 +394,7 @@ export async function consommerDelai(
 	const pose = await cached(
 		`communaute:xp:${guildId}:${discordId}`,
 		delai * 1_000,
-		async () => maintenant
+		async () => maintenant,
 	);
 	return pose === maintenant;
 }
@@ -424,7 +413,7 @@ export async function mouvementKizuna(
 	discordId: string,
 	delta: number,
 	motif: Motif,
-	options: { reference?: string | null; contrepartie?: string | null } = {}
+	options: { reference?: string | null; contrepartie?: string | null } = {},
 ): Promise<number> {
 	const montant = Math.trunc(delta);
 	if (montant === 0) {
@@ -471,7 +460,7 @@ export interface ResultatQuotidien {
 export async function reclamerQuotidien(
 	guildId: string,
 	discordId: string,
-	maintenant: Date = new Date()
+	maintenant: Date = new Date(),
 ): Promise<ResultatQuotidien> {
 	const profil = await profilDe(guildId, discordId);
 	const etat = etatQuotidien(profil.dernierQuotidienLe, profil.serieQuotidienne, maintenant);
@@ -537,7 +526,7 @@ export async function reclamerQuotidien(
 export async function dejaDonneAujourdhui(
 	guildId: string,
 	discordId: string,
-	maintenant: Date = new Date()
+	maintenant: Date = new Date(),
 ): Promise<number> {
 	const [ligne] = await sql<Array<{ total: string }>>`
 		SELECT COALESCE(-SUM(delta), 0)::text AS total
@@ -560,7 +549,7 @@ export async function transfererKizuna(
 	guildId: string,
 	expediteurId: string,
 	destinataireId: string,
-	montant: number
+	montant: number,
 ): Promise<{ soldeExpediteur: number; soldeDestinataire: number }> {
 	const valeur = Math.max(DON.minimum, Math.trunc(montant));
 	return await sql.begin(async (tx) => {
@@ -603,7 +592,7 @@ export interface LigneJournal {
 export async function journalDe(
 	guildId: string,
 	discordId: string,
-	limite = 10
+	limite = 10,
 ): Promise<LigneJournal[]> {
 	const lignes = await sql<
 		Array<{
@@ -646,7 +635,7 @@ const TTL_TOTAL_PERSOS_MS = 6 * 60 * 60_000;
 /** Nombre de joueurs recensés — le dénominateur de la complétion. */
 export async function totalPersonnages(): Promise<number> {
 	return await cached("communaute:persos:total", TTL_TOTAL_PERSOS_MS, async () => {
-		const [ligne] = await sql<Array<{ total: string }>>`
+		const [ligne] = await inagleSql<Array<{ total: string }>>`
 			SELECT count(*)::text AS total FROM inagle_characters WHERE name_fr IS NOT NULL AND name_fr <> ''
 		`;
 		return nombre(ligne?.total);
@@ -665,15 +654,17 @@ export async function totalPersonnages(): Promise<number> {
  * lève `operator does not exist: text = integer`. Les comparaisons ci-dessous
  * passent donc par des chaînes.
  */
-export async function tirerPersonnage(options: { garantie?: boolean } = {}): Promise<FichePersonnage | null> {
+export async function tirerPersonnage(
+	options: { garantie?: boolean } = {},
+): Promise<FichePersonnage | null> {
 	const lignes = options.garantie
-		? await sql<Array<Record<string, string | null>>>`
+		? await inagleSql<Array<Record<string, string | null>>>`
 			SELECT id, name_fr, internal_code, rarity, element, position, slug
 			  FROM inagle_characters
 			 WHERE name_fr IS NOT NULL AND name_fr <> '' AND rarity <> '0'
 			 ORDER BY random() LIMIT 1
 		`
-		: await sql<Array<Record<string, string | null>>>`
+		: await inagleSql<Array<Record<string, string | null>>>`
 			SELECT id, name_fr, internal_code, rarity, element, position, slug
 			  FROM inagle_characters
 			 WHERE name_fr IS NOT NULL AND name_fr <> ''
@@ -699,7 +690,7 @@ export async function fichesPersonnages(ids: readonly string[]): Promise<FichePe
 	if (ids.length === 0) {
 		return [];
 	}
-	const lignes = await sql<Array<Record<string, string | null>>>`
+	const lignes = await inagleSql<Array<Record<string, string | null>>>`
 		SELECT id, name_fr, internal_code, rarity, element, position, slug
 		  FROM inagle_characters
 		 WHERE id = ANY(${[...ids]}::text[])
@@ -748,7 +739,7 @@ export interface ResultatTirage {
 export async function tirage(
 	guildId: string,
 	discordId: string,
-	options: { garantie?: boolean; prix?: number } = {}
+	options: { garantie?: boolean; prix?: number } = {},
 ): Promise<ResultatTirage | null> {
 	const prix = Math.max(0, Math.floor(options.prix ?? TARIFS.tirage));
 	const personnage = await tirerPersonnage({ garantie: options.garantie });
@@ -796,10 +787,7 @@ export async function tirage(
 }
 
 /** Le prochain tirage du membre est-il garanti ? */
-export async function prochainTirageGaranti(
-	guildId: string,
-	discordId: string
-): Promise<boolean> {
+export async function prochainTirageGaranti(guildId: string, discordId: string): Promise<boolean> {
 	return garantieAuTirage(await nombreTirages(guildId, discordId));
 }
 
@@ -813,19 +801,15 @@ export interface EntreeInventaire {
 export async function inventaireDe(
 	guildId: string,
 	discordId: string,
-	categorie?: Categorie
+	categorie?: Categorie,
 ): Promise<EntreeInventaire[]> {
 	const lignes = categorie
-		? await sql<
-				Array<{ categorie: string; objet_id: string; prix_paye: number; obtenu_le: Date }>
-			>`
+		? await sql<Array<{ categorie: string; objet_id: string; prix_paye: number; obtenu_le: Date }>>`
 			SELECT categorie, objet_id, prix_paye, obtenu_le FROM bot_inventaire
 			 WHERE guild_id = ${guildId} AND discord_id = ${discordId} AND categorie = ${categorie}
 			 ORDER BY obtenu_le DESC
 		`
-		: await sql<
-				Array<{ categorie: string; objet_id: string; prix_paye: number; obtenu_le: Date }>
-			>`
+		: await sql<Array<{ categorie: string; objet_id: string; prix_paye: number; obtenu_le: Date }>>`
 			SELECT categorie, objet_id, prix_paye, obtenu_le FROM bot_inventaire
 			 WHERE guild_id = ${guildId} AND discord_id = ${discordId}
 			 ORDER BY obtenu_le DESC
@@ -841,25 +825,23 @@ export async function inventaireDe(
 /** La collection d'un membre, jointe aux fiches de jeu. */
 export async function personnagesPossedes(
 	guildId: string,
-	discordId: string
+	discordId: string,
 ): Promise<Array<FichePersonnage & { obtenuLe: Date }>> {
-	const lignes = await sql<Array<Record<string, string | Date | null>>>`
-		SELECT c.id, c.name_fr, c.internal_code, c.rarity, c.element, c.position, c.slug, i.obtenu_le
-		  FROM bot_inventaire i
-		  JOIN inagle_characters c ON c.id = i.objet_id
-		 WHERE i.guild_id = ${guildId} AND i.discord_id = ${discordId} AND i.categorie = 'perso'
-		 ORDER BY i.obtenu_le DESC
+	const inventory = await sql<Array<{ objet_id: string; obtenu_le: Date }>>`
+		SELECT objet_id, obtenu_le FROM bot_inventaire
+		 WHERE guild_id = ${guildId} AND discord_id = ${discordId} AND categorie = 'perso'
+		 ORDER BY obtenu_le DESC
 	`;
-	return lignes.map((ligne) => ({
-		code: (ligne.internal_code as string | null) ?? null,
-		element: (ligne.element as string | null) ?? null,
-		id: (ligne.id as string) ?? "",
-		nom: (ligne.name_fr as string | null) ?? "Joueur inconnu",
-		obtenuLe: ligne.obtenu_le as Date,
-		position: (ligne.position as string | null) ?? null,
-		rarete: (ligne.rarity as string | null) ?? "0",
-		slug: (ligne.slug as string | null) ?? null,
-	}));
+	const characters = new Map(
+		(await fichesPersonnages(inventory.map((row) => row.objet_id))).map((character) => [
+			character.id,
+			character,
+		]),
+	);
+	return inventory.flatMap((row) => {
+		const character = characters.get(row.objet_id);
+		return character ? [{ ...character, obtenuLe: row.obtenu_le }] : [];
+	});
 }
 
 export interface FichePlaque {
@@ -875,8 +857,13 @@ const TTL_PLAQUES_MS = 6 * 60 * 60_000;
 /** Le catalogue des plaques, tel qu'il vient des données de jeu. */
 export async function plaques(): Promise<FichePlaque[]> {
 	return await cached("communaute:plaques", TTL_PLAQUES_MS, async () => {
-		const lignes = await sql<
-			Array<{ id: string; sort_no: number | null; image_path: string | null; name_text_id: string | null }>
+		const lignes = await inagleSql<
+			Array<{
+				id: string;
+				sort_no: number | null;
+				image_path: string | null;
+				name_text_id: string | null;
+			}>
 		>`
 			SELECT id, sort_no, image_path, name_text_id FROM inagle_nameplates ORDER BY sort_no ASC
 		`;
@@ -902,7 +889,7 @@ export async function acheter(
 	discordId: string,
 	categorie: Categorie,
 	objetId: string,
-	prix: number
+	prix: number,
 ): Promise<{ solde: number } | null> {
 	const cout = Math.max(0, Math.floor(prix));
 	return await sql.begin(async (tx) => {
@@ -939,7 +926,7 @@ export async function possede(
 	guildId: string,
 	discordId: string,
 	categorie: Categorie,
-	objetId: string
+	objetId: string,
 ): Promise<boolean> {
 	const [ligne] = await sql<Array<{ objet_id: string }>>`
 		SELECT objet_id FROM bot_inventaire
@@ -961,7 +948,7 @@ export async function equiper(
 	guildId: string,
 	discordId: string,
 	champ: "plaque" | "titre" | "perso_favori",
-	valeur: string | null
+	valeur: string | null,
 ): Promise<void> {
 	switch (champ) {
 		case "plaque": {
@@ -1030,7 +1017,7 @@ export async function recompensesDe(guildId: string): Promise<RecompenseNiveau[]
  */
 export function rolesPourNiveau(
 	recompenses: readonly RecompenseNiveau[],
-	niveau: number
+	niveau: number,
 ): { aPoser: string[]; aRetirer: string[] } {
 	const acquises = recompenses.filter((recompense) => recompense.niveau <= niveau);
 	if (acquises.length === 0) {
@@ -1050,7 +1037,7 @@ export function rolesPourNiveau(
 export async function peutPayer(
 	guildId: string,
 	discordId: string,
-	prix: number
+	prix: number,
 ): Promise<ReturnType<typeof verifierDepense>> {
 	const profil = await profilDe(guildId, discordId);
 	return verifierDepense(profil.jetons, prix);
