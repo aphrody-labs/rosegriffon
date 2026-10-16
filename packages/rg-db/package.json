@@ -36,10 +36,10 @@
   },
   "scripts": {
     "types:gen": "bun scripts/types-gen.ts",
-    "type-check": "bun --bun tsc --noEmit",
+    "type-check": "bun check --noEmit",
     "test": "bun test",
-    "lint": "oxlint -c ../config/oxlintrc.json src",
-    "typecheck": "bun --bun tsc --noEmit"
+    "lint": "bun lint src",
+    "typecheck": "bun check --noEmit"
   },
   "dependencies": {
     "@aphrody/sql": "catalog:",
@@ -49,11 +49,10 @@
     "pg": "catalog:"
   },
   "devDependencies": {
-    "@types/bun": "catalog:",
     "@types/pg": "catalog:",
     "kysely-supabase": "^0.2.1",
-    "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@aphrody/bun-types": "workspace:*"
   },
   "engines": {
     "bun": ">=1.4.3-aphrody.4"

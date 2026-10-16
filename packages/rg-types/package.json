@@ -30,17 +30,16 @@
   },
   "scripts": {
     "test": "bun test src",
-    "lint": "oxlint -c ../config/oxlintrc.json src",
-    "type-check": "bun --bun tsc --noEmit",
-    "typecheck": "bun --bun tsc --noEmit"
+    "lint": "bun lint src",
+    "type-check": "bun check --noEmit",
+    "typecheck": "bun check --noEmit"
   },
   "dependencies": {
     "zod": "catalog:"
   },
   "devDependencies": {
     "@rosegriffon/config": "workspace:*",
-    "@types/bun": "catalog:",
-    "typescript": "catalog:"
+    "@aphrody/bun-types": "workspace:*"
   },
   "peerDependencies": {
     "@rosegriffon/db": "^1.0.7"
