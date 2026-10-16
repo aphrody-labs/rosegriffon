@@ -7,7 +7,7 @@ Un seul socle de données alimente les cibles actives :
 
 | Cible                                 | Ce qu'elle importe                                              |
 | ------------------------------------- | --------------------------------------------------------------- |
-| Wiki web (`apps/rg/website`, Next 16) | la lib entière, derrière des façades `server-only`              |
+| Wiki web (`apps/rg-website`, Next 16) | la lib entière, derrière des façades `server-only`              |
 | CLI `azalee` (`src/cli.ts`)           | la surface serveur, en Bun pur                                  |
 | GUI Tauri (sidecar Bun + webview)     | la racine client-safe côté webview, `azalee serve` côté sidecar |
 
@@ -79,7 +79,7 @@ texte, et expose l'API HTTP headless. Runtime Bun (ou Node ≥ 22).
 import { wikiService, resolveMirrorPath, resolveDataDir } from "@rosegriffon/azalee/server";
 
 resolveMirrorPath(); // <iecode>/var/mirror.sqlite
-resolveDataDir(); // <aphrody>/apps/rg/website/data
+resolveDataDir(); // <aphrody>/apps/rg-website/data
 
 const { data, total } = await wikiService.getCharactersList({ q: "Mark", page: 1, limit: 2 });
 total; // 5130 personnages au total dans le miroir courant
@@ -151,10 +151,10 @@ La lib distingue deux familles de données.
    Les textes et l’index CPK sont importés dans PostgreSQL et ne sont plus matérialisés
    en fichiers locaux.
 
-Dans l'arborescence Aphrody, les artefacts web vivent sous `apps/rg/website/data/` :
+Dans l'arborescence Aphrody, les artefacts web vivent sous `apps/rg-website/data/` :
 
 ```text
-apps/rg/website/data/
+apps/rg-website/data/
 ├── backups/mirror.sqlite            # fallback local ; la prod lit le miroir niers
 └── backups/mirror.sqlite            # miroir local de développement uniquement
 ```
@@ -165,7 +165,7 @@ apps/rg/website/data/
 | ----------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `SQLITE_DB_PATH`              | `src/config.ts`       | Chemin explicite du miroir SQLite. **Épinglé en production** (drop-in systemd) : sans lui, le repli essaie le miroir canonique niers puis, à défaut, le snapshot `supabase-*.sqlite` au nom le plus grand. |
 | `NIERS_MIRROR`                | `src/config.ts`       | Chemin du miroir canonique niers utilisé par le fallback CLI/tests quand `SQLITE_DB_PATH` n'est pas défini.                                                                                                |
-| `AZALEE_DATA_DIR`             | `src/config.ts`       | Dossier des artefacts runtime, testé avant les chemins conventionnels (`<cwd>/data`, `<cwd>/apps/rg/website/data`, `<pkg>/../../../apps/rg/website/data`).                                                 |
+| `AZALEE_DATA_DIR`             | `src/config.ts`       | Dossier des artefacts runtime, testé avant les chemins conventionnels (`<cwd>/data`, `<cwd>/apps/rg-website/data`, `<pkg>/../../../apps/rg-website/data`).                                                 |
 | `AZALEE_PORT` / `AZALEE_HOST` | `src/server/serve.ts` | Défauts de l'API headless (`3010` / `127.0.0.1`).                                                                                                                                                          |
 | `DATABASE_URL`                | `src/cli.ts`          | PostgreSQL pour les commandes CLI qui ne passent pas par le miroir (`db`, `data push`…).                                                                                                                   |
 | `DATA_ROOT` / `DATA_PATH`     | `src/cli.ts`          | Racine du dump de jeu pour `azalee data` (défaut `<iecode>/data`).                                                                                                                                         |
@@ -212,10 +212,10 @@ Même socle de données que le wiki web, exposé en JSON pur, sans Next.
 n'importe quel routeur ; `createAzaleeServer` l'attache à `Bun.serve`.
 
 ```bash
-bun packages/rg/azalee/src/cli.ts serve --port 3010
+bun packages/rg-azalee/src/cli.ts serve --port 3010
 # azalee serve url=http://127.0.0.1:3010 routes=41
 
-bun packages/rg/azalee/src/cli.ts serve --json   # table de routage en JSON, puis quitte
+bun packages/rg-azalee/src/cli.ts serve --json   # table de routage en JSON, puis quitte
 ```
 
 Options : `-p, --port` (défaut `3010`), `-H, --host` (défaut `127.0.0.1`),
@@ -294,8 +294,8 @@ Le CLI se compile en binaire autonome embarquant le runtime Bun : il tourne sans
 `node_modules`, ce qui en fait le sidecar naturel d'une application Tauri.
 
 ```bash
-bun run --cwd packages/rg/azalee compile          # → packages/rg/azalee/bin/azalee
-bun packages/rg/azalee/scripts/build-standalone.ts --install   # + copie dans ~/.local/bin
+bun run --cwd packages/rg-azalee compile          # → packages/rg-azalee/bin/azalee
+bun packages/rg-azalee/scripts/build-standalone.ts --install   # + copie dans ~/.local/bin
 ```
 
 Côté application (patron Tauri v2 — pas encore de projet Tauri dans ce dépôt) :
@@ -382,8 +382,8 @@ const picked = await resolveAzaleeBaseUrl(["http://127.0.0.1:3010", AZALEE_DEFAU
 ## CLI `azalee`
 
 ```bash
-bun packages/rg/azalee/src/cli.ts <commande>      # depuis la racine du dépôt
-bun run --cwd packages/rg/azalee cli <commande>   # via le script du package
+bun packages/rg-azalee/src/cli.ts <commande>      # depuis la racine du dépôt
+bun run --cwd packages/rg-azalee cli <commande>   # via le script du package
 bun --filter @rosegriffon/azalee cli          # via le filtre workspace
 ```
 
@@ -422,8 +422,8 @@ Sous-commandes de `data` : `push` (inagle → Supabase), `migrate` (`--apply`),
 La plupart des commandes acceptent `--json` pour une sortie machine :
 
 ```bash
-bun packages/rg/azalee/src/cli.ts chara "Mark Evans" --json
-bun packages/rg/azalee/src/cli.ts search "tornade" --json
+bun packages/rg-azalee/src/cli.ts chara "Mark Evans" --json
+bun packages/rg-azalee/src/cli.ts search "tornade" --json
 ```
 
 ## Données embarquées et régénération
@@ -458,7 +458,7 @@ bun run compile             # binaire autonome → bin/azalee
 ```
 
 Les tests (`test/`) s'appuient sur les **vrais artefacts** de la machine
-(`apps/rg/website/data/`) : résolution de configuration et URLs CDN. Ils restaurent
+(`apps/rg-website/data/`) : résolution de configuration et URLs CDN. Ils restaurent
 systématiquement la configuration explicite et les variables d'environnement
 touchées — le miroir SQLite est un singleton de processus, une fuite de
 configuration casserait les fichiers de test suivants.

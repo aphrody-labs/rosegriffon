@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/identity",
-  "version": "1.0.4",
+  "version": "1.4.4",
   "private": false,
   "description": "Compte unique Rose Griffon : identité native et connexions liées (Discord, Patreon, Twitch, Google, Steam, Achilléa)",
   "type": "module",
@@ -11,15 +11,15 @@
     }
   },
   "scripts": {
-    "lint": "oxlint -c ../config/oxlintrc.json src",
-    "type-check": "bun --bun tsc --noEmit",
+    "lint": "bun lint -c ../rg-config/oxlintrc.json src",
+    "type-check": "bun check --noEmit",
     "test": "bun test test",
-    "typecheck": "bun --bun tsc --noEmit"
+    "typecheck": "bun check --noEmit"
   },
   "engines": {
-    "bun": ">=1.4.3-aphrody.4"
+    "bun": ">=1.4.4"
   },
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "files": [
     "src",
     "test",

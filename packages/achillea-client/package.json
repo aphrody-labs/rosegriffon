@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/achillea-client",
-  "version": "1.0.4",
+  "version": "1.4.4",
   "private": false,
   "description": "Versioned HTTP client and runtime contracts for the Achillea guild API",
   "type": "module",
@@ -11,10 +11,10 @@
     "./v1": "./src/v1/index.ts"
   },
   "scripts": {
-    "lint": "oxlint -c ../config/oxlintrc.json -A style -A pedantic -A restriction src tests",
-    "type-check": "bun --bun tsc --noEmit",
+    "lint": "bun lint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction src tests",
+    "type-check": "bun check --noEmit",
     "test": "bun test tests",
-    "typecheck": "bun --bun tsc --noEmit"
+    "typecheck": "bun check --noEmit"
   },
   "dependencies": {
     "@rosegriffon/achillea-types": "workspace:*",
@@ -22,13 +22,12 @@
   },
   "devDependencies": {
     "@types/bun": "catalog:",
-    "oxlint": "catalog:",
     "typescript": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.3-aphrody.4"
+    "bun": ">=1.4.4"
   },
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "files": [
     "README.md",
     "src",

@@ -19,14 +19,14 @@ import { resolveMirrorPath } from "../../config";
 
 /** Racine du dépôt Rose Griffon (les commandes orchestrées y sont lancées). */
 const REPO_ROOT = rgRoot();
-/** Racine du site Rose Griffon (`apps/rg/website` dans Aphrody). */
+/** Racine du site Rose Griffon (`apps/rg-website` dans Aphrody). */
 const WEBSITE_ROOT = rgWebsiteRoot();
 /** Fichier d'environnement chargé par le pousseur inagle. */
 const AZALEE_ENV = `${WEBSITE_ROOT}/.env`;
 /** Racine des dumps de jeu (IECODE `data/`). */
 const DATA_ROOT_DEFAULT = iecodeDataRoot();
 const NIERS_ROOT = iecodeRoot();
-const NIERS_MIRROR_PUBLISHER = `${NIERS_ROOT}/scripts/donnees/miroir-inagle.sh`;
+const NIERS_MIRROR_PUBLISHER = `${NIERS_ROOT}/scripts/iecode/donnees/miroir-inagle.sh`;
 /** CLI canoniques, servies par IECODE. */
 const INAGLE_CLI = `${NIERS_ROOT}/packages/inagle/src/cli.ts`;
 const AZALEE_CLI = `${NIERS_ROOT}/packages/azalee/src/cli.ts`;
@@ -191,8 +191,8 @@ export function registerDataCommand(program: Command): void {
         "standalone embarque un miroir",
         existsSync(
           firstExisting([
-            `${WEBSITE_ROOT}/.next/standalone/apps/rg/website/data/backups`,
-            `${WEBSITE_ROOT}/.next/standalone/aphrody/apps/rg/website/data/backups`,
+            `${WEBSITE_ROOT}/.next/standalone/apps/rg-website/data/backups`,
+            `${WEBSITE_ROOT}/.next/standalone/aphrody/apps/rg-website/data/backups`,
             `${WEBSITE_ROOT}/.next/standalone/apps/website/data/backups`,
           ]),
         ),

@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/achillea-core",
-  "version": "1.0.4",
+  "version": "1.4.4",
   "private": false,
   "description": "Logique métier portable (multi-runtime : navigateur, edge Deno/Web, Node, Bun) — Elo, classement, sanctions, licences, votes, validation. Aucune dépendance Discord / ORM / DI.",
   "type": "module",
@@ -40,13 +40,13 @@
     "./wallet": "./src/wallet/index.ts"
   },
   "scripts": {
-    "lint": "oxlint -c ../config/oxlintrc.json -A style -A pedantic -A restriction src tests",
-    "lint:fix": "oxlint -c ../config/oxlintrc.json -A style -A pedantic -A restriction --fix src tests",
-    "type-check": "bun --bun tsc --noEmit",
-    "format": "oxfmt .",
-    "format:check": "oxfmt --check .",
+    "lint": "bun lint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction src tests",
+    "lint:fix": "bun lint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction --fix src tests",
+    "type-check": "bun check --noEmit",
+    "format": "bun fmt .",
+    "format:check": "bun fmt --check .",
     "test": "bun test",
-    "typecheck": "bun --bun tsc --noEmit"
+    "typecheck": "bun check --noEmit"
   },
   "dependencies": {
     "@casl/ability": "catalog:",
@@ -55,13 +55,12 @@
   },
   "devDependencies": {
     "@types/bun": "catalog:",
-    "oxlint": "catalog:",
     "typescript": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.3-aphrody.4"
+    "bun": ">=1.4.4"
   },
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "files": [
     "README.md",
     "src",

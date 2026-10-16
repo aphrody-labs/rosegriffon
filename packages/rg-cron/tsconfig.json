@@ -1,5 +1,5 @@
 {
-	"extends": "../config/tsconfig-bun.json",
+	"extends": "../rg-config/tsconfig-bun.json",
 	"compilerOptions": {
 		"outDir": "dist",
 		"noEmit": true,

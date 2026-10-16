@@ -1,9 +1,9 @@
 {
   "name": "@rosegriffon/db",
-  "version": "1.0.7",
+  "version": "1.4.4",
   "private": false,
   "description": "Accès PostgreSQL partagé, façades SQL et types Database générés (site + bot)",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "files": [
     "README.md",
     "scripts",
@@ -50,11 +50,11 @@
   },
   "devDependencies": {
     "@types/pg": "catalog:",
-    "kysely-supabase": "^0.2.1",
+    "kysely-supabase": "catalog:",
     "vitest": "catalog:",
     "@aphrody/bun-types": "workspace:*"
   },
   "engines": {
-    "bun": ">=1.4.3-aphrody.4"
+    "bun": ">=1.4.4"
   }
 }

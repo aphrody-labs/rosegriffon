@@ -1,12 +1,12 @@
 {
   "name": "@rosegriffon/preferences",
-  "version": "1.0.6",
+  "version": "1.4.4",
   "private": false,
   "description": "Pure cross-runtime resolution of Rose Griffon presentation preferences",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rose-griffon/rg.git",
-    "directory": "packages/preferences"
+    "url": "git+https://github.com/aphrody-labs/bun-os.git",
+    "directory": "packages/rg-preferences"
   },
   "files": [
     "src",
@@ -31,7 +31,7 @@
     "typecheck": "bun check --noEmit"
   },
   "engines": {
-    "bun": ">=1.4.3-aphrody.4"
+    "bun": ">=1.4.4"
   },
-  "license": "UNLICENSED"
+  "license": "Apache-2.0"
 }

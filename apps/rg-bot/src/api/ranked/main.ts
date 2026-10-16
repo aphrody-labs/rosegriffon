@@ -308,7 +308,8 @@ const server = defineServer({
 		// Salon de présence partagé (défi direct) — une seule instance pour tous.
 		lobby: defineRoom(LobbyRoom),
 	},
-	express: (app: express.Express) => {
+	express: (rawApp: any) => {
+		const app = rawApp as express.Express;
 		app.use(corsMiddleware);
 		app.use(express.json({ limit: "100kb" }));
 

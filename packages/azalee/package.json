@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/azalee",
-  "version": "1.0.10",
+  "version": "1.4.4",
   "private": false,
   "description": "Bibliothèque Bun du wiki Azalée (Inazuma Eleven: Victory Road) — accès PostgreSQL, index CPK, recherche et CLI.",
   "keywords": [
@@ -17,7 +17,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aphrody-labs/iecode.git",
+    "url": "git+https://github.com/aphrody-labs/bun-os.git",
     "directory": "packages/azalee"
   },
   "bin": {
@@ -72,17 +72,17 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "build": "bun --bun tsc -p tsconfig.build.json",
+    "build": "bun check -p tsconfig.build.json",
     "cli": "bun src/cli.ts",
     "compile": "bun scripts/build-standalone.ts",
     "serve": "bun src/cli.ts serve",
     "test": "bun test",
-    "lint": "oxlint -A style -A pedantic -A restriction src",
-    "lint:fix": "oxlint -A style -A pedantic -A restriction --fix src",
-    "type-check": "bun --bun tsc --noEmit",
+    "lint": "bun lint -A style -A pedantic -A restriction src",
+    "lint:fix": "bun lint -A style -A pedantic -A restriction --fix src",
+    "type-check": "bun check --noEmit",
     "clean": "rm -rf dist *.tsbuildinfo",
     "prepublishOnly": "bun run build",
-    "typecheck": "bun --bun tsc --noEmit"
+    "typecheck": "bun check --noEmit"
   },
   "dependencies": {
     "@rosegriffon/assets": "workspace:*",
@@ -97,10 +97,9 @@
     "@types/bun": "catalog:",
     "@types/node": "catalog:",
     "@types/pg": "catalog:",
-    "oxlint": "catalog:",
     "typescript": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.3-aphrody.4"
+    "bun": ">=1.4.4"
   }
 }

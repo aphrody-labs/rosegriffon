@@ -12,7 +12,7 @@ const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL?.trim() || "";
 const CDN_LOADER = CDN_URL && process.env.NEXT_PUBLIC_CDN_LOADER === "1";
 
 // Producer archives are installed inside this workspace; tracing stays in Aphrody.
-const buildRoot = path.resolve(process.cwd(), "../../../");
+const buildRoot = path.resolve(process.cwd(), "../../");
 
 const nextConfig: NextConfig = {
   reactCompiler: true,

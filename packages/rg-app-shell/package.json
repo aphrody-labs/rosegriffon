@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/app-shell",
-  "version": "1.0.4",
+  "version": "1.4.4",
   "private": false,
   "description": "Chrome applicatif partagé de website (navigation, barre latérale, barre supérieure, pied de page)",
   "type": "module",
@@ -9,10 +9,10 @@
     "./routes-next": "./src/lib/routes-next.ts"
   },
   "scripts": {
-    "lint": "oxlint -c ../config/oxlintrc.json src",
-    "type-check": "bun --bun tsc --noEmit",
+    "lint": "bun lint -c ../rg-config/oxlintrc.json src",
+    "type-check": "bun check --noEmit",
     "test": "bun test test",
-    "typecheck": "bun --bun tsc --noEmit"
+    "typecheck": "bun check --noEmit"
   },
   "dependencies": {
     "@rosegriffon/ui": "npm:@aphrody/rg-ui@1.0.4",
@@ -34,9 +34,9 @@
     "react-dom": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.3-aphrody.4"
+    "bun": ">=1.4.4"
   },
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "files": [
     "src",
     "test",

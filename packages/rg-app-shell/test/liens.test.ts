@@ -16,7 +16,7 @@ import { listerMotifsRoutes, motifAccepte, routeExiste } from "../src/lib/routes
 
 const RACINE = join(import.meta.dir, "../../../..");
 
-const APP = join(RACINE, "apps/rg/website/src/app");
+const APP = join(RACINE, "apps/rg-website/src/app");
 
 describe("motifAccepte", () => {
 	test("segment littéral", () => {

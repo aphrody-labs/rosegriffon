@@ -1,7 +1,6 @@
 {
   "extends": "@rosegriffon/config/tsconfig-nextjs.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "noImplicitOverride": false,
     "noUncheckedIndexedAccess": false,
     "target": "ES2022",

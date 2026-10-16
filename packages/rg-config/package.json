@@ -1,12 +1,12 @@
 {
   "name": "@rosegriffon/config",
-  "version": "1.0.6",
+  "version": "1.4.4",
   "private": false,
   "description": "Configs partagées : TypeScript, Oxc et Tailwind preset",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rose-griffon/rg.git",
-    "directory": "packages/config"
+    "url": "git+https://github.com/aphrody-labs/bun-os.git",
+    "directory": "packages/rg-config"
   },
   "files": [
     "README.md",
@@ -33,11 +33,11 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "lint": "oxlint -c ./oxlintrc.json .",
-    "typecheck": "tsc --noEmit"
+    "lint": "bun lint -c ./oxlintrc.json .",
+    "typecheck": "bun check --noEmit"
   },
   "engines": {
-    "bun": ">=1.4.3-aphrody.4"
+    "bun": ">=1.4.4"
   },
-  "license": "UNLICENSED"
+  "license": "Apache-2.0"
 }

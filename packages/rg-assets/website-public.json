@@ -1,5 +1,5 @@
 {
-  "$comment": "Files of @rosegriffon/assets served by the RG website's public/ directory; copied by scripts/sync-website-public.ts, never committed in apps/rg/website/public.",
+  "$comment": "Files of @rosegriffon/assets served by the RG website's public/ directory; copied by scripts/sync-website-public.ts, never committed in apps/rg-website/public.",
   "paths": [
     "RG_Achillea_blanc.webp",
     "RG_Azalee_logo_blanc.webp",

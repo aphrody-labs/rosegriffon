@@ -47,7 +47,7 @@ est éphémère) : [`docs/bot-format.md`](../../docs/bot-format.md).
 
 ```bash
 bun install              # depuis la racine du monorepo
-cd apps/rg/bot
+cd apps/rg-bot
 cp .env.example .env     # remplir les secrets Discord/Supabase et les deux URLs PostgreSQL
 
 bun dev                  # bun --watch

@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/cron",
-  "version": "1.0.4",
+  "version": "1.4.4",
   "private": false,
   "description": "Daemon de tâches planifiées (cron) pour la maintenance DB, CDN et API",
   "type": "module",
@@ -17,9 +17,9 @@
     "start": "bun src/index.ts",
     "qa:website": "bun src/index.ts --run website:qa",
     "build": "bun build src/index.ts --compile --minify --sourcemap --bytecode --format esm --outfile dist/rg-cron",
-    "type-check": "bun --bun tsc -p tsconfig.typecheck.json --noEmit",
-    "lint": "oxlint -c ../config/oxlintrc.json src",
-    "typecheck": "bun --bun tsc -p tsconfig.typecheck.json --noEmit"
+    "type-check": "bun check -p tsconfig.typecheck.json --noEmit",
+    "lint": "bun lint -c ../rg-config/oxlintrc.json src",
+    "typecheck": "bun check -p tsconfig.typecheck.json --noEmit"
   },
   "dependencies": {
     "@aphrody/agent-browser": "catalog:",
@@ -41,9 +41,9 @@
     "typescript": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.3-aphrody.4"
+    "bun": ">=1.4.4"
   },
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "files": [
     ".npmignore",
     "src",

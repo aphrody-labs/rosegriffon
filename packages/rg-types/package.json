@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/types",
-  "version": "1.0.6",
+  "version": "1.4.4",
   "private": false,
   "description": "Types métier partagés (roles, user, discord) — source unique de vérité bot/azalee/website",
   "type": "module",
@@ -42,12 +42,12 @@
     "@aphrody/bun-types": "workspace:*"
   },
   "peerDependencies": {
-    "@rosegriffon/db": "^1.0.7"
+    "@rosegriffon/db": "workspace:*"
   },
   "engines": {
-    "bun": ">=1.4.3-aphrody.4"
+    "bun": ">=1.4.4"
   },
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "files": [
     "src",
     "tsconfig.json"

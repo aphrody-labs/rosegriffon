@@ -1,6 +1,6 @@
 {
   "name": "@rosegriffon/achillea-types",
-  "version": "1.0.4",
+  "version": "1.4.4",
   "private": false,
   "description": "Contrats d'API partagés (DTO + enums) — source unique pour le bot et le web",
   "type": "module",
@@ -14,21 +14,20 @@
     "./domain/*": "./src/domain/*.ts"
   },
   "scripts": {
-    "lint": "oxlint -c ../config/oxlintrc.json -A style -A pedantic -A restriction src test",
-    "type-check": "bun --bun tsc --noEmit",
+    "lint": "bun lint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction src test",
+    "type-check": "bun check --noEmit",
     "test": "bun test test",
-    "typecheck": "bun --bun tsc --noEmit"
+    "typecheck": "bun check --noEmit"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
     "brackets-model": "catalog:",
-    "oxlint": "catalog:",
     "typescript": "catalog:"
   },
   "engines": {
-    "bun": ">=1.4.3-aphrody.4"
+    "bun": ">=1.4.4"
   },
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "files": [
     "src",
     "test",
