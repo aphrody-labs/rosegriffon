@@ -4,7 +4,7 @@ import { cdnOrigin } from "@rosegriffon/assets";
 import { listCharacterFaceCodes } from "@rosegriffon/azalee/images";
 
 import type { Catalogue } from "@/app/wiki/avatar/types";
-import { getPgPool } from "@/lib/db/pg";
+import { getInaglePgPool } from "@rosegriffon/db/pg";
 
 import { construireBanque, type LigneBanque, type PersonnageBanque } from "./banque";
 
@@ -19,7 +19,7 @@ let banque: { lue: number; items: PersonnageBanque[] } | null = null;
  */
 export async function lireBanque(): Promise<PersonnageBanque[]> {
   if (banque && Date.now() - banque.lue < UNE_HEURE) return banque.items;
-  const { rows } = await getPgPool().query<LigneBanque>(
+  const { rows } = await getInaglePgPool().query<LigneBanque>(
     `SELECT internal_code, name_fr, name_en, name_ja, series
        FROM inagle_characters
       WHERE internal_code ~ '^c[0-9]{8}'`,
