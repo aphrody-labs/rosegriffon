@@ -30,7 +30,7 @@ export function SyncEventsButton() {
   return (
     <Button variant="outline" onClick={handleSync} disabled={isSyncing} className="gap-2">
       <RefreshCw className={`size-4 ${isSyncing ? "animate-spin" : ""}`} />
-      {isSyncing ? "Sync..." : "Sync Google"}
+      {isSyncing ? "Sync…" : "Sync Google"}
     </Button>
   );
 }

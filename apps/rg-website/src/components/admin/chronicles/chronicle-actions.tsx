@@ -77,7 +77,7 @@ export function ChronicleActions({ id, published }: ChronicleActionsProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="size-8 p-0">
+          <Button variant="ghost" className="size-11 p-0 sm:size-9">
             <span className="sr-only">Ouvrir le menu</span>
             <MoreHorizontal className="size-4" />
           </Button>

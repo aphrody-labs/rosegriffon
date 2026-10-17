@@ -111,7 +111,7 @@ export default async function ChroniquesAdminPage({
           <form className="flex flex-col gap-3 sm:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-              <Input placeholder="Rechercher..." className="pl-8 text-sm" name="q" defaultValue={query} />
+              <Input placeholder="Rechercher…" className="pl-8 text-sm" name="q" defaultValue={query} />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">

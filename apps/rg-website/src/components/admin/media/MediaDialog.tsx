@@ -131,11 +131,11 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
             </TabsList>
           </div>
 
-          <div className="flex-1 overflow-hidden bg-slate-50">
+          <div className="flex-1 overflow-hidden bg-surface-container-low">
             <TabsContent value="upload" className="h-full m-0 p-6 flex flex-col items-center justify-center">
               <label
-                className={`w-full max-w-md aspect-video border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center bg-white transition-colors relative ${
-                  isUploading ? "cursor-not-allowed opacity-50" : "hover:bg-slate-50 cursor-pointer"
+                className={`w-full max-w-md aspect-video border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center bg-surface-container-lowest transition-colors relative ${
+                  isUploading ? "cursor-not-allowed opacity-50" : "hover:bg-surface-container cursor-pointer"
                 }`}
               >
                 <input
@@ -149,7 +149,7 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
                 {isUploading ? (
                   <div className="text-center">
                     <Loader2 className="size-10 animate-spin text-rg-rose mx-auto mb-4" />
-                    <p className="text-sm text-slate-500">Téléchargement en cours...</p>
+                    <p className="text-sm text-on-surface-variant">Téléchargement en cours…</p>
                   </div>
                 ) : (
                   <div className="text-center p-6">
@@ -157,7 +157,7 @@ export function MediaDialog({ open, onOpenChange, onInsert }: MediaDialogProps) 
                       <Upload className="size-8 text-rg-rose" />
                     </div>
                     <h3 className="font-semibold text-lg mb-2">Cliquez pour téléverser</h3>
-                    <p className="text-sm text-slate-500">PNG, JPG, WEBP jusqu&apos;à 5Mo</p>
+                    <p className="text-sm text-on-surface-variant">PNG, JPG, WEBP jusqu&apos;à 5Mo</p>
                   </div>
                 )}
               </label>

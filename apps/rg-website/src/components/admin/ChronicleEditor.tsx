@@ -271,7 +271,7 @@ export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEdit
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-8 text-xs text-blue-700 hover:bg-blue-100 flex-1 sm:flex-none"
+                className="h-8 text-xs text-primary hover:bg-primary/10 flex-1 sm:flex-none"
                 onClick={() => {
                   localStorage.removeItem(draftKey);
                   setHasDraft(false);
@@ -327,7 +327,7 @@ export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEdit
               className="text-xs sm:text-sm"
             >
               <Save className="size-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">{isSaving && !published ? "Enregistrement..." : "Brouillon"}</span>
+              <span className="hidden sm:inline">{isSaving && !published ? "Enregistrement…" : "Brouillon"}</span>
               <span className="sm:hidden">Draft</span>
             </Button>
 
@@ -339,7 +339,7 @@ export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEdit
               className="bg-linear-to-r from-rg-rose to-rg-or hover:opacity-90 text-white text-xs sm:text-sm"
             >
               <Send className="size-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">{isSaving && published ? "Publication..." : "Publier"}</span>
+              <span className="hidden sm:inline">{isSaving && published ? "Publication…" : "Publier"}</span>
               <span className="sm:hidden">Pub</span>
             </Button>
           </div>

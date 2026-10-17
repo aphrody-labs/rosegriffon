@@ -228,7 +228,7 @@ export function VerificationClient({
                       <Input
                         value={row.name_fr || ""}
                         onChange={e => handleFieldChange(activeTab, row.id, "name_fr", e.target.value)}
-                        placeholder="Traduction du nom..."
+                        placeholder="Traduction du nom…"
                         className="h-10 text-sm rounded-xl border-outline/30 focus:border-primary"
                       />
                     </TableCell>
@@ -236,7 +236,7 @@ export function VerificationClient({
                       <Textarea
                         value={row.description_fr || ""}
                         onChange={e => handleFieldChange(activeTab, row.id, "description_fr", e.target.value)}
-                        placeholder="Traduction de la description..."
+                        placeholder="Traduction de la description…"
                         className="min-h-[40px] h-10 py-2 text-xs rounded-xl border-outline/30 focus:border-primary resize-y font-sans"
                       />
                     </TableCell>

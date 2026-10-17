@@ -102,7 +102,7 @@ export function VersionsList({ versions, articleId, restoreAction }: VersionsLis
                 className="shrink-0 rounded-full text-xs"
               >
                 <RotateCcw className="size-3.5 mr-1.5" />
-                {restoringId === version.id ? "Restauration..." : "Restaurer"}
+                {restoringId === version.id ? "Restauration…" : "Restaurer"}
               </Button>
             )}
           </div>

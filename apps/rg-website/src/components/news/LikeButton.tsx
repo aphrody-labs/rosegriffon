@@ -56,7 +56,7 @@ export function LikeButton({ articleId, initialCount, initialLiked, compact }: L
         disabled={isPending}
         className={cn(
           "inline-flex items-center gap-1 text-xs transition-colors",
-          liked ? "text-red-500" : "text-on-surface-variant/50 hover:text-red-500",
+          liked ? "text-destructive" : "text-on-surface-variant/50 hover:text-destructive",
         )}
       >
         <Heart className={cn("size-3.5", liked && "fill-current")} />
@@ -72,8 +72,8 @@ export function LikeButton({ articleId, initialCount, initialLiked, compact }: L
       className={cn(
         "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
         liked
-          ? "bg-red-500/10 text-red-500"
-          : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest hover:text-red-500",
+          ? "bg-destructive/10 text-destructive"
+          : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest hover:text-destructive",
       )}
     >
       <Heart className={cn("size-4", liked && "fill-current")} />

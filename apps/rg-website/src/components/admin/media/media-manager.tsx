@@ -216,7 +216,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
           <div className="relative flex-1 sm:w-64">
             <Search className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher des fichiers..."
+              placeholder="Rechercher des fichiers…"
               value={searchQuery}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="pl-8"
@@ -250,7 +250,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               className="cursor-pointer hover:bg-accent/50 transition-colors flex flex-col items-center justify-center p-6 aspect-square"
               onClick={navigateUp}
             >
-              <Folder className="size-12 text-blue-300 mb-2" />
+              <Folder className="size-12 text-primary/50 mb-2" />
               <span className="text-sm font-medium">..</span>
             </Card>
           )}
@@ -260,7 +260,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               className="cursor-pointer hover:bg-accent/50 transition-colors flex flex-col items-center justify-center p-6 aspect-square"
               onClick={() => navigateToFolder(folder)}
             >
-              <Folder className="size-12 text-blue-500 mb-2" />
+              <Folder className="size-12 text-primary mb-2" />
               <span className="text-sm font-medium truncate w-full text-center">{folder}</span>
             </Card>
           ))}
@@ -311,7 +311,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               {currentPath && (
                 <TableRow className="cursor-pointer hover:bg-muted/50" onClick={navigateUp}>
                   <TableCell>
-                    <Folder className="size-4 text-blue-300" />
+                    <Folder className="size-4 text-primary/50" />
                   </TableCell>
                   <TableCell colSpan={5}>..</TableCell>
                 </TableRow>
@@ -323,7 +323,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
                   onClick={() => navigateToFolder(folder)}
                 >
                   <TableCell>
-                    <Folder className="size-4 text-blue-500" />
+                    <Folder className="size-4 text-primary" />
                   </TableCell>
                   <TableCell className="font-medium">{folder}</TableCell>
                   <TableCell>-</TableCell>
@@ -351,7 +351,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="text-red-500 hover:text-red-600"
+                        className="text-destructive hover:text-destructive/80"
                         onClick={() => deleteFile(file.name, file.id)}
                         disabled={deletingId === file.id}
                       >

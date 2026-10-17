@@ -158,7 +158,7 @@ export function ChronicleMeta({
           id="excerpt"
           value={excerpt}
           onChange={e => setExcerpt(e.target.value)}
-          placeholder="Bref résumé visible dans la liste..."
+          placeholder="Bref résumé visible dans la liste…"
           rows={3}
           required
         />
@@ -202,7 +202,7 @@ export function ChronicleMeta({
             {isUploading ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/30">
                 <Loader2 className="size-8 animate-spin text-rg-rose" />
-                <span className="text-sm text-muted-foreground mt-2">Upload en cours...</span>
+                <span className="text-sm text-muted-foreground mt-2">Upload en cours…</span>
               </div>
             ) : featuredImage ? (
               <>
@@ -274,7 +274,7 @@ export function ChronicleMeta({
           <Input
             value={featuredImage}
             onChange={e => setFeaturedImage(e.target.value)}
-            placeholder="Ou collez une URL ici..."
+            placeholder="Ou collez une URL ici…"
             className="text-xs text-muted-foreground font-mono"
           />
         </div>

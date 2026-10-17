@@ -127,7 +127,7 @@ export function CommentForm({
         <div
           className={cn(
             "relative bg-surface-container-low border rounded-2xl transition-colors focus-within:border-primary/40",
-            isOverLimit ? "border-red-500/40" : "border-outline-variant/10",
+            isOverLimit ? "border-destructive/40" : "border-outline-variant/10",
           )}
         >
           <textarea
@@ -146,7 +146,7 @@ export function CommentForm({
               className={cn(
                 "text-xs tabular-nums",
                 isOverLimit
-                  ? "text-red-500 font-medium"
+                  ? "text-destructive font-medium"
                   : remaining <= 100
                     ? "text-amber-500"
                     : "text-on-surface-variant/40",

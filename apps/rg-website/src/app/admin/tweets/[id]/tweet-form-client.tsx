@@ -55,7 +55,7 @@ export function TweetFormClient({ initialData }: { initialData?: any }) {
       </div>
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={loading} className="rounded-full px-8">
-          {loading ? "Enregistrement..." : "Enregistrer"}
+          {loading ? "Enregistrement…" : "Enregistrer"}
         </Button>
       </div>
     </div>

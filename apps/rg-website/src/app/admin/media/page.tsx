@@ -50,7 +50,7 @@ export default async function MediaPage({ searchParams }: MediaPageProps) {
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-bold">Médiathèque</h1>
       {error ? (
-        <div className="p-4 border border-red-200 bg-red-50 text-red-700 rounded-md">
+        <div className="p-4 border border-destructive/20 bg-destructive/10 text-destructive rounded-md">
           Erreur lors du chargement des médias.
           <br />
           <span className="text-sm opacity-80">{error.message}</span>

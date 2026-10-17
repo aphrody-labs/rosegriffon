@@ -44,7 +44,7 @@ export default function AdminError({ error, reset }: { error: Error & { digest?:
           <Home className="mr-2 size-4" />
           Tableau de bord
         </Button>
-        <Button onClick={() => reset()} variant="default" size="lg" className="bg-red-600 hover:bg-red-700 text-white">
+        <Button onClick={() => reset()} variant="default" size="lg">
           <RefreshCcw className="mr-2 size-4" />
           Réessayer
         </Button>

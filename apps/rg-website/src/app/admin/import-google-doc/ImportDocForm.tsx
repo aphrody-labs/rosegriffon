@@ -98,7 +98,7 @@ export function ImportDocForm() {
             </p>
           </div>
           <Button onClick={handleImport} disabled={loading} className="w-full rounded-full">
-            {loading ? "Importation en cours..." : "Importer le document"}
+            {loading ? "Importation en cours…" : "Importer le document"}
           </Button>
         </CardContent>
       </Card>
@@ -112,7 +112,7 @@ export function ImportDocForm() {
         </CardHeader>
         <CardContent>
           <Button onClick={handleFolderImport} disabled={loading} variant="outline" className="w-full rounded-full">
-            {loading ? "Scan en cours..." : "Importer depuis le dossier Drive"}
+            {loading ? "Scan en cours…" : "Importer depuis le dossier Drive"}
           </Button>
         </CardContent>
       </Card>

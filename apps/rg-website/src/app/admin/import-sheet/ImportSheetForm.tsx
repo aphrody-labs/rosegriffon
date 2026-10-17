@@ -103,7 +103,7 @@ export function ImportSheetForm() {
                 </p>
               </div>
               <Button onClick={handleSheetImport} disabled={loading} className="w-full rounded-full">
-                {loading ? "Importation..." : "Importer le Sheet"}
+                {loading ? "Importation…" : "Importer le Sheet"}
               </Button>
             </TabsContent>
 
@@ -128,7 +128,7 @@ export function ImportSheetForm() {
                 />
               </div>
               <Button onClick={handleCsvImport} disabled={loading} className="w-full rounded-full">
-                {loading ? "Importation..." : "Convertir le CSV"}
+                {loading ? "Importation…" : "Convertir le CSV"}
               </Button>
             </TabsContent>
           </Tabs>

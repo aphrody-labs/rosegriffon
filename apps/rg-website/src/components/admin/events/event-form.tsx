@@ -71,7 +71,7 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
             <div className="space-y-2">
               <Label htmlFor="title">Titre</Label>
               <Input id="title" name="title" defaultValue={event?.title} placeholder="Titre de l'événement" required />
-              {state?.errors?.title && <p className="text-sm text-red-500">{state.errors.title}</p>}
+              {state?.errors?.title && <p className="text-sm text-destructive">{state.errors.title}</p>}
             </div>
 
             <div className="space-y-2">
@@ -80,10 +80,10 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
                 id="description"
                 name="description"
                 defaultValue={event?.description || undefined}
-                placeholder="Description détaillée..."
+                placeholder="Description détaillée…"
                 rows={5}
               />
-              {state?.errors?.description && <p className="text-sm text-red-500">{state.errors.description}</p>}
+              {state?.errors?.description && <p className="text-sm text-destructive">{state.errors.description}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -96,13 +96,13 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
                   defaultValue={formatDate(event?.start_time)}
                   required
                 />
-                {state?.errors?.start_time && <p className="text-sm text-red-500">{state.errors.start_time}</p>}
+                {state?.errors?.start_time && <p className="text-sm text-destructive">{state.errors.start_time}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="end_time">Date de fin (optionnel)</Label>
                 <Input id="end_time" name="end_time" type="datetime-local" defaultValue={formatDate(event?.end_time)} />
-                {state?.errors?.end_time && <p className="text-sm text-red-500">{state.errors.end_time}</p>}
+                {state?.errors?.end_time && <p className="text-sm text-destructive">{state.errors.end_time}</p>}
               </div>
             </div>
 
@@ -112,7 +112,7 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
                 id="location"
                 name="location"
                 defaultValue={event?.location || undefined}
-                placeholder="Ex: Discord, Twitch, Paris..."
+                placeholder="Ex: Discord, Twitch, Paris…"
               />
             </div>
 
@@ -127,7 +127,7 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
             </div>
 
             {state?.message && (
-              <div className="p-3 bg-red-100 border border-red-200 text-red-700 rounded-md text-sm">
+              <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md text-sm">
                 {state.message}
               </div>
             )}

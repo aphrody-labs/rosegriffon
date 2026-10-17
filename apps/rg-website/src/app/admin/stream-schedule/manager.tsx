@@ -193,7 +193,7 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
           </span>
           <Button onClick={handleSync} disabled={syncing} variant="outline" size="sm" className="shrink-0">
             <RefreshCw className={`mr-2 size-4 ${syncing ? "animate-spin" : ""}`} />
-            {syncing ? "Synchro..." : "Forcer la synchro"}
+            {syncing ? "Synchro…" : "Forcer la synchro"}
           </Button>
         </AlertDescription>
       </Alert>
@@ -300,7 +300,7 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
           </div>
 
           <div className="flex gap-2">
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit">
               {editingId ? "Mettre à jour" : "Ajouter"}
             </Button>
             {editingId && (

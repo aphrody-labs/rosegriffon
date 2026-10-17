@@ -26,11 +26,11 @@ export default function ChroniquesError({ error, reset }: { error: Error & { dig
       <Alert variant="destructive" className="max-w-2xl mx-auto">
         <AlertCircle className="size-4" />
         <AlertTitle>Détails de l'erreur</AlertTitle>
-        <AlertDescription className="mt-2 font-mono text-xs bg-red-950/10 p-2 rounded overflow-auto max-h-64">
+        <AlertDescription className="mt-2 font-mono text-xs bg-destructive/10 p-2 rounded overflow-auto max-h-64">
           <div className="font-bold mb-2">{error.message || "Erreur inconnue"}</div>
           {error.digest && <div className="mb-2 text-xs opacity-70">Digest: {error.digest}</div>}
           {error.stack && (
-            <div className="whitespace-pre-wrap opacity-70 border-t border-red-200/20 pt-2">{error.stack}</div>
+            <div className="whitespace-pre-wrap opacity-70 border-t border-destructive/20 pt-2">{error.stack}</div>
           )}
         </AlertDescription>
       </Alert>

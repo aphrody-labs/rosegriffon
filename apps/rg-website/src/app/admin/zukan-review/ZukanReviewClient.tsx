@@ -529,7 +529,7 @@ function CandidatePanel({
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Rechercher par nom..."
+          placeholder="Rechercher par nom…"
           className="flex-1 min-w-[200px] px-3 py-1.5 rounded-xl bg-surface-container-high border border-outline-variant/30 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-hidden focus:border-primary"
         />
         <select

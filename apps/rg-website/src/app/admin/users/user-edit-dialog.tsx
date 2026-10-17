@@ -57,7 +57,7 @@ export function UserEditDialog({ user }: UserEditDialogProps) {
   });
 
   const onSubmit = async (values: UserEditFormValues) => {
-    const toastId = toast.loading("Mise à jour...");
+    const toastId = toast.loading("Mise à jour…");
 
     try {
       const result = await updateUserProfile(user.id, values);
@@ -141,7 +141,7 @@ export function UserEditDialog({ user }: UserEditDialogProps) {
                 Annuler
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Sauvegarde..." : "Sauvegarder"}
+                {form.formState.isSubmitting ? "Sauvegarde…" : "Sauvegarder"}
               </Button>
             </div>
           </form>

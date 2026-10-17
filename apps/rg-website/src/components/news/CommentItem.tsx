@@ -221,8 +221,8 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
                   className={cn(
                     "inline-flex items-center justify-center min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 p-1.5 rounded-xl transition-colors",
                     showDeleteConfirm
-                      ? "text-red-500 bg-red-500/10"
-                      : "text-on-surface-variant/50 hover:text-red-500 hover:bg-surface-container",
+                      ? "text-destructive bg-destructive/10"
+                      : "text-on-surface-variant/50 hover:text-destructive hover:bg-surface-container",
                   )}
                   title="Supprimer"
                 >
@@ -235,7 +235,7 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
 
         {/* Confirmation de suppression */}
         {showDeleteConfirm && (
-          <div className="flex items-center justify-between gap-3 bg-red-500/5 border border-red-500/15 rounded-xl px-3 py-2.5">
+          <div className="flex items-center justify-between gap-3 bg-destructive/5 border border-destructive/20 rounded-xl px-3 py-2.5">
             <p className="text-xs text-on-surface">Supprimer ce commentaire ?</p>
             <div className="flex items-center gap-2">
               <Button
@@ -250,7 +250,7 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
                 size="sm"
                 disabled={isPending}
                 onClick={handleDelete}
-                className="h-10 sm:h-6 px-2.5 text-xs rounded-lg bg-red-500 hover:bg-red-600 text-white"
+                className="h-10 sm:h-6 px-2.5 text-xs rounded-lg bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               >
                 {isPending ? "…" : "Supprimer"}
               </Button>
@@ -264,7 +264,7 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
             <div
               className={cn(
                 "relative border rounded-xl bg-surface-container transition-colors focus-within:border-primary/40",
-                editContent.length > EDIT_MAX_LENGTH ? "border-red-500/40" : "border-outline-variant/15",
+                editContent.length > EDIT_MAX_LENGTH ? "border-destructive/40" : "border-outline-variant/15",
               )}
             >
               <textarea
@@ -279,7 +279,7 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
                   className={cn(
                     "text-xs tabular-nums",
                     editRemaining < 0
-                      ? "text-red-500 font-medium"
+                      ? "text-destructive font-medium"
                       : editRemaining <= 100
                         ? "text-amber-500"
                         : "text-on-surface-variant/40",
@@ -354,7 +354,7 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
           <button
             onClick={handleLoadReplies}
             disabled={repliesLoading}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-primary/70 hover:text-primary transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 min-h-11 sm:min-h-0 text-xs font-medium text-primary/70 hover:text-primary transition-colors disabled:opacity-50"
           >
             <ChevronDown className={cn("size-3.5 transition-transform", repliesLoaded && "rotate-180")} />
             {repliesLoading

@@ -124,7 +124,7 @@ export function UsersTable({ users: initialUsers }: UsersTableProps) {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Rechercher par email..."
+            placeholder="Rechercher par email…"
             defaultValue={searchParams?.get("query")?.toString()}
             onChange={e => {
               // La fonction de nettoyage retournée par un `onChange` n'est

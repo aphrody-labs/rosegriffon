@@ -260,7 +260,7 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
             </PopoverTrigger>
             <PopoverContent className="w-64 p-0" align="start">
               <Command>
-                <CommandInput placeholder="Rechercher un auteur..." />
+                <CommandInput placeholder="Rechercher un auteur…" />
                 <CommandList>
                   <CommandEmpty>Aucun auteur trouvé.</CommandEmpty>
                   <CommandGroup>

@@ -81,7 +81,7 @@ export function GenericEditorForm({ table, initialData }: { table: string; initi
 
       <div className="flex justify-end pt-6 border-t border-outline-variant/10">
         <Button onClick={handleSave} disabled={loading} className="rounded-full px-8">
-          {loading ? "Enregistrement..." : "Enregistrer les modifications"}
+          {loading ? "Enregistrement…" : "Enregistrer les modifications"}
         </Button>
       </div>
     </div>
