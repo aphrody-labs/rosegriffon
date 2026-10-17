@@ -168,7 +168,8 @@ async function demarrerCoeur(): Promise<void> {
   const binaireModeles = Bun.env.NIE_MODEL_SERVE_BIN ?? Bun.which("aphrody-nie-model-serve");
   const jeuIevr = Bun.env.NIE_GAME_DIR;
   let modeles: Superviseur | null = null;
-  if (Bun.env.RG_CORE_MODELES !== "0" && binaireModeles && jeuIevr) {
+  // `NIE_MODEL_SERVE_URL` : serveur de modèles externe (autre hôte ou service), relayé sans enfant local.
+  if (!Bun.env.NIE_MODEL_SERVE_URL && Bun.env.RG_CORE_MODELES !== "0" && binaireModeles && jeuIevr) {
     const args = ["--game-dir", jeuIevr, "--port", String(portModeles)];
     if (Bun.env.NIE_MODEL_CACHE_DIR) args.push("--cache-dir", Bun.env.NIE_MODEL_CACHE_DIR);
     args.push("--threads", Bun.env.NIE_MODEL_SERVE_THREADS ?? "8");
@@ -179,7 +180,9 @@ async function demarrerCoeur(): Promise<void> {
     enfants.push(modeles);
   } else {
     console.warn(
-      "[rg-core] nie-model-serve désactivé (NIE_MODEL_SERVE_BIN ou NIE_GAME_DIR absent, ou RG_CORE_MODELES=0)",
+      Bun.env.NIE_MODEL_SERVE_URL
+        ? `[rg-core] nie-model-serve externe : ${Bun.env.NIE_MODEL_SERVE_URL}`
+        : "[rg-core] nie-model-serve désactivé (NIE_MODEL_SERVE_BIN ou NIE_GAME_DIR absent, ou RG_CORE_MODELES=0)",
     );
   }
 
@@ -204,7 +207,7 @@ async function demarrerCoeur(): Promise<void> {
   const { clientActif } = await import("./lib/client-actif");
   const hotesModeles = hotes(Bun.env.RG_CORE_MODEL_HOSTS, "cdn.rosegriffon.fr,nie.aphrody.app");
   const hotesBot = hotes(Bun.env.RG_CORE_BOT_HOSTS, "bot.rosegriffon.fr");
-  const origineModeles = `http://127.0.0.1:${portModeles}`;
+  const origineModeles = (Bun.env.NIE_MODEL_SERVE_URL ?? `http://127.0.0.1:${portModeles}`).replace(/\/+$/, "");
   let planifiees: string[] = [];
 
   const sante = () => ({

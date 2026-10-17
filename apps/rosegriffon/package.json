@@ -1,0 +1,26 @@
+{
+  "name": "@rosegriffon/server",
+  "version": "1.4.4",
+  "private": true,
+  "description": "rosegriffon: one self-hostable executable for the Rose Griffon site, unified API, Discord gateway, Achillea ranked and cron runner",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "rosegriffon": "./src/main.ts"
+  },
+  "scripts": {
+    "start": "bun src/main.ts",
+    "compile": "bun ../../scripts/compile.ts",
+    "typecheck": "bun check --noEmit",
+    "lint": "bun lint src"
+  },
+  "dependencies": {
+    "@aphrody/next-bun": "catalog:",
+    "@rosegriffon/bot": "workspace:*",
+    "@rosegriffon/cron": "workspace:*",
+    "reflect-metadata": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:"
+  }
+}
