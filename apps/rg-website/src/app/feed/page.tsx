@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   alternates: { canonical: "/feed" },
   description:
-    "Le feed d'Inazuma Eleven en direct : X, Instagram et TikTok de Rose Griffon, Achilléa, Azalée, des comptes officiels du jeu et de LEVEL-5.",
+    "Le feed d'Inazuma Eleven en direct : X, Instagram, TikTok et YouTube de Rose Griffon, Achilléa, Azalée, des comptes officiels du jeu et de LEVEL-5.",
   title: "Feed Inazuma Eleven",
 };
 
@@ -41,7 +41,7 @@ export default async function PageFeedInazuma({
           <header className="mb-4">
             <h1 className="text-2xl leading-8 font-extrabold text-on-surface">Feed Inazuma Eleven</h1>
             <p className="text-sm leading-6 text-on-surface-variant">
-              Rose Griffon, les comptes officiels du jeu et LEVEL-5, sur X, Instagram et TikTok, en direct.
+              Rose Griffon, les comptes officiels du jeu et LEVEL-5, sur X, Instagram, TikTok et YouTube.
             </p>
           </header>
         )}
@@ -85,15 +85,16 @@ export default async function PageFeedInazuma({
             À propos des sources
           </summary>
           <div className="space-y-2 px-4 pb-4">
+            <p>X est relu en direct toutes les 30 secondes : profils, fils, recherche et conversations.</p>
             <p>
-              X est relu en direct toutes les 30 secondes : profils, fils, recherche et conversations.
+              YouTube (flux public des chaînes), TikTok (les dernières vidéos publiques) et Instagram (la grille publique
+              des profils) sont synchronisés en tâche de fond toutes les 30 minutes. Sans connexion, TikTok et Instagram
+              se limitent à leurs publications les plus récentes, sans likes ni commentaires pour Instagram.
             </p>
             <p>
-              Instagram et TikTok ne permettent pas de lire le fil d&apos;un compte sans connexion. Le Feed affiche donc
-              les créations déposées par la communauté et les publications partagées par l&apos;équipe, et ne simule rien
-              d&apos;autre.
+              Aucun compte officiel d&apos;Inazuma Eleven ou de LEVEL-5 n&apos;est référencé sur Instagram ni TikTok ; leurs
+              vidéos officielles sont sur la chaîne YouTube LEVEL5ch.
             </p>
-            <p>Aucun compte officiel d&apos;Inazuma Eleven ou de LEVEL-5 n&apos;est référencé sur Instagram ni TikTok.</p>
           </div>
         </details>
       </div>

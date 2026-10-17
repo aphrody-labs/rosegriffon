@@ -3,7 +3,7 @@
 import { ArrowUp, BadgeCheck, CalendarDays, ExternalLink, Link2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { MARQUES } from "@/lib/feed/comptes";
+import { lienCompte, MARQUES } from "@/lib/feed/comptes";
 import type { FiltreFil } from "@/lib/feed/comptes";
 import type { CompteSource, PostFeed, ProfilFeed, StatutSource } from "@/lib/feed/types";
 
@@ -278,7 +278,7 @@ function EnteteProfil({ compte, profil }: { compte: CompteSource; profil?: Profi
             </span>
           )}
           <a
-            href={profil?.lien ?? marque.lien(compte.pseudo)}
+            href={profil?.lien ?? lienCompte(compte)}
             target="_blank"
             rel="noopener noreferrer"
             className={`${BOUTON} gap-2`}
@@ -292,7 +292,8 @@ function EnteteProfil({ compte, profil }: { compte: CompteSource; profil?: Profi
           {profil?.certifie && <BadgeCheck className="size-5 text-info" aria-label="Compte certifié" />}
         </h1>
         <p className="flex items-center gap-2 text-sm text-on-surface-variant">
-          <BadgeReseau reseau={compte.reseau} taille={18} />@{profil?.pseudo ?? compte.pseudo} · {compte.groupe}
+          <BadgeReseau reseau={compte.reseau} taille={18} />
+          {compte.reseau === "youtube" ? "Chaîne YouTube" : `@${profil?.pseudo ?? compte.pseudo}`} · {compte.groupe}
         </p>
         {profil?.bio && (
           <p className="mt-3 text-[15px] leading-6 whitespace-pre-line text-on-surface">

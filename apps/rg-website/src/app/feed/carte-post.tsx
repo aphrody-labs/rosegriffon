@@ -7,6 +7,8 @@ import { Fragment, useState } from "react";
 import type { MetriquesFeed, PostFeed, ProfilFeed, Reseau } from "@/lib/feed/types";
 import { cleProfil } from "@/lib/feed/types";
 
+import { MARQUES } from "@/lib/feed/comptes";
+
 import { BadgeReseau } from "./marque";
 
 const SEUIL_LONG = 420;
@@ -31,6 +33,7 @@ function lienHashtag(reseau: Reseau, mot: string): string | null {
   const nom = encodeURIComponent(mot.slice(1));
   if (reseau === "instagram") return `https://www.instagram.com/explore/tags/${nom}/`;
   if (reseau === "tiktok") return `https://www.tiktok.com/tag/${nom}`;
+  if (reseau === "youtube") return `https://www.youtube.com/hashtag/${nom}`;
   return null;
 }
 
@@ -38,6 +41,7 @@ function lienMention(reseau: Reseau, mot: string): string {
   const nom = mot.slice(1);
   if (reseau === "instagram") return `https://www.instagram.com/${nom}/`;
   if (reseau === "tiktok") return `https://www.tiktok.com/@${nom}`;
+  if (reseau === "youtube") return `https://www.youtube.com/@${nom}`;
   return `https://x.com/${nom}`;
 }
 
@@ -145,7 +149,7 @@ function Integration({ post }: { post: PostFeed }) {
   const cadre = { aspectRatio: String(integration.ratio) };
   return (
     <div
-      className="mt-3 w-full max-w-[340px] overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-high"
+      className={`mt-3 w-full overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-high ${integration.ratio < 1 ? "max-w-[340px]" : ""}`}
       style={cadre}
     >
       {actif ? (
@@ -284,7 +288,9 @@ export function CartePost({
           >
             {post.auteur.nom}
           </a>
-          <span className="min-w-0 truncate text-on-surface-variant">@{post.auteur.pseudo}</span>
+          {post.reseau !== "youtube" && (
+            <span className="min-w-0 truncate text-on-surface-variant">@{post.auteur.pseudo}</span>
+          )}
           <BadgeReseau reseau={post.reseau} taille={18} />
           <span aria-hidden className="text-on-surface-variant">
             ·
@@ -331,7 +337,7 @@ export function CartePost({
             rel="noopener noreferrer"
             className={`ml-auto flex min-h-11 items-center text-sm ${LIEN}`}
           >
-            Voir sur {post.reseau === "x" ? "X" : post.reseau === "instagram" ? "Instagram" : "TikTok"}
+            Voir sur {MARQUES[post.reseau].nom}
           </a>
         </div>
       </div>

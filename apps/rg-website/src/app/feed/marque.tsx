@@ -1,4 +1,4 @@
-import { Instagram, Twitter } from "@/lib/brand-icons";
+import { Instagram, Twitter, Youtube } from "@/lib/brand-icons";
 import { MARQUES } from "@/lib/feed/comptes";
 import type { Reseau } from "@/lib/feed/types";
 
@@ -19,7 +19,7 @@ function IconeTiktok({ className }: { className?: string }) {
   );
 }
 
-const ICONES = { x: Twitter, instagram: Instagram, tiktok: IconeTiktok } as const;
+const ICONES = { x: Twitter, instagram: Instagram, tiktok: IconeTiktok, youtube: Youtube } as const;
 
 /** Pastille du réseau : la couleur de marque est la seule couleur brute de la page. */
 export function BadgeReseau({ reseau, taille = 20 }: { reseau: Reseau; taille?: number }) {
