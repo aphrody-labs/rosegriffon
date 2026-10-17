@@ -45,33 +45,32 @@ export function AccountShell({ email, backHref, backLabel = "Retour", initialTab
   };
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
-      {backHref && (
-        <nav aria-label="Retour" className="mb-4">
-          <Button variant="ghost" size="sm" asChild className="-ml-2">
-            <Link href={backHref}>
-              <ArrowLeft className="size-4" aria-hidden />
-              {backLabel}
-            </Link>
-          </Button>
-        </nav>
-      )}
-
-      <header className="mb-6 space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Paramètres du compte</h1>
-        {email && (
-          <p className="text-sm break-all text-muted-foreground">
-            Connecté en tant que <span className="font-medium text-foreground">{email}</span>
-          </p>
+    <div className="mx-auto w-full max-w-5xl pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-10">
+      {/* Barre d'application : retour, titre et identité restent sous l'en-tête du site pendant le défilement. */}
+      <header className="sticky top-16 z-20 flex min-h-14 items-center gap-1 border-b border-border bg-background/90 px-2 backdrop-blur sm:static sm:mb-6 sm:border-0 sm:bg-transparent sm:px-0 sm:backdrop-blur-none lg:top-14">
+        {backHref && (
+          <Link
+            href={backHref}
+            aria-label={backLabel}
+            className="flex size-11 shrink-0 items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted active:bg-muted"
+          >
+            <ArrowLeft className="size-5" aria-hidden />
+          </Link>
         )}
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-xl leading-tight font-bold tracking-tight text-foreground sm:text-3xl">
+            Paramètres du compte
+          </h1>
+          {email && <p className="truncate text-xs text-muted-foreground sm:text-sm">{email}</p>}
+        </div>
       </header>
 
       <Tabs value={active} onValueChange={change} className="w-full">
         <TabsList
           aria-label="Sections du compte"
-          // `grid-cols-2` en dessous de 640 px : quatre onglets côte à côte sur
-          // un écran de 320 px produisent des libellés tronqués à deux lettres.
-          className="grid h-auto w-full grid-cols-2 gap-1 p-1 sm:flex sm:justify-start"
+          // Une rangée de pastilles qui défile : aucun libellé tronqué, cibles de 44 px,
+          // et la rangée reste accrochée sous la barre pendant le défilement.
+          className="sticky top-[7.5rem] z-10 flex h-auto w-full snap-x justify-start gap-2 overflow-x-auto rounded-none bg-background/90 p-2 backdrop-blur [scrollbar-width:none] sm:static sm:rounded-lg sm:bg-muted sm:p-1 sm:backdrop-blur-none lg:top-[6.5rem]"
         >
           {tabs.map(({ id }) => {
             const meta = TAB_META[id];
@@ -79,17 +78,17 @@ export function AccountShell({ email, backHref, backLabel = "Retour", initialTab
               <TabsTrigger
                 key={id}
                 value={id}
-                className="flex min-h-11 flex-col items-center justify-center gap-0.5 px-2 text-xs sm:min-h-9 sm:flex-row sm:gap-2 sm:text-sm"
+                className="flex min-h-11 shrink-0 snap-start items-center justify-center gap-2 rounded-full px-4 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground sm:min-h-9 sm:rounded-md"
               >
                 <meta.icon className="size-4 shrink-0" aria-hidden />
-                <span className="truncate">{meta.label}</span>
+                <span>{meta.label}</span>
               </TabsTrigger>
             );
           })}
         </TabsList>
 
         {tabs.map(({ id, content }) => (
-          <TabsContent key={id} value={id} className="mt-6 focus-visible:outline-hidden">
+          <TabsContent key={id} value={id} className="mt-4 px-4 focus-visible:outline-hidden sm:mt-6 sm:px-0">
             {content}
           </TabsContent>
         ))}

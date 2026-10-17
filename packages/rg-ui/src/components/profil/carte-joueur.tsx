@@ -151,6 +151,7 @@ export function CarteJoueur({
   const fond = urlBanniereAffichable(banniereUrl);
   const cadrage = Math.min(100, Math.max(0, banniereCadrage ?? 50));
   const [bandes, setBandes] = useState(false);
+  const [avatarCasse, setAvatarCasse] = useState(false);
   // Ref + onLoad : l'image peut être déjà chargée avant l'hydratation, auquel
   // cas `onLoad` ne se déclenche jamais côté React.
   const verifierBandes = useCallback(
@@ -217,11 +218,12 @@ export function CarteJoueur({
 					    que les initiales), si bien que la photo restait absente du rendu
 					    serveur — et donc de tout aperçu de lien partagé. Ici l'image est
 					    dans le document dès la première réponse. */}
-          {avatarUrl ? (
+          {avatarUrl && !avatarCasse ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={avatarUrl}
               alt={`Photo de profil de ${pseudo}`}
+              onError={() => setAvatarCasse(true)}
               className="size-20 shrink-0 rounded-full border-2 border-white/80 object-cover shadow-lg sm:size-28"
             />
           ) : (

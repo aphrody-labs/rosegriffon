@@ -330,7 +330,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
 
       {/* Carte de joueur : bannière, portrait, nom, description et éléments
 			    dans la composition des fiches du jeu. */}
-      <div className="container mx-auto px-4 pt-6 sm:px-6 sm:pt-8 lg:px-8">
+      <div className="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6 sm:pt-8 lg:px-8">
         <CarteJoueur
           pseudo={profile.username ?? username}
           titre={titreJoueur}
