@@ -358,10 +358,17 @@ const nextConfig: NextConfig = {
 
   async rewrites() {
     // Les URL relatives `/storage/v1/…` déjà enregistrées en base restent
-    // valides : elles sont relayées vers Supabase Storage.
+    // valides. Les buckets lourds (`tweets`, `assets`) vivent sur le disque de
+    // rg-core, servi par `cdn.rosegriffon.fr` (qui retombe lui-même sur Supabase) ;
+    // les relayer vers Supabase seul renvoyait 400 pour tous ces médias.
+    const origineMedias = (process.env.RG_MEDIA_PUBLIC_ORIGIN ?? "https://cdn.rosegriffon.fr").replace(/\/+$/, "");
+    const medias = {
+      destination: `${origineMedias}/storage/v1/object/public/:bucket/:path*`,
+      source: "/storage/v1/object/public/:bucket(tweets|assets)/:path*",
+    };
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-    if (!supabaseUrl?.startsWith("https://")) return [];
-    return [{ destination: `${supabaseUrl}/storage/v1/:path*`, source: "/storage/v1/:path*" }];
+    if (!supabaseUrl?.startsWith("https://")) return [medias];
+    return [medias, { destination: `${supabaseUrl}/storage/v1/:path*`, source: "/storage/v1/:path*" }];
   },
 
   async headers() {

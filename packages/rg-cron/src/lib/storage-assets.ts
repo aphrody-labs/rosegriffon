@@ -138,6 +138,24 @@ export async function telechargerPieceJointeDiscord(
  * déterministe : une seconde passe réécrit le même octet au même endroit plutôt
  * que de créer un doublon horodaté.
  */
+/**
+ * L'objet existe-t-il réellement ? Une ligne en base qui porte un chemin ne le
+ * garantit pas : après une migration d'hôte, la base gardait les chemins de
+ * médias dont les fichiers n'avaient pas suivi, et plus rien ne les recopiait.
+ */
+export async function objetPresent(bucket: string, chemin: string): Promise<boolean> {
+  const fichier = fichierMedia(bucket, chemin);
+  if (fichier) return Bun.file(fichier).exists();
+  let base: string;
+  try {
+    base = baseStorage();
+  } catch {
+    return false;
+  }
+  const reponse = await fetch(`${base}/storage/v1/object/public/${bucket}/${chemin}`, { method: "HEAD" }).catch(() => null);
+  return reponse?.ok ?? false;
+}
+
 export async function televerserObjet(
   bucket: string,
   chemin: string,

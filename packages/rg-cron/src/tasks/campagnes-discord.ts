@@ -71,7 +71,7 @@
  */
 
 import { sql } from "../lib/db.js";
-import { telechargerPieceJointeDiscord, televerserObjet, urlSansSignature } from "../lib/storage-assets.js";
+import { objetPresent, telechargerPieceJointeDiscord, televerserObjet, urlSansSignature } from "../lib/storage-assets.js";
 
 const PREFIXE = "[Campagnes Discord]";
 
@@ -761,9 +761,9 @@ async function recolterCampagne(
 /**
  * Ré-héberge les images d'un message dans le bucket public `assets`.
  *
- * Une image déjà recopiée lors d'un run précédent est reprise TELLE QUELLE :
- * aucun appel réseau, aucune réécriture. C'est ce qui rend la tâche rejouable à
- * coût nul, y compris toutes les heures.
+ * Une image déjà recopiée lors d'un run précédent est reprise TELLE QUELLE,
+ * sans retéléchargement, tant que l'objet existe encore dans le bucket : un
+ * fichier disparu est recopié depuis Discord au run suivant.
  */
 async function rehebergerMedias(
   slug: string,
@@ -790,7 +790,7 @@ async function rehebergerMedias(
     };
 
     const connue = parIdentifiant.get(media.id);
-    if (connue?.chemin) {
+    if (connue?.chemin && (dry || (await objetPresent(BUCKET, connue.chemin)))) {
       stats.imagesDejaLa++;
       // `kind` n'existait pas avant le 26/8/2026 : une ligne d'alors le rejoue
       // ici depuis le type MIME courant plutôt que de rester sans réponse.
