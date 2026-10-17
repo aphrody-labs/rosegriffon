@@ -147,22 +147,44 @@ async function lireProfil(compte: CompteX): Promise<XProfil> {
   };
 }
 
-/** Profil et derniers posts d'un compte officiel, relus sur X (cache 30 s). */
-export function lireCompte(compte: CompteX, nombre = 12): Promise<XLive> {
+/** Une page de posts et le curseur de la suivante (absent à la fin). */
+export interface PageXPosts {
+  tweets: XTweet[];
+  next_cursor?: string;
+}
+
+const CURSEUR_OK = /^[A-Za-z0-9_=+/-]{1,400}$/;
+
+function optionCurseur(curseur?: string): string[] {
+  return curseur && CURSEUR_OK.test(curseur) ? ["--cursor", curseur] : [];
+}
+
+/** Profil et posts d'un compte officiel, relus sur X (cache 30 s) ; `curseur` pagine. */
+export function lireCompte(compte: CompteX, nombre = 12, curseur?: string): Promise<XLive & { next_cursor?: string }> {
   const n = Math.min(Math.max(1, nombre), 30);
-  return memo(`compte:${compte}:${n}`, async () => {
+  return memo(`compte:${compte}:${n}:${curseur ?? ""}`, async () => {
     const [profil, page] = await Promise.all([
       lireProfil(compte),
-      lancer<{ tweets: XTweet[] }>(["user-tweets", compte, "-n", String(n)]),
+      lancer<PageXPosts>(["user-tweets", compte, "-n", String(n), ...optionCurseur(curseur)]),
     ]);
-    return { profil, tweets: page.tweets, recuLe: new Date().toISOString() };
+    return { profil, tweets: page.tweets, next_cursor: page.next_cursor, recuLe: new Date().toISOString() };
   });
 }
 
 /** Recherche « Latest » sur X ; la requête est bornée et ne peut pas devenir une option. */
-export function chercher(requete: string, nombre = 20): Promise<XTweet[]> {
+export function chercher(requete: string, nombre = 20, curseur?: string): Promise<PageXPosts> {
   const q = requete.trim().slice(0, 200);
-  if (!q || q.startsWith("-")) return Promise.resolve([]);
+  if (!q || q.startsWith("-")) return Promise.resolve({ tweets: [] });
   const n = Math.min(Math.max(1, nombre), 40);
-  return memo(`q:${q}:${n}`, async () => (await lancer<{ tweets: XTweet[] }>(["search", q, "-n", String(n)])).tweets);
+  return memo(`q:${q}:${n}:${curseur ?? ""}`, () => lancer<PageXPosts>(["search", q, "-n", String(n), ...optionCurseur(curseur)]));
+}
+
+export function estIdPost(valeur: string): boolean {
+  return /^d{5,25}$/.test(valeur);
+}
+
+/** Conversation d'un post (le post puis ses réponses), paginée. */
+export function lireThread(id: string, curseur?: string): Promise<PageXPosts> {
+  if (!estIdPost(id)) return Promise.resolve({ tweets: [] });
+  return memo(`thread:${id}:${curseur ?? ""}`, () => lancer<PageXPosts>(["thread", id, "-n", "20", ...optionCurseur(curseur)]));
 }

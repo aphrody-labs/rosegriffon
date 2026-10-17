@@ -1,185 +1,161 @@
 "use client";
 
-import { BadgeCheck, CalendarDays, ChartNoAxesColumn, Heart, Link2, MessageCircle, Repeat2 } from "lucide-react";
-import { Fragment, useEffect, useState } from "react";
+import { BadgeCheck, CalendarDays, Link2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { XLive, XProfil, XTweet } from "@/lib/x/live";
+import type { PageXPosts, XLive, XProfil, XTweet } from "@/lib/x/live";
+
+import { entier, Post, SquelettePosts, TexteAvecLiens } from "./x-composants";
 
 const INTERVALLE_MS = 30_000;
-const SEUIL_LONG = 420;
-const MOTIF_TCO = /(https:\/\/t\.co\/\w+)/g;
-const MOTIF_TCO_SEUL = /^https:\/\/t\.co\/\w+$/;
 
-const compact = new Intl.NumberFormat("fr-FR", { notation: "compact", maximumFractionDigits: 1 });
-const entier = new Intl.NumberFormat("fr-FR");
-
-function dateCourte(valeur: string): string {
-  const date = new Date(valeur);
-  if (Number.isNaN(date.getTime())) return "";
-  const meme = date.getFullYear() === new Date().getFullYear();
-  return date.toLocaleDateString("fr-FR", meme ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" });
+interface Page extends PageXPosts {
+  profil?: XProfil;
 }
 
-function TexteAvecLiens({ texte }: { texte: string }) {
-  return (
-    <>
-      {texte.split(MOTIF_TCO).map((morceau, i) =>
-        MOTIF_TCO_SEUL.test(morceau) ? (
-          <a
-            key={i}
-            href={morceau}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--x-link)] hover:underline"
-          >
-            {morceau.replace("https://", "")}
-          </a>
-        ) : (
-          <Fragment key={i}>{morceau}</Fragment>
-        ),
-      )}
-    </>
+/**
+ * Liste paginée : la première page vient du serveur (ou se charge seule), « la suite » se charge
+ * quand le bas de liste approche, et `rafraichir` ramène en tête les posts parus entre-temps.
+ */
+function useListe(url: string, initial: Page | null, rafraichir: boolean) {
+  const [posts, setPosts] = useState<XTweet[]>(initial?.tweets ?? []);
+  const [profil, setProfil] = useState<XProfil | undefined>(initial?.profil);
+  const [curseur, setCurseur] = useState<string | undefined>(initial?.next_cursor);
+  const [charge, setCharge] = useState(initial !== null);
+  const [chargement, setChargement] = useState(false);
+  const [erreur, setErreur] = useState(false);
+  const sentinelle = useRef<HTMLDivElement | null>(null);
+
+  const lire = useCallback(
+    async (cur?: string): Promise<Page> => {
+      const reponse = await fetch(`${url}${cur ? `&cursor=${encodeURIComponent(cur)}` : ""}`, { cache: "no-store" });
+      if (!reponse.ok) throw new Error(String(reponse.status));
+      return (await reponse.json()) as Page;
+    },
+    [url],
   );
+
+  const suite = useCallback(async () => {
+    if (chargement || !curseur) return;
+    setChargement(true);
+    try {
+      const page = await lire(curseur);
+      setPosts(actuels => {
+        const vus = new Set(actuels.map(p => p.id));
+        return [...actuels, ...page.tweets.filter(p => !vus.has(p.id))];
+      });
+      setCurseur(page.next_cursor);
+      setErreur(false);
+    } catch {
+      setErreur(true);
+    } finally {
+      setChargement(false);
+    }
+  }, [chargement, curseur, lire]);
+
+  useEffect(() => {
+    let actif = true;
+    const premiere = async () => {
+      try {
+        const page = await lire();
+        if (!actif) return;
+        setPosts(page.tweets);
+        setCurseur(page.next_cursor);
+        if (page.profil) setProfil(page.profil);
+        setErreur(false);
+      } catch {
+        if (actif) setErreur(true);
+      } finally {
+        if (actif) setCharge(true);
+      }
+    };
+    if (initial === null) void premiere();
+    if (!rafraichir) return () => void (actif = false);
+    const minuteur = setInterval(async () => {
+      if (document.visibilityState !== "visible") return;
+      try {
+        const page = await lire();
+        if (!actif) return;
+        if (page.profil) setProfil(page.profil);
+        setPosts(actuels => {
+          const vus = new Set(actuels.map(p => p.id));
+          const nouveaux = page.tweets.filter(p => !vus.has(p.id));
+          return nouveaux.length > 0 ? [...nouveaux, ...actuels] : actuels;
+        });
+        setErreur(false);
+      } catch {
+        // La liste affichée reste valable ; le prochain passage retentera.
+      }
+    }, INTERVALLE_MS);
+    return () => {
+      actif = false;
+      clearInterval(minuteur);
+    };
+  }, [initial, lire, rafraichir]);
+
+  useEffect(() => {
+    const noeud = sentinelle.current;
+    if (!noeud || !curseur) return;
+    const observateur = new IntersectionObserver(entrees => entrees[0]?.isIntersecting && void suite(), {
+      rootMargin: "600px",
+    });
+    observateur.observe(noeud);
+    return () => observateur.disconnect();
+  }, [curseur, suite]);
+
+  return { posts, profil, curseur, charge, chargement, erreur, sentinelle, suite };
 }
 
-function Compteur({
-  icone: Icone,
-  libelle,
-  valeur,
-  survol,
+function ListePosts({
+  liste,
+  profil,
+  vide,
 }: {
-  icone: typeof Heart;
-  libelle: string;
-  valeur?: number;
-  survol: string;
+  liste: ReturnType<typeof useListe>;
+  profil?: XProfil;
+  vide: string;
 }) {
+  const { posts, curseur, charge, chargement, erreur, sentinelle, suite } = liste;
+  if (!charge && posts.length === 0)
+    return erreur ? <Erreur /> : <SquelettePosts />;
+  if (posts.length === 0)
+    return erreur ? (
+      <Erreur />
+    ) : (
+      <p className="p-8 text-center text-[15px] leading-5 text-[var(--x-muted)]">{vide}</p>
+    );
   return (
-    <span
-      className={`group/c flex min-h-11 items-center gap-1 text-[13px] leading-4 text-[var(--x-muted)] ${survol}`}
-      title={`${valeur != null ? entier.format(valeur) : 0} ${libelle}`}
-    >
-      <Icone className="size-[18px]" aria-hidden />
-      <span className="tabular-nums">{valeur ? compact.format(valeur) : ""}</span>
-      <span className="sr-only">{libelle}</span>
-    </span>
-  );
-}
-
-function Avatar({ profil, taille }: { profil: Pick<XProfil, "avatar" | "name">; taille: number }) {
-  return profil.avatar ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={profil.avatar}
-      alt=""
-      width={taille}
-      height={taille}
-      referrerPolicy="no-referrer"
-      className="shrink-0 rounded-full bg-[var(--x-border)] object-cover"
-      style={{ width: taille, height: taille }}
-    />
-  ) : (
-    <span className="shrink-0 rounded-full bg-[var(--x-border)]" style={{ width: taille, height: taille }} />
-  );
-}
-
-function Medias({ post, citation = false }: { post: XTweet; citation?: boolean }) {
-  const medias = post.media?.filter(m => m.preview_url || m.url) ?? [];
-  if (medias.length === 0) return null;
-  const grille = medias.length === 1 ? "grid-cols-1" : "grid-cols-2";
-  return (
-    <div
-      className={`mt-3 grid ${grille} gap-0.5 overflow-hidden rounded-2xl border border-[var(--x-border)] ${citation ? "" : ""}`}
-    >
-      {medias.slice(0, 4).map(m => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          key={m.url}
-          src={m.preview_url ?? m.url}
-          alt=""
-          width={m.width}
-          height={m.height}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-          className={`w-full object-cover ${medias.length === 1 ? "max-h-[510px]" : "aspect-square"}`}
-        />
+    <div>
+      {posts.map(post => (
+        <Post key={post.id} post={post} profil={profil} />
       ))}
+      {curseur && (
+        <div ref={sentinelle}>
+          {chargement ? (
+            <SquelettePosts nombre={2} />
+          ) : (
+            <button
+              type="button"
+              onClick={() => void suite()}
+              className="min-h-[53px] w-full text-[15px] text-[var(--x-link)] hover:bg-white/[0.03]"
+            >
+              {erreur ? "Réessayer" : "Afficher plus de posts"}
+            </button>
+          )}
+        </div>
+      )}
+      <p className="sr-only" role="status">
+        {posts.length} posts affichés
+      </p>
     </div>
   );
 }
 
-function Citation({ post }: { post: XTweet }) {
+function Erreur() {
   return (
-    <a
-      href={`https://x.com/${post.author.username}/status/${post.id}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="mt-3 block overflow-hidden rounded-2xl border border-[var(--x-border)] p-3 hover:bg-white/[0.03]"
-    >
-      <p className="flex flex-wrap items-baseline gap-x-1 text-[15px] leading-5">
-        <span className="font-bold text-[var(--x-text)]">{post.author.name}</span>
-        <span className="text-[var(--x-muted)]">@{post.author.username}</span>
-      </p>
-      <p className="mt-0.5 line-clamp-4 whitespace-pre-line break-words text-[15px] leading-5 text-[var(--x-text)]">
-        {post.text}
-      </p>
-      <Medias post={post} citation />
-    </a>
-  );
-}
-
-function Post({ post, profil }: { post: XTweet; profil: XProfil }) {
-  const [deplie, setDeplie] = useState(false);
-  const long = post.text.length > SEUIL_LONG;
-  return (
-    <article className="flex gap-3 border-b border-[var(--x-border)] px-4 pt-3 pb-1 transition-colors hover:bg-[var(--x-hover)]">
-      <Avatar profil={profil} taille={40} />
-      <div className="min-w-0 flex-1">
-        <header className="flex min-w-0 items-baseline gap-x-1 text-[15px] leading-5">
-          <span className="truncate font-bold text-[var(--x-text)]">{post.author.name}</span>
-          {profil.certifie && <BadgeCheck className="size-[18px] shrink-0 self-center fill-[var(--x-link)] text-black" aria-label="Compte certifié" />}
-          <span className="shrink-0 text-[var(--x-muted)]">@{post.author.username}</span>
-          <span aria-hidden className="text-[var(--x-muted)]">
-            ·
-          </span>
-          <a
-            href={`https://x.com/${post.author.username}/status/${post.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0 text-[var(--x-muted)] hover:underline"
-          >
-            <time dateTime={new Date(post.created_at).toISOString()}>{dateCourte(post.created_at)}</time>
-          </a>
-        </header>
-        <p
-          className={`whitespace-pre-line break-words text-[15px] leading-5 text-[var(--x-text)] ${long && !deplie ? "line-clamp-6" : ""}`}
-        >
-          <TexteAvecLiens texte={post.text} />
-        </p>
-        {long && (
-          <button
-            type="button"
-            onClick={() => setDeplie(!deplie)}
-            aria-expanded={deplie}
-            className="min-h-11 text-[15px] text-[var(--x-link)] hover:underline"
-          >
-            {deplie ? "Réduire" : "Afficher plus"}
-          </button>
-        )}
-        <Medias post={post} />
-        {post.quoted_tweet && <Citation post={post.quoted_tweet} />}
-        <footer className="mt-1 flex max-w-[425px] justify-between">
-          <Compteur icone={MessageCircle} libelle="réponses" valeur={post.reply_count} survol="hover:text-[var(--x-link)]" />
-          <Compteur
-            icone={Repeat2}
-            libelle="reposts"
-            valeur={(post.retweet_count ?? 0) + (post.quote_count ?? 0)}
-            survol="hover:text-[#00ba7c]"
-          />
-          <Compteur icone={Heart} libelle="j'aime" valeur={post.like_count} survol="hover:text-[#f91880]" />
-          <Compteur icone={ChartNoAxesColumn} libelle="vues" valeur={post.view_count} survol="hover:text-[var(--x-link)]" />
-        </footer>
-      </div>
-    </article>
+    <p role="alert" className="p-8 text-center text-[15px] leading-5 text-[var(--x-muted)]">
+      X ne répond pas pour le moment. Nouvel essai dans quelques secondes.
+    </p>
   );
 }
 
@@ -215,7 +191,9 @@ function EnTete({ profil }: { profil: XProfil }) {
         </h1>
         <p className="text-[15px] leading-5 text-[var(--x-muted)]">@{profil.screen_name}</p>
         {profil.description && (
-          <p className="mt-3 text-[15px] leading-5 whitespace-pre-line text-[var(--x-text)]">{profil.description}</p>
+          <p className="mt-3 text-[15px] leading-5 whitespace-pre-line text-[var(--x-text)]">
+            <TexteAvecLiens texte={profil.description} />
+          </p>
         )}
         <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] leading-5 text-[var(--x-muted)]">
           {profil.site && (
@@ -248,55 +226,27 @@ function EnTete({ profil }: { profil: XProfil }) {
   );
 }
 
-export function FilX({ compte, initial }: { compte: string; initial: XLive | null }) {
-  const [donnees, setDonnees] = useState<XLive | null>(initial);
-  const [erreur, setErreur] = useState(false);
-
-  useEffect(() => {
-    let actif = true;
-    const charger = async () => {
-      try {
-        const reponse = await fetch(`/api/x/live?compte=${compte}`, { cache: "no-store" });
-        if (!reponse.ok) throw new Error(String(reponse.status));
-        const suivant = (await reponse.json()) as XLive;
-        if (actif) {
-          setDonnees(suivant);
-          setErreur(false);
-        }
-      } catch {
-        if (actif) setErreur(true);
-      }
-    };
-    if (!initial) void charger();
-    const minuteur = setInterval(() => {
-      if (document.visibilityState === "visible") void charger();
-    }, INTERVALLE_MS);
-    return () => {
-      actif = false;
-      clearInterval(minuteur);
-    };
-  }, [compte, initial]);
-
-  if (!donnees) {
-    return (
-      <p role={erreur ? "alert" : "status"} className="p-8 text-center text-[15px] text-[var(--x-muted)]">
-        {erreur ? "X ne répond pas pour le moment. Nouvel essai dans quelques secondes." : "Chargement des posts…"}
-      </p>
-    );
-  }
-
+/** Profil d'un compte officiel et son fil, en direct. */
+export function FilX({ compte, initial }: { compte: string; initial: (XLive & { next_cursor?: string }) | null }) {
+  const liste = useListe(`/api/x/live?compte=${compte}`, initial, true);
   return (
     <>
-      <EnTete profil={donnees.profil} />
-      <p className="sr-only" aria-live="polite">
-        Mis à jour à {new Date(donnees.recuLe).toLocaleTimeString("fr-FR")}
-        {erreur ? ". X ne répond plus, dernier état affiché." : ""}
-      </p>
+      {liste.profil ? <EnTete profil={liste.profil} /> : <div className="aspect-[3/1] w-full bg-[#333639]" aria-hidden />}
       <div className="border-t border-[var(--x-border)]">
-        {donnees.tweets.map(post => (
-          <Post key={post.id} post={post} profil={donnees.profil} />
-        ))}
+        <ListePosts liste={liste} profil={liste.profil} vide="Aucun post à afficher pour le moment." />
       </div>
     </>
   );
+}
+
+/** Résultats de recherche (posts les plus récents sur X). */
+export function ResultatsRecherche({ q, initial }: { q: string; initial: PageXPosts | null }) {
+  const liste = useListe(`/api/x/live?q=${encodeURIComponent(q)}`, initial, false);
+  return <ListePosts liste={liste} vide={`Aucun résultat pour « ${q} ».`} />;
+}
+
+/** Un post et ses réponses. */
+export function FilThread({ id, initial }: { id: string; initial: PageXPosts | null }) {
+  const liste = useListe(`/api/x/live?thread=${id}`, initial, false);
+  return <ListePosts liste={liste} vide="Ce post est introuvable ou n'est plus visible." />;
 }
