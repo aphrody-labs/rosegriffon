@@ -38,7 +38,7 @@ type CommentRow = Omit<Comment, "profiles">;
 
 interface CommentsSectionProps {
   targetId: string;
-  targetType: "article" | "stream";
+  targetType: "article" | "stream" | "x_post";
   className?: string;
 }
 
