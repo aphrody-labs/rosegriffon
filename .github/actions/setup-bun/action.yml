@@ -1,0 +1,42 @@
+name: Setup Aphrody Bun
+description: >-
+  Installs the Aphrody Bun fork (native `bun check`, `bun lint`, `bun fmt`) from an
+  aphrody-labs/bun GitHub release and verifies its SHA-256. Upstream oven-sh/setup-bun
+  ships neither these commands nor a 1.4.4 build.
+inputs:
+  tag:
+    description: aphrody-labs/bun release tag
+    default: bun-v1.4.5
+runs:
+  using: composite
+  steps:
+    - name: Install Bun (${{ inputs.tag }})
+      shell: bash
+      env:
+        TAG: ${{ inputs.tag }}
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        case "${RUNNER_OS}" in
+          Linux) asset=bun-linux-x64.tar.gz ;;
+          Windows) asset=bun-windows-x64.zip ;;
+          *) echo "unsupported runner ${RUNNER_OS}" >&2; exit 1 ;;
+        esac
+        dir="${RUNNER_TEMP}/aphrody-bun"
+        mkdir -p "$dir" && cd "$dir"
+        base="https://github.com/aphrody-labs/bun/releases/download/${TAG}"
+        curl -fsSL --retry 3 -o "$asset" "$base/$asset"
+        curl -fsSL --retry 3 -o SHA256SUMS "$base/SHA256SUMS"
+        expected="$(grep -E "[ *]${asset}\$" SHA256SUMS | awk '{print $1}')"
+        actual="$(sha256sum "$asset" | awk '{print $1}')"
+        [ -n "$expected" ] && [ "$expected" = "$actual" ] || { echo "checksum mismatch for $asset" >&2; exit 1; }
+        if [ "${RUNNER_OS}" = Linux ]; then
+          tar -xzf "$asset"
+          bindir="$dir/bun-linux-x64"
+        else
+          unzip -q "$asset"
+          bindir="$dir/bun-windows-x64"
+        fi
+        echo "$bindir" >> "$GITHUB_PATH"
+        echo "$HOME/.bun/bin" >> "$GITHUB_PATH"
+        "$bindir/bun" --revision
