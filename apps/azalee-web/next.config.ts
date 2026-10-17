@@ -108,6 +108,17 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname, "../../"),
   },
+  // Les paquets TypeScript publiés (inagle…) importent leurs modules en `.js`.
+  webpack(config) {
+    config.resolve ??= {};
+    config.resolve.extensionAlias = {
+      ".js": [".js", ".ts", ".tsx"],
+      ".mjs": [".mjs", ".mts"],
+      ".cjs": [".cjs", ".cts"],
+      ...config.resolve.extensionAlias,
+    };
+    return config;
+  },
   transpilePackages: [
     "@rosegriffon/inagle",
     "@rosegriffon/inagle-cross",
@@ -140,7 +151,10 @@ const nextConfig: NextConfig = {
     "csv-parse",
   ],
 
-  logging: process.env.NODE_ENV === "production" ? { fetches: { fullUrl: false } } : { fetches: { fullUrl: true } },
+  logging:
+    process.env.NODE_ENV === "production"
+      ? { fetches: { fullUrl: false } }
+      : { fetches: { fullUrl: true } },
 
   // Types are checked by `bun check` (`typecheck` script), not during `next build`.
   typescript: {
@@ -161,7 +175,11 @@ const nextConfig: NextConfig = {
       // Formes d'URL d'authentification alignées sur rosegriffon.fr : les deux
       // apps partagent le même chrome et les mêmes courriels transactionnels,
       // un lien émis par l'une doit aboutir sur l'autre.
-      { destination: "/auth/reset-password", permanent: false, source: "/reset-password" },
+      {
+        destination: "/auth/reset-password",
+        permanent: false,
+        source: "/reset-password",
+      },
       // Azalee traite l'oubli de mot de passe dans le formulaire de connexion.
       { destination: "/login", permanent: false, source: "/forgot-password" },
       {
@@ -185,12 +203,18 @@ const nextConfig: NextConfig = {
   async rewrites() {
     // Les URL relatives `/storage/v1/…` sont relayées vers Supabase Storage
     // (Supabase Cloud) ; sans passerelle configurée, la surface n'existe pas.
-    const storageUrl = (process.env.SUPABASE_INTERNAL_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(
-      /\/+$/,
-      "",
-    );
+    const storageUrl = (
+      process.env.SUPABASE_INTERNAL_URL ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      ""
+    ).replace(/\/+$/, "");
     const storage = storageUrl.startsWith("http")
-      ? [{ destination: `${storageUrl}/storage/v1/:path*`, source: "/storage/v1/:path*" }]
+      ? [
+          {
+            destination: `${storageUrl}/storage/v1/:path*`,
+            source: "/storage/v1/:path*",
+          },
+        ]
       : [];
 
     return [
@@ -232,7 +256,10 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
           {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
