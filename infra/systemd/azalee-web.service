@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: Apache-2.0
+# Azalée (apps/azalee-web, Next standalone) behind nginx on azalee.rosegriffon.fr
+# (infra/nginx/azalee.rosegriffon.fr.conf). Built in the rosegriffon checkout with
+#   set -a; . /etc/aphrody/rg-core.env; . /etc/rg/azalee.env; set +a
+#   cd apps/azalee-web && NODE_ENV=production bun run build
+# then .next/standalone is synced to /home/ubuntu/apps/azalee/current, with .next/static and
+# public next to server.js. Secrets are shared with rg-core (/etc/aphrody/rg-core.env, same
+# CRON_SECRET as the `publish` task); /etc/rg/azalee.env (root:ubuntu 0640) only overrides the
+# public origin (NEXT_PUBLIC_SITE_URL, BETTER_AUTH_URL, ...) and is read last.
+[Unit]
+Description=Azalée (azalee.rosegriffon.fr)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/apps/azalee/current/apps/azalee-web
+EnvironmentFile=/etc/aphrody/rg-core.env
+EnvironmentFile=/etc/rg/azalee.env
+Environment=PORT=3200 HOSTNAME=127.0.0.1 NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
+ExecStart=/home/ubuntu/.local/bin/bun /home/ubuntu/apps/azalee/current/apps/azalee-web/server.js
+Restart=always
+RestartSec=2
+MemoryHigh=2G
+MemoryMax=3G
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+# ISR writes regenerated pages under .next/server and its fetch/image data under .next/cache.
+ReadWritePaths=/home/ubuntu/apps/azalee/current/apps/azalee-web/.next/cache /home/ubuntu/apps/azalee/current/apps/azalee-web/.next/server
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=azalee-web
+
+[Install]
+WantedBy=multi-user.target
