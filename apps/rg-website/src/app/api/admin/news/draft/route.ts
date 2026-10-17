@@ -2,6 +2,7 @@ import { ADMIN_ROLES } from "@rosegriffon/types/roles";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { SITE_URL } from "@/lib/site-url";
 
 /**
  * POST /api/admin/news/draft
@@ -47,7 +48,7 @@ const VALID_CATEGORIES = ["announcement", "event", "critique", "community"] as c
 type Category = (typeof VALID_CATEGORIES)[number];
 
 const APP_SCOPE = "azalee";
-const ORIGIN = "https://azalee.rosegriffon.fr";
+const ORIGIN = SITE_URL;
 
 interface CoAuthor {
   name: string;

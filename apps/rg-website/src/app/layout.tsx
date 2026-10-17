@@ -165,10 +165,6 @@ export default async function RootLayout({
                   // (X/YouTube/Twitch/Instagram/Discord). sameAs partagé à l'identique
                   // sur website / azalee / achillea pour une entité Organization cohérente.
                   sameAs: NETWORK_SAME_AS,
-                  subOrganization: [
-                    { "@id": "https://azalee.rosegriffon.fr/#website" },
-                    { "@id": "https://achillea.rosegriffon.fr/#website" },
-                  ],
                 },
                 {
                   "@type": "WebSite",

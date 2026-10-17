@@ -34,7 +34,7 @@ function getImageUrl(row: CharRow): string {
   if (row.image_url) {
     return row.image_url.startsWith("http")
       ? row.image_url
-      : `https://azalee.rosegriffon.fr/storage/v1/object/public/menu/${row.image_url}`;
+      : `/storage/v1/object/public/menu/${row.image_url}`;
   }
   return "";
 }

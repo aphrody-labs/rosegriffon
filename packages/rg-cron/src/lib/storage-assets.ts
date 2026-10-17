@@ -172,8 +172,8 @@ export async function televerserObjet(
       return { ok: false, motif: `écriture disque ${err instanceof Error ? err.message : String(err)}` };
     }
   }
-  const cle = Bun.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!cle) return { ok: false, motif: "SUPABASE_SERVICE_ROLE_KEY absente" };
+  const cle = Bun.env.SUPABASE_SECRET_KEY || Bun.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!cle) return { ok: false, motif: "SUPABASE_SECRET_KEY et SUPABASE_SERVICE_ROLE_KEY absentes" };
   let base: string;
   try {
     base = baseStorage();

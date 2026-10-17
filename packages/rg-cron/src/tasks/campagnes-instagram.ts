@@ -201,7 +201,7 @@ function message(err: unknown): string {
  * pas retirer la création d'un membre.
  */
 async function objetPresent(chemin: string): Promise<boolean> {
-  const cle = Bun.env.SUPABASE_SERVICE_ROLE_KEY;
+  const cle = Bun.env.SUPABASE_SECRET_KEY || Bun.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!cle) return true;
   try {
     const reponse = await fetch(`${baseStorage()}/storage/v1/object/${BUCKET}/${chemin}`, {
