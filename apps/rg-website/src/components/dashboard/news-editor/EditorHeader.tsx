@@ -93,7 +93,7 @@ export function EditorHeader({
       <div className="flex items-center justify-between px-3 md:px-6 py-2.5 gap-2">
         {/* Left: Back + Status + Save indicator */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <Link href="/dashboard/news">
+          <Link href="/admin/news">
             <Button
               variant="ghost"
               size="icon"

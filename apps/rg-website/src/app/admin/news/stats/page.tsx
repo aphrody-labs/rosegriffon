@@ -24,7 +24,7 @@ export default async function NewsStatsPage() {
       <DashboardPageHeader
         breadcrumbs={[
           { href: "/dashboard", label: "Tableau de bord" },
-          { href: "/dashboard/news", label: "Actualités" },
+          { href: "/admin/news", label: "Actualités" },
           { label: "Statistiques" },
         ]}
         title="Statistiques"

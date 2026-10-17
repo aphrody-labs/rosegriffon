@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge, Button } from "@rosegriffon/ui";
+import { useConfirm } from "@/components/admin/confirmation-dialog";
 
 interface Version {
   id: string;
@@ -30,12 +31,17 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
 };
 
 export function VersionsList({ versions, articleId, restoreAction }: VersionsListProps) {
+  const { confirm, dialog } = useConfirm();
   const [restoringId, setRestoringId] = useState<string | null>(null);
   const router = useRouter();
 
   const handleRestore = async (versionId: string, versionNumber: number) => {
     if (
-      !window.confirm(`Restaurer la version ${versionNumber} ? La version actuelle sera sauvegardée automatiquement.`)
+      !(await confirm({
+        title: `Restaurer la version ${versionNumber}`,
+        message: "La version actuelle sera sauvegardée automatiquement.",
+        confirmText: "Restaurer",
+      }))
     ) {
       return;
     }
@@ -45,7 +51,7 @@ export function VersionsList({ versions, articleId, restoreAction }: VersionsLis
       const result = await restoreAction(articleId, versionId);
       if (result.success) {
         toast.success(`Version ${versionNumber} restaurée`);
-        router.push(`/dashboard/news/${articleId}`);
+        router.push(`/admin/news/${articleId}`);
         router.refresh();
       } else {
         toast.error(result.error || "Erreur lors de la restauration");
@@ -59,6 +65,7 @@ export function VersionsList({ versions, articleId, restoreAction }: VersionsLis
 
   return (
     <div className="rounded-2xl border border-outline-variant/20 overflow-hidden bg-surface-container-lowest divide-y divide-outline-variant/10">
+      {dialog}
       {versions.map((version, i) => {
         const statusInfo = STATUS_LABELS[version.status || "draft"] || STATUS_LABELS.draft;
         const isLatest = i === 0;

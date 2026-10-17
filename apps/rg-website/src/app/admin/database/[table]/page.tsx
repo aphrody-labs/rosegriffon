@@ -21,7 +21,7 @@ export default async function GenericTablePage({
   const supabase = createPostgresClient();
 
   // Liste blanche (anti-injection). Elle DOIT couvrir toutes les tables
-  // référencées par un lien `/dashboard/database/<t>` du dépôt : trois tuiles
+  // référencées par un lien `/admin/database/<t>` du dépôt : trois tuiles
   // de l'accueil et de l'index DB pointaient vers des tables absentes d'ici
   // et tombaient en 404 alors que leur compteur s'affichait correctement.
   const allowedTables = [
@@ -63,7 +63,7 @@ export default async function GenericTablePage({
       <DashboardPageHeader
         breadcrumbs={[
           { href: "/dashboard", label: "Tableau de bord" },
-          { href: "/dashboard/database", label: "Base de données" },
+          { href: "/admin/database", label: "Base de données" },
           { label: table },
         ]}
         title={table}

@@ -113,7 +113,7 @@ export function NewsFilters({ totalItems, rangeStart, rangeEnd, authors = [] }: 
       params.delete("page");
     }
     const qs = params.toString();
-    return qs ? `?${qs}` : "/dashboard/news";
+    return qs ? `?${qs}` : "/admin/news";
   }
 
   const pushOverrides = (overrides: Record<string, string | null>) => {

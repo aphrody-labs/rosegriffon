@@ -140,7 +140,7 @@ export default async function ImageValidationPage({
       <DashboardPageHeader
         breadcrumbs={[
           { href: "/dashboard", label: "Tableau de bord" },
-          { href: "/dashboard/database", label: "Base de données" },
+          { href: "/admin/database", label: "Base de données" },
           { label: "Validation images" },
         ]}
         title={title}
@@ -153,7 +153,7 @@ export default async function ImageValidationPage({
         {filterOptions.map(f => (
           <Link
             key={f.value}
-            href={`/dashboard/database/images?filter=${f.value}`}
+            href={`/admin/database/images?filter=${f.value}`}
             className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all ${
               filter === f.value
                 ? "bg-primary text-on-primary shadow-md"
@@ -284,7 +284,7 @@ export default async function ImageValidationPage({
         <div className="flex items-center justify-center gap-2">
           {page > 1 && (
             <Link
-              href={`/dashboard/database/images?filter=${filter}&page=${page - 1}`}
+              href={`/admin/database/images?filter=${filter}&page=${page - 1}`}
               className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest text-sm font-bold transition-all"
             >
               <ChevronLeft size={16} aria-hidden="true" />
@@ -296,7 +296,7 @@ export default async function ImageValidationPage({
           </span>
           {page < totalPages && (
             <Link
-              href={`/dashboard/database/images?filter=${filter}&page=${page + 1}`}
+              href={`/admin/database/images?filter=${filter}&page=${page + 1}`}
               className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest text-sm font-bold transition-all"
             >
               Suivant

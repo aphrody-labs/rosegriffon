@@ -15,7 +15,7 @@ export function NewsCard({ item }: { item: NewsItem }) {
   const relativeDate = item.updated_at
     ? formatDistanceToNow(new Date(item.updated_at), { addSuffix: true, locale: fr })
     : null;
-  const href = item.status === "published" ? `/news/${item.slug || item.id}` : `/dashboard/news/${item.id}`;
+  const href = item.status === "published" ? `/news/${item.slug || item.id}` : `/admin/news/${item.id}`;
 
   return (
     <div className="group flex flex-col">

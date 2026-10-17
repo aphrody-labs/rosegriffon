@@ -8,12 +8,21 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@rosegriffon/ui";
 import { deleteTweet } from "./actions";
+import { useConfirm } from "@/components/admin/confirmation-dialog";
 
 export function TweetRow({ tweet }: { tweet: any }) {
+  const { confirm, dialog } = useConfirm();
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm("Supprimer ce tweet ?")) {
+    if (
+      !(await confirm({
+        title: "Supprimer le tweet",
+        message: "Ce tweet sera définitivement supprimé.",
+        confirmText: "Supprimer",
+        danger: true,
+      }))
+    ) {
       return;
     }
     setDeleting(true);
@@ -29,6 +38,7 @@ export function TweetRow({ tweet }: { tweet: any }) {
 
   return (
     <div className="flex gap-4 p-4 border-b border-outline-variant/10 hover:bg-surface-container-high transition-colors">
+      {dialog}
       <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
         <span className="font-bold text-primary text-xs">X</span>
       </div>
@@ -43,7 +53,7 @@ export function TweetRow({ tweet }: { tweet: any }) {
       </div>
       <div className="flex flex-col gap-2 shrink-0">
         <Button asChild size="icon" variant="ghost" className="rounded-full">
-          <Link href={`/dashboard/tweets/${tweet.id}`}>
+          <Link href={`/admin/tweets/${tweet.id}`}>
             <Edit className="size-4" />
           </Link>
         </Button>

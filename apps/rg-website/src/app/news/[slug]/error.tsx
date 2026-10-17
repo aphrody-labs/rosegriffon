@@ -18,7 +18,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
           <Button onClick={() => reset()} variant="outline">
             Réessayer
           </Button>
-          <Link href="/dashboard/news">
+          <Link href="/admin/news">
             <Button>Retour aux news</Button>
           </Link>
         </div>

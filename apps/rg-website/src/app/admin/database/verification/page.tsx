@@ -53,7 +53,7 @@ export default async function VerificationPage() {
       <DashboardPageHeader
         breadcrumbs={[
           { href: "/dashboard", label: "Tableau de bord" },
-          { href: "/dashboard/database", label: "Base de données" },
+          { href: "/admin/database", label: "Base de données" },
           { label: "Modération en masse" },
         ]}
         title="Modération & Traduction"

@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rosegriffon/ui";
-import { useState } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 
 import { AlertTriangle } from "@/lib/icons-config";
 
@@ -56,7 +56,7 @@ export function ConfirmationDialog({
       <DialogContent>
         <DialogHeader>
           <div className="flex items-center gap-2">
-            {danger && <AlertTriangle className="size-5 text-red-500" />}
+            {danger && <AlertTriangle className="size-5 text-destructive" />}
             <DialogTitle>{title}</DialogTitle>
           </div>
           {description && <DialogDescription>{description}</DialogDescription>}
@@ -72,12 +72,57 @@ export function ConfirmationDialog({
             variant={dangerColor}
             onClick={handleConfirm}
             disabled={loading || isLoading}
-            className={dangerColor === "destructive" ? "bg-red-600 hover:bg-red-700" : ""}
           >
-            {loading || isLoading ? "Chargement..." : confirmText}
+            {loading || isLoading ? "Chargement…" : confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
+}
+
+interface ConfirmOptions {
+  title: string;
+  message: string;
+  confirmText?: string;
+  danger?: boolean;
+}
+
+/**
+ * Remplace `window.confirm` : renvoie `confirm(options)` (promesse de booléen)
+ * et l'élément `dialog` à rendre une fois dans le composant.
+ */
+export function useConfirm(): {
+  confirm: (options: ConfirmOptions) => Promise<boolean>;
+  dialog: ReactNode;
+} {
+  const [options, setOptions] = useState<ConfirmOptions | null>(null);
+  const resolver = useRef<((value: boolean) => void) | null>(null);
+
+  const confirm = useCallback((next: ConfirmOptions) => {
+    setOptions(next);
+    return new Promise<boolean>(resolve => {
+      resolver.current = resolve;
+    });
+  }, []);
+
+  const settle = (value: boolean) => {
+    resolver.current?.(value);
+    resolver.current = null;
+    setOptions(null);
+  };
+
+  const dialog = (
+    <ConfirmationDialog
+      open={options !== null}
+      title={options?.title ?? ""}
+      message={options?.message ?? ""}
+      confirmText={options?.confirmText}
+      danger={options?.danger}
+      onConfirm={() => settle(true)}
+      onCancel={() => settle(false)}
+    />
+  );
+
+  return { confirm, dialog };
 }

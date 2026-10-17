@@ -35,6 +35,7 @@ import {
 import { getBrowserStorage } from "@/lib/storage/browser";
 
 import { MediaUploader } from "./media-uploader";
+import { useConfirm } from "@/components/admin/confirmation-dialog";
 
 interface FileObject {
   name: string;
@@ -54,6 +55,7 @@ interface MediaManagerProps {
 }
 
 export function MediaManager({ initialFiles }: MediaManagerProps) {
+  const { confirm, dialog } = useConfirm();
   const [files, _setFiles] = useResetState<FileObject[]>(initialFiles, initialFiles);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -97,7 +99,15 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
   };
 
   const deleteFile = async (name: string, id: string | null) => {
-    if (!id || !confirm("Êtes-vous sûr de vouloir supprimer ce fichier ?")) {
+    if (
+      !id ||
+      !(await confirm({
+        title: "Supprimer le fichier",
+        message: "Ce fichier sera définitivement supprimé du stockage.",
+        confirmText: "Supprimer",
+        danger: true,
+      }))
+    ) {
       return;
     }
 
@@ -173,6 +183,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
 
   return (
     <div className="space-y-6">
+      {dialog}
       <Card>
         <CardContent className="p-6">
           <MediaUploader onUploadComplete={refreshFiles} />

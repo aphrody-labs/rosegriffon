@@ -145,7 +145,7 @@ export default async function NewsListPage({
               size="lg"
               className="rounded-full h-12 px-6 sm:px-8 bg-primary text-on-primary hover:bg-primary/90 font-medium shadow-md hover:shadow-lg transition-all"
             >
-              <Link href="/dashboard/news/new">
+              <Link href="/admin/news/new">
                 <Icon name="add" size={20} className="mr-2" />
                 <span className="hidden sm:inline">Nouvel Article</span>
                 <span className="sm:hidden">Nouveau</span>
@@ -173,7 +173,7 @@ export default async function NewsListPage({
           </EmptyHeader>
           <EmptyContent>
             <Button asChild className="h-12 rounded-full bg-primary px-6 text-on-primary hover:bg-primary/90 sm:px-8">
-              <Link href="/dashboard/news/new">
+              <Link href="/admin/news/new">
                 <Icon name="add" size={18} />
                 Créer un article
               </Link>

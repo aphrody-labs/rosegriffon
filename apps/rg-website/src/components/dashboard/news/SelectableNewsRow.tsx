@@ -81,7 +81,7 @@ export function SelectableNewsRow({ item, selected, onToggle }: SelectableNewsRo
       </button>
 
       {/* Content */}
-      <Link href={`/dashboard/news/${item.id}`} className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+      <Link href={`/admin/news/${item.id}`} className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
         {/* Thumbnail */}
         <div className="relative size-14 sm:size-16 rounded-xl sm:rounded-2xl overflow-hidden bg-surface-container shrink-0">
           <Image

@@ -70,7 +70,7 @@ export async function importGoogleSheet(sheetId: string) {
 
     const article = await saveArticle(title, html, user.id, "Data");
 
-    revalidatePath("/dashboard/news");
+    revalidatePath("/admin/news");
     return { data: article, success: true };
   } catch (error: unknown) {
     console.error("Sheet Import Error:", error);
@@ -93,7 +93,7 @@ export async function importCsv(title: string, csvContent: string) {
 
     const article = await saveArticle(title, html, user.id, "Data");
 
-    revalidatePath("/dashboard/news");
+    revalidatePath("/admin/news");
     return { data: article, success: true };
   } catch (error: unknown) {
     console.error("CSV Import Error:", error);

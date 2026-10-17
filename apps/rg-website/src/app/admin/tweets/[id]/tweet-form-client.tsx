@@ -26,7 +26,7 @@ export function TweetFormClient({ initialData }: { initialData?: any }) {
       }
 
       toast.success("Tweet enregistré");
-      router.push("/dashboard/tweets");
+      router.push("/admin/tweets");
       router.refresh();
     } catch (error: any) {
       console.error(error);

@@ -18,7 +18,7 @@ export default async function GenericRowPage({ params }: { params: Promise<{ tab
     <div className="p-6 md:p-10 space-y-6">
       <div className="flex items-center gap-4">
         <Button asChild variant="ghost" size="icon">
-          <Link href={`/dashboard/database/${table}`}>
+          <Link href={`/admin/database/${table}`}>
             <ChevronLeft className="size-5" />
           </Link>
         </Button>

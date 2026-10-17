@@ -42,7 +42,7 @@ export function ImportSheetForm() {
       const result = await importGoogleSheet(sheetId);
       if (result.success && result.data) {
         toast.success("Tableau importé avec succès !");
-        router.push(`/dashboard/news/${result.data.id}`);
+        router.push(`/admin/news/${result.data.id}`);
       } else {
         toast.error(`Erreur : ${result.error}`);
       }
@@ -64,7 +64,7 @@ export function ImportSheetForm() {
       const result = await importCsv(csvTitle, csvContent);
       if (result.success && result.data) {
         toast.success("CSV importé avec succès !");
-        router.push(`/dashboard/news/${result.data.id}`);
+        router.push(`/admin/news/${result.data.id}`);
       } else {
         toast.error(`Erreur : ${result.error}`);
       }

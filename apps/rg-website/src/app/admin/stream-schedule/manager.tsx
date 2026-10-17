@@ -23,6 +23,7 @@ import { AdminCard } from "@/components/admin/shared/AdminCard";
 import type { StreamSchedule } from "@rosegriffon/types";
 
 import { addSchedule, deleteSchedule, syncWithGoogleCalendar, updateSchedule } from "./actions";
+import { useConfirm } from "@/components/admin/confirmation-dialog";
 
 const DAYS = [
   { label: "Lundi", value: "1" },
@@ -45,6 +46,7 @@ interface StreamScheduleManagerProps {
 }
 
 export function StreamScheduleManager({ initialSchedules }: StreamScheduleManagerProps) {
+  const { confirm, dialog } = useConfirm();
   const router = useRouter();
   const [schedules, setSchedules] = useState<StreamSchedule[]>(initialSchedules);
   const [syncing, setSyncing] = useState(false);
@@ -127,7 +129,14 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cet horaire ?")) {
+    if (
+      !(await confirm({
+        title: "Supprimer l'horaire",
+        message: "Cet horaire sera définitivement supprimé.",
+        confirmText: "Supprimer",
+        danger: true,
+      }))
+    ) {
       return;
     }
 
@@ -173,6 +182,7 @@ export function StreamScheduleManager({ initialSchedules }: StreamScheduleManage
 
   return (
     <div className="space-y-6">
+      {dialog}
       <Alert>
         <Calendar className="size-4" />
         <AlertTitle>Synchronisation Google Calendar</AlertTitle>

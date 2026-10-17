@@ -142,7 +142,7 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
         <DropdownMenuSeparator className="bg-outline-variant/10" />
 
         <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/10 focus:text-primary transition-colors">
-          <Link href={`/dashboard/news/${newsId}`} className="cursor-pointer font-bold">
+          <Link href={`/admin/news/${newsId}`} className="cursor-pointer font-bold">
             <Edit className="mr-3 size-4" /> Modifier
           </Link>
         </DropdownMenuItem>
@@ -229,7 +229,7 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
               const result = await duplicateArticle(newsId);
               if ("id" in result) {
                 toast.success("Article dupliqué");
-                router.push(`/dashboard/news/${result.id}`);
+                router.push(`/admin/news/${result.id}`);
               } else {
                 toast.error(result.error);
               }
@@ -244,7 +244,7 @@ export function NewsActions({ newsId, slug, pinned = false, currentStatus = "dra
           <Copy className="mr-3 size-4" /> Dupliquer
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/10 focus:text-primary transition-colors">
-          <Link href={`/dashboard/news/${newsId}/versions`} className="cursor-pointer font-bold">
+          <Link href={`/admin/news/${newsId}/versions`} className="cursor-pointer font-bold">
             <History className="mr-3 size-4" /> Historique
           </Link>
         </DropdownMenuItem>

@@ -5,8 +5,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label } from "@rosegriffon/ui";
 import { importDriveFolder, importGoogleDoc } from "./actions";
+import { useConfirm } from "@/components/admin/confirmation-dialog";
 
 export function ImportDocForm() {
+  const { confirm, dialog } = useConfirm();
   const [docId, setDocId] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -33,7 +35,7 @@ export function ImportDocForm() {
       const result = await importGoogleDoc(realId);
       if (result.success && result.data) {
         toast.success("Google Doc importé avec succès !");
-        router.push(`/dashboard/news/${result.data.id}`);
+        router.push(`/admin/news/${result.data.id}`);
       } else {
         toast.error(`Erreur lors de l'import : ${result.error}`);
       }
@@ -45,7 +47,13 @@ export function ImportDocForm() {
   };
 
   const handleFolderImport = async () => {
-    if (!confirm("Voulez-vous importer tous les documents du dossier Drive configuré ?")) {
+    if (
+      !(await confirm({
+        title: "Importer le dossier Drive",
+        message: "Voulez-vous importer tous les documents du dossier Drive configuré ?",
+        confirmText: "Importer",
+      }))
+    ) {
       return;
     }
 
@@ -67,6 +75,7 @@ export function ImportDocForm() {
 
   return (
     <div className="space-y-6 max-w-2xl">
+      {dialog}
       <Card className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm">
         <CardHeader>
           <CardTitle>Importer un Google Doc</CardTitle>

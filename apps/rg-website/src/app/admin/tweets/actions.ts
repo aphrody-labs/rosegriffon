@@ -34,7 +34,7 @@ export async function deleteTweet(id: string) {
 
   const adminDb = createPostgresClient();
   await adminDb.from("tweets").delete().eq("id", id);
-  revalidatePath("/dashboard/tweets");
+  revalidatePath("/admin/tweets");
 }
 
 export async function saveTweet(data: TweetFormValues) {
@@ -70,6 +70,6 @@ export async function saveTweet(data: TweetFormValues) {
     return { error: error.message, success: false };
   }
 
-  revalidatePath("/dashboard/tweets");
+  revalidatePath("/admin/tweets");
   return { success: true };
 }

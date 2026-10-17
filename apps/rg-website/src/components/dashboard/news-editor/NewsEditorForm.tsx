@@ -361,7 +361,7 @@ export function NewsEditorForm({ initialData }: NewsEditorFormProps) {
         }
 
         if (shouldRedirect) {
-          router.push("/dashboard/news");
+          router.push("/admin/news");
           router.refresh();
         } else {
           router.refresh();

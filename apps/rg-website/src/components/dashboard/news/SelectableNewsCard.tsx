@@ -88,7 +88,7 @@ export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsC
       const result = await duplicateArticle(item.id);
       if ("id" in result) {
         toast.success("Article dupliqué");
-        router.push(`/dashboard/news/${result.id}`);
+        router.push(`/admin/news/${result.id}`);
       } else {
         toast.error(result.error);
       }
@@ -170,7 +170,7 @@ export function SelectableNewsCard({ item, selected, onToggle }: SelectableNewsC
 
         <ContextMenuGroup>
           <ContextMenuItem asChild className="rounded-xl font-bold focus:bg-primary/10 focus:text-primary">
-            <Link href={`/dashboard/news/${item.id}`}>
+            <Link href={`/admin/news/${item.id}`}>
               <Edit /> Modifier
               <ContextMenuShortcut>E</ContextMenuShortcut>
             </Link>

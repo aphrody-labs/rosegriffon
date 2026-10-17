@@ -482,7 +482,7 @@ export default async function ArticlePage({
               : news.status}{" "}
           »
           <Link
-            href={`/dashboard/news/${news.id}`}
+            href={`/admin/news/${news.id}`}
             className="ml-2 underline hover:no-underline font-bold"
           >
             Modifier

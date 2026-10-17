@@ -106,7 +106,7 @@ export async function importGoogleDoc(docId: string) {
       return { error: `Erreur base de données: ${error.message}`, success: false };
     }
 
-    revalidatePath("/dashboard/news");
+    revalidatePath("/admin/news");
     return { data, success: true };
   } catch (error: unknown) {
     const err = error as { code?: number; message?: string };
@@ -152,7 +152,7 @@ export async function importDriveFolder() {
       }
     }
 
-    revalidatePath("/dashboard/news");
+    revalidatePath("/admin/news");
     return { message: `${importedCount} articles importés avec succès.`, success: true };
   } catch (error: unknown) {
     const err = error as { message?: string };

@@ -53,7 +53,7 @@ export default async function DatabasePage() {
     {
       color: "bg-primary",
       count: characters.length,
-      href: "/dashboard/database/inagle_characters",
+      href: "/admin/database/inagle_characters",
       icon: User,
       name: "Joueurs",
       textColor: "text-on-primary",
@@ -61,7 +61,7 @@ export default async function DatabasePage() {
     {
       color: "bg-secondary",
       count: skills.length,
-      href: "/dashboard/database/inagle_skills",
+      href: "/admin/database/inagle_skills",
       icon: Zap,
       name: "Techniques",
       textColor: "text-on-secondary",
@@ -69,7 +69,7 @@ export default async function DatabasePage() {
     {
       color: "bg-tertiary",
       count: teams.length,
-      href: "/dashboard/database/inagle_teams",
+      href: "/admin/database/inagle_teams",
       icon: Users,
       name: "Équipes",
       textColor: "text-on-tertiary",
@@ -77,7 +77,7 @@ export default async function DatabasePage() {
     {
       color: "bg-emerald-500",
       count: items.length,
-      href: "/dashboard/database/inagle_items",
+      href: "/admin/database/inagle_items",
       icon: Backpack,
       name: "Objets",
       textColor: "text-white",
@@ -85,7 +85,7 @@ export default async function DatabasePage() {
     {
       color: "bg-amber-500",
       count: keshinsCount,
-      href: "/dashboard/database/inagle_keshins_clean",
+      href: "/admin/database/inagle_keshins_clean",
       icon: Swords,
       name: "Keshins",
       textColor: "text-white",
@@ -102,14 +102,14 @@ export default async function DatabasePage() {
         actions={
           <div className="flex gap-2">
             <Link
-              href="/dashboard/database/images"
+              href="/admin/database/images"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest text-sm font-bold transition-all"
             >
               <ScanSearch size={16} aria-hidden="true" />
               Validation images
             </Link>
             <Link
-              href="/dashboard/database/verification"
+              href="/admin/database/verification"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest text-sm font-bold transition-all"
             >
               <BadgeCheck size={16} aria-hidden="true" />

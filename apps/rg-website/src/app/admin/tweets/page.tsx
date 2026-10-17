@@ -21,7 +21,7 @@ export default async function TweetsPage() {
         icon={<Icon name="tag" size={20} />}
         actions={
           <Button asChild className="rounded-full">
-            <Link href="/dashboard/tweets/new">
+            <Link href="/admin/tweets/new">
               <Icon name="add" size={18} className="mr-2" />
               Nouveau Tweet
             </Link>
