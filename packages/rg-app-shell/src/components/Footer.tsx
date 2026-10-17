@@ -11,8 +11,10 @@ export interface FooterProps {
  * chrome de l'application. Le footer ne conserve donc que les accès légaux
  * indispensables, sans recréer plusieurs colonnes de navigation.
  */
+/** Year of the server build or of the client module evaluation, outside render. */
+const currentYear = new Date().getFullYear();
+
 export function Footer({ className }: FooterProps = {}) {
-  const currentYear = new Date().getFullYear();
 
   return (
     <footer className={`mt-auto w-full border-t border-outline-variant/10 bg-surface-container ${className ?? ""}`}>

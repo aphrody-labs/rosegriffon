@@ -33,9 +33,9 @@
  *
  * Usage
  * -----
- *   bun scripts/iecode/rg/sauvegarde.ts            # sauvegarde + vérification + envoi
- *   bun scripts/iecode/rg/sauvegarde.ts --local    # sans envoi distant
- *   bun scripts/iecode/rg/sauvegarde.ts --verifier # revérifie les archives existantes
+ *   bun scripts/sauvegarde.ts            # sauvegarde + vérification + envoi
+ *   bun scripts/sauvegarde.ts --local    # sans envoi distant
+ *   bun scripts/sauvegarde.ts --verifier # revérifie les archives existantes
  */
 
 import { mkdir, readdir, stat, unlink } from "node:fs/promises";

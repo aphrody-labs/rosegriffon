@@ -36,7 +36,7 @@ export function UnifiedSearchBar({
   const router = useRouter();
   const [query, setQuery] = React.useState(defaultValue);
   const [results, setResults] = React.useState<SearchResult[]>([]);
-  const [isSearching, setIsSearching] = React.useState(false);
+  const [isSearching, setIsSearching] = React.useState(defaultValue.trim().length >= 2);
   const [hasSearchError, setHasSearchError] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const abortRef = React.useRef<AbortController | null>(null);
@@ -54,17 +54,19 @@ export function UnifiedSearchBar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  React.useEffect(() => {
-    const value = query.trim();
+  /** Every query change resets the results; the effect below only fetches. */
+  const changeQuery = (next: string) => {
     abortRef.current?.abort();
+    setQuery(next);
     setResults([]);
     setHasSearchError(false);
-    if (value.length < 2) {
-      setIsSearching(false);
-      return;
-    }
+    setIsSearching(next.trim().length >= 2);
+  };
 
-    setIsSearching(true);
+  React.useEffect(() => {
+    const value = query.trim();
+    if (value.length < 2) return;
+
     const controller = new AbortController();
     abortRef.current = controller;
     const timer = window.setTimeout(async () => {
@@ -111,14 +113,12 @@ export function UnifiedSearchBar({
   };
 
   const handleClear = () => {
-    setQuery("");
-    setResults([]);
+    changeQuery("");
     inputRef.current?.focus();
   };
 
   return (
-    <div
-      role="search"
+    <search
       className={`relative flex items-center w-full max-w-[480px] h-10 px-3.5 rounded-full bg-surface-container-high/70 hover:bg-surface-container-high focus-within:bg-surface-container-highest border border-outline-variant/15 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200 group ${
         className ?? ""
       }`}
@@ -133,10 +133,7 @@ export function UnifiedSearchBar({
         ref={inputRef}
         type="text"
         value={query}
-        onChange={e => {
-          setQuery(e.target.value);
-          setResults([]);
-        }}
+        onChange={e => changeQuery(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         aria-label="Recherche unifiée"
@@ -161,13 +158,13 @@ export function UnifiedSearchBar({
       {query.trim().length >= 2 && (
         <div className="absolute left-0 top-[calc(100%+0.5rem)] z-[70] max-h-80 w-full overflow-y-auto rounded-2xl border border-outline-variant/30 bg-surface-container p-1.5 shadow-xl">
           {results.length === 0 ? (
-            <p className="px-3 py-3 text-center text-xs text-on-surface-variant" role="status">
+            <output className="block px-3 py-3 text-center text-xs text-on-surface-variant">
               {isSearching
                 ? "Recherche dans Azalée, Achilléa et Rose Griffon…"
                 : hasSearchError
                   ? "Recherche temporairement indisponible. Réessayez."
                   : "Aucun résultat."}
-            </p>
+            </output>
           ) : (
             <ul>
               {results.map(result => (
@@ -187,7 +184,7 @@ export function UnifiedSearchBar({
           )}
         </div>
       )}
-    </div>
+    </search>
   );
 }
 

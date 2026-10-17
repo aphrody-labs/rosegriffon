@@ -9,7 +9,7 @@ import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 
 // RG lives in the IECODE monorepo root unless RG_ROOT says otherwise.
-const root = resolve(process.env.RG_ROOT ?? resolve(import.meta.dir, "../../.."));
+const root = resolve(process.env.RG_ROOT ?? resolve(import.meta.dir, ".."));
 const configDir = join(homedir(), ".config", "aphrody", "vercel");
 const authFile = join(configDir, "auth.json");
 const mode = process.argv[2] ?? "preflight";
@@ -78,4 +78,4 @@ async function deploy(): Promise<void> {
 
 if (mode === "preflight") await preflight();
 else if (mode === "deploy") await deploy();
-else throw new Error("Usage: bun scripts/iecode/rg/vercel-failover.ts [preflight|deploy]");
+else throw new Error("Usage: bun scripts/vercel-failover.ts [preflight|deploy]");

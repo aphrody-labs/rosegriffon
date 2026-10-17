@@ -22,9 +22,9 @@
 import { Glob } from "bun";
 import { resolve } from "node:path";
 
-// Racine du monorepo rg (ce fichier vit dans scripts/iecode/rg/).
+// Racine du monorepo rg (ce fichier vit dans scripts/).
 // RG lives in the IECODE monorepo root unless RG_ROOT says otherwise.
-const REPO_ROOT = resolve(process.env.RG_ROOT ?? resolve(import.meta.dir, "../../.."));
+const REPO_ROOT = resolve(process.env.RG_ROOT ?? resolve(import.meta.dir, ".."));
 const SW_PATH = resolve(REPO_ROOT, "apps/rg-website/public/sw.js");
 
 // ── Parsing minimal des arguments (sans dépendance) ──────────────────────────
@@ -234,8 +234,8 @@ async function main() {
         "invalidate-cdn — invalidation bornée du cache CDN azalee/website",
         "",
         "Usage :",
-        "  bun scripts/iecode/rg/invalidate-cdn.ts --bump-sw [--apply]",
-        "  bun scripts/iecode/rg/invalidate-cdn.ts --purge-g4tx '<glob>' [--apply]",
+        "  bun scripts/invalidate-cdn.ts --bump-sw [--apply]",
+        "  bun scripts/invalidate-cdn.ts --purge-g4tx '<glob>' [--apply]",
         "",
         "Flags :",
         "  --bump-sw            incrémente CACHE_NAME (vN→vN+1) dans apps/rg-website/public/sw.js",

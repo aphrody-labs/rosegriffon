@@ -364,18 +364,12 @@ export function DesktopTopBar({
 
         <div className="ml-2">
           {user ? (
-            <div
+            <button
+              type="button"
               className="size-9 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden transition-all duration-200 cursor-pointer hover:ring-2 hover:ring-primary/20 active:scale-95"
               onClick={() => router.push(publicProfileHref)}
-              role="button"
-              tabIndex={0}
               aria-label={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
               title={profile?.username ? `Profil public de ${profile.username}` : "Profil public"}
-              onKeyDown={e => {
-                if (e.key === "Enter" || e.key === " ") {
-                  router.push(publicProfileHref);
-                }
-              }}
             >
               {profile?.avatar_url ? (
                 <Image
@@ -389,7 +383,7 @@ export function DesktopTopBar({
               ) : (
                 <User size={18} className="text-primary" aria-hidden="true" />
               )}
-            </div>
+            </button>
           ) : (
             (loginSlot ?? (
               <Link

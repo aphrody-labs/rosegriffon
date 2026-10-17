@@ -24,9 +24,9 @@
  *
  * Usage
  * -----
- *   bun scripts/iecode/rg/infra.ts            # dérive dépôt ↔ machine (défaut : check)
- *   bun scripts/iecode/rg/infra.ts pull       # importe la machine dans le dépôt
- *   bun scripts/iecode/rg/infra.ts diff <nom> # diff unifié d'un seul objet
+ *   bun scripts/infra.ts            # dérive dépôt ↔ machine (défaut : check)
+ *   bun scripts/infra.ts pull       # importe la machine dans le dépôt
+ *   bun scripts/infra.ts diff <nom> # diff unifié d'un seul objet
  */
 
 import { $ } from "bun";
@@ -51,7 +51,7 @@ const HOST_CLI = `${YOLO_ROOT}/packages/core/src/host/cli.ts`;
 // suit donc leur source canonique là où elle vit réellement.
 const NIE_REPO_ROOT = (() => {
   if (Bun.env.NIE_REPO_ROOT) return resolve(Bun.env.NIE_REPO_ROOT);
-  const workspaceCheckout = resolve(import.meta.dir, "../../../../nie");
+  const workspaceCheckout = resolve(import.meta.dir, "../../nie");
   return existsSync(workspaceCheckout) ? workspaceCheckout : resolve(homedir(), "nie");
 })();
 const NIERS_SYSTEMD = `${NIE_REPO_ROOT}/deploy/systemd`;
@@ -328,7 +328,7 @@ async function commandeCheck(options: { secrets: boolean }): Promise<number> {
   process.stdout.write(
     dérive === 0
       ? "\n[32m✓ dépôt et machine alignés[0m\n"
-      : `\n[33m${dérive} écart(s)[0m — « bun scripts/iecode/rg/infra.ts pull » pour importer la machine\n`,
+      : `\n[33m${dérive} écart(s)[0m — « bun scripts/infra.ts pull » pour importer la machine\n`,
   );
   return dérive === 0 ? 0 : 1;
 }
@@ -393,7 +393,7 @@ const code = await (async () => {
       return argument ? commandeDiff(argument) : 2;
     }
     default: {
-      process.stderr.write("usage : bun scripts/iecode/rg/infra.ts [check|pull|diff <nom>]\n");
+      process.stderr.write("usage : bun scripts/infra.ts [check|pull|diff <nom>]\n");
       return 2;
     }
   }

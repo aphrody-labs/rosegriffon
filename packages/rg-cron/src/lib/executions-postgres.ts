@@ -13,7 +13,7 @@
  * traduisent par une ligne de journal et rien d'autre.
  *
  * TABLE ABSENTE = CAS NOMINAL AU DÉPLOIEMENT
- * La migration `apps/rg-website/supabase/migrations/20260813_02_cron_executions.sql`
+ * La migration `supabase/migrations/20260813_02_cron_executions.sql`
  * peut manquer sur une base neuve. Le code part donc du principe que la table
  * peut ne pas exister : au premier `42P01` (`undefined_table`), l'écriture se met
  * en veille (pour l'instance de fonction courante) et se retente au bout d'un
@@ -81,7 +81,7 @@ function mettreEnVeille(err: unknown): void {
     console.warn(
       `[cron-historique] public.cron_executions n'existe pas : historique désactivé pendant ${
         VEILLE_MS / 60_000
-      } min. Appliquer apps/rg-website/supabase/migrations/20260813_02_cron_executions.sql.`,
+      } min. Appliquer supabase/migrations/20260813_02_cron_executions.sql.`,
     );
     return;
   }

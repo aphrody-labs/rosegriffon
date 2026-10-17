@@ -1,6 +1,6 @@
 import { stat } from "node:fs/promises";
 import { isAbsolute, join, relative, resolve } from "node:path";
-import { checkBunRuntime } from "../validation/bun-runtime";
+import { checkBunRuntime } from "./bun-runtime";
 
 export function assertWorkspaceMember(root: string, app: string): void {
   const member = relative(root, app);
@@ -10,7 +10,7 @@ export function assertWorkspaceMember(root: string, app: string): void {
     member === ".." ||
     member.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`)
   )
-    throw new Error("Next build must run from an app inside the Bun OS workspace");
+    throw new Error("Next build must run from an app inside the Rose Griffon workspace");
 }
 
 export async function assertFreshBuild(app: string, startedAt: number): Promise<void> {
@@ -43,7 +43,7 @@ if (import.meta.main) {
   const args = process.argv.slice(2);
   if (args.includes("--analyze")) process.env.ANALYZE = "true";
   process.exitCode = await buildNext(
-    resolve(import.meta.dir, "../../.."),
+    resolve(import.meta.dir, ".."),
     process.cwd(),
     args.filter(arg => arg !== "--analyze"),
   );

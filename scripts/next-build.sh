@@ -29,7 +29,7 @@ if [ -z "$NODE_BIN" ] || [ ! -x "$NODE_BIN" ]; then
 	exit 127
 fi
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 # Shared Rose Griffon assets come from @rosegriffon/assets (single source); copy
 # the files the website serves into public/ before building.
 BUN_BIN="${BUN_BIN:-$(command -v bun || printf '%s' "$HOME/.bun/bin/bun")}"

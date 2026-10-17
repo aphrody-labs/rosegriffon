@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: Apache-2.0
+# Rose Griffon on one host with the self-contained executable (`bun run compile`):
+# site on 127.0.0.1:3100 and rg-core (gateways, ranked + unified API, cron) on RG_CORE_PORT.
+# Install: /opt/rosegriffon/rosegriffon (0755) and /etc/rosegriffon/rosegriffon.env (0600).
+[Unit]
+Description=Rose Griffon (rosegriffon serve)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=rosegriffon
+Group=rosegriffon
+WorkingDirectory=/var/lib/rosegriffon
+Environment=RG_CACHE_DIR=/var/lib/rosegriffon/cache NODE_ENV=production
+ExecStart=/opt/rosegriffon/rosegriffon serve --env-file /etc/rosegriffon/rosegriffon.env
+Restart=always
+RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/rosegriffon
+StateDirectory=rosegriffon
+
+[Install]
+WantedBy=multi-user.target

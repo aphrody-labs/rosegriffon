@@ -13,14 +13,14 @@
     "types": ["node", "react", "react-dom"],
     "paths": {
       "@/*": ["./src/*", "./*"],
-      "@rosegriffon/db": ["../../packages/db/src/index.ts"],
-      "@rosegriffon/db/*": ["../../packages/db/src/*"],
-      "@rosegriffon/types": ["../../packages/types/src/index.ts"],
-      "@rosegriffon/types/*": ["../../packages/types/src/*"],
-      "@rosegriffon/auth": ["../../packages/auth/src/index.ts"],
-      "@rosegriffon/auth/*": ["../../packages/auth/src/*"],
-      "@rosegriffon/app-shell": ["../../packages/app-shell/src/index.ts"],
-      "@rosegriffon/app-shell/*": ["../../packages/app-shell/src/*"]
+      "@rosegriffon/db": ["../../packages/rg-db/src/index.ts"],
+      "@rosegriffon/db/*": ["../../packages/rg-db/src/*"],
+      "@rosegriffon/types": ["../../packages/rg-types/src/index.ts"],
+      "@rosegriffon/types/*": ["../../packages/rg-types/src/*"],
+      "@rosegriffon/auth": ["../../packages/rg-auth/src/index.ts"],
+      "@rosegriffon/auth/*": ["../../packages/rg-auth/src/*"],
+      "@rosegriffon/app-shell": ["../../packages/rg-app-shell/src/index.ts"],
+      "@rosegriffon/app-shell/*": ["../../packages/rg-app-shell/src/*"]
     },
     "incremental": true,
     "plugins": [

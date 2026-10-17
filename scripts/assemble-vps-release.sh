@@ -6,8 +6,8 @@ set -Eeuo pipefail
 # here live in yolo (`$YOLO_ROOT/config/host`, default `$HOME/yolo`): rg only
 # contributes application code.
 commit_arg="${1:?usage: assemble-vps-release.sh FULL_GIT_SHA}"
-source_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-infra_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+infra_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 yolo_root="${YOLO_ROOT:-$HOME/yolo}"
 host_root="$yolo_root/config/host"
 releases_root="${RG_RELEASES_ROOT:-/srv/rg/releases}"
@@ -23,8 +23,8 @@ catalog_snapshot="$(mktemp "${TMPDIR:-/tmp}/rg-catalog.XXXXXX")"
 trap 'rm -f -- "$catalog_snapshot"' EXIT
 cp -- "$catalog" "$catalog_snapshot"
 catalog="$catalog_snapshot"
-[[ -d "$host_root/systemd/rg" && -f "$host_root/rg/nginx-routes.json" && -f "$infra_root/scripts/iecode/rg/nginx-gen.ts" ]] || {
-  echo "$host_root/{systemd/rg,rg/nginx-routes.json} (set YOLO_ROOT) and scripts/iecode/rg/nginx-gen.ts required" >&2; exit 2;
+[[ -d "$host_root/systemd/rg" && -f "$host_root/rg/nginx-routes.json" && -f "$infra_root/scripts/nginx-gen.ts" ]] || {
+  echo "$host_root/{systemd/rg,rg/nginx-routes.json} (set YOLO_ROOT) and scripts/nginx-gen.ts required" >&2; exit 2;
 }
 # Units and routes are release content: they must be committed in aphrody-infra
 # so the artifact records exactly which yolo revision it carries.
@@ -33,8 +33,8 @@ git -C "$yolo_root" diff --quiet HEAD -- config/host packages/core/src/host &&
   [[ -z "$(git -C "$yolo_root" ls-files --others --exclude-standard -- config/host packages/core/src/host)" ]] || {
   echo 'yolo config/host has uncommitted changes' >&2; exit 2;
 }
-git -C "$infra_root" diff --quiet HEAD -- scripts/iecode/rg/nginx-gen.ts || {
-  echo 'scripts/iecode/rg/nginx-gen.ts has uncommitted changes' >&2; exit 2;
+git -C "$infra_root" diff --quiet HEAD -- scripts/nginx-gen.ts || {
+  echo 'scripts/nginx-gen.ts has uncommitted changes' >&2; exit 2;
 }
 [[ -f "$website_env" && "$(stat -c %a "$website_env")" = 600 ]] || {
   echo 'website build environment must exist with mode 0600' >&2; exit 2;
@@ -202,7 +202,7 @@ mkdir -p "$stage/apps/rg-website/.next/cache"
 mkdir -p "$stage/apps/rg-bot/logs" "$stage/apps/rg-bot/storage"
 
 mkdir -p "$stage/systemd" "$stage/nginx"
-bun "$infra_root/scripts/iecode/rg/nginx-gen.ts" --out "$stage/nginx/rg.conf"
+bun "$infra_root/scripts/nginx-gen.ts" --out "$stage/nginx/rg.conf"
 chmod 0644 "$stage/nginx/rg.conf"
 python3 - "$stage" "$catalog" "$commit" "$yolo_root" "$infra_commit" <<'PY'
 import datetime

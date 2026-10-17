@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { appendFile, chmod, mkdir, open, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const repositoryRoot = path.resolve(import.meta.dir, "../../../..");
+const repositoryRoot = path.resolve(import.meta.dir, "../..");
 const DEFAULT_SOURCE_PROJECT_REF = "yftdclwvehxxffwqvhmc";
 const EXPECTED_TARGET_ORIGIN = "http://127.0.0.1:8823";
 const EXPECTED_TARGET_ROOT = "/var/www/achillea-storage";

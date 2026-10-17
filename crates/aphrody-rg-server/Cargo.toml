@@ -14,7 +14,7 @@ version = "1.4.4"
 edition = "2024"
 license = "MIT"
 publish = false
-repository = "https://github.com/aphrody-labs/bun-distribution"
+repository = "https://github.com/aphrody-labs/rosegriffon"
 authors = ["aphrody-dev <contact@aphrody.com>"]
 
 [lib]

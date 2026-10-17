@@ -12,8 +12,8 @@
     // un cycle que turbo refuse ("Cyclic dependency detected"). Ces alias assurent la
     // résolution locale sans passer par le hoisting de node_modules.
     "paths": {
-      "@rosegriffon/db": ["../db/src/index.ts"],
-      "@rosegriffon/db/*": ["../db/src/*"]
+      "@rosegriffon/db": ["../rg-db/src/index.ts"],
+      "@rosegriffon/db/*": ["../rg-db/src/*"]
     }
   },
   "include": ["src/**/*.ts"],

@@ -3,7 +3,7 @@
 import { Check, Moon } from "lucide-react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import {
   Button,
   DropdownMenu,
@@ -54,11 +54,11 @@ export const DEFAULT_THEMES: ThemeOption[] = [
 
 export function ThemeToggle({ themes = DEFAULT_THEMES, className }: { themes?: ThemeOption[]; className?: string }) {
   const { setTheme, theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
 
   if (!mounted) {
     return (
@@ -127,3 +127,7 @@ export function ThemeToggle({ themes = DEFAULT_THEMES, className }: { themes?: T
 }
 
 export default ThemeToggle;
+
+function subscribeNever(): () => void {
+  return () => {};
+}

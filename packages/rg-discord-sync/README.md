@@ -2,7 +2,7 @@
 
 `@rosegriffon/discord-sync` mirrors Discord metadata visible to each bot into
 the `discord_mirror` PostgreSQL schema (migration
-`apps/rg-website/supabase/migrations/20261017_discord_mirror.sql`). It uses the
+`supabase/migrations/20261017_discord_mirror.sql`). It uses the
 shared `@rosegriffon/db` Bun.sql factory, so every writer and reader reaches the
 same database through `DATABASE_URL`; no local file, disk or Redis is involved,
 which keeps it usable from serverless functions. The connection is opened

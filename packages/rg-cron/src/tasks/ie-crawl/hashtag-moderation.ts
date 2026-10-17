@@ -20,7 +20,7 @@
 //  - `motif_masquage` est un texte de modération INTERNE. Il n'est lu par aucune
 //    surface publique, et aucun déclencheur temps réel n'est posé sur ces tables
 //    (le flux SSE `rg-realtime` n'est pas authentifié — cf. la section 5 de
-//    `apps/website/supabase/migrations/20260812_01_campagnes_x.sql`).
+//    `supabase/migrations/20260812_01_campagnes_x.sql`).
 //  - Les fichiers déjà ré-hébergés dans le Storage ne sont PAS supprimés : ils
 //    sont partagés avec les autres consommateurs de `public.tweets`. La commande
 //    affiche leur chemin pour qu'un retrait complet reste possible à la main.

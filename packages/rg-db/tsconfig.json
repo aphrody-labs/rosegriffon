@@ -9,8 +9,8 @@
     "paths": {
       "@rosegriffon/db": ["./src/index.ts"],
       "@rosegriffon/db/*": ["./src/*"],
-      "@rosegriffon/types": ["../types/src/index.ts"],
-      "@rosegriffon/types/*": ["../types/src/*"]
+      "@rosegriffon/types": ["../rg-types/src/index.ts"],
+      "@rosegriffon/types/*": ["../rg-types/src/*"]
     }
   },
   "include": ["src/**/*.ts"],

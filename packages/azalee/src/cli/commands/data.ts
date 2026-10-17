@@ -89,7 +89,11 @@ export function registerDataCommand(program: Command): void {
     .description("Migrations SQL (better-auth_migrations/*.sql) — liste par défaut, --apply pour exécuter")
     .option("--apply", "Applique les migrations via psql (rose_griffon local)")
     .action((opts: DataMigrateOptions) => {
-      const dir = firstExisting([`${WEBSITE_ROOT}/supabase/migrations`, `${WEBSITE_ROOT}/sql/migrations`]);
+      const dir = firstExisting([
+        `${WEBSITE_ROOT}/../../supabase/migrations`,
+        `${WEBSITE_ROOT}/supabase/migrations`,
+        `${WEBSITE_ROOT}/sql/migrations`,
+      ]);
       let files: string[] = [];
       try {
         files = readdirSync(dir)

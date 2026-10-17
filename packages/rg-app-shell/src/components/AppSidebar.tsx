@@ -200,17 +200,15 @@ function RecursiveNavItem({
 
   const [isOpen, setIsOpen] = React.useState(isActive || isUniversePillar || Boolean(item.defaultOpen));
 
-  React.useEffect(() => {
-    // Un changement d'univers ouvre sa catégorie et replie celle que l'on
-    // quitte. Les sous-sections internes conservent, elles, le choix manuel.
-    if (depth === 0 && item.groupOnly) {
-      setIsOpen(isUniversePillar);
-      return;
-    }
-    if (isActive) {
-      setIsOpen(true);
-    }
-  }, [depth, isActive, isUniversePillar, item.groupOnly]);
+  // Un changement d'univers ouvre sa catégorie et replie celle que l'on
+  // quitte. Les sous-sections internes conservent, elles, le choix manuel.
+  // Ajusté pendant le rendu (et non dans un effet) pour éviter un rendu en cascade.
+  const [suivi, setSuivi] = React.useState({ isActive, isUniversePillar });
+  if (suivi.isActive !== isActive || suivi.isUniversePillar !== isUniversePillar) {
+    setSuivi({ isActive, isUniversePillar });
+    if (depth === 0 && item.groupOnly) setIsOpen(isUniversePillar);
+    else if (isActive) setIsOpen(true);
+  }
 
   const { state, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed" && !isMobile;
@@ -415,10 +413,7 @@ export function AppSidebar({
   const { state, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed" && !isMobile;
 
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsClient();
 
   const filteredNavItems = filtrerNavigation(resolvedNavItems, item => {
     if (item.adminOnly && !(mounted && isAdmin)) return false;
@@ -461,3 +456,16 @@ export function AppSidebar({
 
 export { AppSidebar as WikiSidebar };
 export default AppSidebar;
+
+/** `true` once hydrated on the client, `false` during server rendering and hydration. */
+function useIsClient(): boolean {
+  return React.useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
+}
+
+function subscribeNever(): () => void {
+  return () => {};
+}
