@@ -40,7 +40,7 @@ export interface XLive {
 }
 
 /** Comptes affichables : la session du serveur n'est pas un proxy ouvert. */
-export const COMPTES_X = ["Azalee_IE"] as const;
+export const COMPTES_X = ["Azalee_IE", "Achillea_IE", "rose_griffon"] as const;
 export type CompteX = (typeof COMPTES_X)[number];
 
 const TTL_MS = 30_000;

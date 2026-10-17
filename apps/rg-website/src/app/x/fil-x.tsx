@@ -68,7 +68,7 @@ function Post({ post }: { post: XTweet }) {
   );
 }
 
-export function FilX({ initial }: { initial: XLive | null }) {
+export function FilX({ compte, initial }: { compte: string; initial: XLive | null }) {
   const [donnees, setDonnees] = useState<XLive | null>(initial);
   const [erreur, setErreur] = useState(false);
 
@@ -76,7 +76,7 @@ export function FilX({ initial }: { initial: XLive | null }) {
     let actif = true;
     const charger = async () => {
       try {
-        const reponse = await fetch("/api/x/live", { cache: "no-store" });
+        const reponse = await fetch(`/api/x/live?compte=${compte}`, { cache: "no-store" });
         if (!reponse.ok) throw new Error(String(reponse.status));
         const suivant = (await reponse.json()) as XLive;
         if (actif) {
@@ -95,7 +95,7 @@ export function FilX({ initial }: { initial: XLive | null }) {
       actif = false;
       clearInterval(minuteur);
     };
-  }, [initial]);
+  }, [compte, initial]);
 
   if (!donnees) {
     return (

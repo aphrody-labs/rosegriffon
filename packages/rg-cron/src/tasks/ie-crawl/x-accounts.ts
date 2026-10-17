@@ -74,6 +74,8 @@ export const OFFICIAL_X_ACCOUNTS = [
   "AkihiroHino", // CEO LEVEL-5
   "LEVEL5_times", // LEVEL-5 officiel
   "Azalee_IE", // FR
+  "Achillea_IE", // FR — Achilléa
+  "rose_griffon", // FR — Rose Griffon
   "InazumaSeries", // Series / officiel global EN
   "Level5Hub", // news/leaks ES actif
   // communauté / news haut-signal centrés IE (découverte search Aphrody 2026-06)

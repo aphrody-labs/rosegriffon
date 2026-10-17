@@ -50,7 +50,7 @@ const SOCIAL_LINKS = [
     href: "https://youtube.com/@rose-griffon",
     label: "YouTube",
   },
-  { Icon: XIcon, href: "https://x.com/rosegriffon_fr", label: "X / Twitter" },
+  { Icon: XIcon, href: "https://x.com/rose_griffon", label: "X / Twitter" },
 ];
 
 function LoginPageContent() {
