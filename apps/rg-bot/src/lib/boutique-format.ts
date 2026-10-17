@@ -33,7 +33,7 @@
  * échoue si le catalogue rétrécit, si un prix devient absurde ou si le format
  * des euros diverge de celui du site.
  */
-import { CATEGORY_LABELS, PRODUCTS, type Product, type ProductCategory } from "@rosegriffon/types/shop";
+import { CATEGORY_LABELS, type Product, type ProductCategory } from "@rosegriffon/types/shop";
 
 /** Base publique du site, où vivent les fiches produit et les images. */
 export const BASE_BOUTIQUE = "https://rosegriffon.fr";
@@ -57,7 +57,7 @@ export interface ProduitBoutique {
   nom: string;
   accroche: string;
   description: string;
-  categorie: ProductCategory;
+  categorie: ProductCategory | null;
   categorieLibelle: string;
   /** Prix d'entrée, en centimes. */
   prixCents: number;
@@ -80,8 +80,8 @@ function convertir(produit: Product): ProduitBoutique {
   const prix = [produit.priceCents, ...variantes.map(v => v.prixCents)];
   return {
     accroche: produit.tagline,
-    categorie: produit.category,
-    categorieLibelle: CATEGORY_LABELS[produit.category],
+    categorie: produit.category ?? null,
+    categorieLibelle: produit.category ? CATEGORY_LABELS[produit.category] : "Autres",
     description: produit.description,
     exclusifPatreon: produit.patreonExclusive === true,
     image: produit.image,
@@ -97,13 +97,22 @@ function convertir(produit: Product): ProduitBoutique {
 }
 
 /** Le catalogue servi, trié par famille puis par prix croissant. */
-export const CATALOGUE: readonly ProduitBoutique[] = PRODUCTS.map(convertir).toSorted(
-  (a, b) => a.categorieLibelle.localeCompare(b.categorieLibelle, "fr") || a.prixCents - b.prixCents,
-);
+export function construireCatalogue(produits: readonly Product[]): ProduitBoutique[] {
+  return produits
+    .map(convertir)
+    .toSorted((a, b) => a.categorieLibelle.localeCompare(b.categorieLibelle, "fr") || a.prixCents - b.prixCents);
+}
+
+/**
+ * Aucun produit n'est en vente : `merch_products` est vide et les packs
+ * personnage passent par le palier Patreon. Le catalogue se remplira par
+ * `construireCatalogue` quand des produits existeront en base.
+ */
+export const CATALOGUE: readonly ProduitBoutique[] = [];
 
 /** Familles réellement présentes dans le catalogue, dans l'ordre alphabétique français. */
 export const CATEGORIES: ReadonlyArray<{ valeur: ProductCategory; libelle: string }> = [
-  ...new Set(CATALOGUE.map(p => p.categorie)),
+  ...new Set(CATALOGUE.flatMap(p => (p.categorie ? [p.categorie] : []))),
 ]
   .map(valeur => ({ libelle: CATEGORY_LABELS[valeur], valeur }))
   .toSorted((a, b) => a.libelle.localeCompare(b.libelle, "fr"));
@@ -211,13 +220,13 @@ export function trouverProduit(
 export function catalogueParCategorie(
   categorie?: string | null,
   catalogue: readonly ProduitBoutique[] = CATALOGUE,
-): Array<{ categorie: ProductCategory; libelle: string; produits: ProduitBoutique[] }> {
+): Array<{ categorie: ProductCategory | null; libelle: string; produits: ProduitBoutique[] }> {
   const filtre = categorie ? normaliser(categorie) : "";
-  const groupes = new Map<ProductCategory, ProduitBoutique[]>();
+  const groupes = new Map<ProductCategory | null, ProduitBoutique[]>();
   for (const produit of catalogue) {
     if (
       filtre.length > 0 &&
-      normaliser(produit.categorie) !== filtre &&
+      normaliser(produit.categorie ?? "") !== filtre &&
       normaliser(produit.categorieLibelle) !== filtre
     ) {
       continue;
@@ -229,7 +238,7 @@ export function catalogueParCategorie(
   return [...groupes.entries()]
     .map(([valeur, produits]) => ({
       categorie: valeur,
-      libelle: CATEGORY_LABELS[valeur],
+      libelle: valeur ? CATEGORY_LABELS[valeur] : "Autres",
       produits,
     }))
     .toSorted((a, b) => a.libelle.localeCompare(b.libelle, "fr"));
@@ -299,9 +308,7 @@ export function champsCatalogue(
 }
 
 const LIBELLES_STOCK: Record<EtatStock, string> = {
-  "in-stock": "En stock",
   limited: "Édition limitée",
-  "low-stock": "Derniers exemplaires",
   preorder: "Précommande",
 };
 
@@ -309,7 +316,7 @@ export function libelleStock(stock: EtatStock | null | undefined): string | null
   return stock ? LIBELLES_STOCK[stock] : null;
 }
 
-/** Une ligne de liste : « [Nom](url) — 9,90 € · En stock ». */
+/** Une ligne de liste : « [Nom](url) — 9,90 € · Édition limitée ». */
 export function ligneCatalogue(produit: ProduitBoutique, base = BASE_BOUTIQUE): string {
   const details = [formaterFourchettePrix(produit), libelleStock(produit.stock)]
     .filter((v): v is string => typeof v === "string" && v.length > 0)

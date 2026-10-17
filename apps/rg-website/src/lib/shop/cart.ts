@@ -132,10 +132,10 @@ async function writeCart(items: CartItem[]): Promise<void> {
   }
 }
 
-function resolveCart(items: CartItem[]): CartSnapshot {
+async function resolveCart(items: CartItem[]): Promise<CartSnapshot> {
   const resolved: CartItemResolved[] = [];
   for (const item of items) {
-    const product = getProduct(item.slug);
+    const product = await getProduct(item.slug);
     if (!product) {
       continue;
     }
@@ -162,7 +162,7 @@ export async function getCart(): Promise<CartSnapshot> {
 }
 
 export async function addToCart(slug: string, variantId?: string, qty = 1): Promise<CartSnapshot> {
-  const product = getProduct(slug);
+  const product = await getProduct(slug);
   if (!product) {
     throw new Error(`[cart] unknown product: ${slug}`);
   }

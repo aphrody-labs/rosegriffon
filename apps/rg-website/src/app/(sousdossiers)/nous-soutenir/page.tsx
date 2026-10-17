@@ -138,7 +138,7 @@ export default function NousSoutenirPage() {
           icon={<Heart className="size-6" aria-hidden />}
           iconClassName="bg-primary text-primary-foreground shadow-primary/20"
           title="Les paliers de mécénat"
-          subtitle="Trois paliers principaux sur Patreon — Roy, Gaëlle, Evans — plus deux options complémentaires. Chaque palier a son propre bouton."
+          subtitle="Les paliers actifs sur Patreon, avec leur prix et le nombre de mécènes."
         />
         <PublicTiers />
         <p className="mx-auto mt-8 max-w-2xl text-center text-xs text-muted-foreground">

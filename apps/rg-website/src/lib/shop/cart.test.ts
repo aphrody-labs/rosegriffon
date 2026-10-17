@@ -32,6 +32,35 @@ mock.module("@rosegriffon/db/redis", () => ({ cache: redisCache }));
 const getServerUser = mock();
 mock.module("@/lib/auth-helpers", () => ({ getServerUser }));
 
+// Catalogue SYNTHÉTIQUE : les produits réels viennent de `merch_products`.
+const PRODUITS_TEST: Record<string, object> = {
+  "11111111-1111-4111-8111-111111111111": {
+    description: "Produit simple.",
+    image: "/a.webp",
+    name: "Produit simple",
+    priceCents: 990,
+    slug: "11111111-1111-4111-8111-111111111111",
+    tagline: "Produit simple.",
+    tags: [],
+  },
+  "22222222-2222-4222-8222-222222222222": {
+    description: "Produit à variantes.",
+    image: "/b.webp",
+    name: "Produit à variantes",
+    priceCents: 2490,
+    slug: "22222222-2222-4222-8222-222222222222",
+    tagline: "Produit à variantes.",
+    tags: [],
+    variants: [{ id: "solstice", label: "Solstice" }],
+  },
+};
+const partage = await import("@rosegriffon/types/shop");
+mock.module("./products", () => ({
+  ...partage,
+  getProduct: async (slug: string) => PRODUITS_TEST[slug],
+  listerProduits: async () => Object.values(PRODUITS_TEST),
+}));
+
 // --- Import dynamique du SUT, APRÈS les mock.module ci-dessus ---
 type CartModule = typeof import("./cart");
 let getCart: CartModule["getCart"];
@@ -86,31 +115,31 @@ describe("Cart persistence & merging", () => {
     });
 
     it("should retrieve items from cookie when cookie is present", async () => {
-      const initialItems = [{ id: "print-a5-roy-fonteneau::default", qty: 2, slug: "print-a5-roy-fonteneau" }];
+      const initialItems = [{ id: "11111111-1111-4111-8111-111111111111::default", qty: 2, slug: "11111111-1111-4111-8111-111111111111" }];
       mockCookies.get.mockReturnValue({ value: encodeURIComponent(JSON.stringify(initialItems)) });
 
       const cart = await getCart();
       expect(cart.items.length).toBe(1);
       const firstItem = cart.items[0]!;
-      expect(firstItem.slug).toBe("print-a5-roy-fonteneau");
+      expect(firstItem.slug).toBe("11111111-1111-4111-8111-111111111111");
       expect(firstItem.qty).toBe(2);
       expect(cart.itemCount).toBe(2);
     });
 
     it("should add a product to cookie cart", async () => {
-      await addToCart("print-a5-roy-fonteneau", undefined, 1);
+      await addToCart("11111111-1111-4111-8111-111111111111", undefined, 1);
       expect(mockCookies.set).toHaveBeenCalled();
       const [, value] = mockCookies.set.mock.calls[0] as [string, string];
       const saved = JSON.parse(decodeURIComponent(value));
-      expect(saved[0].slug).toBe("print-a5-roy-fonteneau");
+      expect(saved[0].slug).toBe("11111111-1111-4111-8111-111111111111");
       expect(saved[0].qty).toBe(1);
     });
 
     it("should update product quantity in cookie cart", async () => {
-      const initialItems = [{ id: "print-a5-roy-fonteneau::default", qty: 2, slug: "print-a5-roy-fonteneau" }];
+      const initialItems = [{ id: "11111111-1111-4111-8111-111111111111::default", qty: 2, slug: "11111111-1111-4111-8111-111111111111" }];
       mockCookies.get.mockReturnValue({ value: encodeURIComponent(JSON.stringify(initialItems)) });
 
-      await updateQty("print-a5-roy-fonteneau::default", 5);
+      await updateQty("11111111-1111-4111-8111-111111111111::default", 5);
       expect(mockCookies.set).toHaveBeenCalled();
       const [, value] = mockCookies.set.mock.calls[0] as [string, string];
       const saved = JSON.parse(decodeURIComponent(value));
@@ -118,10 +147,10 @@ describe("Cart persistence & merging", () => {
     });
 
     it("should remove product from cookie cart", async () => {
-      const initialItems = [{ id: "print-a5-roy-fonteneau::default", qty: 2, slug: "print-a5-roy-fonteneau" }];
+      const initialItems = [{ id: "11111111-1111-4111-8111-111111111111::default", qty: 2, slug: "11111111-1111-4111-8111-111111111111" }];
       mockCookies.get.mockReturnValue({ value: encodeURIComponent(JSON.stringify(initialItems)) });
 
-      await removeFromCart("print-a5-roy-fonteneau::default");
+      await removeFromCart("11111111-1111-4111-8111-111111111111::default");
       expect(mockCookies.delete).toHaveBeenCalledWith("rg_cart");
     });
 
@@ -148,7 +177,7 @@ describe("Cart persistence & merging", () => {
     });
 
     it("should retrieve items from Redis cache when authenticated", async () => {
-      const redisItems = [{ id: "print-a5-roy-fonteneau::default", qty: 3, slug: "print-a5-roy-fonteneau" }];
+      const redisItems = [{ id: "11111111-1111-4111-8111-111111111111::default", qty: 3, slug: "11111111-1111-4111-8111-111111111111" }];
       redisCache.get.mockResolvedValue(redisItems);
 
       const cart = await getCart();
@@ -158,16 +187,16 @@ describe("Cart persistence & merging", () => {
 
     it("should merge cookie cart items into Redis cart when logging in", async () => {
       // Simule des items existants dans le cache Redis
-      const redisItems = [{ id: "print-a5-roy-fonteneau::default", qty: 1, slug: "print-a5-roy-fonteneau" }];
+      const redisItems = [{ id: "11111111-1111-4111-8111-111111111111::default", qty: 1, slug: "11111111-1111-4111-8111-111111111111" }];
       redisCache.get.mockResolvedValue(redisItems);
 
       // Simule des items dans le cookie (avant authentification complète)
       const cookieItems = [
-        { id: "print-a5-roy-fonteneau::default", qty: 2, slug: "print-a5-roy-fonteneau" },
+        { id: "11111111-1111-4111-8111-111111111111::default", qty: 2, slug: "11111111-1111-4111-8111-111111111111" },
         {
-          id: "pack-personnage-destin-billows::solstice",
+          id: "22222222-2222-4222-8222-222222222222::solstice",
           qty: 1,
-          slug: "pack-personnage-destin-billows",
+          slug: "22222222-2222-4222-8222-222222222222",
           variantId: "solstice",
         },
       ];
@@ -178,11 +207,11 @@ describe("Cart persistence & merging", () => {
 
       // Vérifie que les paniers ont été fusionnés
       // 1 print (Redis) + 2 prints (Cookie) = 3 prints
-      const print = cart.items.find(i => i.slug === "print-a5-roy-fonteneau");
+      const print = cart.items.find(i => i.slug === "11111111-1111-4111-8111-111111111111");
       expect(print?.qty).toBe(3);
 
       // Le pack personnage a également été ajouté
-      const pack = cart.items.find(i => i.slug === "pack-personnage-destin-billows");
+      const pack = cart.items.find(i => i.slug === "22222222-2222-4222-8222-222222222222");
       expect(pack?.qty).toBe(1);
 
       // Le cache Redis doit être mis à jour avec le panier fusionné
@@ -193,7 +222,7 @@ describe("Cart persistence & merging", () => {
     });
 
     it("should add a product directly to Redis when authenticated", async () => {
-      await addToCart("print-a5-roy-fonteneau", undefined, 2);
+      await addToCart("11111111-1111-4111-8111-111111111111", undefined, 2);
       expect(redisCache.set).toHaveBeenCalled();
       const calls = redisCache.set.mock.calls;
       expect(calls.length).toBeGreaterThan(0);
@@ -201,7 +230,7 @@ describe("Cart persistence & merging", () => {
       const key = call[0];
       const savedItems = call[1];
       expect(key).toBe("cart:user_123");
-      expect((savedItems as { slug: string; qty: number }[])[0]!.slug).toBe("print-a5-roy-fonteneau");
+      expect((savedItems as { slug: string; qty: number }[])[0]!.slug).toBe("11111111-1111-4111-8111-111111111111");
       expect((savedItems as { slug: string; qty: number }[])[0]!.qty).toBe(2);
     });
 

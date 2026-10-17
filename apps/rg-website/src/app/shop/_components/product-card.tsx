@@ -23,13 +23,15 @@ export function ProductCard({ product }: { product: Product }) {
     >
       {/* Visual */}
       <div className="relative aspect-[4/3] overflow-hidden bg-rg-marine">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform motion-safe:duration-500 group-hover:scale-105"
-        />
+        {product.image && (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform motion-safe:duration-500 group-hover:scale-105"
+          />
+        )}
         {/* Vignette */}
         <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-rg-marine via-transparent to-transparent" />
         {/* Stock badge */}
@@ -41,9 +43,11 @@ export function ProductCard({ product }: { product: Product }) {
           </span>
         )}
         {/* Category tag */}
-        <span className="absolute left-3 top-3 inline-flex items-center rounded-full border border-white/40 bg-rg-marine/80 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rg-or backdrop-blur">
-          {CATEGORY_LABELS[product.category]}
-        </span>
+        {product.category && (
+          <span className="absolute left-3 top-3 inline-flex items-center rounded-full border border-white/40 bg-rg-marine/80 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rg-or backdrop-blur">
+            {CATEGORY_LABELS[product.category]}
+          </span>
+        )}
       </div>
 
       {/* Content */}

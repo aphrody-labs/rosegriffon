@@ -5,7 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import { CATEGORY_LABELS, PRODUCTS, formatEuros, getProduct } from "@/lib/shop/products";
+import { CATEGORY_LABELS, formatEuros, getProduct, listerProduits } from "@/lib/shop/products";
 import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 import { PatreonDiscountBanner } from "../_components/patreon-discount-banner";
 import { ProductCard } from "../_components/product-card";
@@ -15,13 +15,9 @@ interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  return PRODUCTS.map(p => ({ slug: p.slug }));
-}
-
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProduct(slug);
   if (!product) {
     return { title: "Produit introuvable · Rose Griffon" };
   }
@@ -39,13 +35,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProduct(slug);
   if (!product) {
     notFound();
   }
 
   const gallery = product.gallery ?? [product.image];
-  const related = PRODUCTS.filter(p => p.category === product.category && p.slug !== product.slug).slice(0, 4);
+  const related = (await listerProduits()).filter(p => p.slug !== product.slug).slice(0, 4);
 
   const stockHintToAvailability = (hint: typeof product.stockHint): string | undefined => {
     switch (hint) {
@@ -108,7 +104,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     "@context": "https://schema.org/",
     "@type": "Product",
     brand: { "@type": "Brand", name: "Rose Griffon" },
-    category: CATEGORY_LABELS[product.category],
+    category: product.category ? CATEGORY_LABELS[product.category] : undefined,
     description: product.description,
     image: allImages,
     name: product.name,
@@ -198,9 +194,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <section className="md:col-span-5">
           <div className="sticky top-24 flex flex-col gap-6">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border-2 border-rg-or/40 bg-rg-marine px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-rg-or">
-                {CATEGORY_LABELS[product.category]}
-              </p>
+              {product.category && (
+                <p className="inline-flex items-center gap-2 rounded-full border-2 border-rg-or/40 bg-rg-marine px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-rg-or">
+                  {CATEGORY_LABELS[product.category]}
+                </p>
+              )}
               <h1 className="mt-3 text-balance text-fluid-headline-xl font-extrabold leading-tight tracking-tight text-white">
                 {product.name}
               </h1>

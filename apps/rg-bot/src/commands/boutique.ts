@@ -123,6 +123,13 @@ export class CommandesBoutique {
   ): Promise<void> {
     await interaction.deferReply();
 
+    if (CATALOGUE.length === 0) {
+      await interaction.editReply({
+        content: `Aucun produit n'est en vente pour le moment. Les packs personnage sont réservés aux mécènes du niveau Evans : https://www.patreon.com/RoseGriffon`,
+      });
+      return;
+    }
+
     const groupes = catalogueParCategorie(categorie);
     if (groupes.length === 0) {
       await interaction.editReply({

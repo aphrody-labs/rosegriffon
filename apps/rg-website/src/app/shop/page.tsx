@@ -1,18 +1,14 @@
 import { Suspense } from "react";
 
-import { PRODUCTS } from "@/lib/shop/products";
-import type { ProductCategory } from "@/lib/shop/products";
-import { CategoryFilter } from "./_components/category-filter";
+import { listerProduits } from "@/lib/shop/products";
+import { PacksPatreon } from "./_components/packs-patreon";
 import { PatreonDiscountBanner } from "./_components/patreon-discount-banner";
 import { ProductCard } from "./_components/product-card";
 
-interface ShopPageProps {
-  searchParams: Promise<{ cat?: string }>;
-}
+export const dynamic = "force-dynamic";
 
-export default async function ShopIndexPage({ searchParams }: ShopPageProps) {
-  const { cat = "" } = await searchParams;
-  const filtered = cat && cat !== "all" ? PRODUCTS.filter(p => p.category === (cat as ProductCategory)) : PRODUCTS;
+export default async function ShopIndexPage() {
+  const produits = await listerProduits().catch(() => []);
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-16 pt-4 min-[600px]:px-6 min-[600px]:pt-6">
@@ -32,37 +28,24 @@ export default async function ShopIndexPage({ searchParams }: ShopPageProps) {
         </aside>
       </section>
 
-      {/* Filters */}
-      <section className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <CategoryFilter active={cat} />
-        <p className="text-xs font-semibold uppercase tracking-widest text-white/60">
-          {filtered.length} produit{filtered.length > 1 ? "s" : ""}
-        </p>
-      </section>
-
-      {/* Grid */}
-      {filtered.length === 0 ? (
-        <EmptyState />
-      ) : (
+      {produits.length > 0 ? (
         <section
           aria-label="Catalogue produits"
           className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         >
-          {filtered.map(p => (
+          {produits.map(p => (
             <ProductCard key={p.slug} product={p} />
           ))}
         </section>
+      ) : (
+        <p className="mb-6 rounded-2xl border border-rg-or/30 bg-rg-marine/60 p-4 text-sm text-white/80">
+          La vente en ligne n'a pas encore ouvert : aucun produit n'est en vente pour le moment.
+        </p>
       )}
-    </div>
-  );
-}
 
-function EmptyState() {
-  return (
-    <div className="rounded-3xl border-2 border-dashed border-rg-or/40 bg-rg-marine/40 p-16 text-center">
-      <p className="text-4xl">🌹</p>
-      <p className="mt-4 text-lg font-bold text-white">Aucun produit dans cette catégorie pour l'instant.</p>
-      <p className="mt-2 text-sm text-white/60">Reviens vite — on prépare de nouveaux drops chaque mois.</p>
+      <div className={produits.length > 0 ? "mt-10" : undefined}>
+        <PacksPatreon />
+      </div>
     </div>
   );
 }

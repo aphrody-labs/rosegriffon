@@ -15,13 +15,13 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { formatEuros, PRODUCTS } from "@rosegriffon/types/shop";
+import { formatEuros, type Product } from "@rosegriffon/types/shop";
 import {
   accorderSoutiens,
   agregerPaliers,
   BASE_BOUTIQUE,
-  CATALOGUE,
-  CATEGORIES,
+  CATALOGUE as CATALOGUE_REEL,
+  construireCatalogue,
   catalogueParCategorie,
   champsCatalogue,
   chercherProduits,
@@ -144,10 +144,27 @@ const ADHESIONS_REELLES: AdhesionPatreon[] = [
   adhesion(),
 ];
 
+/** Produits SYNTHÉTIQUES : ils servent à éprouver la logique, pas à décrire une boutique réelle. */
+const PRODUITS_TEST: Product[] = [
+  { category: "sticker", description: "Un sticker de test.", image: "/a.webp", name: "Sticker Alpha", priceCents: 250, slug: "sticker-alpha", stockHint: "limited", tagline: "Un sticker de test.", tags: ["vinyle"] },
+  { category: "sticker", description: "Autre sticker.", image: "/b.webp", name: "Sticker Beta", priceCents: 450, slug: "sticker-beta", tagline: "Autre sticker.", tags: [] },
+  { category: "sticker", description: "Dernier sticker.", image: "/c.webp", name: "Pack Gamma", priceCents: 790, slug: "pack-gamma", tagline: "Dernier sticker.", tags: [] },
+  {
+    category: "print", description: "Un print à variantes.", image: "/d.webp", name: "Print Delta", priceCents: 990, slug: "print-delta", tagline: "Print.", tags: ["papier"],
+    variants: [{ id: "v1", label: "Petit" }, { id: "v2", label: "Grand", priceCentsOverride: 2490 }],
+  },
+  { description: "Sans famille.", image: "/e.webp", name: "Objet Epsilon", priceCents: 1200, slug: "objet-epsilon", tagline: "Sans famille.", tags: [] },
+];
+const CATALOGUE = construireCatalogue(PRODUITS_TEST);
+
 describe("catalogue", () => {
-  test("les 12 produits servis par le site sont repris, sans perte", () => {
-    expect(CATALOGUE.length).toBe(PRODUCTS.length);
-    expect(CATALOGUE.length).toBeGreaterThanOrEqual(12);
+  test("le catalogue réel est vide : aucun produit n'est promis", () => {
+    expect(CATALOGUE_REEL.length).toBe(0);
+    expect(catalogueParCategorie()).toEqual([]);
+  });
+
+  test("tous les produits fournis sont repris, sans doublon de slug", () => {
+    expect(CATALOGUE.length).toBe(PRODUITS_TEST.length);
     expect(new Set(CATALOGUE.map(p => p.slug)).size).toBe(CATALOGUE.length);
   });
 
@@ -158,52 +175,49 @@ describe("catalogue", () => {
       expect(produit.categorieLibelle.length).toBeGreaterThan(0);
       expect(produit.prixCents).toBeGreaterThan(0);
       expect(produit.prixMaxCents).toBeGreaterThanOrEqual(produit.prixCents);
-      expect(produit.image.startsWith("/")).toBe(true);
     }
   });
 
   test("la variante la plus chère fixe le haut de la fourchette", () => {
-    const pack = trouverProduit("pack-personnage-destin-billows");
-    expect(pack).not.toBeNull();
-    expect(pack?.prixCents).toBe(2490);
-    expect(pack?.prixMaxCents).toBe(7990);
-    expect(pack?.variantes.length).toBe(5);
-    expect(espaces(formaterFourchettePrix(pack as NonNullable<typeof pack>))).toBe("de 24,90 € à 79,90 €");
+    const print = trouverProduit("print-delta", CATALOGUE);
+    expect(print?.prixCents).toBe(990);
+    expect(print?.prixMaxCents).toBe(2490);
+    expect(print?.variantes.length).toBe(2);
+    expect(espaces(formaterFourchettePrix(print as NonNullable<typeof print>))).toBe("de 9,90 € à 24,90 €");
   });
 
   test("sans variante, la fourchette est un prix unique", () => {
-    const print = trouverProduit("print-a5-roy-fonteneau");
-    expect(print?.prixCents).toBe(990);
-    expect(espaces(formaterFourchettePrix(print as NonNullable<typeof print>))).toBe("9,90 €");
+    const sticker = trouverProduit("sticker-alpha", CATALOGUE);
+    expect(espaces(formaterFourchettePrix(sticker as NonNullable<typeof sticker>))).toBe("2,50 €");
   });
 
-  test("les familles couvrent tout le catalogue", () => {
-    const total = catalogueParCategorie().reduce((n, g) => n + g.produits.length, 0);
-    expect(total).toBe(CATALOGUE.length);
-    expect(CATEGORIES.length).toBe(catalogueParCategorie().length);
+  test("les familles couvrent tout le catalogue, les produits sans famille vont dans « Autres »", () => {
+    const groupes = catalogueParCategorie(undefined, CATALOGUE);
+    expect(groupes.reduce((n, g) => n + g.produits.length, 0)).toBe(CATALOGUE.length);
+    expect(groupes.map(g => g.libelle)).toContain("Autres");
   });
 
   test("un filtre de famille accepte le libellé comme la valeur brute", () => {
-    const parValeur = catalogueParCategorie("sticker");
-    const parLibelle = catalogueParCategorie("Stickers");
+    const parValeur = catalogueParCategorie("sticker", CATALOGUE);
+    const parLibelle = catalogueParCategorie("Stickers", CATALOGUE);
     expect(parValeur.length).toBe(1);
     expect(parValeur[0]?.produits.length).toBe(3);
     expect(parLibelle.map(g => g.categorie)).toEqual(parValeur.map(g => g.categorie));
   });
 
   test("une famille inconnue ne renvoie rien plutôt que tout", () => {
-    expect(catalogueParCategorie("peluche")).toEqual([]);
+    expect(catalogueParCategorie("peluche", CATALOGUE)).toEqual([]);
   });
 });
 
 describe("champs de l'embed catalogue — les trois limites Discord", () => {
-  const groupes = catalogueParCategorie();
+  const groupes = catalogueParCategorie(undefined, CATALOGUE);
 
-  test("le catalogue réel passe en entier, sans rien omettre", () => {
+  test("un catalogue court passe en entier, sans rien omettre", () => {
     const { champs, omises } = champsCatalogue(groupes, MAX_TOTAL_EMBED - 300);
     expect(omises).toBe(0);
     expect(champs.length).toBe(groupes.length);
-    expect(champs.map(c => c.nom)).toContain(`Stickers (3)`);
+    expect(champs.map(c => c.nom)).toContain("Stickers (3)");
   });
 
   test("la somme des champs reste sous le budget, et chacun sous 1 024", () => {
@@ -216,12 +230,11 @@ describe("champs de l'embed catalogue — les trois limites Discord", () => {
   });
 
   test("un budget trop court écarte des familles au lieu de faire échouer l'envoi", () => {
-    const { champs, omises } = champsCatalogue(groupes, 400);
-    expect(champs.length).toBeGreaterThan(0);
+    const { champs, omises } = champsCatalogue(groupes, 150);
     expect(champs.length).toBeLessThan(groupes.length);
     expect(omises).toBe(groupes.length - champs.length);
     const total = champs.reduce((n, c) => n + c.nom.length + c.valeur.length, 0);
-    expect(total).toBeLessThanOrEqual(400);
+    expect(total).toBeLessThanOrEqual(150);
   });
 
   test("un budget nul n'affiche rien et le dit, plutôt que de mentir", () => {
@@ -298,16 +311,13 @@ describe("liens", () => {
   });
 
   test("la ligne de liste porte le nom, le lien, le prix et le stock", () => {
-    const carte = trouverProduit("carte-trading-roy-foil");
-    const ligne = espaces(ligneCatalogue(carte as NonNullable<typeof carte>));
-    expect(ligne).toBe(
-      `[Carte Trading · Roy Fonteneau (Foil)](${BASE_BOUTIQUE}/shop/carte-trading-roy-foil) — 4,90 € · Édition limitée`,
-    );
+    const sticker = trouverProduit("sticker-alpha", CATALOGUE);
+    const ligne = espaces(ligneCatalogue(sticker as NonNullable<typeof sticker>));
+    expect(ligne).toBe(`[Sticker Alpha](${BASE_BOUTIQUE}/shop/sticker-alpha) — 2,50 € · Édition limitée`);
   });
 
   test("les libellés de stock sont en français", () => {
-    expect(libelleStock("in-stock")).toBe("En stock");
-    expect(libelleStock("low-stock")).toBe("Derniers exemplaires");
+    expect(libelleStock("limited")).toBe("Édition limitée");
     expect(libelleStock("preorder")).toBe("Précommande");
     expect(libelleStock(null)).toBeNull();
   });
@@ -315,53 +325,51 @@ describe("liens", () => {
 
 describe("recherche", () => {
   test("une saisie vide propose le début du catalogue", () => {
-    expect(chercherProduits("").length).toBe(Math.min(25, CATALOGUE.length));
-    expect(chercherProduits(null, 3).length).toBe(3);
+    expect(chercherProduits("", 25, CATALOGUE).length).toBe(Math.min(25, CATALOGUE.length));
+    expect(chercherProduits(null, 3, CATALOGUE).length).toBe(3);
   });
 
   test("les accents et la casse n'empêchent pas de trouver", () => {
     expect(normaliser("Édition Limitée")).toBe("edition limitee");
-    const trouve = chercherProduits("gaelle");
-    expect(trouve[0]?.slug).toBe("print-a5-gaelle-la-goatte");
+    expect(chercherProduits("GAMMA", 25, CATALOGUE)[0]?.slug).toBe("pack-gamma");
   });
 
   test("un début de nom passe devant une correspondance interne", () => {
-    const resultats = chercherProduits("sticker");
+    const resultats = chercherProduits("sticker", 25, CATALOGUE);
     expect(resultats[0]?.nom.toLowerCase().startsWith("sticker")).toBe(true);
   });
 
   test("une étiquette suffit à faire remonter un produit", () => {
-    const resultats = chercherProduits("achillea");
-    expect(resultats.map(p => p.slug)).toContain("affiche-a2-achillea-rose-griffon");
+    expect(chercherProduits("papier", 25, CATALOGUE).map(p => p.slug)).toContain("print-delta");
   });
 
   test("le nombre de propositions reste sous la limite Discord", () => {
-    expect(chercherProduits("e", 25).length).toBeLessThanOrEqual(25);
+    expect(chercherProduits("e", 25, CATALOGUE).length).toBeLessThanOrEqual(25);
   });
 
   test("une recherche sans réponse renvoie une liste vide", () => {
-    expect(chercherProduits("zzzzz")).toEqual([]);
+    expect(chercherProduits("zzzzz", 25, CATALOGUE)).toEqual([]);
   });
 });
 
 describe("trouverProduit", () => {
   test("le slug exact gagne", () => {
-    expect(trouverProduit("badge-brode-rose-griffon")?.nom).toBe("Grand Badge brodé · Rose Griffon");
+    expect(trouverProduit("print-delta", CATALOGUE)?.nom).toBe("Print Delta");
   });
 
   test("le nom complet tapé à la main fonctionne aussi", () => {
-    expect(trouverProduit("Grand Badge brodé · Rose Griffon")?.slug).toBe("badge-brode-rose-griffon");
+    expect(trouverProduit("Print Delta", CATALOGUE)?.slug).toBe("print-delta");
   });
 
   test("un fragment retombe sur le meilleur résultat de recherche", () => {
-    expect(trouverProduit("t-shirt")?.slug).toBe("tshirt-rose-griffon-edition");
+    expect(trouverProduit("epsilon", CATALOGUE)?.slug).toBe("objet-epsilon");
   });
 
   test("une référence vide ou inconnue ne renvoie rien", () => {
-    expect(trouverProduit("")).toBeNull();
-    expect(trouverProduit(null)).toBeNull();
-    expect(trouverProduit("   ")).toBeNull();
-    expect(trouverProduit("mug licorne")).toBeNull();
+    expect(trouverProduit("", CATALOGUE)).toBeNull();
+    expect(trouverProduit(null, CATALOGUE)).toBeNull();
+    expect(trouverProduit("   ", CATALOGUE)).toBeNull();
+    expect(trouverProduit("mug licorne", CATALOGUE)).toBeNull();
   });
 });
 

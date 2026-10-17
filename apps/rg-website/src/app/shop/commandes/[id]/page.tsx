@@ -139,8 +139,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             Articles ({order.items?.length ?? 0})
           </h2>
           <ul className="flex flex-col gap-3">
-            {(order.items ?? []).map((item, idx) => {
-              const product = item.slug ? getProduct(item.slug) : undefined;
+            {(await Promise.all((order.items ?? []).map(async item => ({ item, product: item.slug ? await getProduct(item.slug) : undefined })))).map(({ item, product }, idx) => {
               return (
                 <li
                   key={`${item.slug}-${item.variantId}-${idx}`}

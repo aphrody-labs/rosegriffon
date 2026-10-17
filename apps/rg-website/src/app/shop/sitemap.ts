@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 
-import { PRODUCTS } from "@/lib/shop/products";
+import { listerProduits } from "@/lib/shop/products";
 import { SITE_URL } from "@/lib/site-url";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const produits = await listerProduits().catch(() => []);
   // Même origine que `app/sitemap.ts`, `app/robots.ts` et `app/wiki/sitemap.ts` :
   // dérivée de `NEXT_PUBLIC_BASE_URL`, pas figée. Ce fichier avait sa propre
   // constante en dur, seul des quatre plans de site à ne pas suivre l'env.
@@ -19,10 +20,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // `/shop/panier` a été retiré : le panier est en `noindex` (état personnel,
     // vide pour un robot). Le laisser ici revenait à demander l'indexation d'une
     // page qui refuse d'être indexée.
-    ...PRODUCTS.map(p => ({
+    ...produits.map(p => ({
       changeFrequency: "monthly" as const,
       lastModified: now,
-      priority: p.stockHint === "limited" ? 0.95 : 0.7,
+      priority: 0.7,
       url: `${baseUrl}/shop/${p.slug}`,
     })),
   ];

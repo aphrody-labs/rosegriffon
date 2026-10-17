@@ -1,162 +1,101 @@
+import { getPgPool } from "@rosegriffon/db/pg";
 import { Button } from "@rosegriffon/ui";
 
 import { Check, ExternalLink } from "@/lib/icons-config";
-import { cn } from "@/lib/utils";
-
-interface Tier {
-  key: "roy" | "gaelle" | "evans" | "communaute" | "route-victoire";
-  name: string;
-  priceCents: number | null;
-  tagline: string;
-  perks: string[];
-  href: string;
-  cta: string;
-  /** Palier mis en avant : bordure et pastille « tier phare ». */
-  highlight?: boolean;
-  /** Palier gratuit : bouton secondaire, pas d'appel au don. */
-  free?: boolean;
-}
+import { texteSansDecor } from "@/lib/typographie";
 
 const PATREON_URL = "https://patreon.com/RoseGriffon";
 
-const FEATURED_TIERS: Tier[] = [
-  {
-    cta: "Choisir Roy",
-    href: PATREON_URL,
-    key: "roy",
-    name: "Niveau Roy",
-    perks: ["Rôle Discord dédié Roy", "Mention au générique des chroniques", "Accès aux annonces avant tout le monde"],
-    priceCents: 250,
-    tagline: "Premier pas de soutien",
-  },
-  {
-    cta: "Choisir Gaëlle",
-    href: PATREON_URL,
-    key: "gaelle",
-    name: "Niveau Gaëlle",
-    perks: ["Tous les avantages Roy", "Accès aux articles en avant-première", "Vote sur les futurs sujets traités"],
-    priceCents: 750,
-    tagline: "Soutien renforcé",
-  },
-  {
-    cta: "Choisir Evans",
-    highlight: true,
-    href: PATREON_URL,
-    key: "evans",
-    name: "Niveau Evans",
-    perks: [
-      "Tous les avantages Gaëlle",
-      "Pack Personnage trimestriel offert (print A5 + marque-page + sticker + grand badge)",
-      "Salon Discord privé avec l'équipe",
-      "Cartes de licence Roy & Gaëlle exclusives (25 premiers)",
-    ],
-    priceCents: 1450,
-    tagline: "Soutien complet",
-  },
-];
+/**
+ * Avantages annoncés par l'équipe dans les posts Patreon (packs personnage
+ * mensuels, badge RG pour les nouveaux abonnés, propositions de fresque).
+ * Les paliers eux-mêmes — nom, prix, nombre de mécènes — viennent de la base.
+ */
+const AVANTAGES: Record<string, string[]> = {
+  evans: [
+    "Pack personnage mensuel : print A5 et sticker, marque-page, grand badge holographique",
+    "Badge Rose Griffon personnalisé pour les nouveaux abonnés, dans leur premier colis",
+    "Propositions de personnages pour la fresque collaborative des abonnés",
+  ],
+};
 
-const SIDE_TIERS: Tier[] = [
-  {
-    cta: "Rejoindre Discord",
-    free: true,
-    href: "https://discord.gg/8X8eQfBMkt",
-    key: "communaute",
-    name: "Communauté",
-    perks: ["Accès au serveur Discord Rose Griffon", "Newsletter occasionnelle", "Suivi des chroniques et événements"],
-    priceCents: 0,
-    tagline: "Gratuit",
-  },
-  {
-    cta: "Devenir grand mécène",
-    href: PATREON_URL,
-    key: "route-victoire",
-    name: "Route Victoire",
-    perks: [
-      "Avantages identiques à Niveau Evans",
-      "Mention spéciale comme grand mécène",
-    ],
-    priceCents: 4900,
-    tagline: "Grand mécène",
-  },
-];
+interface PalierBase {
+  titre: string;
+  montant_cents: string;
+  mecenes: number;
+}
 
-function formatPrice(cents: number | null): string {
-  if (cents === null) {
-    return "—";
-  }
-  if (cents === 0) {
-    return "Gratuit";
-  }
+async function lirePaliers(): Promise<PalierBase[]> {
+  const { rows } = await getPgPool().query<PalierBase>(
+    `SELECT t.titre, t.montant_cents, count(*)::int AS mecenes
+       FROM patreon_memberships m,
+            LATERAL unnest(m.tier_titles, m.tier_amounts_cents) AS t(titre, montant_cents)
+      WHERE m.patron_status = 'active_patron' AND t.montant_cents::bigint > 0
+      GROUP BY 1, 2
+      ORDER BY t.montant_cents::bigint`,
+  );
+  return rows;
+}
+
+function formatPrix(cents: number): string {
   return `${(cents / 100).toFixed(2).replace(".", ",")} €/mois`;
 }
 
-function TierCard({ tier }: { tier: Tier }) {
+export async function PublicTiers() {
+  const paliers = await lirePaliers().catch(() => []);
+
   return (
-    <div
-      className={cn(
-        "relative flex h-full flex-col rounded-2xl border bg-card p-6 text-card-foreground transition",
-        tier.highlight ? "border-primary shadow-lg shadow-primary/20 lg:scale-[1.02]" : "border-border",
+    <div className="space-y-6">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {paliers.map(palier => {
+          const nom = texteSansDecor(palier.titre);
+          const avantages = AVANTAGES[nom.split(/\s+/).at(-1)?.toLowerCase() ?? ""] ?? [];
+          return (
+            <div
+              key={palier.titre}
+              className="flex h-full flex-col rounded-2xl border border-border bg-card p-6 text-card-foreground"
+            >
+              <h3 className="text-lg font-bold text-foreground">{nom}</h3>
+              <p className="mt-1 mb-4 text-2xl font-bold text-primary">{formatPrix(Number(palier.montant_cents))}</p>
+              {avantages.length > 0 && (
+                <ul className="space-y-2 text-sm text-foreground/85">
+                  {avantages.map(avantage => (
+                    <li key={avantage} className="flex gap-2">
+                      <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                      <span>{avantage}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-4 text-xs text-muted-foreground">
+                {palier.mecenes} mécène{palier.mecenes > 1 ? "s" : ""} actuellement
+              </p>
+              <div className="mt-auto pt-6">
+                <Button asChild size="lg" className="h-auto min-h-12 w-full rounded-full px-4 py-3 whitespace-normal">
+                  <a href={PATREON_URL} target="_blank" rel="noopener noreferrer">
+                    Choisir {nom}
+                    <ExternalLink className="size-4" aria-hidden />
+                  </a>
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {paliers.length === 0 && (
+        <p className="text-center text-sm text-muted-foreground">
+          Les paliers sont affichés sur la page Patreon de l'association.
+        </p>
       )}
-    >
-      {tier.highlight && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
-          Le plus complet
-        </div>
-      )}
-      <p
-        className={cn(
-          "mb-3 inline-block w-fit rounded-md border px-2 py-1 text-xs font-semibold",
-          tier.highlight
-            ? "border-primary/40 bg-primary/10 text-primary"
-            : "border-border bg-muted text-muted-foreground",
-        )}
-      >
-        {tier.tagline}
-      </p>
-      <h3 className="text-lg font-bold text-foreground">{tier.name}</h3>
-      <p className="mt-1 mb-4 text-2xl font-bold text-primary">{formatPrice(tier.priceCents)}</p>
-      <ul className="space-y-2 text-sm text-foreground/85">
-        {tier.perks.map(perk => (
-          <li key={perk} className="flex gap-2">
-            <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-            <span>{perk}</span>
-          </li>
-        ))}
-      </ul>
-      <div className="mt-auto pt-6">
-        <Button
-          asChild
-          size="lg"
-          variant={tier.free ? "outline" : tier.highlight ? "default" : "secondary"}
-          // `whitespace-normal` : le libellé le plus long déborderait sinon à 320 px.
-          className="h-auto min-h-12 w-full rounded-full px-4 py-3 whitespace-normal"
-        >
-          <a href={tier.href} target="_blank" rel="noopener noreferrer">
-            {tier.cta}
+
+      <div className="flex justify-center">
+        <Button asChild variant="outline" size="lg" className="rounded-full">
+          <a href={PATREON_URL} target="_blank" rel="noopener noreferrer">
+            Voir tous les paliers sur Patreon
             <ExternalLink className="size-4" aria-hidden />
           </a>
         </Button>
-      </div>
-    </div>
-  );
-}
-
-export function PublicTiers() {
-  return (
-    <div className="space-y-10">
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURED_TIERS.map(tier => (
-          <TierCard key={tier.key} tier={tier} />
-        ))}
-      </div>
-
-      <div className="space-y-4">
-        <p className="text-center text-sm font-medium tracking-wider text-muted-foreground uppercase">Autres options</p>
-        <div className="grid gap-6 md:grid-cols-2">
-          {SIDE_TIERS.map(tier => (
-            <TierCard key={tier.key} tier={tier} />
-          ))}
-        </div>
       </div>
     </div>
   );
