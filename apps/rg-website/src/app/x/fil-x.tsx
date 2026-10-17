@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import type { XLive, XTweet } from "@/lib/x/live";
 
@@ -15,6 +15,33 @@ function quand(valeur: string): string {
     : date.toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
 }
 
+/** Les liens raccourcis `t.co` du texte deviennent des liens cliquables vers leur destination. */
+function TexteAvecLiens({ texte }: { texte: string }) {
+  return (
+    <>
+      {texte.split(MOTIF_TCO).map((morceau, i) =>
+        MOTIF_TCO_SEUL.test(morceau) ? (
+          <a
+            key={i}
+            href={morceau}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="break-all text-primary underline underline-offset-2"
+          >
+            {morceau.replace("https://", "")}
+          </a>
+        ) : (
+          <Fragment key={i}>{morceau}</Fragment>
+        ),
+      )}
+    </>
+  );
+}
+
+const SEUIL_LONG = 420;
+const MOTIF_TCO = /(https:\/\/t\.co\/\w+)/g;
+const MOTIF_TCO_SEUL = /^https:\/\/t\.co\/\w+$/;
+
 function Compteur({ libelle, valeur }: { libelle: string; valeur?: number }) {
   if (valeur == null) return null;
   return (
@@ -25,6 +52,8 @@ function Compteur({ libelle, valeur }: { libelle: string; valeur?: number }) {
 }
 
 function Post({ post }: { post: XTweet }) {
+  const [deplie, setDeplie] = useState(false);
+  const long = post.text.length > SEUIL_LONG;
   const media = post.media?.filter(m => m.type === "photo" || m.preview_url) ?? [];
   return (
     <article className="rounded-xl border border-border bg-card p-4 sm:p-5">
@@ -40,7 +69,19 @@ function Post({ post }: { post: XTweet }) {
           <time dateTime={new Date(post.created_at).toISOString()}>{quand(post.created_at)}</time>
         </a>
       </header>
-      <p className="whitespace-pre-line break-words text-pretty">{post.text}</p>
+      <p className={`whitespace-pre-line break-words text-pretty ${long && !deplie ? "line-clamp-6" : ""}`}>
+        <TexteAvecLiens texte={post.text} />
+      </p>
+      {long && (
+        <button
+          type="button"
+          onClick={() => setDeplie(!deplie)}
+          aria-expanded={deplie}
+          className="mt-1 min-h-11 text-sm font-medium text-primary underline-offset-2 hover:underline"
+        >
+          {deplie ? "Réduire" : "Lire la suite"}
+        </button>
+      )}
       {media.length > 0 && (
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {media.slice(0, 4).map(m => (

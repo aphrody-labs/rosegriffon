@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { COMPTES_X, estCompteX, lireCompte } from "@/lib/x/live";
 import type { XLive } from "@/lib/x/live";
-import { PageHero } from "@/components/shared/PageShell";
+import { PageContainer, PageHero } from "@/components/shared/PageShell";
 
 import { FilX } from "./fil-x";
 
@@ -25,14 +25,14 @@ export default async function PageX({ searchParams }: { searchParams: Promise<{ 
     // Le client retente seul ; la page reste utile sans les données du serveur.
   }
   return (
-    <>
+    <PageContainer className="max-w-3xl">
       <PageHero
         eyebrow={`@${compte}`}
         icon={<Twitter className="size-4" aria-hidden />}
         title="Nos comptes sur X"
         description="Les posts s'affichent tels que X les sert à l'instant, sans copie intermédiaire."
       />
-      <main className="mx-auto w-full max-w-3xl px-4 pb-16 sm:px-6 lg:px-8">
+      <section aria-label="Posts">
         <nav aria-label="Comptes" className="mb-4 flex flex-wrap gap-2">
           {COMPTES_X.map(c => (
             <Link
@@ -46,7 +46,7 @@ export default async function PageX({ searchParams }: { searchParams: Promise<{ 
           ))}
         </nav>
         <FilX key={compte} compte={compte} initial={initial} />
-      </main>
-    </>
+      </section>
+    </PageContainer>
   );
 }

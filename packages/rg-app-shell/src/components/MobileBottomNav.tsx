@@ -55,25 +55,26 @@ function NavItemButton({
       }}
       className="relative flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 cursor-pointer select-none"
     >
-      {/* Active pill */}
-      <div
-        className={`absolute inset-0 m-auto w-16 h-8 rounded-full bg-secondary-container transition-all duration-300 motion-emphasized-decelerate ${
-          isActive ? "opacity-100 scale-100" : "opacity-0 scale-50"
-        }`}
-      />
-
-      {/* Icon */}
-      {customIcon ??
-        (LucideIcon && (
-          <LucideIcon
-            size={24}
-            className={`relative z-10 transition-colors duration-200 ${
-              isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/80"
-            }`}
-            fill={isActive ? "currentColor" : "none"}
-            aria-hidden="true"
-          />
-        ))}
+      {/* Pastille M3 : elle n'entoure que l'icône, le libellé reste dessous. */}
+      <span className="relative flex h-8 w-16 items-center justify-center">
+        <span
+          aria-hidden="true"
+          className={`absolute inset-0 rounded-full bg-secondary-container transition-all duration-300 motion-emphasized-decelerate ${
+            isActive ? "opacity-100 scale-100" : "opacity-0 scale-50"
+          }`}
+        />
+        {customIcon ??
+          (LucideIcon && (
+            <LucideIcon
+              size={24}
+              className={`relative z-10 transition-colors duration-200 ${
+                isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/80"
+              }`}
+              fill={isActive ? "currentColor" : "none"}
+              aria-hidden="true"
+            />
+          ))}
+      </span>
 
       {/* Label */}
       <span

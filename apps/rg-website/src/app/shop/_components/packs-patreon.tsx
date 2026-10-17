@@ -1,6 +1,9 @@
 import { PatreonIcon } from "@rosegriffon/ui";
 import { getPgPool } from "@rosegriffon/db/pg";
 
+/** Les extraits Patreon arrivent sans espace entre paragraphes : on la rétablit. */
+const aerer = (texte: string) => texte.replace(/([!?.…])(?=[A-ZÀ-ÖØ-Þ])/g, (_m, p) => p + " ");
+
 interface PostPack {
   patreon_post_id: string;
   title: string;
@@ -54,7 +57,7 @@ export async function PacksPatreon() {
               </a>
               <p className="text-xs text-white/60">{date.format(new Date(pack.published_at))}</p>
               {pack.content_excerpt && (
-                <p className="mt-2 line-clamp-3 text-sm text-white/80">{pack.content_excerpt}</p>
+                <p className="mt-2 line-clamp-3 text-sm text-white/80">{aerer(pack.content_excerpt)}</p>
               )}
             </li>
           ))}
