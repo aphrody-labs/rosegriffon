@@ -7,7 +7,7 @@ export async function waitForSelector(page: DomEvaluator, selector: string, time
   const expression = `Boolean(document.querySelector(${JSON.stringify(selector)}))`;
   while (Date.now() < deadline) {
     if (await page.evaluate<boolean>(expression)) return;
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await Bun.sleep(100);
   }
   throw new Error(`Selector ${JSON.stringify(selector)} was not found within ${timeoutMs} ms`);
 }

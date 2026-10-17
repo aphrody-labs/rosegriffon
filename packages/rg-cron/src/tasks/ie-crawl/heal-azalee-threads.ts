@@ -34,7 +34,7 @@ function saveVerified(set: Set<string>): void {
   }
 }
 
-const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number): Promise<void> => Bun.sleep(ms);
 
 async function main(): Promise<void> {
   const screenName = process.argv[2] || "Azalee_IE";

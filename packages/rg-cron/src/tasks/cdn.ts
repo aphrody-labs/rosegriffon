@@ -2,7 +2,6 @@ import { Glob } from "bun";
 import { mkdir, stat, writeFile } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { brotliCompressSync, gzipSync, constants } from "node:zlib";
-import { execSync } from "node:child_process";
 import { workspacePath } from "@aphrody/paths";
 import { SHARED_ASSETS_PATH } from "@rosegriffon/assets";
 
@@ -95,11 +94,11 @@ export async function syncCdnAssets(): Promise<{ success: boolean; error?: strin
       console.log("[Cron CDN] Nouveaux fichiers copiés. Invalidation du cache CDN...");
       // 1. Invalider le cache local Nginx
       try {
-        execSync("sudo systemctl reload nginx", { stdio: "ignore" });
+        if (Bun.spawnSync(["sudo", "systemctl", "reload", "nginx"], { stdio: ["ignore", "ignore", "ignore"] }).exitCode !== 0) throw new Error("systemctl reload nginx");
         console.log("[Cron CDN] Nginx rechargé avec succès.");
       } catch {
         try {
-          execSync("sudo nginx -s reload", { stdio: "ignore" });
+          if (Bun.spawnSync(["sudo", "nginx", "-s", "reload"], { stdio: ["ignore", "ignore", "ignore"] }).exitCode !== 0) throw new Error("nginx -s reload");
           console.log("[Cron CDN] Nginx rechargé via la commande nginx.");
         } catch (nginxErr: any) {
           console.warn("[Cron CDN] Impossible de recharger Nginx :", nginxErr.message || nginxErr);
