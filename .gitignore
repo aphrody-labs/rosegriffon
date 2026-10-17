@@ -25,3 +25,14 @@ secrets/
 *~
 *.swp
 __pycache__/
+
+# Local tool state, never versioned
+.claude/
+.agents/
+.codex/
+.cursor/
+.gemini/
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.mcp.json
