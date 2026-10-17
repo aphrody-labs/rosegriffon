@@ -164,7 +164,7 @@ export function TableauTaches({
                     )}
 
                     {retour && (
-                      <p className={`text-xs ${retour.statut === "ok" ? "text-succes" : "text-destructive"}`}>
+                      <p role={retour.statut === "ok" ? "status" : "alert"} className={`text-xs ${retour.statut === "ok" ? "text-succes" : "text-destructive"}`}>
                         {retour.message}
                       </p>
                     )}

@@ -726,7 +726,7 @@ function SectionCarte({
           </p>
         )}
         {etat.message && (
-          <p className={`mt-2 text-xs ${etat.statut === "erreur" ? "text-destructive" : "text-succes"}`}>
+          <p role={etat.statut === "erreur" ? "alert" : "status"} className={`mt-2 text-xs ${etat.statut === "erreur" ? "text-destructive" : "text-succes"}`}>
             {etat.message}
           </p>
         )}

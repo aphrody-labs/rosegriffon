@@ -297,6 +297,7 @@ export function ImportExportPlugin() {
             </DialogDescription>
           </DialogHeader>
           <textarea
+            aria-label={importType === "html" ? "Code HTML à importer" : "Contenu Markdown à importer"}
             value={importContent}
             onChange={e => setImportContent(e.target.value)}
             className="w-full h-64 p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 text-sm font-mono text-on-surface placeholder:text-on-surface-variant/40 focus:outline-hidden focus:ring-2 focus:ring-primary/30 resize-none"

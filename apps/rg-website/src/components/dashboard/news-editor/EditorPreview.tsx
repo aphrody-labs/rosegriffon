@@ -26,7 +26,7 @@ export function EditorPreview({ title, excerpt, imageUrl, category, content, onC
     <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-outline-variant/30 px-6 py-3 flex items-center justify-between">
         <h2 className="text-sm font-bold text-on-surface">Aperçu de l&apos;article</h2>
-        <Button variant="ghost" size="icon" className="rounded-full" onClick={onClose}>
+        <Button variant="ghost" size="icon" className="rounded-full" onClick={onClose} aria-label="Fermer l'aperçu">
           <X className="size-5" />
         </Button>
       </div>

@@ -79,6 +79,7 @@ export function EditorMetadata({
                 <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Titre</h3>
                 <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-4">
                   <input
+                    aria-label="Titre de l'article"
                     className="w-full bg-transparent text-xl font-bold font-sans placeholder:text-muted-foreground/40 border-none outline-hidden focus:ring-0 p-0 leading-tight"
                     placeholder="Titre de l'article"
                     value={title}

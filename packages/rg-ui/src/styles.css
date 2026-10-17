@@ -266,14 +266,14 @@
     /* États sémantiques partagés (succès / info / alerte). L'erreur passe par
 		 * `--destructive`, déjà thémé. Sans ces tokens, les composants retombent
 		 * sur `bg-green-500` & consorts, qui ignorent le thème. */
-    --rg-succes: oklch(0.62 0.15 150);
+    --rg-succes: var(--success);
     --rg-info: oklch(0.6 0.14 240);
-    --rg-alerte: oklch(0.75 0.15 75);
+    --rg-alerte: var(--warning);
     /* `--rg-alerte` est un ambre clair : du blanc dessus tombe sous le ratio
 		 * 4.5:1. Il prend donc un texte sombre, les deux autres un texte clair. */
-    --rg-sur-succes: oklch(0.98 0.004 90);
+    --rg-sur-succes: var(--success-foreground);
     --rg-sur-info: oklch(0.98 0.004 90);
-    --rg-sur-alerte: oklch(0.22 0.04 75);
+    --rg-sur-alerte: var(--warning-foreground);
 
     /* ─── Palette ranking Achilléa — 11 paliers ────────────────────────── */
     --achillea-rank-1-stops: #959595, #919191, #d4d4d4, #494949, #797979;

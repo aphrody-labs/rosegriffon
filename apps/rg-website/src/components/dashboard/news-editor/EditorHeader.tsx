@@ -93,10 +93,12 @@ export function EditorHeader({
       <div className="flex items-center justify-between px-3 md:px-6 py-2.5 gap-2">
         {/* Left: Back + Status + Save indicator */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <Link href="/admin/news">
+          <Link href="/admin/news" aria-label="Retour aux actualités">
             <Button
               variant="ghost"
               size="icon"
+              tabIndex={-1}
+              aria-hidden
               className="rounded-full size-10 sm:size-12 text-on-surface-variant hover:bg-surface-container shrink-0"
             >
               <ArrowLeft className="size-5" />
