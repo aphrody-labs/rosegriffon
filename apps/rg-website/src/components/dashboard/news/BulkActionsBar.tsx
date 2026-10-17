@@ -127,7 +127,7 @@ export function BulkActionsBar({ selectedCount, onClearSelection, onBulkAction }
             size="sm"
             disabled={loading}
             onClick={() => setDeleteOpen(true)}
-            className="h-8 text-xs text-red-300 hover:text-red-100 hover:bg-red-500/20 rounded-full px-3"
+            className="h-8 text-xs text-destructive hover:text-destructive/80 hover:bg-destructive/20 rounded-full px-3"
           >
             <Trash2 className="size-3.5 mr-1.5" />
             Supprimer
@@ -162,7 +162,7 @@ export function BulkActionsBar({ selectedCount, onClearSelection, onBulkAction }
             <AlertDialogCancel className="rounded-full">Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => handleAction("delete")}
-              className="rounded-full bg-red-600 hover:bg-red-700 text-white"
+              className="rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
               <Trash2 className="size-4 mr-2" />
               Supprimer

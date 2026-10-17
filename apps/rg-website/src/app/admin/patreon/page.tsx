@@ -89,8 +89,8 @@ export default async function AdminPatreonPage() {
               variant="outline"
               className={
                 creatorLinked
-                  ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
-                  : "border-amber-500/40 text-amber-700 dark:text-amber-300"
+                  ? "border-success/40 text-success"
+                  : "border-warning/40 text-warning"
               }
             >
               {creatorLinked ? "Créateur lié" : "Créateur non lié"}
@@ -105,9 +105,9 @@ export default async function AdminPatreonPage() {
       />
 
       {!live && (
-        <Card className="border-amber-500/40 bg-amber-50/40 dark:bg-amber-950/20">
+        <Card className="border-warning/40 bg-warning/10">
           <CardContent className="space-y-2 p-5 text-sm">
-            <div className="flex items-center gap-2 font-semibold text-amber-700 dark:text-amber-300">
+            <div className="flex items-center gap-2 font-semibold text-warning">
               <AlertCircle className="size-4" />
               API Patreon live indisponible
             </div>
@@ -168,9 +168,9 @@ export default async function AdminPatreonPage() {
                     <dt className="text-muted-foreground">Compte créateur</dt>
                     <dd className="font-medium text-foreground">
                       {creatorLinked ? (
-                        <span className="text-emerald-600 dark:text-emerald-400">Lié ✓</span>
+                        <span className="text-success">Lié ✓</span>
                       ) : (
-                        <span className="text-amber-600 dark:text-amber-400">Non lié</span>
+                        <span className="text-warning">Non lié</span>
                       )}
                     </dd>
                   </div>
@@ -285,7 +285,7 @@ export default async function AdminPatreonPage() {
                           Brouillon
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-300">
+                        <span className="inline-flex items-center rounded-full bg-success/15 px-2 py-0.5 text-xs text-success">
                           Publié
                         </span>
                       )}

@@ -32,7 +32,7 @@ export default async function AdminAchilleaPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <AdminPageHeader
-        icon={<Trophy className="size-5 text-amber-400" />}
+        icon={<Trophy className="size-5 text-warning" />}
         title="Achilléa Esport & rapprochement des comptes"
         description="Supervision de la ligue esport et recoupement des comptes Rose Griffon et Achilléa."
         actions={
@@ -52,8 +52,8 @@ export default async function AdminAchilleaPage() {
             <div
               className={`p-2.5 rounded-xl border ${
                 donneesPresentes
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                  : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                  ? "bg-success/10 text-success border-success/20"
+                  : "bg-destructive/10 text-destructive border-destructive/20"
               }`}
             >
               <Database className="size-5" />
@@ -93,7 +93,7 @@ export default async function AdminAchilleaPage() {
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-5 space-y-1">
                 <div className="text-lg text-muted-foreground">Joueurs Achilléa</div>
-                <div className="text-2xl font-black font-mono text-amber-400">
+                <div className="text-2xl font-black font-mono text-warning">
                   {comptes.joueursAchillea.toLocaleString("fr-FR")}
                 </div>
                 <div className="text-lg text-muted-foreground">Base esport Achilléa</div>
@@ -103,7 +103,7 @@ export default async function AdminAchilleaPage() {
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-5 space-y-1">
                 <div className="text-lg text-muted-foreground">Comptes Communs</div>
-                <div className="text-2xl font-black font-mono text-emerald-400">
+                <div className="text-2xl font-black font-mono text-success">
                   {comptes.communs.toLocaleString("fr-FR")}
                 </div>
                 <div className="text-lg text-muted-foreground">
@@ -116,7 +116,7 @@ export default async function AdminAchilleaPage() {
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-5 space-y-1">
                 <div className="text-lg text-muted-foreground">Joueurs Achilléa Seuls</div>
-                <div className="text-2xl font-black font-mono text-cyan-400">
+                <div className="text-2xl font-black font-mono text-primary">
                   {comptes.achilleaSeuls.toLocaleString("fr-FR")}
                 </div>
                 <div className="text-lg text-muted-foreground">Cibles d'onboarding RG</div>
@@ -152,7 +152,7 @@ export default async function AdminAchilleaPage() {
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-4 space-y-1">
                 <div className="text-lg text-muted-foreground">Licences actives</div>
-                <div className="text-xl font-bold font-mono text-emerald-400">{volumes.licencesActives}</div>
+                <div className="text-xl font-bold font-mono text-success">{volumes.licencesActives}</div>
                 <div className="text-lg text-muted-foreground">Joueurs officiels certifiés</div>
               </CardContent>
             </Card>
@@ -162,7 +162,7 @@ export default async function AdminAchilleaPage() {
                 <div className="text-lg text-muted-foreground">Sanctions actives</div>
                 <div
                   className={`text-xl font-bold font-mono ${
-                    volumes.sanctionsOuvertes > 0 ? "text-rose-400" : "text-muted-foreground"
+                    volumes.sanctionsOuvertes > 0 ? "text-destructive" : "text-muted-foreground"
                   }`}
                 >
                   {volumes.sanctionsOuvertes}
@@ -174,7 +174,7 @@ export default async function AdminAchilleaPage() {
             <Card className="border-border/60 bg-card/60">
               <CardContent className="p-4 space-y-1">
                 <div className="text-lg text-muted-foreground">Matchs classés</div>
-                <div className="text-xl font-bold font-mono text-amber-400">
+                <div className="text-xl font-bold font-mono text-warning">
                   {volumes.matchsClasses.toLocaleString("fr-FR")}
                 </div>
                 <div className="text-lg text-muted-foreground">Rencontres ELO / AP</div>
@@ -194,7 +194,7 @@ export default async function AdminAchilleaPage() {
             <CardHeader className="p-5 pb-2">
               <CardTitle className="text-lg font-bold flex items-center justify-between">
                 <span className="flex items-center gap-2">
-                  <Trophy className="size-4 text-amber-400" />
+                  <Trophy className="size-4 text-warning" />
                   Tableau de bord Esport
                 </span>
                 <ArrowUpRight className="size-4 text-muted-foreground" />
@@ -212,7 +212,7 @@ export default async function AdminAchilleaPage() {
             <CardHeader className="p-5 pb-2">
               <CardTitle className="text-lg font-bold flex items-center justify-between">
                 <span className="flex items-center gap-2">
-                  <Swords className="size-4 text-rose-400" />
+                  <Swords className="size-4 text-destructive" />
                   Litiges & Arbitrage Ranked
                 </span>
                 <ArrowUpRight className="size-4 text-muted-foreground" />
@@ -230,7 +230,7 @@ export default async function AdminAchilleaPage() {
             <CardHeader className="p-5 pb-2">
               <CardTitle className="text-lg font-bold flex items-center justify-between">
                 <span className="flex items-center gap-2">
-                  <ShieldAlert className="size-4 text-amber-500" />
+                  <ShieldAlert className="size-4 text-warning" />
                   Sanctions & Modération
                 </span>
                 <ArrowUpRight className="size-4 text-muted-foreground" />
@@ -266,7 +266,7 @@ export default async function AdminAchilleaPage() {
             <CardHeader className="p-5 pb-2">
               <CardTitle className="text-lg font-bold flex items-center justify-between">
                 <span className="flex items-center gap-2">
-                  <Radio className="size-4 text-purple-400" />
+                  <Radio className="size-4 text-primary" />
                   Casting & Disponibilités
                 </span>
                 <ArrowUpRight className="size-4 text-muted-foreground" />
@@ -284,7 +284,7 @@ export default async function AdminAchilleaPage() {
             <CardHeader className="p-5 pb-2">
               <CardTitle className="text-lg font-bold flex items-center justify-between">
                 <span className="flex items-center gap-2">
-                  <Layers className="size-4 text-cyan-400" />
+                  <Layers className="size-4 text-primary" />
                   Ligue Astrale & Championnat
                 </span>
                 <ArrowUpRight className="size-4 text-muted-foreground" />

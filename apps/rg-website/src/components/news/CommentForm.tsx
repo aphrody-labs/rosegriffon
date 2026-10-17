@@ -148,7 +148,7 @@ export function CommentForm({
                 isOverLimit
                   ? "text-destructive font-medium"
                   : remaining <= 100
-                    ? "text-amber-500"
+                    ? "text-warning"
                     : "text-on-surface-variant/40",
               )}
             >

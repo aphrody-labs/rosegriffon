@@ -44,20 +44,20 @@ export default async function NewsStatsPage() {
           label="Vues totales"
           value={stats.totalViews.toLocaleString("fr-FR")}
           icon={<Icon name="visibility" size={20} />}
-          accentColor="bg-blue-500/15 text-blue-600"
+          accentColor="bg-primary/15 text-primary"
         />
         <DashboardMetricCard
           label="Vues / article"
           value={avgViews.toLocaleString("fr-FR")}
           icon={<Icon name="analytics" size={20} />}
-          accentColor="bg-green-500/15 text-green-600"
+          accentColor="bg-success/15 text-success"
           description="Moyenne par article publié"
         />
         <DashboardMetricCard
           label="Taux publication"
           value={stats.totalArticles > 0 ? `${Math.round((stats.totalPublished / stats.totalArticles) * 100)}%` : "—"}
           icon={<Icon name="publish" size={20} />}
-          accentColor="bg-amber-500/15 text-amber-600"
+          accentColor="bg-warning/15 text-warning"
           description={`${stats.totalDrafts} brouillon${stats.totalDrafts !== 1 ? "s" : ""} en attente`}
         />
       </div>

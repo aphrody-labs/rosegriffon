@@ -21,8 +21,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const CATEGORY_TONE: Record<string, string> = {
   announcement: "bg-primary/10 text-primary",
-  community: "bg-blue-500/10 text-blue-500",
-  critique: "bg-rose-500/10 text-rose-600",
+  community: "bg-primary/10 text-primary",
+  critique: "bg-destructive/10 text-destructive",
   event: "bg-tertiary-container/30 text-tertiary",
 };
 

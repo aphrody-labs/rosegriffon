@@ -196,8 +196,8 @@ export default async function ChroniquesAdminPage({
                       variant={isPublished ? "default" : "secondary"}
                       className={
                         isPublished
-                          ? "bg-green-500 hover:bg-green-600 shadow-lg text-xs"
-                          : "bg-amber-500 hover:bg-amber-600 shadow-lg text-xs"
+                          ? "bg-success hover:bg-success/90 shadow-lg text-xs"
+                          : "bg-warning hover:bg-warning/90 shadow-lg text-xs"
                       }
                     >
                       {isPublished ? "Publié" : "Brouillon"}

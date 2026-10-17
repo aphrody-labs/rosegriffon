@@ -41,7 +41,7 @@ export function DashboardMetricCard({
           {trend && (
             <span
               className={`inline-flex items-center gap-0.5 text-xs font-medium ${
-                trend.value > 0 ? "text-green-600" : trend.value < 0 ? "text-red-500" : "text-on-surface-variant"
+                trend.value > 0 ? "text-success" : trend.value < 0 ? "text-destructive" : "text-on-surface-variant"
               }`}
             >
               <Icon

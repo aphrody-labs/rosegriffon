@@ -175,8 +175,8 @@ export function AuthorDashboard() {
       {/* Article le plus populaire */}
       {data.most_popular && (
         <div className="flex items-start gap-3 rounded-2xl border border-outline-variant/10 bg-surface-container-low p-4">
-          <span className="size-8 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
-            <Trophy className="size-4 text-amber-500" />
+          <span className="size-8 rounded-xl bg-warning/10 flex items-center justify-center shrink-0 mt-0.5">
+            <Trophy className="size-4 text-warning" />
           </span>
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant/50 mb-0.5">

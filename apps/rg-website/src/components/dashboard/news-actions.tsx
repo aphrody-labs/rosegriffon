@@ -42,9 +42,9 @@ interface NewsActionsProps {
 }
 
 const STATUS_OPTIONS = [
-  { color: "text-amber-500", icon: FileText, label: "Brouillon", value: "draft" },
-  { color: "text-green-500", icon: CheckCircle, label: "Publié", value: "published" },
-  { color: "text-stone-500", icon: Archive, label: "Archivé", value: "archived" },
+  { color: "text-warning", icon: FileText, label: "Brouillon", value: "draft" },
+  { color: "text-success", icon: CheckCircle, label: "Publié", value: "published" },
+  { color: "text-on-surface-variant", icon: Archive, label: "Archivé", value: "archived" },
 ];
 
 export function NewsActions({ newsId, slug, pinned = false, currentStatus = "draft" }: NewsActionsProps) {

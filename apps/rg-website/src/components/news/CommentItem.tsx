@@ -281,7 +281,7 @@ export function CommentItem({ comment, articleId, onDelete, onUpdate, depth = 0 
                     editRemaining < 0
                       ? "text-destructive font-medium"
                       : editRemaining <= 100
-                        ? "text-amber-500"
+                        ? "text-warning"
                         : "text-on-surface-variant/40",
                   )}
                 >

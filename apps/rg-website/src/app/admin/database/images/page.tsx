@@ -179,9 +179,9 @@ export default async function ImageValidationPage({
               key={charaId}
               className={`rounded-[20px] border p-4 sm:p-6 space-y-3 ${
                 hasBasara
-                  ? "border-purple-400/40 bg-purple-500/5"
+                  ? "border-primary/40 bg-primary/5"
                   : missingImages.length > 0
-                    ? "border-amber-400/40 bg-amber-500/5"
+                    ? "border-warning/40 bg-warning/5"
                     : "border-outline-variant/30 bg-surface-container-lowest"
               }`}
             >
@@ -195,12 +195,12 @@ export default async function ImageValidationPage({
                   </Badge>
                 )}
                 {missingImages.length > 0 && (
-                  <Badge variant="outline" className="text-amber-600 border-amber-400 text-[10px] font-bold">
+                  <Badge variant="outline" className="text-warning border-warning text-[10px] font-bold">
                     {missingImages.length} sans image
                   </Badge>
                 )}
                 {!allSameImage && rows.length > 1 && (
-                  <Badge variant="outline" className="text-red-600 border-red-400 text-[10px] font-bold">
+                  <Badge variant="outline" className="text-destructive border-destructive text-[10px] font-bold">
                     Images différentes
                   </Badge>
                 )}
@@ -237,10 +237,10 @@ export default async function ImageValidationPage({
                             variant="outline"
                             className={`text-[9px] font-bold ${
                               row.rarity >= 20
-                                ? "bg-purple-500/20 text-purple-400 border-purple-400/30"
+                                ? "bg-primary/20 text-primary border-primary/30"
                                 : row.rarity >= 10
-                                  ? "bg-amber-500/20 text-amber-600 border-amber-400/30"
-                                  : "bg-slate-500/10 text-on-surface-variant border-outline-variant/30"
+                                  ? "bg-warning/20 text-warning border-warning/30"
+                                  : "bg-on-surface-variant/10 text-on-surface-variant border-outline-variant/30"
                             }`}
                           >
                             {row.rarity_label || "N"}
@@ -257,11 +257,11 @@ export default async function ImageValidationPage({
                           {row.id}
                         </div>
                         {row.constellation && (
-                          <div className="text-[9px] text-purple-500 truncate max-w-[100px]" title={row.constellation}>
+                          <div className="text-[9px] text-primary truncate max-w-[100px]" title={row.constellation}>
                             {row.constellation}
                           </div>
                         )}
-                        {!row.zukan_hash && <span className="text-[9px] text-amber-500 font-bold">Pas de zukan</span>}
+                        {!row.zukan_hash && <span className="text-[9px] text-warning font-bold">Pas de zukan</span>}
                       </div>
                       <Link
                         href={`/wiki/chara/${row.slug || row.id}`}

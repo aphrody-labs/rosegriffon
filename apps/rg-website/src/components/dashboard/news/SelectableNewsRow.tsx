@@ -30,7 +30,7 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
     label: "Publié",
   },
   scheduled: {
-    className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+    className: "bg-primary/10 text-primary",
     label: "Programmé",
   },
 };

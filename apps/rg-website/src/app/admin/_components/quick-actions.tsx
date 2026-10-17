@@ -22,7 +22,7 @@ interface QuickAction {
 
 const ACTIONS: QuickAction[] = [
   {
-    accent: "text-amber-400",
+    accent: "text-warning",
     description: "Compétitions, tournois, litiges, clans, ELO",
     href: "/achillea/admins/dashboard",
     icon: Trophy,

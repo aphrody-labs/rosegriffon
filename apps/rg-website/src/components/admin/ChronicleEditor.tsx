@@ -245,8 +245,8 @@ export function ChronicleEditor({ initialData, onSave, onCancel }: ChronicleEdit
 
       {/* Alerte brouillon trouvé */}
       {hasDraft && (
-        <Alert className="border-sky-500/40 bg-sky-500/10">
-          <AlertCircle className="size-4 text-sky-600 dark:text-sky-400" />
+        <Alert className="border-primary/40 bg-primary/10">
+          <AlertCircle className="size-4 text-primary" />
           <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm text-foreground">
               Un brouillon non enregistré a été trouvé. Voulez-vous le restaurer ?

@@ -124,7 +124,7 @@ export function EditorHeader({
               </>
             ) : lastServerSave ? (
               <>
-                <Cloud className="size-3 text-green-500" />
+                <Cloud className="size-3 text-success" />
                 <span>Serveur à {lastSaveLabel}</span>
               </>
             ) : lastAutoSave ? (
@@ -256,7 +256,7 @@ export function EditorHeader({
                 <DropdownMenuSeparator className="bg-outline-variant/10" />
                 <DropdownMenuItem
                   onClick={onRevertToDraft}
-                  className="rounded-xl focus:bg-amber-500/10 focus:text-amber-600 transition-colors cursor-pointer font-bold text-amber-600"
+                  className="rounded-xl focus:bg-warning/10 focus:text-warning transition-colors cursor-pointer font-bold text-warning"
                 >
                   <Redo2 className="mr-3 size-4" />
                   Repasser en brouillon
@@ -280,7 +280,7 @@ export function EditorHeader({
               <Button
                 onClick={onPublish}
                 disabled={loading || !title}
-                className="rounded-full h-10 sm:h-12 px-4 sm:px-5 font-bold hover:opacity-90 transition-opacity text-xs gap-1.5 bg-green-600 text-white"
+                className="rounded-full h-10 sm:h-12 px-4 sm:px-5 font-bold hover:opacity-90 transition-opacity text-xs gap-1.5 bg-success text-success-foreground"
                 size="sm"
               >
                 {loading ? (

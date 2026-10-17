@@ -162,7 +162,7 @@ export function PublicationSection({
 
           {!scheduledAt && <p className="text-[10px] text-destructive">Veuillez choisir une date de publication.</p>}
           {scheduledAt && date && (
-            <p className="text-[10px] text-blue-500">
+            <p className="text-[10px] text-primary">
               Sera publié le{" "}
               {format(new Date(scheduledAt), "EEEE d MMMM yyyy 'à' HH:mm", {
                 locale: fr,

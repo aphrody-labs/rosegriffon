@@ -24,6 +24,14 @@
  */
 
 @theme inline {
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-container: var(--success-container);
+  --color-success-container-foreground: var(--success-container-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-container: var(--warning-container);
+  --color-warning-container-foreground: var(--warning-container-foreground);
   /* Accordion animation tokens — utilisés par packages/rg-ui/src/components/accordion.tsx.
 	 * Présents dans le package partagé pour que toute app qui importe @rosegriffon/ui/styles.css
 	 * obtienne les keyframes sans dépendre de tw-animate-css / tailwindcss-animate. */
@@ -317,6 +325,34 @@
     --md-sys-color-surface-container: oklch(0.94 0.005 264);
     --md-sys-color-surface-container-high: oklch(0.92 0.006 264);
     --md-sys-color-surface-container-highest: oklch(0.9 0.007 264);
+  }
+
+  /* États sémantiques succès / avertissement (clair). Les couleurs de statut ne
+	 * s'écrivent jamais en palette Tailwind brute : elles suivent le thème. */
+  :root {
+    --success: oklch(0.5 0.14 150);
+    --success-foreground: oklch(0.99 0.005 150);
+    --success-container: oklch(0.93 0.06 150);
+    --success-container-foreground: oklch(0.3 0.09 150);
+    --warning: oklch(0.52 0.12 65);
+    --warning-foreground: oklch(0.99 0.005 85);
+    --warning-container: oklch(0.94 0.07 85);
+    --warning-container-foreground: oklch(0.35 0.08 65);
+  }
+
+  /* États sémantiques succès / avertissement (thèmes sombres). */
+  :root.dark,
+  .dark,
+  :root.theme-azalee-dark,
+  :root.azalee-dark {
+    --success: oklch(0.78 0.15 150);
+    --success-foreground: oklch(0.2 0.06 150);
+    --success-container: oklch(0.3 0.07 150);
+    --success-container-foreground: oklch(0.9 0.08 150);
+    --warning: oklch(0.82 0.14 80);
+    --warning-foreground: oklch(0.25 0.05 80);
+    --warning-container: oklch(0.35 0.07 75);
+    --warning-container-foreground: oklch(0.92 0.07 85);
   }
 
   :root.dark,

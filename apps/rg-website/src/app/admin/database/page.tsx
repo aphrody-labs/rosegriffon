@@ -75,7 +75,7 @@ export default async function DatabasePage() {
       textColor: "text-on-tertiary",
     },
     {
-      color: "bg-emerald-500",
+      color: "bg-success",
       count: items.length,
       href: "/admin/database/inagle_items",
       icon: Backpack,
@@ -83,7 +83,7 @@ export default async function DatabasePage() {
       textColor: "text-white",
     },
     {
-      color: "bg-amber-500",
+      color: "bg-warning",
       count: keshinsCount,
       href: "/admin/database/inagle_keshins_clean",
       icon: Swords,

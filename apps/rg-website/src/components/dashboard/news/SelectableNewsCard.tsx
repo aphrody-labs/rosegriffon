@@ -30,19 +30,19 @@ interface SelectableNewsCardProps {
 
 const QUICK_STATUS = [
   {
-    color: "text-amber-500",
+    color: "text-warning",
     icon: FileText,
     label: "Brouillon",
     value: "draft",
   },
   {
-    color: "text-green-500",
+    color: "text-success",
     icon: CheckCircle,
     label: "Publié",
     value: "published",
   },
   {
-    color: "text-stone-500",
+    color: "text-on-surface-variant",
     icon: Archive,
     label: "Archivé",
     value: "archived",

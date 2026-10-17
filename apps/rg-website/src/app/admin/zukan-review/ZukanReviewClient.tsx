@@ -69,10 +69,10 @@ interface Props {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const SEVERITY_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  critical: { bg: "bg-red-500/20", color: "text-red-400", label: "Critique" },
-  high: { bg: "bg-orange-500/20", color: "text-orange-400", label: "Élevé" },
-  low: { bg: "bg-blue-500/20", color: "text-blue-400", label: "Faible" },
-  medium: { bg: "bg-yellow-500/20", color: "text-yellow-400", label: "Moyen" },
+  critical: { bg: "bg-destructive/20", color: "text-destructive", label: "Critique" },
+  high: { bg: "bg-warning/20", color: "text-warning", label: "Élevé" },
+  low: { bg: "bg-primary/20", color: "text-primary", label: "Faible" },
+  medium: { bg: "bg-warning/20", color: "text-warning", label: "Moyen" },
 };
 
 const STAT_LABELS = ["Tir", "Ctrl", "Tech", "Pres", "Phys", "Agi", "Intel"];
@@ -166,13 +166,13 @@ export function ZukanReviewClient({ issues, bySeverity, zukanCatalog, missingCha
       {/* Legend */}
       <div className="flex flex-wrap gap-4 text-xs text-on-surface-variant px-1">
         <span className="flex items-center gap-1">
-          <span className="size-2 rounded-full bg-orange-500" /> Stats inversées = probable mauvais variant
+          <span className="size-2 rounded-full bg-warning" /> Stats inversées = probable mauvais variant
         </span>
         <span className="flex items-center gap-1">
-          <span className="size-2 rounded-full bg-yellow-500" /> Ère différente = image d&apos;une autre série
+          <span className="size-2 rounded-full bg-warning" /> Ère différente = image d&apos;une autre série
         </span>
         <span className="flex items-center gap-1">
-          <span className="size-2 rounded-full bg-yellow-500" /> Hash dupliqué = personnages différents, même image
+          <span className="size-2 rounded-full bg-warning" /> Hash dupliqué = personnages différents, même image
         </span>
       </div>
 
@@ -435,10 +435,10 @@ function IssueCard({
                         className={cn(
                           "font-mono",
                           issue.statsCorrelation < 0
-                            ? "text-red-400"
+                            ? "text-destructive"
                             : issue.statsCorrelation < 0.5
-                              ? "text-yellow-400"
-                              : "text-green-400",
+                              ? "text-warning"
+                              : "text-success",
                         )}
                       >
                         {issue.statsCorrelation.toFixed(2)}
@@ -584,7 +584,7 @@ function CandidatePanel({
                 className={cn(
                   "relative group rounded-xl overflow-hidden border transition-all text-left",
                   isCurrent
-                    ? "border-green-500/50 bg-green-500/5 ring-1 ring-green-500/30"
+                    ? "border-success/50 bg-success/5 ring-1 ring-success/30"
                     : "border-outline-variant/20 bg-surface-container-low hover:border-primary/50 hover:ring-1 hover:ring-primary/30",
                 )}
               >
@@ -597,7 +597,7 @@ function CandidatePanel({
                     unoptimized
                   />
                   {isCurrent && (
-                    <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-green-500 text-white text-[9px] font-bold">
+                    <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-success text-success-foreground text-[9px] font-bold">
                       Actuelle
                     </div>
                   )}
@@ -609,7 +609,7 @@ function CandidatePanel({
                       className={cn(
                         "px-1 py-0.5 rounded text-[9px] font-bold",
                         posMatch
-                          ? "bg-green-500/20 text-green-600"
+                          ? "bg-success/20 text-success"
                           : "bg-surface-container-high text-on-surface-variant",
                       )}
                     >
@@ -619,7 +619,7 @@ function CandidatePanel({
                       className={cn(
                         "px-1 py-0.5 rounded text-[9px] font-bold flex items-center gap-0.5",
                         elemMatch
-                          ? "bg-green-500/20 text-green-600"
+                          ? "bg-success/20 text-success"
                           : "bg-surface-container-high text-on-surface-variant",
                       )}
                     >

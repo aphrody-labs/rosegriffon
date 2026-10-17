@@ -105,7 +105,7 @@ export function FeaturedImageSection({
             <Button
               variant="outline"
               size="sm"
-              className="rounded-full size-8 p-0 bg-red-500/90 text-white border-none hover:bg-red-600"
+              className="rounded-full size-8 p-0 bg-destructive/90 text-white border-none hover:bg-destructive"
               onClick={onRemove}
               aria-label="Supprimer l'image"
             >

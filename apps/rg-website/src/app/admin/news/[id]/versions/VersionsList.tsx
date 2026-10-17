@@ -24,10 +24,10 @@ interface VersionsListProps {
 }
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  archived: { className: "bg-stone-500/10 text-stone-600", label: "Archivé" },
-  draft: { className: "bg-amber-500/10 text-amber-600", label: "Brouillon" },
-  published: { className: "bg-green-500/10 text-green-600", label: "Publié" },
-  scheduled: { className: "bg-blue-500/10 text-blue-600", label: "Programmé" },
+  archived: { className: "bg-on-surface-variant/10 text-on-surface-variant", label: "Archivé" },
+  draft: { className: "bg-warning/10 text-warning", label: "Brouillon" },
+  published: { className: "bg-success/10 text-success", label: "Publié" },
+  scheduled: { className: "bg-primary/10 text-primary", label: "Programmé" },
 };
 
 export function VersionsList({ versions, articleId, restoreAction }: VersionsListProps) {

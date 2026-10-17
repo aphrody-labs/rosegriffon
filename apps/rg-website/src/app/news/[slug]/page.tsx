@@ -472,7 +472,7 @@ export default async function ArticlePage({
 
       {/* Bandeau de prévisualisation pour les articles non publiés */}
       {canPreview && news.status !== "published" && (
-        <div className="sticky top-0 z-50 bg-amber-500 text-amber-950 px-4 py-2 text-center text-sm font-bold flex items-center justify-center gap-3">
+        <div className="sticky top-0 z-50 bg-warning text-warning-foreground px-4 py-2 text-center text-sm font-bold flex items-center justify-center gap-3">
           <Eye className="size-4" />
           Mode prévisualisation — cet article est en statut «{" "}
           {news.status === "draft"

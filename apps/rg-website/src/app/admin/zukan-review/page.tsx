@@ -99,20 +99,20 @@ export default async function ZukanReviewPage() {
           label="Avec image Zukan"
           value={matched}
           icon={<Icon name="check_circle" size={20} />}
-          accentColor="bg-green-500/15 text-green-600"
+          accentColor="bg-success/15 text-success"
           description={`${coverage}% de couverture`}
         />
         <DashboardMetricCard
           label="Sans image"
           value={missing}
           icon={<Icon name="image_not_supported" size={20} />}
-          accentColor="bg-red-500/15 text-red-500"
+          accentColor="bg-destructive/15 text-destructive"
         />
         <DashboardMetricCard
           label="Problèmes détectés"
           value={auditData?.metadata.totalIssues || 0}
           icon={<Icon name="warning" size={20} />}
-          accentColor="bg-amber-500/15 text-amber-600"
+          accentColor="bg-warning/15 text-warning"
           description={
             auditData
               ? `${auditData.metadata.bySeverity.high || 0} élevé · ${auditData.metadata.bySeverity.medium || 0} moyen`
@@ -137,7 +137,7 @@ export default async function ZukanReviewPage() {
                   <span className="text-sm font-medium text-on-surface truncate">{s.series}</span>
                   <span
                     className={`text-xs font-bold ${
-                      s.coverage >= 95 ? "text-green-600" : s.coverage >= 80 ? "text-amber-600" : "text-red-500"
+                      s.coverage >= 95 ? "text-success" : s.coverage >= 80 ? "text-warning" : "text-destructive"
                     }`}
                   >
                     {s.coverage}%
@@ -146,7 +146,7 @@ export default async function ZukanReviewPage() {
                 <div className="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
-                      s.coverage >= 95 ? "bg-green-500" : s.coverage >= 80 ? "bg-amber-500" : "bg-red-500"
+                      s.coverage >= 95 ? "bg-success" : s.coverage >= 80 ? "bg-warning" : "bg-destructive"
                     }`}
                     style={{ width: `${s.coverage}%` }}
                   />

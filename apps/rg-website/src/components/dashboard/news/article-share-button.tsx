@@ -292,7 +292,7 @@ export function ArticleShareButton({ articleId, title, description, url, imageUr
               onClick={handleCopyLink}
               className={cn(
                 "shrink-0 p-1 rounded-lg transition-colors",
-                copied ? "text-green-500" : "text-on-surface-variant/50 hover:text-on-surface",
+                copied ? "text-success" : "text-on-surface-variant/50 hover:text-on-surface",
               )}
             >
               {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
@@ -364,7 +364,7 @@ function SharePopoverContent({
           className={cn(
             "flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-sm font-medium transition-all",
             copied
-              ? "text-green-500 bg-green-500/5"
+              ? "text-success bg-success/5"
               : "text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface",
           )}
         >

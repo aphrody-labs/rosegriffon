@@ -45,7 +45,7 @@ export function SeoSection({
               className={cn(
                 "bg-surface-container-high border-none rounded-xl text-sm h-10 font-sans pr-8",
                 slugStatus === "taken" && "ring-2 ring-destructive/50",
-                slugStatus === "available" && "ring-2 ring-green-500/50",
+                slugStatus === "available" && "ring-2 ring-success/50",
               )}
               placeholder={generatedSlug || "auto-generated"}
               aria-describedby="slug-hint"
@@ -55,7 +55,7 @@ export function SeoSection({
               <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 animate-spin text-muted-foreground" />
             )}
             {slugStatus === "available" && (
-              <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-green-500" />
+              <Check className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-success" />
             )}
             {slugStatus === "taken" && (
               <AlertCircle className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-destructive" />
@@ -78,7 +78,7 @@ export function SeoSection({
           {slugStatus === "taken" && (
             <p className="text-[10px] text-destructive font-medium">Ce slug est déjà utilisé</p>
           )}
-          {slugStatus === "available" && <p className="text-[10px] text-green-600 font-medium">Slug disponible</p>}
+          {slugStatus === "available" && <p className="text-[10px] text-success font-medium">Slug disponible</p>}
           <p id="slug-hint" className="text-[10px] text-muted-foreground/50">
             {slug ? (
               <>
