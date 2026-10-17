@@ -56,7 +56,7 @@ export default async function CapsulePage({
     const sp = new URLSearchParams();
     sp.set("onglet", next);
     if (extra) for (const [k, v] of Object.entries(extra)) sp.set(k, v);
-    return `/capsule?${sp.toString()}`;
+    return wiki(`/capsule?${sp.toString()}`);
   };
 
   const collectionJsonLd = {

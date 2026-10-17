@@ -24,7 +24,9 @@ import { cn } from "@/lib/utils";
  * Detect search context from current pathname
  */
 function useSearchContext(): SearchContext {
-  const pathname = usePathname();
+  // Le wiki est monté sous `/wiki` : sans retirer ce préfixe, aucun contexte
+  // (`/chara`, `/skill`…) ne correspondait et la recherche restait « global ».
+  const pathname = (usePathname() ?? "").replace(/^\/wiki(?=\/|$)/, "");
 
   if (pathname.startsWith("/chara")) {
     return "chara";

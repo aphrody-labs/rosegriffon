@@ -82,7 +82,7 @@ export default async function SuccesPage({
     if (next !== "all") sp.set("cat", next);
     if (q) sp.set("q", q);
     const qs = sp.toString();
-    return qs ? `/succes?${qs}` : "/succes";
+    return qs ? wiki(`/succes?${qs}`) : wiki("/succes");
   };
 
   const collectionJsonLd = {

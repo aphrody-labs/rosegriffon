@@ -11,6 +11,7 @@ import { SafeImage } from "@/components/ui/SafeImage";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
+import { wiki } from "@rosegriffon/app-shell";
 
 // ---------- Constants ----------
 
@@ -153,7 +154,7 @@ function resolveImageUrl(char: BaseCharacter): string {
 function getCharHref(char: BaseCharacter): string {
   const charAny = char as any;
   const variant = char.variants?.[0] as any;
-  return `/chara/${charAny.slug || variant?.slug || variant?.charaParamId || char.charaId}`;
+  return wiki(`/chara/${charAny.slug || variant?.slug || variant?.charaParamId || char.charaId}`);
 }
 
 function getCharName(char: BaseCharacter): string {

@@ -8,6 +8,7 @@ import type { DropEntry } from "@rosegriffon/azalee/wiki/drops-shared";
 import { dropCategoryLabel, dropSourceLabel } from "@rosegriffon/azalee/wiki/drops-shared";
 import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
+import { wiki } from "@rosegriffon/app-shell";
 
 export interface DropsCardProps {
   drop: DropEntry;
@@ -37,10 +38,10 @@ export function DropsCard({ drop, className }: DropsCardProps) {
     resolveAssetUrl(drop.itemImageUrl) || (drop.itemInternalCode ? getItemIconUrl(drop.itemInternalCode) : null);
   const hasRealImage = !!resolvedSrc && resolvedSrc !== PLACEHOLDERS.item && !imgError;
 
-  // Les Hyper Tactiques sont des objets `super_tactics`/`special_tactics` → fiche /tactic,
-  // tout le reste → fiche /item (les deux acceptent l'id hash de l'objet).
-  const isTactic = drop.itemCategory === "special_tactics" || drop.itemCategory === "super_tactics";
-  const href = isTactic ? `/tactic/${drop.itemId}` : `/item/${drop.itemId}`;
+  // Toujours la fiche objet : `/wiki/tactic/<id>` ne résout que les codes `wht*` de
+  // `inagle_tactics`, pas l'id hash ni le code `st*` d'un objet Hyper Tactique
+  // (404 mesuré sur /wiki/drops), alors que `/wiki/item/<id>` sert ces objets.
+  const href = wiki(`/item/${drop.itemId}`);
 
   return (
     <Link

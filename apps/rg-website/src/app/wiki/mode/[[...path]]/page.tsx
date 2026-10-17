@@ -26,6 +26,7 @@ import path from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -262,7 +263,7 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
     if (!mode) {
       return (
         <div className="space-y-6">
-          <MediaBack href="/mode" label="Tous les modes" />
+          <MediaBack href={wiki("/mode")} label="Tous les modes" />
           <MediaEmpty>Aucun mode ne porte l’identifiant « {slug} ».</MediaEmpty>
         </div>
       );
@@ -288,7 +289,7 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
     );
     return (
       <div className="space-y-6">
-        <MediaBack href="/mode" label="Tous les modes" />
+        <MediaBack href={wiki("/mode")} label="Tous les modes" />
         <header className="space-y-1">
           <h1 className="text-fluid-headline-md font-extrabold text-on-surface">{mode.label}</h1>
           {mode.labelEn || mode.labelJa ? (
@@ -685,7 +686,7 @@ export default async function PageModes({ params }: { params: Promise<{ path?: s
     return (
       <li key={m.slug}>
         <Link
-          href={`/mode/${m.slug}`}
+          href={wiki(`/mode/${m.slug}`)}
           className="
        block rounded-lg border border-outline-variant p-4 transition
        hover:bg-surface-container

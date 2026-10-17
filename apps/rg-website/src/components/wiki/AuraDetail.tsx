@@ -15,6 +15,7 @@ import {
 } from "@rosegriffon/azalee/text/aura-translations";
 import { resolveAssetUrl } from "@rosegriffon/azalee/images";
 import { japaneseToRomaji } from "@rosegriffon/azalee/text/japanese-romaji";
+import { wiki } from "@rosegriffon/app-shell";
 
 interface SheetData {
   matchedName?: string;
@@ -167,7 +168,7 @@ export function AuraDetail({ aura, category, subTypeInfo, prevAura, nextAura }: 
             {/* Owner character */}
             {aura.ownerName && (
               <Link
-                href={aura.ownerSlug ? `/chara/${aura.ownerSlug}` : "#"}
+                href={aura.ownerSlug ? wiki(`/chara/${aura.ownerSlug}`) : "#"}
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-highest border border-outline-variant/10 w-full justify-center hover:bg-surface-container-high transition-colors"
               >
                 <CircleDot size={16} className="text-primary" />

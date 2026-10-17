@@ -12,6 +12,7 @@ import { StatHeptagon } from "@/components/wiki/StatHeptagon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { getCharacterImageUrl, getSkillCategoryIconUrl, getSkillElementIconUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
+import { wiki } from "@rosegriffon/app-shell";
 
 // ---------- Types ----------
 
@@ -373,7 +374,7 @@ function SkillRow({ skill, isCommon }: { skill: SkillInfo; isCommon: boolean }) 
 
   return (
     <Link
-      href={skill.id ? `/skill/${skill.id}` : "#"}
+      href={skill.id ? wiki(`/skill/${skill.id}`) : "#"}
       className={cn(
         "group relative flex items-center gap-1.5 sm:gap-2 h-10 sm:h-11 rounded-r-xl border-l-[5px] border border-outline-variant/20 overflow-hidden transition-all hover:translate-x-0.5",
         skill.isPassive

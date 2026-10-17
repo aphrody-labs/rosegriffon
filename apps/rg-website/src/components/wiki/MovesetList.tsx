@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getSkillElementIconUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
+import { wiki } from "@rosegriffon/app-shell";
 
 // Interface simplifiée pour l'affichage (compatible avec Wiki et MyTeam)
 export interface MovesetSkill {
@@ -45,7 +46,7 @@ export function MovesetList({ skills, maxSlots = 4, className }: MovesetListProp
       <div className="flex flex-col gap-2">
         {skills.map((skill, i) => {
           const elementIcon = skill.element ? getSkillElementIconUrl(skill.element) : null;
-          const skillHref = skill.id ? `/skill/${skill.id}` : "#";
+          const skillHref = skill.id ? wiki(`/skill/${skill.id}`) : "#";
 
           return (
             <Link

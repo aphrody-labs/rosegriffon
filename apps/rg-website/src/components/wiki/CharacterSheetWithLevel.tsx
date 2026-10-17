@@ -5,6 +5,7 @@ import { formatDescription } from "@rosegriffon/azalee/text/format-description";
 import { CharacterSheet } from "./CharacterSheet";
 import type { CharacterSheetStats, SheetData } from "./CharacterSheet";
 import type { MovesetSkill } from "./MovesetList";
+import { wiki } from "@rosegriffon/app-shell";
 
 interface CharacterSheetWithLevelProps {
   name: string;
@@ -122,8 +123,8 @@ export function CharacterSheetWithLevel({
         teamName={teamName}
         teamId={teamId}
         gender={gender}
-        prevCharacterHref={prevCharacterId ? `/chara/${prevCharacterId}` : undefined}
-        nextCharacterHref={nextCharacterId ? `/chara/${nextCharacterId}` : undefined}
+        prevCharacterHref={prevCharacterId ? wiki(`/chara/${prevCharacterId}`) : undefined}
+        nextCharacterHref={nextCharacterId ? wiki(`/chara/${nextCharacterId}`) : undefined}
         sheetData={sheetData}
         constellation={constellation}
         heroConstellations={heroConstellations}

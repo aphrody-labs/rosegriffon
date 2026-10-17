@@ -35,6 +35,7 @@ import CharacterModelViewer from "./CharacterModelViewer";
 import { FormSelector } from "./FormSelector";
 import type { MovesetSkill } from "./MovesetList";
 import { StatHeptagon } from "./StatHeptagon";
+import { wiki } from "@rosegriffon/app-shell";
 
 // Position badge colors - matching game exactly
 const POSITION_COLORS: Record<string, string> = {
@@ -802,7 +803,7 @@ export function CharacterSheet({
               const catIcon = getSkillCategoryIconUrl(cat);
               const hasLink = Boolean(skill.href || skill.id);
               const Wrapper = hasLink ? NextLink : "div";
-              const wrapperProps = hasLink ? { href: skill.href || `/skill/${skill.id}` } : {};
+              const wrapperProps = hasLink ? { href: skill.href || wiki(`/skill/${skill.id}`) } : {};
               return (
                 <Wrapper
                   key={skill.id || i}

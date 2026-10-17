@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
+import { wiki } from "@rosegriffon/app-shell";
 
 export interface ItemCardProps {
   id: string;
@@ -88,7 +89,7 @@ export function ItemCard({
 
   return (
     <Link
-      href={isTactic ? `/tactic/${id}` : `/item/${id}`}
+      href={wiki(isTactic ? `/tactic/${id}` : `/item/${id}`)}
       className={cn(
         "block h-full transition-all duration-200 relative overflow-hidden group",
         "hover:shadow-lg hover:-translate-y-0.5",
