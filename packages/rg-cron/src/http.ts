@@ -93,6 +93,10 @@ export async function handleCronHttp(request: Request): Promise<Response> {
       tasks: TACHES_CRON,
       schedules: PLANIFICATIONS,
       catalogue: CATALOGUE_TACHES,
+      registre: Object.keys(REGISTRE_TACHES),
+      alias: Object.fromEntries(
+        Object.entries(REGISTRE_TACHES).flatMap(([nom, def]) => (def.historique ? [[nom, def.historique]] : [])),
+      ),
       horsServerless: Object.fromEntries(
         Object.entries(REGISTRE_TACHES).flatMap(([nom, def]) =>
           def.horsServerless ? [[nom, def.horsServerless]] : [],

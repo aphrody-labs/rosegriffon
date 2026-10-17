@@ -260,12 +260,16 @@ export default async function BotDashboardPage() {
             accent="primary"
           />
           <DashboardStatsCard
-            title="Ordonnanceur"
-            value={cron.joignable ? "en ligne" : "arrêté"}
+            title="Tâches planifiées"
+            value={cron.joignable ? `${cron.bilan.total} tâches` : "API injoignable"}
             icon={Activity}
-            description={cron.sante ? `Depuis ${duree(Math.round(cron.sante.uptime))}` : "rg-cron.service"}
+            description={
+              cron.bilan.enEchec > 0
+                ? `${cron.bilan.enEchec} en échec à la dernière exécution`
+                : `${cron.bilan.reussies} réussies à la dernière exécution`
+            }
             href="/admin/cron"
-            accent={cron.joignable ? "emerald" : "rose"}
+            accent={cron.joignable && cron.bilan.enEchec === 0 ? "emerald" : "rose"}
           />
         </div>
       </section>

@@ -6,6 +6,7 @@ import {
   Bot,
   Calendar,
   Database,
+  Globe,
   Hash,
   Heart,
   Home,
@@ -32,6 +33,7 @@ const adminNavItems: NavItem[] = [
       { title: "Chroniques du bouquet", href: "/admin/chroniques" },
       { title: "Éditeur d'articles Wiki", href: "/admin/news" },
       { title: "Nouvel article (Lexical)", href: "/admin/news/new" },
+      { title: "Statistiques des articles", href: "/admin/news/stats" },
     ],
     title: "Articles & Chroniques",
   },
@@ -101,6 +103,7 @@ const adminNavItems: NavItem[] = [
     title: "Bot Discord",
   },
   { href: "/admin/base", icon: Database, title: "Infrastructure" },
+  { href: "/admin/routes", icon: Globe, title: "API et pages" },
   { href: "/admin/settings", icon: Settings, title: "Configuration" },
 ];
 

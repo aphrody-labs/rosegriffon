@@ -9,6 +9,7 @@ import {
   FolderOpen,
   Heart,
   LayoutDashboard,
+  Timer,
   MonitorSmartphone,
   UserPlus,
   Users,
@@ -17,6 +18,7 @@ import {
 import { AdminPageHeader, DashboardGrid, RecentListCard, DashboardStatsCard as StatsCard } from "@rosegriffon/ui";
 import { createPostgresClient } from "@rosegriffon/db/service";
 
+import { etatDuCron } from "@/lib/bot/cron";
 import { describeMimeType, listRecentDriveFiles } from "@/lib/google/drive";
 
 import { QuickActions } from "./_components/quick-actions";
@@ -89,6 +91,16 @@ export default async function AdminDashboardPage() {
   // Drive partagé : lu via le compte de service, indépendamment de la connexion
   // Google des visiteurs. Dégrade en liste vide si Google est injoignable.
   const driveFiles = await listRecentDriveFiles(5);
+
+  // Tâches planifiées : catalogue de l'API + dernier état réel en base.
+  const cron = await etatDuCron();
+  const tachesAffichees = [...cron.taches]
+    .sort((a, b) => {
+      const echec = Number(a.dernier?.succes !== false) - Number(b.dernier?.succes !== false);
+      if (echec !== 0) return echec;
+      return Date.parse(b.dernier?.demarre_le ?? "") - Date.parse(a.dernier?.demarre_le ?? "") || 0;
+    })
+    .slice(0, 8);
 
   const usersCount = usersCountRes.count ?? 0;
   const newUsersWeek = newUsersWeekRes.count ?? 0;
@@ -226,6 +238,49 @@ export default async function AdminDashboardPage() {
           accent="rose"
         />
       </DashboardGrid>
+
+      <DashboardGrid title="Tâches planifiées">
+        <StatsCard
+          title="Tâches au registre"
+          value={cron.bilan.total}
+          description={cron.joignable ? "API des tâches en ligne" : "API des tâches injoignable"}
+          icon={Timer}
+          href="/admin/cron"
+          accent={cron.joignable ? "emerald" : "rose"}
+        />
+        <StatsCard
+          title="En échec"
+          value={cron.bilan.enEchec}
+          description="Dernière exécution échouée"
+          icon={Activity}
+          href="/admin/cron"
+          accent={cron.bilan.enEchec > 0 ? "rose" : "emerald"}
+        />
+        <StatsCard
+          title="Sans exécution connue"
+          value={cron.bilan.jamaisExecutees}
+          description={cron.historiqueDisponible ? "Jamais lancées ou hors historique" : "Historique illisible"}
+          icon={CalendarClock}
+          href="/admin/cron"
+          accent="amber"
+        />
+      </DashboardGrid>
+
+      <section aria-label="Dernières tâches planifiées">
+        <RecentListCard
+          title="Tâches planifiées"
+          href="/admin/cron"
+          icon={Timer}
+          accent="bg-info/10 text-info"
+          items={tachesAffichees.map(t => ({
+            date: t.dernier?.demarre_le ?? undefined,
+            id: t.nom,
+            status: t.dernier ? (t.dernier.succes ? undefined : "Échec") : "Jamais exécutée",
+            subtitle: t.planification === "manuel" ? "Manuelle" : t.planification,
+            title: t.titre,
+          }))}
+        />
+      </section>
 
       <SignupsChartLoader data={signupsTimeline} />
 

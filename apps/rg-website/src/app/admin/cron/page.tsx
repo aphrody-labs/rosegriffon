@@ -10,7 +10,7 @@ import { TableauTaches } from "./TableauTaches";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  description: "Les tâches planifiées de rg-cron.service : planification, portée et déclenchement manuel.",
+  description: "Les tâches planifiées du registre rg-cron : planification, dernier état et lancement manuel.",
   title: "Tâches planifiées — Administration",
 };
 
@@ -53,7 +53,7 @@ export default async function CronPage() {
         ]}
         icon={<Timer className="size-5" />}
         title="Tâches planifiées"
-        description="rg-cron.service — ce qui tourne tout seul, et ce qu'on peut relancer à la main."
+        description="Les tâches du registre, leur dernier état réel et ce qu'on peut relancer à la main."
       />
 
       <Card>
@@ -64,21 +64,21 @@ export default async function CronPage() {
             ) : (
               <XCircle className="size-4 text-destructive" aria-hidden />
             )}
-            Ordonnanceur
+            API des tâches planifiées
           </CardTitle>
           <CardDescription>
-            {cron.joignable && cron.sante
-              ? `En ligne depuis ${duree(cron.sante.uptime)} · ${cron.sante.wsConnections} client(s) attaché(s) au flux de journaux · ${cron.taches.length} tâches au catalogue.`
-              : (cron.erreur ??
-                "Injoignable. Les tâches ci-dessous sont celles du catalogue partagé, pas celles que le démon sert.")}
+            {cron.joignable
+              ? `En ligne · ${cron.bilan.total} tâches · ${cron.bilan.reussies} réussies à la dernière exécution · ${cron.bilan.enEchec} en échec · ${cron.bilan.jamaisExecutees} sans exécution connue.`
+              : (cron.erreur ?? "Injoignable. Les tâches ci-dessous sont celles du catalogue partagé.")}
           </CardDescription>
         </CardHeader>
-        {cron.catalogueDesynchronise && (
+        {(cron.bilan.enEchec > 0 || !cron.historiqueDisponible) && (
           <CardContent>
             <p className="flex items-start gap-2 text-sm text-alerte">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
-              Le démon sert une liste plus ancienne que celle du site : il tourne sur des sources antérieures au
-              catalogue partagé. Redémarre <code>rg-cron.service</code> après déploiement.
+              {cron.historiqueDisponible
+                ? `${cron.bilan.enEchec} tâche(s) ont échoué à leur dernière exécution : voir le détail sur chaque carte.`
+                : "L'historique `cron_executions` est illisible : les derniers états ne peuvent pas être affichés."}
             </p>
           </CardContent>
         )}
