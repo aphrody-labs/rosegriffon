@@ -109,6 +109,10 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname, "../../"),
   },
   transpilePackages: [
+    "@rosegriffon/inagle",
+    "@rosegriffon/inagle-cross",
+    "@aphrody/sql",
+    "@aphrody/m3-tokens",
     "@rosegriffon/azalee",
     "@rosegriffon/ui",
     "@rosegriffon/app-shell",
@@ -121,7 +125,6 @@ const nextConfig: NextConfig = {
 
   // Packages Node.js natifs exclus du bundling serveur
   serverExternalPackages: [
-    "@rosegriffon/inagle",
     "better-auth",
     "@better-auth/kysely-adapter",
     "kysely",

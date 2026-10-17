@@ -29,6 +29,27 @@ jobs:
       - name: Typecheck and lint
         run: bun run turbo run typecheck lint --continue
       - name: Build
+        # The public pages are prerendered from the production databases.
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RG_DATABASE_URL: ${{ secrets.RG_DATABASE_URL }}
+          INAGLE_DATABASE_URL: ${{ secrets.INAGLE_DATABASE_URL }}
+          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          NEXT_PUBLIC_ACTIVITY_URL: ${{ secrets.NEXT_PUBLIC_ACTIVITY_URL }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
+          NEXT_PUBLIC_CDN_ORIGIN: ${{ secrets.NEXT_PUBLIC_CDN_ORIGIN }}
+          NEXT_PUBLIC_DISCORD_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_DISCORD_CLIENT_ID }}
+          NEXT_PUBLIC_DISCORD_GUILD_ID: ${{ secrets.NEXT_PUBLIC_DISCORD_GUILD_ID }}
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+          NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_URL }}
         run: bun run turbo run build --continue
       - name: Compile rosegriffon (no site)
         run: bun run compile --site=skip
