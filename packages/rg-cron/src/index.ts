@@ -57,6 +57,7 @@ const TOUTES = [
   "campagnes:discord",
   "campagnes:instagram",
   "campagnes:relais",
+  "feed:sync",
   "seo:llms-txt",
   "seo:indexnow",
   "stats:achillea",

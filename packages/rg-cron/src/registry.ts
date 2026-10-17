@@ -135,6 +135,11 @@ export const REGISTRE_TACHES: Readonly<Record<string, DefinitionTache>> = Object
   "campagnes:instagram": {
     executer: options => import("./tasks/campagnes-instagram").then(m => m.revaliderCreationsInstagram(slug(options))),
   },
+  "feed:sync": {
+    executer: options =>
+      import("./tasks/feed-sync").then(m => m.synchroniserFeed({ reseau: slug(options).slug })),
+    horsServerless: "ouvre Chrome (`Bun.WebView`) et écrit les vignettes sur le disque des médias",
+  },
   "campagnes:relais": {
     executer: options => import("./tasks/campagnes-relais-discord").then(m => m.relayerCampagnesDiscord(slug(options))),
   },
@@ -184,6 +189,7 @@ const DELAIS_TACHES_MS: Record<string, number> = {
   "campagnes:discord": 3600_000,
   "campagnes:instagram": 3600_000,
   "campagnes:relais": 900_000,
+  "feed:sync": 15 * 60_000,
   "seo:llms-txt": 3600_000,
   x: 3600_000,
   "x-search": 3600_000,
