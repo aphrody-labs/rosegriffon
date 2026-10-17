@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 // Lecture X en direct côté serveur : la CLI native `aphrody x` du fork de Bun interroge les
-// vrais endpoints X avec la session du serveur. Rien n'est lu en base ; un cache court (par
-// requête) protège le quota de la session, et les appels identiques simultanés n'en font qu'un.
+// vrais endpoints X avec la session du serveur (cookies, variables d'environnement du serveur ;
+// `APHRODY_BIN` pour changer le binaire). Rien n'est lu en base ; un cache court (par requête)
+// protège le quota de la session, et les appels identiques simultanés n'en font qu'un.
 import { homedir } from "node:os";
 import { join } from "node:path";
+
+import { memo } from "./memo";
 
 export interface XMedia {
   type: string;
@@ -42,22 +45,9 @@ export interface XProfil {
   certifie?: boolean;
 }
 
-export interface XLive {
-  profil: XProfil;
-  tweets: XTweet[];
-  recuLe: string;
-}
-
-import { COMPTES_X, type CompteX } from "./comptes";
-
-export { COMPTES, COMPTES_X, COMPTE_TOUS, estCompteX, type CompteX } from "./comptes";
-
 const TTL_MS = 45_000;
+const TTL_PROFIL_MS = 600_000;
 const DELAI_MS = 25_000;
-const MAX_ENTREES = 64;
-
-const cache = new Map<string, { at: number; valeur: unknown }>();
-const enCours = new Map<string, Promise<unknown>>();
 
 function binaire(): string {
   return process.env.APHRODY_BIN || Bun.which("aphrody") || join(homedir(), ".local", "bin", "aphrody");
@@ -78,27 +68,6 @@ async function lancer<T>(args: string[]): Promise<T> {
   ]);
   if (code !== 0) throw new Error(`aphrody x ${args[0]} : ${(erreur || sortie).trim().slice(-200)}`);
   return JSON.parse(sortie) as T;
-}
-
-async function memo<T>(cle: string, produire: () => Promise<T>): Promise<T> {
-  const frais = cache.get(cle);
-  if (frais && Date.now() - frais.at < TTL_MS) return frais.valeur as T;
-  const attente = enCours.get(cle);
-  if (attente) return attente as Promise<T>;
-  const p = produire()
-    .then(valeur => {
-      if (cache.size >= MAX_ENTREES) cache.delete(cache.keys().next().value as string);
-      cache.set(cle, { at: Date.now(), valeur });
-      return valeur;
-    })
-    .catch(erreur => {
-      // Mieux vaut une page légèrement périmée qu'une page vide quand X répond mal.
-      if (frais) return frais.valeur as T;
-      throw erreur;
-    })
-    .finally(() => enCours.delete(cle));
-  enCours.set(cle, p);
-  return p;
 }
 
 interface ProfilBrut {
@@ -122,7 +91,7 @@ interface ProfilBrut {
 }
 
 /** Le profil complet vient de l'opération GraphQL `UserByScreenName` (avatar, bannière, compteurs). */
-async function lireProfil(compte: CompteX): Promise<XProfil> {
+async function lireProfilBrut(compte: string): Promise<XProfil> {
   const brut = await lancer<ProfilBrut>(["graphql", "UserByScreenName", "--var", `screen_name=${compte}`, "--var", "withSafetyModeUserFields=true"]);
   const r = brut.data?.user?.result;
   if (!r?.rest_id) throw new Error(`profil X introuvable : ${compte}`);
@@ -143,6 +112,11 @@ async function lireProfil(compte: CompteX): Promise<XProfil> {
   };
 }
 
+/** Profil d'un compte, mis en cache dix minutes (il change rarement, et coûte un appel par compte). */
+export function lireProfil(compte: string): Promise<XProfil> {
+  return memo(`profil:${compte}`, TTL_PROFIL_MS, () => lireProfilBrut(compte));
+}
+
 /** Une page de posts et le curseur de la suivante (absent à la fin). */
 export interface PageXPosts {
   tweets: XTweet[];
@@ -151,20 +125,20 @@ export interface PageXPosts {
 
 const CURSEUR_OK = /^[A-Za-z0-9_=+/-]{1,400}$/;
 
-function optionCurseur(curseur?: string): string[] {
-  return curseur && CURSEUR_OK.test(curseur) ? ["--cursor", curseur] : [];
+export function curseurValide(curseur?: string): curseur is string {
+  return !!curseur && CURSEUR_OK.test(curseur);
 }
 
-/** Profil et posts d'un compte officiel, relus sur X (cache 30 s) ; `curseur` pagine. */
-export function lireCompte(compte: CompteX, nombre = 12, curseur?: string): Promise<XLive & { next_cursor?: string }> {
+function optionCurseur(curseur?: string): string[] {
+  return curseurValide(curseur) ? ["--cursor", curseur] : [];
+}
+
+/** Une page de posts d'un compte (le pseudo doit venir de la liste fermée `COMPTES`). */
+export function lirePostsCompte(compte: string, nombre: number, curseur?: string): Promise<PageXPosts> {
   const n = Math.min(Math.max(1, nombre), 30);
-  return memo(`compte:${compte}:${n}:${curseur ?? ""}`, async () => {
-    const [profil, page] = await Promise.all([
-      lireProfil(compte),
-      lancer<PageXPosts>(["user-tweets", compte, "-n", String(n), ...optionCurseur(curseur)]),
-    ]);
-    return { profil, tweets: page.tweets, next_cursor: page.next_cursor, recuLe: new Date().toISOString() };
-  });
+  return memo(`posts:${compte}:${n}:${curseur ?? ""}`, TTL_MS, () =>
+    lancer<PageXPosts>(["user-tweets", compte, "-n", String(n), ...optionCurseur(curseur)]),
+  );
 }
 
 /** Recherche « Latest » sur X ; la requête est bornée et ne peut pas devenir une option. */
@@ -172,59 +146,19 @@ export function chercher(requete: string, nombre = 20, curseur?: string): Promis
   const q = requete.trim().slice(0, 200);
   if (!q || q.startsWith("-")) return Promise.resolve({ tweets: [] });
   const n = Math.min(Math.max(1, nombre), 40);
-  return memo(`q:${q}:${n}:${curseur ?? ""}`, () => lancer<PageXPosts>(["search", q, "-n", String(n), ...optionCurseur(curseur)]));
+  return memo(`q:${q}:${n}:${curseur ?? ""}`, TTL_MS, () =>
+    lancer<PageXPosts>(["search", q, "-n", String(n), ...optionCurseur(curseur)]),
+  );
 }
 
 export function estIdPost(valeur: string): boolean {
-  return /^d{5,25}$/.test(valeur);
+  return /^\d{5,25}$/.test(valeur);
 }
 
 /** Conversation d'un post (le post puis ses réponses), paginée. */
 export function lireThread(id: string, curseur?: string): Promise<PageXPosts> {
   if (!estIdPost(id)) return Promise.resolve({ tweets: [] });
-  return memo(`thread:${id}:${curseur ?? ""}`, () => lancer<PageXPosts>(["thread", id, "-n", "20", ...optionCurseur(curseur)]));
-}
-
-export interface XFilGlobal {
-  profils: Record<string, XProfil>;
-  tweets: XTweet[];
-  recuLe: string;
-}
-
-const PARALLELE = 4;
-const PAR_COMPTE = 5;
-const MAX_FIL = 60;
-
-async function parTranches<T, R>(elements: readonly T[], taille: number, f: (e: T) => Promise<R>): Promise<R[]> {
-  const sortie: R[] = [];
-  for (let i = 0; i < elements.length; i += taille) {
-    sortie.push(...(await Promise.all(elements.slice(i, i + taille).map(f))));
-  }
-  return sortie;
-}
-
-/**
- * Tous les comptes réunis, du plus récent au plus ancien. Un compte qui ne répond pas est
- * simplement absent de cette lecture : le fil reste utile, et le prochain passage le retrouve.
- */
-export function lireFilGlobal(): Promise<XFilGlobal> {
-  return memo("global", async () => {
-    const lectures = await parTranches(COMPTES_X, PARALLELE, async compte => {
-      const [profil, page] = await Promise.all([
-        lireProfil(compte).catch(() => null),
-        lancer<PageXPosts>(["user-tweets", compte, "-n", String(PAR_COMPTE)]).catch(() => null),
-      ]);
-      return { compte, profil, tweets: page?.tweets ?? [] };
-    });
-    if (lectures.every(l => l.tweets.length === 0)) throw new Error("aucun compte n'a répondu");
-    const profils: Record<string, XProfil> = {};
-    for (const l of lectures) if (l.profil) profils[l.compte.toLowerCase()] = l.profil;
-    const vus = new Set<string>();
-    const tweets = lectures
-      .flatMap(l => l.tweets)
-      .filter(t => !vus.has(t.id) && vus.add(t.id))
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, MAX_FIL);
-    return { profils, tweets, recuLe: new Date().toISOString() };
-  });
+  return memo(`thread:${id}:${curseur ?? ""}`, TTL_MS, () =>
+    lancer<PageXPosts>(["thread", id, "-n", "20", ...optionCurseur(curseur)]),
+  );
 }
