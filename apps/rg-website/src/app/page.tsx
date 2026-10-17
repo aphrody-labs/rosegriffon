@@ -4,7 +4,6 @@ import Image from "next/image";
 
 import { NextEventBanner } from "@/components/home/NextEventBanner";
 import FusionBlock from "@/components/shared/FusionBlock";
-import { MotionSection } from "@/components/shared/MotionSection";
 import { RealtimeSettingsListener } from "@/components/shared/RealtimeSettingsListener";
 import { OrganizationSchema, WebsiteSchema } from "@/components/shared/StructuredData";
 import { getCalendarEvents } from "@/lib/api/events";
@@ -129,13 +128,13 @@ export default async function Home() {
         <div className="flex flex-col gap-7 pb-12 pt-2 min-[600px]:gap-8 min-[840px]:pb-16 min-[840px]:pt-4">
           {/* 1. Prochain Événement si programmé */}
           {data.prochain && (
-            <MotionSection className="w-full">
+            <section className="w-full" aria-label="Prochain événement">
               <NextEventBanner event={data.prochain} />
-            </MotionSection>
+            </section>
           )}
 
           {/* Présentation de l'association + recherche fédérée. */}
-          <MotionSection className="mx-auto w-full max-w-7xl px-4 min-[600px]:px-0" aria-labelledby="about-heading">
+          <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8" aria-labelledby="about-heading">
             <FusionBlock isImageLeft image={data.introImage} isPriority>
               <div className="flex h-full flex-col justify-center space-y-4 py-1">
                 <div className="flex items-center gap-2">
@@ -157,20 +156,20 @@ export default async function Home() {
                 </p>
               </div>
             </FusionBlock>
-          </MotionSection>
+          </section>
 
-          <MotionSection className="content-deferred" aria-labelledby="other-projects-heading">
+          <div className="content-deferred">
             <ProjectsSection />
-          </MotionSection>
+          </div>
 
-          <MotionSection
-            className="mx-auto grid w-full max-w-7xl gap-4 px-4 min-[600px]:px-0 lg:grid-cols-2"
+          <section
+            className="content-deferred mx-auto grid w-full max-w-7xl gap-4 px-4 sm:px-6 lg:grid-cols-2 lg:px-8"
             aria-label="Serveurs Discord"
           >
             {SERVEURS_DISCORD.map(serveur => (
               <DiscordSection key={serveur.cle} serveur={serveur} compact />
             ))}
-          </MotionSection>
+          </section>
         </div>
       </div>
     </>

@@ -24,7 +24,6 @@ interface MembreDiscord {
 interface DonneesWidget {
   name: string;
   presence_count: number;
-  member_count: number;
   instant_invite: string | null;
   members: MembreDiscord[];
 }
@@ -86,12 +85,10 @@ function WidgetDiscord({
       </div>
 
       <p className="mb-3 text-sm text-muted-foreground">
-        <span className="font-semibold text-foreground">{donnees.presence_count}</span> en ligne
-        {" • "}
-        <span className="font-semibold text-foreground">{donnees.member_count}</span> membres
+        <span className="font-semibold text-foreground">{donnees.presence_count}</span> membres en ligne
       </p>
 
-      <ul className="min-h-0 grow flex flex-col gap-2 overflow-y-auto pr-1 scrollbar-thin">
+      <ul className="min-h-0 grow flex flex-col gap-2 overflow-y-auto pr-1 pb-4 scrollbar-thin mask-b-from-80%">
         {donnees.members.map(membre => (
           <li key={membre.id} className="flex items-center gap-3">
             <div className="relative shrink-0">
@@ -104,7 +101,7 @@ function WidgetDiscord({
                 unoptimized
               />
               <span
-                className={`absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-muted ${
+                className={`absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-card ${
                   COULEUR_STATUT[membre.status] ?? COULEUR_STATUT.offline
                 }`}
               />
@@ -142,7 +139,6 @@ export default function DiscordSection({
         }
         setDonnees({
           instant_invite: brut.instant_invite ?? null,
-          member_count: brut.members?.length ?? 0,
           members: (brut.members ?? []).map((m: MembreDiscord) => ({
             avatar_url: m.avatar_url,
             id: m.id,

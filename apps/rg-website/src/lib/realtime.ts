@@ -79,7 +79,15 @@ export function subscribeTable<T = Record<string, unknown>>(
   const schema = options.schema ?? "public";
   const filter = parseFilter(options.filter);
   const topic = topicOf(schema, options.table);
-  const shared = acquire(topic);
+  // Le temps réel est un enrichissement : sans client configuré, la page reste
+  // rendue, simplement sans rafraîchissement en direct.
+  let shared: SharedChannel;
+  try {
+    shared = acquire(topic);
+  } catch (error) {
+    console.warn(`[realtime] ${topic} indisponible`, error);
+    return () => {};
+  }
 
   const listener: Listener = event => {
     if (event.table !== options.table || event.schema !== schema) return;

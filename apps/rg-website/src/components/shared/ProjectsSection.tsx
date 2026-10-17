@@ -33,7 +33,11 @@ export function ProjectsSection() {
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4 lg:gap-8">
         {PROJETS_ACCUEIL.map(projet => (
-          <ProjectCard key={projet.slug} projet={projet} />
+          <ProjectCard
+            key={projet.slug}
+            projet={projet}
+            sizes="(min-width: 1280px) 18rem, (min-width: 640px) 50vw, 100vw"
+          />
         ))}
       </div>
 

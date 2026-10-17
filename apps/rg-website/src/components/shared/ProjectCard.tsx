@@ -65,10 +65,10 @@ export function ProjectCard({ projet, sizes = SIZES_PAR_DEFAUT }: ProjectCardPro
 
           <div className="flex grow flex-col gap-3 p-5 sm:p-6">
             <div className="flex items-center gap-3">
-              <span className="rounded-xl bg-muted p-2 text-muted-foreground transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+              <span className="shrink-0 rounded-xl bg-muted p-2 text-muted-foreground transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
                 <Icone className="size-5" />
               </span>
-              <h3 className="text-xl font-bold text-card-foreground transition-colors duration-300 group-hover:text-primary sm:text-2xl">
+              <h3 className="min-w-0 text-xl font-bold leading-tight text-balance hyphens-auto text-card-foreground transition-colors duration-300 group-hover:text-primary sm:text-2xl xl:text-xl">
                 {projet.titre}
               </h3>
             </div>
