@@ -105,6 +105,8 @@ export async function chargerDocument(url: string, delaiMs = DELAI_NAVIGATION_MS
  */
 export class PageWebView {
   readonly #vue: Bun.WebView;
+  /** Chargement complet de la dernière navigation : la vue n'en accepte pas une nouvelle avant sa fin. */
+  #navigation: Promise<unknown> = Promise.resolve();
 
   private constructor(vue: Bun.WebView) {
     this.#vue = vue;
@@ -122,9 +124,10 @@ export class PageWebView {
    */
   async goto(url: string, _waitUntil?: string): Promise<NavigationResponse> {
     const vue = this.#vue;
+    await Promise.race([this.#navigation, Bun.sleep(DELAI_NAVIGATION_MS)]);
     // Repère posé sur l'ancien document : il disparaît quand le nouveau prend la place.
     await vue.evaluate("window.__rgNav = 1").catch(() => undefined);
-    void vue.navigate(url).catch(() => undefined);
+    this.#navigation = vue.navigate(url).catch(() => undefined);
     const echeance = Date.now() + DELAI_NAVIGATION_MS;
     // Une seule évaluation à la fois : la vue refuse la seconde tant que la première attend.
     let attente: Promise<string> | null = null;
