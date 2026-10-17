@@ -27,9 +27,10 @@ import type { SpriteCommonKey } from "@/config/sprites-common";
 import { normalizeText } from "@rosegriffon/azalee/search/utils";
 import { parseSearchParams } from "@/lib/validations";
 import { passiveCategory, wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/passive" },
+  alternates: { canonical: wiki("/passive") },
   description:
     "Guide complet des passifs : joueur, personnalisé, coordinateur et manager. Valeurs par rareté et style de jeu.",
   title: "Talents & Passifs | Codex Stratégique - Azalée",

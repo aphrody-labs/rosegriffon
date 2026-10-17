@@ -370,7 +370,7 @@ export default async function ArticlePage({
     ? CATEGORY_LABELS[news.category] || news.category
     : "Article";
   const authorName = news.author?.full_name || "Azalée";
-  const canonicalUrl = `https://azalee.rosegriffon.fr/news/${slug}`;
+  const canonicalUrl = absoluteUrl(`/news/${slug}`);
   const tocItems = extractTableOfContents(news.content || "");
 
   const [
@@ -408,7 +408,7 @@ export default async function ArticlePage({
       "@type": "Organization",
       logo: {
         "@type": "ImageObject",
-        url: "https://azalee.rosegriffon.fr/icon.webp",
+        url: absoluteUrl("/icon.webp"),
       },
       name: "Azalée - Rose Griffon",
     },
@@ -420,7 +420,7 @@ export default async function ArticlePage({
     itemListElement: [
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/news",
+        item: absoluteUrl("/news"),
         name: "Actualités",
         position: 1,
       },
