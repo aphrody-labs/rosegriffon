@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Types communs du Feed : sûrs côté client (aucun import serveur). Le serveur normalise chaque
-// réseau vers `PostFeed` ; l'interface ne connaît que ce format.
+// Modèle commun du Feed (types, normaliseurs purs, format des instantanés), partagé entre le site
+// (lecture en direct, rendu) et le cron `feed:sync` (lecture en tâche de fond). Sûr côté client :
+// aucun import serveur, aucun accès réseau. Chaque réseau est normalisé vers `PostFeed` ; l'interface
+// ne connaît que ce format.
 
-export type Reseau = "x" | "instagram" | "tiktok";
+export type Reseau = "x" | "instagram" | "tiktok" | "youtube";
 
 export type Groupe = "Rose Griffon" | "Inazuma Eleven" | "LEVEL-5";
 
@@ -12,6 +14,8 @@ export interface MediaFeed {
   apercu?: string;
   largeur?: number;
   hauteur?: number;
+  /** Durée en secondes (vidéos sondées par `Bun.Video`). */
+  duree?: number;
 }
 
 export interface AuteurFeed {
@@ -89,6 +93,31 @@ export interface PageSource {
   /** Curseur opaque de la page suivante ; absent à la fin. */
   curseur?: string;
   statut: StatutSource;
+}
+
+/**
+ * Instantané d'une source non temps réel, écrit par le cron `feed:sync` (bucket `assets`,
+ * `feed/snapshots/<réseau>.json`) et servi instantanément par le site.
+ */
+export interface SnapshotFeed {
+  version: 1;
+  reseau: Reseau;
+  /** ISO 8601 de la dernière synchronisation réussie. */
+  genereLe: string;
+  posts: PostFeed[];
+  profils: ProfilFeed[];
+  statut: StatutSource;
+}
+
+export const CHEMIN_SNAPSHOT = (reseau: Reseau): string => `feed/snapshots/${reseau}.json`;
+
+export function lireSnapshot(valeur: unknown, reseau: Reseau): SnapshotFeed | null {
+  if (!valeur || typeof valeur !== "object") return null;
+  const s = valeur as Partial<SnapshotFeed>;
+  if (s.version !== 1 || s.reseau !== reseau || !Array.isArray(s.posts) || !Array.isArray(s.profils) || !s.statut)
+    return null;
+  if (typeof s.genereLe !== "string" || Number.isNaN(Date.parse(s.genereLe))) return null;
+  return s as SnapshotFeed;
 }
 
 export interface FilUnifie {

@@ -1,53 +1,43 @@
 // SPDX-License-Identifier: Apache-2.0
 // Source TikTok du Feed.
 //
-// CE QUI EST LISIBLE SANS CLÉ NI COMPTE (mesuré en octobre 2026) :
-//  - le profil public `tiktok.com/@pseudo` : bio, avatar, compteurs, lien du profil (JSON de
-//    réhydratation embarqué dans la page, voir `profilDepuisHtmlTiktok`) ;
-//  - l'oEmbed `tiktok.com/oembed?url=<lien de vidéo>` : titre, auteur, vignette d'UNE vidéo ;
-//    la date est exacte (horodatage contenu dans l'identifiant de la vidéo) ;
-//  - l'embed `tiktok.com/embed/v2/<id>` (iframe publique, chargée au clic).
-// CE QUI NE L'EST PAS : la liste des vidéos d'un compte. Le JSON du profil porte `itemList: []` ;
-// la vraie liste passe par une API signée, et un navigateur automatisé tombe sur un captcha.
-// Aucun flux RSS n'existe. Cette source ne simule donc rien : sans vidéo partagée, elle rend un
-// état vide explicite, avec le profil et ses compteurs.
+// CE QUI EST LISIBLE SANS CLÉ NI COMPTE (vérifié en octobre 2026) :
+//  - la page d'embed du créateur `tiktok.com/embed/@pseudo` : les ≈ 10 dernières vidéos (légende,
+//    dimensions, vignette, vues, lien MP4). C'est la page que charge l'embed « créateur » de
+//    l'oEmbed public ; elle ne demande pas de connexion ;
+//  - le profil public `tiktok.com/@pseudo` : bio, avatar, compteurs, lien du site ;
+//  - l'oEmbed `tiktok.com/oembed?url=<lien de vidéo>` pour une vidéo isolée (`FEED_TIKTOK_VIDEOS`) ;
+//  - l'embed de lecteur `tiktok.com/embed/v2/<id>` (iframe publique, chargée au clic).
+// La date de chaque vidéo est exacte (horodatage contenu dans son identifiant).
+// CE QUI NE L'EST PAS : au-delà des ≈ 10 dernières vidéos, et l'historique complet. La page du profil
+// elle-même est derrière un captcha pour un navigateur anonyme (`Bun.WebView` inclus) : lister tout
+// le catalogue exigerait une session (`FEED_TIKTOK_COOKIES`, voir le cron `feed:sync`).
 //
-// Variable d'environnement (serveur, optionnelle) :
-//   FEED_TIKTOK_VIDEOS  liens https://www.tiktok.com/@pseudo/video/<id>, séparés par espaces,
-//                       virgules ou retours à la ligne ; chacun est résolu par l'oEmbed public.
-//                       Seules les vidéos de comptes listés dans lib/feed/comptes.ts s'affichent.
+// Le cron `feed:sync` écrit un instantané (vignettes ré-hébergées, durée sondée) ; sans instantané
+// frais, lecture directe. Variable d'environnement (serveur, optionnelle) :
+//   FEED_TIKTOK_VIDEOS  liens https://www.tiktok.com/@pseudo/video/<id> (espaces, virgules, lignes),
+//                       résolus par l'oEmbed ; seules les vidéos des comptes de comptes.ts s'affichent.
+import { lireTiktok } from "@rosegriffon/types/feed-lecture";
+
 import { COMPTES_SOURCE_TIKTOK } from "../comptes";
 import { avecDelai, memo } from "../memo";
-import { analyserVideoTiktok, postDepuisOembedTiktok, profilDepuisHtmlTiktok } from "../normalisation";
+import { analyserVideoTiktok, postDepuisOembedTiktok } from "../normalisation";
 import type { OembedTiktok } from "../normalisation";
 import type { CompteSource, PageSource, PostFeed, ProfilFeed, SourceFeed } from "../types";
 
 import { listeEnv } from "./instagram";
+import { estFrais, lireSnapshotServeur } from "./snapshots";
 
-const TTL_PROFIL_MS = 300_000;
+const TTL_DIRECT_MS = 300_000;
 const TTL_OEMBED_MS = 3_600_000;
 const MAX_VIDEOS = 30;
-const UA =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36";
 
-const MESSAGE_VIDE =
-  "TikTok ne permet pas de lire la liste des vidéos d'un compte sans connexion. Les vidéos apparaissent ici lorsqu'elles sont partagées par l'équipe.";
-
-function lireProfilTiktok(pseudo: string): Promise<ProfilFeed | null> {
-  return memo(`tt-profil:${pseudo}`, TTL_PROFIL_MS, async () => {
-    const reponse = await fetch(`https://www.tiktok.com/@${pseudo}`, {
-      headers: { "User-Agent": UA, "Accept-Language": "fr-FR,fr;q=0.9" },
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!reponse.ok) throw new Error(`profil TikTok ${reponse.status}`);
-    return profilDepuisHtmlTiktok(await reponse.text(), pseudo);
-  });
-}
+const MESSAGE_VIDE = "Aucune vidéo TikTok lisible pour le moment.";
 
 function lireOembed(url: string): Promise<OembedTiktok> {
   return memo(`tt-oembed:${url}`, TTL_OEMBED_MS, async () => {
     const reponse = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`, {
-      headers: { "User-Agent": UA },
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; RoseGriffonFeed/1.0)" },
       signal: AbortSignal.timeout(8000),
     });
     if (!reponse.ok) throw new Error(`oEmbed TikTok ${reponse.status}`);
@@ -55,7 +45,7 @@ function lireOembed(url: string): Promise<OembedTiktok> {
   });
 }
 
-async function lireVideos(comptes: readonly CompteSource[]): Promise<PostFeed[]> {
+async function lireVideosListees(comptes: readonly CompteSource[]): Promise<PostFeed[]> {
   const connus = new Map(COMPTES_SOURCE_TIKTOK.map(c => [c.pseudo.toLowerCase(), c]));
   const choisis = new Set(comptes.map(c => c.pseudo.toLowerCase()));
   const videos = listeEnv(process.env.FEED_TIKTOK_VIDEOS)
@@ -78,16 +68,45 @@ export const sourceTiktok: SourceFeed = {
   comptes: COMPTES_SOURCE_TIKTOK,
   async lire({ comptes }): Promise<PageSource> {
     if (comptes.length === 0) return { posts: [], profils: [], statut: { reseau: "tiktok", etat: "vide" } };
-    const [profils, videos] = await Promise.all([
-      Promise.all(
-        comptes.map(c => avecDelai(lireProfilTiktok(c.pseudo), 12_000, `TikTok @${c.pseudo}`).catch(() => null)),
-      ),
-      avecDelai(lireVideos(comptes), 14_000, "TikTok (oEmbed)").catch(() => [] as PostFeed[]),
-    ]);
+    const choisis = new Set(comptes.map(c => c.pseudo));
+    const snapshot = await lireSnapshotServeur("tiktok");
+    let posts: PostFeed[] = [];
+    let profils: ProfilFeed[] = [];
+    let panne = false;
+    if (estFrais(snapshot)) {
+      posts = snapshot.posts.filter(p => p.compte && choisis.has(p.compte));
+      profils = snapshot.profils.filter(p => choisis.has(p.pseudo));
+    } else {
+      const lus = await Promise.allSettled(
+        comptes.map(c =>
+          avecDelai(
+            memo(`tt:${c.pseudo}`, TTL_DIRECT_MS, () => lireTiktok(c)),
+            20_000,
+            `TikTok @${c.pseudo}`,
+          ),
+        ),
+      );
+      const ok = lus.flatMap(l => (l.status === "fulfilled" ? [l.value] : []));
+      panne = ok.length === 0;
+      posts = ok.flatMap(r => r.posts);
+      profils = ok.flatMap(r => {
+        const p = r.profilPage ?? r.profil;
+        return p ? [p] : [];
+      });
+    }
+    const listees = await avecDelai(lireVideosListees(comptes), 14_000, "TikTok (oEmbed)").catch(() => [] as PostFeed[]);
+    const vus = new Set(posts.map(p => p.id));
+    posts = [...posts, ...listees.filter(p => !vus.has(p.id))];
+    if (panne && posts.length === 0)
+      return {
+        posts,
+        profils,
+        statut: { reseau: "tiktok", etat: "indisponible", message: "TikTok ne répond pas pour le moment." },
+      };
     return {
-      posts: videos,
-      profils: profils.filter((p): p is ProfilFeed => p !== null),
-      statut: { reseau: "tiktok", etat: videos.length > 0 ? "ok" : "vide", message: MESSAGE_VIDE },
+      posts,
+      profils,
+      statut: { reseau: "tiktok", etat: posts.length > 0 ? "ok" : "vide", message: MESSAGE_VIDE },
     };
   },
 };

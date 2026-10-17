@@ -11,7 +11,11 @@
 //  - TikTok : rose_griffon (« Association française Inazuma Eleven », lien du profil vers
 //    rosegriffon.fr). @inazumaeleven, @level5official, @inazuma_project… sont des comptes de
 //    fans ou sans rapport (non vérifiés, non certifiés) : exclus.
-import type { CompteSource, Groupe, Reseau } from "./types";
+//  - YouTube : « Rose Griffon TV » (lien officiel du site) et « LEVEL5ch【公式】 » (lien du pied de
+//    page de level5.co.jp ; les vidéos d'Inazuma Eleven d'inazuma.jp y sont publiées, il n'existe
+//    pas de chaîne Inazuma Eleven distincte). L'identifiant de chaîne a été lu sur la page de la
+//    chaîne et le flux RSS vérifié. Le lien YouTube d'Achilléa du site répond 404 : non listé.
+import type { CompteSource, Groupe, Reseau } from "./feed";
 
 export const COMPTES = [
   { handle: "rose_griffon", nom: "Rose Griffon", groupe: "Rose Griffon" },
@@ -33,13 +37,14 @@ export const COMPTES_X: readonly CompteX[] = COMPTES.map(c => c.handle);
 
 export const GROUPES: readonly Groupe[] = ["Rose Griffon", "Inazuma Eleven", "LEVEL-5"];
 
-export const RESEAUX: readonly Reseau[] = ["x", "instagram", "tiktok"];
+export const RESEAUX: readonly Reseau[] = ["x", "instagram", "tiktok", "youtube"];
 
 /** Libellé et couleur de marque du réseau (la seule couleur brute admise : celle du logo). */
 export const MARQUES: Record<Reseau, { nom: string; couleur: string; lien: (pseudo: string) => string }> = {
   x: { nom: "X", couleur: "#000000", lien: p => `https://x.com/${p}` },
   instagram: { nom: "Instagram", couleur: "#E4405F", lien: p => `https://www.instagram.com/${p}/` },
   tiktok: { nom: "TikTok", couleur: "#FE2C55", lien: p => `https://www.tiktok.com/@${p}` },
+  youtube: { nom: "YouTube", couleur: "#FF0000", lien: p => `https://www.youtube.com/@${p}` },
 };
 
 export const COMPTES_SOURCE_X: readonly CompteSource[] = COMPTES.map(c => ({
@@ -58,10 +63,22 @@ export const COMPTES_SOURCE_TIKTOK: readonly CompteSource[] = [
   { reseau: "tiktok", pseudo: "rose_griffon", nom: "Rose Griffon", groupe: "Rose Griffon" },
 ];
 
+/** `pseudo` = identifiant de chaîne (`UC…`), `nom` = nom affiché ; le flux RSS est public. */
+export const COMPTES_SOURCE_YOUTUBE: readonly CompteSource[] = [
+  { reseau: "youtube", pseudo: "UCleqt3V_yTgxY6XLZeEFV8g", nom: "Rose Griffon TV", groupe: "Rose Griffon" },
+  { reseau: "youtube", pseudo: "UClfhcLqicImW9Se7NKaFADQ", nom: "LEVEL5ch", groupe: "LEVEL-5" },
+];
+
+/** Lien public d'un compte (YouTube : la chaîne par identifiant). */
+export function lienCompte(c: Pick<CompteSource, "reseau" | "pseudo">): string {
+  return c.reseau === "youtube" ? `https://www.youtube.com/channel/${c.pseudo}` : MARQUES[c.reseau].lien(c.pseudo);
+}
+
 export const TOUS_LES_COMPTES: readonly CompteSource[] = [
   ...COMPTES_SOURCE_X,
   ...COMPTES_SOURCE_INSTAGRAM,
   ...COMPTES_SOURCE_TIKTOK,
+  ...COMPTES_SOURCE_YOUTUBE,
 ];
 
 /** Onglet qui réunit tous les comptes, du plus récent au plus ancien. */
@@ -72,7 +89,7 @@ export function estCompteX(valeur: string): valeur is CompteX {
 }
 
 export function estReseau(valeur: string | null | undefined): valeur is Reseau {
-  return valeur === "x" || valeur === "instagram" || valeur === "tiktok";
+  return valeur === "x" || valeur === "instagram" || valeur === "tiktok" || valeur === "youtube";
 }
 
 export function estGroupe(valeur: string | null | undefined): valeur is Groupe {

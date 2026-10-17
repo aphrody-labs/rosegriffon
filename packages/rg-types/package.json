@@ -21,6 +21,10 @@
     "./stream": "./src/stream.ts",
     "./team": "./src/team.ts",
     "./instagram": "./src/instagram.ts",
+    "./feed": "./src/feed.ts",
+    "./feed-comptes": "./src/feed-comptes.ts",
+    "./feed-normalisation": "./src/feed-normalisation.ts",
+    "./feed-lecture": "./src/feed-lecture.ts",
     "./schemas": "./src/schemas.ts",
     "./shop": "./src/shop.ts"
   },
