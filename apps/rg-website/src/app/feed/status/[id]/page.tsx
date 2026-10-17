@@ -6,12 +6,11 @@ import { CommentsSection } from "@/components/shared/CommentsSection";
 import { requireAdminOrFail } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
 
-import { estIdPost, lireThread } from "@/lib/feed/live";
-import type { PageXPosts } from "@/lib/feed/live";
+import { conversationX, estIdPost } from "@/lib/feed";
 
 import { BoutonBrouillon } from "../../bouton-brouillon";
-import { FilThread } from "../../fil-x";
-import { VARIABLES_X } from "../../x-theme";
+import { FilThread } from "../../fil-feed";
+import type { PageFeed } from "../../fil-feed";
 
 export const dynamic = "force-dynamic";
 
@@ -20,9 +19,9 @@ export const metadata = { robots: { index: false }, title: "Publication sur X" }
 export default async function PagePost({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!estIdPost(id)) notFound();
-  let initial: PageXPosts | null = null;
+  let initial: PageFeed | null = null;
   try {
-    initial = await lireThread(id);
+    initial = await conversationX(id);
   } catch {
     // Le client retente seul.
   }
@@ -40,13 +39,13 @@ export default async function PagePost({ params }: { params: Promise<{ id: strin
     articleExiste = false;
   }
   return (
-    <div className="min-h-full bg-[#000] px-0 sm:px-4" style={VARIABLES_X}>
-      <div className="mx-auto min-h-screen w-full max-w-[600px] border-x border-[var(--x-border)] bg-[var(--x-bg)] text-[var(--x-text)]">
-        <header className="sticky top-14 z-10 flex min-h-[53px] items-center gap-6 border-b border-[var(--x-border)] bg-[var(--x-bg)]/85 px-4 backdrop-blur">
+    <div className="min-h-full bg-background px-3 py-4 text-on-surface sm:px-4">
+      <div className="mx-auto w-full max-w-[640px] space-y-3">
+        <header className="flex min-h-14 items-center gap-3">
           <Link
             href="/feed"
-            aria-label="Retour aux comptes"
-            className="-ml-2 flex size-11 items-center justify-center rounded-full hover:bg-white/10"
+            aria-label="Retour au feed"
+            className="-ml-2 flex size-11 items-center justify-center rounded-full hover:bg-surface-container-high"
           >
             <ArrowLeft className="size-5" aria-hidden />
           </Link>
@@ -55,7 +54,7 @@ export default async function PagePost({ params }: { params: Promise<{ id: strin
             href={`https://x.com/i/status/${id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-auto text-[15px] text-[var(--x-link)] hover:underline"
+            className="ml-auto flex min-h-11 items-center text-sm text-primary hover:underline"
           >
             Ouvrir sur X
           </a>
@@ -63,15 +62,15 @@ export default async function PagePost({ params }: { params: Promise<{ id: strin
         {articleExiste && (
           <Link
             href={`/news/tweet/${id}`}
-            className="flex min-h-[53px] items-center justify-between gap-3 border-b border-[var(--x-border)] px-4 text-[15px] leading-5 hover:bg-white/[0.03]"
+            className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-2 text-sm leading-5 hover:bg-surface-container"
           >
             <span>Ce post a une version traduite et éditée sur Rose Griffon.</span>
-            <span className="shrink-0 text-[var(--x-link)]">Lire l'article</span>
+            <span className="shrink-0 text-primary">Lire l&apos;article</span>
           </Link>
         )}
-        {admin && initial?.tweets[0] && <BoutonBrouillon post={initial.tweets[0]} />}
+        {admin && initial?.posts[0] && <BoutonBrouillon post={initial.posts[0]} />}
         <FilThread id={id} initial={initial} />
-        <section aria-labelledby="discussion-rg" className="bg-background p-4 text-foreground">
+        <section aria-labelledby="discussion-rg" className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">
           <h2 id="discussion-rg" className="mb-3 text-lg font-semibold">
             Discussion sur Rose Griffon
           </h2>
