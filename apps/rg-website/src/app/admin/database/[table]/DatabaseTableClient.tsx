@@ -173,7 +173,7 @@ export function DatabaseTableClient({
                   <TableRow key={row.id}>
                     <TableCell className="sticky left-0 bg-surface-container z-10">
                       <Button asChild size="icon" variant="ghost" className="size-10">
-                        <Link href={`/admin/database/${table}/${row.id}`}>
+                        <Link href={`/admin/database/${table}/${row.id}`} aria-label="Modifier la ligne">
                           <Icon name="edit" size={16} />
                         </Link>
                       </Button>

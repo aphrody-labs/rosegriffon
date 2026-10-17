@@ -52,7 +52,7 @@ export function TweetRow({ tweet }: { tweet: any }) {
         <p className="text-sm text-on-surface line-clamp-3 whitespace-pre-wrap">{tweet.text}</p>
       </div>
       <div className="flex flex-col gap-2 shrink-0">
-        <Button asChild size="icon" variant="ghost" className="rounded-full">
+        <Button asChild size="icon" variant="ghost" className="rounded-full" aria-label="Modifier le tweet">
           <Link href={`/admin/tweets/${tweet.id}`}>
             <Edit className="size-4" />
           </Link>
@@ -60,6 +60,7 @@ export function TweetRow({ tweet }: { tweet: any }) {
         <Button
           size="icon"
           variant="ghost"
+          aria-label="Supprimer le tweet"
           className="rounded-full text-error hover:bg-error/10 hover:text-error"
           disabled={deleting}
           onClick={handleDelete}

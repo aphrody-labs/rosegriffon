@@ -246,6 +246,7 @@ export function VerificationClient({
                           <Button
                             size="icon"
                             variant="ghost"
+                            aria-label="Enregistrer la ligne"
                             className="text-primary hover:bg-primary/10 size-10 rounded-full"
                             onClick={() => saveRow(activeTab, row.id)}
                             disabled={loading[row.id]}

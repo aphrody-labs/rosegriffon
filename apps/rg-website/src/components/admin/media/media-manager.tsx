@@ -192,7 +192,7 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button variant="ghost" size="icon" onClick={() => setCurrentPath("")} disabled={!currentPath}>
+          <Button variant="ghost" size="icon" aria-label="Retour à la racine" onClick={() => setCurrentPath("")} disabled={!currentPath}>
             <Home className="size-4" />
           </Button>
           {breadcrumbs.map((part, index) => (
@@ -226,6 +226,8 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
             <Button
               variant={viewMode === "grid" ? "secondary" : "ghost"}
               size="icon"
+              aria-label="Affichage en grille"
+              aria-pressed={viewMode === "grid"}
               onClick={() => setViewMode("grid")}
               className="rounded-r-none"
             >
@@ -234,6 +236,8 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
             <Button
               variant={viewMode === "list" ? "secondary" : "ghost"}
               size="icon"
+              aria-label="Affichage en liste"
+              aria-pressed={viewMode === "list"}
               onClick={() => setViewMode("list")}
               className="rounded-l-none"
             >
@@ -269,12 +273,13 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
               <div className="aspect-square relative bg-muted">
                 <StorageImage src={file.name} alt={file.name} fill className="object-cover" />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <Button size="icon" variant="secondary" onClick={() => copyToClipboard(file.name)}>
+                  <Button size="icon" variant="secondary" aria-label="Copier l'URL" onClick={() => copyToClipboard(file.name)}>
                     <Copy className="size-4" />
                   </Button>
                   <Button
                     size="icon"
                     variant="destructive"
+                    aria-label="Supprimer le fichier"
                     onClick={() => deleteFile(file.name, file.id)}
                     disabled={deletingId === file.id}
                   >
@@ -345,12 +350,13 @@ export function MediaManager({ initialFiles }: MediaManagerProps) {
                   <TableCell>{file.created_at ? new Date(file.created_at).toLocaleDateString() : "-"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button size="icon" variant="ghost" onClick={() => copyToClipboard(file.name)}>
+                      <Button size="icon" variant="ghost" aria-label="Copier l'URL" onClick={() => copyToClipboard(file.name)}>
                         <Copy className="size-4" />
                       </Button>
                       <Button
                         size="icon"
                         variant="ghost"
+                        aria-label="Supprimer le fichier"
                         className="text-destructive hover:text-destructive/80"
                         onClick={() => deleteFile(file.name, file.id)}
                         disabled={deletingId === file.id}

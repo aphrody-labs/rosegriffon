@@ -42,16 +42,18 @@ function CommentSkeleton() {
 export function CommentSection({ articleId, initialCommentCount }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [count, setCount] = useState(initialCommentCount);
+  const [failed, setFailed] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const [loading, setLoading] = useResetState(true, `${articleId}:${sortOrder}`);
 
   const fetchComments = useCallback(async () => {
     try {
       const data = await getComments(articleId, sortOrder);
+      setFailed(false);
       setComments(data);
       setCount(data.length);
     } catch {
-      // Silently fail — l'état vide sera affiché
+      setFailed(true);
     } finally {
       setLoading(false);
     }
@@ -98,8 +100,9 @@ export function CommentSection({ articleId, initialCommentCount }: CommentSectio
             <button
               key={order}
               onClick={() => setSortOrder(order)}
+              aria-pressed={sortOrder === order}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                "px-3 py-1.5 min-h-11 sm:min-h-0 rounded-lg text-sm font-medium transition-all",
                 sortOrder === order
                   ? "bg-surface-container-highest text-on-surface shadow-sm"
                   : "text-on-surface-variant hover:text-on-surface",
@@ -117,10 +120,25 @@ export function CommentSection({ articleId, initialCommentCount }: CommentSectio
       {/* Liste des commentaires */}
       {loading ? (
         <CommentSkeleton />
+      ) : failed ? (
+        <div role="alert" className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+          <p className="text-sm text-destructive">Impossible de charger les commentaires.</p>
+          <button
+            type="button"
+            onClick={() => {
+              setLoading(true);
+              setFailed(false);
+              void fetchComments();
+            }}
+            className="min-h-11 rounded-lg bg-surface-container px-4 text-sm font-medium text-on-surface hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Réessayer
+          </button>
+        </div>
       ) : comments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <MessageSquare className="size-10 text-on-surface-variant/30 mb-3" />
-          <p className="text-on-surface-variant/60 text-sm">Aucun commentaire. Soyez le premier !</p>
+          <p className="text-on-surface-variant text-sm">Aucun commentaire. Soyez le premier !</p>
         </div>
       ) : (
         <div className="space-y-3">

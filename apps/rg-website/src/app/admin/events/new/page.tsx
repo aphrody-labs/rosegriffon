@@ -10,7 +10,7 @@ export default function NewEventPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center space-x-4">
         <Button variant="ghost" size="icon" asChild>
-          <Link href="/admin/events">
+          <Link href="/admin/events" aria-label="Retour aux événements">
             <ArrowLeft className="size-4" />
           </Link>
         </Button>
