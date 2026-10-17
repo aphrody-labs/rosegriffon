@@ -83,19 +83,18 @@ const BUCKET = "assets";
  *
  * Plus haut que les 8 Mio des visuels de sondage : une création de campagne est
  * un dessin en pleine résolution (l'affiche de remerciement d'`inazuma-rg` fait
- * 2400×3000). Discord plafonne de toute façon la pièce jointe d'un compte non
- * boosté à 25 Mio.
- */
-const TAILLE_IMAGE_MAX = 16 * 1024 * 1024;
-
-/**
- * Taille maximale d'une vidéo recopiée.
+ * 2400×3000).
  *
- * C'est le plafond de pièce jointe d'un compte Discord non boosté : au-delà,
- * le fichier n'existe pas. Mesuré sur la seule vidéo reçue à ce jour
- * (`copy_7F99427F….mov`, karuminasan, IERG Day) : 1,29 Mo.
+ * Le plafond de pièce jointe dépend du boost du serveur (jusqu'à 100 Mo) : les
+ * salons de dépôt portent des PNG de 20 à 32 Mo et des vidéos de 27 à 40 Mo,
+ * refusés à chaque run tant que la limite était calée sur 16 et 25 Mio. Le
+ * bucket `assets` vit sur le disque des médias lourds (`RG_MEDIA_ROOT`), pas
+ * dans le quota Supabase.
  */
-const TAILLE_VIDEO_MAX = 25 * 1024 * 1024;
+const TAILLE_IMAGE_MAX = 100 * 1024 * 1024;
+
+/** Taille maximale d'une vidéo recopiée : le plafond Discord d'un serveur boosté niveau 3. */
+const TAILLE_VIDEO_MAX = 100 * 1024 * 1024;
 
 /**
  * Tolérance de dépôt APRÈS la clôture, sur le chemin « salon de dépôt ».

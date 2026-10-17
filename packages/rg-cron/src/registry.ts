@@ -68,7 +68,7 @@ export const REGISTRE_TACHES: Readonly<Record<string, DefinitionTache>> = Object
     historique: "db:sync",
     // `db:sync` vide puis réécrit `inagle_skills` : `zukan:videos` doit passer après.
     ensuite: ["zukan:videos"],
-    horsServerless: "lance `bun run --filter @rosegriffon/inagle push` sur les fichiers du jeu (disque local)",
+    horsServerless: "lance la CLI d'Inagle (`src/cli.ts push`) sur les fichiers du jeu (disque local)",
   },
   "zukan:videos": { executer: () => import("./tasks/zukan-videos").then(m => m.rafraichirVideosTechniques()) },
   cdn: {

@@ -1,5 +1,7 @@
 import { checkoutRoot } from "@aphrody/paths";
 import { $ } from "bun";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 /**
  * Chemin du binaire Bun **courant**, utilisé au lieu d'un `bun` nu.
@@ -7,21 +9,18 @@ import { $ } from "bun";
  * Ces tâches échouaient avec le code 127 à chaque exécution nocturne :
  * `bun run --filter <paquet> <script>` exécute le script du paquet **via
  * `/usr/bin/bash`**, et ce shell hérite du `PATH` du service — qui ne
- * contenait pas `~/.bun/bin`. Le message n'apparaissait que dans la
+ * contient pas `~/.bun/bin`. Le message n'apparaissait que dans la
  * sortie standard de la commande imbriquée (`bun: command not found`), jamais
  * dans l'erreur remontée, d'où six semaines de sauvegardes muettes.
  *
- * Le correctif de fond est le `PATH` de l'unité systemd (cf.
- * `infra/systemd/rg-cron.service`), sans lequel la commande imbriquée
- * resterait cassée. `process.execPath` sécurise en plus l'appel externe :
- * il vaut le binaire qui fait tourner ce processus, quel que soit
- * l'environnement.
+ * Le push lance donc directement la CLI du paquet (`src/cli.ts push`, ce que
+ * fait son script `push`) avec `process.execPath`, sans shell intermédiaire ni
+ * dépendance au `PATH`.
  *
  * Dans `rg-core`, ce binaire est l'exécutable compilé (`bun build --compile`) :
  * lancé tel quel, il redémarrerait le service (« Failed to start server. Is port
  * 8810 in use? »). `BUN_BE_BUN=1` le fait se comporter en `bun` — pour CE
- * sous-processus seulement, et pour ses descendants (le `bun` du script du
- * paquet), qui en héritent.
+ * sous-processus seulement, et pour ses descendants, qui en héritent.
  */
 const BUN = process.execPath;
 
@@ -43,6 +42,12 @@ export function environnementBun(): Record<string, string | undefined> {
  */
 const RACINE_JEU = process.env.NIERS_ROOT ?? checkoutRoot("iecode");
 
+/** Paquet `@rosegriffon/inagle` du dépôt du jeu (disposition à plat, ou `packages/rg/`). */
+function dossierInagle(): string {
+  const aPlat = join(RACINE_JEU, "packages", "inagle");
+  return existsSync(aPlat) ? aPlat : join(RACINE_JEU, "packages", "rg", "inagle");
+}
+
 /**
  * Exécute la commande de push d'Inagle pour synchroniser la base de données
  * PostgreSQL avec les fichiers de données du jeu les plus récents.
@@ -50,7 +55,7 @@ const RACINE_JEU = process.env.NIERS_ROOT ?? checkoutRoot("iecode");
 export async function runInaglePush(): Promise<{ success: boolean; error?: string }> {
   console.log("[Cron DB] Démarrage de la synchronisation Inagle avec la base de données...");
   try {
-    await $`${BUN} run --filter @rosegriffon/inagle push`.cwd(RACINE_JEU).env(environnementBun());
+    await $`${BUN} src/cli.ts push`.cwd(dossierInagle()).env(environnementBun());
     console.log("[Cron DB] Synchronisation réussie.");
     return { success: true };
   } catch (err: unknown) {
