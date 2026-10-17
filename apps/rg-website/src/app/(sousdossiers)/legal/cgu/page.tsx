@@ -13,16 +13,16 @@ export const metadata: Metadata = {
 export default function TermsOfServicePage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
-      <h1 className="text-4xl font-bold mb-4 text-[#B03519]">Conditions Générales d'Utilisation</h1>
+      <h1 className="text-4xl font-bold mb-4 text-foreground">Conditions Générales d'Utilisation</h1>
       <p className="text-sm text-muted-foreground mb-8">Dernière mise à jour : 24 novembre 2025</p>
 
       <div className="prose prose-lg dark:prose-invert max-w-none space-y-8">
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">1. Objet et Champ d'Application</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">1. Objet et Champ d'Application</h2>
           <p>
             Les présentes Conditions Générales d'Utilisation (ci-après « CGU ») régissent l'accès et l'utilisation du
             site web{" "}
-            <Link href={SITE_URL} className="text-[#344E8C] hover:underline">
+            <Link href={SITE_URL} className="text-primary hover:underline">
               rosegriffon.fr
             </Link>{" "}
             et de l'ensemble des services associés fournis par l'association Rose Griffon, association loi 1901 à but
@@ -38,15 +38,15 @@ export default function TermsOfServicePage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">2. Acceptation des Conditions</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">2. Acceptation des Conditions</h2>
           <p>
             En accédant à notre site web et en utilisant nos services, vous acceptez sans réserve les présentes CGU
             ainsi que notre{" "}
-            <Link href="/legal/confidentialite" className="text-[#344E8C] hover:underline">
+            <Link href="/legal/confidentialite" className="text-primary hover:underline">
               Politique de Confidentialité
             </Link>{" "}
             et notre{" "}
-            <Link href="/charte-engagements" className="text-[#344E8C] hover:underline">
+            <Link href="/charte-engagements" className="text-primary hover:underline">
               Charte d'Engagements
             </Link>
             .
@@ -55,13 +55,13 @@ export default function TermsOfServicePage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">
+          <h2 className="text-2xl font-semibold mb-4 text-primary">
             3. Code de Conduite et Valeurs de l'Association
           </h2>
           <h3 className="text-xl font-semibold mb-3">3.1. Respect et Inclusion</h3>
           <p>
             Conformément à notre{" "}
-            <Link href="/charte-engagements" className="text-[#344E8C] hover:underline">
+            <Link href="/charte-engagements" className="text-primary hover:underline">
               charte d'engagements
             </Link>
             , Rose Griffon est une structure inclusive. Nous défendons activement le respect de toutes les identités
@@ -86,7 +86,7 @@ export default function TermsOfServicePage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">4. Propriété Intellectuelle</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">4. Propriété Intellectuelle</h2>
           <h3 className="text-xl font-semibold mb-3">4.1. Propriété de Rose Griffon</h3>
           <p>
             Le nom « Rose Griffon », nos logos, mascottes (Roy, Gaëlle) et tous les contenus originaux créés par
@@ -111,7 +111,7 @@ export default function TermsOfServicePage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">5. Utilisation des Services</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">5. Utilisation des Services</h2>
           <h3 className="text-xl font-semibold mb-3">5.1. Conditions d'Accès</h3>
           <p>
             L'accès à nos services est gratuit et ouvert à tous. Certaines fonctionnalités peuvent nécessiter une
@@ -130,7 +130,7 @@ export default function TermsOfServicePage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">6. Responsabilité et Limitation de Garantie</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">6. Responsabilité et Limitation de Garantie</h2>
           <h3 className="text-xl font-semibold mb-3">6.1. Services Fournis "En l'État"</h3>
           <p>
             Rose Griffon s'efforce de fournir des services fiables et de qualité. Toutefois, en tant qu'association à
@@ -150,10 +150,10 @@ export default function TermsOfServicePage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">7. Protection des Données Personnelles</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">7. Protection des Données Personnelles</h2>
           <p>
             La collecte et le traitement de vos données personnelles sont régis par notre{" "}
-            <Link href="/legal/confidentialite" className="text-[#344E8C] hover:underline">
+            <Link href="/legal/confidentialite" className="text-primary hover:underline">
               Politique de Confidentialité
             </Link>
             , conforme au Règlement Général sur la Protection des Données (RGPD) et à la loi Informatique et Libertés du
@@ -162,7 +162,7 @@ export default function TermsOfServicePage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">8. Modification et Interruption des Services</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">8. Modification et Interruption des Services</h2>
           <p>
             Rose Griffon se réserve le droit de modifier, suspendre ou interrompre tout ou partie de ses services à tout
             moment, sans préavis ni indemnité.
@@ -175,7 +175,7 @@ export default function TermsOfServicePage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">9. Sanctions et Exclusion</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">9. Sanctions et Exclusion</h2>
           <p>
             En cas de non-respect des présentes CGU, de notre code de conduite ou de notre charte d'engagements, Rose
             Griffon se réserve le droit de :
@@ -189,7 +189,7 @@ export default function TermsOfServicePage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">10. Droit Applicable et Litiges</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">10. Droit Applicable et Litiges</h2>
           <p>
             Les présentes CGU sont régies par le droit français. En cas de litige, conformément aux articles L.612-1 et
             suivants du Code de la consommation, vous pouvez recourir à une procédure de médiation conventionnelle ou à
@@ -201,7 +201,7 @@ export default function TermsOfServicePage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">11. Contact</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">11. Contact</h2>
           <p>Pour toute question relative à ces conditions, vous pouvez nous contacter :</p>
           <ul className="list-disc pl-6 space-y-2">
             <li>
@@ -210,14 +210,14 @@ export default function TermsOfServicePage() {
                 href="https://discord.gg/8X8eQfBMkt"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#344E8C] hover:underline"
+                className="text-primary hover:underline"
               >
                 discord.gg/8X8eQfBMkt
               </a>
             </li>
             <li>
               Via notre{" "}
-              <Link href="/a-propos/contact" className="text-[#344E8C] hover:underline">
+              <Link href="/a-propos/contact" className="text-primary hover:underline">
                 formulaire de contact
               </Link>
             </li>

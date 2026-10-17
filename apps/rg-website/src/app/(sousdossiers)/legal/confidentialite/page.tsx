@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function PrivacyPolicyPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
-      <h1 className="text-4xl font-bold mb-4 text-[#B03519]">Politique de Confidentialité</h1>
+      <h1 className="text-4xl font-bold mb-4 text-foreground">Politique de Confidentialité</h1>
       <p className="text-sm text-muted-foreground mb-8">Dernière mise à jour : 17 août 2026</p>
 
       <div className="prose prose-lg dark:prose-invert max-w-none space-y-8">
@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">1. Responsable du Traitement</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">1. Responsable du Traitement</h2>
           <p>
             Le responsable du traitement des données est l'association Rose Griffon, association loi 1901 à but non
             lucratif.
@@ -39,7 +39,7 @@ export default function PrivacyPolicyPage() {
           <ul className="list-disc pl-6 space-y-2">
             <li>
               Notre{" "}
-              <Link href="/a-propos/contact" className="text-[#344E8C] hover:underline">
+              <Link href="/a-propos/contact" className="text-primary hover:underline">
                 formulaire de contact
               </Link>
             </li>
@@ -49,7 +49,7 @@ export default function PrivacyPolicyPage() {
                 href="https://discord.gg/8X8eQfBMkt"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#344E8C] hover:underline"
+                className="text-primary hover:underline"
               >
                 discord.gg/8X8eQfBMkt
               </a>
@@ -58,7 +58,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">2. Collecte des Données Personnelles</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">2. Collecte des Données Personnelles</h2>
           <h3 className="text-xl font-semibold mb-3">2.1. Données Collectées</h3>
           <p>
             Dans le cadre de l'utilisation de nos services (site web, bot Discord, événements, outils interactifs), nous
@@ -125,7 +125,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">3. Utilisation des Données</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">3. Utilisation des Données</h2>
           <p>Vos données personnelles sont utilisées uniquement pour :</p>
           <ul className="list-disc pl-6 space-y-2">
             <li>
@@ -160,7 +160,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">4. Partage des Données</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">4. Partage des Données</h2>
           <p>Vos données personnelles peuvent être partagées uniquement dans les cas suivants :</p>
 
           <h3 className="text-xl font-semibold mb-3 mt-6">4.1. Prestataires Techniques</h3>
@@ -180,7 +180,7 @@ export default function PrivacyPolicyPage() {
                 href="https://policies.google.com/privacy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#344E8C] hover:underline"
+                className="text-primary hover:underline"
               >
                 politique de confidentialité
               </a>
@@ -191,7 +191,7 @@ export default function PrivacyPolicyPage() {
                 href="https://discord.com/privacy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#344E8C] hover:underline"
+                className="text-primary hover:underline"
               >
                 politique de confidentialité
               </a>
@@ -212,7 +212,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">5. Durée de Conservation</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">5. Durée de Conservation</h2>
           <p>
             Conformément au principe de limitation de la conservation (Art. 5.1.e du RGPD), nous conservons vos données
             personnelles uniquement aussi longtemps que nécessaire :
@@ -236,7 +236,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">6. Sécurité des Données</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">6. Sécurité des Données</h2>
           <p>
             Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données
             contre :
@@ -257,7 +257,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">
+          <h2 className="text-2xl font-semibold mb-4 text-primary">
             7. Vos Droits (RGPD et Loi Informatique et Libertés)
           </h2>
           <p>
@@ -340,7 +340,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">8. Cookies et Technologies Similaires</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">8. Cookies et Technologies Similaires</h2>
           <p>Cookies déposés par le site lui-même :</p>
           <ul className="list-disc pl-6 space-y-2">
             <li>
@@ -389,7 +389,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">9. Transferts de Données Hors UE</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">9. Transferts de Données Hors UE</h2>
           <p>
             Certains de nos prestataires (Discord, Google) sont basés aux États-Unis. Ces transferts sont encadrés par :
           </p>
@@ -401,7 +401,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">10. Mineurs</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">10. Mineurs</h2>
           <p>
             Nos services sont accessibles à tous. Conformément à l'article 8 du RGPD, si vous avez moins de 15 ans,
             l'utilisation de nos services nécessite le consentement de vos parents ou de votre responsable légal.
@@ -413,7 +413,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">11. Modification de la Politique</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary">11. Modification de la Politique</h2>
           <p>
             Cette politique de confidentialité peut être mise à jour pour refléter les évolutions de nos pratiques ou de
             la réglementation. En cas de modification substantielle, nous vous en informerons via nos canaux officiels
@@ -426,7 +426,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-[#FFC46E]">
+          <h2 className="text-2xl font-semibold mb-4 text-primary">
             12. Contact et Délégué à la Protection des Données
           </h2>
           <p>
@@ -436,7 +436,7 @@ export default function PrivacyPolicyPage() {
           <ul className="list-disc pl-6 space-y-2">
             <li>
               Par notre{" "}
-              <Link href="/a-propos/contact" className="text-[#344E8C] hover:underline">
+              <Link href="/a-propos/contact" className="text-primary hover:underline">
                 formulaire de contact
               </Link>
             </li>
@@ -446,7 +446,7 @@ export default function PrivacyPolicyPage() {
                 href="https://discord.gg/8X8eQfBMkt"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#344E8C] hover:underline"
+                className="text-primary hover:underline"
               >
                 discord.gg/8X8eQfBMkt
               </a>

@@ -214,6 +214,7 @@
   --color-patreon: #ff424d;
   --color-twitch: #9146ff;
   --color-youtube: #ff0000;
+  --color-twitter: #1da1f2;
   /* Instagram est un dégradé : on retient la teinte dominante de sa charte,
 	 * celle que la marque emploie pour ses aplats monochromes. Un dégradé en
 	 * `hover:bg-linear-to-tr hover:from-[…]` écrit dans un composant serait trois
