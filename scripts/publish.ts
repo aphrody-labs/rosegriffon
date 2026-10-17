@@ -58,6 +58,7 @@ for (const { dir, manifest } of pending) {
   const tag = manifest.version.includes("-") ? ["--tag", "next"] : [];
   run(["npm", "publish", tarball, "--access", "public", ...(PROVENANCE ? ["--provenance"] : []), ...tag], dir);
   console.log(`published ${id}`);
-  // Changesets reads these lines to tag the release.
+  // Changesets pushes the tags it reads from these lines; it does not create them.
+  if (!run(["git", "tag", "--list", id], ROOT).trim()) run(["git", "tag", id], ROOT);
   console.log(`New tag: ${id}`);
 }
