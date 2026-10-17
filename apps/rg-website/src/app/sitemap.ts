@@ -33,7 +33,7 @@ const ROUTES: Array<{
   { path: "/news", priority: 0.9, changeFrequency: "daily" },
   { path: "/community", priority: 0.8, changeFrequency: "weekly" },
   { path: "/shop", priority: 0.7, changeFrequency: "weekly" },
-  { path: "/x", priority: 0.5, changeFrequency: "hourly" },
+  { path: "/feed", priority: 0.5, changeFrequency: "hourly" },
   { path: "/notre-equipe", priority: 0.8, changeFrequency: "weekly" },
   { path: "/sondages", priority: 0.6, changeFrequency: "weekly" },
   { path: "/iergday", priority: 0.7, changeFrequency: "daily" },

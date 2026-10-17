@@ -48,11 +48,11 @@ export interface XLive {
   recuLe: string;
 }
 
-/** Comptes affichables : la session du serveur n'est pas un proxy ouvert. */
-export const COMPTES_X = ["rose_griffon", "Achillea_IE", "Azalee_IE"] as const;
-export type CompteX = (typeof COMPTES_X)[number];
+import { COMPTES_X, type CompteX } from "./comptes";
 
-const TTL_MS = 30_000;
+export { COMPTES, COMPTES_X, COMPTE_TOUS, estCompteX, type CompteX } from "./comptes";
+
+const TTL_MS = 45_000;
 const DELAI_MS = 25_000;
 const MAX_ENTREES = 64;
 
@@ -99,10 +99,6 @@ async function memo<T>(cle: string, produire: () => Promise<T>): Promise<T> {
     .finally(() => enCours.delete(cle));
   enCours.set(cle, p);
   return p;
-}
-
-export function estCompteX(valeur: string): valeur is CompteX {
-  return (COMPTES_X as readonly string[]).includes(valeur);
 }
 
 interface ProfilBrut {
@@ -187,4 +183,48 @@ export function estIdPost(valeur: string): boolean {
 export function lireThread(id: string, curseur?: string): Promise<PageXPosts> {
   if (!estIdPost(id)) return Promise.resolve({ tweets: [] });
   return memo(`thread:${id}:${curseur ?? ""}`, () => lancer<PageXPosts>(["thread", id, "-n", "20", ...optionCurseur(curseur)]));
+}
+
+export interface XFilGlobal {
+  profils: Record<string, XProfil>;
+  tweets: XTweet[];
+  recuLe: string;
+}
+
+const PARALLELE = 4;
+const PAR_COMPTE = 5;
+const MAX_FIL = 60;
+
+async function parTranches<T, R>(elements: readonly T[], taille: number, f: (e: T) => Promise<R>): Promise<R[]> {
+  const sortie: R[] = [];
+  for (let i = 0; i < elements.length; i += taille) {
+    sortie.push(...(await Promise.all(elements.slice(i, i + taille).map(f))));
+  }
+  return sortie;
+}
+
+/**
+ * Tous les comptes réunis, du plus récent au plus ancien. Un compte qui ne répond pas est
+ * simplement absent de cette lecture : le fil reste utile, et le prochain passage le retrouve.
+ */
+export function lireFilGlobal(): Promise<XFilGlobal> {
+  return memo("global", async () => {
+    const lectures = await parTranches(COMPTES_X, PARALLELE, async compte => {
+      const [profil, page] = await Promise.all([
+        lireProfil(compte).catch(() => null),
+        lancer<PageXPosts>(["user-tweets", compte, "-n", String(PAR_COMPTE)]).catch(() => null),
+      ]);
+      return { compte, profil, tweets: page?.tweets ?? [] };
+    });
+    if (lectures.every(l => l.tweets.length === 0)) throw new Error("aucun compte n'a répondu");
+    const profils: Record<string, XProfil> = {};
+    for (const l of lectures) if (l.profil) profils[l.compte.toLowerCase()] = l.profil;
+    const vus = new Set<string>();
+    const tweets = lectures
+      .flatMap(l => l.tweets)
+      .filter(t => !vus.has(t.id) && vus.add(t.id))
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, MAX_FIL);
+    return { profils, tweets, recuLe: new Date().toISOString() };
+  });
 }

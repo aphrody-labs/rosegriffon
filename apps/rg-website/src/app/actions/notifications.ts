@@ -1,7 +1,7 @@
 "use server";
 
 import { createPostgresClient } from "@rosegriffon/db/service";
-import { getServerSession } from "@/lib/auth-helpers";
+import { getServerSession, requireEditorOrFail } from "@/lib/auth-helpers";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || "";
@@ -140,6 +140,7 @@ export async function sendPushToAll(
   body: string,
   data: Record<string, unknown> = {},
 ): Promise<{ sent: number; failed: number }> {
+  await requireEditorOrFail();
   const supabase = createPostgresClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;

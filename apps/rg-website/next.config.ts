@@ -156,6 +156,9 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      // Le Feed s'appelait « X » : les anciens liens (et leurs conversations) suivent.
+      { destination: "/feed", permanent: true, source: "/x" },
+      { destination: "/feed/status/:id", permanent: true, source: "/x/status/:id" },
       // www → apex : l'auth-client force baseURL=https://rosegriffon.fr (apex) pour
       // que le cookie OAuth `state` et le callback soient sur le même domaine. Sur
       // www.rosegriffon.fr, l'appel /api/auth part donc en cross-origin → bloqué

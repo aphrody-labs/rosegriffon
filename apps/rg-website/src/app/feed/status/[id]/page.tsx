@@ -3,11 +3,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 
 import { CommentsSection } from "@/components/shared/CommentsSection";
+import { requireAdminOrFail } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
 
-import { estIdPost, lireThread } from "@/lib/x/live";
-import type { PageXPosts } from "@/lib/x/live";
+import { estIdPost, lireThread } from "@/lib/feed/live";
+import type { PageXPosts } from "@/lib/feed/live";
 
+import { BoutonBrouillon } from "../../bouton-brouillon";
 import { FilThread } from "../../fil-x";
 import { VARIABLES_X } from "../../x-theme";
 
@@ -25,6 +27,7 @@ export default async function PagePost({ params }: { params: Promise<{ id: strin
     // Le client retente seul.
   }
   // Le post a-t-il une version traduite et éditée sur le site (table `tweets`) ?
+  const admin = await requireAdminOrFail().then(() => true, () => false);
   let articleExiste = false;
   try {
     // Un post seul porte son identifiant ; un thread liste ses posts dans `raw_tweets`.
@@ -41,7 +44,7 @@ export default async function PagePost({ params }: { params: Promise<{ id: strin
       <div className="mx-auto min-h-screen w-full max-w-[600px] border-x border-[var(--x-border)] bg-[var(--x-bg)] text-[var(--x-text)]">
         <header className="sticky top-14 z-10 flex min-h-[53px] items-center gap-6 border-b border-[var(--x-border)] bg-[var(--x-bg)]/85 px-4 backdrop-blur">
           <Link
-            href="/x"
+            href="/feed"
             aria-label="Retour aux comptes"
             className="-ml-2 flex size-11 items-center justify-center rounded-full hover:bg-white/10"
           >
@@ -66,6 +69,7 @@ export default async function PagePost({ params }: { params: Promise<{ id: strin
             <span className="shrink-0 text-[var(--x-link)]">Lire l'article</span>
           </Link>
         )}
+        {admin && initial?.tweets[0] && <BoutonBrouillon post={initial.tweets[0]} />}
         <FilThread id={id} initial={initial} />
         <section aria-labelledby="discussion-rg" className="bg-background p-4 text-foreground">
           <h2 id="discussion-rg" className="mb-3 text-lg font-semibold">

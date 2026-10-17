@@ -3,7 +3,8 @@
 import { BadgeCheck, CalendarDays, Link2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { PageXPosts, XLive, XProfil, XTweet } from "@/lib/x/live";
+import { COMPTE_TOUS } from "@/lib/feed/comptes";
+import type { PageXPosts, XFilGlobal, XLive, XProfil, XTweet } from "@/lib/feed/live";
 
 import { entier, Post, SquelettePosts, TexteAvecLiens } from "./x-composants";
 
@@ -11,6 +12,7 @@ const INTERVALLE_MS = 30_000;
 
 interface Page extends PageXPosts {
   profil?: XProfil;
+  profils?: Record<string, XProfil>;
 }
 
 /**
@@ -20,6 +22,7 @@ interface Page extends PageXPosts {
 function useListe(url: string, initial: Page | null, rafraichir: boolean) {
   const [posts, setPosts] = useState<XTweet[]>(initial?.tweets ?? []);
   const [profil, setProfil] = useState<XProfil | undefined>(initial?.profil);
+  const [profils, setProfils] = useState<Record<string, XProfil>>(initial?.profils ?? {});
   const [curseur, setCurseur] = useState<string | undefined>(initial?.next_cursor);
   const [charge, setCharge] = useState(initial !== null);
   const [chargement, setChargement] = useState(false);
@@ -62,6 +65,7 @@ function useListe(url: string, initial: Page | null, rafraichir: boolean) {
         setPosts(page.tweets);
         setCurseur(page.next_cursor);
         if (page.profil) setProfil(page.profil);
+        if (page.profils) setProfils(page.profils);
         setErreur(false);
       } catch {
         if (actif) setErreur(true);
@@ -77,6 +81,7 @@ function useListe(url: string, initial: Page | null, rafraichir: boolean) {
         const page = await lire();
         if (!actif) return;
         if (page.profil) setProfil(page.profil);
+        if (page.profils) setProfils(page.profils);
         setPosts(actuels => {
           const vus = new Set(actuels.map(p => p.id));
           const nouveaux = page.tweets.filter(p => !vus.has(p.id));
@@ -103,19 +108,12 @@ function useListe(url: string, initial: Page | null, rafraichir: boolean) {
     return () => observateur.disconnect();
   }, [curseur, suite]);
 
-  return { posts, profil, curseur, charge, chargement, erreur, sentinelle, suite };
+  const tousProfils = profil ? { ...profils, [profil.screen_name.toLowerCase()]: profil } : profils;
+  return { posts, profil, profils: tousProfils, curseur, charge, chargement, erreur, sentinelle, suite };
 }
 
-function ListePosts({
-  liste,
-  profil,
-  vide,
-}: {
-  liste: ReturnType<typeof useListe>;
-  profil?: XProfil;
-  vide: string;
-}) {
-  const { posts, curseur, charge, chargement, erreur, sentinelle, suite } = liste;
+function ListePosts({ liste, vide }: { liste: ReturnType<typeof useListe>; vide: string }) {
+  const { posts, profils, curseur, charge, chargement, erreur, sentinelle, suite } = liste;
   if (!charge && posts.length === 0)
     return erreur ? <Erreur /> : <SquelettePosts />;
   if (posts.length === 0)
@@ -127,7 +125,7 @@ function ListePosts({
   return (
     <div>
       {posts.map(post => (
-        <Post key={post.id} post={post} profil={profil} />
+        <Post key={post.id} post={post} profils={profils} />
       ))}
       {curseur && (
         <div ref={sentinelle}>
@@ -227,13 +225,28 @@ function EnTete({ profil }: { profil: XProfil }) {
 }
 
 /** Profil d'un compte officiel et son fil, en direct. */
-export function FilX({ compte, initial }: { compte: string; initial: (XLive & { next_cursor?: string }) | null }) {
-  const liste = useListe(`/api/x/live?compte=${compte}`, initial, true);
+export function FilX({
+  compte,
+  initial,
+}: {
+  compte: string;
+  initial: ((XLive & { next_cursor?: string }) | XFilGlobal) | null;
+}) {
+  const liste = useListe(`/api/feed/live?compte=${compte}`, initial as Page | null, true);
+  if (compte === COMPTE_TOUS)
+    return (
+      <>
+        <h1 className="border-b border-[var(--x-border)] px-4 py-3 text-xl leading-6 font-extrabold text-[var(--x-text)]">
+          Tous les comptes
+        </h1>
+        <ListePosts liste={liste} vide="Aucun post à afficher pour le moment." />
+      </>
+    );
   return (
     <>
       {liste.profil ? <EnTete profil={liste.profil} /> : <div className="aspect-[3/1] w-full bg-[#333639]" aria-hidden />}
       <div className="border-t border-[var(--x-border)]">
-        <ListePosts liste={liste} profil={liste.profil} vide="Aucun post à afficher pour le moment." />
+        <ListePosts liste={liste} vide="Aucun post à afficher pour le moment." />
       </div>
     </>
   );
@@ -241,12 +254,12 @@ export function FilX({ compte, initial }: { compte: string; initial: (XLive & { 
 
 /** Résultats de recherche (posts les plus récents sur X). */
 export function ResultatsRecherche({ q, initial }: { q: string; initial: PageXPosts | null }) {
-  const liste = useListe(`/api/x/live?q=${encodeURIComponent(q)}`, initial, false);
+  const liste = useListe(`/api/feed/live?q=${encodeURIComponent(q)}`, initial, false);
   return <ListePosts liste={liste} vide={`Aucun résultat pour « ${q} ».`} />;
 }
 
 /** Un post et ses réponses. */
 export function FilThread({ id, initial }: { id: string; initial: PageXPosts | null }) {
-  const liste = useListe(`/api/x/live?thread=${id}`, initial, false);
+  const liste = useListe(`/api/feed/live?thread=${id}`, initial, false);
   return <ListePosts liste={liste} vide="Ce post est introuvable ou n'est plus visible." />;
 }

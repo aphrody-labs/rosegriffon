@@ -201,6 +201,7 @@ export async function checkSlugAvailability(
   slug: string,
   excludeId?: string,
 ): Promise<{ available: boolean; suggestion?: string }> {
+  await requireEditorOrFail();
   const supabase = createPostgresClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -627,6 +628,7 @@ export async function getArticleStats(): Promise<{
     published_at: string;
   }>;
 }> {
+  await requireEditorOrFail();
   const supabase = createPostgresClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -760,6 +762,7 @@ export async function getArticleVersions(articleId: string): Promise<
     created_at: string;
   }>
 > {
+  await requireEditorOrFail();
   const supabase = createPostgresClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any)
@@ -787,6 +790,7 @@ export async function getArticleVersion(versionId: string): Promise<{
   meta_description: string | null;
   created_at: string;
 } | null> {
+  await requireEditorOrFail();
   const supabase = createPostgresClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("article_versions").select("*").eq("id", versionId).maybeSingle();

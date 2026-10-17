@@ -135,7 +135,7 @@ export const CHEMINS_ASSOCIATION = [
   "/community",
   "/notre-equipe",
   "/sondages",
-  "/x",
+  "/feed",
   "/iergday",
   "/rose-griffon-tv",
   "/projets",

@@ -4,7 +4,7 @@ import { BadgeCheck, ChartNoAxesColumn, Heart, MessageCircle, Repeat2 } from "lu
 import Link from "next/link";
 import { Fragment, useState } from "react";
 
-import type { XProfil, XTweet } from "@/lib/x/live";
+import type { XProfil, XTweet } from "@/lib/feed/live";
 
 const SEUIL_LONG = 420;
 const MOTIF_TEXTE = /(https:\/\/t\.co\/\w+|#[\p{L}\p{N}_]+|@\w{1,15})/gu;
@@ -36,7 +36,7 @@ export function TexteAvecLiens({ texte }: { texte: string }) {
           );
         if (morceau.startsWith("#") && morceau.length > 1)
           return (
-            <Link key={i} href={`/x?q=${encodeURIComponent(morceau)}`} className={lien} onClick={e => e.stopPropagation()}>
+            <Link key={i} href={`/feed?q=${encodeURIComponent(morceau)}`} className={lien} onClick={e => e.stopPropagation()}>
               {morceau}
             </Link>
           );
@@ -141,10 +141,10 @@ function Citation({ post }: { post: XTweet }) {
  * Un post. `profil` n'est fourni que pour les posts du compte affiché (avatar, certification) ;
  * les résultats de recherche et les réponses n'ont que le nom et le pseudo de l'auteur.
  */
-export function Post({ post, profil, ouvert = false }: { post: XTweet; profil?: XProfil; ouvert?: boolean }) {
+export function Post({ post, profils, ouvert = false }: { post: XTweet; profils?: Record<string, XProfil>; ouvert?: boolean }) {
   const [deplie, setDeplie] = useState(ouvert);
   const long = post.text.length > SEUIL_LONG;
-  const duProfil = profil && profil.screen_name.toLowerCase() === post.author.username.toLowerCase() ? profil : undefined;
+  const duProfil = profils?.[post.author.username.toLowerCase()];
   return (
     <article className="flex gap-3 border-b border-[var(--x-border)] px-4 pt-3 pb-1 transition-colors hover:bg-[var(--x-hover)]">
       <Avatar profil={{ avatar: duProfil?.avatar }} taille={40} />
@@ -158,7 +158,7 @@ export function Post({ post, profil, ouvert = false }: { post: XTweet; profil?: 
           <span aria-hidden className="text-[var(--x-muted)]">
             ·
           </span>
-          <Link href={`/x/status/${post.id}`} className="shrink-0 text-[var(--x-muted)] hover:underline">
+          <Link href={`/feed/status/${post.id}`} className="shrink-0 text-[var(--x-muted)] hover:underline">
             <time dateTime={new Date(post.created_at).toISOString()}>{dateCourte(post.created_at)}</time>
           </Link>
         </header>

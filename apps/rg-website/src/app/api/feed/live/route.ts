@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { chercher, COMPTES_X, estCompteX, estIdPost, lireCompte, lireThread } from "@/lib/x/live";
+import { chercher, COMPTE_TOUS, estCompteX, estIdPost, lireCompte, lireFilGlobal, lireThread } from "@/lib/feed/live";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,8 @@ export async function GET(request: Request) {
       return NextResponse.json(await lireThread(thread, curseur), { headers: ENTETES });
     }
     if (q) return NextResponse.json(await chercher(q, 20, curseur), { headers: ENTETES });
-    const compte = searchParams.get("compte") ?? COMPTES_X[0];
+    const compte = searchParams.get("compte") ?? COMPTE_TOUS;
+    if (compte === COMPTE_TOUS) return NextResponse.json(await lireFilGlobal(), { headers: ENTETES });
     if (!estCompteX(compte)) return NextResponse.json({ error: "Compte non pris en charge." }, { status: 400 });
     return NextResponse.json(await lireCompte(compte, 12, curseur), { headers: ENTETES });
   } catch {

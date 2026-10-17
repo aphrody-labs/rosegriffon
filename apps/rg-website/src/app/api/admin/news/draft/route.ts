@@ -2,6 +2,7 @@ import { ADMIN_ROLES } from "@rosegriffon/types/roles";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { requireAdminOrFail } from "@/lib/auth-helpers";
 import { SITE_URL } from "@/lib/site-url";
 
 /**
@@ -326,14 +327,16 @@ async function ensureUniqueSlug(supabase: any, base: string): Promise<string> {
 }
 
 export async function POST(request: NextRequest) {
+  // Deux accès : la clé d'intégration (scripts/CLI) ou une session d'administrateur (CMS du site).
   const apiKey = process.env.CLAUDE_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: "CLAUDE_API_KEY non configuré côté serveur" }, { status: 500 });
-  }
-
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${apiKey}`) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  let auteurSession: string | undefined;
+  if (!(apiKey && authHeader === `Bearer ${apiKey}`)) {
+    try {
+      auteurSession = (await requireAdminOrFail()).profile.id;
+    } catch {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
   }
 
   let body: DraftBody;
@@ -342,6 +345,7 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: "JSON invalide" }, { status: 400 });
   }
+  if (auteurSession && !body.author_id) body.author_id = auteurSession;
 
   if (!body.title || typeof body.title !== "string") {
     return NextResponse.json({ error: "Le champ `title` est requis (string)" }, { status: 400 });
@@ -419,7 +423,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         authorId,
-        editUrl: `${ORIGIN}/dashboard/news/${data.id}`,
+        editUrl: `${ORIGIN}/admin/news/${data.id}`,
         id: data.id,
         previewUrl: `${ORIGIN}/news/${data.slug}?preview=true`,
         slug: data.slug,
