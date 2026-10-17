@@ -115,8 +115,23 @@ export class PageWebView {
     return new PageWebView(ouvrirVue());
   }
 
-  goto(url: string, _waitUntil?: string): Promise<NavigationResponse> {
-    return naviguer(this.#vue, url);
+  /**
+   * Rend la main dès que le document est interactif (DOMContentLoaded), sans attendre les
+   * images et polices : les crawlers attendent ensuite leurs sélecteurs, et une page lourde
+   * (zukan, 200 cartes) dépassait l'échéance du chargement complet.
+   */
+  async goto(url: string, _waitUntil?: string): Promise<NavigationResponse> {
+    const vue = this.#vue;
+    const chargement = vue.navigate(url).catch(() => undefined);
+    const echeance = Date.now() + DELAI_NAVIGATION_MS;
+    while (Date.now() < echeance) {
+      const etat = await Promise.race([vue.evaluate("document.readyState").catch(() => ""), chargement.then(() => "complete")]);
+      if ((etat === "interactive" || etat === "complete") && vue.url && vue.url !== "about:blank") break;
+      await Bun.sleep(250);
+    }
+    if (Date.now() >= echeance) throw new Error(`Navigation trop longue (${DELAI_NAVIGATION_MS} ms) : ${url}`);
+    const status = Number(await vue.evaluate(SCRIPT_STATUT)) || 200;
+    return { ok: status >= 200 && status < 400, status, url: vue.url };
   }
 
   async evaluate<T = unknown>(script: string): Promise<T> {
