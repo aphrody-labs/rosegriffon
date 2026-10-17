@@ -128,7 +128,7 @@ export function CarteSondage({ sondage, contexte }: { sondage: Sondage; contexte
         <Link
           href={`/sondages/${sondage.poll_id}`}
           aria-label={`Voir le détail du sondage : ${resume}`}
-          className="inline-flex items-center gap-1.5 rounded-full text-fluid-body-md font-semibold text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-hidden"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-fluid-body-md font-semibold text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-hidden"
         >
           Voir le détail
           <ArrowRight className="size-4" aria-hidden />

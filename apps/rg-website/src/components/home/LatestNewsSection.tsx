@@ -292,7 +292,7 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-4 px-0">
           <SectionHeader size="sm" />
-          <Link href="/news" className="text-xs font-bold text-primary">
+          <Link href="/news" className="inline-flex min-h-11 items-center px-2 -mr-2 text-xs font-bold text-primary hover:underline">
             Voir tout
           </Link>
         </div>

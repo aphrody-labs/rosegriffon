@@ -97,8 +97,8 @@ function Onglets<T extends string>({
           href={lien(entree.cle)}
           aria-current={actif === entree.cle ? "page" : undefined}
           className={cn(
-            "rounded-full font-medium transition-colors",
-            compact ? "px-3 py-1 text-xs" : "px-4 py-1.5 text-sm",
+            "inline-flex items-center rounded-full font-medium transition-colors",
+            compact ? "min-h-8 px-3 text-xs" : "min-h-10 px-4 text-sm",
             actif === entree.cle ? "bg-primary text-on-primary" : "text-on-surface-variant hover:text-on-surface",
           )}
         >
