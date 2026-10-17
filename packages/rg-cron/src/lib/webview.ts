@@ -124,13 +124,25 @@ export class PageWebView {
     const vue = this.#vue;
     // Repère posé sur l'ancien document : il disparaît quand le nouveau prend la place.
     await vue.evaluate("window.__rgNav = 1").catch(() => undefined);
-    const chargement = vue.navigate(url).catch(() => undefined);
+    void vue.navigate(url).catch(() => undefined);
     const echeance = Date.now() + DELAI_NAVIGATION_MS;
+    // Une seule évaluation à la fois : la vue refuse la seconde tant que la première attend.
+    let attente: Promise<string> | null = null;
     while (Date.now() < echeance) {
-      const etat = await Promise.race([vue.evaluate("document.readyState").catch(() => ""), chargement.then(() => "complete")]);
-      const ancien = await vue.evaluate("window.__rgNav === 1").catch(() => false);
-      if ((etat === "interactive" || etat === "complete") && !ancien && vue.url && vue.url !== "about:blank") break;
-      await Bun.sleep(250);
+      attente ??= vue
+        .evaluate("JSON.stringify([document.readyState, window.__rgNav === 1])")
+        .then(String)
+        .catch(() => "");
+      const reponse = await Promise.race([attente, Bun.sleep(250).then(() => null)]);
+      if (reponse === null) continue;
+      attente = null;
+      try {
+        const [etat, ancien] = JSON.parse(reponse) as [string, boolean];
+        if ((etat === "interactive" || etat === "complete") && !ancien && vue.url && vue.url !== "about:blank") break;
+      } catch {
+        // Document en cours de remplacement : on réessaie.
+      }
+      await Bun.sleep(150);
     }
     if (Date.now() >= echeance) throw new Error(`Navigation trop longue (${DELAI_NAVIGATION_MS} ms) : ${url}`);
     const status = Number(await vue.evaluate(SCRIPT_STATUT)) || 200;
