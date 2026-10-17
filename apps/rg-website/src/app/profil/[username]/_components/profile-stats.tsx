@@ -3,6 +3,8 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarDays, Coins, Flame, Gem, MessageSquare, Star, TrendingUp, Trophy, UserCheck } from "lucide-react";
 
+import { couleurLisible } from "@/lib/couleur-lisible";
+
 /**
  * La fiche détaillée du profil — ce que le membre a réellement fait.
  *
@@ -100,13 +102,13 @@ export function ProfileStats({ stats }: { stats: StatistiquesProfil }) {
                 <li
                   key={role.nom}
                   className="rounded-full border px-2.5 py-0.5 text-xs font-semibold"
-                  // La couleur du rôle telle que Discord la donne : c'est celle qui
-                  // colore déjà le pseudo dans les salons.
+                  // La teinte du rôle telle que Discord la donne (celle qui colore le
+                  // pseudo dans les salons), rendue lisible sur nos fonds.
                   style={
                     role.couleur
                       ? {
                           borderColor: `#${role.couleur.toString(16).padStart(6, "0")}66`,
-                          color: `#${role.couleur.toString(16).padStart(6, "0")}`,
+                          color: couleurLisible(`#${role.couleur.toString(16).padStart(6, "0")}`),
                         }
                       : undefined
                   }

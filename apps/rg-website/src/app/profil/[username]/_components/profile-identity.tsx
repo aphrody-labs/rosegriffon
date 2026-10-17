@@ -24,7 +24,12 @@ interface ProfileIdentityProps {
  */
 export function ProfileIdentity({ website, twitterHandle, isOwnProfile }: ProfileIdentityProps) {
   const lienSite = lienSuivable(website);
-  const twitter = twitterHandle?.replace("@", "").trim();
+  // Le champ accepte « @pseudo », « pseudo » ou l'URL complète du profil.
+  const twitter = twitterHandle
+    ?.trim()
+    .replace(/^https?:\/\/(www\.)?(twitter|x)\.com\//i, "")
+    .replace(/^@/, "")
+    .split(/[/?#]/)[0];
 
   if (!lienSite && !twitter && !isOwnProfile) {
     return null;
@@ -46,7 +51,7 @@ export function ProfileIdentity({ website, twitterHandle, isOwnProfile }: Profil
 
       {twitter && (
         <a
-          href={`https://twitter.com/${twitter}`}
+          href={`https://x.com/${twitter}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"

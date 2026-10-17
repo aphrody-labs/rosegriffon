@@ -16,18 +16,16 @@ import { cn } from "@/lib/utils";
  */
 
 /**
- * Habillage des boutons posés SUR la bannière de marque. Le `Button` partagé
- * suppose un fond d'interface ; sur le dégradé marine ses variantes `default`
- * (primaire sombre) et `outline` (fond `background`) passent sous le seuil de
- * contraste. Ces deux classes le rétablissent avec les seuls tokens de marque —
- * à passer en `className` du `Button`, jamais à réécrire à la main.
+ * Habillage des boutons de l'en-tête de page (`PageHero`), posé sur le fond de
+ * l'interface : primaire or de marque, secondaire en contour or et texte du
+ * thème — à passer en `className` du `Button`, jamais à réécrire à la main.
  *
  * `whitespace-normal` + `h-auto min-h-12` : le `Button` partagé impose
  * `whitespace-nowrap`, ce qui fait déborder un libellé long dès 320 px.
  */
 const heroButtonBase = "h-auto min-h-11 rounded-xl px-4 py-2 text-center text-sm font-semibold whitespace-normal";
 export const heroPrimaryButtonClass = `${heroButtonBase} bg-rg-or text-rg-marine hover:bg-rg-or/90`;
-export const heroSecondaryButtonClass = `${heroButtonBase} border border-rg-or/60 bg-rg-sur-marine/10 text-rg-sur-marine backdrop-blur-sm hover:border-rg-or hover:bg-rg-sur-marine/20 hover:text-rg-sur-marine`;
+export const heroSecondaryButtonClass = `${heroButtonBase} border border-rg-or/60 bg-transparent text-foreground hover:border-rg-or hover:bg-rg-or/10 hover:text-foreground`;
 
 /** Conteneur de page — même largeur maximale et mêmes gouttières que la home. */
 export function PageContainer({ children, className }: { children: React.ReactNode; className?: string }) {

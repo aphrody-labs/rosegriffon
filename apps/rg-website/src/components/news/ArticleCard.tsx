@@ -9,6 +9,7 @@ import type { FeedItem } from "@/app/news/news-client";
 import { LikeButton } from "@/components/news/LikeButton";
 import { Badge, HoverCard, HoverCardContent, HoverCardTrigger } from "@rosegriffon/ui";
 import { ArrowRight, MessageCircle } from "@/lib/icons-config";
+import { typographieFr } from "@/lib/typographie";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -69,7 +70,7 @@ export function ArticleCard({ item, reactionData, commentCount }: ArticleCardPro
           </div>
 
           <h3 className="line-clamp-2 font-bold text-base text-on-surface leading-snug transition-colors group-hover:text-primary">
-            {item.title}
+            {typographieFr(item.title)}
           </h3>
 
           {item.excerpt && (
@@ -139,7 +140,7 @@ export function ArticleCard({ item, reactionData, commentCount }: ArticleCardPro
           </div>
         )}
         <div className="flex flex-col gap-2 p-4">
-          <h4 className="font-bold text-on-surface text-sm leading-snug">{item.title}</h4>
+          <h4 className="font-bold text-on-surface text-sm leading-snug">{typographieFr(item.title)}</h4>
           <p className="line-clamp-4 text-on-surface-variant text-xs leading-relaxed">{item.excerpt}</p>
           <div className="flex items-center justify-between border-outline-variant/20 border-t pt-2 text-on-surface-variant/70 text-xs">
             <span title={format(date, "PPPp", { locale: fr })}>

@@ -2,6 +2,8 @@ import Image from "next/image";
 
 import { couleurRole, type MembreClasse } from "@rosegriffon/types/discord-hierarchie";
 
+import { couleurLisible } from "@/lib/couleur-lisible";
+
 import { cn } from "@/lib/utils";
 
 /**
@@ -106,15 +108,6 @@ export function GrilleMembres({ membres, compacte }: { membres: MembreClasse[]; 
       ))}
     </div>
   );
-}
-
-/**
- * Les couleurs de rôle Discord sont pensées pour le fond sombre de Discord :
- * claires, elles tombent sous 4.5:1 sur nos fonds. On les tire vers la couleur
- * de texte du thème, ce qui garde la teinte et suit le mode clair ou sombre.
- */
-function couleurLisible(couleur: string): string {
-  return `color-mix(in oklab, ${couleur} 50%, var(--foreground))`;
 }
 
 /** Titre d'une section, avec son effectif. */
