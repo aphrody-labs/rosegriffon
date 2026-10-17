@@ -122,11 +122,14 @@ export class PageWebView {
    */
   async goto(url: string, _waitUntil?: string): Promise<NavigationResponse> {
     const vue = this.#vue;
+    // Repère posé sur l'ancien document : il disparaît quand le nouveau prend la place.
+    await vue.evaluate("window.__rgNav = 1").catch(() => undefined);
     const chargement = vue.navigate(url).catch(() => undefined);
     const echeance = Date.now() + DELAI_NAVIGATION_MS;
     while (Date.now() < echeance) {
       const etat = await Promise.race([vue.evaluate("document.readyState").catch(() => ""), chargement.then(() => "complete")]);
-      if ((etat === "interactive" || etat === "complete") && vue.url && vue.url !== "about:blank") break;
+      const ancien = await vue.evaluate("window.__rgNav === 1").catch(() => false);
+      if ((etat === "interactive" || etat === "complete") && !ancien && vue.url && vue.url !== "about:blank") break;
       await Bun.sleep(250);
     }
     if (Date.now() >= echeance) throw new Error(`Navigation trop longue (${DELAI_NAVIGATION_MS} ms) : ${url}`);
