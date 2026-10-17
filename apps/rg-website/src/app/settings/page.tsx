@@ -71,6 +71,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       initialTab={resolveAccountTab(tab, TABS)}
       backHref={username ? `/profil/${encodeURIComponent(username)}` : "/"}
       avatarUrl={str("avatar_url") || null}
+      gameAvatar={str("game_avatar") || null}
       username={username || null}
       role={str("role") || null}
       twoFactorEnabled={Boolean((user as { twoFactorEnabled?: boolean }).twoFactorEnabled)}

@@ -439,6 +439,11 @@ export function getCharacterFaceUrl(charaId: string | undefined | null, _unused?
 // Alias pour compatibilité
 export const getCharacterImageUrl = getCharacterFaceUrl;
 
+/** Codes de base `c<8>` qui possèdent un portrait réel dans les CPK (même gate que `getCharacterFaceUrl`). */
+export function listCharacterFaceCodes(): string[] {
+  return [...CHARACTER_FACE_CODES];
+}
+
 /**
  * Dérive le code uniforme `u<8>` d'un code perso et le retourne UNIQUEMENT s'il a un
  * fichier réel (`CHARACTER_UNIFORM_CODES`, 303 codes). Sinon `null` → le caller ne

@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { getBrowserStorage } from "@/lib/storage/browser";
 
+import { AvatarJeuDialog } from "./avatar-jeu/AvatarJeuDialog";
 import { updateAddress, updateAvatarUrl, updateProfile } from "./actions";
 import { revokeAccountSession } from "./session-actions";
 
@@ -33,6 +34,8 @@ interface AccountClientProps {
   initialTab: AccountTabId;
   backHref: string;
   avatarUrl: string | null;
+  /** Code de partage de l'avatar `chara_edit` en place, s'il y en a un. */
+  gameAvatar: string | null;
   username: string | null;
   role: string | null;
   twoFactorEnabled: boolean;
@@ -65,6 +68,7 @@ export function AccountClient({
   initialTab,
   backHref,
   avatarUrl,
+  gameAvatar,
   username,
   role,
   twoFactorEnabled,
@@ -193,7 +197,10 @@ export function AccountClient({
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <div className="lg:col-span-1">
                 <AccountAvatarCard
+                  // Recréé quand l'avatar change côté serveur (portrait ou avatar du jeu).
+                  key={avatarUrl ?? "aucun"}
                   avatarUrl={avatarUrl}
+                  extraActions={<AvatarJeuDialog avatarUrl={avatarUrl} codeActuel={gameAvatar} />}
                   username={username}
                   role={role}
                   // Sans pseudo, la page publique n'existe pas encore : le

@@ -161,7 +161,7 @@ export async function updateAvatarUrl(avatarUrl: string): Promise<{ error?: stri
   const admin = createPostgresClient();
   const { data: updated, error } = await admin
     .from("profiles")
-    .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+    .update({ avatar_url: avatarUrl, game_avatar: null, updated_at: new Date().toISOString() })
     .eq("id", user.id)
     .select("username")
     .maybeSingle();

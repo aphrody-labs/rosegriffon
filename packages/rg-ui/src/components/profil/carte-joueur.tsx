@@ -224,7 +224,7 @@ export function CarteJoueur({
               src={avatarUrl}
               alt={`Photo de profil de ${pseudo}`}
               onError={() => setAvatarCasse(true)}
-              className="size-20 shrink-0 rounded-full border-2 border-white/80 object-cover shadow-lg sm:size-28"
+              className="size-20 shrink-0 rounded-full border-2 border-white/80 bg-rg-marine object-cover shadow-lg sm:size-28"
             />
           ) : (
             <span

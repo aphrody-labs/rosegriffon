@@ -40,6 +40,8 @@ interface AccountAvatarCardProps {
    * alors affichée alors que le stockage a bien été mis à jour.
    */
   onUpload: (file: File) => Promise<string>;
+  /** Actions supplémentaires sous le bouton du profil (ex. choisir un avatar du jeu). */
+  extraActions?: React.ReactNode;
 }
 
 /**
@@ -63,6 +65,7 @@ export function AccountAvatarCard({
   role,
   profileHref,
   onUpload,
+  extraActions,
 }: AccountAvatarCardProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -188,6 +191,7 @@ export function AccountAvatarCard({
               </Link>
             </Button>
           )}
+          {extraActions}
           <p className="text-xs text-muted-foreground">
             PNG, JPEG ou WebP — 400 × 400 px recommandé, 2 Mo maximum.
           </p>
