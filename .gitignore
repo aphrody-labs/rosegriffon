@@ -1,0 +1,27 @@
+# Dependencies and build output
+node_modules/
+.turbo/
+dist/
+.next/
+out/
+target/
+*.tsbuildinfo
+next-env.d.ts.bak
+
+# Local state and credentials
+.env
+.env.*
+!.env.example
+.vercel/
+.local/
+.secrets/
+secrets/
+*.pem
+*.p12
+*.pfx
+
+# Editors and OS
+.DS_Store
+*~
+*.swp
+__pycache__/

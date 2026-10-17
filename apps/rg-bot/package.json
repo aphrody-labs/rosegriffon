@@ -14,7 +14,11 @@
   ],
   "type": "module",
   "exports": {
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./core": "./src/core.ts",
+    "./gateway": "./src/index.ts",
+    "./api": "./src/api/server.ts",
+    "./ranked": "./src/api/ranked/main.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -55,7 +59,7 @@
     "@rosegriffon/azalee": "workspace:*",
     "@rosegriffon/cron": "workspace:*",
     "@rosegriffon/db": "workspace:*",
-    "@rosegriffon/inagle": "workspace:*",
+    "@rosegriffon/inagle": "catalog:",
     "@rosegriffon/types": "workspace:*",
     "@rosegriffon/ui": "workspace:*",
     "@vercel/functions": "catalog:",
@@ -78,6 +82,15 @@
     "@vercel/config": "catalog:"
   },
   "engines": {
-    "bun": "=1.4.4"
+    "bun": ">=1.4.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "directory": "apps/rg-bot"
+  },
+  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/apps/rg-bot#readme",
+  "bugs": {
+    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
   }
 }

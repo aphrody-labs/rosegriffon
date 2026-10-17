@@ -52,9 +52,18 @@
     "@types/pg": "catalog:",
     "kysely-supabase": "catalog:",
     "vitest": "catalog:",
-    "@aphrody/bun-types": "workspace:*"
+    "@aphrody/bun-types": "catalog:"
   },
   "engines": {
-    "bun": "=1.4.4"
+    "bun": ">=1.4.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "directory": "packages/rg-db"
+  },
+  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-db#readme",
+  "bugs": {
+    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
   }
 }

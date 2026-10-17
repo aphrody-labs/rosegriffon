@@ -43,7 +43,7 @@
     "vitest": "catalog:"
   },
   "engines": {
-    "bun": "=1.4.4"
+    "bun": ">=1.4.4"
   },
   "license": "Apache-2.0",
   "files": [
@@ -51,5 +51,14 @@
     "src",
     "tsconfig.json",
     "vitest.config.ts"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "directory": "packages/rg-auth"
+  },
+  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-auth#readme",
+  "bugs": {
+    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
+  }
 }

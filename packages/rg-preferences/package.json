@@ -5,7 +5,7 @@
   "description": "Pure cross-runtime resolution of Rose Griffon presentation preferences",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aphrody-labs/bun-os.git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
     "directory": "packages/rg-preferences"
   },
   "files": [
@@ -31,7 +31,11 @@
     "typecheck": "bun check --noEmit"
   },
   "engines": {
-    "bun": "=1.4.4"
+    "bun": ">=1.4.4"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-preferences#readme",
+  "bugs": {
+    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
+  }
 }

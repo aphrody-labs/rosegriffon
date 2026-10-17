@@ -1,0 +1,10 @@
+# Rose Griffon Rust workspace. `crates/aphrody-rg-server` stays self-contained
+# (no `workspace = true` fields) because Vercel builds that directory alone.
+[workspace]
+resolver = "3"
+members = ["crates/aphrody-rg-server"]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

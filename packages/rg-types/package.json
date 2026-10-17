@@ -39,17 +39,26 @@
   },
   "devDependencies": {
     "@rosegriffon/config": "workspace:*",
-    "@aphrody/bun-types": "workspace:*"
+    "@aphrody/bun-types": "catalog:"
   },
   "peerDependencies": {
     "@rosegriffon/db": "workspace:*"
   },
   "engines": {
-    "bun": "=1.4.4"
+    "bun": ">=1.4.4"
   },
   "license": "Apache-2.0",
   "files": [
     "src",
     "tsconfig.json"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "directory": "packages/rg-types"
+  },
+  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-types#readme",
+  "bugs": {
+    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
+  }
 }

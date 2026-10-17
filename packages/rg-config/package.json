@@ -5,7 +5,7 @@
   "description": "Configs partagées : TypeScript, bun lint et Tailwind preset",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aphrody-labs/bun-os.git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
     "directory": "packages/rg-config"
   },
   "files": [
@@ -37,7 +37,11 @@
     "typecheck": "bun check --noEmit"
   },
   "engines": {
-    "bun": "=1.4.4"
+    "bun": ">=1.4.4"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-config#readme",
+  "bugs": {
+    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
+  }
 }

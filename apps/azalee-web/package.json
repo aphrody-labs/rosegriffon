@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "bun --smol --bun node_modules/next/dist/bin/next dev --turbopack",
-    "build": "bash ../../scripts/next-build.sh",
+    "build": "bun ../../scripts/next-build.ts --turbopack",
     "start": "bun --bun node_modules/next/dist/bin/next start",
     "lint": "bun lint -A style -A pedantic -A restriction -A react/react-in-jsx-scope -A unicorn/consistent-function-scoping -A promise/no-multiple-resolved -A react-perf .",
     "lint:fix": "bun lint -A style -A pedantic -A restriction -A react/react-in-jsx-scope -A unicorn/consistent-function-scoping -A promise/no-multiple-resolved -A react-perf --fix .",
@@ -64,8 +64,8 @@
     "@rosegriffon/azalee": "workspace:*",
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/i18n": "workspace:*",
-    "@rosegriffon/inagle": "workspace:*",
-    "@rosegriffon/inagle-cross": "workspace:*",
+    "@rosegriffon/inagle": "catalog:",
+    "@rosegriffon/inagle-cross": "catalog:",
     "@rosegriffon/preferences": "workspace:*",
     "@rosegriffon/types": "workspace:*",
     "@rosegriffon/ui": "workspace:*",
@@ -145,6 +145,15 @@
     "defaults and supports es6-module"
   ],
   "engines": {
-    "bun": "=1.4.4"
+    "bun": ">=1.4.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "directory": "apps/azalee-web"
+  },
+  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/apps/azalee-web#readme",
+  "bugs": {
+    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
   }
 }

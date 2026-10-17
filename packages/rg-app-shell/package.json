@@ -33,7 +33,7 @@
     "react-dom": "catalog:"
   },
   "engines": {
-    "bun": "=1.4.4"
+    "bun": ">=1.4.4"
   },
   "license": "Apache-2.0",
   "files": [
@@ -44,5 +44,14 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "directory": "packages/rg-app-shell"
+  },
+  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-app-shell#readme",
+  "bugs": {
+    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
   }
 }

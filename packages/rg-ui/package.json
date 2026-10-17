@@ -30,7 +30,7 @@
     "typecheck": "bun check --noEmit"
   },
   "dependencies": {
-    "@aphrody/m3-tokens": "workspace:*",
+    "@aphrody/m3-tokens": "catalog:",
     "@base-ui/react": "catalog:",
     "@hookform/resolvers": "catalog:",
     "@rosegriffon/db": "workspace:*",
@@ -69,6 +69,15 @@
     "react-dom": "catalog:"
   },
   "engines": {
-    "bun": "=1.4.4"
+    "bun": ">=1.4.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "directory": "packages/rg-ui"
+  },
+  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-ui#readme",
+  "bugs": {
+    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
   }
 }

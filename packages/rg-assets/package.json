@@ -13,7 +13,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "engines": {
-    "bun": "=1.4.4"
+    "bun": ">=1.4.4"
   },
   "license": "Apache-2.0",
   "files": [
@@ -24,5 +24,14 @@
   ],
   "scripts": {
     "typecheck": "bun check -p tsconfig.json --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "directory": "packages/rg-assets"
+  },
+  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-assets#readme",
+  "bugs": {
+    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
   }
 }

@@ -28,7 +28,7 @@
     "@rosegriffon/assets": "workspace:*",
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/discord-sync": "workspace:*",
-    "@rosegriffon/inagle": "workspace:*",
+    "@rosegriffon/inagle": "catalog:",
     "@rosegriffon/types": "workspace:*",
     "@vercel/functions": "catalog:",
     "cheerio": "catalog:",
@@ -38,7 +38,7 @@
     "@types/bun": "catalog:"
   },
   "engines": {
-    "bun": "=1.4.4"
+    "bun": ">=1.4.4"
   },
   "license": "Apache-2.0",
   "files": [
@@ -47,5 +47,14 @@
     "tsconfig.json",
     "tsconfig.typecheck.json",
     "types"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "directory": "packages/rg-cron"
+  },
+  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-cron#readme",
+  "bugs": {
+    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
+  }
 }
