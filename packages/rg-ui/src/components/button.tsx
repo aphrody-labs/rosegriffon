@@ -1,7 +1,7 @@
 "use client";
 
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
-import { childRender } from "../lib/render";
+import { childRender, markNativeButton } from "../lib/render";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
@@ -55,5 +55,6 @@ const Button = React.forwardRef<
   );
 });
 Button.displayName = "Button";
+markNativeButton(Button);
 
 export { Button, buttonVariants };

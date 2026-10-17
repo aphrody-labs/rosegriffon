@@ -11,6 +11,17 @@ export interface PublicClan {
 }
 
 const PAGE_SIZE = 50;
+
+/**
+ * L'API renvoie `/achillea/default-clan-avatar.svg?clan=<id>` pour un clan sans
+ * logo : ce fichier n'existe pas sur le site (404 à chaque carte). Ce marqueur
+ * vaut « pas d'avatar », pour que l'interface affiche le monogramme du clan.
+ */
+const DEFAULT_AVATAR_PREFIX = "/achillea/default-clan-avatar.svg";
+
+function withoutDefaultAvatar(clan: PublicClan): PublicClan {
+  return clan.avatarUrl.startsWith(DEFAULT_AVATAR_PREFIX) ? { ...clan, avatarUrl: "" } : clan;
+}
 type Fetcher = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
 export async function listPublicClans(
@@ -28,7 +39,7 @@ export async function listPublicClans(
     if (!response.ok) throw new Error(`Achilléa clans: HTTP ${response.status}`);
     const payload: unknown = await response.json();
     if (!isPublicClanList(payload)) throw new Error("Achilléa clans: réponse invalide");
-    clans.push(...payload.data);
+    clans.push(...payload.data.map(withoutDefaultAvatar));
     count = payload.count;
     page++;
   } while (clans.length < count && page <= Math.ceil(count / PAGE_SIZE));
@@ -51,7 +62,7 @@ export async function getPublicClan(
   if (!isPublicClan(payload) || payload.id !== id) {
     throw new Error(`Achilléa clan ${id}: réponse invalide`);
   }
-  return payload;
+  return withoutDefaultAvatar(payload);
 }
 
 export function isPublicClan(value: unknown): value is PublicClan {

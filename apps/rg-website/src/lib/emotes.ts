@@ -13,7 +13,7 @@ export interface Emote {
   authorUrl?: string;
 }
 
-export const EMOTES: Record<string, Emote> = {
+const DEFINITIONS = {
   // Gaëlle
   "gaelle-coeur": {
     alt: "Gaëlle avec un cœur",
@@ -149,13 +149,23 @@ export const EMOTES: Record<string, Emote> = {
     name: "rg-funny",
     path: "/emote/RG_funny.webp",
   },
-};
+} satisfies Record<string, Emote>;
+
+/** Nom d'une emote existante : une faute de frappe échoue au typage au lieu de rendre une emote vide. */
+export type EmoteName = keyof typeof DEFINITIONS;
+
+export const EMOTES: Readonly<Record<EmoteName, Emote>> = DEFINITIONS;
+
+/** Garde de type pour les noms venant d'une saisie libre (texte, URL…). */
+export function isEmoteName(name: string): name is EmoteName {
+  return Object.hasOwn(EMOTES, name);
+}
 
 /**
  * Obtenir une emote par son nom
  */
 export function getEmote(name: string): Emote | undefined {
-  return EMOTES[name];
+  return isEmoteName(name) ? EMOTES[name] : undefined;
 }
 
 /**

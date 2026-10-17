@@ -287,7 +287,7 @@ export default async function PassivesPage({
   const totalCount = nierFamilies.length + customPassives.length + coordinatorPassives.length;
 
   return (
-    <main className="space-y-8 pb-20" aria-label="Passifs et talents">
+    <section className="space-y-8 pb-20" aria-label="Passifs et talents">
       <div className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface font-display">
           Talents & Passifs
@@ -529,6 +529,6 @@ export default async function PassivesPage({
           )}
         </div>
       )}
-    </main>
+    </section>
   );
 }

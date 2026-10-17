@@ -215,6 +215,11 @@ async function chargerEquipes(): Promise<{ definition: DefinitionEquipe; membres
       if (imageUrl.startsWith("https://https://")) {
         imageUrl = imageUrl.replace("https://https://", "https://");
       }
+      // Le logo par défaut pointait vers le bucket Storage `assets`, non recopié
+      // lors de la bascule Supabase : il est servi depuis public/.
+      if (imageUrl.endsWith("/storage/v1/object/public/assets/RG_Logo_V2.5.webp")) {
+        imageUrl = "";
+      }
 
       return {
         displayIndex: row.display_index ?? 999,
@@ -355,7 +360,7 @@ export default async function NotreEquipePage() {
         members={tousLesMembresPourSchema}
       />
 
-      <header className="container mx-auto flex flex-col gap-3 border-b border-outline-variant/30 px-4 py-4 min-[600px]:px-6 min-[600px]:py-6 min-[840px]:flex-row min-[840px]:items-center">
+      <header className="container mx-auto flex flex-col gap-3 border-b border-outline-variant/30 px-4 py-4 min-[600px]:px-6 min-[600px]:py-6">
         <div className="flex shrink-0 items-center gap-3">
           <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Users className="size-5" aria-hidden />
@@ -366,14 +371,19 @@ export default async function NotreEquipePage() {
           </div>
         </div>
 
-        <nav aria-label="Navigation rapide par équipe" className="flex gap-2 overflow-x-auto pb-1 min-[840px]:ml-auto">
+        {/* Mobile : défilement horizontal aimanté avec fondu à droite (indice qu'il reste
+            des équipes). Desktop : toutes les équipes visibles, passage à la ligne. */}
+        <nav
+          aria-label="Navigation rapide par équipe"
+          className="flex w-full snap-x gap-2 overflow-x-auto pb-1 mask-r-from-90% min-[840px]:flex-wrap min-[840px]:overflow-visible min-[840px]:mask-none"
+        >
           {equipes.map(({ definition, membres }) => {
             const Icone = definition.icon;
             return (
               <a
                 key={definition.id}
                 href={`#${definition.id}`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-outline-variant/20 bg-surface-container/60 hover:bg-surface-container-high hover:border-primary/40 text-xs font-semibold text-foreground transition-colors"
+                className="inline-flex min-h-8 shrink-0 snap-start items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-full border border-outline-variant/20 bg-surface-container/60 hover:bg-surface-container-high hover:border-primary/40 text-xs font-semibold text-foreground transition-colors"
               >
                 <Icone className="size-3.5 text-primary" />
                 <span>{definition.nom}</span>
@@ -387,7 +397,7 @@ export default async function NotreEquipePage() {
       </header>
 
       {/* Grilles d'Équipes & Médailles */}
-      <main className="container mx-auto max-w-7xl space-y-10 px-4 py-6 min-[600px]:px-6 min-[840px]:space-y-14 min-[840px]:py-8">
+      <div className="container mx-auto max-w-7xl space-y-10 px-4 py-6 min-[600px]:px-6 min-[840px]:space-y-14 min-[840px]:py-8">
         {equipes.map(({ definition, membres }, eqIdx) => {
           const IconeEquipe = definition.icon;
           const estBureau = definition.id === "bureauteam";
@@ -560,7 +570,7 @@ export default async function NotreEquipePage() {
             </section>
           );
         })}
-      </main>
+      </div>
     </div>
   );
 }

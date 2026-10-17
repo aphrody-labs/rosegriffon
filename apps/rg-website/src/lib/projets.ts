@@ -103,7 +103,7 @@ export const PROJETS: Projet[] = [
     badge: "WebTV & Replays",
     description:
       "La chaîne WebTV historique de Rose Griffon : sessions de jeu, tournois commentés et archives vidéo de la communauté.",
-    emote: "roy-cool",
+    emote: "roy-fine",
     href: "/rose-griffon-tv",
     icone: Tv,
     image: "/rgtv/affiche.webp",

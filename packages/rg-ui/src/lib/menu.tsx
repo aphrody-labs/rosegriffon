@@ -4,7 +4,7 @@ import { Menu } from "@base-ui/react/menu";
 import { ContextMenu } from "@base-ui/react/context-menu";
 import { Menubar } from "@base-ui/react/menubar";
 import type { ComponentProps } from "react";
-import { childRender, type PrimitiveProps } from "./render";
+import { childRender, rendersNativeButton, type PrimitiveProps } from "./render";
 
 type Position = Pick<
   ComponentProps<typeof Menu.Positioner>,
@@ -17,7 +17,7 @@ function Trigger({ asChild, children, render, nativeButton, ...props }: Primitiv
   return (
     <Menu.Trigger
       {...props}
-      nativeButton={nativeButton ?? (!child || child.type === "button")}
+      nativeButton={nativeButton ?? rendersNativeButton(child)}
       render={child ?? render}
     >
       {asChild ? undefined : children}

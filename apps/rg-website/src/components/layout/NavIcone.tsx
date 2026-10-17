@@ -8,7 +8,7 @@ import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { GameSpriteIcon } from "@/components/ui/GameSpriteIcon";
 import type { GameIconKey } from "@/config/game-icons";
 import type { SpriteCommonKey } from "@/config/sprites-common";
-import { EMOTES } from "@/lib/emotes";
+import { getEmote } from "@/lib/emotes";
 
 /**
  * Icône d'une entrée de navigation — les images de CETTE communauté.
@@ -36,8 +36,8 @@ export function NavIcone(item: NavItem): React.ReactNode {
     );
   }
 
-  if (item.emote && item.emote in EMOTES) {
-    const emote = EMOTES[item.emote]!;
+  const emote = item.emote ? getEmote(item.emote) : undefined;
+  if (emote) {
     return (
       <span className="relative block size-full">
         <Image src={emote.path} alt="" fill sizes="24px" className="object-contain" />

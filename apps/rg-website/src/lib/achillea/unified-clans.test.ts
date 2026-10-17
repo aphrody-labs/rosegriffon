@@ -34,6 +34,13 @@ describe("annuaire clans unifié", () => {
     ]);
   });
 
+  test("traite l'avatar par défaut de l'API comme une absence d'avatar", async () => {
+    const fetcher = async () =>
+      Response.json({ data: [{ ...clan, avatarUrl: "/achillea/default-clan-avatar.svg?clan=1" }], count: 1 });
+    const [result] = await listPublicClans(fetcher, "https://api.example.test");
+    expect(result?.avatarUrl).toBe("");
+  });
+
   test("rejette une réponse compacte incomplète", async () => {
     const fetcher = async () => Response.json({ data: [{ id: 1, name: "Incomplet" }], count: 1 });
     await expect(listPublicClans(fetcher)).rejects.toThrow("réponse invalide");

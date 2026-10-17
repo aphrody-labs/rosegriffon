@@ -24,6 +24,31 @@ export function childRender(asChild: boolean | undefined, children: ReactNode): 
   return child;
 }
 
+/** Composants qui rendent eux-mêmes un vrai <button> (ex. `Button` sans `asChild`). */
+const NATIVE_BUTTON_COMPONENTS = new WeakSet<object>();
+
+export function markNativeButton<T extends object>(component: T): T {
+  NATIVE_BUTTON_COMPONENTS.add(component);
+  return component;
+}
+
+/**
+ * Valeur de `nativeButton` pour un déclencheur Base UI rendu via `asChild` :
+ * vrai si l'élément final est un <button>, y compris quand l'enfant est notre
+ * `Button`. Sans cela, `<XTrigger asChild><Button/></XTrigger>` annonçait un
+ * non-bouton alors que le DOM contient un <button> (avertissement Base UI et
+ * attributs `role`/`aria-disabled` superflus).
+ */
+export function rendersNativeButton(child: ReactElement | undefined): boolean {
+  if (!child) return true;
+  if (child.type === "button") return true;
+  if (typeof child.type === "object" || typeof child.type === "function") {
+    const props = child.props as { asChild?: boolean };
+    return NATIVE_BUTTON_COMPONENTS.has(child.type) && !props.asChild;
+  }
+  return false;
+}
+
 export function Slot({
   children,
   ref,

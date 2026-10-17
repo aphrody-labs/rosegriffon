@@ -81,6 +81,7 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
 
           const marker = new AdvancedMarkerElement({
             content: markerElement,
+            gmpClickable: true,
             map,
             position: event.position,
             title: event.name,
@@ -105,7 +106,7 @@ export default function GoogleMapEvents({ events, isLoading }: GoogleMapEventsPr
             content: infoContent,
           });
 
-          marker.addListener("click", () => {
+          marker.addEventListener("gmp-click", () => {
             infoWindow.open({
               anchor: marker,
               map,

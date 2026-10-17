@@ -148,7 +148,10 @@ function renderNode(node: LexicalNode, key: string | number, ctx: SlugContext): 
     }
     case "heading": {
       const tag = (node.tag as string) || "h2";
-      const Tag = tag as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+      // Le titre de l'article est déjà l'unique <h1> de la page : un « h1 » saisi
+      // dans l'éditeur est rendu en <h2>. L'id reste calculé sur la balise
+      // d'origine pour rester aligné avec `extractTableOfContents`.
+      const Tag = (tag === "h1" ? "h2" : tag) as "h2" | "h3" | "h4" | "h5" | "h6";
       const text = extractText(node).trim();
       const id = (tag === "h2" || tag === "h3") && text ? uniqueSlug(ctx, slugify(text)) : undefined;
       return (

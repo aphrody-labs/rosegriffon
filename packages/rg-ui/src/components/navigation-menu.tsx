@@ -5,7 +5,7 @@ import * as React from "react";
 import { cva } from "class-variance-authority";
 import { ChevronDownIcon } from "lucide-react";
 import { cn } from "../lib/utils";
-import { childRender, type PrimitiveProps } from "../lib/render";
+import { childRender, rendersNativeButton, type PrimitiveProps } from "../lib/render";
 
 const ViewportMode = React.createContext(true);
 
@@ -62,7 +62,7 @@ function NavigationMenuTrigger({
       data-slot="navigation-menu-trigger"
       className={cn(navigationMenuTriggerStyle(), "group", className)}
       {...props}
-      nativeButton={nativeButton ?? (!child || child.type === "button")}
+      nativeButton={nativeButton ?? rendersNativeButton(child)}
       render={child ?? render}
     >
       {asChild ? undefined : (

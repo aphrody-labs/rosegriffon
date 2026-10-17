@@ -4,7 +4,7 @@ import { Select as SelectPrimitive } from "@base-ui/react/select";
 import * as React from "react";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { cn } from "../lib/utils";
-import { childRender, type PrimitiveProps } from "../lib/render";
+import { childRender, rendersNativeButton, type PrimitiveProps } from "../lib/render";
 
 type SelectProps = Omit<SelectPrimitive.Root.Props<string>, "onValueChange"> & {
   onValueChange?: (value: string, details: SelectPrimitive.Root.ChangeEventDetails) => void;
@@ -62,7 +62,7 @@ function SelectTrigger({
         className,
       )}
       {...props}
-      nativeButton={nativeButton ?? (!child || child.type === "button")}
+      nativeButton={nativeButton ?? rendersNativeButton(child)}
       render={child ?? render}
     >
       {asChild ? undefined : (

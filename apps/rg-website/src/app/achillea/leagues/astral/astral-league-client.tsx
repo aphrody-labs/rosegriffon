@@ -124,7 +124,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
         <button
           type="button"
           onClick={() => setActiveTab("standings")}
-          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
             activeTab === "standings"
               ? "border-primary text-foreground"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -136,7 +136,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
         <button
           type="button"
           onClick={() => setActiveTab("matches")}
-          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
             activeTab === "matches"
               ? "border-primary text-foreground"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -148,7 +148,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
         <button
           type="button"
           onClick={() => setActiveTab("playoffs")}
-          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
             activeTab === "playoffs"
               ? "border-primary text-foreground"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -160,7 +160,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
         <button
           type="button"
           onClick={() => setActiveTab("rules")}
-          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex items-center gap-1.5 ${
+          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
             activeTab === "rules"
               ? "border-primary text-foreground"
               : "border-transparent text-muted-foreground hover:text-foreground"

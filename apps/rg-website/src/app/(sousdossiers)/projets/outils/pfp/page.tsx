@@ -31,6 +31,7 @@ export default function PfpPage() {
       <div className="grid lg:grid-cols-2 gap-12 items-center">
         <div className="space-y-8">
           <div className="text-center space-y-4">
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Avatar RG</h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Personnalisez votre photo de profil en quelques clics et montrez votre appartenance à la communauté{" "}
               <span className="font-semibold text-primary">Rose Griffon</span>.

@@ -144,23 +144,26 @@ export function MobileHeader({
       </button>
 
       {isHome || !title ? (
-        <Link href={homeHref} className="flex items-center gap-1.5 shrink-0 ml-1">
-          <div className="relative size-7">
-            <Image src={logoSrc} fill sizes="28px" alt={appName} className="object-contain" />
+        // Sous ~440 px les actions (accueil, langue, thème, compte) occupent déjà
+        // la largeur : le nom passe en texte accessible pour ne pas pousser le
+        // bouton compte hors de l'écran.
+        <Link href={homeHref} aria-label={appName} className="flex min-w-0 items-center gap-1.5 ml-1">
+          <div className="relative size-7 shrink-0">
+            <Image src={logoSrc} fill sizes="28px" alt="" className="object-contain" />
           </div>
-          <span className="type-title-large text-sidebar-foreground">{appName}</span>
+          <span className="type-title-large text-sidebar-foreground truncate max-[439px]:sr-only">{appName}</span>
         </Link>
       ) : (
-        <span className="type-title-large text-sidebar-foreground truncate ml-1">{title}</span>
+        <span className="type-title-large text-sidebar-foreground truncate min-w-0 ml-1">{title}</span>
       )}
 
-      <div className="flex-1" />
+      <div className="flex-1 min-w-0" />
       {showUniverseSwitch && (
         <div className="flex items-center mr-1">
           <UniverseSwitch className="scale-90" />
         </div>
       )}
-      <div className="flex items-center gap-0.5">
+      <div className="flex shrink-0 items-center gap-0.5">
         <Link
           href={portalHref}
           className="size-12 rounded-full flex items-center justify-center text-sidebar-foreground/85 hover:bg-sidebar-accent active:bg-sidebar-accent transition-colors"

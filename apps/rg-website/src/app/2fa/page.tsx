@@ -32,7 +32,7 @@ function Verification() {
   }, [router, destination]);
 
   return (
-    <main className="flex min-h-[70vh] items-center justify-center px-4 py-12">
+    <div className="flex min-h-[70vh] items-center justify-center px-4 py-12">
       <TwoFactorChallenge
         hrefAide="/contact"
         onSucces={onSucces}
@@ -54,7 +54,7 @@ function Verification() {
           }
         }}
       />
-    </main>
+    </div>
   );
 }
 
@@ -67,14 +67,14 @@ export default function Page() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-[70vh] items-center justify-center px-4 py-12">
+        <div className="flex min-h-[70vh] items-center justify-center px-4 py-12">
           <div className="w-full max-w-md space-y-4 rounded-xl border border-border p-6">
             <Skeleton className="h-6 w-64" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full rounded-full" />
           </div>
-        </main>
+        </div>
       }
     >
       <Verification />

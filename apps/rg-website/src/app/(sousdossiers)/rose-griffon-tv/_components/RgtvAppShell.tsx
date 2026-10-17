@@ -129,11 +129,11 @@ export function RgtvAppShell({
             >
               <Image src="/rgtv/rgtv.webp" alt="RGTV" fill sizes="40px" className="object-cover" />
             </div>
-            <div className="hidden sm:block">
-              <h1 className="text-lg font-bold" style={{ color: "#345182" }}>
+            <div className="min-w-0">
+              <h1 className="truncate text-base font-bold sm:text-lg" style={{ color: "#345182" }}>
                 Rose Griffon TV
               </h1>
-              <p className="text-xs text-muted-foreground">100% Inazuma Eleven</p>
+              <p className="hidden text-xs text-muted-foreground sm:block">100% Inazuma Eleven</p>
             </div>
           </div>
 

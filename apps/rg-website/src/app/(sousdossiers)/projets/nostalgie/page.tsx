@@ -43,13 +43,14 @@ import { Toaster, toast } from "sonner";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 
 import { useNostalgieCollage } from "@/hooks/use-nostalgie-collage";
-import { useNostalgieExampleImage } from "@/hooks/use-nostalgie-example-image";
 import { useNostalgieUpload } from "@/hooks/use-nostalgie-upload";
 import { cn } from "@/lib/utils";
 import { InstagramIcon as Instagram } from "@/shared/icons/instagram";
 
 const IE1Image = "/IE1_EN.webp";
 const VRImage = "/vr.webp";
+/** Montage d'exemple (2011 vs 2025), servi depuis public/ comme les autres visuels de la page. */
+const ExampleImage = "/ogVR.webp";
 
 const ImageCropperDialog = nextDynamic(
   () =>
@@ -93,6 +94,7 @@ const UploadPlaceholder = ({
           src={showPreviewImage === "vr" ? VRImage : IE1Image}
           alt={showPreviewImage === "vr" ? "Victory Road Preview" : "Inazuma Eleven Preview"}
           fill
+          sizes="(min-width: 1024px) 50vw, 100vw"
           className="object-cover opacity-10 blur-sm"
           priority
         />
@@ -251,7 +253,6 @@ const UploadArea = ({
 export default function NostalgieVR() {
   const ogUpload = useNostalgieUpload();
   const vrUpload = useNostalgieUpload();
-  const { url: exampleImageUrl, loading: loadingExampleImage } = useNostalgieExampleImage();
   const {
     finalImage,
     showFinalCropDialog,
@@ -367,7 +368,7 @@ export default function NostalgieVR() {
               onClick={() => canCreateCollage && createCollage(ogUpload.image!, vrUpload.image!)}
               disabled={!canCreateCollage}
               size="lg"
-              className="min-w-[200px] bg-[#a14b3f] hover:bg-[#8a3f35] text-white shadow-lg hover:shadow-xl transition-all"
+              className="min-w-[200px] bg-rg-brique hover:bg-[#8a3f35] text-white shadow-lg hover:shadow-xl transition-all"
             >
               {isProcessing ? (
                 <>
@@ -535,30 +536,16 @@ export default function NostalgieVR() {
               </p>
             </div>
 
-            <Card className="overflow-hidden border-2 hover:border-[#a14b3f]/30 transition-all hover:shadow-2xl max-w-3xl mx-auto">
+            <Card className="overflow-hidden border-2 hover:border-rg-brique/30 transition-all hover:shadow-2xl max-w-3xl mx-auto">
               <CardContent className="p-0">
-                {loadingExampleImage ? (
-                  <div className="w-full aspect-video bg-muted flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <Loader2 className="size-8 animate-spin text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Chargement de l&apos;exemple...</p>
-                    </div>
-                  </div>
-                ) : exampleImageUrl ? (
-                  <div className="relative w-full h-auto">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={exampleImageUrl}
-                      alt="Exemple de montage Nostalgie - Comparaison 2011 vs 2025"
-                      className="w-full h-auto"
-                      crossOrigin="anonymous"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full aspect-video bg-muted flex items-center justify-center">
-                    <p className="text-sm text-muted-foreground">Impossible de charger l&apos;image d&apos;exemple</p>
-                  </div>
-                )}
+                <NextImage
+                  src={ExampleImage}
+                  alt="Exemple de montage Nostalgie - Comparaison 2011 vs 2025"
+                  width={1000}
+                  height={1000}
+                  sizes="(min-width: 768px) 768px, 100vw"
+                  className="w-full h-auto"
+                />
               </CardContent>
             </Card>
           </div>

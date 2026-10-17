@@ -7,7 +7,7 @@ import { EMOTES } from "@/lib/emotes";
 import type { Emote } from "@/lib/emotes";
 import { cn } from "@/lib/utils";
 
-interface RgEmoteProps extends React.HTMLAttributes<HTMLDivElement> {
+interface RgEmoteProps extends React.HTMLAttributes<HTMLSpanElement> {
   /** Nom de l'emote à afficher */
   name: keyof typeof EMOTES;
   /** Taille de l'emote en pixels (default: 48) */
@@ -54,8 +54,10 @@ export default function RgEmote({
     }
   };
 
+  // <span> et non <div> : l'emote est un élément en ligne, souvent posé dans un
+  // <p> ; un <div> y est du HTML invalide et fait échouer l'hydratation React.
   return (
-    <div
+    <span
       className={cn(
         "inline-block relative select-none",
         animated && "hover:scale-110 hover:rotate-12 transition-transform duration-300 cursor-pointer",
@@ -79,7 +81,7 @@ export default function RgEmote({
         onContextMenu={preventDownload ? e => e.preventDefault() : undefined}
         draggable={preventDownload ? false : undefined}
       />
-    </div>
+    </span>
   );
 }
 

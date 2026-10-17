@@ -493,7 +493,7 @@ export default async function ArticlePage({
       <CollapseSidebarOnMount />
       <ReadingProgressBar />
 
-      <article className="min-h-screen bg-background" id="main-content">
+      <article className="min-h-screen bg-background">
         {/* ================================================================
             HERO — Mobile-first : image pleine largeur, contenu dessous
             Desktop : image en fond avec overlay

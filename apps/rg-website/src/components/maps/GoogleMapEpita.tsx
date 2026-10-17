@@ -36,14 +36,15 @@ export default function GoogleMapEpita() {
 
         // Création du marqueur avancé
         const marker = new AdvancedMarkerElement({
-          content: pin.element,
+          content: pin,
+          gmpClickable: true,
           map,
           position: EPITA_COORDS,
           title: "EPITA Kremlin-Bicêtre",
         });
 
         // Ajout d'un événement au clic pour ouvrir Google Maps avec le Place ID spécifique
-        marker.addListener("click", () => {
+        marker.addEventListener("gmp-click", () => {
           const url = `https://www.google.com/maps/search/?api=1&query=EPITA&query_place_id=${EPITA_PLACE_ID}`;
           window.open(url, "_blank");
         });

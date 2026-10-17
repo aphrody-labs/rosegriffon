@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 
-import { EMOTES } from "@/lib/emotes";
+import { getEmote, isEmoteName } from "@/lib/emotes";
 import type { Emote } from "@/lib/emotes";
 import { cn } from "@/lib/utils";
 
@@ -55,7 +55,7 @@ export default function EmoteRenderer({
         lastIndex = match.index + match[0].length;
         continue;
       }
-      const emote = EMOTES[emoteName as keyof typeof EMOTES];
+      const nomEmote = isEmoteName(emoteName) ? emoteName : undefined;
 
       // Ajouter le texte avant l'emote
       if (match.index > lastIndex) {
@@ -63,11 +63,11 @@ export default function EmoteRenderer({
       }
 
       // Ajouter l'emote si elle existe
-      if (emote) {
+      if (nomEmote) {
         parts.push(
           <RgEmote
             key={`emote-${match.index}`}
-            name={emoteName as keyof typeof EMOTES}
+            name={nomEmote}
             size={emoteSize}
             animated={animated}
             className="inline-block align-middle mx-0.5"
@@ -114,7 +114,7 @@ export function useEmotesFromText(text: string, pattern: RegExp = /:([a-z]+-?[a-
       if (!emoteName) {
         continue;
       }
-      const emote = EMOTES[emoteName as keyof typeof EMOTES];
+      const emote = getEmote(emoteName);
       if (emote && !foundEmotes.find(e => e.name === emote.name)) {
         foundEmotes.push(emote);
       }
@@ -136,7 +136,7 @@ export function useEmotesFromText(text: string, pattern: RegExp = /:([a-z]+-?[a-
  */
 export function stripEmotes(text: string, pattern: RegExp = /:([a-z]+-?[a-z]+):/g): string {
   return text.replace(pattern, (match, emoteName) => {
-    const emote = EMOTES[emoteName];
+    const emote = getEmote(emoteName);
     return emote ? emote.alt : match;
   });
 }

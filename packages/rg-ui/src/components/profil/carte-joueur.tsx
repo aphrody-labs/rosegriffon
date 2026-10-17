@@ -25,7 +25,7 @@
  * sans titre, le ruban n'est pas rendu. La carte ne montre jamais un
  * emplacement vide.
  */
-import { useMemo } from "react";
+import { useCallback, useMemo, useState, type CSSProperties } from "react";
 
 import { AVAILABLE_BADGES } from "../../lib/badges-profil";
 import { urlBanniereAffichable } from "../../lib/galerie-cdn";
@@ -87,6 +87,41 @@ const POSTES: Record<string, { abrege: string; nom: string; couleur: string }> =
   MIL: { abrege: "MF", couleur: "var(--color-poste-milieu)", nom: "Milieu" },
 };
 
+/**
+ * Letterbox des illustrations du jeu : 16:9 avec deux bandes noires de 13,8 %
+ * de la hauteur chacune (mesuré au pixel sur les scènes de chronique 3840 × 2160).
+ */
+const RATIO_ILLUSTRATION = 16 / 9;
+const PART_BANDE = 0.138;
+
+/**
+ * Une illustration du CDN qui arrive encore en 16:9 n'a PAS été recadrée
+ * (`crop=bandes` ignoré par le service de variantes) : ses bandes noires
+ * apparaissaient en travers de la carte, selon le cadrage choisi.
+ */
+function garderSesBandes(img: HTMLImageElement, url: string): boolean {
+  if (!/\/(dx11|g4tx)\//.test(url) || !img.naturalWidth || !img.naturalHeight) return false;
+  return Math.abs(img.naturalWidth / img.naturalHeight - RATIO_ILLUSTRATION) < 0.03;
+}
+
+/**
+ * Équivalent `object-cover` + `object-position` appliqué à la SEULE zone utile
+ * de l'image (bandes exclues), en unités de conteneur : aucun calcul JS, la
+ * carte reste fluide. `cadrage` va de 0 (haut de la zone utile) à 1 (bas).
+ */
+function styleSansBandes(cadrage: number): CSSProperties {
+  const largeur = `max(100cqw, calc(100cqh * ${RATIO_ILLUSTRATION / (1 - 2 * PART_BANDE)}))`;
+  const decalage = -(PART_BANDE + cadrage * (1 - 2 * PART_BANDE));
+  return {
+    height: "auto",
+    left: `calc((100cqw - ${largeur}) / 2)`,
+    maxWidth: "none",
+    position: "absolute",
+    top: `calc(${largeur} / ${RATIO_ILLUSTRATION} * ${decalage} + ${cadrage} * 100cqh)`,
+    width: largeur,
+  };
+}
+
 export function CarteJoueur({
   pseudo,
   nom,
@@ -115,6 +150,15 @@ export function CarteJoueur({
   // en base : on les retire à l'affichage plutôt que de réécrire les lignes.
   const fond = urlBanniereAffichable(banniereUrl);
   const cadrage = Math.min(100, Math.max(0, banniereCadrage ?? 50));
+  const [bandes, setBandes] = useState(false);
+  // Ref + onLoad : l'image peut être déjà chargée avant l'hydratation, auquel
+  // cas `onLoad` ne se déclenche jamais côté React.
+  const verifierBandes = useCallback(
+    (img: HTMLImageElement | null) => {
+      if (img?.complete && fond) setBandes(garderSesBandes(img, fond));
+    },
+    [fond],
+  );
 
   return (
     <section aria-label={`Carte de ${nomAffiche}`} className="relative isolate w-full">
@@ -135,16 +179,20 @@ export function CarteJoueur({
         style={{ clipPath: "polygon(2.5% 0, 100% 0, 97.5% 100%, 0 100%)" }}
       >
         {fond ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={fond}
-            alt=""
-            aria-hidden
-            className="absolute inset-0 -z-10 size-full object-cover"
-            // Le cadrage choisi par le membre : `object-cover` seul prend
-            // toujours le centre de l'image.
-            style={{ objectPosition: `50% ${cadrage}%` }}
-          />
+          <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden [container-type:size]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              key={fond}
+              ref={verifierBandes}
+              src={fond}
+              alt=""
+              onLoad={event => setBandes(garderSesBandes(event.currentTarget, fond))}
+              className={bandes ? undefined : "absolute inset-0 size-full object-cover"}
+              // Le cadrage choisi par le membre : `object-cover` seul prend
+              // toujours le centre de l'image.
+              style={bandes ? styleSansBandes(cadrage / 100) : { objectPosition: `50% ${cadrage}%` }}
+            />
+          </div>
         ) : (
           <div
             aria-hidden
