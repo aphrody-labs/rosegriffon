@@ -4,7 +4,7 @@ import { Check, Loader2, Plus, ShoppingBag } from "lucide-react";
 import { useState, useTransition } from "react";
 
 import { addToCart } from "@/lib/shop/cart";
-import type { Product } from "@/lib/shop/products";
+import type { Product } from "@rosegriffon/types/shop";
 
 interface AddToCartProps {
   product: Product;

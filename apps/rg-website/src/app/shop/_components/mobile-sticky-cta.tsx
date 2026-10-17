@@ -3,7 +3,7 @@
 import { ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { formatEuros } from "@/lib/shop/products";
+import { formatEuros } from "@rosegriffon/types/shop";
 
 /**
  * Sticky CTA mobile pour les pages produit. Apparaît après scroll > 60%

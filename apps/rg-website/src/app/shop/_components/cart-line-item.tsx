@@ -7,7 +7,7 @@ import { useTransition } from "react";
 
 import { removeFromCart, updateQty } from "@/lib/shop/cart";
 import type { CartItemResolved } from "@/lib/shop/cart";
-import { formatEuros } from "@/lib/shop/products";
+import { formatEuros } from "@rosegriffon/types/shop";
 
 export function CartLineItem({ item }: { item: CartItemResolved }) {
   const [pending, startTransition] = useTransition();

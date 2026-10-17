@@ -3,7 +3,7 @@
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useState } from "react";
 
-import { formatEuros } from "@/lib/shop/products";
+import { formatEuros } from "@rosegriffon/types/shop";
 
 export function CheckoutButton({ subtotalCents }: { subtotalCents: number }) {
   const [pending, setPending] = useState(false);

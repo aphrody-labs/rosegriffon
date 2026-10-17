@@ -3,8 +3,8 @@
 import { useId, useState, useTransition } from "react";
 
 import { addToCart } from "@/lib/shop/cart";
-import { formatEuros } from "@/lib/shop/products";
-import type { Product } from "@/lib/shop/products";
+import { formatEuros } from "@rosegriffon/types/shop";
+import type { Product } from "@rosegriffon/types/shop";
 import { AddToCart } from "./add-to-cart";
 import { MobileStickyCta } from "./mobile-sticky-cta";
 
