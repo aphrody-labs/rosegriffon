@@ -172,11 +172,15 @@ export async function publierMessageDiscord(
  * moins de 24 h : une pièce jointe archivée hier n'est plus téléchargeable
  * aujourd'hui. Cette route rend des URL fraîches sans re-lire le message.
  * Rend `null` si la route échoue : l'appelant retentera à la passe suivante.
+ *
+ * La route est GLOBALE (`POST /attachments/refresh-urls`) : la variante préfixée
+ * par le salon n'existe pas et répond 404, ce qui laissait toutes les pièces
+ * jointes de plus de 24 h « périmées et non re-signables », run après run.
  */
-export async function resignerPiecesJointes(salonId: string, urls: string[]): Promise<string[] | null> {
+export async function resignerPiecesJointes(urls: string[]): Promise<string[] | null> {
   if (urls.length === 0) return [];
   try {
-    const reponse = await fetch(`${API_DISCORD}/channels/${salonId}/attachments/refresh-urls`, {
+    const reponse = await fetch(`${API_DISCORD}/attachments/refresh-urls`, {
       method: "POST",
       headers: entetes({ "Content-Type": "application/json" }),
       body: JSON.stringify({ attachment_urls: urls }),

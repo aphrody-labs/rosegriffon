@@ -82,7 +82,7 @@ export type TelechargementDiscord =
  * Télécharge une pièce jointe Discord, en re-signant son URL si elle a expiré.
  *
  * Sur 403/404 l'URL signée est simplement périmée : Discord sait la re-signer
- * (`POST /channels/{id}/attachments/refresh-urls`), on retente UNE fois avant
+ * (`POST /attachments/refresh-urls`), on retente UNE fois avant
  * d'abandonner. `tailleMax` protège la mémoire du démon comme le bucket.
  */
 export async function telechargerPieceJointeDiscord(
@@ -104,9 +104,9 @@ export async function telechargerPieceJointeDiscord(
   let reponse = await fetch(urlUtilisee).catch(() => null);
 
   if (!reponse || reponse.status === 403 || reponse.status === 404) {
-    const fraiches = await resignerPiecesJointes(salonId, [urlUtilisee]);
+    const fraiches = await resignerPiecesJointes([urlUtilisee]);
     const fraiche = fraiches?.[0];
-    if (!fraiche) return { ok: false, motif: "URL Discord périmée et non re-signable" };
+    if (!fraiche) return { ok: false, motif: `URL Discord périmée et non re-signable (salon ${salonId})` };
     urlUtilisee = fraiche;
     reponse = await fetch(urlUtilisee).catch(() => null);
   }
