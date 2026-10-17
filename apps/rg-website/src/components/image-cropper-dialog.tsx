@@ -203,7 +203,7 @@ export function ImageCropperDialog({
             <Button
               onClick={handleCrop}
               disabled={!cropArea || isProcessing}
-              className="w-full sm:w-auto bg-[#a14b3f] hover:bg-[#8a3f35]"
+              className="w-full sm:w-auto bg-rg-brique hover:bg-[#8a3f35]"
             >
               {isProcessing ? (
                 <>

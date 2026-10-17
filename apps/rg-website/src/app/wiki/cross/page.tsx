@@ -5,6 +5,7 @@ import { Badge, Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui
 import { crossData } from "./data";
 import { Reveal, RevealGroup, RevealChild, StampPop, KenBurns, Float, Carousel } from "./motion";
 import { CrossGallery } from "./CrossGallery";
+import { wiki } from "@rosegriffon/app-shell";
 
 const GOOGLE_PLAY = "https://play.google.com/store/apps/details?id=jp.co.level5.inazumacross";
 const APP_STORE = "https://apps.apple.com/jp/app/id6756994116";
@@ -13,7 +14,7 @@ const X_ACCOUNT = "https://x.com/inazuma_cross";
 const YT_PLAYLIST = "https://www.youtube.com/playlist?list=PLlapDTT9GR4TwdLT5pbq88rfeuKXe3XLv";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/cross" },
+  alternates: { canonical: wiki("/cross") },
   title: "Inazuma Eleven Cross — le nouveau jeu mobile | Azalée",
   description:
     "Inazuma Eleven Cross (イナズマイレブン クロス), le jeu mobile Level-5 × Aiming, lancement le 9 juin 2026. Traduction factuelle du site officiel inazuma-cross.jp + tweets récents @inazuma_cross. Jeu distinct d'Inazuma Eleven: Victory Road.",
@@ -516,7 +517,7 @@ export default function CrossPage() {
       <section className="mb-12">
         {/* Key visual de la page spéciale */}
         <Reveal blur className="mb-6 overflow-hidden rounded-3xl border-2 border-secondary/30 shadow-level-2">
-          <div className="relative aspect-[16/9] bg-[#0c1730]">
+          <div className="relative aspect-[16/9] bg-rg-marine">
             <Image
               src={localImages.samuraiBlueKeyVisual}
               alt="Projet Équipe Nationale du Japon 2026 — visuel principal"
@@ -557,7 +558,7 @@ export default function CrossPage() {
                 <RevealChild key={c.nameJa} blur>
                   <Card className="h-full overflow-hidden border-l-8 border-l-secondary bg-surface-container-low shadow-sm transition-transform hover:-translate-y-1 hover:shadow-level-2">
                     {c.image ? (
-                      <div className="relative aspect-[4/3] bg-[#0c1730]">
+                      <div className="relative aspect-[4/3] bg-rg-marine">
                         <Image
                           src={c.image}
                           alt={c.nameFr}
@@ -613,7 +614,7 @@ export default function CrossPage() {
           </div>
           <Reveal blur amount={0.2}>
             <Float distance={8} duration={6}>
-              <div className="self-start overflow-hidden rounded-2xl border border-outline-variant/30 bg-[#0c1730]">
+              <div className="self-start overflow-hidden rounded-2xl border border-outline-variant/30 bg-rg-marine">
                 <div className="relative aspect-square">
                   <Image
                     src={localImages.samuraiBlueCharacter}

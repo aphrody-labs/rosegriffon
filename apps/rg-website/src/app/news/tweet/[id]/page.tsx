@@ -155,7 +155,7 @@ function renderFormattedText(text: string) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-0.5 text-[#1DA1F2] hover:text-[#1DA1F2]/80 font-semibold underline decoration-wavy decoration-[#1DA1F2]/30 hover:decoration-[#1DA1F2] transition-all break-all"
+          className="inline-flex items-center gap-0.5 text-twitter hover:text-twitter/80 font-semibold underline decoration-wavy decoration-twitter/30 hover:decoration-twitter transition-all break-all"
         >
           {displayUrl}
           {suffix}
@@ -200,7 +200,7 @@ function formatSectionText(text: string, isFirstSection = false) {
           return (
             <h2
               key={index}
-              className="text-xl sm:text-2xl font-normal font-cartoon text-on-surface mt-10 mb-5 pl-4 relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1.5 before:bg-[#1DA1F2] before:rounded-full"
+              className="text-xl sm:text-2xl font-normal font-cartoon text-on-surface mt-10 mb-5 pl-4 relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1.5 before:bg-twitter before:rounded-full"
             >
               {trimmed.replace(/^[-\s•]+/g, "")}
             </h2>
@@ -213,7 +213,7 @@ function formatSectionText(text: string, isFirstSection = false) {
               key={index}
               className="list-none flex items-start gap-2.5 my-2 pl-2 text-on-surface-variant/90 leading-relaxed text-base sm:text-lg font-medium"
             >
-              <span className="inline-flex size-2 rounded-full bg-[#1DA1F2]/50 mt-2.5 shrink-0 animate-pulse" />
+              <span className="inline-flex size-2 rounded-full bg-twitter/50 mt-2.5 shrink-0 animate-pulse" />
               <span className="flex-1">{renderFormattedText(trimmed.replace(/^[-\s•]+/g, ""))}</span>
             </li>
           );
@@ -230,7 +230,7 @@ function formatSectionText(text: string, isFirstSection = false) {
           return (
             <blockquote
               key={index}
-              className="my-6 pl-5 border-l-4 border-[#1DA1F2]/60 italic text-on-surface/90 text-base sm:text-lg font-medium leading-[1.8] bg-[#1DA1F2]/5 py-4 pr-4 rounded-r-2xl"
+              className="my-6 pl-5 border-l-4 border-twitter/60 italic text-on-surface/90 text-base sm:text-lg font-medium leading-[1.8] bg-twitter/5 py-4 pr-4 rounded-r-2xl"
             >
               {renderFormattedText(quoteText)}
             </blockquote>
@@ -352,7 +352,7 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
               sizes="100vw"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1DA1F2]/20 via-surface-container to-primary/10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-twitter/20 via-surface-container to-primary/10" />
           )}
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
@@ -375,10 +375,10 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
           <div className="bg-surface-container/90 border border-outline-variant/15 backdrop-blur-xl rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl animate-in slide-in-from-bottom-8 duration-500">
             {/* Category & Badge */}
             <div className="flex flex-wrap items-center gap-2.5 mb-4">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#1DA1F2]">
+              <span className="text-[10px] font-black uppercase tracking-widest text-twitter">
                 Inazuma Eleven News
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#1DA1F2] text-white shadow-sm shadow-[#1DA1F2]/20">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-twitter text-white shadow-sm shadow-twitter/20">
                 <Twitter className="size-3 fill-current" />
                 {isThread ? `Thread · ${tweet.tweet_count} tweets` : "Tweet"}
               </span>
@@ -514,7 +514,7 @@ export default async function TweetPage({ params }: { params: Promise<{ id: stri
               <div>
                 <div className="flex items-center gap-2">
                   <p className="font-bold text-on-surface text-base sm:text-lg">{authorInfo.name}</p>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#1DA1F2]/10 text-[#1DA1F2]">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-twitter/10 text-twitter">
                     Auteur
                   </span>
                 </div>

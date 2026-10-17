@@ -81,7 +81,7 @@ function TweetPost({ item }: { item: FeedItem }) {
 
   return (
     <Link href={href} className="group block">
-      <article className="rounded-2xl overflow-hidden bg-surface-container-low border border-outline-variant/10 transition-all duration-300 hover:shadow-lg hover:shadow-[#1DA1F2]/5 hover:border-outline-variant/20">
+      <article className="rounded-2xl overflow-hidden bg-surface-container-low border border-outline-variant/10 transition-all duration-300 hover:shadow-lg hover:shadow-twitter/5 hover:border-outline-variant/20">
         {/* Cover image */}
         {heroImage ? (
           <div className="relative aspect-[16/9] bg-surface-container overflow-hidden">
@@ -94,21 +94,21 @@ function TweetPost({ item }: { item: FeedItem }) {
             />
           </div>
         ) : (
-          <div className="relative aspect-[16/9] bg-linear-to-br from-[#1DA1F2]/10 via-surface-container to-primary/5 flex items-center justify-center">
-            <Twitter className="size-12 text-[#1DA1F2]/20 fill-[#1DA1F2]/20" />
+          <div className="relative aspect-[16/9] bg-linear-to-br from-twitter/10 via-surface-container to-primary/5 flex items-center justify-center">
+            <Twitter className="size-12 text-twitter/20 fill-twitter/20" />
           </div>
         )}
 
         {/* Content */}
         <div className="p-4 space-y-2">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 bg-[#1DA1F2]/10 text-[#1DA1F2] rounded-md border-none px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+            <span className="inline-flex items-center gap-1 bg-twitter/10 text-twitter rounded-md border-none px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
               <Twitter className="size-3 fill-current" />
               {isThread ? `Thread · ${item.threadTweets!.length}` : "Tweet"}
             </span>
           </div>
 
-          <h3 className="text-base font-bold text-on-surface leading-snug line-clamp-2 group-hover:text-[#1DA1F2] transition-colors">
+          <h3 className="text-base font-bold text-on-surface leading-snug line-clamp-2 group-hover:text-twitter transition-colors">
             {title}
           </h3>
 
@@ -140,7 +140,7 @@ function TweetPost({ item }: { item: FeedItem }) {
                 {formatDistanceToNow(date, { addSuffix: true, locale })}
               </span>
             </div>
-            <span className="inline-flex items-center gap-1 text-xs text-[#1DA1F2]/70 font-medium group-hover:text-[#1DA1F2] transition-colors shrink-0">
+            <span className="inline-flex items-center gap-1 text-xs text-twitter/70 font-medium group-hover:text-twitter transition-colors shrink-0">
               Lire
               <ExternalLink className="size-3 transition-transform group-hover:translate-x-0.5" />
             </span>
@@ -350,8 +350,8 @@ export function NewsFeedClient({
             {/* Section header */}
             <div className="flex items-center gap-3 mb-4">
               <div className="flex items-center gap-2">
-                <div className="size-8 rounded-lg bg-[#1DA1F2]/10 flex items-center justify-center">
-                  <Twitter className="size-4 text-[#1DA1F2]" />
+                <div className="size-8 rounded-lg bg-twitter/10 flex items-center justify-center">
+                  <Twitter className="size-4 text-twitter" />
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-on-surface">Tweets</h2>
@@ -361,7 +361,7 @@ export function NewsFeedClient({
                   </p>
                 </div>
               </div>
-              <div className="flex-1 h-px bg-[#1DA1F2]/10" />
+              <div className="flex-1 h-px bg-twitter/10" />
             </div>
 
             {/* Tweets grid */}

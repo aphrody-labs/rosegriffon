@@ -73,7 +73,7 @@ export function PatreonConnectButton({ variant = "patron-link", redirect, classN
       onClick={handleClick}
       disabled={loading}
       size="lg"
-      className={cn("gap-2 bg-[#c9a958] text-[#0c1730] hover:bg-[#dab86a] font-semibold", className)}
+      className={cn("gap-2 bg-[#c9a958] text-rg-marine hover:bg-[#dab86a] font-semibold", className)}
     >
       {loading ? (
         <Loader2 className="size-4 animate-spin" />

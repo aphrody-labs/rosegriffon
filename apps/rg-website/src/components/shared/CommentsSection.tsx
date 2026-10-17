@@ -184,7 +184,7 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
     <Card className={`border-2 bg-white/90 dark:bg-gray-900/90 shadow-xl backdrop-blur-md ${className}`}>
       <CardContent className="p-4 sm:p-6 flex flex-col h-full">
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
-          <MessageSquare className="size-5 text-[#a14b3f]" />
+          <MessageSquare className="size-5 text-rg-brique" />
           <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">
             {isLiveChat ? "Tchat Live" : "Commentaires"}
           </h3>
@@ -201,7 +201,7 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
         >
           {isLoading ? (
             <div className="flex justify-center items-center py-8">
-              <span className="animate-spin size-6 border-2 border-[#a14b3f] border-t-transparent rounded-full" />
+              <span className="animate-spin size-6 border-2 border-rg-brique border-t-transparent rounded-full" />
             </div>
           ) : comments.length === 0 ? (
             <p className="text-center text-gray-500 py-8 text-sm italic">
@@ -222,7 +222,7 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
                 >
                   <Avatar className="size-8 sm:size-9 border border-gray-200 dark:border-gray-800 shadow-sm">
                     <AvatarImage src={comment.profiles?.avatar_url || ""} />
-                    <AvatarFallback className="bg-[#a14b3f]/10 text-[#a14b3f] font-bold text-xs uppercase">
+                    <AvatarFallback className="bg-rg-brique/10 text-rg-brique font-bold text-xs uppercase">
                       {(comment.profiles?.username || "U").substring(0, 2)}
                     </AvatarFallback>
                   </Avatar>
@@ -235,7 +235,7 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
 
                       {/* Rôle badge */}
                       {comment.profiles?.role === "admin" && (
-                        <Badge className="bg-[#a14b3f] text-white hover:bg-[#a14b3f] scale-90 origin-left px-1.5 py-0">
+                        <Badge className="bg-rg-brique text-white hover:bg-rg-brique scale-90 origin-left px-1.5 py-0">
                           <ShieldAlert className="size-3 mr-0.5 inline" />
                           Admin
                         </Badge>
@@ -298,7 +298,7 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
                 placeholder={isLiveChat ? "Envoyer un message..." : "Ajouter un commentaire..."}
                 value={newComment}
                 onChange={e => setNewComment(e.target.value)}
-                className="flex-1 min-h-[40px] max-h-[120px] text-sm resize-none focus-visible:ring-[#a14b3f] bg-gray-50/50 dark:bg-gray-800/50"
+                className="flex-1 min-h-[40px] max-h-[120px] text-sm resize-none focus-visible:ring-rg-brique bg-gray-50/50 dark:bg-gray-800/50"
                 maxLength={1000}
                 onKeyDown={e => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -311,7 +311,7 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
                 type="submit"
                 size="icon"
                 disabled={isSubmitting || !newComment.trim()}
-                className="bg-[#a14b3f] hover:bg-[#a14b3f]/90 text-white shrink-0 size-10"
+                className="bg-rg-brique hover:bg-rg-brique/90 text-white shrink-0 size-10"
               >
                 {isSubmitting ? (
                   <span className="animate-spin size-4 border-2 border-white border-t-transparent rounded-full" />
@@ -323,7 +323,7 @@ export function CommentsSection({ targetId, targetType, className = "" }: Commen
           ) : (
             <div className="text-center py-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-dashed border-gray-200 dark:border-gray-800">
               <p className="text-sm text-gray-500 mb-2">Connecte-toi pour participer à la discussion !</p>
-              <Button asChild size="sm" className="bg-[#a14b3f] hover:bg-[#a14b3f]/90 text-white">
+              <Button asChild size="sm" className="bg-rg-brique hover:bg-rg-brique/90 text-white">
                 <a href={`/login?redirect=${encodeURIComponent(pathname)}`}>Se connecter</a>
               </Button>
             </div>

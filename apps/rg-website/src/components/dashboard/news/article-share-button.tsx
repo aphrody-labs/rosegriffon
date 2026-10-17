@@ -29,8 +29,8 @@ interface Platform {
 
 const PLATFORMS: Platform[] = [
   {
-    bgHover: "hover:bg-[#1DA1F2]/10",
-    color: "text-[#1DA1F2]",
+    bgHover: "hover:bg-twitter/10",
+    color: "text-twitter",
     getUrl: (url, title) =>
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`,
     icon: (

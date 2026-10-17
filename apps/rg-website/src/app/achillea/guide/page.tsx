@@ -148,7 +148,7 @@ export default function AchilleaGuidePage() {
       <Card className="border-border/60">
         <CardHeader className="p-6 pb-2">
           <CardTitle className="text-xl flex items-center gap-2.5">
-            <FaDiscord className="size-5 text-[#5865F2]" />
+            <FaDiscord className="size-5 text-discord" />
             Commandes Bot Discord
           </CardTitle>
         </CardHeader>
@@ -323,7 +323,7 @@ export default function AchilleaGuidePage() {
               className="flex items-center justify-between p-3 rounded-lg border border-border/60 hover:bg-muted/40 transition"
             >
               <div className="flex items-center gap-2.5">
-                <FaDiscord className="size-4 text-[#5865F2]" />
+                <FaDiscord className="size-4 text-discord" />
                 <span className="font-semibold">Discord</span>
               </div>
               <ExternalLink className="size-3.5 text-muted-foreground" />

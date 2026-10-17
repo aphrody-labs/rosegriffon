@@ -160,7 +160,7 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
     return (
       <Link
         href={`/news/tweet/${tweet.id}`}
-        className="shrink-0 min-w-[220px] max-w-[220px] flex items-start gap-2.5 px-3 py-2.5 rounded-xl bg-surface-container border border-outline-variant/10 hover:border-[#1DA1F2]/30 transition-colors"
+        className="shrink-0 min-w-[220px] max-w-[220px] flex items-start gap-2.5 px-3 py-2.5 rounded-xl bg-surface-container border border-outline-variant/10 hover:border-twitter/30 transition-colors"
       >
         {heroImage ? (
           <div className="size-10 rounded-lg overflow-hidden relative bg-surface-container-high shrink-0">
@@ -188,7 +188,7 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
   return (
     <Link
       href={`/news/tweet/${tweet.id}`}
-      className="group flex flex-col bg-surface-container rounded-2xl overflow-hidden border border-outline-variant/10 hover:border-[#1DA1F2]/30 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+      className="group flex flex-col bg-surface-container rounded-2xl overflow-hidden border border-outline-variant/10 hover:border-twitter/30 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
     >
       {/* Cover image */}
       {heroImage ? (
@@ -202,8 +202,8 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
           />
         </div>
       ) : (
-        <div className="relative aspect-[16/9] bg-linear-to-br from-[#1DA1F2]/10 via-surface-container to-primary/5 flex items-center justify-center">
-          <svg className="size-10 text-[#1DA1F2]/20" viewBox="0 0 24 24" fill="currentColor">
+        <div className="relative aspect-[16/9] bg-linear-to-br from-twitter/10 via-surface-container to-primary/5 flex items-center justify-center">
+          <svg className="size-10 text-twitter/20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
           </svg>
         </div>
@@ -211,13 +211,13 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
 
       {/* Content */}
       <div className="p-4 flex flex-col flex-1">
-        <span className="inline-flex items-center gap-1 w-fit bg-[#1DA1F2]/10 text-[#1DA1F2] rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider mb-2">
+        <span className="inline-flex items-center gap-1 w-fit bg-twitter/10 text-twitter rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider mb-2">
           <svg className="size-3" viewBox="0 0 24 24" fill="currentColor">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
           </svg>
           Post
         </span>
-        <h3 className="text-base font-bold text-on-surface leading-snug line-clamp-2 group-hover:text-[#1DA1F2] transition-colors mb-1">
+        <h3 className="text-base font-bold text-on-surface leading-snug line-clamp-2 group-hover:text-twitter transition-colors mb-1">
           {title}
         </h3>
         {excerpt && (
@@ -241,7 +241,7 @@ function TweetCard({ tweet, variant }: { tweet: Tweet; variant: "chip" | "full" 
             </span>
             <span className="text-[11px] text-on-surface-variant/50">{timeAgo}</span>
           </div>
-          <span className="inline-flex items-center gap-1 text-[11px] text-[#1DA1F2]/60 font-medium group-hover:text-[#1DA1F2] transition-colors">
+          <span className="inline-flex items-center gap-1 text-[11px] text-twitter/60 font-medium group-hover:text-twitter transition-colors">
             Lire
             <ArrowRight size={12} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
           </span>
@@ -345,7 +345,7 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
         {hasTweets && (
           <div className={hasArticles ? "mt-5" : ""}>
             <div className="flex items-center gap-1.5 mb-3 px-0">
-              <AtSign size={14} aria-hidden="true" className="text-[#1DA1F2]" />
+              <AtSign size={14} aria-hidden="true" className="text-twitter" />
               <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">@Azalee_IE</span>
             </div>
             <div className="flex overflow-x-auto gap-2.5 -mx-4 px-4 scrollbar-hide">
@@ -409,7 +409,7 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
             <div className={hasArticles ? "mt-5 border-t border-outline-variant/20 pt-5" : ""}>
               {hasArticles && (
                 <div className="mb-3 flex items-center gap-2">
-                  <AtSign size={18} aria-hidden="true" className="text-[#1DA1F2]" />
+                  <AtSign size={18} aria-hidden="true" className="text-twitter" />
                   <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider">
                     Derniers tweets @Azalee_IE
                   </h3>

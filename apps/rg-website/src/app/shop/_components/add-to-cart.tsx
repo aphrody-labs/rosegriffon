@@ -41,7 +41,7 @@ export function AddToCart({ product, variantId, size = "default", className = ""
         type="button"
         onClick={handle}
         disabled={disabled || pending}
-        className={`group inline-flex items-center justify-center gap-2 rounded-full bg-[#d4af37] font-extrabold uppercase tracking-wider text-[#0c1730] shadow-[0_3px_0_0_rgba(0,0,0,0.4)] transition-all motion-safe:duration-200 hover:-translate-y-0.5 hover:bg-[#e8c668] hover:shadow-[0_5px_0_0_rgba(0,0,0,0.5)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 outline-hidden focus-visible:ring-[3px] focus-visible:ring-[#d4af37]/50 ${
+        className={`group inline-flex items-center justify-center gap-2 rounded-full bg-rg-or font-extrabold uppercase tracking-wider text-rg-marine shadow-[0_3px_0_0_rgba(0,0,0,0.4)] transition-all motion-safe:duration-200 hover:-translate-y-0.5 hover:bg-[#e8c668] hover:shadow-[0_5px_0_0_rgba(0,0,0,0.5)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 outline-hidden focus-visible:ring-[3px] focus-visible:ring-rg-or/50 ${
           isLarge ? "h-12 w-full px-6 text-sm" : "h-10 px-5 text-xs"
         }`}
         aria-label={`Ajouter ${product.name} au panier`}
@@ -60,7 +60,7 @@ export function AddToCart({ product, variantId, size = "default", className = ""
           </>
         )}
       </button>
-      {error && <p className="mt-2 text-xs font-semibold text-[#a14b3f]">{error}</p>}
+      {error && <p className="mt-2 text-xs font-semibold text-rg-brique">{error}</p>}
     </div>
   );
 }

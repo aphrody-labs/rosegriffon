@@ -57,7 +57,7 @@ function EventCard({ event }: EventCardProps) {
 
       {/* Content */}
       <div className="relative grow w-full sm:w-auto">
-        <h3 className="text-base sm:text-lg font-bold mb-1 group-hover:text-[#a14b3f] transition-colors duration-300 line-clamp-2">
+        <h3 className="text-base sm:text-lg font-bold mb-1 group-hover:text-rg-brique transition-colors duration-300 line-clamp-2">
           {event.summary}
         </h3>
         <div className="flex flex-col gap-0.5 sm:gap-1">

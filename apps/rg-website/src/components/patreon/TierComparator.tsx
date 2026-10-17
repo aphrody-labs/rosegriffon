@@ -55,7 +55,7 @@ export function TierComparator() {
           )}
         >
           {tier.highlight && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#c9a958] px-3 py-1 text-xs font-bold text-[#0c1730]">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#c9a958] px-3 py-1 text-xs font-bold text-rg-marine">
               TIER PHARE
             </div>
           )}

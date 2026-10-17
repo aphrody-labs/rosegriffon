@@ -36,8 +36,8 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-4 py-16 text-center">
-      <div className="grid size-20 place-items-center rounded-full bg-[#d4af37] shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
-        <Check className="size-10 text-[#0c1730]" strokeWidth={3} />
+      <div className="grid size-20 place-items-center rounded-full bg-rg-or shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
+        <Check className="size-10 text-rg-marine" strokeWidth={3} />
       </div>
       <h1 className="mt-6 text-fluid-display-lg font-extrabold tracking-tight text-white">Merci 🌹</h1>
       <p className="mt-4 max-w-md text-base text-white/80">
@@ -52,7 +52,7 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
       </p>
 
       {(total !== null || lineCount > 0) && (
-        <dl className="mt-8 grid w-full max-w-sm grid-cols-2 gap-y-2 rounded-2xl border-2 border-[#d4af37]/40 bg-[#0c1730]/60 p-5 text-sm">
+        <dl className="mt-8 grid w-full max-w-sm grid-cols-2 gap-y-2 rounded-2xl border-2 border-rg-or/40 bg-rg-marine/60 p-5 text-sm">
           {lineCount > 0 && (
             <>
               <dt className="text-left text-white/60">Articles</dt>
@@ -62,7 +62,7 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
           {total !== null && (
             <>
               <dt className="text-left text-white/60">Total réglé</dt>
-              <dd className="text-right text-base font-extrabold text-[#d4af37]">{formatEuros(total)}</dd>
+              <dd className="text-right text-base font-extrabold text-rg-or">{formatEuros(total)}</dd>
             </>
           )}
         </dl>
@@ -72,7 +72,7 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
         On prépare ton colis sous 3 à 5 jours ouvrés. Une question ?{" "}
         <a
           href="mailto:contact@rose-griffon.fr"
-          className="font-semibold text-[#d4af37] underline decoration-2 underline-offset-4"
+          className="font-semibold text-rg-or underline decoration-2 underline-offset-4"
         >
           contact@rose-griffon.fr
         </a>
@@ -81,14 +81,14 @@ export default async function ThankYouPage({ searchParams }: ThankYouProps) {
       <div className="mt-10 flex flex-col gap-3 sm:flex-row">
         <Link
           href="/shop"
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-full border-2 border-[#d4af37] bg-[#0c1730] px-6 text-sm font-extrabold uppercase tracking-wider text-[#d4af37] shadow-[0_3px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-full border-2 border-rg-or bg-rg-marine px-6 text-sm font-extrabold uppercase tracking-wider text-rg-or shadow-[0_3px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
         >
           <ShoppingBag className="size-4" />
           Continuer mes achats
         </Link>
         <Link
           href="/"
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#d4af37] px-6 text-sm font-extrabold uppercase tracking-wider text-[#0c1730] shadow-[0_3px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-rg-or px-6 text-sm font-extrabold uppercase tracking-wider text-rg-marine shadow-[0_3px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
         >
           <Home className="size-4" />
           Retour au site

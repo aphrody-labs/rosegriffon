@@ -177,7 +177,7 @@ export function CrossGallery() {
                     type="button"
                     aria-label="Agrandir la ressource"
                     onClick={() => setLightboxImage(img.src)}
-                    className="group relative w-full aspect-square bg-[#0c1730]/90 cursor-pointer flex items-center justify-center"
+                    className="group relative w-full aspect-square bg-rg-marine/90 cursor-pointer flex items-center justify-center"
                   >
                     <div className="relative size-36">
                       <Image

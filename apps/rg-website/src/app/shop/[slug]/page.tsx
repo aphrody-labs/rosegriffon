@@ -148,7 +148,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <nav aria-label="Fil d'Ariane" className="mb-6">
         <Link
           href="/shop"
-          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/70 transition-colors motion-safe:duration-200 hover:text-[#d4af37]"
+          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/70 transition-colors motion-safe:duration-200 hover:text-rg-or"
         >
           <ArrowLeft className="size-4" />
           <span>Retour catalogue</span>
@@ -158,7 +158,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <div className="grid gap-10 md:grid-cols-12 md:gap-12 lg:gap-16">
         {/* Gallery */}
         <section className="md:col-span-7">
-          <div className="relative overflow-hidden rounded-3xl border-2 border-[#d4af37]/50 bg-[#0c1730] shadow-[0_8px_0_0_rgba(0,0,0,0.4)]">
+          <div className="relative overflow-hidden rounded-3xl border-2 border-rg-or/50 bg-rg-marine shadow-[0_8px_0_0_rgba(0,0,0,0.4)]">
             <div className="relative aspect-[4/3]">
               <Image
                 src={gallery[0]!}
@@ -170,15 +170,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
               />
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-[#0c1730]/40 via-transparent to-transparent"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-rg-marine/40 via-transparent to-transparent"
               />
             </div>
             {gallery.length > 1 && (
-              <div className="grid grid-cols-4 gap-2 border-t-2 border-[#d4af37]/40 p-3">
+              <div className="grid grid-cols-4 gap-2 border-t-2 border-rg-or/40 p-3">
                 {gallery.map((src, i) => (
                   <div
                     key={src}
-                    className="relative aspect-square overflow-hidden rounded-xl border-2 border-[#d4af37]/30 bg-[#0c1730]"
+                    className="relative aspect-square overflow-hidden rounded-xl border-2 border-rg-or/30 bg-rg-marine"
                   >
                     <Image
                       src={src}
@@ -198,7 +198,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <section className="md:col-span-5">
           <div className="sticky top-24 flex flex-col gap-6">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border-2 border-[#d4af37]/40 bg-[#0c1730] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#d4af37]">
+              <p className="inline-flex items-center gap-2 rounded-full border-2 border-rg-or/40 bg-rg-marine px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-rg-or">
                 {CATEGORY_LABELS[product.category]}
               </p>
               <h1 className="mt-3 text-balance text-fluid-headline-xl font-extrabold leading-tight tracking-tight text-white">
@@ -208,22 +208,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
 
             <Suspense
-              fallback={<div className="h-20 animate-pulse rounded-2xl border-2 border-[#d4af37]/30 bg-[#0c1730]/40" />}
+              fallback={<div className="h-20 animate-pulse rounded-2xl border-2 border-rg-or/30 bg-rg-marine/40" />}
             >
               <PatreonDiscountBanner />
             </Suspense>
 
-            <div className="rounded-3xl border-2 border-[#d4af37]/40 bg-[#0c1730]/60 p-5 shadow-[0_4px_0_0_rgba(0,0,0,0.4)]">
+            <div className="rounded-3xl border-2 border-rg-or/40 bg-rg-marine/60 p-5 shadow-[0_4px_0_0_rgba(0,0,0,0.4)]">
               <VariantPickerWithCta product={product} />
             </div>
 
             {product.highlights && (
               <div>
-                <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d4af37]">Contenu du pack</h2>
+                <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-rg-or">Contenu du pack</h2>
                 <ul className="space-y-2">
                   {product.highlights.map(h => (
                     <li key={h} className="flex items-start gap-3 text-sm text-white/85">
-                      <Check className="mt-0.5 size-4 shrink-0 text-[#d4af37]" />
+                      <Check className="mt-0.5 size-4 shrink-0 text-rg-or" />
                       <span>{h}</span>
                     </li>
                   ))}
@@ -231,7 +231,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3 border-t-2 border-[#d4af37]/30 pt-5 text-xs uppercase tracking-widest text-white/60">
+            <div className="grid grid-cols-2 gap-3 border-t-2 border-rg-or/30 pt-5 text-xs uppercase tracking-widest text-white/60">
               <span>Prix</span>
               <span className="text-right text-white">{formatEuros(product.priceCents)}</span>
               <span>Livraison FR</span>
@@ -246,13 +246,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {/* Description longue */}
       <section className="mt-16 grid gap-8 md:grid-cols-12">
         <div className="md:col-span-8">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-[#d4af37]">Description</h2>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-rg-or">Description</h2>
           <p className="mt-4 text-pretty text-lg leading-relaxed text-white/85">{product.description}</p>
           <div className="mt-6 flex flex-wrap gap-2">
             {product.tags.map(t => (
               <span
                 key={t}
-                className="inline-flex items-center rounded-full border border-[#d4af37]/40 bg-[#0c1730]/60 px-3 py-1 text-xs font-semibold text-white/70"
+                className="inline-flex items-center rounded-full border border-rg-or/40 bg-rg-marine/60 px-3 py-1 text-xs font-semibold text-white/70"
               >
                 #{t}
               </span>
@@ -264,7 +264,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {/* Related */}
       {related.length > 0 && (
         <section aria-label="Produits similaires" className="mt-20">
-          <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-[#d4af37]">Tu aimeras aussi</h2>
+          <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-rg-or">Tu aimeras aussi</h2>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {related.map(p => (
               <ProductCard key={p.slug} product={p} />

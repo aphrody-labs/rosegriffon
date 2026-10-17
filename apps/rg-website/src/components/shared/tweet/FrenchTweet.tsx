@@ -7,7 +7,7 @@ import { Heart, MessageCircle } from "@/lib/icons-config"; // Assurez-vous que R
 import { formatDate, formatNumber } from "@/lib/tweet-utils";
 
 const TwitterLogo = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5 fill-current text-[#1DA1F2] dark:text-white">
+  <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5 fill-current text-twitter dark:text-white">
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
   </svg>
 );
@@ -44,7 +44,7 @@ export async function FrenchTweet({ id }: { id: string }) {
   const tweetUrl = `https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`;
 
   return (
-    <Card className="overflow-hidden border bg-white dark:bg-black dark:border-zinc-800 hover:border-[#1DA1F2]/50 transition-colors duration-300 h-full flex flex-col">
+    <Card className="overflow-hidden border bg-white dark:bg-black dark:border-zinc-800 hover:border-twitter/50 transition-colors duration-300 h-full flex flex-col">
       {/* Header */}
       <div className="p-4 flex items-start justify-between">
         <div className="flex items-center gap-3">

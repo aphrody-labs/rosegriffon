@@ -19,14 +19,14 @@ export default async function CartPage() {
   if (cart.items.length === 0) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center px-4 py-16 text-center">
-        <ShoppingBag className="size-16 text-[#d4af37]" />
+        <ShoppingBag className="size-16 text-rg-or" />
         <h1 className="mt-6 text-3xl font-extrabold text-white">Ton panier est vide</h1>
         <p className="mt-3 max-w-md text-base text-white/70">
           Pas encore d'articles. Découvre nos packs personnage édition limitée, nos prints A5 et nos stickers chibi.
         </p>
         <Link
           href="/shop"
-          className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-[#d4af37] px-6 text-sm font-extrabold uppercase tracking-wider text-[#0c1730] shadow-[0_3px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
+          className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-rg-or px-6 text-sm font-extrabold uppercase tracking-wider text-rg-marine shadow-[0_3px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
         >
           <ArrowLeft className="size-4" />
           Voir le catalogue
@@ -40,7 +40,7 @@ export default async function CartPage() {
       <nav className="mb-6">
         <Link
           href="/shop"
-          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/70 hover:text-[#d4af37]"
+          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/70 hover:text-rg-or"
         >
           <ArrowLeft className="size-4" />
           <span>Continuer mes achats</span>
@@ -49,7 +49,7 @@ export default async function CartPage() {
 
       <header className="mb-8 flex items-end justify-between gap-4">
         <h1 className="text-fluid-headline-xl font-extrabold tracking-tight text-white">Mon panier</h1>
-        <p className="text-sm font-semibold uppercase tracking-widest text-[#d4af37]">
+        <p className="text-sm font-semibold uppercase tracking-widest text-rg-or">
           {cart.itemCount} article{cart.itemCount > 1 ? "s" : ""}
         </p>
       </header>
@@ -64,14 +64,14 @@ export default async function CartPage() {
         </section>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="flex flex-col gap-5 rounded-3xl border-2 border-[#d4af37]/50 bg-[#0c1730]/80 p-6 shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-[#d4af37]">Récapitulatif</h2>
+          <div className="flex flex-col gap-5 rounded-3xl border-2 border-rg-or/50 bg-rg-marine/80 p-6 shadow-[0_4px_0_0_rgba(0,0,0,0.5)]">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-rg-or">Récapitulatif</h2>
 
-            <Suspense fallback={<div className="h-20 animate-pulse rounded-xl bg-[#0c1730]/60" />}>
+            <Suspense fallback={<div className="h-20 animate-pulse rounded-xl bg-rg-marine/60" />}>
               <PatreonDiscountBanner />
             </Suspense>
 
-            <dl className="space-y-2 border-t border-[#d4af37]/20 pt-4 text-sm">
+            <dl className="space-y-2 border-t border-rg-or/20 pt-4 text-sm">
               <div className="flex items-center justify-between text-white/80">
                 <dt>Sous-total</dt>
                 <dd className="font-semibold text-white">{formatEuros(cart.subtotalCents)}</dd>
@@ -89,15 +89,15 @@ export default async function CartPage() {
               </div>
             </dl>
 
-            <div className="flex items-end justify-between gap-3 border-t-2 border-[#d4af37]/30 pt-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#d4af37]">À régler</span>
+            <div className="flex items-end justify-between gap-3 border-t-2 border-rg-or/30 pt-4">
+              <span className="text-xs font-bold uppercase tracking-widest text-rg-or">À régler</span>
               <span className="text-3xl font-extrabold text-white">{formatEuros(cart.subtotalCents)}</span>
             </div>
 
             <CheckoutButton subtotalCents={cart.subtotalCents} />
 
             {/* Trust signals — Baymard 2024 anti-friction */}
-            <ul className="grid grid-cols-2 gap-3 border-t border-[#d4af37]/20 pt-4 text-[11px] text-white/70">
+            <ul className="grid grid-cols-2 gap-3 border-t border-rg-or/20 pt-4 text-[11px] text-white/70">
               <TrustItem icon={<Lock className="size-3.5" />} label="Paiement sécurisé" sub="Stripe TLS" />
               <TrustItem icon={<RefreshCw className="size-3.5" />} label="Retours 14j" sub="Satisfait ou remboursé" />
               <TrustItem icon={<Truck className="size-3.5" />} label="Expédié FR" sub="3-7 jours" />
@@ -106,7 +106,7 @@ export default async function CartPage() {
 
             {/* Urgency badge limited items */}
             {cart.items.some(i => i.product.stockHint === "limited" || i.product.stockHint === "low-stock") && (
-              <p className="rounded-xl border border-[#a14b3f] bg-[#a14b3f]/15 px-3 py-2 text-[11px] font-bold text-[#fbcfca]">
+              <p className="rounded-xl border border-rg-brique bg-rg-brique/15 px-3 py-2 text-[11px] font-bold text-[#fbcfca]">
                 ⚡ Édition limitée dans ton panier — réserve avant rupture.
               </p>
             )}
@@ -120,7 +120,7 @@ export default async function CartPage() {
 function TrustItem({ icon, label, sub }: { icon: React.ReactNode; label: string; sub: string }) {
   return (
     <li className="flex items-start gap-2">
-      <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#d4af37]/15 text-[#d4af37]">
+      <span className="grid size-7 shrink-0 place-items-center rounded-full bg-rg-or/15 text-rg-or">
         {icon}
       </span>
       <span>

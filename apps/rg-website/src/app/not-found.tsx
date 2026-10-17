@@ -17,7 +17,7 @@ export default function NotFound() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
       <div className="relative mb-8">
         {/* Effet de lueur derrière l'image */}
-        <div className="absolute -inset-4 rounded-full bg-[#a14b3f]/20 blur-3xl" />
+        <div className="absolute -inset-4 rounded-full bg-rg-brique/20 blur-3xl" />
         <Image
           src="/gaelle_lagoatte_pfp.webp"
           alt="Gaelle Lagoatte Rose Griffon"
@@ -62,7 +62,7 @@ export default function NotFound() {
         </Button>
 
         <Link href="/">
-          <Button className="gap-2 bg-[#a14b3f] text-white hover:bg-[#8a3e34]">
+          <Button className="gap-2 bg-rg-brique text-white hover:bg-[#8a3e34]">
             <Home className="size-4" />
             Retour au vestiaire
             <RgEmote name="gaelle-salut" size={20} />

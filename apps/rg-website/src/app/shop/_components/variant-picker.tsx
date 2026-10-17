@@ -38,7 +38,7 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d4af37]">Choisis ta variante</h3>
+        <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-rg-or">Choisis ta variante</h3>
         <div role="radiogroup" aria-label="Variantes du produit" className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {variants.map(v => {
             const isActive = v.id === selected;
@@ -46,10 +46,10 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
             return (
               <label
                 key={v.id}
-                className={`flex items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all motion-safe:duration-200 outline-hidden focus-within:ring-[3px] focus-within:ring-[#d4af37]/50 ${
+                className={`flex items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all motion-safe:duration-200 outline-hidden focus-within:ring-[3px] focus-within:ring-rg-or/50 ${
                   isActive
-                    ? "border-[#d4af37] bg-[#d4af37]/15 shadow-[0_2px_0_0_rgba(0,0,0,0.4)]"
-                    : "border-[#d4af37]/30 bg-[#0c1730]/40 hover:border-[#d4af37]/60"
+                    ? "border-rg-or bg-rg-or/15 shadow-[0_2px_0_0_rgba(0,0,0,0.4)]"
+                    : "border-rg-or/30 bg-rg-marine/40 hover:border-rg-or/60"
                 }`}
               >
                 <input
@@ -61,7 +61,7 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
                   className="sr-only"
                 />
                 <span className="text-sm font-semibold text-white">{v.label}</span>
-                <span className={`text-sm font-bold ${isActive ? "text-[#d4af37]" : "text-white/70"}`}>
+                <span className={`text-sm font-bold ${isActive ? "text-rg-or" : "text-white/70"}`}>
                   {formatEuros(price)}
                 </span>
               </label>
@@ -70,9 +70,9 @@ export function VariantPickerWithCta({ product }: { product: Product }) {
         </div>
       </div>
 
-      <div className="flex items-end justify-between gap-4 border-t border-[#d4af37]/30 pt-4">
+      <div className="flex items-end justify-between gap-4 border-t border-rg-or/30 pt-4">
         <div>
-          <span className="block text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">Total</span>
+          <span className="block text-[10px] font-bold uppercase tracking-widest text-rg-or">Total</span>
           <span className="block text-3xl font-extrabold text-white">{formatEuros(displayPrice)}</span>
         </div>
       </div>

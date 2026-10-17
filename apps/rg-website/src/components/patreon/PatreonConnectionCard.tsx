@@ -102,10 +102,10 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
 
   return (
     <>
-      <Card className="border-[#FF424D]/30 bg-card">
+      <Card className="border-patreon/30 bg-card">
         <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5">
           <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#FF424D]/10 text-[#FF424D]">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-patreon/10 text-patreon">
               <Heart className="size-5" />
             </div>
             <div className="min-w-0">
@@ -140,7 +140,7 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
               size="sm"
               onClick={startLink}
               disabled={busy}
-              className="bg-[#FF424D] text-white hover:bg-[#e63b46]"
+              className="bg-patreon text-white hover:bg-[#e63b46]"
             >
               {busy ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Link2 className="mr-2 size-4" />}
               {message("account.patreon.action.link")}
@@ -177,8 +177,8 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
       <Dialog open={promoOpen} onOpenChange={setPromoOpen}>
         <DialogContent>
           <DialogHeader>
-            <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-[#FF424D]/10">
-              <Heart className="size-6 text-[#FF424D]" />
+            <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-patreon/10">
+              <Heart className="size-6 text-patreon" />
             </div>
             <DialogTitle>Liez votre Patreon</DialogTitle>
             <DialogDescription>
@@ -196,7 +196,7 @@ export function PatreonConnectionCard({ isLinked, hasDiscord }: Props) {
                 startLink();
               }}
               disabled={busy}
-              className="bg-[#FF424D] text-white hover:bg-[#e63b46]"
+              className="bg-patreon text-white hover:bg-[#e63b46]"
             >
               {busy ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Link2 className="mr-2 size-4" />}
               {message("account.patreon.action.link")}

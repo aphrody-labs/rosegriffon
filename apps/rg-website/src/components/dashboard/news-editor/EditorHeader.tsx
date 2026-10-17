@@ -206,7 +206,7 @@ export function EditorHeader({
             onClick={() => onShareOnDiscordChange(!shareOnDiscord)}
             className={cn(
               "rounded-full size-10 sm:size-12",
-              shareOnDiscord ? "bg-[#5865F2]/10 text-[#5865F2]" : "text-on-surface-variant/40",
+              shareOnDiscord ? "bg-discord/10 text-discord" : "text-on-surface-variant/40",
             )}
             title={shareOnDiscord ? "Partage Discord activé" : "Partage Discord désactivé"}
           >

@@ -31,8 +31,8 @@ export interface FondUnivers {
 
 const VOILE: Record<FondUnivers["univers"], string> = {
   achillea: "from-[#1a0b2e]/95 via-[#1a0b2e]/80 to-[#1a0b2e]/95",
-  azalee: "from-[#240112]/95 via-[#240112]/80 to-[#240112]/95",
-  "rose-griffon": "from-[#0c1730]/95 via-[#0c1730]/80 to-[#0c1730]/95",
+  azalee: "from-azalee-dark/95 via-azalee-dark/80 to-azalee-dark/95",
+  "rose-griffon": "from-rg-marine/95 via-rg-marine/80 to-rg-marine/95",
 };
 
 /** Durée d'affichage d'un univers, en millisecondes. */

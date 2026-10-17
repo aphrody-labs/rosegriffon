@@ -42,7 +42,7 @@ export default async function ShopLayout({ children }: { children: ReactNode }) 
   const cart = await getCart();
 
   return (
-    <div className="relative min-h-screen bg-[#0c1730] text-white">
+    <div className="relative min-h-screen bg-rg-marine text-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
       {/* Grain overlay */}
       <div
@@ -56,17 +56,17 @@ export default async function ShopLayout({ children }: { children: ReactNode }) 
       />
 
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b-2 border-[#d4af37]/40 bg-[#0c1730]/95 backdrop-blur supports-[backdrop-filter]:bg-[#0c1730]/80">
+      <header className="sticky top-0 z-30 border-b-2 border-rg-or/40 bg-rg-marine/95 backdrop-blur supports-[backdrop-filter]:bg-rg-marine/80">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-8">
           <Link
             href="/shop"
-            className="group inline-flex items-center gap-3 outline-hidden focus-visible:ring-[3px] focus-visible:ring-[#d4af37]/50 rounded-full"
+            className="group inline-flex items-center gap-3 outline-hidden focus-visible:ring-[3px] focus-visible:ring-rg-or/50 rounded-full"
           >
             <span className="relative grid size-10 place-items-center rounded-full bg-white shadow-[0_2px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 group-hover:rotate-12">
               <Image src="/RG_Logo_V2.5.webp" alt="" width={26} height={26} className="size-6" aria-hidden />
             </span>
             <span className="flex flex-col leading-none">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#d4af37]">Boutique</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-rg-or">Boutique</span>
               <span className="text-base font-extrabold text-white">Rose Griffon</span>
             </span>
           </Link>
@@ -85,17 +85,17 @@ export default async function ShopLayout({ children }: { children: ReactNode }) 
       <div className="relative z-10">{children}</div>
 
       {/* Footer */}
-      <footer className="relative z-10 mt-24 border-t-2 border-[#d4af37]/40 bg-[#0c1730]/80">
+      <footer className="relative z-10 mt-24 border-t-2 border-rg-or/40 bg-rg-marine/80">
         <div className="mx-auto max-w-7xl px-4 py-12 md:px-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d4af37]">Association Rose Griffon</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-rg-or">Association Rose Griffon</p>
               <p className="mt-2 max-w-md text-sm text-white/70">
                 Inazuma Eleven France — illustrations originales, packs collector et goodies imprimés en France.
                 Soutiens-nous via{" "}
                 <Link
                   href="/nous-soutenir"
-                  className="font-semibold text-[#d4af37] underline decoration-[#d4af37] decoration-2 underline-offset-4"
+                  className="font-semibold text-rg-or underline decoration-rg-or decoration-2 underline-offset-4"
                 >
                   Patreon
                 </Link>{" "}
@@ -113,7 +113,7 @@ export default async function ShopLayout({ children }: { children: ReactNode }) 
               <dd className="text-white">
                 <a
                   href="mailto:contact@rose-griffon.fr"
-                  className="text-[#d4af37] underline decoration-2 underline-offset-2"
+                  className="text-rg-or underline decoration-2 underline-offset-2"
                 >
                   contact@rose-griffon.fr
                 </a>
@@ -130,7 +130,7 @@ function HeaderLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link
       href={href}
-      className="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-white/80 transition-colors motion-safe:duration-200 hover:bg-[#d4af37]/15 hover:text-[#d4af37] outline-hidden focus-visible:ring-[3px] focus-visible:ring-[#d4af37]/50"
+      className="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-white/80 transition-colors motion-safe:duration-200 hover:bg-rg-or/15 hover:text-rg-or outline-hidden focus-visible:ring-[3px] focus-visible:ring-rg-or/50"
     >
       {children}
     </Link>

@@ -30,7 +30,7 @@ export default async function NewArticlePage() {
         <div className="mb-8">
           <Link
             href="/dashboard/articles"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-[#a14b3f] transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-rg-brique transition-colors mb-4"
           >
             <ArrowLeft className="size-4" />
             Retour aux Articles

@@ -26,7 +26,7 @@ export function TwitchPlayer() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="aspect-video w-full rounded-lg overflow-hidden border-2 border-[#9146FF]/50">
+      <div className="aspect-video w-full rounded-lg overflow-hidden border-2 border-twitch/50">
         <Skeleton className="w-full h-full" />
       </div>
     );
@@ -55,16 +55,16 @@ export function TwitchPlayer() {
   // No data
   if (!data) {
     return (
-      <div className="aspect-video w-full bg-slate-900/50 flex items-center justify-center rounded-lg border-2 border-[#9146FF]/30">
+      <div className="aspect-video w-full bg-slate-900/50 flex items-center justify-center rounded-lg border-2 border-twitch/30">
         <p className="text-gray-400">Chargement...</p>
       </div>
     );
   }
 
   return (
-    <div className="aspect-video w-full rounded-lg overflow-hidden border-2 border-[#9146FF]/50 shadow-lg relative group">
+    <div className="aspect-video w-full rounded-lg overflow-hidden border-2 border-twitch/50 shadow-lg relative group">
       {/* Status Badge */}
-      <div className="absolute top-4 right-4 z-10 flex items-center gap-2 bg-slate-900/80 px-3 py-1 rounded-full border border-[#9146FF]/50">
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-2 bg-slate-900/80 px-3 py-1 rounded-full border border-twitch/50">
         <div className={`size-2 rounded-full ${data.isLive ? "bg-red-500 animate-pulse" : "bg-gray-500"}`} />
         <span className="text-xs font-semibold text-purple-300">{data.isLive ? "🔴 EN DIRECT" : "📹 VOD"}</span>
       </div>
@@ -82,7 +82,7 @@ export function TwitchPlayer() {
           </div>
           <Button
             asChild
-            className="bg-linear-to-r from-[#9146FF] to-purple-600 text-white hover:from-[#772CE8] hover:to-purple-700"
+            className="bg-linear-to-r from-twitch to-purple-600 text-white hover:from-[#772CE8] hover:to-purple-700"
           >
             <a
               href={`https://twitch.tv/${channel}`}

@@ -72,7 +72,7 @@ export default async function OrdersPage() {
     <div className="mx-auto max-w-5xl px-4 pb-16 pt-10 md:px-8 md:pt-16">
       <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="mb-2 inline-flex items-center gap-2 rounded-full border-2 border-[#d4af37] bg-[#0c1730] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[#d4af37]">
+          <p className="mb-2 inline-flex items-center gap-2 rounded-full border-2 border-rg-or bg-rg-marine px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-rg-or">
             <ShoppingBag className="size-3" />
             <span>Boutique Rose Griffon</span>
           </p>
@@ -80,7 +80,7 @@ export default async function OrdersPage() {
         </div>
         <Link
           href="/shop"
-          className="inline-flex h-10 items-center gap-2 rounded-full bg-[#d4af37] px-5 text-xs font-extrabold uppercase tracking-wider text-[#0c1730] shadow-[0_3px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
+          className="inline-flex h-10 items-center gap-2 rounded-full bg-rg-or px-5 text-xs font-extrabold uppercase tracking-wider text-rg-marine shadow-[0_3px_0_0_rgba(0,0,0,0.5)] transition-transform motion-safe:duration-200 hover:-translate-y-0.5"
         >
           <span>Continuer mes achats</span>
           <ArrowRight className="size-4" />
@@ -95,11 +95,11 @@ export default async function OrdersPage() {
             <li key={order.id}>
               <Link
                 href={`/shop/commandes/${order.id}`}
-                className="group block overflow-hidden rounded-2xl border-2 border-[#d4af37]/40 bg-[#0c1730]/60 p-5 transition-all motion-safe:duration-200 hover:-translate-y-0.5 hover:border-[#d4af37] hover:bg-[#0c1730]/80"
+                className="group block overflow-hidden rounded-2xl border-2 border-rg-or/40 bg-rg-marine/60 p-5 transition-all motion-safe:duration-200 hover:-translate-y-0.5 hover:border-rg-or hover:bg-rg-marine/80"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-rg-or">
                       Commande #{order.id.slice(0, 8).toUpperCase()}
                     </p>
                     <p className="mt-1 text-sm text-white/80">
@@ -115,7 +115,7 @@ export default async function OrdersPage() {
                       {order.items?.length ?? 0} article
                       {(order.items?.length ?? 0) > 1 ? "s" : ""}
                       {order.patron_discount_applied && (
-                        <span className="ml-2 inline-flex items-center rounded-full bg-[#d4af37]/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#d4af37]">
+                        <span className="ml-2 inline-flex items-center rounded-full bg-rg-or/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rg-or">
                           Patron −20%
                         </span>
                       )}
@@ -141,15 +141,15 @@ export default async function OrdersPage() {
 
 function EmptyOrders() {
   return (
-    <div className="grid place-items-center rounded-3xl border-2 border-dashed border-[#d4af37]/40 bg-[#0c1730]/40 px-6 py-20 text-center">
-      <PackageOpen className="size-14 text-[#d4af37]" />
+    <div className="grid place-items-center rounded-3xl border-2 border-dashed border-rg-or/40 bg-rg-marine/40 px-6 py-20 text-center">
+      <PackageOpen className="size-14 text-rg-or" />
       <h2 className="mt-6 text-2xl font-extrabold text-white">Aucune commande pour le moment</h2>
       <p className="mt-2 max-w-md text-sm text-white/70">
         Quand tu auras commandé, tes commandes apparaîtront ici avec le statut d'expédition et le suivi.
       </p>
       <Link
         href="/shop"
-        className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-[#d4af37] px-5 text-xs font-extrabold uppercase tracking-wider text-[#0c1730] shadow-[0_3px_0_0_rgba(0,0,0,0.5)] hover:-translate-y-0.5 transition-transform motion-safe:duration-200"
+        className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-rg-or px-5 text-xs font-extrabold uppercase tracking-wider text-rg-marine shadow-[0_3px_0_0_rgba(0,0,0,0.5)] hover:-translate-y-0.5 transition-transform motion-safe:duration-200"
       >
         <ShoppingBag className="size-4" />
         Voir le catalogue

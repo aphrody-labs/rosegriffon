@@ -180,7 +180,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
     ? "border-emerald-500/30 bg-linear-to-br from-emerald-500/5 via-card to-card"
     : wasMember
       ? "border-zinc-500/20 bg-card"
-      : "border-[#FF424D]/30 bg-card";
+      : "border-patreon/30 bg-card";
 
   return (
     <Card className={accent}>
@@ -188,7 +188,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
         {/* Header */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#FF424D]/10 text-[#FF424D]">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-patreon/10 text-patreon">
               <Heart className="size-5" />
             </div>
             <div className="min-w-0">

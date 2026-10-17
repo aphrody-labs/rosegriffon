@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default function MurauxPage() {
   const murals = [
     {
-      color: "from-[#a14b3f] to-orange-600",
+      color: "from-rg-brique to-orange-600",
       description:
         "Première galerie collaborative rassemblant des dizaines de créations originales et d'histoires développées autour des personnages inventés par la communauté (OC)",
       href: "https://app.mural.co/t/test07988/m/test07988/1697613494251/021f27cb0d01ff0ef10d8dd9a1d15104bf592c07",

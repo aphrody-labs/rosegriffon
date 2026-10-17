@@ -40,14 +40,14 @@ export default async function PartenairesSection() {
         />
       )}
       <div className="text-center space-y-4 max-w-4xl mx-auto animate-fade-in">
-        <h1 className="text-4xl lg:text-6xl font-black bg-linear-to-r from-[#2f6e9c] to-[#4088b8] dark:from-[#4088b8] dark:to-[#2f6e9c] bg-clip-text text-transparent">
+        <h1 className="text-4xl lg:text-6xl font-black bg-linear-to-r from-gaelle-blue to-gaelle-blue-light dark:from-gaelle-blue-light dark:to-gaelle-blue bg-clip-text text-transparent">
           Nos Partenaires
         </h1>
         <p className="text-lg lg:text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
           Découvrez les partenaires qui contribuent à enrichir l&apos;univers de Rose Griffon par leur expertise et leur
           créativité.
         </p>
-        <div className="w-24 h-1 bg-linear-to-r from-[#2f6e9c] to-[#4088b8] mx-auto rounded-full" />
+        <div className="w-24 h-1 bg-linear-to-r from-gaelle-blue to-gaelle-blue-light mx-auto rounded-full" />
       </div>
 
       {collaborateurs.length === 0 ? (
@@ -63,20 +63,20 @@ export default async function PartenairesSection() {
               style={{ animationDelay: `${idx * 100}ms` }}
             >
               <div className="relative">
-                <div className="relative size-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-3 sm:border-4 border-[#2f6e9c]/30 group-hover:border-[#2f6e9c] transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-[#2f6e9c]/20">
+                <div className="relative size-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-3 sm:border-4 border-gaelle-blue/30 group-hover:border-gaelle-blue transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-gaelle-blue/20">
                   <ImageWithSkeleton
                     src={member.image || "/RG_Logo_V2.5.webp"}
                     alt={`${member.name}, ${member.role} — partenaire Rose Griffon`}
                     priority={member.index < 3}
                   />
                 </div>
-                <div className="absolute inset-0 rounded-full bg-[#2f6e9c]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+                <div className="absolute inset-0 rounded-full bg-gaelle-blue/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
               </div>
               <div className="space-y-1 sm:space-y-2 w-full">
-                <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white group-hover:text-[#2f6e9c] dark:group-hover:text-[#4088b8] transition-colors duration-200 break-words">
+                <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-white group-hover:text-gaelle-blue dark:group-hover:text-gaelle-blue-light transition-colors duration-200 break-words">
                   {member.name}
                 </h3>
-                <p className="text-xs sm:text-sm lg:text-base font-medium text-[#2f6e9c] dark:text-[#4088b8] bg-[#2f6e9c]/10 dark:bg-[#2f6e9c]/20 px-2 sm:px-3 py-1 rounded-full inline-block">
+                <p className="text-xs sm:text-sm lg:text-base font-medium text-gaelle-blue dark:text-gaelle-blue-light bg-gaelle-blue/10 dark:bg-gaelle-blue/20 px-2 sm:px-3 py-1 rounded-full inline-block">
                   {member.role}
                 </p>
                 {member.link && member.link.trim() !== "" && (
@@ -84,7 +84,7 @@ export default async function PartenairesSection() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="mt-2 text-xs sm:text-sm border-[#2f6e9c]/50 text-[#2f6e9c] hover:bg-[#2f6e9c] hover:text-white dark:border-[#4088b8]/50 dark:text-[#4088b8] dark:hover:bg-[#4088b8] dark:hover:text-white transition-all duration-300 group-hover:shadow-lg"
+                      className="mt-2 text-xs sm:text-sm border-gaelle-blue/50 text-gaelle-blue hover:bg-gaelle-blue hover:text-white dark:border-gaelle-blue-light/50 dark:text-gaelle-blue-light dark:hover:bg-gaelle-blue-light dark:hover:text-white transition-all duration-300 group-hover:shadow-lg"
                     >
                       Visiter
                       <ArrowUpRight className="size-3 sm:w-4 sm:h-4 ml-1" />

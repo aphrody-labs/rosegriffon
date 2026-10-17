@@ -16,16 +16,16 @@ export default async function ShopIndexPage({ searchParams }: ShopPageProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-16 pt-4 min-[600px]:px-6 min-[600px]:pt-6">
-      <section className="mb-6 grid gap-4 border-b border-[#d4af37]/30 pb-4 min-[840px]:grid-cols-12 min-[840px]:items-center">
+      <section className="mb-6 grid gap-4 border-b border-rg-or/30 pb-4 min-[840px]:grid-cols-12 min-[840px]:items-center">
         <header className="min-[840px]:col-span-8">
           <h1 className="text-2xl font-extrabold tracking-tight text-white min-[840px]:text-3xl">
-            Boutique <span className="text-[#d4af37]">Rose Griffon</span>
+            Boutique <span className="text-rg-or">Rose Griffon</span>
           </h1>
         </header>
 
         <aside className="min-[840px]:col-span-4">
           <Suspense
-            fallback={<div className="h-24 animate-pulse rounded-2xl border-2 border-[#d4af37]/30 bg-[#0c1730]/60" />}
+            fallback={<div className="h-24 animate-pulse rounded-2xl border-2 border-rg-or/30 bg-rg-marine/60" />}
           >
             <PatreonDiscountBanner />
           </Suspense>
@@ -59,7 +59,7 @@ export default async function ShopIndexPage({ searchParams }: ShopPageProps) {
 
 function EmptyState() {
   return (
-    <div className="rounded-3xl border-2 border-dashed border-[#d4af37]/40 bg-[#0c1730]/40 p-16 text-center">
+    <div className="rounded-3xl border-2 border-dashed border-rg-or/40 bg-rg-marine/40 p-16 text-center">
       <p className="text-4xl">🌹</p>
       <p className="mt-4 text-lg font-bold text-white">Aucun produit dans cette catégorie pour l'instant.</p>
       <p className="mt-2 text-sm text-white/60">Reviens vite — on prépare de nouveaux drops chaque mois.</p>
