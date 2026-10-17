@@ -64,7 +64,7 @@ describe("oauth client", () => {
 			PatreonOauthClient["isExpired"](<never>{
 				expires_in_epoch: (Date.now() + 86000).toString(),
 			})
-		);
+		).toBeFalsy();
 	});
 
 	test("util: to stored", () => {

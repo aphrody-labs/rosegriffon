@@ -674,7 +674,7 @@
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.4.2",
     "@react-three/postprocessing": "^3.1.3",
-    "@rosegriffon/inagle": "2.0.10",
+    "@rosegriffon/inagle": "2.0.11",
     "@rosegriffon/inagle-cross": "1.0.7",
     "@rosegriffon/patreon-bun": "1.0.3",
     "@sentry/nextjs": "^11.1.0",
@@ -1747,7 +1747,7 @@
 
     "@rosegriffon/identity": ["@rosegriffon/identity@workspace:packages/rg-identity"],
 
-    "@rosegriffon/inagle": ["@rosegriffon/inagle@2.0.10", "", { "dependencies": { "@aphrody/runtime-sdk": "0.1.3", "@leeoniya/ufuzzy": "^1.0.19", "@rosegriffon/assets": "1.0.5", "@rosegriffon/db": "1.0.6", "cheerio": "^1.2.0", "commander": "^15.0.0", "dotenv": "^18.0.4", "drizzle-orm": "^0.45.3", "kuroshiro": "^1.2.0", "kuroshiro-analyzer-kuromoji": "^1.1.0", "picocolors": "^1.1.1", "sharp": "^0.35.5", "wanakana": "^5.3.1", "zod": "^4.6.5" }, "peerDependencies": { "@aphrody/agent-browser": "1.0.0-canary.2" }, "optionalPeers": ["@aphrody/agent-browser"], "bin": { "inagle": "src/cli.ts" } }, "sha512-uV5BPMp6V7OsBnutRYAXiGcoe0l04hOS+XhAR9+BawdpUXoq5m3ND0PGmh6SIIt1JmtAcStBPAUlBCaW9xIx0A=="],
+    "@rosegriffon/inagle": ["@rosegriffon/inagle@2.0.11", "", { "dependencies": { "@aphrody/runtime-sdk": "0.1.3", "@leeoniya/ufuzzy": "^1.0.19", "@rosegriffon/assets": "1.4.4", "@rosegriffon/db": "1.4.4", "cheerio": "^1.2.0", "commander": "^15.0.0", "dotenv": "^18.0.4", "drizzle-orm": "^0.45.3", "kuroshiro": "^1.2.0", "kuroshiro-analyzer-kuromoji": "^1.1.0", "picocolors": "^1.1.1", "sharp": "^0.35.5", "wanakana": "^5.3.1", "zod": "^4.6.5" }, "peerDependencies": { "@aphrody/agent-browser": "1.0.0-canary.2" }, "optionalPeers": ["@aphrody/agent-browser"], "bin": { "inagle": "src/cli.ts" } }, "sha512-00oLCJjMlZgNJdwA7/yStGl7dh+qqaC1NTAE8bbIk2sEP4fWA2BoPaNBiUw/05YkLhDcKAkAANpvgXXjm0CuOw=="],
 
     "@rosegriffon/inagle-cross": ["@rosegriffon/inagle-cross@1.0.7", "", { "dependencies": { "zod": "^4.6.5" } }, "sha512-4ZPv7ScjYQZWA1hAL7C7n6RfrSzgj4IO4GqKiHtEIOh+Ay7jaRYaBETpr8efMiG/MJXunNEMk4d4evG0Cefvkw=="],
 
@@ -3615,10 +3615,6 @@
 
     "@rollup/pluginutils/estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
 
-    "@rosegriffon/inagle/@rosegriffon/assets": ["@rosegriffon/assets@1.0.5", "", {}, "sha512-ybtjaBOB4GTiZUgDxNXrHeRd2z0p5QdqcGS3R4jRtRXSp6/gS8KC5scplLLEXQe53CaobyJ86NKV1Ynr21MrOA=="],
-
-    "@rosegriffon/inagle/@rosegriffon/db": ["@rosegriffon/db@1.0.6", "", { "dependencies": { "@aphrody/sql": "0.1.2", "@rosegriffon/types": "1.0.5", "@supabase/ssr": "^0.12.7", "kysely": "^0.29.6", "pg": "^8.23.0" } }, "sha512-ijIth0XdNYsnZbJuTu8NoJ4K9H/+X7FBBqGb84WJK2DoVJPI41BueDuyuMXAb4qAB78Y7RJ6kLYapAfa/JUlcQ=="],
-
     "@rosegriffon/website/@rosegriffon/patreon-bun": ["@rosegriffon/patreon-bun@1.0.3", "", {}, "sha512-gJx9eIp2lTG7O8il71TTqVqJGzeAEuqSK7VbxKLwfL3+T+VOqKlwgrwl4bh4he76Lwnjc5NtWYhtMrpMA5WBng=="],
 
     "@scalar/themes/@scalar/types": ["@scalar/types@0.1.7", "", { "dependencies": { "@scalar/openapi-types": "0.2.0", "@unhead/schema": "^1.11.11", "nanoid": "^5.1.5", "type-fest": "^4.20.0", "zod": "^3.23.8" } }, "sha512-irIDYzTQG2KLvFbuTI8k2Pz/R4JR+zUUSykVTbEMatkzMmVFnn1VzNSMlODbadycwZunbnL2tA27AXed9URVjw=="],
@@ -3880,8 +3876,6 @@
     "@modelcontextprotocol/sdk/ajv/fast-uri": ["fast-uri@3.1.8", "", {}, "sha512-GZMtZUTNRpOVIECoXwLNZS5xUGE+mVNbTB8h/7Rwh2TFWcBQiPzTgyZi05BF9UMZKkLJv8XBRJTlU7zg8+ZfMg=="],
 
     "@modelcontextprotocol/sdk/ajv/json-schema-traverse": ["json-schema-traverse@1.0.0", "", {}, "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug=="],
-
-    "@rosegriffon/inagle/@rosegriffon/db/@rosegriffon/types": ["@rosegriffon/types@1.0.5", "", { "dependencies": { "zod": "^4.6.5" }, "peerDependencies": { "@rosegriffon/db": "^1.0.0" } }, "sha512-uARRB7jxOTc0tFDhFriwyucNuNG0RpVH5f8afwUN14ALNMPRjR0kFfJWnFe1dqSKXgW/8kMVPDjWJSiGkG+TnQ=="],
 
     "@scalar/themes/@scalar/types/@scalar/openapi-types": ["@scalar/openapi-types@0.2.0", "", { "dependencies": { "zod": "^3.23.8" } }, "sha512-waiKk12cRCqyUCWTOX0K1WEVX46+hVUK+zRPzAahDJ7G0TApvbNkuy5wx7aoUyEk++HHde0XuQnshXnt8jsddA=="],
 
