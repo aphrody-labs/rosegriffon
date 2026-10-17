@@ -1,0 +1,73 @@
+<p-card class="card relative">
+	<ng-template pTemplate="content">
+		<div class="card-content-flex">
+			<div class="clan-logo h-28.5">
+				<div class="w-full h-full p-[2px] rounded-lg" [style.background-image]="gradientCss">
+					<div class="relative w-full h-full rounded-lg">
+						<img
+							[src]="clan.clanAvatarUrl"
+							alt="Banner"
+							class="object-cover w-27.5 h-27.5 rounded-lg relative test"
+							loading="lazy"
+							decoding="async"
+						/>
+						<div class="level-bg" [style.background-image]="gradientCss">
+							<span class="text-xs level flex flex-1 self-stretch items-center justify-center"
+								>{{ clan.experience.currentLevel }}</span
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="card-body-content">
+				<div class="flex justify-between items-center">
+					@if (false) {
+					<h2 class="font-bold">
+						[{{ clan.shortenedName }}] {{ clan.name }}
+						<p-tag
+							icon="pi pi-verified"
+							value="PRO"
+							severity="secondary"
+							pTooltip="Une équipe de ce Clan participe au circuit professionnel"
+						/>
+					</h2>
+					} @else {
+					<h2 class="font-bold">[{{ clan.shortenedName }}] {{ clan.name }}</h2>
+					}
+					<div>
+						@if (false) {
+						<p-button icon="pi pi-twitch" [rounded]="true" [text]="true" severity="contrast" />
+						} @if (clan.xUrl) {
+						<a [href]="clan.xUrl" target="_blank" (click)="$event.stopPropagation()">
+							<p-button icon="pi pi-twitter" [rounded]="true" [text]="true" severity="contrast" />
+						</a>
+						} @if (clan.tiktokUrl) {
+						<a [href]="clan.tiktokUrl" target="_blank" (click)="$event.stopPropagation()">
+							<p-button icon="pi pi-tiktok" [rounded]="true" [text]="true" severity="contrast" />
+						</a>
+						} @if (clan.instagramUrl) {
+						<a [href]="clan.instagramUrl" target="_blank" (click)="$event.stopPropagation()">
+							<p-button icon="pi pi-instagram" [rounded]="true" [text]="true" severity="contrast" />
+						</a>
+						}
+					</div>
+				</div>
+				<h3>Président: {{ clan.president.username }}</h3>
+				<h3>Membres: {{ clan.membersCount }}</h3>
+				<div class="flex flex-row mt-1 tags">
+					@if (clan.isRecruiting) {
+					<p-tag icon="pi pi-check" value="Recrute" severity="success"></p-tag>
+					} @else {
+					<p-tag icon="pi pi-times" value="Recrute" severity="danger"></p-tag>
+					} @for (language of clan.languages; track language) {
+					<p-tag
+						icon="pi pi-language"
+						[value]="displayLanguageFullName(language)"
+						severity="info"
+					/>
+					}
+				</div>
+			</div>
+		</div>
+	</ng-template>
+</p-card>

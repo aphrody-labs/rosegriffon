@@ -1,0 +1,87 @@
+<header>
+	<p-menubar [model]="items" class="header">
+		<ng-template #start>
+			<a routerLink="/" class="flex items-center mr-2 md:mr-4">
+				<img src="achillea_ico.png" alt="Achillea" class="h-8 w-8 md:h-9 md:w-9 object-contain" />
+			</a>
+		</ng-template>
+		<ng-template #item let-item let-root="root">
+			<a pRipple class="flex items-center p-menubar-item-link">
+				@if (!root) {
+				<i class="{{ item.icon }}"></i>
+				}
+				<span>{{ item.label }}</span>
+				@if (item.items) {
+				<i [ngClass]="['ml-auto pi', root ? 'pi-angle-down' : 'pi-angle-right']"></i>
+				}
+			</a>
+		</ng-template>
+		<ng-template #end>
+			<div class="header-actions">
+				@if (svc.user()) {
+				<p-button
+					icon="pi pi-bell"
+					[badge]="badge()"
+					[badgeSeverity]="badge() === '0' ? 'primary' : 'danger'"
+					[rounded]="true"
+					[text]="true"
+					size="small"
+					(click)="notifs.toggle($event)"
+					ariaLabel="Notifications"
+				/>
+				}
+				<button
+					type="button"
+					class="theme-btn"
+					(click)="toggleTheme()"
+					[attr.aria-label]="isDark() ? 'Mode clair' : 'Mode sombre'"
+				>
+					<i [class]="themeIcon()" aria-hidden="true"></i>
+				</button>
+				@if (svc.user()) {
+				<button
+					type="button"
+					class="avatar-btn"
+					(click)="menuIn.toggle($event)"
+					aria-label="Menu utilisateur"
+				>
+					<app-user-avatar
+						[userId]="svc.user()!.id"
+						[avatar]="svc.user()!.avatar"
+						[name]="svc.user()!.username"
+						shape="circle"
+						size="normal"
+					/>
+				</button>
+				} @else {
+				<button
+					type="button"
+					class="avatar-btn"
+					(click)="menuOut.toggle($event)"
+					aria-label="Connexion"
+				>
+					<p-avatar icon="pi pi-user" shape="circle" size="normal" />
+				</button>
+				}
+			</div>
+		</ng-template>
+	</p-menubar>
+</header>
+
+<p-popover #notifs appendTo="body" [style]="{ 'min-width': '300px', 'max-width': '90vw' }">
+	@for (notif of newestNotifications; track notif.id) {
+	<div class="flex flex-col gap-1 mt-1">
+		<app-notif-preview
+			[notification]="notif"
+			(click)="notificationHandler(notif)"
+		></app-notif-preview>
+	</div>
+	} @if (newestNotifications.length === 0) {
+	<div class="text-center py-4 text-sm opacity-60">
+		<i class="pi pi-inbox text-2xl mb-2 block"></i>
+		Aucune notification
+	</div>
+	}
+</p-popover>
+<p-menu #menuIn [model]="userItems" [popup]="true" appendTo="body"></p-menu>
+<p-menu #menuOut [model]="loggedOut" [popup]="true" appendTo="body"></p-menu>

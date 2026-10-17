@@ -1,0 +1,40 @@
+@if (areMembersLoading()) {
+<p-progressSpinner></p-progressSpinner>
+} @else {
+<p-table [value]="sortClanMembers(clanMembers)" [tableStyle]="{ 'min-width': '50rem' }">
+	<ng-template #header>
+		<tr>
+			@for (col of memberColumns; track col) {
+			<th>{{ col.header }}</th>
+			}
+		</tr>
+	</ng-template>
+	<ng-template #body let-member>
+		<tr [routerLink]="['/users', member.user.id]" class="hover:cursor-pointer">
+			<td>
+				<div class="flex items-center">
+					<p-avatar class="mr-2" shape="circle" [image]="member.user.avatar"></p-avatar>
+					{{ member.user.username }}
+				</div>
+			</td>
+			<td>{{ getMemberRoleName(member.clanRole) }}</td>
+			<td>{{ member.distinctions.join(', ') }}</td>
+			<td>{{ member.clanFameContributed }}</td>
+			<td>{{ getDate(member.createdAt) | date:'longDate' }}</td>
+			<td>{{ member.user.currentLevel }}</td>
+			<td>
+				<p-tag>
+					<img
+						[src]="getEloImagePath(member.user.soloRank.key)"
+						[alt]="member.user.soloRank.key"
+						class="inline-block w-5 h-5 mr-1 align-middle"
+						loading="lazy"
+						decoding="async"
+					/>
+					<span class="align-middle">{{ member.user.soloRank.key }}</span>
+				</p-tag>
+			</td>
+		</tr>
+	</ng-template>
+</p-table>
+}

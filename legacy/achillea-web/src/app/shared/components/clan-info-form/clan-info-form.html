@@ -1,0 +1,123 @@
+@if (!canEdit) {
+<p-message severity="info" size="small" variant="simple">
+	Seul·e le/la président·e (chef d'équipe) du clan ou un·e administrateur·rice du site peut modifier
+	ces informations.
+</p-message>
+}
+
+<form [formGroup]="infoForm" (ngSubmit)="save()" class="mt-4 flex flex-col gap-6">
+	<div class="flex flex-col md:flex-row gap-6 items-start">
+		<div class="flex flex-col items-center gap-2 shrink-0">
+			<img
+				[src]="clanAvatarUrlControl.value"
+				alt="clan_logo"
+				class="max-w-[120px] max-h-[120px] rounded"
+				loading="lazy"
+				decoding="async"
+			/>
+			@if (canEdit) {
+			<p-fileupload
+				name="file"
+				[url]="uploadUrl"
+				method="post"
+				[auto]="true"
+				[withCredentials]="true"
+				(onUpload)="onLogoUpload($event)"
+				(onError)="onLogoUploadError($event)"
+				[multiple]="false"
+				accept="image/png,image/jpeg,image/webp,image/gif"
+				maxFileSize="6000000"
+				invalidFileSizeMessageSummary="{0} : fichier trop lourd"
+				invalidFileSizeMessageDetail="Taille max 6 Mo."
+				invalidFileTypeMessageSummary="{0} : type invalide"
+				invalidFileTypeMessageDetail="Formats acceptés : png, jpeg, webp, gif."
+				mode="basic"
+				chooseLabel="Changer le logo"
+			></p-fileupload>
+			}
+		</div>
+		<div class="flex flex-col gap-4 w-full">
+			<div class="flex flex-col sm:flex-row gap-4">
+				<p-floatlabel variant="on" class="w-full">
+					<label for="clan_name">Nom</label>
+					<input fluid pInputText id="clan_name" autocomplete="off" [formControl]="nameControl" />
+				</p-floatlabel>
+				<p-floatlabel variant="on" class="w-full sm:max-w-[10rem]">
+					<label for="clan_tag">Tag</label>
+					<input
+						fluid
+						pInputText
+						id="clan_tag"
+						autocomplete="off"
+						[formControl]="shortenedNameControl"
+					/>
+				</p-floatlabel>
+			</div>
+			<p-floatlabel variant="on" class="w-full">
+				<label for="clan_bio">Biographie</label>
+				<textarea
+					fluid
+					pTextarea
+					id="clan_bio"
+					rows="4"
+					[formControl]="clanBiographyControl"
+				></textarea>
+			</p-floatlabel>
+			<div class="flex flex-col sm:flex-row gap-4">
+				<p-floatlabel variant="on" class="w-full">
+					<label for="clan_x">X / Twitter</label>
+					<input fluid pInputText id="clan_x" autocomplete="off" [formControl]="xUrlControl" />
+				</p-floatlabel>
+				<p-floatlabel variant="on" class="w-full">
+					<label for="clan_instagram">Instagram</label>
+					<input
+						fluid
+						pInputText
+						id="clan_instagram"
+						autocomplete="off"
+						[formControl]="instagramUrlControl"
+					/>
+				</p-floatlabel>
+				<p-floatlabel variant="on" class="w-full">
+					<label for="clan_tiktok">TikTok</label>
+					<input
+						fluid
+						pInputText
+						id="clan_tiktok"
+						autocomplete="off"
+						[formControl]="tiktokUrlControl"
+					/>
+				</p-floatlabel>
+			</div>
+			<div class="flex flex-col sm:flex-row gap-6">
+				<div class="flex items-center gap-2">
+					<p-toggleswitch [formControl]="isRecruitingControl" inputId="is_recruiting" />
+					<label for="is_recruiting">Recrutement ouvert</label>
+				</div>
+				<div class="flex items-center gap-2">
+					<p-toggleswitch [formControl]="autoAcceptMembersControl" inputId="auto_accept" />
+					<label for="auto_accept">Candidatures acceptées automatiquement</label>
+				</div>
+				@if (showInactiveToggle) {
+				<div class="flex items-center gap-2">
+					<p-toggleswitch [formControl]="isInactiveControl" inputId="is_inactive" />
+					<label for="is_inactive">Clan inactif</label>
+				</div>
+				}
+			</div>
+		</div>
+	</div>
+	@if (canEdit) {
+	<div>
+		<button
+			pButton
+			type="submit"
+			severity="primary"
+			[disabled]="infoForm.invalid || !formDirty"
+			[loading]="saving"
+		>
+			Enregistrer
+		</button>
+	</div>
+	}
+</form>

@@ -1,0 +1,30 @@
+<p-dialog
+	header="Inviter un Membre"
+	(onHide)="onDialogClose()"
+	[modal]="true"
+	[(visible)]="showDialog"
+	[style]="{ 'min-width': '30rem' }"
+>
+	<div class="flex flex-col gap-4">
+		@if (!targetUserId) {
+		<app-searchbar
+			class="justify-center"
+			[multiple]="false"
+			[searchFormControl]="searchFormControl"
+			behaviour="select"
+			searchType="users"
+		></app-searchbar>
+		}
+		<app-clan-tag-select [distinctionsFormControl]="distinctionsFormControl"></app-clan-tag-select>
+	</div>
+	<div class="flex justify-end mt-4 gap-2">
+		<p-button
+			label="Inviter"
+			severity="primary"
+			(click)="inviteMember()"
+			[disabled]="!isInviteValid()"
+			[loading]="inviteLoading()"
+		/>
+		<p-button label="Annuler" severity="secondary" (click)="showDialog.set(false)" />
+	</div>
+</p-dialog>

@@ -1,0 +1,567 @@
+<div class="tournament-ranking max-w-[1600px] mx-auto p-4 md:p-6 xl:p-8 flex flex-col gap-4">
+	<header class="text-center mb-2">
+		<h1 class="text-3xl md:text-4xl font-bold mb-2">Statistiques du circuit</h1>
+		<p class="opacity-70 text-sm md:text-base">
+			Classement, records et historique complet de tous les tournois Achillea — La Coupe d'Ilion, La
+			Masia Winter Cup, Summer Kama Club...
+		</p>
+	</header>
+
+	<div class="flex justify-end">
+		<a [routerLink]="['/events/list/tournament']" class="hub-link">
+			<i class="pi pi-arrow-left mr-1"></i>Retour aux tournois
+		</a>
+	</div>
+
+	@if (!loading() && !errored() && players().length > 0) {
+	<nav class="section-nav" aria-label="Navigation dans la page">
+		<a
+			href="/events/tournaments/circuit/ranking#section-overview"
+			(click)="scrollToSection($event, 'section-overview')"
+			>Vue d'ensemble</a
+		>
+		<a
+			href="/events/tournaments/circuit/ranking#section-records"
+			(click)="scrollToSection($event, 'section-records')"
+			>Records</a
+		>
+		<a
+			href="/events/tournaments/circuit/ranking#section-podium"
+			(click)="scrollToSection($event, 'section-podium')"
+			>Podium</a
+		>
+		<a
+			href="/events/tournaments/circuit/ranking#section-players"
+			(click)="scrollToSection($event, 'section-players')"
+			>Joueurs</a
+		>
+		<a
+			href="/events/tournaments/circuit/ranking#section-clans"
+			(click)="scrollToSection($event, 'section-clans')"
+			>Clans</a
+		>
+		<a
+			href="/events/tournaments/circuit/ranking#section-editions"
+			(click)="scrollToSection($event, 'section-editions')"
+			>Éditions</a
+		>
+		<a
+			href="/events/tournaments/circuit/ranking#section-history"
+			(click)="scrollToSection($event, 'section-history')"
+			>Historique</a
+		>
+	</nav>
+	} @if (loading()) {
+	<div class="flex flex-col items-center py-16 opacity-70">
+		<p-progressSpinner styleClass="!w-12 !h-12" strokeWidth="3"></p-progressSpinner>
+		<div class="mt-3 text-sm">Calcul des statistiques…</div>
+	</div>
+	} @else if (errored()) {
+	<div class="text-center py-16 opacity-60">
+		Impossible de charger les statistiques pour le moment. Réessaie plus tard.
+	</div>
+	} @else if (players().length === 0) {
+	<div class="text-center py-16 opacity-60">Aucun tournoi éligible pour le moment.</div>
+	} @else {
+
+	<!-- Vue d'ensemble -->
+	@if (overview(); as ov) {
+	<div class="ov-strip" id="section-overview">
+		<div class="ov-tile">
+			<span class="ov-n">{{ ov.totalTournaments }}</span><span class="ov-l">Tournois</span>
+		</div>
+		<div class="ov-tile">
+			<span class="ov-n">{{ ov.totalMatches }}</span><span class="ov-l">Matchs</span>
+		</div>
+		<div class="ov-tile">
+			<span class="ov-n">{{ ov.totalGoals }}</span><span class="ov-l">Buts</span>
+		</div>
+		<div class="ov-tile">
+			<span class="ov-n">{{ ov.avgGoalsPerMatch }}</span><span class="ov-l">Buts / match</span>
+		</div>
+		<div class="ov-tile">
+			<span class="ov-n">{{ ov.totalPlayers }}</span><span class="ov-l">Joueurs</span>
+		</div>
+		<div class="ov-tile">
+			<span class="ov-n">{{ ov.totalClans }}</span><span class="ov-l">Clans</span>
+		</div>
+	</div>
+	}
+
+	<!-- Records all-time -->
+	@if (records(); as r) {
+	<p-card id="section-records">
+		<h2 class="text-xl font-bold mb-3">Records</h2>
+		<div class="records-grid">
+			@if (r.mostTitles) {
+			<a [routerLink]="['/users', r.mostTitles.userId]" class="record-card">
+				<span class="record-icon"><i class="pi pi-trophy"></i></span>
+				<span class="record-label">Plus de titres</span>
+				<span class="record-value">{{ r.mostTitles.displayName }}</span>
+				<span class="record-sub"
+					>{{ r.mostTitles.wins }} titre{{ r.mostTitles.wins > 1 ? "s" : "" }}</span
+				>
+			</a>
+			} @if (r.topScorer) {
+			<a [routerLink]="['/users', r.topScorer.userId]" class="record-card">
+				<span class="record-icon"><i class="pi pi-bolt"></i></span>
+				<span class="record-label">Meilleur buteur</span>
+				<span class="record-value">{{ r.topScorer.displayName }}</span>
+				<span class="record-sub">{{ r.topScorer.goalsScored }} buts</span>
+			</a>
+			} @if (r.mostTournaments) {
+			<a [routerLink]="['/users', r.mostTournaments.userId]" class="record-card">
+				<span class="record-icon"><i class="pi pi-calendar"></i></span>
+				<span class="record-label">Plus assidu</span>
+				<span class="record-value">{{ r.mostTournaments.displayName }}</span>
+				<span class="record-sub">{{ r.mostTournaments.tournamentsPlayed }} tournois joués</span>
+			</a>
+			} @if (r.bestStreakPlayer && r.bestStreakPlayer.bestStreak > 0) {
+			<a [routerLink]="['/users', r.bestStreakPlayer.userId]" class="record-card">
+				<span class="record-icon"><i class="pi pi-fire"></i></span>
+				<span class="record-label">Meilleure série</span>
+				<span class="record-value">{{ r.bestStreakPlayer.displayName }}</span>
+				<span class="record-sub">{{ r.bestStreakPlayer.bestStreak }} victoires d'affilée</span>
+			</a>
+			} @if (r.biggestTournament) {
+			<a [routerLink]="['/events/tournaments', r.biggestTournament.id]" class="record-card">
+				<span class="record-icon"><i class="pi pi-users"></i></span>
+				<span class="record-label">Plus gros tournoi</span>
+				<span class="record-value">{{ r.biggestTournament.name }}</span>
+				<span class="record-sub">{{ r.biggestTournament.size }} joueurs</span>
+			</a>
+			} @if (r.highestScoringMatch) {
+			<a
+				[routerLink]="['/events/tournaments', r.highestScoringMatch.tournamentId]"
+				class="record-card"
+			>
+				<span class="record-icon"><i class="pi pi-star-fill"></i></span>
+				<span class="record-label">Match le plus prolifique</span>
+				<span class="record-value">{{ r.highestScoringMatch.value }} buts</span>
+				<span class="record-sub">{{ r.highestScoringMatch.detail }}</span>
+			</a>
+			} @if (r.closestFinal) {
+			<a [routerLink]="['/events/tournaments', r.closestFinal.tournamentId]" class="record-card">
+				<span class="record-icon"><i class="pi pi-heart-fill"></i></span>
+				<span class="record-label">Finale la plus serrée</span>
+				<span class="record-value">Écart de {{ r.closestFinal.value }}</span>
+				<span class="record-sub">{{ r.closestFinal.detail }}</span>
+			</a>
+			} @if (r.biggestBlowoutFinal) {
+			<a
+				[routerLink]="['/events/tournaments', r.biggestBlowoutFinal.tournamentId]"
+				class="record-card"
+			>
+				<span class="record-icon"><i class="pi pi-bolt"></i></span>
+				<span class="record-label">Finale la plus large</span>
+				<span class="record-value">Écart de {{ r.biggestBlowoutFinal.value }}</span>
+				<span class="record-sub">{{ r.biggestBlowoutFinal.detail }}</span>
+			</a>
+			}
+		</div>
+	</p-card>
+	}
+
+	<!-- Podium Top 3 -->
+	<div class="podium grid grid-cols-3 gap-2 md:gap-4" id="section-podium">
+		@if (podium().second; as p) {
+		<div class="podium-card silver" [class.is-me]="isCurrentUser(p.userId)">
+			<div class="medal">🥈</div>
+			<div class="podium-avatar">
+				@if (p.avatar) {
+				<img
+					[src]="p.avatar"
+					[alt]="p.displayName"
+					loading="lazy"
+					decoding="async"
+					width="48"
+					height="48"
+				/>
+				} @else {
+				<span>{{ p.displayName.slice(0, 2).toUpperCase() }}</span>
+				}
+			</div>
+			<a [routerLink]="['/users', p.userId]" class="podium-name">{{ p.displayName }}</a>
+			<div class="podium-points">
+				<img
+					[src]="getEloImagePath(p.tier)"
+					[alt]="p.tier"
+					class="tier-icon"
+					width="16"
+					height="16"
+				/>
+				{{ p.points }} pts
+			</div>
+			@if (p.clan) {
+			<span class="podium-clan">{{ p.clan.shortName }}</span>
+			}
+		</div>
+		} @else {
+		<div></div>
+		} @if (podium().first; as p) {
+		<div class="podium-card gold raised" [class.is-me]="isCurrentUser(p.userId)">
+			<div class="medal">🥇</div>
+			<div class="podium-avatar large">
+				@if (p.avatar) {
+				<img
+					[src]="p.avatar"
+					[alt]="p.displayName"
+					loading="eager"
+					fetchpriority="high"
+					decoding="async"
+					width="64"
+					height="64"
+				/>
+				} @else {
+				<span>{{ p.displayName.slice(0, 2).toUpperCase() }}</span>
+				}
+			</div>
+			<a [routerLink]="['/users', p.userId]" class="podium-name">{{ p.displayName }}</a>
+			<div class="podium-points">
+				<img
+					[src]="getEloImagePath(p.tier)"
+					[alt]="p.tier"
+					class="tier-icon"
+					width="16"
+					height="16"
+				/>
+				{{ p.points }} pts
+			</div>
+			@if (p.clan) {
+			<span class="podium-clan">{{ p.clan.shortName }}</span>
+			}
+		</div>
+		} @else {
+		<div></div>
+		} @if (podium().third; as p) {
+		<div class="podium-card bronze" [class.is-me]="isCurrentUser(p.userId)">
+			<div class="medal">🥉</div>
+			<div class="podium-avatar">
+				@if (p.avatar) {
+				<img
+					[src]="p.avatar"
+					[alt]="p.displayName"
+					loading="lazy"
+					decoding="async"
+					width="48"
+					height="48"
+				/>
+				} @else {
+				<span>{{ p.displayName.slice(0, 2).toUpperCase() }}</span>
+				}
+			</div>
+			<a [routerLink]="['/users', p.userId]" class="podium-name">{{ p.displayName }}</a>
+			<div class="podium-points">
+				<img
+					[src]="getEloImagePath(p.tier)"
+					[alt]="p.tier"
+					class="tier-icon"
+					width="16"
+					height="16"
+				/>
+				{{ p.points }} pts
+			</div>
+			@if (p.clan) {
+			<span class="podium-clan">{{ p.clan.shortName }}</span>
+			}
+		</div>
+		} @else {
+		<div></div>
+		}
+	</div>
+
+	<!-- Joueurs -->
+	<p-card id="section-players">
+		<div class="players-toolbar">
+			<h2 class="text-xl font-bold">Joueurs</h2>
+			<div class="players-filters">
+				<p-iconfield iconPosition="left">
+					<p-inputicon styleClass="pi pi-search" />
+					<input
+						pInputText
+						type="search"
+						placeholder="Rechercher un joueur"
+						[ngModel]="searchQuery()"
+						(ngModelChange)="searchQuery.set($event)"
+						class="w-48 max-w-full"
+					/>
+				</p-iconfield>
+				<p-select
+					[options]="tierOptions()"
+					[ngModel]="selectedTier()"
+					(ngModelChange)="selectedTier.set($event)"
+					placeholder="Tous les paliers"
+					[showClear]="true"
+					styleClass="w-44"
+				/>
+				<p-select
+					[options]="clanOptions()"
+					[ngModel]="selectedClanId()"
+					(ngModelChange)="selectedClanId.set($event)"
+					placeholder="Tous les clans"
+					[showClear]="true"
+					[filter]="true"
+					filterPlaceholder="Chercher un clan"
+					styleClass="w-48"
+				/>
+				@if (filtersActive()) {
+				<button type="button" class="clear-filters-btn" (click)="resetFilters()">
+					<i class="pi pi-times" aria-hidden="true"></i> Réinitialiser
+				</button>
+				}
+			</div>
+		</div>
+		<div class="text-xs opacity-60 mb-2">
+			{{ entries().length }} joueur{{ entries().length > 1 ? "s" : "" }}
+		</div>
+
+		<p-table [value]="entries()" [paginator]="true" [rows]="25" styleClass="leaderboard-table">
+			<ng-template pTemplate="header">
+				<tr>
+					<th class="w-12 text-center">#</th>
+					<th>Joueur</th>
+					<th class="text-right" pSortableColumn="points">Points <p-sortIcon field="points" /></th>
+					<th class="text-right hidden md:table-cell" pSortableColumn="tournamentsPlayed">
+						Tournois <p-sortIcon field="tournamentsPlayed" />
+					</th>
+					<th class="text-right hidden md:table-cell" pSortableColumn="wins">
+						Titres <p-sortIcon field="wins" />
+					</th>
+					<th class="text-right hidden lg:table-cell" pSortableColumn="goalsScored">
+						Buts <p-sortIcon field="goalsScored" />
+					</th>
+					<th class="text-right hidden lg:table-cell" pSortableColumn="goalDiff">
+						Diff. <p-sortIcon field="goalDiff" />
+					</th>
+					<th
+						class="text-right hidden lg:table-cell"
+						pSortableColumn="goalAverage"
+						pTooltip="Buts marqués / encaissés — départage officiel à points égaux"
+						tooltipPosition="top"
+					>
+						Avg <p-sortIcon field="goalAverage" />
+					</th>
+					<th class="text-right hidden lg:table-cell" pSortableColumn="bestStreak">
+						Série <p-sortIcon field="bestStreak" />
+					</th>
+					<th class="text-right hidden xl:table-cell">Meilleur</th>
+				</tr>
+			</ng-template>
+			<ng-template pTemplate="body" let-row let-i="rowIndex">
+				<tr [class.is-me]="isCurrentUser(row.userId)" [class]="rankClass(i)">
+					<td class="text-center font-bold rank-cell">
+						@if (i === 0) {
+						<span class="medal">🥇</span>
+						} @else if (i === 1) {
+						<span class="medal">🥈</span>
+						} @else if (i === 2) {
+						<span class="medal">🥉</span>
+						} @else { {{ i + 1 }} }
+					</td>
+					<td>
+						<div class="flex items-center gap-3">
+							@if (row.avatar) {
+							<img
+								[src]="row.avatar"
+								class="w-9 h-9 rounded-full object-cover"
+								[alt]="row.displayName"
+								loading="lazy"
+								decoding="async"
+								width="36"
+								height="36"
+							/>
+							} @else {
+							<div
+								class="w-9 h-9 rounded-full bg-surface-700 flex items-center justify-center text-xs"
+							>
+								{{ row.displayName.slice(0, 2).toUpperCase() }}
+							</div>
+							}
+							<a
+								[routerLink]="['/users', row.userId]"
+								class="font-semibold hover:underline truncate max-w-[160px] md:max-w-[220px]"
+							>
+								{{ row.displayName }}
+							</a>
+							@if (row.clan) {
+							<span class="clan-chip" [routerLink]="['/clans', row.clan.id]"
+								>{{ row.clan.shortName }}</span
+							>
+							} @if (isCurrentUser(row.userId)) {
+							<p-tag severity="info" value="Vous"></p-tag>
+							}
+						</div>
+					</td>
+					<td class="text-right font-mono font-bold">
+						<img
+							[src]="getEloImagePath(row.tier)"
+							[alt]="row.tier"
+							[pTooltip]="row.tier"
+							tooltipPosition="top"
+							class="tier-icon"
+							width="18"
+							height="18"
+						/>
+						{{ row.points }}
+					</td>
+					<td class="text-right hidden md:table-cell opacity-80">{{ row.tournamentsPlayed }}</td>
+					<td class="text-right hidden md:table-cell opacity-80">
+						@if (row.wins > 0) {
+						<span class="win-chip">{{ row.wins }}</span>
+						} @else { — }
+					</td>
+					<td class="text-right hidden lg:table-cell font-mono opacity-80">
+						{{ row.goalsScored }}
+					</td>
+					<td class="text-right hidden lg:table-cell font-mono opacity-70">
+						{{ row.goalDiff > 0 ? "+" : "" }}{{ row.goalDiff }}
+					</td>
+					<td class="text-right hidden lg:table-cell font-mono opacity-70">
+						{{ formatGoalAverage(row.goalAverage) }}
+					</td>
+					<td class="text-right hidden lg:table-cell opacity-70">
+						@if (row.bestStreak > 0) { {{ row.bestStreak }} } @else { — }
+					</td>
+					<td class="text-right hidden xl:table-cell opacity-70">{{ row.bestRankLabel }}</td>
+				</tr>
+			</ng-template>
+		</p-table>
+	</p-card>
+
+	<!-- Classement des clans -->
+	@if (clans().length > 0) {
+	<p-card id="section-clans">
+		<h2 class="text-xl font-bold mb-3">Clans</h2>
+		<div class="clan-ranking-list">
+			@for (c of clans(); track c.id; let i = $index) {
+			<a [routerLink]="['/clans', c.id]" class="clan-row" [class]="rankClass(i)">
+				<span class="clan-row-rank">
+					@if (i === 0) {
+					<span class="medal">🥇</span>
+					} @else if (i === 1) {
+					<span class="medal">🥈</span>
+					} @else if (i === 2) {
+					<span class="medal">🥉</span>
+					} @else { {{ i + 1 }} }
+				</span>
+				<div class="clan-row-avatar">
+					@if (c.avatar) {
+					<img
+						[src]="c.avatar"
+						[alt]="c.name"
+						loading="lazy"
+						decoding="async"
+						width="36"
+						height="36"
+					/>
+					} @else {
+					<span>{{ c.shortName.slice(0, 2).toUpperCase() }}</span>
+					}
+				</div>
+				<div class="clan-row-body">
+					<span class="clan-row-name">{{ c.name }}</span>
+					<span class="clan-row-sub"
+						>{{ c.players }} joueurs · {{ c.tournamentsPlayed }} participations · {{ c.goalsScored
+						}} buts · avg {{ formatGoalAverage(c.goalAverage) }}</span
+					>
+				</div>
+				<img
+					[src]="getEloImagePath(c.tier)"
+					[alt]="c.tier"
+					[pTooltip]="c.tier"
+					tooltipPosition="top"
+					class="tier-icon"
+					width="20"
+					height="20"
+				/>
+				<span class="clan-row-points">{{ c.points }} pts</span>
+			</a>
+			}
+		</div>
+	</p-card>
+	}
+
+	<!-- Podiums par édition -->
+	<p-card id="section-editions">
+		<h2 class="text-xl font-bold mb-3">Podium par édition</h2>
+		<div class="tournament-switcher">
+			@for (t of tournamentList(); track t.id) {
+			<button
+				type="button"
+				class="switcher-btn"
+				[class.active]="selectedTournament()?.id === t.id"
+				(click)="selectTournament(t.id)"
+			>
+				{{ t.name }}
+			</button>
+			}
+		</div>
+
+		@if (selectedTournament(); as t) {
+		<div class="edition-meta">
+			<span>{{ t.size }} joueurs</span>
+			<span>{{ t.grandFinalAt | date: "d MMMM y" }}</span>
+		</div>
+		<div class="edition-podium-grid">
+			@for (p of t.podium; track p.userId) {
+			<div class="edition-podium-card" [class]="podiumRankClass(p.rank)">
+				<div class="edition-podium-avatar">
+					@if (p.avatar) {
+					<img
+						[src]="p.avatar"
+						[alt]="p.displayName"
+						loading="lazy"
+						decoding="async"
+						width="40"
+						height="40"
+					/>
+					} @else {
+					<span>{{ p.displayName.slice(0, 2).toUpperCase() }}</span>
+					}
+				</div>
+				<div class="edition-podium-body">
+					<a [routerLink]="['/users', p.userId]" class="edition-podium-name">{{ p.displayName }}</a>
+					<span class="edition-podium-rank">{{ p.rankLabel }}</span>
+				</div>
+			</div>
+			}
+		</div>
+		}
+	</p-card>
+
+	<!-- Historique complet -->
+	<p-card id="section-history">
+		<h2 class="text-xl font-bold mb-3">Historique des tournois</h2>
+		<div class="table-scroll">
+			<table class="history-table">
+				<thead>
+					<tr>
+						<th>Édition</th>
+						<th>Date</th>
+						<th class="text-right">Joueurs</th>
+						<th class="text-right">Matchs</th>
+						<th class="text-right">Buts</th>
+						<th>Champion</th>
+						<th>Finaliste</th>
+					</tr>
+				</thead>
+				<tbody>
+					@for (t of history(); track t.id) {
+					<tr>
+						<td>
+							<a [routerLink]="['/events/tournaments', t.id]" class="history-link">{{ t.name }}</a>
+						</td>
+						<td class="opacity-70">{{ t.grandFinalAt | date: "d MMM y" }}</td>
+						<td class="text-right font-mono">{{ t.size || "—" }}</td>
+						<td class="text-right font-mono">{{ t.matches || "—" }}</td>
+						<td class="text-right font-mono">{{ t.goals || "—" }}</td>
+						<td>{{ t.champion || "—" }}</td>
+						<td class="opacity-80">{{ t.runnerUp || "—" }}</td>
+					</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</p-card>
+	}
+</div>

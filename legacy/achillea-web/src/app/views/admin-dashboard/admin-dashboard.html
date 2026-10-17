@@ -1,0 +1,219 @@
+<div class="admin-shell">
+	<!-- Mobile top bar -->
+	<header class="admin-mobile-bar">
+		<button
+			type="button"
+			class="admin-icon-btn"
+			aria-label="Ouvrir le menu"
+			(click)="mobileNavOpen.set(true)"
+		>
+			<i class="pi pi-bars"></i>
+		</button>
+		<div class="admin-mobile-brand">
+			<span class="admin-mobile-title">Admin</span>
+			@if (activeItem(); as cur) {
+			<span class="admin-mobile-sub">{{ cur.label }}</span>
+			}
+		</div>
+		<p-tag [value]="roleLabel()" severity="info" [rounded]="true" styleClass="text-xs"></p-tag>
+	</header>
+
+	<!-- Desktop sidebar (shadcn-style) -->
+	<aside class="admin-sidebar" aria-label="Navigation admin">
+		<div class="admin-sidebar-brand">
+			<div class="admin-sidebar-logo" aria-hidden="true">
+				<i class="pi pi-shield"></i>
+			</div>
+			<div class="admin-sidebar-brand-text">
+				<span class="admin-sidebar-title">Admin Achillea</span>
+				<span class="admin-sidebar-sub"
+					>{{ roleLabel() }} · {{ userService.user()?.username }}</span
+				>
+			</div>
+		</div>
+
+		<nav class="admin-sidebar-nav">
+			@for (group of visibleGroups(); track group.title) {
+			<div class="admin-nav-group">
+				<div class="admin-nav-group-label">{{ group.title }}</div>
+				<ul class="admin-nav-list">
+					@for (item of group.items; track item.id) {
+					<li>
+						<button
+							type="button"
+							class="admin-nav-item"
+							[class.admin-nav-item--active]="activeId() === item.id"
+							(click)="select(item.id)"
+						>
+							<i [class]="item.icon" class="admin-nav-icon" aria-hidden="true"></i>
+							<span class="admin-nav-label">{{ item.label }}</span>
+							@if (badgeText(item); as b) {
+							<span class="admin-nav-badge">{{ b }}</span>
+							}
+						</button>
+					</li>
+					}
+				</ul>
+			</div>
+			}
+		</nav>
+
+		<div class="admin-sidebar-footer">
+			<div class="admin-sidebar-stats" aria-label="Compteurs rapides">
+				<button type="button" class="admin-stat-pill" (click)="select('disputes')">
+					<span class="admin-stat-n">{{ ranked.disputes().length }}</span>
+					<span class="admin-stat-l">Litiges</span>
+				</button>
+				<button type="button" class="admin-stat-pill" (click)="select('clans')">
+					<span class="admin-stat-n">{{ pendingClansCount() }}</span>
+					<span class="admin-stat-l">Clans</span>
+				</button>
+			</div>
+			<a routerLink="/" class="admin-nav-item admin-nav-item--muted">
+				<i class="pi pi-home admin-nav-icon" aria-hidden="true"></i>
+				<span class="admin-nav-label">Retour au site</span>
+			</a>
+		</div>
+	</aside>
+
+	<!-- Mobile drawer -->
+	<p-drawer
+		[visible]="mobileNavOpen()"
+		(visibleChange)="mobileNavOpen.set($event)"
+		position="left"
+		[modal]="true"
+		[dismissible]="true"
+		styleClass="admin-drawer"
+		[style]="{ width: '18rem' }"
+	>
+		<ng-template pTemplate="header">
+			<div class="admin-sidebar-brand admin-sidebar-brand--drawer">
+				<div class="admin-sidebar-logo" aria-hidden="true">
+					<i class="pi pi-shield"></i>
+				</div>
+				<div class="admin-sidebar-brand-text">
+					<span class="admin-sidebar-title">Admin Achillea</span>
+					<span class="admin-sidebar-sub">{{ roleLabel() }}</span>
+				</div>
+			</div>
+		</ng-template>
+		<nav class="admin-sidebar-nav">
+			@for (group of visibleGroups(); track group.title) {
+			<div class="admin-nav-group">
+				<div class="admin-nav-group-label">{{ group.title }}</div>
+				<ul class="admin-nav-list">
+					@for (item of group.items; track item.id) {
+					<li>
+						<button
+							type="button"
+							class="admin-nav-item"
+							[class.admin-nav-item--active]="activeId() === item.id"
+							(click)="select(item.id)"
+						>
+							<i [class]="item.icon" class="admin-nav-icon" aria-hidden="true"></i>
+							<span class="admin-nav-label">{{ item.label }}</span>
+							@if (badgeText(item); as b) {
+							<span class="admin-nav-badge">{{ b }}</span>
+							}
+						</button>
+					</li>
+					}
+				</ul>
+			</div>
+			}
+		</nav>
+	</p-drawer>
+
+	<!-- Main content — une seule zone de titre, pas de 2e nav -->
+	<main class="admin-main">
+		@if (activeItem(); as cur) {
+		<header class="admin-page-header">
+			<div class="admin-page-header-text">
+				<h1 class="admin-page-title">{{ cur.label }}</h1>
+				<p class="admin-page-desc">{{ cur.description }}</p>
+			</div>
+			@if (activeId() === 'tournaments') {
+			<div class="admin-page-actions">
+				<p-button
+					label="Nouveau tournoi"
+					icon="pi pi-plus"
+					size="small"
+					(onClick)="openCreateTournament()"
+				></p-button>
+				<p-button
+					label="Actualiser"
+					icon="pi pi-refresh"
+					size="small"
+					severity="secondary"
+					[outlined]="true"
+					(onClick)="refreshTournaments()"
+				></p-button>
+			</div>
+			}
+		</header>
+		}
+
+		<div class="admin-page-body">
+			@switch (activeId()) { @case ("overview") {
+			<app-admin-overview-tab
+				[pendingClans]="pendingClansCount()"
+				(navigate)="onOverviewNavigate($event)"
+			></app-admin-overview-tab>
+			} @case ("clans") {
+			<app-clans-tab></app-clans-tab>
+			} @case ("orgs") {
+			<app-organization-table [mode]="Mode.Validate"></app-organization-table>
+			} @case ("tournaments") {
+			<app-tournament-table [isStandalone]="false" [showAdminActions]="true"></app-tournament-table>
+			} @case ("matches") {
+			<app-ranked-active-tab></app-ranked-active-tab>
+			} @case ("disputes") {
+			<app-ranked-disputes-tab></app-ranked-disputes-tab>
+			} @case ("seasons") {
+			<app-ranked-seasons-tab></app-ranked-seasons-tab>
+			} @case ("telemetry") {
+			<app-ranked-telemetry-tab></app-ranked-telemetry-tab>
+			} @case ("sanctions") {
+			<app-sanctions-tab></app-sanctions-tab>
+			} @case ("player-notes") {
+			<app-player-notes-panel
+				heading="Signalements joueurs — registre du staff"
+			></app-player-notes-panel>
+			} @case ("licenses") {
+			<app-licenses-tab></app-licenses-tab>
+			} @case ("users") {
+			<app-admin-users-tab></app-admin-users-tab>
+			} @case ("wallets") {
+			<app-admin-wallets-tab></app-admin-wallets-tab>
+			} @case ("casts") {
+			<app-admin-casts-tab></app-admin-casts-tab>
+			} @case ("bot-health") {
+			<app-admin-bot-health-tab></app-admin-bot-health-tab>
+			} @case ("guilds") {
+			<app-admin-guilds-tab></app-admin-guilds-tab>
+			} @case ("database") {
+			<app-admin-database-tab></app-admin-database-tab>
+			} @case ("leagues") {
+			<app-admin-leagues-tab></app-admin-leagues-tab>
+			} @case ("audit") {
+			<app-admin-audit-tab></app-admin-audit-tab>
+			} }
+		</div>
+	</main>
+</div>
+
+<p-dialog
+	header="Créer un tournoi"
+	[visible]="showTournamentDialog()"
+	(visibleChange)="showTournamentDialog.set($event)"
+	[modal]="true"
+	[style]="{ width: '95vw', 'max-width': '48rem' }"
+	[dismissableMask]="true"
+>
+	@if (showTournamentDialog()) {
+	<app-tournament-creation-form
+		(closeDialog)="onCreateTournamentClosed()"
+		(saved)="onTournamentCreated()"
+	></app-tournament-creation-form>
+	}
+</p-dialog>

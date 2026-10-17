@@ -1,0 +1,438 @@
+/* Event participants table — seeding TO UX */
+
+.ept-caption {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	width: 100%;
+}
+
+.ept-caption__meta {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+
+.ept-hint {
+	margin: 0;
+	font-size: 0.85rem;
+	line-height: 1.4;
+	color: var(--p-text-muted-color, #9ca3af);
+}
+
+.ept-hint__kbd {
+	display: inline-block;
+	padding: 0.05rem 0.35rem;
+	border-radius: 0.3rem;
+	font-size: 0.75rem;
+	font-family: ui-monospace, monospace;
+	background: color-mix(in srgb, var(--p-content-border-color) 55%, transparent);
+	color: var(--p-text-color);
+}
+
+.ept-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 0.85rem;
+	align-items: center;
+}
+
+.ept-stat {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--p-primary-color);
+}
+
+.ept-stat--muted {
+	color: var(--p-text-muted-color, #9ca3af);
+	font-weight: 500;
+}
+
+.ept-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+}
+
+.ept-toolbar__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.ept-search {
+	margin-left: auto;
+	min-width: 12rem;
+}
+
+@media (max-width: 640px) {
+	.ept-search {
+		margin-left: 0;
+		width: 100%;
+	}
+}
+
+/* Rows */
+.ept-row--editing {
+	background: color-mix(in srgb, var(--p-primary-color) 8%, transparent) !important;
+}
+
+.ept-seed-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.75rem;
+	height: 1.75rem;
+	padding: 0 0.4rem;
+	border-radius: 0.45rem;
+	font-size: 0.85rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	background: color-mix(in srgb, var(--p-primary-color) 18%, transparent);
+	color: var(--p-primary-color);
+}
+
+.ept-seed-empty {
+	opacity: 0.45;
+	font-size: 0.95rem;
+	font-weight: 600;
+}
+
+.ept-seed-edit {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	max-width: 7rem;
+}
+
+:host ::ng-deep .ept-seed-input {
+	width: 4.5rem !important;
+	text-align: center;
+	font-weight: 700;
+}
+
+.ept-swap-hint {
+	font-size: 0.7rem;
+	font-weight: 600;
+	color: var(--p-orange-400, #fb923c);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 7rem;
+}
+
+.ept-user {
+	display: flex;
+	align-items: center;
+	gap: 0.55rem;
+	cursor: pointer;
+	min-width: 0;
+}
+
+.ept-user:hover .ept-user__name {
+	text-decoration: underline;
+}
+
+.ept-user__name {
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.ept-rank {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.ept-rank-tag {
+	display: inline-flex !important;
+	align-items: center;
+	gap: 0.3rem;
+}
+
+.ept-rank-img {
+	display: inline-block;
+	width: 1.15rem;
+	height: 1.15rem;
+	vertical-align: middle;
+	object-fit: contain;
+}
+
+.ept-elo {
+	font-size: 0.8rem;
+	font-weight: 650;
+	font-variant-numeric: tabular-nums;
+	color: var(--p-text-muted-color, #9ca3af);
+}
+
+.ept-level {
+	font-variant-numeric: tabular-nums;
+	opacity: 0.85;
+}
+
+.ept-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	align-items: center;
+}
+
+.ept-frozen {
+	font-size: 0.8rem;
+	color: var(--p-text-muted-color, #9ca3af);
+}
+
+.ept-empty {
+	text-align: center;
+	padding: 1.5rem !important;
+	color: var(--p-text-muted-color, #9ca3af);
+}
+
+/* Confirm dialog */
+.ept-confirm__text {
+	margin: 0 0 0.75rem;
+	line-height: 1.45;
+	font-size: 0.95rem;
+}
+
+.ept-preview {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	max-height: 18rem;
+	overflow: auto;
+}
+
+.ept-preview__row {
+	display: flex;
+	align-items: center;
+	gap: 0.55rem;
+	padding: 0.35rem 0.45rem;
+	border-radius: 0.5rem;
+	background: color-mix(in srgb, var(--p-content-border-color) 25%, transparent);
+}
+
+.ept-preview__name {
+	flex: 1;
+	min-width: 0;
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.ept-preview__elo {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	font-size: 0.8rem;
+	font-weight: 650;
+	font-variant-numeric: tabular-nums;
+	opacity: 0.85;
+	flex-shrink: 0;
+}
+
+.ept-preview__more {
+	text-align: center;
+	font-size: 0.8rem;
+	opacity: 0.65;
+	padding: 0.35rem;
+}
+
+.ept-confirm__footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+/* ── Statut de participant : DQ, liste d'attente ────────────────────────────── */
+
+.ept-stat--danger {
+	color: var(--p-red-400, #f87171);
+	font-weight: 600;
+}
+
+.ept-user-cell {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.ept-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.1rem 0.45rem;
+	border-radius: 999px;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.ept-status--dq {
+	color: var(--p-red-400, #f87171);
+	background: color-mix(in srgb, var(--p-red-400, #f87171) 15%, transparent);
+	border: 1px solid color-mix(in srgb, var(--p-red-400, #f87171) 35%, transparent);
+}
+
+.ept-waitlist {
+	margin-top: 1rem;
+	padding: 0.9rem 1rem;
+	border-radius: 0.75rem;
+	border: 1px solid var(--p-content-border-color);
+	background: color-mix(in srgb, var(--p-content-border-color) 12%, transparent);
+}
+
+.ept-waitlist__header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.5rem;
+	margin-bottom: 0.6rem;
+}
+
+.ept-waitlist__title {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin: 0;
+	font-size: 0.95rem;
+	font-weight: 700;
+}
+
+.ept-waitlist__hint {
+	margin: 0;
+	font-size: 0.8rem;
+	color: var(--p-text-muted-color, #9ca3af);
+}
+
+.ept-waitlist__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.ept-waitlist__row {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.4rem 0.5rem;
+	border-radius: 0.5rem;
+	background: color-mix(in srgb, var(--p-content-border-color) 22%, transparent);
+}
+
+.ept-waitlist__pos {
+	flex-shrink: 0;
+	min-width: 1.6rem;
+	height: 1.6rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	font-size: 0.78rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	background: color-mix(in srgb, var(--p-primary-color) 18%, transparent);
+	color: var(--p-primary-color);
+}
+
+.ept-waitlist__row .ept-user {
+	flex: 1;
+	min-width: 0;
+}
+
+.ept-waitlist__rank {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	font-size: 0.8rem;
+	font-weight: 650;
+	font-variant-numeric: tabular-nums;
+	opacity: 0.85;
+	flex-shrink: 0;
+}
+
+.ept-waitlist__actions {
+	display: flex;
+	gap: 0.35rem;
+	flex-shrink: 0;
+	flex-wrap: wrap;
+}
+
+.ept-confirm__label {
+	display: block;
+	margin: 0.75rem 0 0.3rem;
+	font-size: 0.82rem;
+	font-weight: 600;
+}
+
+.ept-confirm__input {
+	width: 100%;
+}
+
+/* Sur téléphone, la ligne d'attente passe en deux niveaux plutôt que de déborder. */
+@media (max-width: 640px) {
+	.ept-waitlist__row {
+		flex-wrap: wrap;
+	}
+
+	.ept-waitlist__rank {
+		order: 3;
+	}
+
+	.ept-waitlist__actions {
+		order: 4;
+		width: 100%;
+		justify-content: flex-end;
+	}
+}
+
+/*
+ * Table des inscrits sur téléphone.
+ *
+ * La table imposait `min-width: 52rem` : sur un écran de 360 px, retirer ou
+ * disqualifier un joueur demandait de faire défiler la table jusqu'à la colonne
+ * d'actions, sans plus voir de qui il s'agissait. On masque le niveau et on
+ * compacte le palier ; le joueur et les actions restent côte à côte.
+ */
+@media (max-width: 640px) {
+	.ept-table th,
+	.ept-table td {
+		padding-inline: 0.4rem;
+		font-size: 0.85rem;
+	}
+
+	.ept-level,
+	:host ::ng-deep .ept-table th:nth-child(4) {
+		display: none;
+	}
+
+	.ept-rank-tag span {
+		display: none;
+	}
+
+	.ept-actions {
+		flex-wrap: wrap;
+		justify-content: flex-end;
+	}
+}

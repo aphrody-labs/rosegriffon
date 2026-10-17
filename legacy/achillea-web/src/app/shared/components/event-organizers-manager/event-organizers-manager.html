@@ -1,0 +1,68 @@
+<div class="flex flex-col gap-3">
+	<p-tabs [value]="activeTab()" (valueChange)="onTabChange($event)">
+		<p-tablist>
+			<p-tab [value]="0">Liste des TOs ({{ managers().length }})</p-tab>
+			<p-tab [value]="1">Ajouter des TOs</p-tab>
+		</p-tablist>
+		<p-tabpanels>
+			<p-tabpanel [value]="0">
+				@if (managers().length === 0) {
+				<p class="text-sm opacity-70 py-4 text-center">Aucun TO rattaché pour le moment.</p>
+				} @else {
+				<ul class="flex flex-col gap-2 mt-2">
+					@for (to of managers(); track to.id) {
+					<li
+						class="flex items-center justify-between gap-2 rounded-lg border border-(--p-content-border-color) p-2"
+					>
+						<a
+							class="flex items-center gap-2 min-w-0 hover:underline"
+							[routerLink]="['/users', to.id]"
+						>
+							<p-avatar shape="circle" [image]="to.avatar ?? undefined" class="shrink-0" />
+							<span class="truncate">{{ to.username }}</span>
+						</a>
+						<p-button
+							label="Retirer"
+							icon="pi pi-times"
+							size="small"
+							severity="danger"
+							[text]="true"
+							[loading]="removingId() === to.id"
+							(onClick)="removeTO(to)"
+						/>
+					</li>
+					}
+				</ul>
+				}
+			</p-tabpanel>
+			<p-tabpanel [value]="1">
+				<div class="flex flex-col gap-3 mt-2">
+					<p class="text-sm opacity-70">Cherche un joueur par pseudo, puis clique sur Ajouter.</p>
+					<app-searchbar
+						searchType="users"
+						behaviour="select"
+						[multiple]="true"
+						[searchFormControl]="newTOsControl"
+					></app-searchbar>
+					@if ((newTOsControl.value?.length ?? 0) > 0) {
+					<p class="text-sm">{{ newTOsControl.value!.length }} joueur(s) sélectionné(s)</p>
+					}
+					<div class="flex justify-end gap-2 mt-2">
+						<p-button
+							label="Ajouter"
+							severity="primary"
+							icon="pi pi-plus"
+							[loading]="adding()"
+							[disabled]="!newTOsControl.value?.length || adding()"
+							(onClick)="addTOs()"
+						/>
+						<p-button label="Fermer" severity="secondary" (onClick)="cancel()" />
+					</div>
+				</div>
+			</p-tabpanel>
+		</p-tabpanels>
+	</p-tabs>
+	<div class="flex justify-end mt-2">
+		<p-button label="Fermer" severity="secondary" [text]="true" (onClick)="cancel()" />
+	</div>
+</div>

@@ -1,0 +1,23 @@
+<div class="flex flex-col gap-6 p-6">
+	<div class="flex flex-col gap-1">
+		<h1 class="text-2xl font-bold text-surface-900 dark:text-surface-0 m-0">Équipe Cast</h1>
+		<p class="text-surface-500 m-0">Découvrez les casters de la communauté</p>
+	</div>
+
+	@if (loading()) {
+	<div class="flex justify-center items-center py-16">
+		<i class="pi pi-spin pi-spinner text-3xl text-surface-400"></i>
+	</div>
+	} @else if (casters().length === 0) {
+	<div class="flex flex-col items-center gap-2 py-16 text-surface-400">
+		<i class="pi pi-users text-4xl"></i>
+		<span>Aucun caster disponible pour le moment</span>
+	</div>
+	} @else {
+	<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+		@for (caster of casters(); track caster.id) {
+		<app-cast-card [caster]="caster" />
+		}
+	</div>
+	}
+</div>

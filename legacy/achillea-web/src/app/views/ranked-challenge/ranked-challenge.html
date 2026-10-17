@@ -1,0 +1,80 @@
+<div class="ranked-challenge max-w-md mx-auto p-4 md:p-6">
+	<p-card>
+		@if (loading()) {
+		<div class="flex flex-col items-center gap-3 py-8">
+			<p-progressSpinner styleClass="!w-12 !h-12" strokeWidth="3"></p-progressSpinner>
+			<div class="text-sm opacity-70">Chargement du défi…</div>
+		</div>
+		} @else if (needAuth()) {
+		<div class="flex flex-col items-center gap-4 py-6 text-center">
+			<i class="pi pi-lock text-4xl opacity-60"></i>
+			<div class="text-lg font-semibold">Connecte-toi pour relever ce défi</div>
+			<p class="text-sm opacity-70 m-0">
+				Tu dois être connecté pour rejoindre un match. Tu reviendras automatiquement ici.
+			</p>
+			<p-button label="Se connecter" icon="pi pi-discord" severity="primary" (onClick)="goAuth()" />
+		</div>
+		} @else if (notFound()) {
+		<div class="flex flex-col items-center gap-4 py-6 text-center">
+			<i class="pi pi-times-circle text-4xl text-red-500"></i>
+			<div class="text-lg font-semibold">Défi indisponible</div>
+			<p class="text-sm opacity-70 m-0">
+				Ce lien a expiré ou le défi a déjà été accepté par un autre joueur.
+			</p>
+			<p-button
+				label="Aller au ranked"
+				icon="pi pi-arrow-right"
+				severity="secondary"
+				(onClick)="decline()"
+			/>
+		</div>
+		} @else if (preview(); as c) {
+		<div class="flex flex-col items-center gap-4 py-4 text-center">
+			<p-avatar [image]="c.fromAvatar" shape="circle" size="xlarge" />
+			<div>
+				<div class="text-xl font-bold">{{ c.fromDisplayName }}</div>
+				<div class="text-sm opacity-70">{{ c.fromElo }} AP</div>
+			</div>
+			<div class="flex items-center gap-2">
+				<p-tag [value]="c.mode === 2 ? '1v1' : '2v2'" severity="secondary"></p-tag>
+				<p-tag
+					[value]="c.ranked ? 'Classé' : 'Amical'"
+					[severity]="c.ranked ? 'warn' : 'secondary'"
+				></p-tag>
+			</div>
+			<p class="text-base m-0">
+				te défie en <b>{{ c.mode === 2 ? '1v1' : '2v2' }}</b>
+				{{ c.ranked ? '(classé)' : '(amical)' }}.
+			</p>
+			@if (c.isOwn) {
+			<p class="text-sm opacity-70 m-0">
+				C'est ton propre lien — partage-le, tu ne peux pas l'accepter toi-même.
+			</p>
+			<p-button
+				label="Retour au ranked"
+				icon="pi pi-arrow-right"
+				severity="secondary"
+				(onClick)="decline()"
+			/>
+			} @else {
+			<div class="flex gap-2 mt-2">
+				<p-button
+					label="Refuser"
+					icon="pi pi-times"
+					severity="secondary"
+					[outlined]="true"
+					(onClick)="decline()"
+				/>
+				<p-button
+					label="Accepter le défi"
+					icon="pi pi-check"
+					severity="primary"
+					[loading]="accepting()"
+					(onClick)="accept()"
+				/>
+			</div>
+			}
+		</div>
+		}
+	</p-card>
+</div>

@@ -1,0 +1,493 @@
+<div class="p-[1.5rem]">
+	<p-panel class="flex">
+		<div class="grid grid-cols-[1fr_auto_1fr] items-center w-full">
+			<div></div>
+			<!-- CENTERED CONTENT -->
+			<div class="flex flex-col md:flex-row items-center gap-2 md:flex-1 md:justify-center">
+				<app-user-avatar
+					[userId]="userProfile?.id"
+					[avatar]="userProfile?.avatar"
+					[name]="userProfile?.username"
+					shape="circle"
+					size="xlarge"
+				/>
+				<div class="flex flex-col">
+					<h1 class="font-bold text-2xl lg:text-3xl mt-2">
+						{{ userProfile?.clan?.shortenedName ? `[${userProfile?.clan?.shortenedName}] ` : ""
+						}}{{ userProfile?.username }}
+					</h1>
+					@if (userProfile?.clan) {
+						<div class="flex items-center justify-center">
+							<img
+								[alt]="userProfile?.clan?.name"
+								[src]="userProfile?.clan?.avatarUrl"
+								class="w-7 h-7"
+								loading="lazy"
+								decoding="async"
+							/>
+							<p
+								[routerLink]="['/clans', userProfile?.clan?.id]"
+								class="italic ml-1 hover:underline cursor-pointer"
+							>
+								{{ userProfile?.clan?.name }}
+							</p>
+							@if (userProfile?.clan?.role === ClanMemberRole.Captain) {
+								<i class="pi pi-crown ml-2"></i>
+							}
+						</div>
+					}
+					<div class="flex items-center justify-center gap-3 mt-2 text-surface-400">
+						<span class="text-sm">
+							<i class="pi pi-star-fill mr-1"></i>Niveau {{ userProfile?.currentLevel ?? 1 }} ·
+							{{ userProfile?.totalXp ?? 0 }} XP
+						</span>
+						@if (userProfile?.hasYoutube) {
+							<i class="pi pi-youtube" title="YouTube lié"></i>
+						}
+					</div>
+					@if (userProfile?.twitchUrl) {
+						<a
+							[href]="userProfile?.twitchUrl"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="up-twitch-link"
+						>
+							<i class="pi pi-twitch mr-1"></i>Twitch
+						</a>
+					}
+					@if (userProfile?.bio) {
+						<p class="up-bio">{{ userProfile?.bio }}</p>
+					}
+					@if (isOwnProfile) {
+						<button type="button" class="up-edit-link" (click)="openEditDialog()">
+							<i class="pi pi-pencil mr-1"></i>Modifier mon profil
+						</button>
+					}
+				</div>
+			</div>
+			<!-- RIGHT BUTTON -->
+			<p-button
+				class="justify-self-end"
+				label="Nouvelle invitation"
+				styleClass="w-fit"
+				(click)="showInviteDialog.set(true)"
+				[disabled]="disableInviteButtonSig()"
+			></p-button>
+		</div>
+		<div class="w-full flex items-center gap-16 mt-8 mb-8">
+			<hr class="w-full border-[#494949]" />
+			<p>Ranked</p>
+			<hr class="w-full border-[#494949]" />
+		</div>
+		<div class="flex flex-col md:flex-row">
+			<div class="basis-1/2 flex flex-col items-center">
+				<h1 class="text-2xl mb-8">SOLO</h1>
+				<div class="flex flex-row gap-8">
+					<div class="flex flex-col items-center">
+						<img
+							alt="user_solo_rank"
+							[src]="getEloImagePath(userProfile?.soloRank?.key)"
+							class="inline-block w-[5rem] mr-1 align-middle"
+							loading="lazy"
+							decoding="async"
+						/>
+					</div>
+					<div>
+						<p class="font-semibold text-xl text-center mb-2">
+							{{ userProfile?.soloRank?.key }} {{ userProfile?.soloRank?.elo }} AP
+						</p>
+						<p>
+							Victoires: {{ userProfile?.ranked?.solo?.wins }} - Défaites:
+							{{ userProfile?.ranked?.solo?.losses }} ({{
+								winrate(userProfile?.ranked?.solo?.wins, userProfile?.ranked?.solo?.losses)
+							}})
+						</p>
+						<p class="text-center">Nuls: {{ userProfile?.ranked?.solo?.draws }}</p>
+					</div>
+				</div>
+			</div>
+			<div class="basis-1/2 flex flex-col items-center">
+				<h1 class="text-2xl mb-8">DUO</h1>
+				<div class="flex flex-row gap-8">
+					<div class="flex flex-col items-center">
+						<img
+							alt="user_duo_rank"
+							[src]="getEloImagePath(userProfile?.duoRank?.key)"
+							class="inline-block w-[5rem] mr-1 align-middle"
+							loading="lazy"
+							decoding="async"
+						/>
+					</div>
+					<div>
+						<p class="font-semibold text-xl text-center mb-2">
+							{{ userProfile?.duoRank?.key }} {{ userProfile?.duoRank?.elo }} AP
+						</p>
+						<p>
+							Victoires: {{ userProfile?.ranked?.duo?.wins }} - Défaites:
+							{{ userProfile?.ranked?.duo?.losses }} ({{
+								winrate(userProfile?.ranked?.duo?.wins, userProfile?.ranked?.duo?.losses)
+							}})
+						</p>
+						<p class="text-center">Nuls: {{ userProfile?.ranked?.duo?.draws }}</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ── Circuit tournois (all-time) ─────────────────────────────── -->
+		@if (circuit(); as c) {
+			@if (c.tournamentsPlayed > 0) {
+				<div class="w-full flex items-center gap-16 mt-16 mb-8">
+					<hr class="w-full border-[#494949]" />
+					<p>Circuit tournois</p>
+					<hr class="w-full border-[#494949]" />
+				</div>
+				<div class="bg-surface-50 dark:bg-(--p-surface-900) px-6 py-8 md:px-12 lg:px-20">
+					<div class="flex flex-col items-center gap-2 mb-8">
+						<img
+							[src]="getEloImagePath(c.tier)"
+							[alt]="c.tier"
+							class="w-16 h-16"
+							loading="lazy"
+							decoding="async"
+						/>
+						<div class="text-2xl font-semibold">
+							{{ c.points }} pts <span class="text-base opacity-60">· {{ c.tier }}</span>
+						</div>
+						<a
+							[routerLink]="['/events/tournaments/circuit/ranking']"
+							class="text-sm hover:underline opacity-80"
+						>
+							Voir le classement circuit complet <i class="pi pi-arrow-right ml-1"></i>
+						</a>
+					</div>
+					<div class="grid grid-cols-2 gap-6 md:grid-cols-4">
+						<div class="flex flex-col items-center">
+							<span class="text-2xl font-semibold">{{ c.tournamentsPlayed }}</span>
+							<span class="text-sm text-surface-500 dark:text-surface-300">Tournois joués</span>
+						</div>
+						<div class="flex flex-col items-center">
+							<span class="text-2xl font-semibold">{{ c.wins }}</span>
+							<span class="text-sm text-surface-500 dark:text-surface-300">Titres</span>
+						</div>
+						<div class="flex flex-col items-center">
+							<span class="text-2xl font-semibold">{{ c.podiums }}</span>
+							<span class="text-sm text-surface-500 dark:text-surface-300">Podiums</span>
+						</div>
+						<div class="flex flex-col items-center">
+							<span class="text-2xl font-semibold">{{ c.bestRankLabel }}</span>
+							<span class="text-sm text-surface-500 dark:text-surface-300">Meilleur résultat</span>
+						</div>
+						<div class="flex flex-col items-center">
+							<span class="text-2xl font-semibold">{{ c.top8 }}</span>
+							<span class="text-sm text-surface-500 dark:text-surface-300">Tops 8</span>
+						</div>
+						<div class="flex flex-col items-center">
+							<span class="text-2xl font-semibold">{{ c.goalsScored }}-{{ c.goalsConceded }}</span>
+							<span class="text-sm text-surface-500 dark:text-surface-300"
+								>Buts marqués-encaissés</span
+							>
+						</div>
+						<div class="flex flex-col items-center">
+							<span class="text-2xl font-semibold">{{ formatGoalAverage(c.goalAverage) }}</span>
+							<span class="text-sm text-surface-500 dark:text-surface-300">Moyenne de buts</span>
+						</div>
+						<div class="flex flex-col items-center">
+							<span class="text-2xl font-semibold">{{ c.bestStreak || "—" }}</span>
+							<span class="text-sm text-surface-500 dark:text-surface-300">Meilleure série</span>
+						</div>
+					</div>
+
+					@if (c.history.length > 0) {
+						<div class="up-history mt-10">
+							<table class="up-history-table">
+								<thead>
+									<tr>
+										<th>Tournoi</th>
+										<th>Date</th>
+										<th class="text-right">Résultat</th>
+										<th class="text-right">Points</th>
+										<th class="text-right">Buts</th>
+									</tr>
+								</thead>
+								<tbody>
+									@for (h of c.history; track h.tournamentId) {
+										<tr>
+											<td>
+												<a
+													[routerLink]="['/events/tournaments', h.tournamentId]"
+													class="up-history-link"
+													>{{ h.tournamentName }}</a
+												>
+											</td>
+											<td class="opacity-70">{{ h.grandFinalAt | date: "d MMM y" }}</td>
+											<td class="text-right">{{ h.rankLabel }}</td>
+											<td class="text-right font-mono">{{ h.points || "—" }}</td>
+											<td class="text-right font-mono opacity-80">
+												{{ h.goalsScored }}-{{ h.goalsConceded }}
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					}
+				</div>
+			}
+		}
+
+		<!-- ── Tournois ─────────────────────────────────────────────────── -->
+		<div class="w-full flex items-center gap-16 mt-16 mb-8">
+			<hr class="w-full border-[#494949]" />
+			<p>Tournois</p>
+			<hr class="w-full border-[#494949]" />
+		</div>
+		<div class="bg-surface-50 dark:bg-(--p-surface-900) px-6 py-8 md:px-12 lg:px-20">
+			<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+				<div class="bg-surface-0 dark:bg-(--p-surface-800) shadow-md p-5 rounded-2xl">
+					<div class="flex justify-between gap-4">
+						<div class="flex flex-col gap-2">
+							<span class="text-surface-700 dark:text-surface-300 font-normal leading-tight"
+								>Participations</span
+							>
+							<div
+								class="text-surface-900 dark:text-surface-0 font-semibold text-2xl! leading-tight!"
+							>
+								{{ userProfile?.tournaments?.total ?? 0 }}
+							</div>
+						</div>
+						<div
+							class="flex items-center justify-center bg-linear-to-b from-violet-400 dark:from-violet-300 to-violet-600 dark:to-violet-500 rounded-lg w-10 h-10"
+						>
+							<i
+								class="pi pi-trophy text-surface-0 dark:text-surface-900 text-xl! leading-none!"
+							></i>
+						</div>
+					</div>
+					<div class="mt-4">
+						<span class="text-surface-600 dark:text-surface-300 font-medium leading-tight"
+							>{{ userProfile?.tournaments?.personalTotal ?? 0 }} match(s) joué(s)</span
+						>
+					</div>
+				</div>
+
+				<div class="bg-surface-0 dark:bg-(--p-surface-800) shadow-sm p-5 rounded-2xl">
+					<div class="flex justify-between gap-4">
+						<div class="flex flex-col gap-2">
+							<span class="text-surface-700 dark:text-surface-300 font-normal leading-tight"
+								>Victoires personnelles</span
+							>
+							<div
+								class="text-surface-900 dark:text-surface-0 font-semibold text-2xl! leading-tight!"
+							>
+								{{ userProfile?.tournaments?.personalWins ?? 0 }}
+							</div>
+						</div>
+						<div
+							class="flex items-center justify-center bg-linear-to-b from-green-400 dark:from-green-300 to-green-600 dark:to-green-500 rounded-lg w-10 h-10"
+						>
+							<i
+								class="pi pi-angle-double-up text-surface-0 dark:text-surface-900 text-xl! leading-none!"
+							></i>
+						</div>
+					</div>
+					<div class="mt-4">
+						<span class="text-surface-600 dark:text-surface-300 font-medium leading-tight"
+							>Winrate
+							{{
+								winrate(
+									userProfile?.tournaments?.personalWins,
+									userProfile?.tournaments?.personalLosses
+								)
+							}}
+							· moy.
+							{{ userProfile?.tournaments?.goalsScoredAvg ?? 0 | number: "1.0-1" }} buts
+							marqués</span
+						>
+					</div>
+				</div>
+
+				<div
+					class="bg-surface-0 dark:bg-(--p-surface-800) shadow-sm p-5 rounded-2xl md:col-span-2 md:mx-auto md:w-1/2 lg:col-span-1 lg:w-full"
+				>
+					<div class="flex justify-between gap-4">
+						<div class="flex flex-col gap-2">
+							<span class="text-surface-700 dark:text-surface-300 font-normal leading-tight"
+								>Défaites personnelles</span
+							>
+							<div
+								class="text-surface-900 dark:text-surface-0 font-semibold text-2xl! leading-tight!"
+							>
+								{{ userProfile?.tournaments?.personalLosses ?? 0 }}
+							</div>
+						</div>
+						<div
+							class="flex items-center justify-center bg-linear-to-b from-red-400 dark:from-red-300 to-red-600 dark:to-red-500 rounded-lg w-10 h-10"
+						>
+							<i
+								class="pi pi-angle-double-down text-surface-0 dark:text-surface-900 text-xl! leading-none!"
+							></i>
+						</div>
+					</div>
+					<div class="mt-4">
+						<span class="text-surface-600 dark:text-surface-300 leading-tight"
+							>Moy. {{ userProfile?.tournaments?.goalsReceivedAvg ?? 0 | number: "1.0-1" }} buts
+							encaissés · nuls {{ userProfile?.tournaments?.personalDraws ?? 0 }}</span
+						>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ── Interclans ───────────────────────────────────────────────── -->
+		<div class="w-full flex items-center gap-16 mt-16 mb-8">
+			<hr class="w-full border-[#494949]" />
+			<p>Interclans</p>
+			<hr class="w-full border-[#494949]" />
+		</div>
+		<div class="bg-surface-50 dark:bg-(--p-surface-900) px-6 py-8 md:px-12 lg:px-20">
+			<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+				<div class="bg-surface-0 dark:bg-(--p-surface-800) shadow-md p-5 rounded-2xl">
+					<div class="flex justify-between gap-4">
+						<div class="flex flex-col gap-2">
+							<span class="text-surface-700 dark:text-surface-300 font-normal leading-tight"
+								>Participations</span
+							>
+							<div
+								class="text-surface-900 dark:text-surface-0 font-semibold text-2xl! leading-tight!"
+							>
+								{{ userProfile?.interclans?.total }}
+							</div>
+						</div>
+						<div
+							class="flex items-center justify-center bg-linear-to-b from-cyan-400 dark:from-cyan-300 to-cyan-600 dark:to-cyan-500 rounded-lg w-10 h-10"
+						>
+							<i class="pi pi-star text-surface-0 dark:text-surface-900 text-xl! leading-none!"></i>
+						</div>
+					</div>
+					<div class="mt-4">
+						<span class="text-surface-600 dark:text-surface-300 font-medium leading-tight"
+							>A contribué à {{ userProfile?.interclans?.wins }} victoire(s) du Clan</span
+						>
+					</div>
+				</div>
+
+				<div class="bg-surface-0 dark:bg-(--p-surface-800) shadow-sm p-5 rounded-2xl">
+					<div class="flex justify-between gap-4">
+						<div class="flex flex-col gap-2">
+							<span class="text-surface-700 dark:text-surface-300 font-normal leading-tight"
+								>Victoires personnelles</span
+							>
+							<div
+								class="text-surface-900 dark:text-surface-0 font-semibold text-2xl! leading-tight!"
+							>
+								{{ userProfile?.interclans?.personalWins ?? 0 }}
+							</div>
+						</div>
+						<div
+							class="flex items-center justify-center bg-linear-to-b from-green-400 dark:from-green-300 to-green-600 dark:to-green-500 rounded-lg w-10 h-10"
+						>
+							<i
+								class="pi pi-angle-double-up text-surface-0 dark:text-surface-900 text-xl! leading-none!"
+							></i>
+						</div>
+					</div>
+					<div class="mt-4">
+						<span class="text-surface-600 dark:text-surface-300 font-medium leading-tight"
+							>Winrate
+							{{
+								winrate(
+									userProfile?.interclans?.personalWins,
+									userProfile?.interclans?.personalLosses
+								)
+							}}
+							· moy.
+							{{ userProfile?.interclans?.goalsScoredAvg ?? 0 | number: "1.0-1" }} buts
+							marqués</span
+						>
+					</div>
+				</div>
+
+				<div
+					class="bg-surface-0 dark:bg-(--p-surface-800) shadow-sm p-5 rounded-2xl md:col-span-2 md:mx-auto md:w-1/2 lg:col-span-1 lg:w-full"
+				>
+					<div class="flex justify-between gap-4">
+						<div class="flex flex-col gap-2">
+							<span class="text-surface-700 dark:text-surface-300 font-normal leading-tight"
+								>Défaites personnelles</span
+							>
+							<div
+								class="text-surface-900 dark:text-surface-0 font-semibold text-2xl! leading-tight!"
+							>
+								{{ userProfile?.interclans?.personalLosses ?? 0 }}
+							</div>
+						</div>
+						<div
+							class="flex items-center justify-center bg-linear-to-b from-red-400 dark:from-red-300 to-red-600 dark:to-red-500 rounded-lg w-10 h-10"
+						>
+							<i
+								class="pi pi-angle-double-down text-surface-0 dark:text-surface-900 text-xl! leading-none!"
+							></i>
+						</div>
+					</div>
+					<div class="mt-4">
+						<span class="text-surface-600 dark:text-surface-300 leading-tight"
+							>Moy. {{ userProfile?.interclans?.goalsReceivedAvg ?? 0 | number: "1.0-1" }} buts
+							encaissés · nuls {{ userProfile?.interclans?.personalDraws ?? 0 }}</span
+						>
+					</div>
+				</div>
+			</div>
+		</div>
+	</p-panel>
+</div>
+<app-invite-member
+	[showDialog]="showInviteDialog"
+	[targetUserId]="userProfile?.id"
+></app-invite-member>
+
+<p-dialog
+	header="Modifier mon profil"
+	[modal]="true"
+	[(visible)]="showEditDialog"
+	[style]="{ width: '28rem', maxWidth: '95vw' }"
+>
+	<div class="flex flex-col gap-4">
+		<div class="flex flex-col gap-1">
+			<label for="edit-bio" class="text-sm font-medium">Bio</label>
+			<textarea
+				pTextarea
+				id="edit-bio"
+				rows="4"
+				maxlength="500"
+				[(ngModel)]="editBio"
+				placeholder="Quelques mots sur toi..."
+			></textarea>
+			<span class="text-xs opacity-60 self-end">{{ editBio.length }}/500</span>
+		</div>
+		<div class="flex flex-col gap-1">
+			<label for="edit-twitch" class="text-sm font-medium">Lien Twitch</label>
+			<input
+				pInputText
+				id="edit-twitch"
+				type="url"
+				[(ngModel)]="editTwitchUrl"
+				placeholder="https://twitch.tv/tonpseudo"
+			/>
+		</div>
+	</div>
+	<div class="flex justify-end gap-2 mt-4">
+		<p-button
+			label="Annuler"
+			severity="secondary"
+			[outlined]="true"
+			(onClick)="showEditDialog.set(false)"
+		></p-button>
+		<p-button
+			label="Enregistrer"
+			icon="pi pi-check"
+			[loading]="savingProfile()"
+			(onClick)="saveProfile()"
+		></p-button>
+	</div>
+</p-dialog>

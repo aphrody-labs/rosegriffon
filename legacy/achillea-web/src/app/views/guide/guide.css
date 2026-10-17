@@ -1,0 +1,14 @@
+:host {
+	display: block;
+}
+
+code {
+	background: rgba(255, 255, 255, 0.08);
+	padding: 0.15rem 0.4rem;
+	border-radius: 4px;
+	font-size: 0.85rem;
+}
+
+.text-primary {
+	color: var(--p-primary-color);
+}
