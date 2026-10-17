@@ -55,7 +55,17 @@ function dossierInagle(): string {
 export async function runInaglePush(): Promise<{ success: boolean; error?: string }> {
   console.log("[Cron DB] Démarrage de la synchronisation Inagle avec la base de données...");
   try {
-    await $`${BUN} src/cli.ts push`.cwd(dossierInagle()).env(environnementBun());
+    const sortie = await $`${BUN} src/cli.ts push`.cwd(dossierInagle()).env(environnementBun());
+    // La CLI attrape son erreur fatale, la journalise et sort en 0 : seul son
+    // message de fin atteste que TOUTES les tables ont été poussées.
+    const lignes = `${sortie.stdout.toString()}\n${sortie.stderr.toString()}`.split("\n");
+    if (!lignes.some(ligne => ligne.includes("Data push completed successfully"))) {
+      const fatale = lignes.find(ligne => ligne.includes("Fatal error during push")) ?? "";
+      const cause = lignes.find(ligne => /^\s*\w*Error:/.test(ligne)) ?? "";
+      const motif = [fatale, cause].filter(Boolean).join(" — ").trim() || "message de fin absent";
+      console.error(`[Cron DB] Push Inagle interrompu : ${motif}`);
+      return { success: false, error: `push Inagle interrompu sans code d'erreur : ${motif}` };
+    }
     console.log("[Cron DB] Synchronisation réussie.");
     return { success: true };
   } catch (err: unknown) {
