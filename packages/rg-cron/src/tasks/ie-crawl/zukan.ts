@@ -7,11 +7,18 @@
 import { cache } from "@rosegriffon/db/redis";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { buildOrderMap, crawlZukanOrderPages } from "@rosegriffon/inagle/zukan/order";
+import { setWebCdpPageFactory } from "@rosegriffon/inagle/zukan/web-cdp";
 import { inagleSql } from "../../lib/db.js";
+import { PageWebView } from "../../lib/webview";
 
-// Le scraper d'ordre (navigation CDP + parsing cheerio des pages chara_param) est
-// désormais unifié dans `@rosegriffon/inagle/zukan/order` (leaf, hors barrel car
-// il utilise Aphrody Web CDP). Ce fichier ne garde que l'orchestration prod :
+// Le transport CDP par défaut d'inagle est un import dynamique de
+// `@aphrody/agent-browser/cdp`, introuvable dans le binaire compilé : la page
+// headless est celle du runtime (`Bun.WebView`).
+setWebCdpPageFactory(endpoint => PageWebView.connect(endpoint));
+
+// Le scraper d'ordre (navigation headless + parsing cheerio des pages chara_param) est
+// unifié dans `@rosegriffon/inagle/zukan/order` (leaf, hors barrel car il
+// pilote un navigateur). Ce fichier ne garde que l'orchestration prod :
 // diff Redis + écriture `zukan_order` sur Supabase. Comportement identique.
 
 /** @deprecated Réexport de compatibilité — type unifié dans le module order. */

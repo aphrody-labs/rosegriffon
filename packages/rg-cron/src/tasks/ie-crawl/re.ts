@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { iecodeDataPath } from "@aphrody/paths";
+import { crawlDataPath } from "../../lib/shared-path";
 import { WebCdpPage, waitForSelector, type NavigationResponse } from "../../lib/web-cdp";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-const DATA_ROOT = iecodeDataPath("inazuma.jp/re");
+const DATA_ROOT = crawlDataPath("inazuma.jp/re");
 
 interface RePageTarget {
   lang: string;

@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WebService } from "@aphrody/agent-browser/service";
-import { iecodeDataPath } from "@aphrody/paths";
+import { crawlDataPath } from "../../lib/shared-path";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
 
-const DATA_ROOT = iecodeDataPath("reddit");
+const DATA_ROOT = crawlDataPath("reddit");
 
 interface RedditPost {
   id: string;
@@ -36,18 +35,17 @@ export async function crawlReddit(): Promise<{ success: boolean; count: number; 
     // Requête sur le flux JSON de Reddit
     const url = "https://www.reddit.com/r/inazumaeleven/new.json?limit=50";
 
-    const report = await new WebService().crawl([url], {
-      maxPages: 1,
-      maxDepth: 0,
-      allowedDomains: ["www.reddit.com"],
-      includeHtml: true,
-      timeoutSecs: 30,
+    // `fetch` natif : Reddit sert ce flux JSON sans navigateur. Il refuse en revanche
+    // les IP de centres de données sans jeton développeur (403 « blocked by network
+    // security ») : l'échec est alors explicite, jamais un succès à vide.
+    const reponse = await fetch(url, {
+      headers: { "user-agent": "rosegriffon-cron/1.0 (+https://rosegriffon.fr)" },
+      signal: AbortSignal.timeout(30_000),
     });
-    const page = report.pages[0];
-    if (!page || page.status < 200 || page.status >= 300) {
-      throw new Error(`Aphrody Web Reddit request failed: ${page?.status ?? "no page"}`);
+    if (!reponse.ok) {
+      throw new Error(`Reddit a répondu HTTP ${reponse.status} (${(await reponse.text()).slice(0, 80).trim()})`);
     }
-    const json = JSON.parse(page.html ?? "") as { data?: { children?: { data: RedditPost }[] } };
+    const json = (await reponse.json()) as { data?: { children?: { data: RedditPost }[] } };
 
     const children = json?.data?.children || [];
     let crawlCount = 0;

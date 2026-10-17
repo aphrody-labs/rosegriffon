@@ -69,7 +69,15 @@ export const app = new Elysia()
     timestamp: Date.now(),
   }))
   // Tâches planifiées (appelées par pg_cron) et annonces Discord du site : Bearer, corps lu par le handler.
-  .all("/v1/cron/*", ({ request }) => handleCronHttp(request), { parse: "none" })
+  // `?attendre=1` : pas d'`idleTimeout` (10 s) pendant que la tâche tourne (cf. `core.ts`).
+  .all(
+    "/v1/cron/*",
+    ({ request, server }) => {
+      if (new URL(request.url).searchParams.get("attendre") === "1") server?.timeout(request, 0);
+      return handleCronHttp(request);
+    },
+    { parse: "none" },
+  )
   .post("/v1/discord/announce", ({ request }) => handleAnnounceHttp(request), { parse: "none" })
   .group("/v1", v1 =>
     v1

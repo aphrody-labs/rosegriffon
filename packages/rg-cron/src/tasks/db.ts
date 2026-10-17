@@ -16,8 +16,19 @@ import { $ } from "bun";
  * resterait cassée. `process.execPath` sécurise en plus l'appel externe :
  * il vaut le binaire qui fait tourner ce processus, quel que soit
  * l'environnement.
+ *
+ * Dans `rg-core`, ce binaire est l'exécutable compilé (`bun build --compile`) :
+ * lancé tel quel, il redémarrerait le service (« Failed to start server. Is port
+ * 8810 in use? »). `BUN_BE_BUN=1` le fait se comporter en `bun` — pour CE
+ * sous-processus seulement, et pour ses descendants (le `bun` du script du
+ * paquet), qui en héritent.
  */
 const BUN = process.execPath;
+
+/** Environnement d'un sous-processus Bun lancé depuis ce processus (compilé ou non). */
+export function environnementBun(): Record<string, string | undefined> {
+  return { ...process.env, BUN_BE_BUN: "1" };
+}
 
 /**
  * Racine du dépôt qui porte le pipeline de données du jeu.
@@ -39,7 +50,7 @@ const RACINE_JEU = process.env.NIERS_ROOT ?? checkoutRoot("iecode");
 export async function runInaglePush(): Promise<{ success: boolean; error?: string }> {
   console.log("[Cron DB] Démarrage de la synchronisation Inagle avec la base de données...");
   try {
-    await $`${BUN} run --filter @rosegriffon/inagle push`.cwd(RACINE_JEU);
+    await $`${BUN} run --filter @rosegriffon/inagle push`.cwd(RACINE_JEU).env(environnementBun());
     console.log("[Cron DB] Synchronisation réussie.");
     return { success: true };
   } catch (err: unknown) {

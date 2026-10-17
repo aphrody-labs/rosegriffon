@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WebService } from "@aphrody/agent-browser/service";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { cronSharedPath } from "../../lib/shared-path";
@@ -13,22 +12,9 @@ const DOCS_DIR = cronSharedPath("docs");
 // Les docs collectées restent hors du checkout et des releases immuables.
 const REFERENCE_DIR = join(DOCS_DIR, "reference");
 
-/** Thin response adapter; Aphrody Web owns acquisition, redirects and transport. */
-async function fetchReference(url: string): Promise<Response> {
-  const report = await new WebService().crawl([url], {
-    maxPages: 1,
-    maxDepth: 0,
-    allowedDomains: [new URL(url).hostname],
-    includeHtml: true,
-    obeyRobots: false,
-    timeoutSecs: 30,
-  });
-  const page = report.pages[0];
-  if (!page) throw new Error(`Aphrody Web returned no reference for ${url}`);
-  return new Response(page.html ?? "", {
-    status: page.status,
-    headers: page.contentType ? { "content-type": page.contentType } : undefined,
-  });
+/** Documents bruts (GitHub raw) : `fetch` natif, redirections suivies, délai borné. */
+function fetchReference(url: string): Promise<Response> {
+  return fetch(url, { signal: AbortSignal.timeout(30_000) });
 }
 
 /**

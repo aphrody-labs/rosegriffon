@@ -37,7 +37,6 @@ if (argv.includes("--version") || argv.includes("-v")) {
   process.exit(0);
 }
 
-
 // ─── Supervision des enfants ────────────────────────────────────────────────
 
 interface EtatEnfant {
@@ -230,8 +229,14 @@ async function demarrerCoeur(): Promise<void> {
     port,
     hostname,
     api: requete => app.handle(requete),
-    intercepter(requete) {
+    intercepter(requete, serveur) {
       const url = new URL(requete.url);
+      // `?attendre=1` garde la requête ouverte jusqu'à la fin de la tâche (minutes, voire heures) :
+      // sans cela, l'`idleTimeout` de Bun.serve (10 s) coupait la connexion (ECONNRESET) alors
+      // que la tâche continuait. Délai désactivé pour CETTE requête seulement.
+      if (url.pathname.startsWith("/v1/cron/") && url.searchParams.get("attendre") === "1") {
+        serveur.timeout(requete, 0);
+      }
       const hote = (requete.headers.get("host") ?? url.host).split(":")[0]!.toLowerCase();
       if (hotesModeles.has(hote)) {
         return url.pathname === "/health"
@@ -263,7 +268,10 @@ async function demarrerCoeur(): Promise<void> {
     await import("./index");
   } catch (err) {
     // Colyseus, l'API, les modèles et le cron restent servis : `/health` rend `bot.pret = false`.
-    console.error("[rg-core] passerelle Discord indisponible :", err instanceof Error ? (err.stack ?? err.message) : err);
+    console.error(
+      "[rg-core] passerelle Discord indisponible :",
+      err instanceof Error ? (err.stack ?? err.message) : err,
+    );
     return;
   }
   await brancher;

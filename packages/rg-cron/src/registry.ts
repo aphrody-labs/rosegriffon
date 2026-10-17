@@ -77,11 +77,11 @@ export const REGISTRE_TACHES: Readonly<Record<string, DefinitionTache>> = Object
   },
   crawl: {
     executer: () => import("./tasks/ie-crawl").then(m => m.runIeCrawl()),
-    horsServerless: "pilote un navigateur CDP et écrit ses corpus sur disque",
+    horsServerless: "pilote un navigateur headless (`Bun.WebView`) et écrit ses corpus sur disque",
   },
   "website:qa": {
     executer: () => import("./tasks/ie-crawl/website-qa").then(m => m.runWebsiteQa()),
-    horsServerless: "lance le script shell agent-browser et un navigateur",
+    horsServerless: "pilote un navigateur headless (`Bun.WebView`) et écrit son rapport sur disque",
   },
   publish: { executer: () => import("./tasks/api").then(m => m.triggerPublishScheduled()) },
   "github-publish": { executer: () => import("./tasks/api").then(m => m.triggerGithubPublishWorkflow()) },

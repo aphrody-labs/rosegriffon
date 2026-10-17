@@ -45,6 +45,7 @@
 import { $ } from "bun";
 import { workspacePath } from "@aphrody/paths";
 import { join } from "node:path";
+import { environnementBun } from "./db";
 
 interface ResultatImportNoctaly {
   success: boolean;
@@ -69,7 +70,10 @@ export async function runNoctalyImport(): Promise<ResultatImportNoctaly> {
   // Resolved from the workspace root (cwd or APHRODY_WORKSPACE_ROOT), never from the bundled module location.
   const botDir = process.env.RG_BOT_DIR ?? workspacePath("apps", "rg-bot");
   const script = join(botDir, "src", "scripts", "import-noctaly.ts");
-  const proc = await $`bun ${script}`.cwd(botDir).nothrow().quiet();
+  // Le shell de Bun résout un `bun` nu vers `process.execPath` : dans `rg-core`,
+  // c'est le binaire compilé, qui redémarrerait le service au lieu d'exécuter le
+  // script. Le chemin est donc explicite, et `BUN_BE_BUN=1` en fait un `bun`.
+  const proc = await $`${process.execPath} ${script}`.cwd(botDir).env(environnementBun()).nothrow().quiet();
   const sortie = `${proc.stdout.toString()}${proc.stderr.toString()}`.trim();
 
   // Les dernières lignes utiles sont celles qu'un humain veut lire en premier
