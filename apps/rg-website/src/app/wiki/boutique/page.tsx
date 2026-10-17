@@ -3,12 +3,14 @@ import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
 import { Icon } from "@/components/ui/Icon";
 import { ShopCard } from "@/components/wiki/ShopCard";
 import { getShopsList } from "@/lib/wiki/shops";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/boutique" },
+  alternates: { canonical: wiki("/boutique") },
   description:
     "Toutes les boutiques d'Inazuma Eleven: Victory Road : Centre commercial Chronique, Marché aux esprits, Goal-Marché, BB Mart, Footech… Découvrez ce que chaque boutique vend et où acheter chaque objet.",
   title: "Boutiques | Inazuma Eleven Victory Road - Azalée",
@@ -22,7 +24,7 @@ export default async function BoutiquesPage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
+      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
       { "@type": "ListItem", name: "Boutiques", position: 2 },
     ],
   };

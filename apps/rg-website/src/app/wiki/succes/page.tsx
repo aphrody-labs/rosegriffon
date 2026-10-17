@@ -8,9 +8,11 @@ import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import { parseSearchParams } from "@/lib/validations";
 import { getTrophiesList } from "@/lib/wiki/trophies";
 import { CATEGORY_LABELS, type Trophy, type TrophyCategory } from "@rosegriffon/azalee/wiki/trophies-shared";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/succes" },
+  alternates: { canonical: wiki("/succes") },
   description:
     "Liste complète des succès et trophées d'Inazuma Eleven: Victory Road — trophées officiels et objectifs d'activité in-game, avec noms et descriptions localisés (FR / EN / JP).",
   title: "Succès | Inazuma Eleven Victory Road - Azalée",
@@ -87,20 +89,20 @@ export default async function SuccesPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Liste complète des succès et trophées d'Inazuma Eleven: Victory Road — trophées officiels et objectifs d'activité.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: trophies.slice(0, 10).map((t: Trophy, i: number) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `https://azalee.rosegriffon.fr/succes/${t.id}`,
+        url: absoluteUrl(wiki(`/succes/${t.id}`)),
         name: t.name,
       })),
       numberOfItems: trophies.length,
     },
     name: "Succès & Trophées - Inazuma Eleven: Victory Road",
     numberOfItems: trophies.length,
-    url: "https://azalee.rosegriffon.fr/succes",
+    url: absoluteUrl(wiki("/succes")),
   };
 
   return (

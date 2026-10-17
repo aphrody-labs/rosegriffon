@@ -116,7 +116,7 @@ export default async function HomePage() {
         "@type": "Organization",
         logo: {
           "@type": "ImageObject",
-          url: "https://azalee.rosegriffon.fr/icon.webp",
+          url: absoluteUrl("/icon.webp"),
         },
         name: "Rose Griffon",
         url: SITE_URL,

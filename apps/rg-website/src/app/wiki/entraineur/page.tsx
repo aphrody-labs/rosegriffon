@@ -8,9 +8,11 @@ import { CoachCard } from "@/components/wiki/CoachCard";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import { COACH_ELEMENT_OPTIONS, COACH_PLAYSTYLE_OPTIONS, COACH_ROLE_OPTIONS, getCoachesList } from "@/lib/wiki/coaches";
 import { parseSearchParams } from "@/lib/validations";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/entraineur" },
+  alternates: { canonical: wiki("/entraineur") },
   description:
     "Liste complète des entraîneurs, managers et coachs d'Inazuma Eleven: Victory Road. Bonus passifs d'équipe, conditions d'activation, élément et style de jeu.",
   title: "Entraîneurs & Coachs | Inazuma Eleven Victory Road - Azalée",
@@ -35,20 +37,20 @@ export default async function CoachesPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Liste complète des entraîneurs, managers et coachs d'Inazuma Eleven: Victory Road.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: coaches.slice(0, 10).map((c: any, i: number) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `https://azalee.rosegriffon.fr/entraineur/${c.id}`,
+        url: absoluteUrl(wiki(`/entraineur/${c.id}`)),
         name: c.name,
       })),
       numberOfItems: coaches.length,
     },
     name: "Entraîneurs & Coachs - Inazuma Eleven: Victory Road",
     numberOfItems: coaches.length,
-    url: "https://azalee.rosegriffon.fr/entraineur",
+    url: absoluteUrl(wiki("/entraineur")),
   };
 
   return (

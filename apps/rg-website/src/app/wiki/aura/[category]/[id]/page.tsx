@@ -8,6 +8,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AuraDetail } from "@/components/wiki/AuraDetail";
 import { wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 const SUBTYPE_INFO: Record<string, { label: string; icon: string; color: string }> = {
   Aura: { color: "text-primary", icon: "wifi_tethering", label: "Aura" },
@@ -41,7 +43,7 @@ export async function generateMetadata({
   const title = `${name} | ${categoryLabel} - Azalée`;
 
   return {
-    alternates: { canonical: `/aura/${category}/${id}` },
+    alternates: { canonical: wiki(`/aura/${category}/${id}`) },
     description,
     openGraph: {
       description,
@@ -75,16 +77,16 @@ export default async function AuraDetailPage({ params }: { params: Promise<{ cat
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
+      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/aura",
+        item: absoluteUrl(wiki("/aura")),
         name: "Hyper Techniques",
         position: 2,
       },
       {
         "@type": "ListItem",
-        item: `https://azalee.rosegriffon.fr/aura/${category}`,
+        item: absoluteUrl(wiki(`/aura/${category}`)),
         name: categoryLabel,
         position: 3,
       },

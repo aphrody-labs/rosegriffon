@@ -24,6 +24,8 @@ import type { SkillVideoVariant } from "@/components/wiki/SkillVideoPlayer";
 import { getSkillImageUrl } from "@rosegriffon/azalee/images";
 import { createPostgresClient } from "@rosegriffon/db/postgres-client";
 import { wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 /**
  * getSkill() (lib/wiki-service.ts) spreads sheet_data — empty {} for the 993 real
@@ -165,10 +167,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   // annoncer une grande image et servir un telop étroit donne un aperçu vide.
   const poster = skill?.posterUrl || null;
   const ogImage = poster || telop;
-  const ogImageUrl = ogImage && ogImage.startsWith("/") ? `https://azalee.rosegriffon.fr${ogImage}` : ogImage;
+  const ogImageUrl = ogImage && ogImage.startsWith("/") ? absoluteUrl(ogImage) : ogImage;
 
   return {
-    alternates: { canonical: `/skill/${id}` },
+    alternates: { canonical: wiki(`/skill/${id}`) },
     description,
     keywords: [
       name,
@@ -266,15 +268,15 @@ export default async function MoveDetailPage({ params }: { params: Promise<{ id:
   // Vidéos officielles zukan (1 ou 2 variantes selon la technique).
   const { variants: videos, publishedAt } = await fetchSkillVideos((skill as any).skillId || id);
 
-  const pageUrl = `https://azalee.rosegriffon.fr/skill/${id}`;
+  const pageUrl = absoluteUrl(wiki(`/skill/${id}`));
 
   const breadcrumbJsonLd = {
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
+      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/skill",
+        item: absoluteUrl(wiki("/skill")),
         name: "Techniques",
         position: 2,
       },

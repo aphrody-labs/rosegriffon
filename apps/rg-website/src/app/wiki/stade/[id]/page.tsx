@@ -7,6 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getStadium } from "@/lib/wiki/stadiums";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -16,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const description = `${name} — terrain de match d'Inazuma Eleven: Victory Road. Illustration in-game, code interne et index (le jeu n'expose ni nom ni équipe associée).`;
 
   return {
-    alternates: { canonical: `/stade/${id}` },
+    alternates: { canonical: wiki(`/stade/${id}`) },
     description,
     openGraph: {
       description,
@@ -43,10 +45,10 @@ export default async function StadiumDetailPage({ params }: { params: Promise<{ 
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
+      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/stade",
+        item: absoluteUrl(wiki("/stade")),
         name: "Stades",
         position: 2,
       },

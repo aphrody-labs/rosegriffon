@@ -18,6 +18,8 @@ import { CharaAssetsSection } from "@/components/wiki/CharaAssetsSection";
 import { AphrodyDossierSection } from "@/components/wiki/AphrodyDossierSection";
 import { CharaVariantsComparison } from "@/components/wiki/CharaVariantsComparison";
 import type { SkillCutinEntry } from "@rosegriffon/azalee/game/skills-cutin";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 /**
  * Variante représentative d'un personnage (accès par slug de base) : celle dont la
@@ -104,7 +106,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     ? `${parts.join(" - ")}. ${charDesc.slice(0, 120)}${charDesc.length > 120 ? "..." : ""}`
     : `${parts.join(" - ")}. Stats, techniques et détails dans Inazuma Eleven: Victory Road.`;
 
-  const ogImageUrl = new URL("/api/og/character", "https://azalee.rosegriffon.fr");
+  const ogImageUrl = new URL(absoluteUrl("/api/og/character"));
   ogImageUrl.searchParams.set("id", id);
   ogImageUrl.searchParams.set("name", name);
   ogImageUrl.searchParams.set("element", variant?.element || "neutral");
@@ -115,7 +117,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   return {
     alternates: {
-      canonical: `/chara/${id}`,
+      canonical: wiki(`/chara/${id}`),
     },
     description: shortDesc,
     openGraph: {
@@ -528,17 +530,17 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
     knowsAbout: skillNames.length > 0 ? skillNames : undefined,
     memberOf: player.teamName ? { "@type": "SportsTeam", name: player.teamName } : undefined,
     name: charName,
-    url: `https://azalee.rosegriffon.fr/chara/${baseChar.slug || id}`,
+    url: absoluteUrl(wiki(`/chara/${baseChar.slug || id}`)),
   };
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
+      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/chara",
+        item: absoluteUrl(wiki("/chara")),
         name: "Joueurs",
         position: 2,
       },

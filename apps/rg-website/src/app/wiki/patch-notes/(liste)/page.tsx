@@ -1,11 +1,12 @@
 import { getPatchNotes } from "@/app/actions/news";
 import PatchNotesDashboard from "@/components/wiki/patch-notes/PatchNotesDashboard";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
 
 export const metadata = {
-  alternates: { canonical: "/patch-notes" },
+  alternates: { canonical: wiki("/patch-notes") },
   description:
     "Historique des mises a jour de Inazuma Eleven: Victory Road. Filtrez par plateforme (Switch, PS4/5, Steam).",
   title: "Notes de Mise a Jour | Azalee",

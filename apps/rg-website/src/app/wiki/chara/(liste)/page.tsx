@@ -6,6 +6,8 @@ import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 import { PlayersClient } from "../players-client";
 import { WikiPageHeader } from "@/components/wiki/WikiPageHeader";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export async function generateMetadata({
   searchParams,
@@ -42,7 +44,7 @@ export async function generateMetadata({
 
   return {
     alternates: {
-      canonical: buildCanonical("/chara", rawParams, LIST_CANONICAL_KEYS),
+      canonical: buildCanonical(wiki("/chara"), rawParams, LIST_CANONICAL_KEYS),
     },
     description: `Base de données des joueurs Inazuma Eleven: Victory Road. ${filters.length > 0 ? `Filtres : ${filters.join(", ")}. ` : ""}Retrouvez les stats, techniques et méthodes de recrutement de tous les personnages.`,
     openGraph: {
@@ -112,20 +114,20 @@ export default async function PlayersPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Base de données de ${total.toLocaleString("fr-FR")} joueurs Inazuma Eleven: Victory Road.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: characters.slice(0, 10).map((c, i) => ({
         "@type": "ListItem",
         position: (pageNumber - 1) * itemsPerPage + i + 1,
-        url: `https://azalee.rosegriffon.fr/chara/${c.slug || c.charaId}`,
+        url: absoluteUrl(wiki(`/chara/${c.slug || c.charaId}`)),
         name: c.names?.fr || c.names?.en || "Joueur",
       })),
       numberOfItems: total,
     },
     name: "Personnages - Inazuma Eleven: Victory Road",
     numberOfItems: total,
-    url: "https://azalee.rosegriffon.fr/chara",
+    url: absoluteUrl(wiki("/chara")),
   };
 
   return (

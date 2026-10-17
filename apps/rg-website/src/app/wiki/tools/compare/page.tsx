@@ -3,6 +3,7 @@ import { CharacterComparator } from "@/components/wiki/CharacterComparator";
 import type { CompareCharacter, SkillInfo } from "@/components/wiki/CharacterComparator";
 import { createPostgresClient } from "@rosegriffon/db/postgres-client";
 import { wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -308,7 +309,7 @@ export async function generateMetadata({
 
   if (!char1 && !char2) {
     return {
-      alternates: { canonical: "/tools/compare" },
+      alternates: { canonical: wiki("/tools/compare") },
       description:
         "Comparez deux personnages d'Inazuma Eleven: Victory Road côte à côte. Stats, techniques et bien plus.",
       title: "Comparateur de personnages | Azalée",

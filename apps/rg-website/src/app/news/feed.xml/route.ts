@@ -1,6 +1,8 @@
+import { SITE_URL } from "@/lib/site-url";
 import { getPgPool } from "@/lib/db/pg";
 
-const BASE_URL = "https://azalee.rosegriffon.fr";
+// azalee.rosegriffon.fr ne répond plus (526) : le fil vit sous rosegriffon.fr/news.
+const BASE_URL = SITE_URL;
 
 function escapeXml(str: string): string {
   return str

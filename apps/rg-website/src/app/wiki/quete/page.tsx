@@ -6,9 +6,11 @@ import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
 import { QuestCard } from "@/components/wiki/QuestCard";
 import { QuestFilterBar } from "@/components/wiki/QuestFilterBar";
 import { getQuestsList, type QuestKind } from "@/lib/wiki/quests";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/quete" },
+  alternates: { canonical: wiki("/quete") },
   description:
     "Liste complète des quêtes d'Inazuma Eleven: Victory Road — objectifs d'histoire principale et quêtes annexes, avec titres localisés (FR / EN / JP).",
   title: "Quêtes | Inazuma Eleven Victory Road - Azalée",
@@ -30,20 +32,20 @@ export default async function QuetesPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Liste complète des quêtes d'Inazuma Eleven: Victory Road — objectifs d'histoire principale et quêtes annexes.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: quests.slice(0, 10).map((quest: any, i: number) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `https://azalee.rosegriffon.fr/quete/${quest.id}`,
+        url: absoluteUrl(wiki(`/quete/${quest.id}`)),
         name: quest.title,
       })),
       numberOfItems: quests.length,
     },
     name: "Quêtes - Inazuma Eleven: Victory Road",
     numberOfItems: quests.length,
-    url: "https://azalee.rosegriffon.fr/quete",
+    url: absoluteUrl(wiki("/quete")),
   };
 
   return (

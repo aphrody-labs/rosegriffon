@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { NiveauExplorer } from "./NiveauExplorer";
 import { formatExp } from "@/lib/wiki/exp-table-shared";
 import { getExpTable } from "@/lib/wiki/exp-table";
+import { wiki } from "@rosegriffon/app-shell";
 
 /**
  * Image de partage de convention (`app/opengraph-image.png`, 1200×630).
@@ -20,7 +21,7 @@ const OG_PAR_DEFAUT = {
 };
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/niveau" },
+  alternates: { canonical: wiki("/niveau") },
   description:
     "Table d'expérience d'Inazuma Eleven: Victory Road : courbe d'EXP, coût de chaque palier de niveau, calculateur « du niveau X au niveau Y » et recherche inverse « j'ai tant d'EXP, je suis niveau ? ». Valeurs brutes extraites du jeu.",
   openGraph: {

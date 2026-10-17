@@ -10,9 +10,11 @@ import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import { getCapsuleList, getCostumeList, getGachaCounts } from "@/lib/wiki/gacha";
 import { cn } from "@/lib/utils";
 import { parseSearchParams } from "@/lib/validations";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/capsule" },
+  alternates: { canonical: wiki("/capsule") },
   description:
     "Lots de capsules (gacha) et costumes d'Inazuma Eleven: Victory Road. Contenu des tirages, pools et modèles de costumes extraits directement des données du jeu.",
   title: "Capsules & Costumes | Inazuma Eleven Victory Road - Azalée",
@@ -61,7 +63,7 @@ export default async function CapsulePage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Lots de capsules (gacha) et costumes d'Inazuma Eleven: Victory Road. pools et modèles de costumes extraits directement des données du jeu.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: (tab === "capsules" ? capsules?.data : costumes?.data)
@@ -69,14 +71,14 @@ export default async function CapsulePage({
         .map((x: any, i: number) => ({
           "@type": "ListItem",
           position: (page - 1) * ITEMS_PER_PAGE + i + 1,
-          url: `https://azalee.rosegriffon.fr/capsule/${x.id}`,
+          url: absoluteUrl(wiki(`/capsule/${x.id}`)),
           name: x.name || x.id,
         })),
       numberOfItems: total,
     },
     name: "Capsules & Costumes - Inazuma Eleven: Victory Road",
     numberOfItems: total,
-    url: "https://azalee.rosegriffon.fr/capsule",
+    url: absoluteUrl(wiki("/capsule")),
   };
 
   return (

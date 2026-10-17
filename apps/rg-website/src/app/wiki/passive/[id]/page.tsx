@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PASSIVE_CATEGORY_LABELS, PassiveDetailView } from "@/components/wiki/PassiveDetail";
 import { wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 /** Données de miroir en lecture seule : la fiche est servie en ISR. */
 export const dynamic = "force-static";
@@ -20,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const title = `${cleanName} | Passifs Inazuma Eleven Victory Road - Azalée`;
 
   return {
-    alternates: { canonical: `/passive/${id}` },
+    alternates: { canonical: wiki(`/passive/${id}`) },
     description,
     openGraph: {
       description,
@@ -55,10 +57,10 @@ export default async function PassiveDetailPage({ params }: { params: Promise<{ 
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
+      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/passive",
+        item: absoluteUrl(wiki("/passive")),
         name: "Passifs",
         position: 2,
       },

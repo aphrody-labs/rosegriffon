@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { StatCalculator } from "@/components/wiki/StatCalculator";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/tools/stats" },
+  alternates: { canonical: wiki("/tools/stats") },
   description:
     "Calculateur de statistiques Inazuma Eleven: Victory Road (Lv1→99) — tables de croissance réelles du jeu. Choisissez position, rareté et pattern de croissance.",
   openGraph: {

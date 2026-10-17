@@ -1,11 +1,12 @@
 import { getSkillImageUrl } from "@rosegriffon/azalee/images";
 import { ImageResponse } from "next/og";
 import { wikiService } from "@/lib/wiki-service";
+import { SITE_URL } from "@/lib/site-url";
 
 const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith("http")
     ? process.env.NEXT_PUBLIC_SUPABASE_URL
-    : "https://azalee.rosegriffon.fr";
+    : SITE_URL;
 
 function absoluteUrl(url?: string | null): string | undefined {
   if (!url) {
@@ -17,7 +18,7 @@ function absoluteUrl(url?: string | null): string | undefined {
   if (url.startsWith("/storage/")) {
     return `${SUPABASE_URL}${url}`;
   }
-  return `https://azalee.rosegriffon.fr${url}`;
+  return `${SITE_URL}${url}`;
 }
 
 export const alt = "Technique Inazuma Eleven Victory Road - Azalee";
@@ -264,7 +265,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
             fontWeight: 700,
           }}
         >
-          azalee.rosegriffon.fr
+          rosegriffon.fr/wiki
         </div>
         <div
           style={{

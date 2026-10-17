@@ -23,8 +23,8 @@ export async function GET() {
     app: "azalee",
     environment: process.env.NODE_ENV,
     network: {
-      achillea: "https://achillea.rosegriffon.fr",
-      azalee: "https://azalee.rosegriffon.fr",
+      achillea: absoluteUrl("/achillea"),
+      azalee: absoluteUrl("/wiki"),
       rgtv: absoluteUrl("/rose-griffon-tv"),
       rosegriffon: SITE_URL,
     },

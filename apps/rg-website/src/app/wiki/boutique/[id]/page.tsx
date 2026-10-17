@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { ShopItemsGrid } from "@/components/wiki/ShopItemsGrid";
 import { SHOP_CATEGORY_FR, getShop } from "@/lib/wiki/shops";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -41,7 +43,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   return {
     // Canonique construite sur l'identifiant normalisé, jamais sur le segment brut.
-    alternates: { canonical: `/boutique/${shopId}` },
+    alternates: { canonical: wiki(`/boutique/${shopId}`) },
     description,
     openGraph: {
       description,
@@ -68,10 +70,10 @@ export default async function ShopDetailPage({ params }: { params: Promise<{ id:
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
+      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/boutique",
+        item: absoluteUrl(wiki("/boutique")),
         name: "Boutiques",
         position: 2,
       },

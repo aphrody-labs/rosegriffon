@@ -13,6 +13,7 @@
  */
 import type { Metadata } from "next";
 import Link from "next/link";
+import { wiki } from "@rosegriffon/app-shell";
 import { lsOrNull, texContainer, texUrl } from "@rosegriffon/azalee/cpk/live";
 import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import { itemNames } from "@/lib/cpk/media-names";
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ path?: st
   const segments = path ?? [];
   const titre = segments.length > 0 ? segments.map(segLabel).join(" › ") : "Toutes les textures";
   return {
-    alternates: { canonical: `/textures${segments.length ? `/${segments.join("/")}` : ""}` },
+    alternates: { canonical: wiki(`/textures${segments.length ? `/${segments.join("/")}` : ""}`) },
     description: `Textures d'Inazuma Eleven: Victory Road décodées depuis les fichiers du jeu — ${titre}.`,
     title: `Textures — ${titre} | Azalée`,
   };

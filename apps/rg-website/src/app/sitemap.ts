@@ -12,9 +12,9 @@ export const revalidate = 3600;
 // Routes publiques réelles (hors auth/dashboard/admin/profil). Les chemins doivent exister
 // — un sitemap qui pointe vers des 404 dégrade le crawl. Priorités/fréquences indicatives.
 //
-// `/notre-equipe` n'y figure plus : la page a fusionné dans `/community` et ne
-// fait que rediriger. Annoncer une redirection dans un plan de site fait
-// dépenser du crawl pour rien.
+// N'y figurent que des pages indexables qui répondent 200 sans redirection :
+// `/search` est `noindex` (cf. `app/search/page.tsx`) et n'a rien à y faire,
+// pas plus que `/chroniques` (redirigée vers `/news` par next.config).
 const ROUTES: Array<{
   path: string;
   priority: number;
@@ -31,9 +31,6 @@ const ROUTES: Array<{
   { path: "/projets/outils/pfp", priority: 0.6, changeFrequency: "monthly" },
   { path: "/evenements", priority: 0.8, changeFrequency: "weekly" },
   { path: "/news", priority: 0.9, changeFrequency: "daily" },
-  // Remontée à la racine depuis la fusion d'`apps/azalee` (l'ancien plan de
-  // site du wiki l'annonçait sous `/search`, chemin qui n'existe plus).
-  { path: "/search", priority: 0.5, changeFrequency: "weekly" },
   { path: "/community", priority: 0.8, changeFrequency: "weekly" },
   { path: "/notre-equipe", priority: 0.8, changeFrequency: "weekly" },
   { path: "/sondages", priority: 0.6, changeFrequency: "weekly" },

@@ -4,9 +4,10 @@ export const revalidate = 3600;
 import type { Metadata } from "next";
 import { RandomTeamGenerator } from "@/components/wiki/RandomTeamGenerator";
 import { wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/tools/random-team" },
+  alternates: { canonical: wiki("/tools/random-team") },
   description:
     "Génère une équipe aléatoire complète avec coach, managers et 11 joueurs dans Inazuma Eleven: Victory Road.",
   title: "Équipe aléatoire | Inazuma Eleven Victory Road - Azalée",

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { requireEditorOrFail } from "@/lib/auth-helpers";
 import { getPgPool } from "@/lib/db/pg";
+import { absoluteUrl } from "@/lib/site-url";
 
 const APP_SCOPE = "azalee";
 
@@ -243,7 +244,7 @@ export async function shareToDiscord(article: {
     throw new Error("Configuration Discord manquante");
   }
 
-  const articleUrl = `https://azalee.rosegriffon.fr/news/${article.slug}`;
+  const articleUrl = absoluteUrl(`/news/${article.slug}`);
 
   const embed = {
     color: 0xf2a93b,

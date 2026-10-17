@@ -4,9 +4,10 @@ export const revalidate = 3600;
 import type { Metadata } from "next";
 import { DropsExplorer } from "./DropsExplorer";
 import { getDropsData } from "@/lib/wiki/drops";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/drops" },
+  alternates: { canonical: wiki("/drops") },
   description:
     "Taux de drop d'objets dans Inazuma Eleven: Victory Road : coffres de victoire, émissions, paliers de rareté des esprits et bonus de Fèves d'équipe. Probabilités réelles et liens vers les objets.",
   title: "Drops & Taux | Inazuma Eleven Victory Road - Azalée",

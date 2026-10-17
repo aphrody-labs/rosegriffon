@@ -280,7 +280,7 @@ export default async function Image({ params }: OgImageProps) {
                 fontWeight: 700,
               }}
             >
-              azalee.rosegriffon.fr
+              rosegriffon.fr
             </div>
           </div>
         </div>

@@ -11,6 +11,8 @@ import { getSkillCategoryIconUrl } from "@rosegriffon/azalee/images";
 import { buildCanonical, LIST_CANONICAL_KEYS } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export async function generateMetadata({
   searchParams,
@@ -50,7 +52,7 @@ export async function generateMetadata({
 
   return {
     alternates: {
-      canonical: buildCanonical("/skill", rawParams, LIST_CANONICAL_KEYS),
+      canonical: buildCanonical(wiki("/skill"), rawParams, LIST_CANONICAL_KEYS),
     },
     description: `Base de données des techniques spéciales (Hissatsu)${filters.length > 0 ? ` filtrée par ${filters.join(", ")}` : ""}. Puissance, tension et effets.`,
     title: `${title} | Inazuma Eleven Victory Road - Azalée`,
@@ -110,7 +112,7 @@ export default async function SkillsPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `${total.toLocaleString("fr-FR")} techniques spéciales (Hissatsu) avec puissance, tension et vidéos.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
     mainEntity: {
       "@type": "ItemList",
       // Toutes les techniques affichées, pas les dix premières : le balisage
@@ -121,14 +123,14 @@ export default async function SkillsPage({
       itemListElement: skills.map((s: any, i: number) => ({
         "@type": "ListItem",
         position: (pageNumber - 1) * ITEMS_PER_PAGE + i + 1,
-        url: `https://azalee.rosegriffon.fr/skill/${s.skillId}`,
+        url: absoluteUrl(wiki(`/skill/${s.skillId}`)),
         name: s.name_FR || s.name_EN || "Technique",
       })),
       numberOfItems: total,
     },
     name: "Techniques Spéciales - Inazuma Eleven: Victory Road",
     numberOfItems: total,
-    url: "https://azalee.rosegriffon.fr/skill",
+    url: absoluteUrl(wiki("/skill")),
   };
 
   return (

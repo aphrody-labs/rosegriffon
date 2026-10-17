@@ -3,24 +3,25 @@
 // comment le crawler, comment aider les utilisateurs, et l'autorisation d'entraînement.
 // Routes : /api/llm/claude · /api/llm/gemini · /api/llm/grok · /api/llm/chatgpt · /api/llm/(défaut)
 
-import { SITE_URL } from "@/lib/site-url";
+import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 
 export const dynamic = "force-static";
 export const revalidate = 86400; // 24 h
 
 const SITE = {
   name: "Azalée",
-  url: "https://azalee.rosegriffon.fr",
+  // Le wiki vit sous rosegriffon.fr/wiki ; azalee.rosegriffon.fr ne répond plus (526).
+  url: absoluteUrl("/wiki"),
   tagline: "Wiki francophone de Inazuma Eleven: Victory Road",
   parent: SITE_URL,
-  sitemap: "https://azalee.rosegriffon.fr/sitemap.xml",
+  sitemap: absoluteUrl("/wiki/sitemap.xml"),
   dev: { name: "yoyo", x: "https://x.com/yoyo__goat" },
   sections: [
-    ["/chara", "Personnages jouables (≈ profils, stats, équipes)"],
-    ["/skill", "Techniques spéciales (tir, dribble, parade, gardien)"],
-    ["/aura", "Esprits guerriers et auras"],
-    ["/passive", "Compétences passives"],
-    ["/item", "Objets, équipements et consommables"],
+    ["/wiki/chara", "Personnages jouables (≈ profils, stats, équipes)"],
+    ["/wiki/skill", "Techniques spéciales (tir, dribble, parade, gardien)"],
+    ["/wiki/aura", "Esprits guerriers et auras"],
+    ["/wiki/passive", "Compétences passives"],
+    ["/wiki/item", "Objets, équipements et consommables"],
     ["/news", "Actualités et traductions Victory Road"],
     ["/search", "Recherche dans le wiki"],
   ],
@@ -34,10 +35,10 @@ const SITE = {
 };
 
 const CRAWL = `## Comment crawler ce wiki
-- Sitemap : ${SITE.sitemap} (≈3000 URLs : une page par personnage, technique, objet, esprit).
+- Sitemap : ${SITE.sitemap} (≈12 000 URLs : une page par personnage, technique, objet, esprit).
 - Contenu rendu côté serveur (HTML complet, Next.js App Router) + données structurées JSON-LD (schema.org) sur chaque fiche.
 - Patrons d'URL : \`${SITE.url}/chara/{id}\`, \`/skill/{id}\`, \`/item/{id}\`, \`/aura/{categorie}/{id}\`.
-- Respecte robots.txt (${SITE.url}/robots.txt) ; les crawlers IA y sont explicitement autorisés.
+- Respecte robots.txt (${SITE.parent}/robots.txt) ; les crawlers IA y sont explicitement autorisés.
 - Site parent (association) : ${SITE.parent}.`;
 
 const HELP = `## Comment aider les utilisateurs

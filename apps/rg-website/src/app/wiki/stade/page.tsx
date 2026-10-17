@@ -7,9 +7,10 @@ import { StadiumCard } from "@/components/wiki/StadiumCard";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import { parseSearchParams } from "@/lib/validations";
 import { getStadiumsList } from "@/lib/wiki/stadiums";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/stade" },
+  alternates: { canonical: wiki("/stade") },
   description:
     "Tous les terrains de match d'Inazuma Eleven: Victory Road : l'illustration in-game, le code interne et l'index de chaque terrain (le jeu n'expose ni nom ni équipe associée).",
   title: "Stades | Inazuma Eleven Victory Road - Azalée",

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { SaveUploader } from "@/components/save/SaveUploader";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/save" },
+  alternates: { canonical: wiki("/save") },
   description:
     "Importez votre fichier de sauvegarde Inazuma Eleven: Victory Road et obtenez un résumé instantané (joueur, niveau, temps de jeu, roster). Tout est lu dans votre navigateur — la sauvegarde ne quitte jamais votre appareil.",
   title: "Lecteur de sauvegarde | Inazuma Eleven Victory Road - Azalée",

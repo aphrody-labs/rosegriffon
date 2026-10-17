@@ -9,6 +9,8 @@ import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import { buildCanonical } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export async function generateMetadata({
   searchParams,
@@ -41,7 +43,7 @@ export async function generateMetadata({
       // `shoes`, et `/item` se canonicalisait encore vers `/item?category=shoes`.
       // C'est `category` BRUT qu'il faut passer — la catégorie par défaut ne va
       // dans l'URL canonique que si le visiteur l'a réellement demandée.
-      canonical: buildCanonical("/item", { category, page }, ["category", "page"]),
+      canonical: buildCanonical(wiki("/item"), { category, page }, ["category", "page"]),
     },
     description: `Liste complète des ${categoryLabel.toLowerCase()} et objets dans Inazuma Eleven: Victory Road. Localisation, stats et effets.`,
     title: `${title} | Inazuma Eleven Victory Road - Azalée`,
@@ -102,20 +104,20 @@ export default async function ItemsPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Base de données des objets (${categoryLabel}) dans Inazuma Eleven: Victory Road.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: items.slice(0, 10).map((item: any, i: number) => ({
         "@type": "ListItem",
         position: (pageNumber - 1) * ITEMS_PER_PAGE + i + 1,
-        url: `https://azalee.rosegriffon.fr/item/${item.itemId}`,
+        url: absoluteUrl(wiki(`/item/${item.itemId}`)),
         name: item.name_FR || item.names?.en || "Objet",
       })),
       numberOfItems: total,
     },
     name: `${categoryLabel} - Objets - Inazuma Eleven: Victory Road`,
     numberOfItems: total,
-    url: `https://azalee.rosegriffon.fr/item?category=${activeCategory}`,
+    url: absoluteUrl(wiki(`/item?category=${activeCategory}`)),
   };
 
   return (

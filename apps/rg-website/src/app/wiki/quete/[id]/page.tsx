@@ -6,6 +6,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getQuest, getQuestNeighbors, type Quest } from "@/lib/wiki/quests";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 /** Libellé du type in-game (enum inagle pour 1/2/3 ; sinon « Étape N »). */
 function typeLabel(type: number): string {
@@ -22,7 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const description = `${name} — Quête d'Inazuma Eleven: Victory Road. Titre localisé FR / EN / JP, chapitre et type.`;
 
   return {
-    alternates: { canonical: `/quete/${id}` },
+    alternates: { canonical: wiki(`/quete/${id}`) },
     description,
     openGraph: {
       description,
@@ -86,13 +88,13 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
     itemListElement: [
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr",
+        item: absoluteUrl(wiki("/")),
         name: "Accueil",
         position: 1,
       },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/quete",
+        item: absoluteUrl(wiki("/quete")),
         name: "Quêtes",
         position: 2,
       },

@@ -18,6 +18,7 @@ import { MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import { audioBankKind } from "@rosegriffon/azalee/cpk/audio";
 import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
 import { bankOwner, ownerIndex } from "@/lib/cpk/audio-names";
+import { wiki } from "@rosegriffon/app-shell";
 
 // Rendu à la requête : le prerender liste ~20 000 entrées CPK en direct et dépasse
 // le délai de génération statique du build.
@@ -25,7 +26,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/sons" },
+  alternates: { canonical: wiki("/sons") },
   description:
     "Toutes les banques sonores d'Inazuma Eleven: Victory Road — voix des personnages, musiques, techniques et effets, décodées à la volée depuis les fichiers du jeu.",
   openGraph: {

@@ -5,9 +5,10 @@ import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
 import type { Formation } from "@rosegriffon/azalee/game/formations";
 import { wikiService } from "@/lib/wiki-service";
 import { TeamBuilderLoader } from "./TeamBuilderLoader";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/tools/my-team" },
+  alternates: { canonical: wiki("/tools/my-team") },
   description:
     "Créez votre équipe Inazuma Eleven idéale. Glissez-déposez vos joueurs sur le terrain, choisissez votre formation et partagez votre équipe.",
   title: "Mon Équipe | Inazuma Eleven Victory Road - Azalée",

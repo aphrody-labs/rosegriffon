@@ -8,9 +8,11 @@ import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/tactic" },
+  alternates: { canonical: wiki("/tactic") },
   description:
     "Liste complète des tactiques spéciales dans Inazuma Eleven: Victory Road. Effets, durée et disponibilité en boutique.",
   title: "Tactiques | Inazuma Eleven Victory Road - Azalée",
@@ -39,20 +41,20 @@ export default async function TacticsPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: `Base de données des tactiques spéciales dans Inazuma Eleven: Victory Road.`,
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: tactics.slice(0, 10).map((t: any, i: number) => ({
         "@type": "ListItem",
         position: (page - 1) * ITEMS_PER_PAGE + i + 1,
-        url: `https://azalee.rosegriffon.fr/tactic/${t.itemId}`,
+        url: absoluteUrl(wiki(`/tactic/${t.itemId}`)),
         name: t.names?.fr || t.names?.en || t.name_FR || "Tactique",
       })),
       numberOfItems: total,
     },
     name: "Tactiques - Inazuma Eleven: Victory Road",
     numberOfItems: total,
-    url: "https://azalee.rosegriffon.fr/tactic",
+    url: absoluteUrl(wiki("/tactic")),
   };
 
   return (

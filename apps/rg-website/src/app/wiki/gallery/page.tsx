@@ -8,6 +8,7 @@ import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
 import { buildCanonical } from "@/lib/seo";
 import { GALLERY_CATEGORIES, wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
 
 const ITEMS_PER_PAGE = 48;
 
@@ -34,7 +35,7 @@ export async function generateMetadata({
 
   return {
     alternates: {
-      canonical: buildCanonical("/gallery", { category, page }, ["category", "page"]),
+      canonical: buildCanonical(wiki("/gallery"), { category, page }, ["category", "page"]),
     },
     description:
       "Galerie complète des illustrations in-game d'Inazuma Eleven: Victory Road : scènes d'histoire, chroniques, illustrations spéciales et liens.",

@@ -7,6 +7,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CapsuleCard } from "@/components/wiki/GachaCard";
 import { getCapsulePoolPrizes, getCapsulePrize } from "@/lib/wiki/gacha";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -15,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const description = `${name} — détail d'un lot de capsule (gacha) d'Inazuma Eleven: Victory Road : contenu, pool de tirage et lots associés.`;
 
   return {
-    alternates: { canonical: `/capsule/${id}` },
+    alternates: { canonical: wiki(`/capsule/${id}`) },
     description,
     openGraph: {
       description,
@@ -51,10 +53,10 @@ export default async function CapsuleDetailPage({ params }: { params: Promise<{ 
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
+      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/capsule",
+        item: absoluteUrl(wiki("/capsule")),
         name: "Capsules & Costumes",
         position: 2,
       },

@@ -8,6 +8,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TacticDetail } from "@/components/wiki/TacticDetail";
 import { wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -17,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const description = `${name} - Tactique spéciale Inazuma Eleven: Victory Road. Effets, durée, recharge et boutique.`;
 
   return {
-    alternates: { canonical: `/tactic/${id}` },
+    alternates: { canonical: wiki(`/tactic/${id}`) },
     description,
     openGraph: {
       description,
@@ -43,10 +45,10 @@ export default async function TacticDetailPage({ params }: { params: Promise<{ i
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
+      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/tactic",
+        item: absoluteUrl(wiki("/tactic")),
         name: "Tactiques",
         position: 2,
       },

@@ -7,6 +7,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTrophy, getTrophyNeighbors } from "@/lib/wiki/trophies";
 import { CATEGORY_LABELS, type Trophy } from "@rosegriffon/azalee/wiki/trophies-shared";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -17,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     : `${name} — Succès d'Inazuma Eleven: Victory Road. Nom localisé FR / EN / JP.`;
 
   return {
-    alternates: { canonical: `/succes/${id}` },
+    alternates: { canonical: wiki(`/succes/${id}`) },
     description,
     openGraph: {
       description,
@@ -82,13 +84,13 @@ export default async function TrophyDetailPage({ params }: { params: Promise<{ i
     itemListElement: [
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr",
+        item: absoluteUrl(wiki("/")),
         name: "Accueil",
         position: 1,
       },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/succes",
+        item: absoluteUrl(wiki("/succes")),
         name: "Succès",
         position: 2,
       },

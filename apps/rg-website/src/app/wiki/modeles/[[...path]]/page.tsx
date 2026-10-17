@@ -17,6 +17,7 @@
  */
 import type { Metadata } from "next";
 import Link from "next/link";
+import { wiki } from "@rosegriffon/app-shell";
 import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import InlineModelViewer from "@/components/wiki/InlineModelViewer";
 import { SafeImage } from "@/components/ui/SafeImage";
@@ -86,7 +87,7 @@ export async function generateMetadata({ params }: { params: Promise<{ path?: st
   const def = famille ? modelFamily(famille) : undefined;
   const titre = code ? `${code} — ${def?.label ?? ""}` : (def?.label ?? "Tous les modèles");
   return {
-    alternates: { canonical: `/modeles${path?.length ? `/${path.join("/")}` : ""}` },
+    alternates: { canonical: wiki(`/modeles${path?.length ? `/${path.join("/")}` : ""}`) },
     description: `Modèles 3D d'Inazuma Eleven: Victory Road assemblés live depuis les fichiers du jeu — ${titre}.`,
     title: `Modèles 3D — ${titre} | Azalée`,
   };

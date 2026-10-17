@@ -15,11 +15,12 @@ import { cpkAssetUrl, cpkAudioUrl, cpkThumbUrl } from "@rosegriffon/azalee/cpk/s
 import { wikiService } from "@/lib/wiki-service";
 import { DemoExperience } from "@/components/wiki/demo/DemoExperience";
 import type { DemoData, DemoDialogue, DemoFormData, DemoSkill, DemoTexture } from "@/components/wiki/demo/types";
+import { wiki } from "@rosegriffon/app-shell";
 
 const CDN = cdnOrigin(process.env.NEXT_PUBLIC_CDN_ORIGIN);
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/demo" },
+  alternates: { canonical: wiki("/demo") },
   description:
     "Démo 3D interactive d'Aphrodi (Byron Love Aphrody) dans Inazuma Eleven: Victory Road — modèles complets texturés des 3 ères, cut-ins jouables avec caméra scénarisée et export MP4, voix japonaise, calcul de statistiques byte-exact et galerie de textures téléchargeables.",
   openGraph: {
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     siteName: "Azalée - Inazuma Eleven Victory Road",
     title: "Démo 3D — Aphrodi | Azalée",
     type: "website",
-    url: "/demo",
+    url: wiki("/demo"),
   },
   title: "Démo 3D complète — Aphrodi (Byron Love Aphrody) - Azalée",
 };

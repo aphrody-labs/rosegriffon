@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPatchNoteDetail } from "@/app/actions/news";
 import { PatchNoteViewer } from "@/components/wiki/patch-notes/PatchNoteViewer";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -11,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const note = await getPatchNoteDetail(id);
   const title = note?.title || "Patch Note";
   return {
-    alternates: { canonical: `/patch-notes/${id}` },
+    alternates: { canonical: wiki(`/patch-notes/${id}`) },
     description: `Détail de la mise à jour : ${title}. Inazuma Eleven: Victory Road.`,
     title: `${title} | Azalée`,
   };

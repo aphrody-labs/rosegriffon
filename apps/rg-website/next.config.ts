@@ -47,6 +47,14 @@ const nextConfig: NextConfig = {
   compress: false,
   poweredByHeader: false,
   ...(CDN_URL && { assetPrefix: CDN_URL }),
+  // `@rosegriffon/inagle/cpk/shared` (`cpkAssetUrl`, `cpkRawUrl`…) préfixe ses URL
+  // par `process.env.NIE_CDN_BASE`, vide par défaut : sans valeur inlinée, le
+  // navigateur résolvait `/dx11/…png` contre rosegriffon.fr, qui ne sert pas ce
+  // chemin (telops de cut-in en 404 sur ~1 000 fiches du wiki). Même origine que
+  // `MENU_CDN_BASE` de `@rosegriffon/azalee/images`.
+  env: {
+    NIE_CDN_BASE: (process.env.NIE_CDN_BASE || "https://cdn.rosegriffon.fr").replace(/\/+$/, ""),
+  },
   transpilePackages: [
     "@rosegriffon/inagle",
     "@rosegriffon/inagle-cross",

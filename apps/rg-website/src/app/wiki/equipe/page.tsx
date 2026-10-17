@@ -4,10 +4,11 @@ export const revalidate = 3600;
 import type { Metadata } from "next";
 import { TeamsListClient } from "@/components/wiki/TeamsListClient";
 import { getTeamsList } from "@/lib/wiki/teams";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const metadata: Metadata = {
   alternates: {
-    canonical: "/equipe",
+    canonical: wiki("/equipe"),
   },
   description:
     "Liste complète des équipes d'Inazuma Eleven: Victory Road : emblèmes, kits/uniformes, apparitions et effectifs. Raimon, Royal Academy, et toutes les formations du jeu.",

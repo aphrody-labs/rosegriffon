@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ItemDetail } from "@/components/wiki/ItemDetail";
 import { wikiService } from "@/lib/wiki-service";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 /** Données de miroir en lecture seule : la fiche est servie en ISR. */
 export const dynamic = "force-static";
@@ -21,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const title = `${name} | Inazuma Eleven Victory Road - Azalée`;
 
   return {
-    alternates: { canonical: `/item/${id}` },
+    alternates: { canonical: wiki(`/item/${id}`) },
     description,
     openGraph: {
       description,
@@ -56,10 +58,10 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
+      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/item",
+        item: absoluteUrl(wiki("/item")),
         name: "Objets",
         position: 2,
       },

@@ -3,9 +3,10 @@ export const revalidate = 3600;
 
 import type { Metadata } from "next";
 import { getInvocationRates } from "@/lib/wiki/invocation";
+import { wiki } from "@rosegriffon/app-shell";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/invocation" },
+  alternates: { canonical: wiki("/invocation") },
   description:
     "Taux d'invocation réels de l'Univers des Joueurs (Players Universe) d'Inazuma Eleven: Victory Road — probabilités par palier de rareté et par personnage pour chaque constellation, décodées depuis les données du jeu.",
   title: "Taux d'invocation — Univers des Joueurs | Azalée",

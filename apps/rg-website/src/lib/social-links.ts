@@ -1,4 +1,4 @@
-import { SITE_URL } from "@/lib/site-url";
+import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 
 /**
  * Liens publics canoniques du réseau Rose Griffon.
@@ -42,6 +42,8 @@ export const NETWORK_SOCIAL_LINKS = [
   SOCIAL_LINKS.achillea.discord,
 ] as const;
 
-export const NETWORK_SITES = [SITE_URL, "https://azalee.rosegriffon.fr", "https://achillea.rosegriffon.fr"] as const;
+// Les sous-domaines azalee./achillea. ne répondent plus (Cloudflare 526) depuis la
+// fusion : le wiki et l'e-sport sont servis sous `/wiki` et `/achillea`.
+export const NETWORK_SITES = [SITE_URL, absoluteUrl("/wiki"), absoluteUrl("/achillea")] as const;
 
 export const NETWORK_SAME_AS = [...NETWORK_SITES, ...NETWORK_SOCIAL_LINKS] as const;

@@ -22,6 +22,7 @@
  *   le compteur et renvoie vers hub.vroid.com pour l'action.
  */
 import type { Metadata } from "next";
+import { wiki } from "@rosegriffon/app-shell";
 import { ErreurVroid, selectionEditoriale } from "@/lib/vroid/client";
 import { lireConfigVroid } from "@/lib/vroid/config";
 import { jetonValide } from "@/lib/vroid/session";
@@ -33,7 +34,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "https://azalee.rosegriffon.fr/vroid" },
+  alternates: { canonical: wiki("/vroid") },
   description:
     "Parcourez les modèles de personnages de VRoid Hub et affichez-les en 3D dans le navigateur. Les conditions d'utilisation fixées par leurs auteurs sont affichées avant tout chargement.",
   title: "VRoid Hub — modèles 3D | Azalée",

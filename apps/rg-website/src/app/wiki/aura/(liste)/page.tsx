@@ -7,9 +7,11 @@ import Link from "next/link";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { cn } from "@/lib/utils";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/aura" },
+  alternates: { canonical: wiki("/aura") },
   description: "Explorez les Esprits Guerriers, Totems, Miximax et autres pouvoirs spéciaux.",
   title: "Hyper Techniques - Azalée",
 };
@@ -62,15 +64,15 @@ export default function AuraHubPage() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     description: "Explorez les Esprits Guerriers, Totems, Miximax et autres pouvoirs spéciaux.",
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+    isPartOf: { "@type": "WebSite", name: "Azalée", url: absoluteUrl(wiki("/")) },
     name: "Hyper Techniques - Azalée",
-    url: "https://azalee.rosegriffon.fr/aura",
+    url: absoluteUrl(wiki("/aura")),
     mainEntity: {
       "@type": "ItemList",
       itemListElement: CATEGORIES.map((cat, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `https://azalee.rosegriffon.fr/aura/${cat.id}`,
+        url: absoluteUrl(wiki(`/aura/${cat.id}`)),
         name: cat.title,
         description: cat.description,
       })),

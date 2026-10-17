@@ -5,6 +5,7 @@ import { getContinueReading } from "@/app/actions/reading-history";
 import { getPgPool } from "@/lib/db/pg";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";
 import { parseSearchParams } from "@/lib/validations";
+import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 import { NewsFeedClient } from "../news-client";
 import type { FeedItem } from "../news-client";
 
@@ -230,7 +231,7 @@ export default async function NewsFeedPage({
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     description: "Actualités, traductions exclusives, interviews et analyses sur Inazuma Eleven: Victory Road.",
-    isPartOf: { "@type": "WebSite", name: "Azalée", url: "https://azalee.rosegriffon.fr" },
+    isPartOf: { "@type": "WebSite", name: "Rose Griffon", url: SITE_URL },
     mainEntity: {
       "@type": "ItemList",
       itemListElement: feedItems.slice(0, 10).map((item, i) => ({
@@ -238,15 +239,15 @@ export default async function NewsFeedPage({
         position: i + 1,
         url:
           item.type === "article"
-            ? `https://azalee.rosegriffon.fr/news/${item.slug}`
-            : `https://azalee.rosegriffon.fr/news/tweet/${item.id}`,
+            ? absoluteUrl(`/news/${item.slug}`)
+            : absoluteUrl(`/news/tweet/${item.id}`),
         name: item.title || "Actualité",
       })),
       numberOfItems: totalItems,
     },
     name: "Actualités Inazuma Eleven: Victory Road - Azalée",
     numberOfItems: totalItems,
-    url: "https://azalee.rosegriffon.fr/news",
+    url: absoluteUrl("/news"),
   };
 
   return (

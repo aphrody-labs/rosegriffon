@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CoachDetail } from "@/components/wiki/CoachDetail";
 import { getCoach } from "@/lib/wiki/coaches";
+import { wiki } from "@rosegriffon/app-shell";
+import { absoluteUrl } from "@/lib/site-url";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -16,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     : "Entraîneur Inazuma Eleven: Victory Road.";
 
   return {
-    alternates: { canonical: `/entraineur/${id}` },
+    alternates: { canonical: wiki(`/entraineur/${id}`) },
     description,
     openGraph: {
       description,
@@ -42,16 +44,16 @@ export default async function CoachDetailPage({ params }: { params: Promise<{ id
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", item: "https://azalee.rosegriffon.fr", name: "Accueil", position: 1 },
+      { "@type": "ListItem", item: absoluteUrl(wiki("/")), name: "Accueil", position: 1 },
       {
         "@type": "ListItem",
-        item: "https://azalee.rosegriffon.fr/entraineur",
+        item: absoluteUrl(wiki("/entraineur")),
         name: "Entraîneurs",
         position: 2,
       },
       {
         "@type": "ListItem",
-        item: `https://azalee.rosegriffon.fr/entraineur/${id}`,
+        item: absoluteUrl(wiki(`/entraineur/${id}`)),
         name: coach.name,
         position: 3,
       },
