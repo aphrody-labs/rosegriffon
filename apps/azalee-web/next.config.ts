@@ -109,7 +109,7 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname, "../../"),
   },
   // Les paquets TypeScript publiés (inagle…) importent leurs modules en `.js`.
-  webpack(config) {
+  webpack(config, { isServer }) {
     config.resolve ??= {};
     config.resolve.extensionAlias = {
       ".js": [".js", ".ts", ".tsx"],
@@ -117,6 +117,21 @@ const nextConfig: NextConfig = {
       ".cjs": [".cjs", ".cts"],
       ...config.resolve.extensionAlias,
     };
+    // `bun:*` modules exist only in the Bun runtime that serves the build.
+    if (isServer) {
+      config.externals = [
+        ...(Array.isArray(config.externals)
+          ? config.externals
+          : [config.externals].filter(Boolean)),
+        (
+          { request }: { request?: string },
+          callback: (error?: Error | null, result?: string) => void,
+        ) =>
+          request?.startsWith("bun:")
+            ? callback(null, `commonjs ${request}`)
+            : callback(),
+      ];
+    }
     return config;
   },
   transpilePackages: [
@@ -124,6 +139,7 @@ const nextConfig: NextConfig = {
     "@rosegriffon/inagle-cross",
     "@aphrody/sql",
     "@aphrody/m3-tokens",
+    "@aphrody/runtime-sdk",
     "@rosegriffon/azalee",
     "@rosegriffon/ui",
     "@rosegriffon/app-shell",
@@ -136,8 +152,6 @@ const nextConfig: NextConfig = {
 
   // Packages Node.js natifs exclus du bundling serveur
   serverExternalPackages: [
-    // Liaisons natives bun:ffi, chargées par le runtime Bun du serveur.
-    "@aphrody/runtime-sdk",
     "better-auth",
     "@better-auth/kysely-adapter",
     "kysely",
