@@ -136,6 +136,8 @@ const nextConfig: NextConfig = {
 
   // Packages Node.js natifs exclus du bundling serveur
   serverExternalPackages: [
+    // Liaisons natives bun:ffi, chargées par le runtime Bun du serveur.
+    "@aphrody/runtime-sdk",
     "better-auth",
     "@better-auth/kysely-adapter",
     "kysely",
