@@ -1,4 +1,4 @@
-import { XClient, XSession } from "@aphrody/x";
+import { XClient, XSession } from "../../lib/x-natif";
 
 async function main() {
   try {

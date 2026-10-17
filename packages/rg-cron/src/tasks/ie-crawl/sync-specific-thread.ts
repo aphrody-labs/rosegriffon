@@ -1,4 +1,4 @@
-import { XClient, XSession, type Tweet } from "@aphrody/x";
+import { XClient, XSession, type Tweet } from "../../lib/x-natif";
 import { createPostgresClient } from "@rosegriffon/db/service";
 
 type PostgresService = ReturnType<typeof createPostgresClient>;

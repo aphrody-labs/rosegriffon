@@ -14,7 +14,7 @@
 // Requêtes validées via Aphrody X search (2026-06, compte yoyo) — voir x-accounts.ts.
 // Lecture/recherche seule : on ne publie RIEN.
 
-import { XClient, XSession, type Tweet } from "@aphrody/x";
+import { XClient, XSession, type Tweet } from "../../lib/x-natif";
 import { createPostgresClient } from "@rosegriffon/db/service";
 // Conversion tweet → ligne de `public.tweets` : mutualisée dans `tweet-row.ts`
 // (le code y est repris à l'identique) pour que la récolte de campagnes à hashtag

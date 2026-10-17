@@ -116,7 +116,7 @@
  * sans eux, et un paquet cassé ne dégrade que le verbe concerné.
  */
 
-import type { XClient } from "@aphrody/x";
+import type { XClient } from "../../lib/x-natif";
 import { WebService } from "@aphrody/agent-browser/service";
 import { WebCdpPage } from "../../lib/web-cdp";
 import { loadXCookieHeader } from "./x-accounts";
@@ -956,7 +956,7 @@ async function clientX(): Promise<XClient> {
       "Les identifiants X ne sont pas disponibles sur cet hôte (cookies absents ou incomplets).",
     );
   }
-  const { XClient: ClasseXClient, XSession } = await import("@aphrody/x");
+  const { XClient: ClasseXClient, XSession } = await import("../../lib/x-natif");
   try {
     return new ClasseXClient(XSession.fromCookieString(cookie));
   } catch (err) {
@@ -1104,8 +1104,6 @@ async function verbeXProfil(requete: Record<string, unknown>): Promise<ReponseSc
     brut = await client.graphqlWaiting(
       "UserByScreenName",
       { screen_name: pseudo, withSafetyModeUserFields: true },
-      undefined,
-      20_000,
     );
   } catch (err) {
     throw new ErreurScrape(

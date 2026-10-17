@@ -1,6 +1,6 @@
 import { tempPath } from "@aphrody/paths";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { XClient, XSession } from "@aphrody/x";
+import { XClient, XSession } from "../../lib/x-natif";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { syncThread } from "./sync-specific-thread";
 

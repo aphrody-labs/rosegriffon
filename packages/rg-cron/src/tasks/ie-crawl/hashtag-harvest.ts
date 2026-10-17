@@ -27,7 +27,7 @@
 // Usage :
 //   bun packages/cron/src/tasks/ie-crawl/hashtag-harvest.ts [--campagne <slug>] [--limite N] [--dry]
 
-import { XClient, XSession, type Tweet } from "@aphrody/x";
+import { XClient, XSession, type Tweet } from "../../lib/x-natif";
 import { createBunSql } from "@rosegriffon/db/bun-sql";
 import type { SQL } from "bun";
 import { compterImages, porteUneImage, tweetToRow, type DBTweetRow, type MediaItem } from "./tweet-row";

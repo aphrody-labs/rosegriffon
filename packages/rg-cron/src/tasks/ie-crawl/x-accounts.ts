@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { XSession } from "@aphrody/x";
+import { XSession } from "../../lib/x-natif";
 
 // Config centralisée des comptes X/Twitter officiels Inazuma Eleven / LEVEL-5.
 // Multi-comptes pour ingestion cron + RAG (cf. UNIFIED-RAG-PLAN §4.1 + §8).

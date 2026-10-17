@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { XClient, XSession, type Tweet } from "@aphrody/x";
+import { XClient, XSession, type Tweet } from "../../lib/x-natif";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import type { Json } from "@rosegriffon/db";
 import { sql } from "../../lib/db.js";
