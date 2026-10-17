@@ -13,6 +13,7 @@ import { SkipToContent } from "@/components/accessibility/SkipToContent";
 import { AppSidebar } from "@/components/app-sidebar";
 import Footer from "@/components/layout/footer";
 import { Header } from "@/components/layout/Header";
+import { isAdminRole } from "@/lib/auth-roles";
 import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigation";
 import { NavIcone } from "@/components/layout/NavIcone";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
@@ -121,6 +122,8 @@ function RoutedHeader({ isMobile, showSidebarToggle }: { isMobile?: boolean; sho
       }
       user={user}
       profile={profile}
+      isAdmin={isAdminRole(profile?.role)}
+      adminHref="/admin"
     />
   );
 }

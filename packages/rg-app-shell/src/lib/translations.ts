@@ -23,7 +23,9 @@ export const DICTIONNAIRE_NAV_FR: Record<string, string> = {
   "nav.association.polls": "Sondages",
   "nav.association.projects": "Projets",
   "nav.association.rgtv": "Rose Griffon TV",
+  "nav.association.shop": "Boutique",
   "nav.association.support": "Nous soutenir",
+  "nav.association.x": "Sur X",
   "nav.association.team": "Notre équipe",
   // — E-sport (Achilléa) —
   "nav.esport.casts": "Casts",

@@ -506,6 +506,8 @@ export function construireAssociationItems(): NavItem[] {
     { emote: "gaelle-salut", icon: "groups", label: "nav.association.team", path: "/notre-equipe" },
     { icon: "event", label: "nav.association.events", path: "/evenements" },
     { icon: "how_to_vote", label: "nav.association.polls", path: "/sondages" },
+    { icon: "alternate_email", label: "nav.association.x", path: "/x" },
+    { icon: "storefront", label: "nav.association.shop", path: "/shop" },
     {
       children: [
         {
