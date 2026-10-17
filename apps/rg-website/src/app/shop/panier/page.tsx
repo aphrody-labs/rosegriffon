@@ -1,4 +1,4 @@
-import { ArrowLeft, Lock, RefreshCw, ShoppingBag, Sparkles, Truck } from "lucide-react";
+import { ArrowLeft, Lock, RefreshCw, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -96,20 +96,11 @@ export default async function CartPage() {
 
             <CheckoutButton subtotalCents={cart.subtotalCents} />
 
-            {/* Trust signals — Baymard 2024 anti-friction */}
             <ul className="grid grid-cols-2 gap-3 border-t border-rg-or/20 pt-4 text-[11px] text-white/70">
-              <TrustItem icon={<Lock className="size-3.5" />} label="Paiement sécurisé" sub="Stripe TLS" />
-              <TrustItem icon={<RefreshCw className="size-3.5" />} label="Retours 14j" sub="Satisfait ou remboursé" />
-              <TrustItem icon={<Truck className="size-3.5" />} label="Expédié FR" sub="3-7 jours" />
-              <TrustItem icon={<Sparkles className="size-3.5" />} label="Édité par RG" sub="Imprimé en France" />
+              <TrustItem icon={<Lock className="size-3.5" />} label="Paiement sécurisé" sub="Par Stripe" />
+              <TrustItem icon={<RefreshCw className="size-3.5" />} label="Rétractation" sub="14 jours" />
             </ul>
 
-            {/* Urgency badge limited items */}
-            {cart.items.some(i => i.product.stockHint === "limited" || i.product.stockHint === "low-stock") && (
-              <p className="rounded-xl border border-rg-brique bg-rg-brique/15 px-3 py-2 text-[11px] font-bold text-[#fbcfca]">
-                ⚡ Édition limitée dans ton panier — réserve avant rupture.
-              </p>
-            )}
           </div>
         </aside>
       </div>

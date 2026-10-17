@@ -47,9 +47,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const gallery = product.gallery ?? [product.image];
   const related = PRODUCTS.filter(p => p.category === product.category && p.slug !== product.slug).slice(0, 4);
 
-  const stockHintToAvailability = (hint: typeof product.stockHint): string => {
+  const stockHintToAvailability = (hint: typeof product.stockHint): string | undefined => {
     switch (hint) {
-      case "low-stock":
       case "limited": {
         return "https://schema.org/LimitedAvailability";
       }
@@ -57,7 +56,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
         return "https://schema.org/PreOrder";
       }
       default: {
-        return "https://schema.org/InStock";
+        // Pas d'inventaire suivi : on n'affirme aucune disponibilité.
+        return undefined;
       }
     }
   };

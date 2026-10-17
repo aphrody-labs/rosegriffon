@@ -2,6 +2,7 @@ import { Heart } from "lucide-react";
 
 import { PatreonConnectButton } from "./PatreonConnectButton";
 import { createPostgresClient } from "@rosegriffon/db/service";
+import { texteSansDecor } from "@/lib/typographie";
 
 interface Props {
   userId: string;
@@ -37,7 +38,7 @@ export async function LegacyBanner({ userId }: Props) {
             {legacy.tier_titles?.[0] ? (
               <>
                 {" "}
-                <span className="text-[#a08540] dark:text-[#c9a958]">({legacy.tier_titles[0]})</span>
+                <span className="text-[#a08540] dark:text-[#c9a958]">({texteSansDecor(legacy.tier_titles[0])})</span>
               </>
             ) : null}{" "}
             🌹

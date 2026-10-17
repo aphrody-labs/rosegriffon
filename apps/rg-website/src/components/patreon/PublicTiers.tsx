@@ -15,7 +15,6 @@ interface Tier {
   highlight?: boolean;
   /** Palier gratuit : bouton secondaire, pas d'appel au don. */
   free?: boolean;
-  patrons?: number;
 }
 
 const PATREON_URL = "https://patreon.com/RoseGriffon";
@@ -25,7 +24,7 @@ const FEATURED_TIERS: Tier[] = [
     cta: "Choisir Roy",
     href: PATREON_URL,
     key: "roy",
-    name: "𝙽𝚒𝚟𝚎𝚊𝚞 𝚁𝚘𝚢 🌹",
+    name: "Niveau Roy",
     perks: ["Rôle Discord dédié Roy", "Mention au générique des chroniques", "Accès aux annonces avant tout le monde"],
     priceCents: 250,
     tagline: "Premier pas de soutien",
@@ -34,7 +33,7 @@ const FEATURED_TIERS: Tier[] = [
     cta: "Choisir Gaëlle",
     href: PATREON_URL,
     key: "gaelle",
-    name: "𝙽𝚒𝚟𝚎𝚊𝚞 𝙶𝚊𝚎𝚕𝚕𝚎 🌹",
+    name: "Niveau Gaëlle",
     perks: ["Tous les avantages Roy", "Accès aux articles en avant-première", "Vote sur les futurs sujets traités"],
     priceCents: 750,
     tagline: "Soutien renforcé",
@@ -44,8 +43,7 @@ const FEATURED_TIERS: Tier[] = [
     highlight: true,
     href: PATREON_URL,
     key: "evans",
-    name: "𝙽𝚒𝚟𝚎𝚊𝚞 𝙴𝚟𝚊𝚗𝚜 🌹",
-    patrons: 8,
+    name: "Niveau Evans",
     perks: [
       "Tous les avantages Gaëlle",
       "Pack Personnage trimestriel offert (print A5 + marque-page + sticker + grand badge)",
@@ -53,7 +51,7 @@ const FEATURED_TIERS: Tier[] = [
       "Cartes de licence Roy & Gaëlle exclusives (25 premiers)",
     ],
     priceCents: 1450,
-    tagline: "Tier-phare · Soutien complet",
+    tagline: "Soutien complet",
   },
 ];
 
@@ -66,20 +64,19 @@ const SIDE_TIERS: Tier[] = [
     name: "Communauté",
     perks: ["Accès au serveur Discord Rose Griffon", "Newsletter occasionnelle", "Suivi des chroniques et événements"],
     priceCents: 0,
-    tagline: "Gratuit · Rejoindre la communauté",
+    tagline: "Gratuit",
   },
   {
     cta: "Devenir grand mécène",
     href: PATREON_URL,
     key: "route-victoire",
-    name: "𝚁𝚘𝚞𝚝𝚎 𝚅𝚒𝚌𝚝𝚘𝚒𝚛𝚎 🥀",
+    name: "Route Victoire",
     perks: [
       "Avantages identiques à Niveau Evans",
       "Mention spéciale comme grand mécène",
-      "Réservé à celles et ceux qui veulent aller plus loin",
     ],
     priceCents: 4900,
-    tagline: "Pour soutenir massivement",
+    tagline: "Grand mécène",
   },
 ];
 
@@ -103,7 +100,7 @@ function TierCard({ tier }: { tier: Tier }) {
     >
       {tier.highlight && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
-          TIER PHARE
+          Le plus complet
         </div>
       )}
       <p
@@ -126,11 +123,6 @@ function TierCard({ tier }: { tier: Tier }) {
           </li>
         ))}
       </ul>
-      {tier.patrons !== undefined && tier.patrons > 0 && (
-        <p className="mt-4 text-xs text-muted-foreground">
-          {tier.patrons} mécène{tier.patrons > 1 ? "s" : ""} actuellement
-        </p>
-      )}
       <div className="mt-auto pt-6">
         <Button
           asChild

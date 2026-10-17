@@ -6,7 +6,7 @@ import Image from "next/image";
 import { createAchilleaClient, rankImagePath } from "@/lib/achillea";
 import { TierDistribution } from "@/components/achillea/TierDistribution";
 import type { RankedTierInfo } from "@rosegriffon/achillea-types";
-import { Layers, ArrowLeft, Sparkles, TrendingUp } from "lucide-react";
+import { ArrowLeft, Layers, ScrollText, TrendingUp } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedTiersPage({ initialTiers }: { initialTiers?: RankedTierInfo[] | null }) {
@@ -189,7 +189,7 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
       {/* Progression note */}
       <div className="p-6 rounded-2xl bg-muted/30 border border-border space-y-2 text-lg text-muted-foreground">
         <h4 className="font-semibold text-foreground text-lg flex items-center gap-1.5">
-          <Sparkles className="w-4 h-4 text-amber-400" />
+          <ScrollText className="w-4 h-4 text-amber-400" aria-hidden />
           Règles du système d'AP (Achilléa Points)
         </h4>
         <p>

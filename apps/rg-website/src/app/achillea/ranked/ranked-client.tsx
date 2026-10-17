@@ -7,21 +7,7 @@ import { useAchilleaAuth, createAchilleaClient, rankImagePath, winRatePercent } 
 import { Sparkline } from "@/components/achillea/Sparkline";
 import { useRankedQueue } from "@/lib/achillea/use-ranked-queue";
 import type { RankedProfile, RankedTrend, RankedChallengeLink } from "@rosegriffon/achillea-types";
-import {
-  Swords,
-  Trophy,
-  History,
-  Layers,
-  Search,
-  Copy,
-  Check,
-  Sparkles,
-  Loader2,
-  Play,
-  XCircle,
-  ExternalLink,
-  ShieldAlert,
-} from "lucide-react";
+import { Check, Copy, ExternalLink, History, Layers, Loader2, Play, Search, ShieldAlert, Swords, Trophy, XCircle } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
 
 export default function RankedHubPage() {
@@ -358,7 +344,7 @@ export default function RankedHubPage() {
           <div className="border border-border bg-card rounded-2xl p-6 flex flex-col justify-between space-y-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" />
+                <Swords className="w-4 h-4 text-amber-400" aria-hidden />
                 <h3 className="font-semibold text-sm">Défi Direct</h3>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">

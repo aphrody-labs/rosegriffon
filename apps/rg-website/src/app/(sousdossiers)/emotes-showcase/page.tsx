@@ -14,7 +14,7 @@ import {
   Textarea,
   Separator,
 } from "@rosegriffon/ui";
-import { Sparkles } from "lucide-react";
+import { Shuffle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -270,8 +270,8 @@ export default function EmotesShowcasePage() {
                     toast.success(`Emote aléatoire : ${emote.name}`);
                   }}
                 >
-                  <Sparkles className="size-4 mr-2" />
-                  Emote Aléatoire
+                  <Shuffle className="size-4 mr-2" aria-hidden />
+                  Emote au hasard
                 </Button>
 
                 <div className="space-y-2">

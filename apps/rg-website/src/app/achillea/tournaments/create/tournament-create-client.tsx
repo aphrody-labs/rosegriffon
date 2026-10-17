@@ -9,26 +9,7 @@ import { StageType, MatchFormat, ScoreReportPolicy } from "@rosegriffon/achillea
 import type { SeedOrdering } from "@rosegriffon/achillea-types/domain/brackets";
 import type { OrganizationDTO } from "@rosegriffon/achillea-types/domain/organization";
 import { isPlacementPrizeEligible, prizeTableForTournamentSize } from "@rosegriffon/achillea-core";
-import {
-  Trophy,
-  ArrowLeft,
-  ShieldAlert,
-  Loader2,
-  Check,
-  Sparkles,
-  Calendar,
-  Users,
-  FileText,
-  Layers,
-  ChevronRight,
-  ChevronLeft,
-  Image as ImageIcon,
-  Clock,
-  SlidersHorizontal,
-  Bot,
-  ShieldCheck,
-  AlertCircle,
-} from "lucide-react";
+import { AlertCircle, ArrowLeft, Bot, Calendar, Check, ChevronLeft, ChevronRight, Clock, FileText, Image as ImageIcon, Layers, Loader2, Medal, ShieldAlert, ShieldCheck, SlidersHorizontal, Trophy, Users } from "lucide-react";
 
 const MATCH_FORMAT_OPTIONS = [
   { label: "BO1 (1 manche gagnante)", value: MatchFormat.BO1 },
@@ -495,7 +476,6 @@ export default function TournamentCreationPage() {
                   htmlFor="route-create-tournament-create-client-tsx-4"
                   className="text-xs font-bold text-foreground flex items-center gap-1.5"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-primary" />
                   Format des matchs *
                 </label>
                 <select
@@ -542,7 +522,7 @@ export default function TournamentCreationPage() {
               <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-xs font-bold text-primary">
-                    <Sparkles className="w-4 h-4" />
+                    <Medal className="w-4 h-4" aria-hidden />
                     Barème des récompenses podium classé (Achilléa Points)
                   </div>
                   <span className="text-xs font-mono font-bold text-primary">Capacité {capacity} joueurs</span>

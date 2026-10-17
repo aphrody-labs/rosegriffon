@@ -1,5 +1,5 @@
 import { Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@rosegriffon/ui";
-import { Hash, ImageIcon, Sparkles, Users } from "lucide-react";
+import { Hash, ImageIcon, ImagePlus, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -609,7 +609,7 @@ export default async function IergDayPage({
                   {etat === "terminee" ? (
                     <Hash className="size-8" aria-hidden />
                   ) : (
-                    <Sparkles className="size-8" aria-hidden />
+                    <ImagePlus className="size-8" aria-hidden />
                   )}
                 </EmptyMedia>
                 <EmptyTitle>

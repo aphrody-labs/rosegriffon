@@ -7,20 +7,7 @@ import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import { absoluteUrl } from "@/lib/site-url";
 import { normalizeNames } from "@rosegriffon/achillea-core/names";
 import { SocialMedia, type SocialMediaDTO } from "@rosegriffon/achillea-types/domain/common";
-import {
-  Building2,
-  ArrowLeft,
-  ShieldAlert,
-  Loader2,
-  Check,
-  Globe,
-  FileText,
-  Image as ImageIcon,
-  Sparkles,
-  Radio,
-  Share2,
-  AlertCircle,
-} from "lucide-react";
+import { AlertCircle, ArrowLeft, Building2, Check, FileText, Globe, Image as ImageIcon, Loader2, Radio, Share2, ShieldAlert } from "lucide-react";
 
 const COUNTRY_OPTIONS = [
   { code: "FR", name: "France (FR)" },
@@ -232,7 +219,6 @@ export default function OrganizationCreationPage() {
               htmlFor="route-create-organization-create-client-tsx-2"
               className="text-xs font-bold text-foreground flex items-center gap-1.5"
             >
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
               Identifiant unique
             </label>
             <p className="text-xs text-muted-foreground">Généré selon le nom de la structure.</p>

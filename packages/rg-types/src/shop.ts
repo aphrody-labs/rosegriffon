@@ -30,7 +30,8 @@ export interface Product {
   gallery?: string[];
   variants?: ProductVariant[];
   tags: string[];
-  stockHint?: "in-stock" | "low-stock" | "preorder" | "limited";
+  /** Propriété du produit (tirage limité, précommande) — jamais un état de stock inventé. */
+  stockHint?: "preorder" | "limited";
   patreonExclusive?: boolean;
   highlights?: string[];
 }
@@ -81,7 +82,6 @@ export const PRODUCTS: Product[] = [
     name: "Print A5 · Roy Fonteneau",
     priceCents: 990,
     slug: "print-a5-roy-fonteneau",
-    stockHint: "in-stock",
     tagline: "Trading card style Inazuma TV — défense n°07",
     tags: ["print", "personnage", "Roy"],
   },
@@ -94,7 +94,6 @@ export const PRODUCTS: Product[] = [
     name: "Print A5 · Gaëlle La Goatte",
     priceCents: 990,
     slug: "print-a5-gaelle-la-goatte",
-    stockHint: "in-stock",
     tagline: "Portrait signature — milieu de terrain emblématique",
     tags: ["print", "personnage", "Gaëlle"],
   },
@@ -112,7 +111,6 @@ export const PRODUCTS: Product[] = [
     name: "Sticker Pack · Communauté",
     priceCents: 790,
     slug: "sticker-pack-communaute",
-    stockHint: "in-stock",
     tagline: "5 stickers chibi vinyle découpé",
     tags: ["sticker", "emote", "lot"],
   },
@@ -125,7 +123,6 @@ export const PRODUCTS: Product[] = [
     name: "Sticker · Mark Evans cœur d'or",
     priceCents: 250,
     slug: "sticker-mark-evans",
-    stockHint: "in-stock",
     tagline: "Le mascot officiel de la communauté",
     tags: ["sticker", "Mark Evans"],
   },
@@ -138,7 +135,6 @@ export const PRODUCTS: Product[] = [
     name: "Pack 3 Marque-pages",
     priceCents: 450,
     slug: "marque-page-trio",
-    stockHint: "in-stock",
     tagline: "Roy / Gaëlle / Mark — papier mat 350g",
     tags: ["marque-page", "lot"],
   },
@@ -151,7 +147,6 @@ export const PRODUCTS: Product[] = [
     name: "Grand Badge brodé · Rose Griffon",
     priceCents: 390,
     slug: "badge-brode-rose-griffon",
-    stockHint: "in-stock",
     tagline: "Logo Griffon × Éclair Inazuma — Ø 56 mm",
     tags: ["badge", "brodé", "logo"],
   },
@@ -190,7 +185,6 @@ export const PRODUCTS: Product[] = [
     name: "Affiche A2 · Achillea × Rose Griffon",
     priceCents: 1990,
     slug: "affiche-a2-achillea-rose-griffon",
-    stockHint: "low-stock",
     tagline: "Murale collector — édition compétition e-sport",
     tags: ["affiche", "Achillea", "édition limitée"],
   },
@@ -221,7 +215,6 @@ export const PRODUCTS: Product[] = [
     name: "Pack Emotes Discord/Twitch",
     priceCents: 590,
     slug: "emote-pack-discord-twitch",
-    stockHint: "in-stock",
     tagline: "5 emotes custom Rose Griffon (téléchargement digital)",
     tags: ["digital", "emote", "Discord", "Twitch"],
   },

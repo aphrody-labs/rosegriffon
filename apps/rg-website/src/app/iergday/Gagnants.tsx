@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge, Button, Collapsible, CollapsibleContent, CollapsibleTrigger } from "@rosegriffon/ui";
-import { ChevronDown, Sparkles, Trophy } from "lucide-react";
+import { ChevronDown, RotateCcw, Trophy } from "lucide-react";
 import { useState } from "react";
 
 import { clePost, type PostCampagne } from "@/lib/x-campagnes/types";
@@ -79,7 +79,7 @@ export function Gagnants({
           {gagnants.length > 1 ? "Les gagnants" : "Le gagnant"}
         </h2>
         <Button variant="secondary" onClick={() => setAnimation(true)}>
-          <Sparkles className="size-4" aria-hidden />
+          <RotateCcw className="size-4" aria-hidden />
           Revoir le tirage
         </Button>
       </div>

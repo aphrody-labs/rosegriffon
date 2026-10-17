@@ -104,7 +104,7 @@ describe("Catalogue PRODUCTS — invariants", () => {
   });
 
   it("a un stockHint parmi les valeurs autorisées si défini", () => {
-    const valid: Product["stockHint"][] = ["in-stock", "low-stock", "preorder", "limited", undefined];
+    const valid: Product["stockHint"][] = ["preorder", "limited", undefined];
     for (const p of PRODUCTS) {
       expect(valid).toContain(p.stockHint);
     }

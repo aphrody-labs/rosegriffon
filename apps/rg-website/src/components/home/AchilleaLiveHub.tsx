@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Card, DiscordIcon } from "@rosegriffon/ui";
-import { ArrowRight, Award, Calendar, Gamepad2, Sparkles, Swords, Trophy, Users } from "lucide-react";
+import { ArrowRight, Award, Calendar, Gamepad2, Swords, Trophy, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -298,7 +298,7 @@ export function AchilleaLiveHub({
               {/* En-tête de section & Sélecteur d'onglets immersif */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
                 <div className="flex items-center gap-1.5">
-                  <Sparkles className="size-3.5 text-achillea-lime" />
+                  <Trophy className="size-3.5 text-achillea-lime" aria-hidden />
                   <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Compétition</span>
                 </div>
 

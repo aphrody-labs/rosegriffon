@@ -11,11 +11,12 @@ import {
   Heart,
   History,
   Mail,
-  Sparkles,
+  BadgePercent,
   Trophy,
 } from "lucide-react";
 
 import { PATRON_DISCOUNT_PERCENT } from "@/lib/patreon/discount";
+import { texteSansDecor } from "@/lib/typographie";
 import { createPostgresClient } from "@rosegriffon/db/service";
 
 type PatronStatus = "active_patron" | "declined_patron" | "former_patron" | null;
@@ -154,8 +155,8 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
   const wasMember =
     Boolean(legacy) || (Boolean(status) && (status === "former_patron" || status === "declined_patron"));
 
-  const tierTitle =
-    (live?.tier_titles && live.tier_titles[0]) || (legacy?.tier_titles && legacy.tier_titles[0]) || null;
+  const tierBrut = (live?.tier_titles && live.tier_titles[0]) || (legacy?.tier_titles && legacy.tier_titles[0]) || null;
+  const tierTitle = tierBrut ? texteSansDecor(tierBrut) : null;
   const tierAmount =
     live?.tier_amounts_cents?.[0] ?? live?.currently_entitled_cents ?? legacy?.currently_entitled_cents ?? null;
   const lifetimeCents = live?.lifetime_support_cents ?? legacy?.lifetime_support_cents ?? null;
@@ -225,7 +226,7 @@ export async function PatreonMembershipCard({ userId }: { userId: string }) {
           <div className="flex flex-wrap items-center gap-2">
             {isActive && (
               <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300">
-                <Sparkles className="mr-1 size-3" />-{PATRON_DISCOUNT_PERCENT}% sur la boutique
+                <BadgePercent className="mr-1 size-3" aria-hidden />-{PATRON_DISCOUNT_PERCENT}% sur la boutique
               </Badge>
             )}
             {isFreeTrial && (

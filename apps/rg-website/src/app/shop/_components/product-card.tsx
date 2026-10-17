@@ -5,16 +5,12 @@ import { formatEuros, CATEGORY_LABELS } from "@/lib/shop/products";
 import type { Product } from "@/lib/shop/products";
 
 const STOCK_LABEL = {
-  "in-stock": "En stock",
   limited: "Édition limitée",
-  "low-stock": "Stock limité",
   preorder: "Précommande",
 } as const;
 
 const STOCK_TONE: Record<keyof typeof STOCK_LABEL, string> = {
-  "in-stock": "bg-emerald-100 text-emerald-800 border-emerald-300",
   limited: "bg-rose-200 text-rose-900 border-rose-400",
-  "low-stock": "bg-amber-100 text-amber-900 border-amber-400",
   preorder: "bg-sky-100 text-sky-800 border-sky-300",
 };
 
