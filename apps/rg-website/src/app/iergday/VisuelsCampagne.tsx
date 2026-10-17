@@ -87,11 +87,14 @@ export interface TailleVisuel {
 function Vignette({
   document,
   onOuvrir,
+  onIndisponible,
   grand = false,
   taille = null,
 }: {
   document: DocumentVisionne;
   onOuvrir: () => void;
+  /** Le fichier ne répond pas : la vignette se retire plutôt que montrer un cadre vide. */
+  onIndisponible: () => void;
   grand?: boolean;
   taille?: TailleVisuel | null;
 }) {
@@ -120,6 +123,7 @@ function Vignette({
           height={taille.hauteur}
           sizes={grand ? TAILLES_GRAND : TAILLES_VIGNETTE}
           priority={grand}
+          onError={onIndisponible}
           className="h-auto w-full"
         />
       ) : (
@@ -130,6 +134,7 @@ function Vignette({
             fill
             sizes={grand ? TAILLES_GRAND : TAILLES_VIGNETTE}
             priority={grand}
+            onError={onIndisponible}
             className="object-contain"
           />
         </AspectRatio>
@@ -185,6 +190,7 @@ export function VisuelsCampagne({
   tailleReglement?: TailleVisuel | null;
 }) {
   const [indexOuvert, setIndexOuvert] = useState<number | null>(null);
+  const [indisponibles, setIndisponibles] = useState<ReadonlySet<string>>(() => new Set());
 
   const documents = useMemo<DocumentVisionne[]>(() => {
     const liste: DocumentVisionne[] = [];
@@ -217,8 +223,8 @@ export function VisuelsCampagne({
         titre: "Les règles, en image",
       });
     }
-    return liste;
-  }, [slug, titreCampagne, description, noteAffiche, imageAffiche, imageReglement]);
+    return liste.filter(document => !indisponibles.has(document.cle));
+  }, [slug, titreCampagne, description, noteAffiche, imageAffiche, imageReglement, indisponibles]);
 
   if (documents.length === 0) {
     return null;
@@ -258,6 +264,7 @@ export function VisuelsCampagne({
               grand={grand}
               taille={tailles[document.cle] ?? null}
               onOuvrir={() => setIndexOuvert(position)}
+              onIndisponible={() => setIndisponibles(actuels => new Set(actuels).add(document.cle))}
             />
             {document.cle === "affiche" && noteAffiche && (
               <p className="mt-2 flex items-start gap-2 rounded-2xl border border-error/50 bg-error-container px-3 py-2 text-xs leading-relaxed text-on-error-container">
