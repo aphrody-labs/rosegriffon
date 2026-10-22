@@ -17,9 +17,9 @@ export const guildsController = new Elysia({ prefix: "/guilds" })
       const [guilds, count] = await Promise.all([
         sql<GuildRow>`SELECT id, name, icon, banner, owner_id, member_count, presence_count,
 				features, premium_tier, verification_level, description, scanned_at
-				FROM "guild" WHERE name IS NOT NULL
+				FROM "guild" WHERE name IS NOT NULL AND NOT deleted
 				ORDER BY member_count DESC NULLS LAST LIMIT ${limit} OFFSET ${offset}`.execute(db),
-        sql<{ total: number }>`SELECT COUNT(*)::int AS total FROM "guild" WHERE name IS NOT NULL`.execute(db),
+        sql<{ total: number }>`SELECT COUNT(*)::int AS total FROM "guild" WHERE name IS NOT NULL AND NOT deleted`.execute(db),
       ]);
       const total = count.rows[0]?.total ?? 0;
       return { data: guilds.rows, meta: { page, limit, total, pageCount: Math.ceil(total / limit) } };
@@ -36,12 +36,12 @@ export const guildsController = new Elysia({ prefix: "/guilds" })
       sql<StatsRow>`SELECT COUNT(*)::int AS total_guilds,
 				COALESCE(SUM(member_count), 0)::bigint AS total_members,
 				MAX(scanned_at) AS last_scan
-				FROM "guild" WHERE name IS NOT NULL`.execute(db),
+				FROM "guild" WHERE name IS NOT NULL AND NOT deleted`.execute(db),
       sql<{ premium_tier: number | null; count: number }>`SELECT premium_tier, COUNT(*)::int AS count
-				FROM "guild" WHERE name IS NOT NULL
+				FROM "guild" WHERE name IS NOT NULL AND NOT deleted
 				GROUP BY premium_tier ORDER BY premium_tier`.execute(db),
       sql<{ type: number; count: number }>`SELECT type, COUNT(*)::int AS count
-				FROM "guild_channel" GROUP BY type ORDER BY type`.execute(db),
+				FROM "guild_channel" WHERE guild_id IN (SELECT id FROM "guild" WHERE NOT deleted) GROUP BY type ORDER BY type`.execute(db),
     ]);
     const row = aggregate.rows[0];
     return {
