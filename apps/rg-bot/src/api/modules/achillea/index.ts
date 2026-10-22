@@ -16,6 +16,12 @@ import { notificationsController } from "./notifications";
 import { rankedController } from "./ranked";
 import { guildsController } from "./guilds";
 import { botController, opsController } from "./ops";
+import { notificationsInternalController } from "./notifications/internal";
+import { castsController } from "./casts";
+import { imagesController } from "./images";
+import { avatarResyncController } from "./users/avatar-resync";
+import { proxyController } from "./proxy";
+import { moderationSyncController } from "./moderation-sync";
 
 export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(tournamentController)
@@ -35,4 +41,10 @@ export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(sanctionController)
   .use(adminController)
   .use(playerNotesController)
-  .use(notificationsController);
+  .use(notificationsController)
+  .use(notificationsInternalController)
+  .use(castsController)
+  .use(imagesController)
+  .use(avatarResyncController)
+  .use(proxyController)
+  .use(moderationSyncController);

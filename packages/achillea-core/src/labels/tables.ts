@@ -489,6 +489,8 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   [NotificationType.NEW_ORGANIZATION_ACCEPT_REPLY]: "Organisation validée",
   [NotificationType.NEW_ORGANIZATION_REJECT_REPLY]: "Organisation refusée",
   [NotificationType.CLAN_MEMBER_KICK]: "Exclusion d'un membre de clan",
+  [NotificationType.RANKED_MATCH_FOUND]: "Match ranked trouvé",
+  [NotificationType.REALTIME_EVENT]: "Évènement ranked",
 };
 
 export function notificationTypeLabel(type: NotificationType): string {
