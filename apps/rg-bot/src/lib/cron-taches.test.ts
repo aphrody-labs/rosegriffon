@@ -33,6 +33,19 @@ describe("catalogue", () => {
   test("les tâches historiques sont toujours servies", () => {
     expect(TACHES_CRON).toContain("achillea:guildes");
     expect(TACHES_CRON).toContain("achillea:clans");
+    // Travaux de l'ancien bot Achilléa (BullMQ, `@Schedule`, intégrations ranked), portés le 22/10/2026.
+    for (const tache of [
+      "achillea:casts",
+      "achillea:sanctions",
+      "achillea:tournois-phases",
+      "achillea:interclans",
+      "achillea:votes",
+      "achillea:classement-annonce",
+      "achillea:ranked-file",
+      "achillea:ranked-promotions",
+    ]) {
+      expect(TACHES_CRON as readonly string[]).toContain(tache);
+    }
     expect(TACHES_CRON).toContain("db");
     expect(TACHES_CRON).toContain("stats:achillea");
     expect(TACHES_CRON).toContain("achillea:weekly-payout");

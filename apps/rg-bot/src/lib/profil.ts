@@ -356,13 +356,36 @@ const SALON_VALIDATION_AZALEE = "1220382147811082340";
 /**
  * Modules du profil Achilléa.
  *
- * Vide pour l'instant : les commandes de l'ancien bot (`/clan`, `/report`,
- * `/sanction`…) sont portées module par module. Tant que la liste est vide, la
- * passerelle sert l'état multi-serveurs au back-office et n'enregistre RIEN —
- * `index.ts` refuse de publier un arbre vide, qui effacerait les commandes
- * encore inscrites sur le serveur Achilléa par l'ancien bot.
+ * Les quatorze commandes de l'ancien bot, leurs boutons/menus/modales (mêmes
+ * `custom_id`, que portent encore des messages publiés et les MP de l'API),
+ * le groupe `/achillea-admin` et les évènements. Aucune n'écrit en base : elles
+ * appellent l'API au nom de l'auteur de l'interaction (`lib/achillea-api.ts`).
+ *
+ * `clan.ts` DÉCLARE le groupe `/clan` ; `clan-gestion.ts` et `clan-equipes.ts`
+ * y ajoutent leurs sous-commandes et doivent donc être chargés APRÈS lui.
+ * `admin-format.ts` est un module d'appui sans décorateur : il n'a rien à faire ici.
  */
-const MODULES_ACHILLEA = [] as const satisfies readonly string[];
+const MODULES_ACHILLEA = [
+  "commands/achillea-bot/clan.ts",
+  "commands/achillea-bot/clan-gestion.ts",
+  "commands/achillea-bot/clan-equipes.ts",
+  "commands/achillea-bot/create-clan.ts",
+  "commands/achillea-bot/composants-clan.ts",
+  "commands/achillea-bot/interclan.ts",
+  "commands/achillea-bot/composants-interclan.ts",
+  "commands/achillea-bot/guild.ts",
+  "commands/achillea-bot/joueur.ts",
+  "commands/achillea-bot/report.ts",
+  "commands/achillea-bot/sanction.ts",
+  "commands/achillea-bot/ranked-admin.ts",
+  "commands/achillea-bot/owner.ts",
+  "commands/achillea-bot/general.ts",
+  "commands/achillea-bot/matchmaker.ts",
+  "commands/achillea-bot/admin.ts",
+  // Évènements : relevé des guildes à l'arrivée/au départ, alerte du vocal d'aide ranked.
+  "events/achillea/serveurs.ts",
+  "events/achillea/aide-ranked.ts",
+] as const;
 
 export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
   rg: Object.freeze({
@@ -462,7 +485,9 @@ export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
     porteeCommandes: "guildes",
     // `GuildMembers` est accordé à cette application (drapeaux vérifiés le
     // 22/10/2026) ; `resolveGrantedIntents` le retire de lui-même s'il ne l'est plus.
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
+    // `GuildVoiceStates` (non privilégié) livre `voiceStateUpdate` : sans lui,
+    // l'alerte du vocal « Aide Ranked » (`events/achillea/aide-ranked.ts`) reste muette.
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildVoiceStates],
     modules: MODULES_ACHILLEA,
     marque: {
       couleurHex: "#6d00ce" as const,

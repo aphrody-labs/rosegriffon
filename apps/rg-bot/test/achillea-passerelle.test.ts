@@ -106,7 +106,8 @@ describe("profil achillea", () => {
   test("publie par guilde sur le serveur Achilléa et demande GuildMembers", () => {
     expect(PROFILS.achillea.porteeCommandes).toBe("guildes");
     expect(PROFILS.achillea.guildes).toEqual(["1055585286320554055"]);
-    expect(PROFILS.achillea.intents.length).toBe(2);
+    // Guilds, GuildMembers, et GuildVoiceStates pour l'alerte du vocal d'aide ranked.
+    expect(PROFILS.achillea.intents.length).toBe(3);
   });
 
   test("a son propre port d'administration", () => {
