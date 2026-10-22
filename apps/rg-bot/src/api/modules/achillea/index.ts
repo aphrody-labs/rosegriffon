@@ -21,6 +21,12 @@ import { healthController } from "./health";
 import { statsController } from "./stats";
 import { databaseController } from "./database";
 import { verificationAuditController } from "./audit-verify";
+import { notificationsInternalController } from "./notifications/internal";
+import { castsController } from "./casts";
+import { imagesController } from "./images";
+import { avatarResyncController } from "./users/avatar-resync";
+import { proxyController } from "./proxy";
+import { moderationSyncController } from "./moderation-sync";
 
 export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(tournamentController)
@@ -45,4 +51,10 @@ export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(healthController)
   .use(statsController)
   .use(databaseController)
-  .use(verificationAuditController);
+  .use(verificationAuditController)
+  .use(notificationsInternalController)
+  .use(castsController)
+  .use(imagesController)
+  .use(avatarResyncController)
+  .use(proxyController)
+  .use(moderationSyncController);
