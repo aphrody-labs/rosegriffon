@@ -68,12 +68,14 @@ export const clanController = new Elysia({ prefix: "/clans" })
   .get(
     "/",
     async ({ db, query }) => {
-      return await ClanService.findAll(db, query.page, query.pageSize);
+      // `pagination` est le nom qu'envoie `AchilleaClient.clans.list` (contrat legacy).
+      return await ClanService.findAll(db, query.page, query.pageSize ?? query.pagination);
     },
     {
       query: t.Object({
         page: t.Optional(t.Numeric({ minimum: 1 })),
         pageSize: t.Optional(t.Numeric({ minimum: 1, maximum: 50 })),
+        pagination: t.Optional(t.Numeric({ minimum: 1, maximum: 50 })),
         state: t.Optional(t.Numeric()),
       }),
       response: {

@@ -97,7 +97,9 @@ describe("surface du client", () => {
     expect(empty).toEqual([]);
   });
 
-  test("la surface couvre les seize ressources attendues", () => {
+  test("la surface couvre les dix-neuf ressources attendues", () => {
+    // `blacklist`, `clanTeams` et `interclans` : surfaces que l'ancien bot ne
+    // servait que sur Discord, ouvertes à l'API au portage du 22/10/2026.
     expect(
       resources(client)
         .map(([name]) => name)
@@ -105,9 +107,12 @@ describe("surface du client", () => {
     ).toEqual([
       "admin",
       "auth",
+      "blacklist",
       "casts",
+      "clanTeams",
       "clans",
       "guilds",
+      "interclans",
       "leagues",
       "licenses",
       "notifications",

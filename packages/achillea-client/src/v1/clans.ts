@@ -211,7 +211,7 @@ export type AdminClanListQuery = {
   q?: string;
 };
 
-/** 21 routes. */
+/** 31 routes. */
 export class ClansResource extends AchilleaResource {
   /** `GET /clans` — annuaire paginé, filtré par état de validation. */
   list(query: ClanListQuery = {}): Promise<AchilleaClientResult<Paginated<ClanDTO>>> {
@@ -336,4 +336,131 @@ export class ClansResource extends AchilleaResource {
   regeneratePoster(id: number): Promise<AchilleaClientResult<ImageGenerationResult>> {
     return this.http.post(`/clans/${encodePathSegment(id)}/poster/regenerate`, imageGenerationResultSchema);
   }
+
+  // ── Cycle de vie (Discord, CLI, site) ─────────────────────────────────────
+
+  /** `GET /clans/fiche/:ref` — fiche complète par identifiant ou sigle, clans dissous compris (public). */
+  fiche(ref: string | number): Promise<AchilleaClientResult<ClanFiche>> {
+    return this.http.get(`/clans/fiche/${encodePathSegment(ref)}`, clanFicheSchema);
+  }
+
+  /** `GET /clans/history/:userId` — carrière d'un joueur : clans actuels et passés (public). */
+  history(userId: string): Promise<AchilleaClientResult<ClanCareer>> {
+    return this.http.get(`/clans/history/${encodePathSegment(userId)}`, clanCareerSchema);
+  }
+
+  /** `POST /clans/leave` — quitte son clan (le Président doit d'abord céder la présidence). */
+  leave(clanId?: number): Promise<AchilleaClientResult<ClanCycleResult>> {
+    return this.http.post("/clans/leave", clanCycleResultSchema, clanId === undefined ? {} : { clanId });
+  }
+
+  /** `POST /clans/:id/disband` — dissout le clan (Président ou administrateur). */
+  disband(id: number): Promise<AchilleaClientResult<ClanCycleResult>> {
+    return this.http.post(`/clans/${encodePathSegment(id)}/disband`, clanCycleResultSchema, {});
+  }
+
+  /** `POST /clans/transfer-ownership` — cède la présidence à un membre du clan. */
+  transferOwnership(userId: string): Promise<AchilleaClientResult<ClanCycleResult>> {
+    return this.http.post("/clans/transfer-ownership", clanCycleResultSchema, { userId });
+  }
+
+  /** `POST /clans/invites/accept` — le joueur invité accepte l'invitation. */
+  acceptInvite(inviteId: number): Promise<AchilleaClientResult<ClanCycleResult>> {
+    return this.http.post("/clans/invites/accept", clanCycleResultSchema, { id: inviteId });
+  }
+
+  /** `POST /clans/invites/decline` — le joueur invité refuse l'invitation. */
+  declineInvite(inviteId: number): Promise<AchilleaClientResult<{ success: boolean; clanName: string }>> {
+    return this.http.post("/clans/invites/decline", z.object({ success: z.boolean(), clanName: z.string() }), {
+      id: inviteId,
+    });
+  }
+
+  /** `POST /clans/applications/accept` — accepte une candidature par son seul identifiant. */
+  acceptApplicationById(applicationId: number): Promise<AchilleaClientResult<SuccessResponse>> {
+    return this.http.post("/clans/applications/accept", successResponseSchema, { id: applicationId });
+  }
+
+  /** `POST /clans/applications/reject` — refuse une candidature par son seul identifiant. */
+  rejectApplicationById(applicationId: number): Promise<AchilleaClientResult<SuccessResponse>> {
+    return this.http.post("/clans/applications/reject", successResponseSchema, { id: applicationId });
+  }
+
+  /** `POST /clans/votes/:id` — vote pour (`true`) ou contre (`false`) une proposition (fondation de clan…). */
+  vote(proposalId: number, approve: boolean): Promise<AchilleaClientResult<ClanVoteResult>> {
+    return this.http.post(`/clans/votes/${encodePathSegment(proposalId)}`, clanVoteResultSchema, { approve });
+  }
 }
+
+export const clanFicheSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  shortName: z.string(),
+  avatarUrl: z.string(),
+  biography: z.string(),
+  fame: z.number(),
+  emojiId: z.string(),
+  isRecruiting: z.boolean(),
+  isDisbanded: z.boolean(),
+  isInactive: z.boolean(),
+  autoAcceptMembers: z.boolean(),
+  underMemberLimit: z.boolean(),
+  state: z.number(),
+  createdAt: apiDateSchema,
+  level: z.number(),
+  totalXp: z.number(),
+  socials: z.object({ x: z.string().nullable(), instagram: z.string().nullable(), tiktok: z.string().nullable() }),
+  languages: z.array(z.string()),
+  origin: z.string(),
+  guildId: z.string().nullable(),
+  president: z.object({ id: z.string(), name: z.string() }).nullable(),
+  members: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      role: z.number(),
+      distinctions: z.array(z.string()),
+      joinedAt: apiDateSchema,
+    }),
+  ),
+});
+export type ClanFiche = z.infer<typeof clanFicheSchema>;
+
+const careerClanSchema = z.object({
+  clanId: z.number(),
+  clanName: z.string(),
+  shortName: z.string(),
+  emojiId: z.string(),
+  role: z.number(),
+  joinedAt: apiDateSchema,
+});
+
+export const clanCareerSchema = z.object({
+  userId: z.string(),
+  displayName: z.string(),
+  since: apiDateSchema,
+  current: z.array(careerClanSchema),
+  past: z.array(careerClanSchema.extend({ leftAt: apiDateSchema, leaveReason: z.number() })),
+});
+export type ClanCareer = z.infer<typeof clanCareerSchema>;
+
+export const clanCycleResultSchema = z.object({
+  success: z.boolean(),
+  clanId: z.number(),
+  clanName: z.string(),
+});
+export type ClanCycleResult = z.infer<typeof clanCycleResultSchema>;
+
+export const clanVoteResultSchema = z.object({
+  success: z.boolean(),
+  proposalId: z.number(),
+  type: z.string(),
+  action: z.enum(["inserer", "retirer", "modifier", "deja_vote", "force"]),
+  status: z.string(),
+  approvals: z.number(),
+  rejections: z.number(),
+  eligible: z.number(),
+  clan: z.object({ id: z.number(), name: z.string() }).nullable(),
+  message: z.string(),
+});
+export type ClanVoteResult = z.infer<typeof clanVoteResultSchema>;

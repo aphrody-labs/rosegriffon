@@ -97,6 +97,8 @@ export interface UpdateClanPayload {
   tiktokUrl?: string | null;
   isRecruiting?: boolean;
   autoAcceptMembers?: boolean;
+  /** Masque le clan de l'annuaire public. */
+  isHidden?: boolean;
   languages?: string[];
   origin?: string;
   /** Bascule « clan inactif » — l'API ne l'accepte que d'un administrateur Achilléa. */

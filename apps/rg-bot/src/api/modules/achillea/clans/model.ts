@@ -58,6 +58,7 @@ export const ClanModel = {
     tiktokUrl: t.Optional(t.Nullable(t.String())),
     isRecruiting: t.Optional(t.Boolean()),
     autoAcceptMembers: t.Optional(t.Boolean()),
+    isHidden: t.Optional(t.Boolean()),
     isInactive: t.Optional(t.Boolean()),
     isHidden: t.Optional(t.Boolean()),
     origin: t.Optional(t.String({ minLength: 2, maxLength: 8 })),
