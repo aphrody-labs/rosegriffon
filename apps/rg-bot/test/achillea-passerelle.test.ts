@@ -320,3 +320,35 @@ describe("salon des preuves de litige", () => {
     expect(salonPreuvesRanked({ RANKED_PROOF_CHANNEL_ID: "pas-un-id" })).toBe(SALON_TO_ACHILLEA);
   });
 });
+
+describe("chaîne d'audit relue depuis jsonb", () => {
+  test("la signature ne dépend pas de l'ordre des clés de la charge", () => {
+    const ts = new Date("2026-10-22T13:00:00.000Z");
+    const base = { actor_id: null, action: "storage.migrate", target_type: "storage", target_id: "images", ts };
+    // Ordre d'écriture JS, puis ordre rendu par Postgres (`jsonb` trie par longueur puis octets).
+    const ecrite = signatureAudit(null, { ...base, payload: { clans: 58, images: 7, captures: 2, objets: 62, vers: "b", depuis: "a" } });
+    const relue = signatureAudit(null, { ...base, payload: { vers: "b", clans: 58, images: 7, objets: 62, depuis: "a", captures: 2 } });
+    expect(relue).toBe(ecrite);
+  });
+});
+
+describe("vérification d'une charge stockée en chaîne jsonb", () => {
+  test("relue sans canonisation, elle redonne la signature d'origine", () => {
+    const ts = new Date("2026-10-22T13:16:18.072Z");
+    const charge = { clans: 58, images: 7, captures: 2, objets: 62, depuis: "a", vers: "b" };
+    const base = { actor_id: null, action: "storage.migrate", target_type: "storage", target_id: "images", ts };
+    const origine = new Bun.CryptoHasher("sha256")
+      .update(
+        JSON.stringify({
+          actor_id: null,
+          action: "storage.migrate",
+          target_type: "storage",
+          target_id: "images",
+          payload: charge,
+          ts: ts.toISOString(),
+        }),
+      )
+      .digest("hex");
+    expect(signatureAudit(null, { ...base, payload: JSON.parse(JSON.stringify(charge)) }, "tel-quel")).toBe(origine);
+  });
+});

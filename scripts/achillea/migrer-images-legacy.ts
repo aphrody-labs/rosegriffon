@@ -186,7 +186,7 @@ async function reecrireUrls(ctx: Contexte, noms: Map<string, string>): Promise<R
       ts,
     });
     await tx`INSERT INTO achillea.audit_log (actor_id, action, target_type, target_id, payload, reason, ts, prev_signature, signature)
-             VALUES (null, 'storage.migrate', 'storage', ${BUCKET}, ${JSON.stringify(charge)}::jsonb,
+             VALUES (null, 'storage.migrate', 'storage', ${BUCKET}, ${charge}::jsonb,
                      'Images rapatriées depuis l''ancien projet Supabase d''Achilléa', ${ts}, ${tete?.signature ?? null}, ${signature})`;
     return bilan;
   });

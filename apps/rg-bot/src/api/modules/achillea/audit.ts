@@ -7,9 +7,13 @@
  * de rôle et des sanctions. Chaque mutation staff passe désormais par
  * `journaliserAudit`.
  *
- * La signature est celle du legacy, à l'octet près, pour que `verifierChaineAudit`
- * relise aussi les lignes écrites par l'ancien bot :
- * `sha256(signaturePrecedente + JSON.stringify({actor_id, action, target_type, target_id, payload, ts}))`.
+ * Signature : `sha256(signaturePrecedente + json({actor_id, action, target_type, target_id, payload, ts}))`,
+ * la formule de l'ancien bot à UNE différence près : la charge est sérialisée en JSON
+ * CANONIQUE (clés triées, récursivement). Postgres stocke `payload` en `jsonb`, qui
+ * réordonne les clés ; relue, la charge ne se sérialisait plus comme à l'écriture et
+ * `verifierChaineAudit` déclarait la chaîne rompue dès la première entrée. L'ancien
+ * bot avait ce défaut sans le voir : il ne vérifiait jamais sa chaîne, et la table
+ * était vide quand elle a été reprise.
  */
 import { sql, type Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
@@ -43,7 +47,21 @@ export interface LigneAudit {
   signature: string;
 }
 
-/** Signature chaînée, identique à `AuditLogService.computeSignature` du legacy. */
+/** Valeur JSON aux clés d'objet triées, récursivement (ordre indépendant de `jsonb`). */
+export function canonique(valeur: unknown): unknown {
+  if (Array.isArray(valeur)) return valeur.map(canonique);
+  if (valeur instanceof Date) return valeur.toISOString();
+  if (valeur && typeof valeur === "object") {
+    return Object.fromEntries(
+      Object.keys(valeur)
+        .toSorted()
+        .map(cle => [cle, canonique((valeur as Record<string, unknown>)[cle])]),
+    );
+  }
+  return valeur;
+}
+
+/** Signature chaînée (formule de l'ancien bot, charge en JSON canonique). */
 export function signatureAudit(
   precedente: string | null,
   entree: {
@@ -54,6 +72,7 @@ export function signatureAudit(
     payload: Record<string, unknown> | null;
     ts: Date;
   },
+  ordre: "canonique" | "tel-quel" = "canonique",
 ): string {
   const hachage = new Bun.CryptoHasher("sha256");
   hachage.update(
@@ -63,7 +82,7 @@ export function signatureAudit(
         action: entree.action,
         target_type: entree.target_type,
         target_id: entree.target_id,
-        payload: entree.payload,
+        payload: ordre === "canonique" ? canonique(entree.payload) : entree.payload,
         ts: entree.ts.toISOString(),
       }),
   );
@@ -142,7 +161,14 @@ export async function verifierChaineAudit(db: Kysely<Database>): Promise<{ valid
       FROM achillea.audit_log ORDER BY ts ASC, id ASC`.execute(db);
   let precedente: string | null = null;
   for (const ligne of lignes.rows) {
-    const attendue = signatureAudit(precedente, ligne);
+    // Une charge enregistrée comme CHAÎNE jsonb (première entrée, écrite par le script de
+    // migration des images via Bun.SQL) a gardé l'ordre de ses clés à l'écriture : elle a
+    // été signée sur cet ordre-là, avant la sérialisation canonique. La table est en
+    // ajout seul (trigger `audit_log_immutable`) : on relit, on ne réécrit pas.
+    const attendue: string =
+      typeof ligne.payload === "string"
+        ? signatureAudit(precedente, { ...ligne, payload: JSON.parse(ligne.payload) as Record<string, unknown> }, "tel-quel")
+        : signatureAudit(precedente, ligne);
     if (attendue !== ligne.signature) return { valid: false, broken_at: ligne.id, total: lignes.rows.length };
     precedente = ligne.signature;
   }
