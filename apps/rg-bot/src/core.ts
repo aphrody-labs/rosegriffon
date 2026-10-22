@@ -237,7 +237,7 @@ async function demarrerCoeur(): Promise<void> {
     cron: planifiees,
   });
 
-  const { demarrerRanked, definirRelaisPreuveRanked } = await import("./api/ranked/main");
+  const { demarrerRanked, definirRelaisPreuveRanked, versApiUnifieeDirecte } = await import("./api/ranked/main");
   await demarrerRanked({
     port,
     hostname,
@@ -261,6 +261,10 @@ async function demarrerCoeur(): Promise<void> {
       }
       if (url.pathname === "/health") return Response.json(sante());
       if (url.pathname.startsWith("/v1/")) return app.handle(requete);
+      // Corps binaires de l'ancien préfixe `/api` (upload d'image) : servis avant Colyseus,
+      // dont le transport Express décoderait le corps en texte (`versApiUnifieeDirecte`).
+      const directe = versApiUnifieeDirecte(requete);
+      if (directe) return app.handle(directe);
       if (hotesBot.has(hote)) {
         // bot.rosegriffon.fr/<profil>/… → serveur d'administration loopback de ce profil.
         const [, profil = "", ...reste] = url.pathname.split("/");

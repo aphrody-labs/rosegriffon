@@ -280,32 +280,28 @@ export function cheminApiUnifiee(cheminApi: string): string {
   return `/v1/achillea${cheminApi}`;
 }
 
-/** Corps relayé au-delà de `TAILLE_MAX_CORPS_RELAYE`. */
-export class CorpsTropLourd extends Error {}
-
-/** Plafond d'un corps relayé tel quel (upload d'image multipart compris). */
-export const TAILLE_MAX_CORPS_RELAYE = 12 * 1024 * 1024;
-
-/** Corps brut d'une requête qu'aucun analyseur Express n'a consommée. */
-async function lireCorpsBrut(req: express.Request): Promise<Uint8Array | null> {
-  const morceaux: Uint8Array[] = [];
-  let taille = 0;
-  for await (const morceau of req as AsyncIterable<Uint8Array>) {
-    taille += morceau.byteLength;
-    if (taille > TAILLE_MAX_CORPS_RELAYE) return null;
-    morceaux.push(morceau);
-  }
-  return Buffer.concat(morceaux);
-}
+/** Types de corps binaires : jamais acceptés par les routes Express du ranked. */
+const CORPS_BINAIRES = /^(multipart\/form-data|application\/octet-stream|image\/)/i;
 
 /**
- * Traduit une requête Express `/api/*` en requête Fetch vers l'API unifiée.
+ * Requête `/api/*` à corps binaire, routée DIRECTEMENT vers l'API unifiée, ou `null`.
  *
- * `express.json` ne consomme que le JSON : un upload `multipart/form-data`
- * (`POST /api/proxy/upload`) arrivait ici avec `req.body` vide et partait
- * SANS corps. Les corps non analysés sont désormais relus depuis le flux.
+ * Le transport Express de Colyseus (`bun-serve-express`) lit tout corps en TEXTE
+ * UTF-8 avant Express (\`IncomingMessage.readBody\`) : un upload d'image
+ * (\`POST /api/proxy/upload\`) y arrivait corrompu. L'intercepteur de \`rg-core\`
+ * appelle cette fonction AVANT Colyseus, sur la requête Bun d'origine, intacte.
  */
-export async function versRequeteUnifiee(req: express.Request): Promise<Request> {
+export function versApiUnifieeDirecte(requete: Request, origine = "http://localhost"): Request | null {
+  const url = new URL(requete.url);
+  if (!url.pathname.startsWith("/api/")) return null;
+  if (!CORPS_BINAIRES.test(requete.headers.get("content-type") ?? "")) return null;
+  const cible = new URL(cheminApiUnifiee(url.pathname.slice("/api".length)), origine);
+  cible.search = url.search;
+  return new Request(cible.href, requete);
+}
+
+/** Traduit une requête Express `/api/*` (corps texte ou JSON) en requête Fetch vers l'API unifiée. */
+export function versRequeteUnifiee(req: express.Request): Request {
   const [chemin = "/", query] = req.originalUrl.replace(/^\/api(?=\/|$)/, "").split("?", 2);
   const cible = new URL(cheminApiUnifiee(chemin || "/"), URL_API_UNIFIEE);
   if (query) cible.search = query;
@@ -315,15 +311,11 @@ export async function versRequeteUnifiee(req: express.Request): Promise<Request>
     headers.set(nom, Array.isArray(valeur) ? valeur.join(", ") : valeur);
   }
   const sansCorps = req.method === "GET" || req.method === "HEAD";
-  let body: string | Uint8Array | undefined;
+  let body: string | undefined;
   if (!sansCorps && typeof req.body === "string") body = req.body;
   else if (!sansCorps && req.body && typeof req.body === "object" && Object.keys(req.body).length > 0) {
     body = JSON.stringify(req.body);
     headers.set("content-type", "application/json");
-  } else if (!sansCorps && !req.readableEnded) {
-    const brut = await lireCorpsBrut(req);
-    if (brut === null) throw new CorpsTropLourd();
-    if (brut.byteLength > 0) body = brut;
   }
   return new Request(cible.href, { method: req.method, headers, body });
 }
@@ -1052,17 +1044,13 @@ const server = defineServer({
     // MUST être ajouté APRÈS toutes les routes ranked spécifiques.
     app.use("/api", async (req, res) => {
       try {
-        const reponse = await appelerApiUnifiee(await versRequeteUnifiee(req));
+        const reponse = await appelerApiUnifiee(versRequeteUnifiee(req));
         res.status(reponse.status);
         reponse.headers.forEach((valeur, nom) => {
           if (!ENTETES_NON_RELAYES.has(nom)) res.setHeader(nom, valeur);
         });
         res.send(Buffer.from(await reponse.arrayBuffer()));
       } catch (err) {
-        if (err instanceof CorpsTropLourd) {
-          if (!res.headersSent) res.status(413).json({ error: "payload_too_large" });
-          return;
-        }
         console.error("[ranked] API unifiée injoignable :", err);
         if (!res.headersSent) res.status(502).json({ error: "api_unavailable" });
       }
