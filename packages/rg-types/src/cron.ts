@@ -50,6 +50,7 @@ export const TACHES_CRON = [
   "seo:llms-txt",
   "stats:achillea",
   "sync:achillea",
+  "achillea:guildes",
   "achillea:seasons",
   "achillea:weekly-payout",
 ] as const;
@@ -350,6 +351,16 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
     niveau: "admin",
     motifInterdiction: null,
     dureeIndicative: "quelques secondes",
+  },
+  {
+    nom: "achillea:guildes",
+    titre: "Serveurs du bot Achilléa",
+    role: "relève les guildes, rôles et salons de tous les serveurs où le bot Achilléa est invité",
+    planification: "17 */6 * * *",
+    famille: "donnees",
+    niveau: "admin",
+    motifInterdiction: null,
+    dureeIndicative: "une à deux minutes",
   },
   {
     nom: "achillea:seasons",

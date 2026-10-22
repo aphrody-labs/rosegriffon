@@ -4,7 +4,7 @@
  * Tout ce qui est long, avec état ou lourd vit ici ; le site, Supabase et Vercel ne gardent que
  * le sans-état :
  *   - la passerelle Discord du profil `rg` (discordx, évènements, synchro des membres) et, en
- *     processus enfant supervisé, celle du profil `azalee` : discordx enregistre ses commandes par
+ *     processus enfants supervisés, celles des profils `azalee` et `achillea` : discordx enregistre ses commandes par
  *     décorateurs à l'import, deux profils ne peuvent donc pas partager un même module graph ;
  *   - le serveur Colyseus du ranked Achilléa (rooms + REST `/api/*`), dont le `Bun.serve` est le
  *     SEUL port du service : santé, modèles, API unifiée `/v1/*` et administration des bots y sont
@@ -193,6 +193,19 @@ async function demarrerCoeur(): Promise<void> {
       env: { RG_PROFIL_BOT: "azalee" },
     });
     enfants.push(azalee);
+  }
+
+  // Passerelle Achilléa : jeton de l'application Achilléa, même schéma qu'Azalée.
+  let achillea: Superviseur | null = null;
+  if (
+    Bun.env.RG_CORE_ACHILLEA !== "0" &&
+    Bun.env.ACHILLEA_DISCORD_BOT_TOKEN &&
+    Bun.env.RG_PROFIL_BOT !== "achillea"
+  ) {
+    achillea = superviser("bot-achillea", commandeSoiMeme("bot"), {
+      env: { RG_PROFIL_BOT: "achillea" },
+    });
+    enfants.push(achillea);
   }
 
   const arreterEnfants = () => {

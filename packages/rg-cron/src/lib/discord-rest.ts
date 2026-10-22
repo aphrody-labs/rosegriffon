@@ -33,15 +33,15 @@ const TENTATIVES_429 = 5;
 const TENTATIVES_5XX = 3;
 
 /** En-têtes d'un appel authentifié en tant que bot. */
-function entetes(supplementaires?: Record<string, string>): Record<string, string> {
-  if (!DISCORD_TOKEN) {
+function entetes(supplementaires?: Record<string, string>, jeton: string | undefined = DISCORD_TOKEN): Record<string, string> {
+  if (!jeton) {
     throw new Error(
       "DISCORD_BOT_TOKEN absent : aucun appel REST Discord n'est possible. " +
         "(Attention : `DISCORD_TOKEN` seul n'est pas défini dans l'environnement du dépôt.)",
     );
   }
   return {
-    Authorization: `Bot ${DISCORD_TOKEN}`,
+    Authorization: `Bot ${jeton}`,
     "User-Agent": AGENT,
     ...supplementaires,
   };
@@ -53,9 +53,12 @@ function entetes(supplementaires?: Record<string, string>): Record<string, strin
  * Lève sur 4xx : c'est le comportement voulu quand l'appelant considère la
  * ressource comme obligatoire. Pour un accès « au mieux », voir
  * {@link appelDiscordOuNull}.
+ *
+ * `jeton` remplace celui du bot Rose Griffon : le bot Achilléa est une autre
+ * application, présente sur d'autres serveurs (`tasks/achillea-guildes.ts`).
  */
-export async function appelDiscord<T>(chemin: string, tentative = 0): Promise<T> {
-  const reponse = await fetch(`${API_DISCORD}${chemin}`, { headers: entetes() });
+export async function appelDiscord<T>(chemin: string, tentative = 0, jeton: string | undefined = DISCORD_TOKEN): Promise<T> {
+  const reponse = await fetch(`${API_DISCORD}${chemin}`, { headers: entetes(undefined, jeton) });
 
   if (reponse.status === 429) {
     if (tentative >= TENTATIVES_429) {
@@ -67,12 +70,12 @@ export async function appelDiscord<T>(chemin: string, tentative = 0): Promise<T>
     const attente = Math.ceil((corps.retry_after ?? 1) * 1000) + 250;
     console.warn(`[Discord REST] Limite de débit sur ${chemin} : attente de ${attente} ms.`);
     await Bun.sleep(attente);
-    return appelDiscord<T>(chemin, tentative + 1);
+    return appelDiscord<T>(chemin, tentative + 1, jeton);
   }
 
   if (reponse.status >= 500 && tentative < TENTATIVES_5XX) {
     await Bun.sleep(1000 * (tentative + 1));
-    return appelDiscord<T>(chemin, tentative + 1);
+    return appelDiscord<T>(chemin, tentative + 1, jeton);
   }
 
   if (!reponse.ok) {
@@ -90,9 +93,9 @@ export async function appelDiscord<T>(chemin: string, tentative = 0): Promise<T>
  * doivent pas interrompre un enrichissement facultatif — la donnée reste
  * simplement absente, ce que le reste du code sait déjà représenter par `null`.
  */
-export async function appelDiscordOuNull<T>(chemin: string): Promise<T | null> {
+export async function appelDiscordOuNull<T>(chemin: string, jeton: string | undefined = DISCORD_TOKEN): Promise<T | null> {
   try {
-    return await appelDiscord<T>(chemin);
+    return await appelDiscord<T>(chemin, 0, jeton);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     if (/a répondu 4\d\d /.test(message)) return null;

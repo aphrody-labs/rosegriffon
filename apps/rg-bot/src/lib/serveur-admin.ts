@@ -30,15 +30,22 @@
  *     Écouter sur `*` exposerait l'inventaire des salons et des rôles à tout ce
  *     qui atteint la machine — le pare-feu tenait, il n'a pas à être la seule
  *     barrière.
- *  3. **LECTURE, PLUS UNE SEULE ÉCRITURE.** La seule route non idempotente
- *     vide un cache. Ce serveur n'envoie aucun message, ne pose aucun rôle, ne
- *     bannit personne : ces actes passent par les slash commands, qui portent
- *     leur garde et leur journal d'audit. Un port HTTP en boucle locale ne doit
- *     jamais être un raccourci vers la modération.
+ *  3. **LECTURE, PLUS DEUX ÉCRITURES BÉNIGNES.** L'une vide un cache, l'autre
+ *     crée une invitation à usage unique valable une heure (le back-office
+ *     Achilléa s'en sert pour que le staff rejoigne un serveur partenaire, comme
+ *     le faisait l'ancien bot). Ce serveur n'envoie aucun message, ne pose aucun
+ *     rôle, ne bannit personne : ces actes passent par les slash commands, qui
+ *     portent leur garde et leur journal d'audit. Un port HTTP en boucle locale
+ *     ne doit jamais être un raccourci vers la modération.
+ *
+ *     Exception assumée : `POST /guildes/:id/quitter`, reprise de l'API
+ *     développeur de l'ancien bot Achilléa (`DELETE /bot/guilds/:id`). Elle ne
+ *     touche aucun membre, seulement la présence du bot ; l'API qui l'appelle
+ *     exige le secret d'administration (`API_ADMIN_TOKEN`).
  */
 import type { Client } from "discordx";
 import { MetadataStorage } from "discordx";
-import { ChannelType, type Guild } from "discord.js";
+import { ChannelType, PermissionFlagsBits, type Guild } from "discord.js";
 
 import {
   PROFILS_BOT,
@@ -146,7 +153,66 @@ function decrireGuilde(guild: Guild): GuildeBot {
     membres: guild.memberCount,
     servie: GUILD_IDS.includes(guild.id),
     icone: guild.iconURL({ size: 128 }),
+    proprietaire: guild.ownerId,
+    rejointeLe: guild.joinedAt?.toISOString() ?? null,
   };
+}
+
+/** Lignes de journal gardées en mémoire pour `/journal`. */
+const TAILLE_JOURNAL = 300;
+const journal: string[] = [];
+let journalBranche = false;
+
+/**
+ * Recopie la sortie console du processus dans un tampon circulaire.
+ *
+ * Le journal complet reste celui de systemd ; ce tampon sert à l'onglet « Santé
+ * du bot » du back-office, qui n'a pas accès à `journalctl`. Appelé une fois.
+ */
+export function brancherJournal(): void {
+  if (journalBranche) return;
+  journalBranche = true;
+  for (const niveau of ["log", "info", "warn", "error"] as const) {
+    const original = console[niveau].bind(console);
+    console[niveau] = (...args: unknown[]) => {
+      const texte = args.map(a => (a instanceof Error ? (a.stack ?? a.message) : typeof a === "string" ? a : Bun.inspect(a))).join(" ");
+      journal.push(`${new Date().toISOString()} [${niveau}] ${texte}`);
+      if (journal.length > TAILLE_JOURNAL) journal.splice(0, journal.length - TAILLE_JOURNAL);
+      original(...args);
+    };
+  }
+}
+
+/** Dernières lignes du journal, les plus récentes en dernier. */
+export function lignesJournal(): readonly string[] {
+  return journal;
+}
+
+/**
+ * Invitation à usage unique (1 h) dans le premier salon où le bot peut en créer.
+ *
+ * Rend `null` quand aucun salon ne le permet : la permission « Créer une
+ * invitation » est souvent retirée aux bots, et ce n'est pas une panne.
+ */
+export async function inviterDans(guild: Guild): Promise<string | null> {
+  const moi = guild.members.me ?? (await guild.members.fetchMe().catch(() => null));
+  if (!moi) return null;
+  const salons = await guild.channels.fetch();
+  const candidats = [...salons.values()]
+    .filter(salon => salon !== null)
+    .filter(
+      salon =>
+        salon.type === ChannelType.GuildText ||
+        salon.type === ChannelType.GuildVoice ||
+        salon.type === ChannelType.GuildAnnouncement,
+    )
+    .filter(salon => moi.permissionsIn(salon).has(PermissionFlagsBits.CreateInstantInvite))
+    .toSorted((a, b) => a.rawPosition - b.rawPosition);
+  for (const salon of candidats) {
+    const invitation = await salon.createInvite({ maxAge: 3600, maxUses: 1, unique: true, reason: "Back-office Achilléa" }).catch(() => null);
+    if (invitation) return invitation.url;
+  }
+  return null;
 }
 
 /** L'état d'exécution, mesuré à l'instant de l'appel. */
@@ -269,6 +335,82 @@ export function demarrerServeurAdmin(client: Client): ServeurAdmin | null {
 
       if (chemin === "/commandes" && requete.method === "GET") {
         return Response.json({ profil: PROFIL.nom, commandes: catalogueCommandes() });
+      }
+
+      if (chemin === "/guildes" && requete.method === "GET") {
+        const guildes = [...client.guilds.cache.values()].map(decrireGuilde).toSorted((a, b) => b.membres - a.membres);
+        return Response.json({ profil: PROFIL.nom, guildes });
+      }
+
+      if (chemin === "/journal" && requete.method === "GET") {
+        return Response.json({ profil: PROFIL.nom, lignes: lignesJournal() });
+      }
+
+      if (chemin === "/identite" && requete.method === "GET") {
+        const application = client.application?.owner ? client.application : await client.application?.fetch().catch(() => null);
+        const proprietaire = application?.owner ?? null;
+        return Response.json({
+          user: client.user ? { ...client.user.toJSON() as object, iconURL: client.user.displayAvatarURL(), bannerURL: client.user.bannerURL() ?? null } : null,
+          owner: proprietaire ? (proprietaire.toJSON() as object) : null,
+        });
+      }
+
+      if (chemin === "/commandes/brutes" && requete.method === "GET") {
+        return Response.json(MetadataStorage.instance.applicationCommands.map(commande => commande.toJSON()));
+      }
+
+      if (chemin === "/utilisateurs/cache" && requete.method === "GET") {
+        return Response.json(client.users.cache.map(utilisateur => utilisateur.toJSON()));
+      }
+
+      // Membres EN CACHE de toutes les guildes, dédoublonnés. Pas de `members.fetch()`
+      // global : sur des dizaines de serveurs, c'est des dizaines de milliers de
+      // comptes et une limite de débit de passerelle pour un simple affichage.
+      if (chemin === "/membres" && requete.method === "GET") {
+        const vus = new Map<string, object>();
+        for (const guild of client.guilds.cache.values()) {
+          for (const membre of guild.members.cache.values()) {
+            if (!vus.has(membre.id)) {
+              vus.set(membre.id, { ...(membre.user.toJSON() as object), iconURL: membre.user.displayAvatarURL(), bannerURL: membre.user.bannerURL() ?? null });
+            }
+          }
+        }
+        return Response.json([...vus.values()]);
+      }
+
+      const utilisateur = chemin.match(/^\/utilisateurs\/(\d{15,25})$/);
+      if (utilisateur && requete.method === "GET") {
+        const brut = await client.users.fetch(utilisateur[1]!).catch(() => null);
+        if (!brut) return Response.json({ erreur: "Utilisateur introuvable" }, { status: 404 });
+        return Response.json({ ...(brut.toJSON() as object), iconURL: brut.displayAvatarURL(), bannerURL: brut.bannerURL() ?? null });
+      }
+
+      const detail = chemin.match(/^\/guildes\/(\d{15,25})\/detail$/);
+      if (detail && requete.method === "GET") {
+        const guild = await client.guilds.fetch(detail[1]!).catch(() => null);
+        if (!guild) return Response.json({ erreur: "Guilde inconnue de ce profil" }, { status: 404 });
+        return Response.json({ ...(guild.toJSON() as object), iconURL: guild.iconURL(), bannerURL: guild.bannerURL() });
+      }
+
+      const quitter = chemin.match(/^\/guildes\/(\d{15,25})\/quitter$/);
+      if (quitter && requete.method === "POST") {
+        const guild = client.guilds.cache.get(quitter[1]!);
+        if (!guild) return Response.json({ erreur: "Guilde inconnue de ce profil" }, { status: 404 });
+        console.warn(`⚠ [serveur-admin] départ demandé de « ${guild.name} » (${guild.id})`);
+        await guild.leave();
+        return Response.json({ success: true, message: "Guild deleted" });
+      }
+
+      const invitation = chemin.match(/^\/guildes\/(\d{15,25})\/invitation$/);
+      if (invitation && requete.method === "POST") {
+        const guild = client.guilds.cache.get(invitation[1]!);
+        if (!guild) {
+          return Response.json({ erreur: "Guilde inconnue de ce profil" }, { status: 404 });
+        }
+        const url = await inviterDans(guild);
+        return url
+          ? Response.json({ url })
+          : Response.json({ erreur: "Aucun salon où le bot peut créer une invitation" }, { status: 409 });
       }
 
       const salons = chemin.match(/^\/guildes\/(\d{15,25})\/salons$/);

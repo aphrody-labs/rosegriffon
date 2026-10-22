@@ -507,8 +507,8 @@ function manquePousse(liste: string[], texte: string): void {
 
 // ─── Profils du bot ─────────────────────────────────────────────────────────
 
-/** Les deux identités Discord servies par le même programme. */
-export const NOMS_PROFILS_BOT = ["rg", "azalee"] as const;
+/** Les identités Discord servies par le même programme. */
+export const NOMS_PROFILS_BOT = ["rg", "azalee", "achillea"] as const;
 
 export type NomProfilBot = (typeof NOMS_PROFILS_BOT)[number];
 
@@ -567,6 +567,18 @@ export const PROFILS_BOT: Readonly<Record<NomProfilBot, ProfilBotPublic>> = Obje
     portAdmin: 3008,
     role: "données du jeu, fichiers extraits, recherche sémantique et annonces X",
   }),
+  // Enfant supervisé de `rg-core` (comme Azalée), sur le jeton de l'application
+  // Achilléa : c'est elle, et non le bot Rose Griffon, qui est invitée sur les
+  // serveurs de la communauté compétitive.
+  achillea: Object.freeze({
+    nom: "achillea",
+    titre: "Achilléa",
+    unite: "rg-core.service",
+    couleurHex: "#6d00ce",
+    domaine: "rosegriffon.fr/achillea",
+    portAdmin: 3009,
+    role: "serveurs de la communauté compétitive : clans, tournois, ranked et sanctions",
+  }),
 });
 
 export const TOUS_LES_PROFILS_BOT: readonly ProfilBotPublic[] = Object.freeze(Object.values(PROFILS_BOT));
@@ -581,6 +593,10 @@ export interface GuildeBot {
   /** Les commandes du profil y sont-elles enregistrées ? */
   readonly servie: boolean;
   readonly icone: string | null;
+  /** Propriétaire du serveur (flocon Discord). */
+  readonly proprietaire: string;
+  /** Date à laquelle le bot a rejoint le serveur, ISO 8601. */
+  readonly rejointeLe: string | null;
 }
 
 /** Une option de slash command, telle que Discord la décrit. */

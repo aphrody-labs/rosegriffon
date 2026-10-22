@@ -49,8 +49,8 @@ import { ACHILLEA_GUILD_ID, AZALEE_GUILD_ID, RG_GUILD_ID, resolveGuildIds } from
  */
 export type EnvLisible = Record<string, string | undefined>;
 
-/** Les deux profils possibles. Toute valeur hors de cette liste est une erreur. */
-export const NOMS_PROFILS = ["rg", "azalee"] as const;
+/** Les profils possibles. Toute valeur hors de cette liste est une erreur. */
+export const NOMS_PROFILS = ["rg", "azalee", "achillea"] as const;
 
 export type NomProfil = (typeof NOMS_PROFILS)[number];
 
@@ -353,6 +353,17 @@ const SALON_ANNONCE_AZALEE = "1349528692086276148";
  */
 const SALON_VALIDATION_AZALEE = "1220382147811082340";
 
+/**
+ * Modules du profil Achilléa.
+ *
+ * Vide pour l'instant : les commandes de l'ancien bot (`/clan`, `/report`,
+ * `/sanction`…) sont portées module par module. Tant que la liste est vide, la
+ * passerelle sert l'état multi-serveurs au back-office et n'enregistre RIEN —
+ * `index.ts` refuse de publier un arbre vide, qui effacerait les commandes
+ * encore inscrites sur le serveur Achilléa par l'ancien bot.
+ */
+const MODULES_ACHILLEA = [] as const satisfies readonly string[];
+
 export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
   rg: Object.freeze({
     nom: "rg",
@@ -438,6 +449,28 @@ export const PROFILS: Readonly<Record<NomProfil, Profil>> = Object.freeze({
       // officiels Inazuma, Rose Griffon) n'ont rien à y faire.
       comptes: ["Azalee_IE"],
     },
+  }),
+  achillea: Object.freeze({
+    nom: "achillea",
+    titre: "Achilléa",
+    identifiantBot: "achillea",
+    variableJeton: "ACHILLEA_DISCORD_BOT_TOKEN",
+    variablesJetonSecours: [],
+    // L'ancien bot publiait ses commandes sur ce seul serveur ; on garde la même
+    // portée pour que le portage les remplace sans doublon global.
+    guildes: [ACHILLEA_GUILD_ID],
+    porteeCommandes: "guildes",
+    // `GuildMembers` est accordé à cette application (drapeaux vérifiés le
+    // 22/10/2026) ; `resolveGrantedIntents` le retire de lui-même s'il ne l'est plus.
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
+    modules: MODULES_ACHILLEA,
+    marque: {
+      couleurHex: "#6d00ce" as const,
+      piedDePage: "rosegriffon.fr/achillea",
+      urlBase: "https://rosegriffon.fr/achillea",
+      variableUrlBase: "ACHILLEA_WEBSITE_URL",
+    },
+    annoncePosts: null,
   }),
 });
 

@@ -24,7 +24,7 @@
  * en retard, c'est une commande absente jusqu'au prochain redémarrage.
  */
 import "reflect-metadata";
-import { Client } from "discordx";
+import { Client, MetadataStorage } from "discordx";
 import { Partials } from "discord.js";
 import {
   clearGuildCommandsSafe,
@@ -44,7 +44,7 @@ import {
   PROFIL_ANNONCEUR,
 } from "./lib/config";
 import { sql } from "./lib/db";
-import { demarrerServeurAdmin, type ServeurAdmin } from "./lib/serveur-admin";
+import { brancherJournal, demarrerServeurAdmin, type ServeurAdmin } from "./lib/serveur-admin";
 import { startApiServer } from "./api/server";
 import { demarrerNotifieurTweets } from "./services/tweetsNotifier";
 
@@ -110,6 +110,8 @@ if (!isApiMode && !DISCORD_TOKEN && !isBotMode) {
 
   // Passerelle partagée avec les autres surfaces du processus (`rg-core` : veille, télémétrie).
   definirClientActif(client);
+  // Tampon de journal lu par le back-office (`/journal` du serveur d'administration).
+  brancherJournal();
 
   /**
    * Charge les modules du profil pour leurs décorateurs.
@@ -162,10 +164,19 @@ if (!isApiMode && !DISCORD_TOKEN && !isBotMode) {
   // chaque démarrage et aurait rendu le bot muet en v15. Les deux sont émis à la
   // suite dans cette version, la bascule est donc sans effet de bord.
   client.once("clientReady", async () => {
-    await initApplicationCommandsSafe(client);
+    // Un arbre VIDE ne se publie pas : discordx synchronise, il effacerait donc
+    // les commandes inscrites par une version précédente (cas du profil Achilléa
+    // tant que ses commandes ne sont pas toutes portées). Mieux vaut des
+    // commandes qui répondent « inconnue » que des commandes disparues.
+    const arbreVide = MetadataStorage.instance.applicationCommandSlashesFlat.length === 0;
+    if (arbreVide) {
+      console.warn(`⚠ Profil « ${PROFIL.nom} » : aucune commande chargée, enregistrement Discord laissé intact.`);
+    } else {
+      await initApplicationCommandsSafe(client);
+    }
 
     // Portée globale : effacer les commandes de guilde héritées de l'ancien mode.
-    if (PROFIL.porteeCommandes === "globale") {
+    if (PROFIL.porteeCommandes === "globale" && !arbreVide) {
       await clearGuildCommandsSafe(client, PROFIL.guildes);
     }
 
