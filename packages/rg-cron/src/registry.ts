@@ -153,6 +153,7 @@ export const REGISTRE_TACHES: Readonly<Record<string, DefinitionTache>> = Object
     horsServerless: "lit le journal nginx local (`/var/log/nginx/rg-stats.log`) et écrit un cache sur disque",
   },
   "sync:achillea": { executer: () => import("./tasks/achillea-sync").then(m => m.runAchilleaSync()) },
+  "achillea:casts": { executer: () => import("./tasks/achillea-casts").then(m => m.runAchilleaCastReminders()) },
   "achillea:guildes": { executer: () => import("./tasks/achillea-guildes").then(m => m.runAchilleaGuildes()) },
   "achillea:seasons": { executer: () => import("./tasks/achillea-seasons").then(m => m.runAchilleaSeasonRollover()) },
   "achillea:weekly-payout": {

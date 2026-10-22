@@ -13,12 +13,13 @@ import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 import { safeEqual } from "@rosegriffon/achillea-core/licenses";
 import { resolveAchilleaSession } from "../auth/session";
+import { ROLE_STAFF, staff } from "./staff";
 
 export type SessionHeaders = { authorization?: string; cookie?: string };
 
 /** Rôles Achilléa (colonne `user.role`). */
-export const ROLE_MODERATOR = 1;
-export const ROLE_ADMINISTRATOR = 2;
+export const ROLE_MODERATOR = ROLE_STAFF.Moderateur;
+export const ROLE_ADMINISTRATOR = ROLE_STAFF.Administrateur;
 
 export const authRequired = { message: "Authentication required" as const };
 
@@ -28,13 +29,11 @@ export async function requireSession(headers: SessionHeaders) {
   return { error: null, session } as const;
 }
 
+/** Même décision que la garde staff du back-office (`staff.ts`), sous la forme attendue par ces routes. */
 export async function requireRole(db: Kysely<Database>, headers: SessionHeaders, minimumRole: number) {
-  const session = await resolveAchilleaSession(headers);
-  if (!session) return { error: status(401, authRequired), session: null } as const;
-  const actor = await db.selectFrom("user").select("role").where("id", "=", session.id).executeTakeFirst();
-  if (!actor || actor.role < minimumRole)
-    return { error: status(403, { message: "Staff role required" as const }), session: null } as const;
-  return { error: null, session, role: actor.role } as const;
+  const garde = await staff(db, headers, minimumRole);
+  if (garde.error) return { error: garde.error, session: null } as const;
+  return { error: null, session: garde.session, role: garde.actor.role } as const;
 }
 
 /**
