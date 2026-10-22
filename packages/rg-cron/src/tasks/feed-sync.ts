@@ -35,8 +35,13 @@
  *  - `RG_MEDIA_ROOT`, `RG_MEDIA_PUBLIC_ORIGIN` : voir `lib/storage-assets.ts`.
  *  - `BUN_CHROME_PATH` : Chrome pour `Bun.WebView` (sinon celui du système).
  *
- * PANNE ≠ VIDE : une source qui échoue GARDE son instantané précédent (le Feed continue de servir
+ * PANNE ≠ VIDE : une source (ou un compte) qui échoue GARDE son instantané précédent (le Feed continue de servir
  * ce qu'il sait) et la tâche le consigne ; seule une source lue avec succès remplace le sien.
+ * Une source en panne ne fait pas échouer les autres : le passage est un succès PARTIEL, et la
+ * tâche n'échoue (alerte du runner) que si rien n'aboutit ou si une panne dure
+ * (`SEUIL_ECHECS_DURABLES` passages d'affilée). Une limitation de débit (TikTok répond 429 à l'IP
+ * du VPS) DIFFÈRE la source : plus relue avant `reprendreApres` (30 min, doublé, plafond 6 h),
+ * état gardé dans `feed/etat-sync.json`.
  *
  * Usage : bun packages/cron/src/tasks/feed-sync.ts [youtube|tiktok|instagram] [--dry]
  */
@@ -48,7 +53,7 @@ import {
 } from "@rosegriffon/types/feed-comptes";
 import { CHEMIN_SNAPSHOT, lireSnapshot } from "@rosegriffon/types/feed";
 import type { CompteSource, PostFeed, ProfilFeed, Reseau, SnapshotFeed, StatutSource } from "@rosegriffon/types/feed";
-import { lireTiktok, lireYoutube } from "@rosegriffon/types/feed-lecture";
+import { estLimiteDebit, lireTiktok, lireYoutube } from "@rosegriffon/types/feed-lecture";
 import {
   cookiesDepuisEnv,
   postDepuisGrilleInstagram,
@@ -86,16 +91,33 @@ export interface OptionsFeedSync {
   dry?: boolean;
 }
 
+/**
+ * Issue d'une source à ce passage :
+ *  - `ok` : lue, instantané remplacé (certains comptes ont pu échouer : `comptesEnEchec`) ;
+ *  - `differe` : limitée par le réseau (429), pas relue avant `reprendreApres` ; instantané gardé ;
+ *  - `echec` : en panne, instantané précédent gardé.
+ */
+export type EtatSync = "ok" | "differe" | "echec";
+
 export interface StatsReseauFeed {
   reseau: Reseau;
+  /** Faux seulement pour `echec` (compatibilité des lecteurs de l'historique). */
   ok: boolean;
+  etat: EtatSync;
   posts: number;
   vignettes: number;
   erreur?: string;
+  /** Comptes du réseau illisibles à ce passage (leurs publications précédentes sont gardées). */
+  comptesEnEchec?: string[];
+  /** ISO 8601 : fin de l'attente imposée par une limitation de débit. */
+  reprendreApres?: string;
 }
 
 export interface StatsFeedSync {
+  /** Faux si aucune source n'a abouti, ou si une source échoue depuis trop de passages d'affilée. */
   success: boolean;
+  /** Vrai si une source ou un compte a échoué ou a été différé : les autres ont tout de même été écrites. */
+  partiel: boolean;
   reseaux: StatsReseauFeed[];
   dry: boolean;
   error?: string;
@@ -106,6 +128,15 @@ interface Resultat {
   profils: ProfilFeed[];
   statut: StatutSource;
 }
+
+/** Ce que rend la lecture d'un réseau. */
+export interface LectureReseau extends Resultat {
+  vignettes: number;
+  /** Comptes illisibles (« nom : motif ») alors que d'autres du même réseau ont été lus. */
+  comptesEnEchec?: string[];
+}
+
+export type LecteurReseau = (precedent: SnapshotFeed | null) => Promise<LectureReseau>;
 
 const message = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 const pause = (ms: number) => Bun.sleep(ms);
@@ -160,15 +191,109 @@ function indexer(snapshot: SnapshotFeed | null): Map<string, PostFeed> {
   return new Map((snapshot?.posts ?? []).map(p => [p.id, p]));
 }
 
+/**
+ * Reprend de l'instantané précédent les publications et profils des comptes illisibles à ce
+ * passage : une chaîne YouTube ou un profil Instagram en panne ne disparaît pas du Feed.
+ */
+export function conserverComptesEnEchec(
+  lu: { posts: PostFeed[]; profils: ProfilFeed[] },
+  precedent: SnapshotFeed | null,
+  comptes: readonly string[],
+  max = MAX_POSTS,
+): { posts: PostFeed[]; profils: ProfilFeed[] } {
+  const enEchec = new Set(comptes);
+  const ids = new Set(lu.posts.map(p => p.id));
+  const repris = (precedent?.posts ?? []).filter(p => p.compte && enEchec.has(p.compte) && !ids.has(p.id));
+  const pseudos = new Set(lu.profils.map(p => p.pseudo));
+  const profils = [
+    ...lu.profils,
+    ...(precedent?.profils ?? []).filter(p => enEchec.has(p.pseudo) && !pseudos.has(p.pseudo)),
+  ];
+  if (repris.length === 0) return { posts: lu.posts, profils };
+  const posts = [...lu.posts, ...repris].toSorted((a, b) => b.date.localeCompare(a.date));
+  return { posts: posts.slice(0, Math.max(max, lu.posts.length)), profils };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Limitation de débit et échecs répétés
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Mémoire d'une source entre deux passages (fichier `feed/etat-sync.json` du bucket `assets`). */
+export interface EtatSource {
+  /** Passages d'affilée terminés en `echec` (une limitation de débit n'en est pas un). */
+  echecs: number;
+  /** Limitations de débit (429) d'affilée. */
+  limites: number;
+  /** ISO 8601 : ne pas relire la source avant. */
+  reprendreApres?: string;
+  motif?: string;
+}
+
+export type EtatsSources = Partial<Record<Reseau, EtatSource>>;
+
+const CHEMIN_ETAT = "feed/etat-sync.json";
+/** Attente après la première limitation, doublée à chaque suivante, plafonnée. */
+export const ATTENTE_LIMITE_MIN_MS = 30 * 60_000;
+export const ATTENTE_LIMITE_MAX_MS = 6 * 3600_000;
+/**
+ * Au-delà de ce nombre de passages d'affilée en échec (ou limités), la tâche échoue pour que
+ * l'alerte du runner parte : une panne passagère est un succès partiel, une panne durable non.
+ * Le cron passe toutes les 30 min : 6 échecs ≈ 3 h ; 6 limitations ≈ 14 h d'attente cumulée.
+ */
+export const SEUIL_ECHECS_DURABLES = 6;
+
+/** Fin de l'attente après la `limites`-ième limitation d'affilée ; `Retry-After` si plus long. */
+export function prochaineReprise(limites: number, maintenant: number, retryAfterMs?: number): number {
+  const exponentielle = ATTENTE_LIMITE_MIN_MS * 2 ** Math.max(0, limites - 1);
+  const attente = Math.min(ATTENTE_LIMITE_MAX_MS, exponentielle);
+  return maintenant + Math.max(attente, Math.min(retryAfterMs ?? 0, ATTENTE_LIMITE_MAX_MS));
+}
+
+function lireEtats(valeur: unknown): EtatsSources {
+  if (!valeur || typeof valeur !== "object") return {};
+  const sortie: EtatsSources = {};
+  for (const reseau of RESEAUX_SYNCHRONISES) {
+    const e = (valeur as Record<string, Partial<EtatSource> | undefined>)[reseau];
+    if (!e || typeof e !== "object") continue;
+    sortie[reseau] = {
+      echecs: Number(e.echecs) || 0,
+      limites: Number(e.limites) || 0,
+      reprendreApres: typeof e.reprendreApres === "string" ? e.reprendreApres : undefined,
+      motif: typeof e.motif === "string" ? e.motif : undefined,
+    };
+  }
+  return sortie;
+}
+
+/** `rg-core` est permanent : l'état vit en mémoire, et sur disque pour survivre à un redémarrage. */
+let etatsMemoire: EtatsSources | null = null;
+
+async function chargerEtats(): Promise<EtatsSources> {
+  etatsMemoire ??= lireEtats(await lireJsonDisque(CHEMIN_ETAT).catch(() => null));
+  return etatsMemoire;
+}
+
+/** Oublie l'état en mémoire (tests, ou relecture forcée depuis le disque). */
+export function oublierEtatsSources(): void {
+  etatsMemoire = null;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // YouTube
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function syncYoutube(precedent: SnapshotFeed | null): Promise<Resultat & { vignettes: number }> {
+/** Le flux Atom répond 404/500 par intermittence : trois lectures espacées avant de conclure. */
+const LECTURE_YOUTUBE = { essais: 3, pauseMs: 2000 } as const;
+
+async function syncYoutube(precedent: SnapshotFeed | null): Promise<LectureReseau> {
   const connus = indexer(precedent);
-  const lus = await Promise.allSettled(COMPTES_SOURCE_YOUTUBE.map(c => lireYoutube(c)));
+  const lus = await Promise.allSettled(COMPTES_SOURCE_YOUTUBE.map(c => lireYoutube(c, LECTURE_YOUTUBE)));
   const ok = lus.flatMap(l => (l.status === "fulfilled" ? [l.value] : []));
-  if (ok.length === 0) throw new Error(lus.map(l => (l.status === "rejected" ? message(l.reason) : "")).join(" ; "));
+  const enEchec = COMPTES_SOURCE_YOUTUBE.flatMap((c, i) => {
+    const l = lus[i]!;
+    return l.status === "rejected" ? [{ compte: c.pseudo, erreur: `${c.nom} : ${message(l.reason)}` }] : [];
+  });
+  if (ok.length === 0) throw new Error(enEchec.map(e => e.erreur).join(" ; "));
   let vignettes = 0;
   const posts: PostFeed[] = [];
   for (const brut of ok.flatMap(r => r.posts)) {
@@ -191,11 +316,17 @@ async function syncYoutube(precedent: SnapshotFeed | null): Promise<Resultat & {
     // YouTube garde des vignettes stables : sans copie, on retombe sur l'URL publique d'origine.
     posts.push(retenu.post.medias.length > 0 ? retenu.post : { ...retenu.post, medias: brut.medias });
   }
+  // Une chaîne en panne garde ses vidéos de l'instantané précédent : panne ≠ vide, chaîne par chaîne.
+  const fusion = conserverComptesEnEchec(
+    { posts, profils: ok.flatMap(r => (r.profil ? [r.profil] : [])) },
+    precedent,
+    enEchec.map(e => e.compte),
+  );
   return {
-    posts,
-    profils: ok.flatMap(r => (r.profil ? [r.profil] : [])),
-    statut: { reseau: "youtube", etat: posts.length > 0 ? "ok" : "vide" },
+    ...fusion,
+    statut: { reseau: "youtube", etat: fusion.posts.length > 0 ? "ok" : "vide" },
     vignettes,
+    comptesEnEchec: enEchec.map(e => e.erreur),
   };
 }
 
@@ -235,9 +366,10 @@ async function lireItemListTiktok(compte: CompteSource): Promise<{ posts: PostFe
   }
 }
 
-async function syncTiktok(precedent: SnapshotFeed | null): Promise<Resultat & { vignettes: number }> {
+async function syncTiktok(precedent: SnapshotFeed | null): Promise<LectureReseau> {
   const connus = indexer(precedent);
   const compte = COMPTES_SOURCE_TIKTOK[0]!;
+  // 429 : `ErreurHttp` remonte telle quelle, la tâche diffère TikTok (voir `synchroniserFeed`).
   const embed = await lireTiktok(compte);
   let session: Awaited<ReturnType<typeof lireItemListTiktok>> = null;
   try {
@@ -271,16 +403,21 @@ async function syncTiktok(precedent: SnapshotFeed | null): Promise<Resultat & { 
     const r = await rehebergerPost(post, ancien, VIGNETTE_9_16);
     vignettes += r.ecrites;
     post = r.post;
-    // Vignette d'origine illisible : image d'affiche tirée du MP4 déjà en mémoire, si on l'a.
+    // Vignette d'origine illisible : image d'affiche tirée du MP4 déjà en mémoire, si on l'a
+    // (et si le runtime a `Bun.Video` : sinon `afficheVideo` rend `null`). Jamais fatal au réseau.
     if (post.medias.length === 0 && mp4) {
-      const affiche = await afficheVideo(mp4, VIGNETTE_9_16);
-      if (affiche) {
-        const chemin = cheminVignette("tiktok", brut.idOrigine);
-        const ecrit = await televerserObjet("assets", chemin, affiche.octets.slice().buffer as ArrayBuffer, "image/webp");
-        if (ecrit.ok) {
-          post = { ...post, medias: [{ type: "video", url: brut.lien, apercu: urlAsset(chemin), largeur: affiche.largeur, hauteur: affiche.hauteur }] };
-          vignettes++;
+      try {
+        const affiche = await afficheVideo(mp4, VIGNETTE_9_16);
+        if (affiche) {
+          const chemin = cheminVignette("tiktok", brut.idOrigine);
+          const ecrit = await televerserObjet("assets", chemin, affiche.octets.slice().buffer as ArrayBuffer, "image/webp");
+          if (ecrit.ok) {
+            post = { ...post, medias: [{ type: "video", url: brut.lien, apercu: urlAsset(chemin), largeur: affiche.largeur, hauteur: affiche.hauteur }] };
+            vignettes++;
+          }
         }
+      } catch (err) {
+        console.warn(`${PREFIXE} affiche TikTok ${brut.idOrigine} : ${message(err)}`);
       }
     }
     posts.push(post);
@@ -325,62 +462,87 @@ async function lireOembedInstagram(code: string): Promise<OembedInstagram | null
   return reponse?.ok ? ((await reponse.json().catch(() => null)) as OembedInstagram | null) : null;
 }
 
-async function lireProfilInstagram(compte: CompteSource): Promise<PageInstagram> {
+
+/** Ouvre un onglet et y pose la session Instagram, si elle est fournie. */
+async function ouvrirPageInstagram(): Promise<PageWebView> {
   const page = await PageWebView.connect();
-  try {
-    const cookies = cookiesDepuisEnv(Bun.env.FEED_INSTAGRAM_COOKIES, ".instagram.com");
-    if (cookies.length > 0) await page.addCookies(cookies as unknown as Array<Record<string, unknown>>);
-    await page.goto(`https://www.instagram.com/${compte.pseudo}/`);
-    const vues = new Map<string, ElementGrilleInstagram>();
-    let derniere: PageInstagram | null = null;
-    // La grille se peuple après le rendu ; deux défilements ramènent la suite quand la session l'autorise.
-    for (let tour = 0; tour < 3; tour++) {
-      for (let i = 0; i < 24; i++) {
-        derniere = await page.evaluate<PageInstagram>(SCRIPT_PROFIL_INSTAGRAM);
-        if (derniere.items.length > 0 || derniere.mur) break;
-        await pause(500);
-      }
-      if (!derniere) break;
-      for (const el of derniere.items) vues.set(el.href, el);
-      if (derniere.mur || derniere.items.length === 0) break;
-      await page.evaluate("window.scrollTo(0, document.body.scrollHeight)");
-      await pause(1500);
-    }
-    if (!derniere) throw new Error("Page Instagram vide");
-    return { ...derniere, items: [...vues.values()] };
-  } finally {
-    await page.close();
-  }
+  const cookies = cookiesDepuisEnv(Bun.env.FEED_INSTAGRAM_COOKIES, ".instagram.com");
+  if (cookies.length > 0) await page.addCookies(cookies as unknown as Array<Record<string, unknown>>);
+  return page;
 }
 
-async function syncInstagram(precedent: SnapshotFeed | null): Promise<Resultat & { vignettes: number }> {
+async function lireProfilInstagram(page: PageWebView, compte: CompteSource): Promise<PageInstagram> {
+  await page.goto(`https://www.instagram.com/${compte.pseudo}/`);
+  const vues = new Map<string, ElementGrilleInstagram>();
+  let derniere: PageInstagram | null = null;
+  // La grille se peuple après le rendu ; deux défilements ramènent la suite quand la session l'autorise.
+  for (let tour = 0; tour < 3; tour++) {
+    for (let i = 0; i < 24; i++) {
+      derniere = await page.evaluate<PageInstagram>(SCRIPT_PROFIL_INSTAGRAM);
+      if (derniere.items.length > 0 || derniere.mur) break;
+      await pause(500);
+    }
+    if (!derniere) break;
+    for (const el of derniere.items) vues.set(el.href, el);
+    if (derniere.mur || derniere.items.length === 0) break;
+    await page.evaluate("window.scrollTo(0, document.body.scrollHeight)");
+    await pause(1500);
+  }
+  if (!derniere) throw new Error("Page Instagram vide");
+  return { ...derniere, items: [...vues.values()] };
+}
+
+async function syncInstagram(precedent: SnapshotFeed | null): Promise<LectureReseau> {
   const connus = indexer(precedent);
   let vignettes = 0;
   const posts: PostFeed[] = [];
   const profils: ProfilFeed[] = [];
+  const enEchec: { compte: string; erreur: string }[] = [];
   let mur = 0;
-  // Un navigateur à la fois : Instagram limite vite les lectures parallèles d'une même IP.
-  for (const compte of COMPTES_SOURCE_INSTAGRAM) {
-    const page = await lireProfilInstagram(compte);
-    profils.push(profilDepuisPageInstagram(page, compte));
-    if (page.items.length === 0) {
-      if (page.mur) mur++;
-      continue;
+  // UN onglet pour tous les comptes : fermer la dernière vue tue Chrome (`fermerVue`), et l'onglet
+  // du compte suivant, ouvert dans la foulée, tombait sur le navigateur mourant (« WebView.navigate:
+  // view is closed », un passage sur deux sur le VPS). Après une erreur, onglet neuf et un second essai.
+  // Un compte à la fois : Instagram limite vite les lectures parallèles d'une même IP.
+  let page: PageWebView | null = null;
+  try {
+    for (const compte of COMPTES_SOURCE_INSTAGRAM) {
+      let lu: PageInstagram | null = null;
+      for (let essai = 1; essai <= 2 && !lu; essai++) {
+        try {
+          page ??= await ouvrirPageInstagram();
+          lu = await lireProfilInstagram(page, compte);
+        } catch (err) {
+          await page?.close().catch(() => undefined);
+          page = null;
+          if (essai === 2) enEchec.push({ compte: compte.pseudo, erreur: `${compte.pseudo} : ${message(err)}` });
+          else console.warn(`${PREFIXE} Instagram ${compte.pseudo}, nouvel essai : ${message(err)}`);
+        }
+      }
+      if (!lu) continue;
+      profils.push(profilDepuisPageInstagram(lu, compte));
+      if (lu.items.length === 0) {
+        if (lu.mur) mur++;
+        continue;
+      }
+      for (const el of lu.items.slice(0, MAX_POSTS)) {
+        const ancien = connus.get(`instagram:${el.href.match(/\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/)?.[1]}`);
+        // Légende : déjà connue, sinon oEmbed (une requête par nouveauté, jamais par passage).
+        const code = el.href.match(/\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/)?.[1];
+        const oembed = ancien?.texte || !code ? undefined : ((await lireOembedInstagram(code)) ?? undefined);
+        if (!ancien?.texte && code) await pause(300);
+        const brut = postDepuisGrilleInstagram(el, compte, oembed);
+        if (!brut) continue;
+        const r = await rehebergerPost({ ...brut, texte: ancien?.texte || brut.texte }, ancien, VIGNETTE_CARREE);
+        vignettes += r.ecrites;
+        posts.push(r.post);
+      }
     }
-    for (const el of page.items.slice(0, MAX_POSTS)) {
-      const ancien = connus.get(`instagram:${el.href.match(/\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/)?.[1]}`);
-      // Légende : déjà connue, sinon oEmbed (une requête par nouveauté, jamais par passage).
-      const code = el.href.match(/\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/)?.[1];
-      const oembed = ancien?.texte || !code ? undefined : ((await lireOembedInstagram(code)) ?? undefined);
-      if (!ancien?.texte && code) await pause(300);
-      const brut = postDepuisGrilleInstagram(el, compte, oembed);
-      if (!brut) continue;
-      const r = await rehebergerPost({ ...brut, texte: ancien?.texte || brut.texte }, ancien, VIGNETTE_CARREE);
-      vignettes += r.ecrites;
-      posts.push(r.post);
-    }
+  } finally {
+    await page?.close().catch(() => undefined);
   }
-  if (posts.length === 0 && mur === COMPTES_SOURCE_INSTAGRAM.length) {
+  if (enEchec.length === COMPTES_SOURCE_INSTAGRAM.length) throw new Error(enEchec.map(e => e.erreur).join(" ; "));
+  const comptesEnEchec = enEchec.map(e => e.erreur);
+  if (posts.length === 0 && enEchec.length === 0 && mur === COMPTES_SOURCE_INSTAGRAM.length) {
     return {
       posts: [],
       profils,
@@ -393,11 +555,16 @@ async function syncInstagram(precedent: SnapshotFeed | null): Promise<Resultat &
     };
   }
   posts.sort((a, b) => b.date.localeCompare(a.date));
+  const fusion = conserverComptesEnEchec(
+    { posts: posts.slice(0, MAX_POSTS), profils },
+    precedent,
+    enEchec.map(e => e.compte),
+  );
   return {
-    posts: posts.slice(0, MAX_POSTS),
-    profils,
+    ...fusion,
     vignettes,
-    statut: { reseau: "instagram", etat: posts.length > 0 ? "ok" : "vide" },
+    comptesEnEchec,
+    statut: { reseau: "instagram", etat: fusion.posts.length > 0 ? "ok" : "vide" },
   };
 }
 
@@ -405,48 +572,129 @@ async function syncInstagram(precedent: SnapshotFeed | null): Promise<Resultat &
 // Tâche
 // ─────────────────────────────────────────────────────────────────────────────
 
-const LECTEURS: Record<ReseauSynchronise, (p: SnapshotFeed | null) => Promise<Resultat & { vignettes: number }>> = {
+const LECTEURS: Record<ReseauSynchronise, LecteurReseau> = {
   youtube: syncYoutube,
   tiktok: syncTiktok,
   instagram: syncInstagram,
 };
 
-export async function synchroniserFeed(options: OptionsFeedSync = {}): Promise<StatsFeedSync> {
+/** Remplacements pour les tests : lecteurs factices, horloge fixe. */
+export interface DependancesFeedSync {
+  lecteurs?: Partial<Record<ReseauSynchronise, LecteurReseau>>;
+  maintenant?: () => number;
+}
+
+/**
+ * Bilan d'un passage. Une source en panne ou différée ne fait plus échouer la tâche : les autres
+ * ont écrit leur instantané, c'est un succès PARTIEL (`partiel`, motifs dans `error`). La tâche
+ * échoue quand rien n'a abouti, ou quand une panne dure (`durables`) : l'alerte du runner part.
+ */
+export function bilanFeedSync(
+  reseaux: readonly StatsReseauFeed[],
+  durables: readonly string[] = [],
+): Pick<StatsFeedSync, "success" | "partiel" | "error"> {
+  const motifs = [
+    ...reseaux.flatMap(r => {
+      if (r.etat === "echec") return [`${r.reseau} : ${r.erreur ?? "échec"}`];
+      if (r.etat === "differe") return [`${r.reseau} : différé jusqu'à ${r.reprendreApres ?? "?"} (${r.erreur ?? "limité"})`];
+      return (r.comptesEnEchec ?? []).map(c => `${r.reseau} : ${c}`);
+    }),
+    ...durables,
+  ];
+  const aboutis = reseaux.filter(r => r.etat !== "echec");
+  return {
+    success: aboutis.length > 0 && durables.length === 0,
+    partiel: motifs.length > 0,
+    error: motifs.length > 0 ? motifs.join(" ; ") : undefined,
+  };
+}
+
+export async function synchroniserFeed(
+  options: OptionsFeedSync = {},
+  dependances: DependancesFeedSync = {},
+): Promise<StatsFeedSync> {
   const dry = options.dry ?? false;
   const demande = options.reseau?.trim().toLowerCase();
   const cibles = RESEAUX_SYNCHRONISES.filter(r => !demande || r === demande);
   if (cibles.length === 0)
-    return { success: false, reseaux: [], dry, error: `Réseau inconnu : ${demande} (youtube, tiktok, instagram)` };
+    return {
+      success: false,
+      partiel: false,
+      reseaux: [],
+      dry,
+      error: `Réseau inconnu : ${demande} (youtube, tiktok, instagram)`,
+    };
 
+  const lecteurs = { ...LECTEURS, ...dependances.lecteurs };
+  const horloge = dependances.maintenant ?? Date.now;
+  // Un passage « dry » ne doit rien changer aux suivants : il travaille sur une copie de l'état.
+  const etats: EtatsSources = dry ? structuredClone(await chargerEtats()) : await chargerEtats();
   const reseaux: StatsReseauFeed[] = [];
+  const durables: string[] = [];
+
   for (const reseau of cibles) {
+    const etat: EtatSource = etats[reseau] ?? { echecs: 0, limites: 0 };
+    const maintenant = horloge();
+    const reprise = etat.reprendreApres ? Date.parse(etat.reprendreApres) : Number.NaN;
+    if (reprise > maintenant) {
+      // Limitée au passage précédent : on ne la relit pas avant l'échéance (relire prolonge la limite).
+      console.warn(`${PREFIXE} ${reseau} : différé jusqu'à ${etat.reprendreApres} (${etat.motif ?? "limité"})`);
+      reseaux.push({ reseau, ok: true, etat: "differe", posts: 0, vignettes: 0, erreur: etat.motif, reprendreApres: etat.reprendreApres });
+      if (etat.limites >= SEUIL_ECHECS_DURABLES) durables.push(`${reseau} : limité ${etat.limites} fois d'affilée`);
+      continue;
+    }
     try {
       const precedent = await lirePrecedent(reseau);
-      const lu = await LECTEURS[reseau](precedent);
+      const lu = await lecteurs[reseau](precedent);
       const snapshot: SnapshotFeed = {
         version: 1,
         reseau,
-        genereLe: new Date().toISOString(),
+        genereLe: new Date(maintenant).toISOString(),
         posts: lu.posts,
         profils: lu.profils,
         statut: lu.statut,
       };
       if (!dry) await ecrireJson(CHEMIN_SNAPSHOT(reseau), snapshot);
-      console.log(`${PREFIXE} ${reseau} : ${lu.posts.length} publications, ${lu.vignettes} vignettes écrites${dry ? " (dry)" : ""}`);
-      reseaux.push({ reseau, ok: true, posts: lu.posts.length, vignettes: lu.vignettes });
+      const comptes = lu.comptesEnEchec ?? [];
+      console.log(
+        `${PREFIXE} ${reseau} : ${lu.posts.length} publications, ${lu.vignettes} vignettes écrites${dry ? " (dry)" : ""}` +
+          (comptes.length > 0 ? ` ; comptes en échec (publications précédentes gardées) : ${comptes.join(" ; ")}` : ""),
+      );
+      etats[reseau] = { echecs: 0, limites: 0 };
+      reseaux.push({
+        reseau,
+        ok: true,
+        etat: "ok",
+        posts: lu.posts.length,
+        vignettes: lu.vignettes,
+        ...(comptes.length > 0 ? { comptesEnEchec: comptes } : {}),
+      });
     } catch (err) {
+      if (estLimiteDebit(err)) {
+        // 429 : attendre, en doublant l'attente à chaque limitation d'affilée (`Retry-After` s'il est plus long).
+        const limites = etat.limites + 1;
+        const reprendreApres = new Date(prochaineReprise(limites, maintenant, err.reessayerApresMs)).toISOString();
+        etats[reseau] = { echecs: etat.echecs, limites, reprendreApres, motif: message(err) };
+        console.warn(`${PREFIXE} ${reseau} : ${message(err)} ; différé jusqu'à ${reprendreApres} (limitation n° ${limites})`);
+        reseaux.push({ reseau, ok: true, etat: "differe", posts: 0, vignettes: 0, erreur: message(err), reprendreApres });
+        if (limites >= SEUIL_ECHECS_DURABLES) durables.push(`${reseau} : limité ${limites} fois d'affilée`);
+        continue;
+      }
       // Panne ≠ vide : l'instantané précédent reste en place, on le consigne.
+      const echecs = etat.echecs + 1;
+      etats[reseau] = { echecs, limites: etat.limites, motif: message(err) };
       console.error(`${PREFIXE} ${reseau} : ${message(err)}`);
-      reseaux.push({ reseau, ok: false, posts: 0, vignettes: 0, erreur: message(err) });
+      reseaux.push({ reseau, ok: false, etat: "echec", posts: 0, vignettes: 0, erreur: message(err) });
+      if (echecs >= SEUIL_ECHECS_DURABLES) durables.push(`${reseau} : en échec ${echecs} passages d'affilée`);
     }
   }
-  const echecs = reseaux.filter(r => !r.ok);
-  return {
-    success: echecs.length === 0,
-    reseaux,
-    dry,
-    error: echecs.length > 0 ? echecs.map(e => `${e.reseau} : ${e.erreur}`).join(" ; ") : undefined,
-  };
+
+  if (!dry) {
+    await ecrireJson(CHEMIN_ETAT, etats).catch(err => console.warn(`${PREFIXE} état non écrit : ${message(err)}`));
+  }
+  const bilan = bilanFeedSync(reseaux, durables);
+  if (bilan.success && bilan.partiel) console.warn(`${PREFIXE} passage partiel : ${bilan.error}`);
+  return { ...bilan, reseaux, dry };
 }
 
 if (import.meta.main) {

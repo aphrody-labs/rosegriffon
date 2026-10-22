@@ -23,7 +23,7 @@ export const SOCIAL_LINKS = {
     discord: "https://discord.gg/achillea-competitif-inazuma-eleven-fr-1055585286320554055",
     twitch: "https://twitch.tv/Achillea_IE",
     x: "https://x.com/Achillea_IE",
-    youtube: "https://youtube.com/@Achillea_IE",
+    youtube: "https://www.youtube.com/@AchilleaRG",
   },
 } as const;
 

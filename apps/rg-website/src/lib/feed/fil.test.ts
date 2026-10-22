@@ -181,7 +181,9 @@ describe("filtres de comptes", () => {
   test("par réseau, groupe et compte", () => {
     expect(comptesDuFiltre({ reseau: "tiktok" }).map(c => c.pseudo)).toEqual(["rose_griffon"]);
     expect(comptesDuFiltre({ groupe: "LEVEL-5" }).map(c => c.reseau).sort()).toEqual(["x", "x", "youtube"]);
-    expect(comptesDuFiltre({ reseau: "youtube" })).toHaveLength(2);
+    // Rose Griffon TV, Achilléa (@AchilleaRG), LEVEL5ch.
+    expect(comptesDuFiltre({ reseau: "youtube" })).toHaveLength(3);
+    expect(comptesDuFiltre({ reseau: "youtube", groupe: "Rose Griffon" })).toHaveLength(2);
     expect(comptesDuFiltre({ compte: "AZALEE_IE" })).toHaveLength(1);
     expect(comptesDuFiltre({ reseau: "instagram", groupe: "LEVEL-5" })).toHaveLength(0);
   });
