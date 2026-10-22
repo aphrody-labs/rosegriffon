@@ -1,13 +1,13 @@
 ---
 title: "Plan des prochaines sessions"
-description: "État vérifié au 2026-10-17, procédures de déploiement et chantiers restants"
+description: "État vérifié au 2026-10-22, procédures de déploiement et chantiers restants"
 scope: ["ops", "agents"]
 status: "active"
 ---
 
 # Plan des prochaines sessions
 
-État vérifié le **2026-10-17 UTC**. Cette page complète [PROD-STATUS.md](PROD-STATUS.md) ; en cas de
+État vérifié le **2026-10-22 UTC** (Achilléa) et le 2026-10-17 (reste). Cette page complète [PROD-STATUS.md](PROD-STATUS.md) ; en cas de
 désaccord sur les ports, unités et routes, `aphrody-infra` fait foi.
 
 ## Règles de travail héritées de ces sessions
@@ -36,7 +36,7 @@ Scripts versionnés dans `scripts/deploy/vps/` (à copier dans `/home/ubuntu/bui
 | `lancer-build.sh` | `git reset --hard origin/main` dans `/home/ubuntu/build/rg/repo`, lève le verrou `.next/lock`, lance `run-build.sh` |
 | `run-build.sh` | charge `/etc/rg/rg.env` ligne par ligne (les valeurs contiennent `&` et des guillemets : `source` ne marche pas) puis `bun run build` |
 | `deploy.sh` | copie `.next/standalone` + `static` + `public` vers `apps/rg/current`, crée `.next/cache` (requis par l'unité), redémarre `rg-website`, supprime l'ancienne release |
-| `rebuild-core.sh` | compile `apps/rg-bot` (`bun run compile:core`), installe `/usr/local/bin/rg-core`, redémarre `rg-core` |
+| `rebuild-core.sh` | compile `apps/rg-bot` (`bun run compile:core`), installe `/usr/local/bin/rg-core`, redémarre `rg-core`. Lancer `bun install --frozen-lockfile` avant si une dépendance a changé ; garder l'ancien binaire en `rg-core.prev` |
 | `vnc-up.sh` | bureau virtuel Xvfb `:99` + openbox + `aphrody infra remote serve` (VNC 127.0.0.1:5900, viewer 8795) |
 
 Gates avant déploiement : `bun check apps/rg-website packages/rg-ui packages/rg-app-shell packages/rg-cron packages/rg-types`
@@ -52,8 +52,36 @@ et `bun test packages/rg-app-shell`. Un seul build lourd à la fois.
   navigateur du crawl (`PageWebView.goto`).
 - Base : tables OAuth Better Auth migrées en 1.7, colonne `profiles.game_avatar`, planification `rg:feed:sync`.
 
+### Achilléa (2026-10-22)
+
+- **Bot Discord legacy rétabli** : profil `achillea` (`RG_PROFIL_BOT=achillea`), enfant `bot-achillea` de
+  `rg-core`, jeton `ACHILLEA_DISCORD_BOT_TOKEN` (application `1427690638576582697`, AchilleaBot#1629, 56
+  serveurs). Admin loopback 127.0.0.1:3009. 15 commandes sur le serveur Achilléa (les 14 legacy +
+  `/achillea-admin`), 44 `custom_id` legacy servis. Les commandes appellent l'API AU NOM de l'auteur
+  (session signée 5 min) : mêmes droits que le site.
+- **API** : les 228 routes du client `@rosegriffon/achillea-client` répondent (sonde du 22/10, plus aucun 404
+  de route). `/admin/ops/*`, `/bot/*` (Bearer `API_ADMIN_TOKEN`), console base, `health/*`, `stats/*`,
+  sauvegardes `pg_dump` → `/home/ubuntu/backups/achillea` (écrit dans `ReadWritePaths` de l'unité).
+  Journal d'audit signé rétabli sur toutes les mutations staff (table en ajout seul ; `/admin/ops/audit/verify`).
+- **CLI** : `rosegriffon achillea list | <ressource>.<méthode> [args JSON] | raw <METHOD> <chemin>`,
+  `--as <discordId>` signe une session avec `JWT_SECRET_KEY`. Sur le VPS, charger `/etc/aphrody/rg-core.env`
+  puis `bun apps/rosegriffon/src/main.ts achillea … --api http://127.0.0.1:8810/api`.
+- **Cron** (en processus, `Bun.cron`) : `achillea:guildes` (6 h), `achillea:casts` (15 min), `achillea:clans`,
+  `achillea:sanctions`, `achillea:tournois-phases`, `achillea:interclans`, `achillea:votes`,
+  `achillea:classement-annonce`, `achillea:ranked-file`, `achillea:ranked-promotions`. Ne PAS les doubler
+  dans `pg_cron` (rg-core planifie déjà tout le catalogue).
+- **Images** : 62 images legacy rapatriées de l'ancien projet Supabase `yftdclwvehxxffwqvhmc` vers le bucket
+  `images` du projet courant (`scripts/achillea/migrer-images-legacy.ts`, rejouable).
+- **Migrations appliquées** : `20261022_achillea_data_valeur_texte.sql`, `20261022_achillea_clans_temps_reel.sql`.
+- **Back-office Next** : les 17 onglets du BO Angular sont portés (`/achillea/admins/dashboard`), visibilité par
+  rôle identique au legacy. ⚠ Côté site, ces changements ne sont **pas encore en ligne** : voir chantier 0.
+
 ## Chantiers restants (par priorité)
 
+0. **Build du site bloqué par Neon** : le projet Neon `inagle` (wiki, `INAGLE_DATABASE_URL`) a dépassé son quota de
+   calcul gratuit (≈63 h, remise à zéro le 2026-11-01) ; le pré-rendu de `/wiki/*` échoue (`53000 exceeded the
+   quota`) et aucun nouveau build de `rg-website` ne passe. La prod sert l'ancienne release. À trancher :
+   offre Neon payante, ou base Inagle déplacée (Supabase / Postgres local).
 1. **Crawl complet jamais prouvé** : zukan passe (5 456 personnages), mais aucun run n'est allé au bout sans
    être coupé. Relancer `crawl` seul, sans aucun redéploiement, et lire le bilan (`Cron Runner … crawl`).
    `reddit` répond 403 (étape non critique).
@@ -67,7 +95,11 @@ et `bun test packages/rg-app-shell`. Un seul build lourd à la fois.
 6. **Infra** : `azalee.` et `achillea.rosegriffon.fr` répondent 526 (Cloudflare) ; `/api/mode-tex` répond 404
    (`DATA_PATH/mode-tex` absent) ; SMTP 535 ; `credentials-calendar.json` absent ; `SUPABASE_SERVICE_ROLE_KEY` du
    VPS appartient à l'ancien projet ; canal Discord « graphisme / DA » à ajouter à la synchronisation.
-7. **Jetons de statut** : `success` / `warning` existent dans `rg-ui` ; `app/achillea/**` utilise encore des palettes brutes.
+7. **`feed:sync` échoue à chaque passage** depuis au moins le 2026-10-20 (TikTok 429, `Bun.Video` absent du Bun 1.4.5
+   du VPS, flux YouTube 404).
+8. **Disque racine du VPS** : saturé le 2026-10-22 (100 %) par `/var/lib/aphrody-games/games.img` (116 Go), les caches
+   Docker et un volume PostgreSQL de 3,1 Go laissé chaque jour par `shenron-offsite-backup` (corrigé : `docker rm -f -v`,
+   commit Shenron `80633b2b` non poussé). Nettoyé à 74 %.
 
 ## Streaming du jeu (Inazuma Eleven: Victory Road)
 
