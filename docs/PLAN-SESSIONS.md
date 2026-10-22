@@ -92,8 +92,16 @@ et `bun test packages/rg-app-shell`. Un seul build lourd à la fois.
    Chemins avec cookies codés (`FEED_INSTAGRAM_COOKIES`, `FEED_TIKTOK_COOKIES`) mais jamais exercés.
    Chaîne YouTube d'Achilléa : lien du site en 404, non listée.
 5. **Streaming du vrai jeu** : voir ci-dessous.
-6. **Infra** : `azalee.` et `achillea.rosegriffon.fr` répondent 526 (Cloudflare) ; `/api/mode-tex` répond 404
-   (`DATA_PATH/mode-tex` absent) ; SMTP 535 ; `credentials-calendar.json` absent ; `SUPABASE_SERVICE_ROLE_KEY` du
+6. **Infra** : 526 sur `azalee.` et `achillea.rosegriffon.fr` **résolu** (vérifié le 2026-10-22 : 301 via Cloudflare
+   en IPv4 et IPv6 ; certificats Let's Encrypt `certbot dns-cloudflare` émis le 2026-10-17 09:34 UTC, valides
+   jusqu'au 2027-01-15, servis par `/etc/nginx/conf.d/{achillea,azalee}.rosegriffon.fr.conf` = `infra/nginx/`).
+   `/api/mode-tex` : `DATA_PATH=/home/ubuntu/data` (`/etc/rg/rg.env`) ne contient ni `modes.json`, ni `mode-contenu/`,
+   ni `mode-tex/` (la route répond 503, `/wiki/mode` est vide). À produire sur le VPS avec `nie`
+   (`~/.local/bin/nie`, jeu dans `/games/SteamLibrary/steamapps/common/INAZUMA ELEVEN Victory Road`) :
+   `nie mode index --game-dir "$G"` puis `nie mode export -o $DATA_PATH/modes.json`, par mode
+   `nie mode contenu <slug> --game-dir "$G" -o $DATA_PATH/mode-contenu/<slug>.json`, et pour chaque `.g4tx` du mode
+   `nie convert <chemin VFS> --toutes --game-dir "$G" -o $DATA_PATH/mode-tex/<slug>/` (PNG `<fichier>__<texture>.png`) ;
+   SMTP 535 ; `credentials-calendar.json` absent ; `SUPABASE_SERVICE_ROLE_KEY` du
    VPS appartient à l'ancien projet ; canal Discord « graphisme / DA » à ajouter à la synchronisation.
 7. **`feed:sync` échoue à chaque passage** depuis au moins le 2026-10-20 (TikTok 429, `Bun.Video` absent du Bun 1.4.5
    du VPS, flux YouTube 404).
