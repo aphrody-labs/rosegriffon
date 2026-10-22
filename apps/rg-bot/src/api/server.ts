@@ -54,7 +54,12 @@ export const app = new Elysia()
       },
     }),
   )
-  .mount(elysiaAuth.handler)
+  // Better Auth sur SON préfixe (`basePath: "/v1/auth"`) et ses métadonnées `/.well-known`, pas
+  // à la racine : monté sur `/`, il recevait toute URL inconnue et interrogeait la base pour
+  // répondre — 500 au lieu de 404 dès que Postgres manquait. Les routes explicites de
+  // `authController` (`/v1/auth/realtime-token`, `/v1/auth/logout`…) restent prioritaires.
+  .all("/v1/auth/*", ({ request }) => elysiaAuth.handler(request), { parse: "none" })
+  .all("/.well-known/*", ({ request }) => elysiaAuth.handler(request), { parse: "none" })
   .get("/.well-known/agent-configuration", ({ request }) =>
     (
       elysiaAuth.api as unknown as {

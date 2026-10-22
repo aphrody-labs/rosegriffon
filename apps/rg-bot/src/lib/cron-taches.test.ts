@@ -21,8 +21,17 @@ import {
 } from "./cron-taches";
 
 describe("catalogue", () => {
-  test("les 26 tâches servies par GET :3005/tasks", () => {
-    expect(TACHES_CRON).toHaveLength(26);
+  // Un nombre figé (« 26 tâches ») cassait à chaque tâche ajoutée sans rien
+  // prouver : l'invariante utile est que le catalogue du bot et le registre
+  // d'exécution désignent exactement les mêmes tâches.
+  test("le catalogue du bot est exactement le registre d'exécution", async () => {
+    const { REGISTRE_TACHES } = await import("@rosegriffon/cron");
+    expect([...TACHES_CRON].toSorted() as string[]).toEqual(Object.keys(REGISTRE_TACHES).toSorted());
+    expect(new Set(TACHES_CRON).size).toBe(TACHES_CRON.length);
+  });
+
+  test("les tâches historiques sont toujours servies", () => {
+    expect(TACHES_CRON).toContain("achillea:guildes");
     expect(TACHES_CRON).toContain("db");
     expect(TACHES_CRON).toContain("stats:achillea");
     expect(TACHES_CRON).toContain("achillea:weekly-payout");
@@ -136,7 +145,13 @@ describe("suggererTaches", () => {
     for (const interdite of TACHES_INTERDITES) {
       expect(proposees).not.toContain(interdite);
     }
-    expect(proposees).toHaveLength(TACHES_CRON.length - TACHES_INTERDITES.length);
+    // Discord n'affiche que 25 choix d'autocomplétion : la liste est bornée.
+    expect(proposees).toHaveLength(Math.min(25, TACHES_CRON.length - TACHES_INTERDITES.length));
+  });
+
+  test("une tâche au-delà des 25 premières reste atteignable en tapant son nom", () => {
+    expect(suggererTaches("achillea:g")).toEqual(["achillea:guildes"]);
+    expect(suggererTaches("x-sea")).toEqual(["x-search"]);
   });
 
   test("plafonne à 25, la limite de Discord", () => {

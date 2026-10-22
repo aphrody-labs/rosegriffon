@@ -464,14 +464,41 @@ export interface EntreeApercu {
   ext: string;
 }
 
+/** Origine du CDN quand `NIE_CDN_BASE` n'est pas posé. */
+const ORIGINE_CDN = "https://cdn.rosegriffon.fr";
+
+/**
+ * Rend une URL du CDN absolue.
+ *
+ * Les fabricants partagés préfixent par `NIE_CDN_BASE`, vide par défaut : sur le
+ * site, `/video/…` est servi par le même hôte et marche. Dans un embed Discord, un
+ * lien relatif ne mène nulle part — c'est ce que les aperçus CPK du bot
+ * publiaient. On ne réécrit que l'ORIGINE, jamais le chemin.
+ */
+export function urlCdnAbsolue(url: string, env: Record<string, string | undefined> = Bun.env): string {
+  if (!url.startsWith("/")) return url;
+  const origine = (env.NIE_CDN_BASE || env.MODEL_SERVE_URL || ORIGINE_CDN).replace(/\/+$/, "");
+  return `${origine}${url}`;
+}
+
 /**
  * Décide de l'aperçu d'un fichier.
  *
  * Les URL viennent des fabricants de `@rosegriffon/azalee/cpk/shared` : le bot
  * ne réécrit aucun chemin CDN, sinon il finirait par montrer autre chose que le
- * wiki.
+ * wiki. Seule l'origine est complétée (`urlCdnAbsolue`).
  */
 export function apercuCpk(entree: EntreeApercu): ApercuCpk {
+  const apercu = apercuCpkRelatif(entree);
+  return {
+    ...apercu,
+    brut: urlCdnAbsolue(apercu.brut),
+    contenu: urlCdnAbsolue(apercu.contenu),
+    image: apercu.image === null ? null : urlCdnAbsolue(apercu.image),
+  };
+}
+
+function apercuCpkRelatif(entree: EntreeApercu): ApercuCpk {
   const famille = cpkPreviewKind(entree.ext);
   const brut = cpkRawUrl(entree.path);
   const base: Omit<ApercuCpk, "contenu" | "image"> = {
