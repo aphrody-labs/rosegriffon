@@ -394,6 +394,57 @@ describe("modules de commandes", () => {
     expect(communs).toEqual([]);
   });
 
+  test("achillea : modules propres, et aucune racine en commun avec azalee", async () => {
+    // Le bot Azalée publie GLOBALEMENT : ses commandes apparaissent aussi sur le
+    // serveur Achilléa. Une racine commune y serait indiscernable pour le joueur.
+    const autres = new Set<string>([...PROFILS.rg.modules, ...PROFILS.azalee.modules]);
+    expect(PROFILS.achillea.modules.filter(chemin => autres.has(chemin))).toEqual([]);
+
+    const [achillea, azalee] = await Promise.all([commandesDuProfil("achillea"), commandesDuProfil("azalee")]);
+    // Les quatorze racines de l'ancien bot, plus le groupe d'administration.
+    for (const racine of [
+      "player",
+      "interclan",
+      "guild",
+      "clan",
+      "website",
+      "blacklist",
+      "player-card",
+      "ping",
+      "report",
+      "report-tournois",
+      "create-clan",
+      "owner",
+      "ranked-admin",
+      "sanction",
+      "achillea-admin",
+    ]) {
+      expect(`${racine}:${achillea.has(racine)}`).toBe(`${racine}:true`);
+    }
+    expect([...achillea].filter(commande => azalee.has(commande)).toSorted()).toEqual([]);
+  });
+
+  test("le groupe /clan est déclaré AVANT les modules qui l'étendent", () => {
+    const ordre = PROFILS.achillea.modules as readonly string[];
+    const declaration = ordre.indexOf("commands/achillea-bot/clan.ts");
+    expect(declaration).toBeGreaterThanOrEqual(0);
+    expect(ordre.indexOf("commands/achillea-bot/clan-gestion.ts")).toBeGreaterThan(declaration);
+    expect(ordre.indexOf("commands/achillea-bot/clan-equipes.ts")).toBeGreaterThan(declaration);
+  });
+
+  test("chaque module de profil a son chargeur statique (compilation --compile)", async () => {
+    // Sans entrée dans `MODULE_LOADERS`, `index.ts` retombe sur un `import()`
+    // calculé que `bun build --compile` ne peut pas résoudre : le module manque
+    // au binaire et le bot meurt au démarrage, en production seulement.
+    const { MODULE_LOADERS } = await import("../modules");
+    const manquants = NOMS_PROFILS.flatMap(nom => [...PROFILS[nom].modules]).filter(chemin => !(chemin in MODULE_LOADERS));
+    expect(manquants).toEqual([]);
+  });
+
+  test("achillea demande les états vocaux pour l'alerte du vocal d'aide ranked", () => {
+    expect(PROFILS.achillea.intents).toContain(GatewayIntentBits.GuildVoiceStates);
+  });
+
   test("les deux profils ne se disputent AUCUN nom de commande", async () => {
     const [rg, azalee] = await Promise.all([commandesDuProfil("rg"), commandesDuProfil("azalee")]);
 

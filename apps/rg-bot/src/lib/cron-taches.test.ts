@@ -21,8 +21,22 @@ import {
 } from "./cron-taches";
 
 describe("catalogue", () => {
-  test("les 26 tâches servies par GET :3005/tasks", () => {
-    expect(TACHES_CRON).toHaveLength(26);
+  test("les 37 tâches servies par GET :3005/tasks", () => {
+    expect(TACHES_CRON).toHaveLength(37);
+    // Les travaux de l'ancien bot Achilléa (BullMQ, `@Schedule`, intégrations ranked), portés le 22/10/2026.
+    for (const tache of [
+      "achillea:sanctions",
+      "achillea:clans-effectif",
+      "achillea:casts-rappels",
+      "achillea:tournois-phases",
+      "achillea:interclans",
+      "achillea:votes",
+      "achillea:classement-annonce",
+      "achillea:ranked-file",
+      "achillea:ranked-promotions",
+    ]) {
+      expect(TACHES_CRON as readonly string[]).toContain(tache);
+    }
     expect(TACHES_CRON).toContain("db");
     expect(TACHES_CRON).toContain("stats:achillea");
     expect(TACHES_CRON).toContain("achillea:weekly-payout");
@@ -136,7 +150,8 @@ describe("suggererTaches", () => {
     for (const interdite of TACHES_INTERDITES) {
       expect(proposees).not.toContain(interdite);
     }
-    expect(proposees).toHaveLength(TACHES_CRON.length - TACHES_INTERDITES.length);
+    // Plafonnée à 25 par Discord : au-delà, l'autocomplétion se resserre en tapant.
+    expect(proposees).toHaveLength(Math.min(25, TACHES_CRON.length - TACHES_INTERDITES.length));
   });
 
   test("plafonne à 25, la limite de Discord", () => {

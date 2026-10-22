@@ -61,6 +61,26 @@ export const MODULE_LOADERS: Record<string, () => Promise<unknown>> = {
   "commands/collection.ts": () => import("./commands/collection"),
   "commands/ticket.ts": () => import("./commands/ticket"),
 
+  // Profil Achilléa (`clan.ts` déclare le groupe `/clan` : il précède ses extensions)
+  "commands/achillea-bot/clan.ts": () => import("./commands/achillea-bot/clan"),
+  "commands/achillea-bot/clan-gestion.ts": () => import("./commands/achillea-bot/clan-gestion"),
+  "commands/achillea-bot/clan-equipes.ts": () => import("./commands/achillea-bot/clan-equipes"),
+  "commands/achillea-bot/create-clan.ts": () => import("./commands/achillea-bot/create-clan"),
+  "commands/achillea-bot/composants-clan.ts": () => import("./commands/achillea-bot/composants-clan"),
+  "commands/achillea-bot/interclan.ts": () => import("./commands/achillea-bot/interclan"),
+  "commands/achillea-bot/composants-interclan.ts": () => import("./commands/achillea-bot/composants-interclan"),
+  "commands/achillea-bot/guild.ts": () => import("./commands/achillea-bot/guild"),
+  "commands/achillea-bot/joueur.ts": () => import("./commands/achillea-bot/joueur"),
+  "commands/achillea-bot/report.ts": () => import("./commands/achillea-bot/report"),
+  "commands/achillea-bot/sanction.ts": () => import("./commands/achillea-bot/sanction"),
+  "commands/achillea-bot/ranked-admin.ts": () => import("./commands/achillea-bot/ranked-admin"),
+  "commands/achillea-bot/owner.ts": () => import("./commands/achillea-bot/owner"),
+  "commands/achillea-bot/general.ts": () => import("./commands/achillea-bot/general"),
+  "commands/achillea-bot/matchmaker.ts": () => import("./commands/achillea-bot/matchmaker"),
+  "commands/achillea-bot/admin.ts": () => import("./commands/achillea-bot/admin"),
+  "events/achillea/serveurs.ts": () => import("./events/achillea/serveurs"),
+  "events/achillea/aide-ranked.ts": () => import("./events/achillea/aide-ranked"),
+
   // Événements RG
   "events/ready.ts": () => import("./events/ready"),
   "events/memberEvents.ts": () => import("./events/memberEvents"),
