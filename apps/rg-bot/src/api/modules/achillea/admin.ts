@@ -1,17 +1,7 @@
 import { Elysia, status, t } from "elysia";
 import { sql as kyselySql } from "kysely";
-import type { Kysely } from "kysely";
-import type { Database } from "@rosegriffon/db/schema";
 import { dbPlugin } from "../../plugins/db";
-import { resolveAchilleaSession } from "../auth/session";
-
-async function staff(db: Kysely<Database>, headers: { authorization?: string; cookie?: string }, minimumRole = 2) {
-  const session = await resolveAchilleaSession(headers);
-  if (!session) return { error: status(401, { message: "Authentication required" as const }) };
-  const actor = await db.selectFrom("user").select(["id", "role"]).where("id", "=", session.id).executeTakeFirst();
-  if (!actor || actor.role < minimumRole) return { error: status(403, { message: "Staff role required" as const }) };
-  return { session, actor };
-}
+import { staff } from "./staff";
 
 export const adminController = new Elysia({ prefix: "/admin" })
   .use(dbPlugin)

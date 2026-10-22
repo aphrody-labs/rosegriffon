@@ -41,8 +41,6 @@ import {
   RefreshCw,
   Loader2,
   CheckCircle2,
-  XCircle,
-  AlertTriangle,
   ExternalLink,
   ShieldCheck,
   ArrowRight,
@@ -52,10 +50,60 @@ import {
   Plus,
   Play,
   RotateCcw,
-  Power,
 } from "lucide-react";
 
-type AdminTab = "overview" | "disputes" | "seasons" | "sanctions" | "notes" | "users" | "wallets" | "bot";
+import { groupesVisibles, libelleRole, ongletsVisibles, type AdminTab } from "./_tabs/visibilite";
+import { AuditTab } from "./_tabs/audit-tab";
+import { BotHealthTab } from "./_tabs/bot-health-tab";
+import { CastsTab } from "./_tabs/casts-tab";
+import { ClansTab } from "./_tabs/clans-tab";
+import { DatabaseTab } from "./_tabs/database-tab";
+import { GuildsTab } from "./_tabs/guilds-tab";
+import { LeaguesTab } from "./_tabs/leagues-tab";
+import { LicensesTab } from "./_tabs/licenses-tab";
+import { RankedActiveTab } from "./_tabs/ranked-active-tab";
+import { RankedTelemetryTab } from "./_tabs/ranked-telemetry-tab";
+
+import {
+  Activity,
+  Database,
+  History,
+  IdCard,
+  MessagesSquare,
+  Shield,
+  Star,
+  Video,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
+
+const ICONES_ONGLETS: Record<AdminTab, LucideIcon> = {
+  overview: LayoutDashboard,
+  "bot-health": Server,
+  guilds: MessagesSquare,
+  database: Database,
+  audit: History,
+  users: Users,
+  clans: Shield,
+  leagues: Star,
+  casts: Video,
+  "ranked-active": Zap,
+  disputes: Gavel,
+  seasons: Calendar,
+  "ranked-telemetry": Activity,
+  wallets: Wallet,
+  sanctions: ShieldAlert,
+  notes: MessageSquare,
+  licenses: IdCard,
+};
+
+/*
+ * Ce fichier est le ROUTEUR d'onglets du back-office : en-tête, navigation
+ * groupée (Ops / Communauté / Ranked / Économie & modération, comme l'ancien
+ * `admin-dashboard.ts`) et rendu de l'onglet actif. Les onglets portés après
+ * la migration vivent chacun dans `_tabs/` ; la visibilité par rôle est dans
+ * `_tabs/visibilite.ts`, testée à part.
+ */
 
 /**
  * Met en forme une durée de fonctionnement.
@@ -113,9 +161,6 @@ export default function AchilleaAdminDashboardPage() {
   const [sanctionsLoading, setSanctionsLoading] = useState(false);
   const [sanctionsList, setSanctionsList] = useState<Sanction[]>([]);
   const [revokingSanctionId, setRevokingSanctionId] = useState<string | null>(null);
-
-  // Bot maintenance state
-  const [togglingMaintenance, setTogglingMaintenance] = useState(false);
 
   const client = createAchilleaClient({ credentials: "include" });
 
@@ -278,36 +323,6 @@ export default function AchilleaAdminDashboardPage() {
     }
   };
 
-  const handleToggleMaintenance = async () => {
-    if (!ops?.bot) return;
-    const nextState = !ops.bot.maintenance;
-    if (
-      !confirm(
-        nextState
-          ? "Activer le mode maintenance ? L'accès joueur sera temporairement verrouillé."
-          : "Désactiver le mode maintenance et rouvrir les accès ?",
-      )
-    ) {
-      return;
-    }
-    setTogglingMaintenance(true);
-    try {
-      const res = await client.admin.setMaintenance(nextState);
-      if (res.ok) {
-        setOps(prev =>
-          prev
-            ? {
-                ...prev,
-                bot: prev.bot ? { ...prev.bot, maintenance: nextState } : undefined,
-              }
-            : null,
-        );
-      }
-    } finally {
-      setTogglingMaintenance(false);
-    }
-  };
-
   useEffect(() => {
     if (isAuthenticated) {
       void loadData();
@@ -366,6 +381,11 @@ export default function AchilleaAdminDashboardPage() {
     );
   }
 
+  const role = user?.role ?? 0;
+  const visibles = ongletsVisibles(role);
+  // Un onglet masqué pour ce rôle ne s'affiche jamais, même s'il était actif.
+  const ongletActif: AdminTab = visibles.includes(activeTab) ? activeTab : (visibles[0] ?? "overview");
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
       {/* En-tête avec raccourci vers l'admin global Rose Griffon */}
@@ -377,7 +397,7 @@ export default function AchilleaAdminDashboardPage() {
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Achilléa Backoffice</h1>
             <Badge variant="outline" className="border-primary/40 text-primary text-xs">
-              {user?.role && user.role >= 3 ? "Super-Admin" : user?.role && user.role >= 2 ? "Admin" : "Modérateur"}
+              {libelleRole(user?.role)}
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -420,96 +440,43 @@ export default function AchilleaAdminDashboardPage() {
         </p>
       )}
 
-      {/* Navigation par Onglets */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-border/60 pb-3">
-        <Button
-          variant={activeTab === "overview" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("overview")}
-          className="gap-2 text-xs"
-        >
-          <LayoutDashboard className="size-3.5" />
-          Vue d&apos;ensemble
-        </Button>
-
-        <Button
-          variant={activeTab === "disputes" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("disputes")}
-          className="gap-2 text-xs relative"
-        >
-          <Gavel className="size-3.5" />
-          Litiges Ranked
-          {disputes.length > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full text-xs bg-rose-500 text-white font-bold">
-              {disputes.length}
+      {/* Navigation par onglets, groupée et filtrée par rôle (`_tabs/visibilite.ts`) */}
+      <nav aria-label="Onglets du back-office" className="space-y-3 border-b border-border/60 pb-3">
+        {groupesVisibles(role).map(groupe => (
+          <div key={groupe.titre} className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+            <span className="w-40 shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {groupe.titre}
             </span>
-          )}
-        </Button>
-
-        <Button
-          variant={activeTab === "sanctions" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("sanctions")}
-          className="gap-2 text-xs"
-        >
-          <ShieldAlert className="size-3.5" />
-          Sanctions
-        </Button>
-
-        <Button
-          variant={activeTab === "notes" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("notes")}
-          className="gap-2 text-xs"
-        >
-          <MessageSquare className="size-3.5" />
-          Signalements
-        </Button>
-
-        <Button
-          variant={activeTab === "seasons" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("seasons")}
-          className="gap-2 text-xs"
-        >
-          <Calendar className="size-3.5" />
-          Saisons Ranked
-        </Button>
-
-        <Button
-          variant={activeTab === "users" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("users")}
-          className="gap-2 text-xs"
-        >
-          <Users className="size-3.5" />
-          Utilisateurs & Staff
-        </Button>
-
-        <Button
-          variant={activeTab === "wallets" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("wallets")}
-          className="gap-2 text-xs"
-        >
-          <Wallet className="size-3.5" />
-          Portefeuilles ACH
-        </Button>
-
-        <Button
-          variant={activeTab === "bot" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("bot")}
-          className="gap-2 text-xs"
-        >
-          <Server className="size-3.5" />
-          Santé Bot & API
-        </Button>
-      </div>
+            <div className="flex flex-wrap gap-1.5">
+              {groupe.onglets.map(onglet => {
+                const Icone = ICONES_ONGLETS[onglet.id];
+                const actif = ongletActif === onglet.id;
+                return (
+                  <Button
+                    key={onglet.id}
+                    variant={actif ? "default" : "ghost"}
+                    onClick={() => setActiveTab(onglet.id)}
+                    className="min-h-11 gap-2 text-xs"
+                    aria-current={actif ? "page" : undefined}
+                    title={onglet.description}
+                  >
+                    <Icone className="size-4" aria-hidden="true" />
+                    {onglet.libelle}
+                    {onglet.id === "disputes" && disputes.length > 0 && (
+                      <Badge variant="destructive" aria-label={`${disputes.length} litiges ouverts`}>
+                        {disputes.length}
+                      </Badge>
+                    )}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
 
       {/* CONTENU ONGLET: VUE D'ENSEMBLE */}
-      {activeTab === "overview" && (
+      {ongletActif === "overview" && (
         <div className="space-y-6">
           {/* KPIs Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -663,7 +630,7 @@ export default function AchilleaAdminDashboardPage() {
       )}
 
       {/* CONTENU ONGLET: LITIGES */}
-      {activeTab === "disputes" && (
+      {ongletActif === "disputes" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Litiges de Matchs Classés</h2>
@@ -717,7 +684,7 @@ export default function AchilleaAdminDashboardPage() {
       )}
 
       {/* CONTENU ONGLET: SANCTIONS */}
-      {activeTab === "sanctions" && (
+      {ongletActif === "sanctions" && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -814,10 +781,10 @@ export default function AchilleaAdminDashboardPage() {
       )}
 
       {/* CONTENU ONGLET: SIGNALEMENTS & NOTES STAFF */}
-      {activeTab === "notes" && <PlayerNotesPanel title="Registre global des signalements staff" />}
+      {ongletActif === "notes" && <PlayerNotesPanel title="Registre global des signalements staff" />}
 
       {/* CONTENU ONGLET: SAISONS */}
-      {activeTab === "seasons" && (
+      {ongletActif === "seasons" && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -924,7 +891,7 @@ export default function AchilleaAdminDashboardPage() {
       )}
 
       {/* CONTENU ONGLET: UTILISATEURS */}
-      {activeTab === "users" && (
+      {ongletActif === "users" && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -1078,7 +1045,7 @@ export default function AchilleaAdminDashboardPage() {
       )}
 
       {/* CONTENU ONGLET: PORTEFEUILLES */}
-      {activeTab === "wallets" && (
+      {ongletActif === "wallets" && (
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -1202,104 +1169,17 @@ export default function AchilleaAdminDashboardPage() {
         </div>
       )}
 
-      {/* CONTENU ONGLET: BOT & API */}
-      {activeTab === "bot" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Statut de l&apos;Infrastructure</h2>
-            <Button
-              variant={ops?.bot?.maintenance ? "destructive" : "outline"}
-              size="sm"
-              onClick={handleToggleMaintenance}
-              disabled={togglingMaintenance || !ops?.bot}
-              className="text-xs gap-1.5"
-            >
-              <Power className="size-3.5" />
-              {ops?.bot?.maintenance ? "Désactiver la maintenance" : "Passer en maintenance"}
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="border-border/60 bg-card/40">
-              <CardHeader className="p-5 pb-2">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Server className="size-4 text-emerald-400" />
-                  API Achilléa & Base de Données
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-5 pt-2 text-xs space-y-2">
-                <div className="flex justify-between py-1 border-b border-border/40">
-                  <span className="text-muted-foreground">Statut API</span>
-                  {ops ? (
-                    <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="size-3" /> Opérationnel
-                    </span>
-                  ) : (
-                    <span className="text-destructive font-semibold flex items-center gap-1">
-                      <XCircle className="size-3" /> Injoignable
-                    </span>
-                  )}
-                </div>
-                <div className="flex justify-between py-1 border-b border-border/40">
-                  <span className="text-muted-foreground">Dernière mesure</span>
-                  <span className="font-mono text-xs">
-                    {ops?.generatedAt ? new Date(ops.generatedAt).toLocaleTimeString("fr-FR") : "—"}
-                  </span>
-                </div>
-                <div className="flex justify-between py-1">
-                  <span className="text-muted-foreground">Mode maintenance</span>
-                  {!ops?.bot ? (
-                    <span className="text-muted-foreground">Non mesuré</span>
-                  ) : ops.bot.maintenance ? (
-                    <span className="text-amber-400 font-semibold flex items-center gap-1">
-                      <AlertTriangle className="size-3" /> Actif
-                    </span>
-                  ) : (
-                    <span className="font-semibold">Inactif</span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/60 bg-card/40">
-              <CardHeader className="p-5 pb-2">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Server className="size-4 text-primary" />
-                  Bot Discord Achilléa
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-5 pt-2 text-xs space-y-2">
-                <div className="flex justify-between py-1 border-b border-border/40">
-                  <span className="text-muted-foreground">Gateway Discord</span>
-                  {!ops?.bot ? (
-                    <span className="text-muted-foreground">Non mesuré</span>
-                  ) : ops.bot.online ? (
-                    <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="size-3" /> Connecté
-                    </span>
-                  ) : (
-                    <span className="text-destructive font-semibold flex items-center gap-1">
-                      <XCircle className="size-3" /> Déconnecté
-                    </span>
-                  )}
-                </div>
-                <div className="flex justify-between py-1 border-b border-border/40">
-                  <span className="text-muted-foreground">Temps de fonctionnement</span>
-                  <span className="font-mono font-semibold">
-                    {typeof ops?.bot?.uptime === "number" ? formaterDuree(ops.bot.uptime) : "—"}
-                  </span>
-                </div>
-                <div className="flex justify-between py-1">
-                  <span className="text-muted-foreground">Serveurs surveillés</span>
-                  <span className="font-mono font-semibold">
-                    {typeof ops?.bot?.guilds === "number" ? ops.bot.guilds : "—"}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
+      {/* ONGLETS EXTRAITS (`_tabs/`) — l'ancien onglet « Santé Bot & API » est fusionné dans « Bot & santé » */}
+      {ongletActif === "bot-health" && <BotHealthTab />}
+      {ongletActif === "guilds" && <GuildsTab />}
+      {ongletActif === "database" && <DatabaseTab />}
+      {ongletActif === "audit" && <AuditTab />}
+      {ongletActif === "clans" && <ClansTab role={role} />}
+      {ongletActif === "casts" && <CastsTab />}
+      {ongletActif === "leagues" && <LeaguesTab />}
+      {ongletActif === "licenses" && <LicensesTab />}
+      {ongletActif === "ranked-active" && <RankedActiveTab />}
+      {ongletActif === "ranked-telemetry" && <RankedTelemetryTab />}
 
       {/* Modal Modification Rôle Utilisateur */}
       <Dialog open={roleModalOpen} onOpenChange={setRoleModalOpen}>

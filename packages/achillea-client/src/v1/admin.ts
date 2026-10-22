@@ -146,6 +146,15 @@ export const adminAuditRowSchema = z.object({
   reason: z.string().nullable(),
 }) satisfies z.ZodType<AdminAuditRow>;
 
+/** Résultat de la relecture de la chaîne d'audit : `broken_at` = première entrée altérée. */
+export const auditChainVerificationSchema = z.object({
+  valid: z.boolean(),
+  broken_at: z.string().nullable(),
+  total: z.number(),
+});
+
+export type AuditChainVerification = z.infer<typeof auditChainVerificationSchema>;
+
 export const adminMetricsSummarySchema = z.object({
   counters: z.record(z.string(), z.number()),
   rawLines: z.number(),
@@ -271,7 +280,7 @@ export type DbRowsQuery = {
 export const MODERATION_SIGNATURE_HEADER = "x-achillea-signature" as const;
 export const MODERATION_TIMESTAMP_HEADER = "x-achillea-timestamp" as const;
 
-/** 49 routes (13 ops, 7 base de données, 13 bot, 9 santé et métriques, 4 sauvegardes, 3 divers). */
+/** 50 routes (14 ops, 7 base de données, 13 bot, 9 santé et métriques, 4 sauvegardes, 3 divers). */
 export class AdminResource extends AchilleaResource {
   // ── /admin/ops ────────────────────────────────────────────────────────────
 
@@ -324,6 +333,11 @@ export class AdminResource extends AchilleaResource {
   /** `GET /admin/ops/audit` — dernières entrées du journal d'audit (Admin+). */
   audit(limit?: number): Promise<AchilleaClientResult<{ data: AdminAuditRow[] }>> {
     return this.http.get("/admin/ops/audit", z.object({ data: z.array(adminAuditRowSchema) }), { query: { limit } });
+  }
+
+  /** `GET /admin/ops/audit/verify` — relit la chaîne signée du journal (SuperAdmin). */
+  verifyAudit(): Promise<AchilleaClientResult<AuditChainVerification>> {
+    return this.http.get("/admin/ops/audit/verify", auditChainVerificationSchema);
   }
 
   /** `GET /admin/ops/metrics-summary` — compteurs Prometheus agrégés en JSON. */

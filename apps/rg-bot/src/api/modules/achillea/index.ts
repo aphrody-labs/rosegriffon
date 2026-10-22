@@ -16,6 +16,11 @@ import { notificationsController } from "./notifications";
 import { rankedController } from "./ranked";
 import { guildsController } from "./guilds";
 import { botController, opsController } from "./ops";
+import { adminDbController } from "./admin-db";
+import { healthController } from "./health";
+import { statsController } from "./stats";
+import { databaseController } from "./database";
+import { verificationAuditController } from "./audit-verify";
 
 export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(tournamentController)
@@ -35,4 +40,9 @@ export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(sanctionController)
   .use(adminController)
   .use(playerNotesController)
-  .use(notificationsController);
+  .use(notificationsController)
+  .use(adminDbController)
+  .use(healthController)
+  .use(statsController)
+  .use(databaseController)
+  .use(verificationAuditController);

@@ -99,6 +99,8 @@ export interface UpdateClanPayload {
   autoAcceptMembers?: boolean;
   languages?: string[];
   origin?: string;
+  /** Bascule « clan inactif » — l'API ne l'accepte que d'un administrateur Achilléa. */
+  isInactive?: boolean;
 }
 
 /**

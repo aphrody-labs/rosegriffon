@@ -16,20 +16,21 @@ import { verifyAdminBearerToken } from "@rosegriffon/achillea-core";
 import type { CommandeBot, EtatBot, GuildeBot } from "@rosegriffon/types/bot";
 
 import { dbPlugin } from "../../plugins/db";
-import { resolveAchilleaSession } from "../auth/session";
 import { appelerBotAchillea, BotAchilleaInjoignable } from "../../../lib/achillea-discord";
 import { journaliserAudit } from "./audit";
+import { ROLE_STAFF, staff, type EnTetesAuth } from "./staff";
 
-/** Rôles de `achillea."user".role` (enum `UserRole` d'achillea-types). */
-export const ROLE = { moderateur: 1, administrateur: 2, superAdministrateur: 3 } as const;
+/** Rôles de `achillea."user".role`, noms courts pour ce module. */
+const ROLE = {
+  moderateur: ROLE_STAFF.Moderateur,
+  administrateur: ROLE_STAFF.Administrateur,
+  superAdministrateur: ROLE_STAFF.SuperAdministrateur,
+} as const;
 
-/** Session staff : 401 sans session, 403 sous le rôle requis. */
-async function exigerStaff(db: Kysely<Database>, headers: { authorization?: string; cookie?: string }, minimum: number) {
-  const session = await resolveAchilleaSession(headers);
-  if (!session) return { erreur: status(401, { message: "Authentication required" as const }) };
-  const acteur = await db.selectFrom("user").select(["id", "role"]).where("id", "=", session.id).executeTakeFirst();
-  if (!acteur || acteur.role < minimum) return { erreur: status(403, { message: "Staff role required" as const }) };
-  return { acteur };
+/** Garde staff partagée (`staff.ts`) : 401 sans session, 403 sous le rôle requis. */
+async function exigerStaff(db: Kysely<Database>, headers: EnTetesAuth, minimum: number) {
+  const garde = await staff(db, headers, minimum);
+  return "error" in garde && garde.error ? { erreur: garde.error } : { acteur: garde.actor! };
 }
 
 /** Traduit l'échec d'un appel au bot en statut HTTP explicite. */
