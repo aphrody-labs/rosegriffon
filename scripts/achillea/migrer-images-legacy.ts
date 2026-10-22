@@ -39,6 +39,11 @@ export function nomObjet(url: string): string | null {
   return nom;
 }
 
+/** URL morte d'un nom d'objet (inverse de `nomObjet`). */
+export function urlMorte(nom: string): string {
+  return PREFIXE_MORT + nom.split("/").map(encodeURIComponent).join("/");
+}
+
 /** URL publique du même objet dans le projet courant. */
 export function urlCible(supabaseUrl: string, nom: string): string {
   const chemin = nom.split("/").map(encodeURIComponent).join("/");
@@ -82,12 +87,45 @@ async function tailleCible(ctx: Contexte, nom: string): Promise<number | null> {
   return Number(reponse.headers.get("content-length") ?? "-1");
 }
 
-async function migrerObjet(ctx: Contexte, nom: string): Promise<"copie" | "deja" | "simule"> {
-  const source = await fetch(ORIGINE_SOURCE + nom.split("/").map(encodeURIComponent).join("/"));
+/** Plafond du bucket `images` (`storage.buckets.file_size_limit`, aussi celui de l'upload de l'API). */
+export const TAILLE_MAX_OBJET = 6 * 1024 * 1024;
+
+/** Nom de l'objet réencodé en WebP (même base, extension remplacée). */
+export function nomWebp(nom: string): string {
+  return `${nom.replace(/\.[^./]+$/, "")}.webp`;
+}
+
+/**
+ * Réencode une image trop lourde pour le bucket : WebP, 2048 px au plus sur le grand
+ * côté, qualité décroissante jusqu'à passer sous le plafond.
+ */
+export async function reduireImage(octets: Uint8Array): Promise<Uint8Array> {
+  for (const qualite of [85, 75, 60]) {
+    const sortie = await new Bun.Image(octets)
+      .resize(2048, 2048, { fit: "inside", withoutEnlargement: true })
+      .webp({ quality: qualite })
+      .bytes();
+    if (sortie.byteLength <= TAILLE_MAX_OBJET) return sortie;
+  }
+  throw new Error("image encore trop lourde après réencodage WebP");
+}
+
+/** Objets déposés sous un autre nom que la source (réencodés), pour la réécriture des URL. */
+const renommes = new Map<string, string>();
+
+async function migrerObjet(ctx: Contexte, nomSource: string): Promise<"copie" | "deja" | "simule"> {
+  const source = await fetch(ORIGINE_SOURCE + nomSource.split("/").map(encodeURIComponent).join("/"));
   if (!source.ok) throw new Error(`source ${source.status}`);
-  const octets = new Uint8Array(await source.arrayBuffer());
-  const mime = typeImage(octets);
+  let octets: Uint8Array = new Uint8Array(await source.arrayBuffer());
+  let mime = typeImage(octets);
   if (!mime) throw new Error("contenu qui n'est pas une image (magic bytes)");
+  let nom = nomSource;
+  if (octets.byteLength > TAILLE_MAX_OBJET) {
+    octets = await reduireImage(octets);
+    mime = "image/webp";
+    nom = nomWebp(nomSource);
+    renommes.set(nomSource, nom);
+  }
 
   const existante = await tailleCible(ctx, nom);
   if (existante === octets.byteLength) return "deja";
@@ -119,6 +157,14 @@ async function reecrireUrls(ctx: Contexte, noms: Map<string, string>): Promise<R
   return ctx.sql.begin(async tx => {
     // Les tables d'Achilléa portent la RLS de leur ancienne base (cf. `tasks/achillea-sync.ts`).
     await tx`SET LOCAL ROLE service_role`;
+    // Objets réencodés : leur nom a changé, l'URL est remplacée en entier avant le préfixe.
+    for (const [nomSource, nomCible] of renommes) {
+      const avant = urlMorte(nomSource);
+      const apres = urlCible(ctx.supabaseUrl, nomCible);
+      await tx`UPDATE achillea.clan SET clan_avatar_url = ${apres}, updated_at = now() WHERE clan_avatar_url = ${avant}`;
+      await tx`UPDATE achillea.image SET url = ${apres} WHERE url = ${avant}`;
+      await tx`UPDATE achillea.lobby_user SET screenshot_url = ${apres} WHERE screenshot_url = ${avant}`;
+    }
     const clans = await tx`UPDATE achillea.clan SET clan_avatar_url = replace(clan_avatar_url, ${ancien}, ${nouveau}), updated_at = now()
                             WHERE clan_avatar_url LIKE ${`${ancien}%`} RETURNING id`;
     const images = await tx`UPDATE achillea.image SET url = replace(url, ${ancien}, ${nouveau})

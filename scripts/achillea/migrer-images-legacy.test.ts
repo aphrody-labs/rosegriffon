@@ -25,3 +25,24 @@ describe("migration des images Achilléa", () => {
     expect(typeImage(new TextEncoder().encode("<!doctype html>"))).toBeNull();
   });
 });
+
+describe("images trop lourdes pour le bucket", () => {
+  test("nom WebP et URL morte, aller-retour", async () => {
+    const { nomWebp, urlMorte } = await import("./migrer-images-legacy");
+    expect(nomWebp("I00wkXo2.png")).toBe("I00wkXo2.webp");
+    expect(nomWebp("clans/a.b.jpeg")).toBe("clans/a.b.webp");
+    expect(nomObjet(urlMorte("clans/a b.png"))).toBe("clans/a b.png");
+  });
+
+  test("le réencodage produit un WebP sous le plafond", async () => {
+    const { reduireImage, TAILLE_MAX_OBJET } = await import("./migrer-images-legacy");
+    // PNG 1×1 opaque.
+    const png = Uint8Array.from(
+      atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="),
+      c => c.charCodeAt(0),
+    );
+    const sortie = await reduireImage(png);
+    expect(typeImage(sortie)).toBe("image/webp");
+    expect(sortie.byteLength).toBeLessThanOrEqual(TAILLE_MAX_OBJET);
+  });
+});
