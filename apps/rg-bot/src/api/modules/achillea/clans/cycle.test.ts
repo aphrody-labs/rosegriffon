@@ -3,7 +3,7 @@
  * Aucun appel n'atteint Postgres : les refus 401 précèdent toute lecture.
  */
 import { describe, expect, test } from "bun:test";
-import { ClanMemberRole, ProposalStatus, ProposalType, VoteChoice } from "@rosegriffon/achillea-core/enums";
+import { ClanMemberRole, ClanState, ProposalStatus, ProposalType, VoteChoice } from "@rosegriffon/achillea-core/enums";
 
 import { achilleaModule } from "../index";
 import { clanCycleController } from "./cycle";
@@ -16,8 +16,10 @@ import {
   referenceClan,
   refusDepart,
   refusTransfert,
+  rejointLaFondation,
   roleCapitaine,
 } from "./cycle-service";
+import { CLAN_FOUNDERS_COUNT, FOUNDING_VOTE_DURATION_MS, FOUNDING_VOTE_MIN_PARTICIPATION } from "./management";
 
 describe("règles du cycle de vie", () => {
   test("le Président ne quitte pas son clan, les autres si", () => {
@@ -192,5 +194,87 @@ describe("routes : session obligatoire pour toute écriture", () => {
       }),
     );
     expect(reponse.status).toBe(422);
+  });
+});
+
+/**
+ * Vote de fondation confronté au legacy (`create-clan.ts` / `ClanService.initFoundingVoteProcedure`,
+ * `VoteButtons`, `VotingService.evaluateProposal`, `ClanFoundationVoteHandler`) :
+ * Président + 4 fondateurs, seuls les 4 fondateurs votent, stratégie MAJORITY,
+ * participation 1.0, 24 h, un seul clic par fondateur.
+ */
+describe("vote de fondation — règle du legacy", () => {
+  /** Oracle recopié de la branche MAJORITY du legacy (`VotingService.evaluateProposal`). */
+  function oracleLegacy(approvals: number, rejections: number, totalEligible: number, expired: boolean): ProposalStatus | null {
+    const votesCount = approvals + rejections;
+    const requiredParticipation = Math.ceil(totalEligible * 1.0);
+    const remainingPossibleVotes = totalEligible - votesCount;
+    if (expired && votesCount < requiredParticipation) return ProposalStatus.EXPIRED;
+    if (approvals > rejections + remainingPossibleVotes) return ProposalStatus.APPROVED;
+    if (rejections >= approvals + remainingPossibleVotes) return ProposalStatus.REJECTED;
+    if (votesCount >= requiredParticipation) return approvals > rejections ? ProposalStatus.APPROVED : ProposalStatus.REJECTED;
+    return null;
+  }
+
+  test("électorat : 5 fondateurs dont le Président, 4 votants, participation totale exigée", () => {
+    expect(CLAN_FOUNDERS_COUNT).toBe(5);
+    expect(FOUNDING_VOTE_MIN_PARTICIPATION).toBe(1);
+    expect(FOUNDING_VOTE_DURATION_MS).toBe(24 * 60 * 60 * 1000);
+  });
+
+  test("toutes les combinaisons de 4 votants, échues ou non, rendent l'issue du legacy", () => {
+    const passe = new Date(Date.now() - 1000);
+    for (let approbations = 0; approbations <= 4; approbations++)
+      for (let rejets = 0; approbations + rejets <= 4; rejets++)
+        for (const expire of [false, true]) {
+          const port = issueProposition({
+            approbations,
+            rejets,
+            eligibles: CLAN_FOUNDERS_COUNT - 1,
+            ratioParticipation: FOUNDING_VOTE_MIN_PARTICIPATION,
+            strategie: "MAJORITY",
+            expireLe: expire ? passe : null,
+          });
+          expect({ approbations, rejets, expire, issue: port }).toEqual({
+            approbations,
+            rejets,
+            expire,
+            issue: oracleLegacy(approbations, rejets, 4, expire),
+          });
+        }
+  });
+
+  test("cas limites : décision anticipée, égalité, quorum à l'échéance", () => {
+    const base = { eligibles: 4, ratioParticipation: 1, strategie: "MAJORITY", expireLe: null };
+    // Trois « pour » sur quatre : approuvé sans attendre le dernier fondateur.
+    expect(issueProposition({ ...base, approbations: 3, rejets: 0 })).toBe(ProposalStatus.APPROVED);
+    // Deux « contre » suffisent : la majorité stricte n'est plus atteignable.
+    expect(issueProposition({ ...base, approbations: 0, rejets: 2 })).toBe(ProposalStatus.REJECTED);
+    expect(issueProposition({ ...base, approbations: 1, rejets: 2 })).toBe(ProposalStatus.REJECTED);
+    // Égalité 2-2 : rejet (la majorité doit être stricte).
+    expect(issueProposition({ ...base, approbations: 2, rejets: 2 })).toBe(ProposalStatus.REJECTED);
+    // 2-1 : encore indécis, le dernier fondateur tranche.
+    expect(issueProposition({ ...base, approbations: 2, rejets: 1 })).toBeNull();
+    // À l'échéance sans les quatre voix et sans décision : expirée, le clan est supprimé.
+    const passe = new Date(Date.now() - 1000);
+    expect(issueEchue({ ...base, approbations: 2, rejets: 1, expireLe: passe, maintenant: new Date() })).toBe(ProposalStatus.EXPIRED);
+  });
+
+  test("départ pendant le vote : refusé tant que le clan n'est pas approuvé (garde `ClanEnabled`)", () => {
+    expect(refusDepart(ClanMemberRole.Member, ClanState.Creating)).toContain("pas encore approuvé");
+    expect(refusDepart(ClanMemberRole.Member, ClanState.PendingReview)).toContain("pas encore approuvé");
+    // Le legacy vérifiait l'état avant le rôle.
+    expect(refusDepart(ClanMemberRole.Captain, ClanState.Creating)).toContain("pas encore approuvé");
+    expect(refusDepart(ClanMemberRole.Member, ClanState.Approved)).toBeNull();
+  });
+
+  test("adhésion par le vote : « pour » d'un fondateur éligible, avant l'échéance, jamais forcé", () => {
+    const base = { type: ProposalType.CLAN_CREATION, choix: VoteChoice.APPROVE, eligible: true, expire: false, force: false };
+    expect(rejointLaFondation(base)).toBe(true);
+    expect(rejointLaFondation({ ...base, choix: VoteChoice.REJECT })).toBe(false);
+    expect(rejointLaFondation({ ...base, eligible: false })).toBe(false);
+    expect(rejointLaFondation({ ...base, expire: true })).toBe(false);
+    expect(rejointLaFondation({ ...base, force: true })).toBe(false);
+    expect(rejointLaFondation({ ...base, type: ProposalType.CLAN_APPROVAL })).toBe(false);
   });
 });

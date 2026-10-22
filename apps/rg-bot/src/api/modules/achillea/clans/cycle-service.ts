@@ -81,9 +81,31 @@ export function enregistrerEffetVote(type: string, effet: EffetVote): void {
 // Règles pures (testées sans base)
 // ---------------------------------------------------------------------------
 
-/** Le président ne quitte pas son clan : il transfère la présidence ou dissout. */
-export function refusDepart(role: number): string | null {
+/**
+ * Départ refusé : clan pas encore approuvé (garde `ClanEnabled` du legacy
+ * `/clan leave`, vérifiée avant le rôle), ou président — il transfère la
+ * présidence ou dissout. Pendant le vote de fondation, un fondateur entré par
+ * son « pour » reste donc dans le clan : sa voix et son adhésion restent liées.
+ */
+export function refusDepart(role: number, etatClan: number = ClanState.Approved): string | null {
+  if (etatClan < ClanState.Approved) return "Votre Clan n'est pas encore approuvé par les Administrateurs.";
   return role === ClanMemberRole.Captain ? "Le Président ne peut pas quitter son Clan ! Transférez la présidence ou dissolvez le Clan." : null;
+}
+
+/**
+ * Le votant entre-t-il dans le clan en fondation (legacy
+ * `ClanFoundationVoteHandler.onVoteCast`) ? Seulement sur un « pour » d'un
+ * fondateur éligible, avant l'échéance, et jamais par un vote forcé de
+ * développeur : le legacy tranchait alors sans passer par `onVoteCast`.
+ */
+export function rejointLaFondation(input: {
+  type: string;
+  choix: VoteChoice;
+  eligible: boolean;
+  expire: boolean;
+  force: boolean;
+}): boolean {
+  return input.type === ProposalType.CLAN_CREATION && input.choix === VoteChoice.APPROVE && input.eligible && !input.expire && !input.force;
 }
 
 /** Qui peut dissoudre : le président du clan, ou un administrateur Achilléa. */
@@ -440,13 +462,13 @@ export abstract class ClanCycleService {
         let requete = trx
           .selectFrom("clan_member as cm")
           .innerJoin("clan as c", "c.id", "cm.clan_id")
-          .select(["cm.clan_id", "cm.role", "cm.created_at", "cm.clan_fame_contributed", "c.name"])
+          .select(["cm.clan_id", "cm.role", "cm.created_at", "cm.clan_fame_contributed", "c.name", "c.state"])
           .where("cm.user_id", "=", userId)
           .where("c.is_disbanded", "=", false);
         if (clanIdDemande !== null) requete = requete.where("cm.clan_id", "=", clanIdDemande);
         const adhesion = await requete.orderBy("c.is_inactive", "asc").executeTakeFirst();
         if (!adhesion) return echec(400, "Vous ne faites pas partie d'un Clan.");
-        const refus = refusDepart(Number(adhesion.role));
+        const refus = refusDepart(Number(adhesion.role), Number(adhesion.state));
         if (refus) return echec(400, refus);
 
         // Compositions d'interclan : verrouillée → départ refusé, sinon le joueur en est retiré.
@@ -780,7 +802,7 @@ export abstract class ClanCycleService {
         else if (action === "retirer" && existant) await sql`delete from vote where id = ${existant.id}`.execute(trx);
         else if (existant) await sql`update vote set vote = ${choix}, updated_at = ${maintenant} where id = ${existant.id}`.execute(trx);
         // Fondation : un « pour » fait entrer le fondateur dans le clan, comme Membre.
-        if (proposition.type === ProposalType.CLAN_CREATION && choix === VoteChoice.APPROVE && clan && eligibles.includes(votantId))
+        if (clan && rejointLaFondation({ type: proposition.type, choix, eligible: eligibles.includes(votantId), expire, force }))
           await trx
             .insertInto("clan_member")
             .values({ clan_id: clan.id, user_id: votantId, role: ClanMemberRole.Member })

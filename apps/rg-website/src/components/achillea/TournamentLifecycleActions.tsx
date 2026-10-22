@@ -59,13 +59,17 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
     };
   }, [tournament.id, tournament.internalState]);
 
-  const executeAction = async (actionKey: string, fn: () => Promise<{ ok: boolean; error?: { message: string } }>) => {
+  const executeAction = async <T,>(
+    actionKey: string,
+    fn: () => Promise<{ ok: boolean; value?: T; error?: { message: string } }>,
+    succes?: (value: T | undefined) => string,
+  ) => {
     setLoadingAction(actionKey);
     setMessage(null);
     try {
       const res = await fn();
       if (res.ok) {
-        setMessage({ text: "Action exécutée avec succès.", type: "success" });
+        setMessage({ text: succes?.(res.value) ?? "Action exécutée avec succès.", type: "success" });
         onUpdated();
       } else {
         setMessage({ text: res.error?.message || "L'action a échoué.", type: "error" });
@@ -191,7 +195,14 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
           <Button
             size="sm"
             disabled={loadingAction !== null}
-            onClick={() => executeAction("start", () => client.tournaments.start(tournament.id))}
+            onClick={() =>
+              executeAction("start", () => client.tournaments.start(tournament.id), reponse => {
+                const demarrage = reponse as { success: boolean; phases?: number; lobbies?: number } | undefined;
+                return demarrage?.phases
+                  ? "Tournoi démarré : la première phase est appariée par la tâche planifiée."
+                  : `Tournoi démarré : ${demarrage?.lobbies ?? 0} lobby(s) ouvert(s) sur l'arbre.`;
+              })
+            }
             className="text-xs font-bold gap-1.5 bg-success hover:bg-success/90 text-success-foreground"
           >
             {loadingAction === "start" ? (

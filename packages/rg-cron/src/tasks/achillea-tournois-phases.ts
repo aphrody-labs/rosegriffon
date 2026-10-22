@@ -17,9 +17,13 @@
  *     `PUT /tournaments/start/:id`, événement `TOURNAMENT_STARTED`), et si le
  *     tournoi a des phases, la première est activée et sa première ronde
  *     appariée (`TournamentsService.startTournament` → `SwissStageService.startSwiss`).
- *  3. PHASES — pour chaque tournoi en cours dont TOUS les lobbys de la phase
- *     active sont terminés (`phaseLobbiesAreFinished`) : ronde suivante, phase
- *     suivante, ou fin du tournoi (`shouldFinishTournament`).
+ *     Sans phase, le démarrage est demandé à l'API (`POST /tournaments/internal/:id/start`),
+ *     qui ouvre les lobbys du premier tour de l'arbre (`BracketService.generateLobbies`).
+ *  3. PHASES — un tournoi démarré à la main dont aucune phase n'est encore
+ *     ouverte reçoit la ronde 1 de sa première phase ; puis, pour chaque tournoi
+ *     en cours dont TOUS les lobbys de la phase active sont terminés
+ *     (`phaseLobbiesAreFinished`) : ronde suivante, phase suivante, ou fin du
+ *     tournoi (`shouldFinishTournament`).
  *
  * ── CE QUI EST CORRIGÉ PAR RAPPORT À L'ANCIEN BOT ──────────────────────────
  *  - Les lobbys créés portaient l'appariement… dans une variable jamais lue :
@@ -330,6 +334,22 @@ export function planifier(phases: readonly PhaseTournoi[], lobbys: readonly Lobb
   return { type: "avancer", phaseId: active.id, suivante: { id: suivante.id, format: "bo3", ronde: 1, paires: [] }, terminerTournoi: false };
 }
 
+/**
+ * Première ronde d'une phase (legacy `SwissStageService.startSwiss`) : têtes de
+ * série si la phase est `seeded`, ordre mélangé sinon ; élimination en BO3,
+ * suisse en BO1.
+ */
+export function premiereRonde(
+  phase: Pick<PhaseTournoi, "kind" | "config" | "qualifiersCount">,
+  joueurs: readonly string[],
+  aleatoire: () => number = Math.random,
+): { format: "bo1" | "bo3"; paires: Appariement[] } {
+  const ordre = phase.config?.seeded ? [...joueurs] : melanger(joueurs, aleatoire);
+  if (ELIMINATION.has(phase.kind))
+    return { format: "bo3", paires: apparierElimination(phase.qualifiersCount > 0 ? ordre.slice(0, phase.qualifiersCount) : ordre) };
+  return { format: "bo1", paires: apparierMonrad(ordre.map(userId => ({ userId, points: 0, buchholz: 0 })), []) };
+}
+
 /** Mélange de Fisher-Yates (le `sort(() => Math.random() - 0.5)` de l'ancien bot est biaisé). */
 export function melanger<T>(valeurs: readonly T[], aleatoire: () => number = Math.random): T[] {
   const copie = [...valeurs];
@@ -378,9 +398,35 @@ export async function transitionsPlanning(
   return { transitions: corps?.transitions ?? [], aDemarrer: corps?.startCandidates ?? [] };
 }
 
+/**
+ * Démarre par l'API un tournoi SANS phase : l'API possède l'arbre
+ * brackets-manager et ouvre les lobbys de son premier tour, ou refuse
+ * (aucun arbre possible) en laissant le tournoi en préparation.
+ */
+export async function demarrerParApi(
+  tournoiId: number,
+  env: Record<string, string | undefined> = Bun.env,
+  fetcher: typeof fetch = fetch,
+): Promise<{ ok: true; lobbies: number } | { ok: false; erreur: string }> {
+  const jeton = (env.API_ADMIN_TOKEN ?? "").trim();
+  if (!jeton) return { ok: false, erreur: "API_ADMIN_TOKEN absent : le démarrage ne peut pas être demandé à l'API." };
+  const reponse = await fetcher(`${baseApiInterne(env)}/tournaments/internal/${tournoiId}/start`, {
+    method: "POST",
+    headers: { Accept: "application/json", Authorization: `Bearer ${jeton}` },
+    signal: AbortSignal.timeout(60_000),
+  });
+  const corps = (await reponse.json().catch(() => null)) as { lobbies?: number; message?: string } | null;
+  if (!reponse.ok) return { ok: false, erreur: corps?.message ?? `API de démarrage : HTTP ${reponse.status}` };
+  return { ok: true, lobbies: Number(corps?.lobbies ?? 0) };
+}
+
 export interface DepotTournois {
   /** Passe le tournoi en cours s'il est encore en préparation ; rend ses joueurs actifs (ordre de tête de série) ou `null`. */
   demarrer(tournoiId: number, maintenant: Date): Promise<string[] | null>;
+  /** Démarre un tournoi sans phase (lobbys de l'arbre ouverts par l'API, `demarrerParApi`). */
+  demarrerSansPhase(tournoiId: number): Promise<{ ok: true; lobbies: number } | { ok: false; erreur: string }>;
+  /** Joueurs actifs d'un tournoi, par tête de série puis inscription. */
+  joueursActifs(tournoiId: number): Promise<string[]>;
   tournoisEnCours(): Promise<number[]>;
   phases(tournoiId: number): Promise<PhaseTournoi[]>;
   lobbys(phaseId: string): Promise<LobbyPhase[]>;
@@ -444,6 +490,14 @@ export const depotTournois: DepotTournois = {
                 ${JSON.stringify({ automatic: true, participants: joueurs.length })}::jsonb, NULL, ${maintenant})`;
       return joueurs.map(j => j.user_id);
     });
+  },
+  demarrerSansPhase: tournoiId => demarrerParApi(tournoiId),
+  async joueursActifs(tournoiId) {
+    const joueurs = await sql<Array<{ user_id: string }>>`
+      SELECT user_id FROM achillea.tournament_participant
+       WHERE tournament_id = ${tournoiId} AND status = 'Active'
+       ORDER BY seed NULLS LAST, id`;
+    return joueurs.map(j => j.user_id);
   },
   async tournoisEnCours() {
     const lignes = await sql<Array<{ id: number }>>`
@@ -563,20 +617,26 @@ export async function runAchilleaTournoisPhases(
     console.warn(`[achillea:tournois-phases] transitions de planning : ${resultat.erreurPlanning}`);
   }
 
-  // 2. Démarrages automatiques.
+  // 2. Démarrages automatiques. Sans phase, l'arbre du tournoi est la phase
+  // unique : l'API (propriétaire de brackets-manager) ouvre ses lobbys, comme au clic.
   for (const tournoiId of aDemarrer) {
-    const joueurs = await depot.demarrer(tournoiId, maintenant);
-    if (!joueurs) continue;
-    resultat.demarres.push(tournoiId);
-    const premiere = (await depot.phases(tournoiId)).find(p => p.status === "Pending");
-    if (!premiere) continue;
-    const ordre = premiere.config?.seeded ? joueurs : melanger(joueurs, aleatoire);
-    const paires = ELIMINATION.has(premiere.kind)
-      ? apparierElimination(premiere.qualifiersCount > 0 ? ordre.slice(0, premiere.qualifiersCount) : ordre)
-      : apparierMonrad(ordre.map(userId => ({ userId, points: 0, buchholz: 0 })), []);
-    const format = ELIMINATION.has(premiere.kind) ? "bo3" : "bo1";
-    if (await depot.creerRonde({ tournoiId, phaseId: premiere.id, ronde: 1, format, paires, activerPhase: true }))
-      resultat.rondesCreees.push({ tournoi: tournoiId, phase: premiere.id, ronde: 1 });
+    try {
+      const premiere = (await depot.phases(tournoiId)).find(p => p.status === "Pending");
+      if (!premiere) {
+        const issue = await depot.demarrerSansPhase(tournoiId);
+        if (issue.ok) resultat.demarres.push(tournoiId);
+        else resultat.enAttente.push({ tournoi: tournoiId, motif: issue.erreur });
+        continue;
+      }
+      const joueurs = await depot.demarrer(tournoiId, maintenant);
+      if (!joueurs) continue;
+      resultat.demarres.push(tournoiId);
+      const { format, paires } = premiereRonde(premiere, joueurs, aleatoire);
+      if (await depot.creerRonde({ tournoiId, phaseId: premiere.id, ronde: 1, format, paires, activerPhase: true }))
+        resultat.rondesCreees.push({ tournoi: tournoiId, phase: premiere.id, ronde: 1 });
+    } catch (err) {
+      resultat.enAttente.push({ tournoi: tournoiId, motif: err instanceof Error ? err.message : String(err) });
+    }
   }
 
   // 3. Avancement des phases. Une erreur sur un tournoi n'arrête pas les autres.
@@ -584,7 +644,20 @@ export async function runAchilleaTournoisPhases(
     try {
       const phases = await depot.phases(tournoiId);
       const active = phases.find(p => p.status === "Active");
-      if (!active) continue;
+      if (!active) {
+        // Démarré à la main (`PUT /tournaments/start/:id`) : aucune phase encore
+        // ouverte, la première reçoit sa ronde 1 ici (idempotent par `creerRonde`).
+        const premiere = phases.every(p => p.status === "Pending") ? [...phases].sort((a, b) => a.index - b.index)[0] : undefined;
+        if (!premiere) continue;
+        const { format, paires } = premiereRonde(premiere, await depot.joueursActifs(tournoiId), aleatoire);
+        if (paires.length === 0) {
+          resultat.enAttente.push({ tournoi: tournoiId, motif: "aucun joueur actif pour la première phase" });
+          continue;
+        }
+        if (await depot.creerRonde({ tournoiId, phaseId: premiere.id, ronde: 1, format, paires, activerPhase: true }))
+          resultat.rondesCreees.push({ tournoi: tournoiId, phase: premiere.id, ronde: 1 });
+        continue;
+      }
       const plan = planifier(phases, await depot.lobbys(active.id));
       if (plan.type === "attendre") {
         if (plan.motif !== "lobbys en cours") resultat.enAttente.push({ tournoi: tournoiId, motif: plan.motif });

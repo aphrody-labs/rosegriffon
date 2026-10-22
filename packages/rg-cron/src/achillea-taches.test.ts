@@ -31,9 +31,11 @@ import {
   apparierMonrad,
   apparierTourSuivant,
   classementSuisse,
+  demarrerParApi,
   doitTerminer,
   melanger,
   planifier,
+  premiereRonde,
   rondesSuisses,
   runAchilleaTournoisPhases,
   transitionsPlanning,
@@ -335,6 +337,8 @@ describe("achillea:tournois-phases", () => {
     ]);
     const depot: DepotTournois = {
       demarrer: async id => (id === 1 ? ["a", "b", "c", "d"] : null),
+      demarrerSansPhase: async () => ({ ok: false, erreur: "Impossible de démarrer le tournoi : aucun arbre" }),
+      joueursActifs: async () => [],
       tournoisEnCours: async () => [2],
       phases: async id => etatPhases.get(id) ?? [],
       lobbys: async () => [lobby(1, 1, ["a", 1], ["b", 0]), lobby(2, 1, ["c", 1], ["d", 0])],
@@ -358,6 +362,8 @@ describe("achillea:tournois-phases", () => {
       async () => ({ transitions: [{ tournamentId: 1, from: "Pending", to: "Preregistering" }], aDemarrer: [1, 3] }),
     );
     expect(r2.demarres).toEqual([1]);
+    // Le tournoi 3 n'a pas de phase : démarrage demandé à l'API, refus remonté tel quel.
+    expect(r2.enAttente).toEqual([{ tournoi: 3, motif: "Impossible de démarrer le tournoi : aucun arbre" }]);
     expect(r2.transitions).toHaveLength(1);
     expect(creees).toEqual([
       expect.objectContaining({
@@ -390,6 +396,103 @@ describe("achillea:tournois-phases", () => {
       transitionsPlanning(new Date(), { API_ADMIN_TOKEN: "t" }, (async () =>
         Response.json({ message: "Internal authentication required" }, { status: 401 })) as unknown as typeof fetch),
     ).rejects.toThrow(/Internal authentication/);
+  });
+
+  const depotVide = (surcharge: Partial<DepotTournois>): DepotTournois => ({
+    demarrer: async () => null,
+    demarrerSansPhase: async () => ({ ok: true, lobbies: 0 }),
+    joueursActifs: async () => [],
+    tournoisEnCours: async () => [],
+    phases: async () => [],
+    lobbys: async () => [],
+    creerRonde: async () => true,
+    completerPhase: async () => true,
+    terminerTournoi: async () => true,
+    ...surcharge,
+  });
+
+  test("démarrage automatique sans phase : délégué à l'API, sans passer par le dépôt SQL", async () => {
+    const demandes: number[] = [];
+    let sqlDirect = false;
+    const r = await runAchilleaTournoisPhases(
+      depotVide({
+        demarrer: async () => ((sqlDirect = true), ["a", "b"]),
+        demarrerSansPhase: async id => (demandes.push(id), { ok: true, lobbies: 4 }),
+      }),
+      async () => ({ transitions: [], aDemarrer: [5] }),
+    );
+    expect(demandes).toEqual([5]);
+    expect(sqlDirect).toBe(false);
+    expect(r.demarres).toEqual([5]);
+    expect(r.rondesCreees).toEqual([]);
+  });
+
+  test("démarré à la main : la première phase encore en attente reçoit sa ronde 1", async () => {
+    const creees: unknown[] = [];
+    const r = await runAchilleaTournoisPhases(
+      depotVide({
+        tournoisEnCours: async () => [7],
+        joueursActifs: async () => ["a", "b", "c"],
+        phases: async () => [
+          phase({ id: "z2", index: 1, status: "Pending", kind: "SingleElim" }),
+          phase({ id: "z1", index: 0, status: "Pending", config: { seeded: true } }),
+        ],
+        creerRonde: async input => (creees.push(input), true),
+      }),
+      async () => ({ transitions: [], aDemarrer: [] }),
+    );
+    expect(creees).toEqual([
+      expect.objectContaining({
+        tournoiId: 7,
+        phaseId: "z1",
+        ronde: 1,
+        format: "bo1",
+        activerPhase: true,
+        paires: [
+          { joueurA: "c", joueurB: null },
+          { joueurA: "a", joueurB: "b" },
+        ],
+      }),
+    ]);
+    expect(r.rondesCreees).toEqual([{ tournoi: 7, phase: "z1", ronde: 1 }]);
+
+    // Une phase déjà close : le tournoi n'est pas « fraîchement démarré », rien n'est rejoué.
+    creees.length = 0;
+    await runAchilleaTournoisPhases(
+      depotVide({
+        tournoisEnCours: async () => [7],
+        joueursActifs: async () => ["a", "b"],
+        phases: async () => [phase({ id: "z1", status: "Completed" }), phase({ id: "z2", index: 1, status: "Pending" })],
+        creerRonde: async input => (creees.push(input), true),
+      }),
+      async () => ({ transitions: [], aDemarrer: [] }),
+    );
+    expect(creees).toEqual([]);
+  });
+
+  test("première ronde : élimination en BO3 bornée aux qualifiés, suisse en BO1", () => {
+    expect(premiereRonde(phase({ kind: "SingleElim", config: { seeded: true }, qualifiersCount: 4 }), ["a", "b", "c", "d", "e"])).toEqual({
+      format: "bo3",
+      paires: [
+        { joueurA: "a", joueurB: "d" },
+        { joueurA: "b", joueurB: "c" },
+      ],
+    });
+    expect(premiereRonde(phase({ config: { seeded: true } }), ["a", "b"]).format).toBe("bo1");
+  });
+
+  test("demarrerParApi : route interne, jeton exigé, refus de l'API remonté", async () => {
+    expect(await demarrerParApi(9, {})).toEqual({ ok: false, erreur: expect.stringContaining("API_ADMIN_TOKEN") });
+    let vue = "";
+    const ok = await demarrerParApi(9, { API_ADMIN_TOKEN: "t", RG_CORE_PORT: "9001" }, (async (url: string | URL | Request, init?: RequestInit) => {
+      vue = `${init?.method} ${String(url)} ${new Headers(init?.headers).get("authorization")}`;
+      return Response.json({ success: true, internalState: "Ongoing", phases: 0, lobbies: 4 });
+    }) as typeof fetch);
+    expect(vue).toBe("POST http://127.0.0.1:9001/api/tournaments/internal/9/start Bearer t");
+    expect(ok).toEqual({ ok: true, lobbies: 4 });
+    const refus = await demarrerParApi(9, { API_ADMIN_TOKEN: "t" }, (async () =>
+      Response.json({ message: "Impossible de démarrer le tournoi : aucun arbre" }, { status: 400 })) as unknown as typeof fetch);
+    expect(refus).toEqual({ ok: false, erreur: "Impossible de démarrer le tournoi : aucun arbre" });
   });
 });
 

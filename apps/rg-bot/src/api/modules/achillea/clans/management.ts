@@ -556,6 +556,13 @@ export type NewClanInput = {
 /** Durée du vote de fondation (legacy : 24 h, majorité). */
 export const FOUNDING_VOTE_DURATION_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Participation exigée au vote de fondation : les quatre fondateurs (legacy
+ * `VoteProposal.minParticipationRatio = 1.0`, jamais modifié à la création).
+ * Écrite explicitement plutôt que laissée au défaut de la colonne.
+ */
+export const FOUNDING_VOTE_MIN_PARTICIPATION = 1;
+
 export abstract class ClanManagementService {
   /** `POST /clans/create` — legacy `ClansController.submitForm`. */
   static async create(db: Kysely<Database>, presidentId: string, dto: NewClanInput): Promise<Result<{ clanId: number }>> {
@@ -649,11 +656,12 @@ export abstract class ClanManagementService {
         const presidentName = (await joueurs(trx, [presidentId])).get(presidentId)!.nom;
         const proposal = await sql<{ id: number }>`
           insert into vote_proposal
-            (created_at, updated_at, type, target_entity_type, target_entity_id, reason, strategy, expires_at)
+            (created_at, updated_at, type, target_entity_type, target_entity_id, reason, strategy,
+             min_participation_ratio, expires_at)
           values
             (${now}, ${now}, 'CLAN_CREATION', 'Clan', ${clan.id},
              ${`Proposition de création du Clan ${name} par ${presidentName}`.slice(0, 255)},
-             'MAJORITY', ${new Date(now.getTime() + FOUNDING_VOTE_DURATION_MS)})
+             'MAJORITY', ${FOUNDING_VOTE_MIN_PARTICIPATION}, ${new Date(now.getTime() + FOUNDING_VOTE_DURATION_MS)})
           returning id
         `.execute(trx);
         const proposalId = Number(proposal.rows[0]!.id);

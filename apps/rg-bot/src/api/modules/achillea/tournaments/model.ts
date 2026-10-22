@@ -58,6 +58,13 @@ export const TournamentModel = {
   notFound: t.Object({
     message: t.Literal("Tournament not found"),
   }),
+  /** Démarrage : phases encore à jouer, lobbys ouverts sur l'arbre (0 si le tournoi a des phases). */
+  started: t.Object({
+    success: t.Literal(true),
+    internalState: t.Literal("Ongoing"),
+    phases: t.Number(),
+    lobbies: t.Number(),
+  }),
 } as const;
 
 export type TournamentDTO = typeof TournamentModel.tournament.static;

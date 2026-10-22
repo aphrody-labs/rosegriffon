@@ -246,6 +246,23 @@ export const lobbySchema = z.object({
   matchFormat: matchFormatSchema.nullish(),
 }) satisfies z.ZodType<LobbyDTO>;
 
+/** Réponse de `PUT /tournaments/start/:id`. */
+export interface TournamentStartResult extends SuccessResponse {
+  internalState?: string;
+  /** Phases encore à jouer (conduites par la tâche planifiée). */
+  phases?: number;
+  /** Lobbys ouverts sur l'arbre quand le tournoi n'a pas de phase. */
+  lobbies?: number;
+}
+
+export const tournamentStartSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+  internalState: z.string().optional(),
+  phases: z.number().optional(),
+  lobbies: z.number().optional(),
+}) satisfies z.ZodType<TournamentStartResult>;
+
 // ── Circuit et hub statistiques ─────────────────────────────────────────────
 
 export const circuitClanTagSchema = z.object({
@@ -690,9 +707,13 @@ export class TournamentsResource extends AchilleaResource {
     return this.http.post(`/tournaments/remove-manager/${encodePathSegment(id)}`, successResponseSchema, manager);
   }
 
-  /** `PUT /tournaments/start/:id` — démarre le tournoi. */
-  start(id: number): Promise<AchilleaClientResult<SuccessResponse>> {
-    return this.http.put(`/tournaments/start/${encodePathSegment(id)}`, successResponseSchema);
+  /**
+   * `PUT /tournaments/start/:id` — démarre le tournoi. Sans phase, l'API ouvre
+   * les lobbys du premier tour de l'arbre (`lobbies`) ou refuse le démarrage
+   * avec un message explicite (aucun arbre possible).
+   */
+  start(id: number): Promise<AchilleaClientResult<TournamentStartResult>> {
+    return this.http.put(`/tournaments/start/${encodePathSegment(id)}`, tournamentStartSchema);
   }
 
   /** `PUT /tournaments/next-phase/:id` — avance à la phase suivante. */
