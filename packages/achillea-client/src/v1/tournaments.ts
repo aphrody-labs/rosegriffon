@@ -475,6 +475,26 @@ export const disqualifyResultSchema = z.object({
   error: z.string().optional(),
 }) satisfies z.ZodType<DisqualifyResult>;
 
+/** Réponse de `validate-score` : la série du lobby, et ce que son issue a fait avancer dans l'arbre. */
+export const serieValidationSchema = z.object({
+  success: z.boolean(),
+  side: z.enum(["ADMIN", "TEAM_1", "TEAM_2"]),
+  serie: z
+    .object({
+      etat: z.string(),
+      gagnant: z.number().nullable(),
+      score1: z.number().nullable(),
+      score2: z.number().nullable(),
+      forfait: z.boolean(),
+      lobbysOuverts: z.array(z.number()),
+      tournoiTermine: z.boolean(),
+      championId: z.string().nullable(),
+    })
+    .nullable()
+    .optional(),
+});
+export type SerieValidationResult = z.infer<typeof serieValidationSchema>;
+
 export const participantMutationResultSchema = z.object({
   success: z.boolean(),
   participant: participantSchema.optional(),
@@ -605,17 +625,17 @@ export class TournamentsResource extends AchilleaResource {
 
   /** `POST /tournaments/report-score` — saisie du score d'une manche. */
   reportScore(score: GameScoreDTO): Promise<AchilleaClientResult<unknown>> {
-    return this.http.post("/tournaments/report-score", z.unknown(), { score });
+    return this.http.post("/tournaments/report-score", z.unknown(), { ...score });
   }
 
-  /** `POST /tournaments/validate-score` — validation de la manche par un camp. */
-  validateScore(gameValidation: GameValidatorDTO): Promise<AchilleaClientResult<unknown>> {
-    return this.http.post("/tournaments/validate-score", z.unknown(), { gameValidation });
+  /** `POST /tournaments/validate-score` — validation de la manche par un camp ; une série décidée fait avancer le vainqueur et ouvre les lobbys suivants. */
+  validateScore(gameValidation: GameValidatorDTO): Promise<AchilleaClientResult<SerieValidationResult>> {
+    return this.http.post("/tournaments/validate-score", serieValidationSchema, { ...gameValidation });
   }
 
   /** `POST /tournaments/unvalidate-score` — retire la validation d'un camp. */
   unvalidateScore(gameValidation: GameValidatorDTO): Promise<AchilleaClientResult<unknown>> {
-    return this.http.post("/tournaments/unvalidate-score", z.unknown(), { gameValidation });
+    return this.http.post("/tournaments/unvalidate-score", z.unknown(), { ...gameValidation });
   }
 
   /** `POST /tournaments/remove-participant/:id` — retrait d'un inscrit. */

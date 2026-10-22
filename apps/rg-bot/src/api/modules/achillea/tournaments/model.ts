@@ -58,6 +58,17 @@ export const TournamentModel = {
   notFound: t.Object({
     message: t.Literal("Tournament not found"),
   }),
+  /** Issue de la série d'un lobby après une validation (legacy `checkAndPropagateLobbyResult`). */
+  serie: t.Object({
+    etat: t.String(),
+    gagnant: t.Nullable(t.Number()),
+    score1: t.Nullable(t.Number()),
+    score2: t.Nullable(t.Number()),
+    forfait: t.Boolean(),
+    lobbysOuverts: t.Array(t.Number()),
+    tournoiTermine: t.Boolean(),
+    championId: t.Nullable(t.String()),
+  }),
   /** Démarrage : phases encore à jouer, lobbys ouverts sur l'arbre (0 si le tournoi a des phases). */
   started: t.Object({
     success: t.Literal(true),

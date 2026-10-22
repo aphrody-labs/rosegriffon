@@ -8,6 +8,7 @@ import type { Database } from "@rosegriffon/db/schema";
 import { rebuildTournamentBracket, tournamentBracketData } from "./bracket";
 import { applyPlacementPrizes } from "./placement";
 import { demarrerTournoi } from "./start";
+import { finaliserPropagation, forfaiterLobbysOuverts, propagerDansTransaction, resumeSerie } from "./progression";
 import { circuitRanking, circuitStats, playerCircuitProfile, tournamentSummary } from "./circuit";
 import { verifyAdminBearerToken } from "@rosegriffon/achillea-core/auth";
 
@@ -1128,7 +1129,11 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           reason,
         })
         .execute();
-      return { success: true as const, userId: body.userId, status: "Disqualified" as const };
+      // En cours de tournoi, ses matchs ouverts sont perdus par forfait et l'arbre avance
+      // (legacy `forfeitOpenLobbiesOf`).
+      const forfaitLobbys =
+        auth.tournament.internal_state === "Ongoing" ? await forfaiterLobbysOuverts(db, id, body.userId) : 0;
+      return { success: true as const, userId: body.userId, status: "Disqualified" as const, forfeitedLobbies: forfaitLobbys };
     },
     {
       params: t.Object({ id: t.Numeric() }),
@@ -1138,6 +1143,7 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           success: t.Literal(true),
           userId: t.String(),
           status: t.Literal("Disqualified"),
+          forfeitedLobbies: t.Number(),
         }),
         400: t.Object({ message: t.String() }),
         401: t.Object({ message: t.Literal("Authentication required") }),
@@ -1567,29 +1573,36 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
           : side === "TEAM_1"
             ? { team1validated: true }
             : { team2validated: true };
-      await db
-        .updateTable("lobby_match")
-        .set({ ...patch, updated_at: new Date() })
-        .where("id", "=", game.id)
-        .execute();
-      await db
-        .insertInto("tournament_event")
-        .values({
-          tournament_id: access.lobby.event_id,
-          type: "SCORE_VALIDATED",
-          actor_id: access.session.id,
-          target_id: null,
-          payload: {
-            lobbyId: body.lobbyId,
-            gameNumber: game.game_number,
-            side,
-            scoreTeam1: game.score_team1,
-            scoreTeam2: game.score_team2,
-          },
-          reason: null,
-        })
-        .execute();
-      return { success: true as const, side };
+      // Validation, journal et propagation dans l'arbre : tout ou rien. Une
+      // manche validée qui décide la série fait avancer le vainqueur et ouvre
+      // les lobbys suivants (legacy `validateGame` → `checkAndPropagateLobbyResult`).
+      const brute = await db.transaction().execute(async trx => {
+        await trx
+          .updateTable("lobby_match")
+          .set({ ...patch, updated_at: new Date() })
+          .where("id", "=", game.id)
+          .execute();
+        await trx
+          .insertInto("tournament_event")
+          .values({
+            tournament_id: access.lobby.event_id,
+            type: "SCORE_VALIDATED",
+            actor_id: access.session.id,
+            target_id: null,
+            payload: {
+              lobbyId: body.lobbyId,
+              gameNumber: game.game_number,
+              side,
+              scoreTeam1: game.score_team1,
+              scoreTeam2: game.score_team2,
+            },
+            reason: null,
+          })
+          .execute();
+        return access.lobby.event_type === "TOURNAMENT" ? propagerDansTransaction(trx, body.lobbyId) : null;
+      });
+      const serie = brute ? await finaliserPropagation(db, access.lobby.event_id, brute) : null;
+      return { success: true as const, side, serie: serie ? resumeSerie(serie) : null };
     },
     {
       body: t.Object({ lobbyId: t.Integer(), lobbyMatchId: t.Integer() }),
@@ -1597,6 +1610,7 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
         200: t.Object({
           success: t.Literal(true),
           side: t.Union([t.Literal("ADMIN"), t.Literal("TEAM_1"), t.Literal("TEAM_2")]),
+          serie: t.Nullable(TournamentModel.serie),
         }),
         400: t.Object({ message: t.String() }),
         401: t.Object({ message: t.Literal("Authentication required") }),

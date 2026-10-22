@@ -9,8 +9,14 @@ import type { Database } from "@rosegriffon/db/schema";
 type BracketDatabase = Record<string, never>;
 const bracketDb = createAchilleaSql<BracketDatabase>();
 
-class KyselyBracketAdapter implements CrudInterface {
-  constructor(private readonly prefix = "bm_") {}
+export type ExecuteurArbre = Kysely<BracketDatabase>;
+
+export class KyselyBracketAdapter implements CrudInterface {
+  /** `executeur` : la transaction en cours, pour que l'arbre et les lobbys s'écrivent ensemble. */
+  constructor(
+    private readonly executeur: ExecuteurArbre = bracketDb,
+    private readonly prefix = "bm_",
+  ) {}
   private tableName(table: Table) {
     const value = `${this.prefix}${String(table)}`;
     if (!/^bm_[a-z][a-z0-9_]*$/u.test(value)) throw new Error(`Invalid bracket table: ${value}`);
@@ -40,7 +46,7 @@ class KyselyBracketAdapter implements CrudInterface {
       await sql`INSERT INTO ${sql.raw(`"${this.tableName(table)}"`)} (${this.columns(columns)}) VALUES ${sql.join(
         rows.map(entry => this.row(entry, columns)),
         sql`, `,
-      )}${Array.isArray(value) ? sql`` : sql` RETURNING "id"`}`.execute(bracketDb);
+      )}${Array.isArray(value) ? sql`` : sql` RETURNING "id"`}`.execute(this.executeur);
     return Array.isArray(value) ? true : ((result.rows as Array<{ id?: number }>)[0]?.id ?? null);
   }
   async select<T extends Table>(table: T, filter?: Id | Partial<DataTypes[T]>): Promise<any> {
@@ -57,7 +63,7 @@ class KyselyBracketAdapter implements CrudInterface {
         )}`
       : sql``;
     const result = await sql`SELECT * FROM ${sql.raw(`"${this.tableName(table)}"`)}${where} ORDER BY "id" ASC`.execute(
-      bracketDb,
+      this.executeur,
     );
     const rows = result.rows as DataTypes[T][];
     return typeof filter === "number" || typeof filter === "string" ? (rows[0] ?? null) : rows;
@@ -82,7 +88,7 @@ class KyselyBracketAdapter implements CrudInterface {
     const result = await sql`UPDATE ${sql.raw(`"${this.tableName(table)}"`)} SET ${sql.join(
       sets.map(([column, entry]) => sql`${this.identifier(column)} = ${entry}`),
       sql`, `,
-    )}${where}`.execute(bracketDb);
+    )}${where}`.execute(this.executeur);
     return Number(result.numAffectedRows ?? 0) > 0;
   }
   async delete<T extends Table>(table: T, filter?: Partial<DataTypes[T]>): Promise<boolean> {
@@ -93,7 +99,7 @@ class KyselyBracketAdapter implements CrudInterface {
           sql` AND `,
         )}`
       : sql``;
-    await sql`DELETE FROM ${sql.raw(`"${this.tableName(table)}"`)}${where}`.execute(bracketDb);
+    await sql`DELETE FROM ${sql.raw(`"${this.tableName(table)}"`)}${where}`.execute(this.executeur);
     return true;
   }
 }
