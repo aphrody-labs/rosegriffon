@@ -1,6 +1,8 @@
 import { Elysia } from "elysia";
 import { tournamentController } from "./tournaments";
 import { clanController } from "./clans";
+import { clanManagementController } from "./clans/management-routes";
+import { miscController } from "./misc";
 import { organizationController } from "./organizations";
 import { leaderboardController } from "./leaderboard";
 import { walletController } from "./wallet";
@@ -18,6 +20,8 @@ import { botController, opsController } from "./ops";
 export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(tournamentController)
   .use(clanController)
+  .use(clanManagementController)
+  .use(miscController)
   .use(organizationController)
   .use(leaderboardController)
   .use(rankedController)

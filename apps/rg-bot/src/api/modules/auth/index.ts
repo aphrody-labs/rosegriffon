@@ -11,6 +11,7 @@ import { verifyAdminBearerToken as verifyAdminToken } from "@rosegriffon/achille
 import { dbPlugin } from "../../plugins/db";
 import { ProviderOAuthService } from "./oauth-service";
 import { resolveAchilleaSession } from "./session";
+import { achilleaSessionClearCookie } from "./logout";
 import { findLinkedPublicProfile } from "../achillea/users/public-profile";
 
 export const authController = new Elysia({ prefix: "/auth" })
@@ -99,6 +100,16 @@ export const authController = new Elysia({ prefix: "/auth" })
         503: t.Object({ message: t.Literal("Session authentication unavailable") }),
       },
     },
+  )
+  .post(
+    "/logout",
+    ({ request, set }) => {
+      // Sans session requise : se déconnecter avec un jeton expiré doit aussi effacer le cookie.
+      set.headers["set-cookie"] = achilleaSessionClearCookie(request);
+      set.headers["cache-control"] = "no-store";
+      return { ok: true as const };
+    },
+    { response: { 200: t.Object({ ok: t.Literal(true) }) } },
   )
   .get("/me", async ({ db, headers, set }) => {
     const session = await resolveAchilleaSession(headers);

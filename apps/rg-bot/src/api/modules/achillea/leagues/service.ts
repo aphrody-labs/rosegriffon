@@ -12,6 +12,16 @@ import {
 } from "@rosegriffon/achillea-core";
 
 export abstract class LeagueService {
+  /**
+   * Saison désignée par son identifiant ou l'un de ses alias (casse ignorée),
+   * `null` si aucune ne correspond. Seule Astral S1 existe à ce jour.
+   */
+  static findSeason(id: string) {
+    const wanted = id.trim().toLowerCase();
+    const known = [ASYTRAL_LEAGUE_META.id, ...ASYTRAL_LEAGUE_META.aliases].map(alias => alias.toLowerCase());
+    return known.includes(wanted) ? LeagueService.getAstralSeason() : null;
+  }
+
   static getAstralSeason() {
     const teamIds = ASYTRAL_TEAMS.map(team => team.tag);
     return {
