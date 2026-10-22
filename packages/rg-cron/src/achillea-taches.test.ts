@@ -27,14 +27,6 @@ import {
   type SanctionEchue,
 } from "./tasks/achillea-sanctions";
 import {
-  decision,
-  messageDissolution,
-  runAchilleaClansEffectif,
-  type ClanSousEffectif,
-  type DepotClans,
-} from "./tasks/achillea-clans-effectif";
-import { fenetre, messageRappel, messageRecap, runAchilleaCastsRappels, type DepotCasts } from "./tasks/achillea-casts-rappels";
-import {
   apparierElimination,
   apparierMonrad,
   apparierTourSuivant,
@@ -104,8 +96,8 @@ const CONFIG = configAchilleaCron({ ACHILLEA_STAFF_CHANNEL_ID: "900" });
 describe("registre et catalogue", () => {
   const nouvelles = [
     "achillea:sanctions",
-    "achillea:clans-effectif",
-    "achillea:casts-rappels",
+    "achillea:clans",
+    "achillea:casts",
     "achillea:tournois-phases",
     "achillea:classement-annonce",
     "achillea:ranked-file",
@@ -122,7 +114,7 @@ describe("registre et catalogue", () => {
   });
 
   test("les noms avec tiret se résolvent malgré la normalisation", () => {
-    expect(resoudreTache("achillea:clans-effectif")).toBe("achillea:clans-effectif");
+    expect(resoudreTache("achillea:weekly-payout")).toBe("achillea:weekly-payout");
     expect(resoudreTache("achillea-ranked-file")).toBe("achillea:ranked-file");
   });
 });
@@ -223,126 +215,6 @@ describe("achillea:sanctions", () => {
     expect(chargeSync(sanction(), "all")).toMatchObject({ version: "1.0", action: "revoke", sanction: { id: "s1", type: "ban" } });
     const attendu = new Bun.CryptoHasher("sha256", "secret").update("123.corps").digest("hex");
     expect(await signatureSync("123", "corps", "secret")).toBe(attendu);
-  });
-});
-
-// ─── achillea:clans-effectif ────────────────────────────────────────────────
-
-const clan = (membres: number): ClanSousEffectif => ({
-  id: 7,
-  name: "Les Griffons",
-  roleId: "r7",
-  channelId: "c7",
-  avatarUrl: "https://cdn/x.png",
-  founders: ["1", "2"],
-  fame: 120,
-  createdAt: new Date("2026-01-01T00:00:00Z"),
-  salonDiffusion: "b7",
-  membres: Array.from({ length: membres }, (_, i) => ({ userId: String(1000 + i), role: i === 0 ? 3 : 1 })),
-});
-
-describe("achillea:clans-effectif", () => {
-  test("décision : sous cinq on dissout, à cinq on lève le drapeau", () => {
-    expect(decision(clan(4))).toBe("dissoudre");
-    expect(decision(clan(5))).toBe("lever");
-  });
-
-  test("l'annonce reprend fondateurs, date et fame", () => {
-    const texte = JSON.stringify(messageDissolution(clan(3), new Date("2026-10-22T12:00:00Z")));
-    expect(texte).toContain("Dissolution de Clan : Les Griffons");
-    expect(texte).toContain("<@1>");
-    expect(texte).toContain("120");
-  });
-
-  test("dissout, supprime salon et rôle, retire le rôle de capitaine au Président, annonce ; lève sinon", async () => {
-    const leves: number[] = [];
-    const dissous: number[] = [];
-    let limite: Date | null = null;
-    const depot: DepotClans = {
-      aExaminer: async l => {
-        limite = l;
-        return [clan(3), { ...clan(6), id: 8, name: "Revenus" }];
-      },
-      leverDrapeau: async id => void leves.push(id),
-      dissoudre: async c => (dissous.push(c.id), true),
-    };
-    const discord = faussePorte({ "DELETE /channels/c7": { ok: false, statut: 404, motif: "Unknown Channel" } });
-    const maintenant = new Date("2026-10-22T12:00:00Z");
-    const r = await runAchilleaClansEffectif(depot, discord, CONFIG, maintenant);
-    expect(limite!.toISOString()).toBe("2026-10-21T12:00:00.000Z");
-    expect(dissous).toEqual([7]);
-    expect(leves).toEqual([8]);
-    expect(r).toMatchObject({ dissous: ["Les Griffons"], drapeauxLeves: ["Revenus"], avertissements: [] });
-    const chemins = discord.appels.map(a => `${a.methode} ${a.chemin}`);
-    expect(chemins).toContain(`DELETE /guilds/${CONFIG.guildeCentrale}/roles/r7`);
-    expect(chemins).toContain(`DELETE /guilds/${CONFIG.guildeCentrale}/members/1000/roles/${CONFIG.roleCapitaine}`);
-    expect(chemins).toContain("POST /channels/b7/messages");
-    expect(chemins).toContain(`POST /channels/${CONFIG.salonAnnoncesClans}/messages`);
-  });
-
-  test("un clan déjà traité par ailleurs n'a aucun effet Discord", async () => {
-    const discord = faussePorte();
-    const depot: DepotClans = { aExaminer: async () => [clan(2)], leverDrapeau: async () => {}, dissoudre: async () => false };
-    const r = await runAchilleaClansEffectif(depot, discord, CONFIG);
-    expect(r.dissous).toEqual([]);
-    expect(discord.appels).toEqual([]);
-  });
-});
-
-// ─── achillea:casts-rappels ─────────────────────────────────────────────────
-
-describe("achillea:casts-rappels", () => {
-  const maintenant = new Date("2026-10-22T12:00:00Z");
-
-  test("fenêtres J-2 ±30 min et H-2 ±15 min", () => {
-    expect(fenetre("J-2", maintenant)).toEqual({
-      debut: new Date("2026-10-24T11:30:00Z"),
-      fin: new Date("2026-10-24T12:30:00Z"),
-    });
-    expect(fenetre("H-2", maintenant)).toEqual({
-      debut: new Date("2026-10-22T13:45:00Z"),
-      fin: new Date("2026-10-22T14:15:00Z"),
-    });
-  });
-
-  test("textes du rappel et du récapitulatif", () => {
-    const evt = { id: "e", name: "Finale", kind: "tournament", scheduledAt: maintenant, twitchUrl: "https://twitch.tv/x" };
-    const j2 = JSON.stringify(messageRappel("J-2", evt, "caster"));
-    expect(j2).toContain("dans **2 jours**");
-    expect(j2).toContain(`<t:${Math.floor(maintenant.getTime() / 1000)}:F>`);
-    expect(j2).toContain("twitch.tv");
-    expect(JSON.stringify(messageRappel("H-2", evt, "caster"))).toContain(":t>");
-    expect(messageRecap("H-2", evt, [], 0, 1).content).toContain("_aucun_");
-  });
-
-  test("MP envoyés et MP fermés sont marqués, une panne ne l'est pas ; récap au staff", async () => {
-    const marques: Array<[string, string[]]> = [];
-    const evt = { id: "e1", name: "Finale", kind: "tournament", scheduledAt: maintenant, twitchUrl: null };
-    const depot: DepotCasts = {
-      evenements: async echeance => (echeance === "J-2" ? [evt] : []),
-      attributions: async () => [
-        { id: "a1", userId: "11", role: "caster" },
-        { id: "a2", userId: "12", role: "co-caster" },
-        { id: "a3", userId: "13", role: "réal" },
-      ],
-      marquer: async (echeance, ids) => void marques.push([echeance, [...ids]]),
-    };
-    let canal = 0;
-    const discord: PorteDiscordAchillea & { appels: AppelDiscord[] } = {
-      appels: [],
-      async rest<T>(methode: MethodeRest, chemin: string, corps?: unknown) {
-        this.appels.push({ methode, chemin, corps });
-        if (chemin === "/users/@me/channels") return { ok: true, data: { id: `dm${++canal}` } } as ResultatRest<T>;
-        if (chemin === "/channels/dm2/messages") return { ok: false, statut: 403, motif: '{"code": 50007}' };
-        if (chemin === "/channels/dm3/messages") return { ok: false, statut: 500, motif: "boom" };
-        return { ok: true, data: { id: "m" } } as ResultatRest<T>;
-      },
-    };
-    const r = await runAchilleaCastsRappels(depot, discord, "900", maintenant);
-    expect(marques).toEqual([["J-2", ["a1", "a2"]]]);
-    expect(r).toMatchObject({ evenements: 1, envoyes: 1, mpFermes: 1, echecs: 1 });
-    const recap = discord.appels.find(a => a.chemin === "/channels/900/messages");
-    expect(JSON.stringify(recap?.corps)).toContain("1 envoyé(s), 1 échec(s)");
   });
 });
 

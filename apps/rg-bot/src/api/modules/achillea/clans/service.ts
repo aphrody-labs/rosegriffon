@@ -35,7 +35,6 @@ type ClanUpdate = {
   /** Masque le clan de l'annuaire public (bouton « Clan caché » de `/clan manage`). */
   isHidden?: boolean;
   isInactive?: boolean;
-  isHidden?: boolean;
   origin?: string;
   languages?: string[];
 };
@@ -319,8 +318,8 @@ export abstract class ClanService {
         return { ok: false as const, status: 403, message: "Reserved for clan captain or administrator" };
       if (!isAdmin && patch.isInactive !== undefined)
         return { ok: false as const, status: 403, message: "Only administrators can change inactivity" };
-      if (!isAdmin && patch.isHidden !== undefined)
-        return { ok: false as const, status: 403, message: "Only administrators can hide a clan" };
+      // Masquer reste ouvert au Président (bouton « Clan caché » de `/clan manage` dans
+      // l'ancien bot) ; seule l'inactivité est une décision d'administration.
       const erreurPays = erreurPaysClan(patch);
       if (erreurPays) return { ok: false as const, status: 400, message: erreurPays };
 
@@ -411,7 +410,6 @@ export abstract class ClanService {
           auto_accept_members: patch.autoAcceptMembers ?? clan.auto_accept_members,
           is_hidden: patch.isHidden ?? clan.is_hidden,
           is_inactive: patch.isInactive ?? clan.is_inactive,
-          is_hidden: patch.isHidden ?? clan.is_hidden,
           origin: patch.origin ?? clan.origin,
           languages: patch.languages ? [...new Set(patch.languages)] : clan.languages,
           updated_at: new Date(),

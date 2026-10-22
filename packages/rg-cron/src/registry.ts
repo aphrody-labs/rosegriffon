@@ -163,12 +163,6 @@ export const REGISTRE_TACHES: Readonly<Record<string, DefinitionTache>> = Object
   // Équivalents des travaux de l'ancien bot Achilléa (BullMQ `SanctionJobs`/`ClanJobs`,
   // `@Schedule` `CastReminders`/`PhaseTransitions`, minuteurs des intégrations ranked).
   "achillea:sanctions": { executer: () => import("./tasks/achillea-sanctions").then(m => m.runAchilleaSanctions()) },
-  "achillea:clans-effectif": {
-    executer: () => import("./tasks/achillea-clans-effectif").then(m => m.runAchilleaClansEffectif()),
-  },
-  "achillea:casts-rappels": {
-    executer: () => import("./tasks/achillea-casts-rappels").then(m => m.runAchilleaCastsRappels()),
-  },
   "achillea:tournois-phases": {
     executer: () => import("./tasks/achillea-tournois-phases").then(m => m.runAchilleaTournoisPhases()),
   },

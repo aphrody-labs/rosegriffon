@@ -103,8 +103,6 @@ export interface UpdateClanPayload {
   origin?: string;
   /** Bascule « clan inactif » — l'API ne l'accepte que d'un administrateur Achilléa. */
   isInactive?: boolean;
-  /** Retire le clan des listes publiques — administrateurs uniquement. */
-  isHidden?: boolean;
 }
 
 /**

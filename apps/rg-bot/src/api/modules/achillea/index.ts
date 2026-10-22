@@ -33,7 +33,6 @@ import { clanTeamsController } from "./clans/equipes";
 import { interclanController } from "./interclans";
 import { blacklistController } from "./blacklist";
 import { guildSettingsController } from "./guilds/reglages";
-import { resyncAvatarsController } from "./users/resync-avatars";
 
 export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(tournamentController)
@@ -46,7 +45,7 @@ export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(blacklistController)
   .use(guildSettingsController)
   // Avant `usersController` : `/users/resync-avatars` ne doit pas tomber sur `/users/:id`.
-  .use(resyncAvatarsController)
+  .use(avatarResyncController)
   .use(miscController)
   .use(organizationController)
   .use(leaderboardController)
@@ -70,7 +69,6 @@ export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(notificationsInternalController)
   .use(castsController)
   .use(imagesController)
-  .use(avatarResyncController)
   .use(proxyController)
   .use(moderationSyncController)
   .use(clansAdminController);

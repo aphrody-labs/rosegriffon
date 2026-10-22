@@ -60,7 +60,6 @@ export const ClanModel = {
     autoAcceptMembers: t.Optional(t.Boolean()),
     isHidden: t.Optional(t.Boolean()),
     isInactive: t.Optional(t.Boolean()),
-    isHidden: t.Optional(t.Boolean()),
     origin: t.Optional(t.String({ minLength: 2, maxLength: 8 })),
     languages: t.Optional(t.Array(t.String({ minLength: 2, maxLength: 8 }), { maxItems: 20 })),
   }),
