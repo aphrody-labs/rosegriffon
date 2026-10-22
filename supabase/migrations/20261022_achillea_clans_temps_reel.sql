@@ -60,9 +60,8 @@ create trigger achillea_notification_temps_reel
   after insert on achillea.user_notification
   for each row execute function achillea.notification_temps_reel();
 
--- 4. Planification de `achillea:clans` toutes les 15 minutes, même mécanique que
---    `20261018_feed_sync_cron.sql` ; expression identique à
---    `PLANIFICATIONS['achillea:clans']` (`@rosegriffon/types/cron`), en UTC.
-select cron.schedule('rg:achillea:clans', '*/15 * * * *', $job$select rg_cron.appeler('achillea:clans')$job$);
+-- 4. Pas de planification pg_cron : `rg-core` planifie en processus (`Bun.cron`) toute
+--    tâche du catalogue qui a une expression (`PLANIFICATIONS['achillea:clans']`). Une
+--    seconde planification ici la déclencherait deux fois par quart d'heure.
 
 commit;
