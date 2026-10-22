@@ -99,13 +99,13 @@ export function nomWebp(nom: string): string {
  * Réencode une image trop lourde pour le bucket : WebP, 2048 px au plus sur le grand
  * côté, qualité décroissante jusqu'à passer sous le plafond.
  */
-export async function reduireImage(octets: Uint8Array): Promise<Uint8Array> {
+export async function reduireImage(octets: Uint8Array): Promise<Uint8Array<ArrayBuffer>> {
   for (const qualite of [85, 75, 60]) {
     const sortie = await new Bun.Image(octets)
       .resize(2048, 2048, { fit: "inside", withoutEnlargement: true })
       .webp({ quality: qualite })
       .bytes();
-    if (sortie.byteLength <= TAILLE_MAX_OBJET) return sortie;
+    if (sortie.byteLength <= TAILLE_MAX_OBJET) return new Uint8Array(sortie);
   }
   throw new Error("image encore trop lourde après réencodage WebP");
 }
@@ -116,7 +116,7 @@ const renommes = new Map<string, string>();
 async function migrerObjet(ctx: Contexte, nomSource: string): Promise<"copie" | "deja" | "simule"> {
   const source = await fetch(ORIGINE_SOURCE + nomSource.split("/").map(encodeURIComponent).join("/"));
   if (!source.ok) throw new Error(`source ${source.status}`);
-  let octets: Uint8Array = new Uint8Array(await source.arrayBuffer());
+  let octets: Uint8Array<ArrayBuffer> = new Uint8Array(await source.arrayBuffer());
   let mime = typeImage(octets);
   if (!mime) throw new Error("contenu qui n'est pas une image (magic bytes)");
   let nom = nomSource;
