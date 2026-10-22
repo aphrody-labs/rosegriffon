@@ -15,7 +15,7 @@
  * mais APRÈS avoir déjà passé le tournoi en `Ongoing`. Ici le refus précède
  * toute écriture : un tournoi sans arbre possible reste en préparation.
  */
-import type { Kysely } from "kysely";
+import type { Kysely, Transaction } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 import { currentStageMatches, rebuildTournamentBracket } from "./bracket";
 
@@ -70,6 +70,77 @@ export function lobbysAOuvrir(
     lobbys.push({ matchId: match.id, equipe1, equipe2 });
   }
   return lobbys;
+}
+
+/**
+ * Insère les lobbys d'un tournoi (legacy `generateLobbies`) : le lobby, ses deux
+ * joueurs (équipe 1 = `opponent1`) et une manche par partie du format. Appelé dans
+ * la transaction de l'appelant : démarrage, ou propagation d'un résultat.
+ */
+export async function ouvrirLobbys(
+  trx: Transaction<Database>,
+  tournoi: { id: number; format: string; personnalise: number | null },
+  lobbys: readonly LobbyArbre[],
+  maintenant: Date,
+): Promise<number[]> {
+  const manches = nombreManches(tournoi.format, tournoi.personnalise);
+  const ids: number[] = [];
+  for (const l of lobbys) {
+    const lobby = await trx
+      .insertInto("lobby")
+      .values({
+        created_at: maintenant,
+        updated_at: maintenant,
+        event_type: "TOURNAMENT",
+        event_id: tournoi.id,
+        mode: 2,
+        state: "Fresh",
+        bracket_match_id: l.matchId,
+        channel_id: null,
+        host_user_id: null,
+        is_repool: false,
+        phase_id: null,
+        swiss_round: null,
+        match_format: tournoi.format,
+        custom_format_child_count: tournoi.personnalise,
+        ranked_elo_applied: false,
+      })
+      .returning("id")
+      .executeTakeFirstOrThrow();
+    const joueur = (userId: string, team: number) => ({
+      created_at: maintenant,
+      updated_at: maintenant,
+      user_id: userId,
+      lobby_id: lobby.id,
+      team,
+      score: 0,
+      forfeit: false,
+      elo_variation: 0,
+      validated_result: false,
+      claimed_opponent_score: null,
+      screenshot_url: null,
+      state: "Pending",
+    });
+    await trx.insertInto("lobby_user").values([joueur(l.equipe1, 1), joueur(l.equipe2, 2)]).execute();
+    await trx
+      .insertInto("lobby_match")
+      .values(
+        Array.from({ length: manches }, (_, i) => ({
+          created_at: maintenant,
+          updated_at: maintenant,
+          lobby_id: lobby.id,
+          game_number: i + 1,
+          score_team1: 0,
+          score_team2: 0,
+          team1validated: false,
+          team2validated: false,
+          admin_validated: false,
+        })),
+      )
+      .execute();
+    ids.push(Number(lobby.id));
+  }
+  return ids;
 }
 
 /** Refus de démarrage, avec le message montré au site, au bot et à la CLI. */
@@ -138,7 +209,6 @@ export async function demarrerTournoi(
   }
 
   const format = tournoi.match_format ?? "bo1";
-  const manches = nombreManches(format, tournoi.custom_format_child_count);
   const demarre = await db.transaction().execute(async trx => {
     const bascule = await trx
       .updateTable("event")
@@ -148,60 +218,7 @@ export async function demarrerTournoi(
       .executeTakeFirst();
     // Démarrage concurrent (clic + tâche planifiée) : le premier l'emporte.
     if (Number(bascule.numUpdatedRows) === 0) return false;
-    for (const l of lobbys) {
-      const lobby = await trx
-        .insertInto("lobby")
-        .values({
-          created_at: maintenant,
-          updated_at: maintenant,
-          event_type: "TOURNAMENT",
-          event_id: tournoiId,
-          mode: 2,
-          state: "Fresh",
-          bracket_match_id: l.matchId,
-          channel_id: null,
-          host_user_id: null,
-          is_repool: false,
-          phase_id: null,
-          swiss_round: null,
-          match_format: format,
-          custom_format_child_count: tournoi.custom_format_child_count,
-          ranked_elo_applied: false,
-        })
-        .returning("id")
-        .executeTakeFirstOrThrow();
-      const joueur = (userId: string, team: number) => ({
-        created_at: maintenant,
-        updated_at: maintenant,
-        user_id: userId,
-        lobby_id: lobby.id,
-        team,
-        score: 0,
-        forfeit: false,
-        elo_variation: 0,
-        validated_result: false,
-        claimed_opponent_score: null,
-        screenshot_url: null,
-        state: "Pending",
-      });
-      await trx.insertInto("lobby_user").values([joueur(l.equipe1, 1), joueur(l.equipe2, 2)]).execute();
-      await trx
-        .insertInto("lobby_match")
-        .values(
-          Array.from({ length: manches }, (_, i) => ({
-            created_at: maintenant,
-            updated_at: maintenant,
-            lobby_id: lobby.id,
-            game_number: i + 1,
-            score_team1: 0,
-            score_team2: 0,
-            team1validated: false,
-            team2validated: false,
-            admin_validated: false,
-          })),
-        )
-        .execute();
-    }
+    await ouvrirLobbys(trx, { id: tournoiId, format, personnalise: tournoi.custom_format_child_count }, lobbys, maintenant);
     const actifs = await trx
       .selectFrom("tournament_participant")
       .select(eb => eb.fn.countAll<number>().as("n"))
