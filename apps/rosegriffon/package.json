@@ -12,6 +12,7 @@
     "start": "bun src/main.ts",
     "compile": "bun ../../scripts/compile.ts",
     "typecheck": "bun check --noEmit",
+    "test": "bun test src",
     "lint": "bun lint src"
   },
   "dependencies": {

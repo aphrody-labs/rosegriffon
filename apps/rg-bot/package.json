@@ -18,7 +18,8 @@
     "./core": "./src/core.ts",
     "./gateway": "./src/index.ts",
     "./api": "./src/api/server.ts",
-    "./ranked": "./src/api/ranked/main.ts"
+    "./ranked": "./src/api/ranked/main.ts",
+    "./achillea-api": "./src/lib/achillea-api.ts"
   },
   "publishConfig": {
     "access": "public",
