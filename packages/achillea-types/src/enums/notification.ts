@@ -9,6 +9,12 @@ export enum NotificationType {
   RANKED_MATCH_FOUND,
   /** Évènement temps réel relayé par `POST /notifications/emit-to-users`. */
   REALTIME_EVENT,
+  // Ajouts en fin d'enum : les valeurs numériques déjà stockées ne bougent pas.
+  CLAN_DISBANDED,
+  CLAN_APPLICATION_RECEIVED,
+  CLAN_APPLICATION_ACCEPTED,
+  CLAN_APPLICATION_REJECTED,
+  CLAN_INVITE_RECEIVED,
 }
 
 export enum NotificationCategory {

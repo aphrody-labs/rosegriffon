@@ -491,6 +491,11 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   [NotificationType.CLAN_MEMBER_KICK]: "Exclusion d'un membre de clan",
   [NotificationType.RANKED_MATCH_FOUND]: "Match ranked trouvé",
   [NotificationType.REALTIME_EVENT]: "Évènement ranked",
+  [NotificationType.CLAN_DISBANDED]: "Dissolution du clan",
+  [NotificationType.CLAN_APPLICATION_RECEIVED]: "Nouvelle candidature au clan",
+  [NotificationType.CLAN_APPLICATION_ACCEPTED]: "Candidature acceptée",
+  [NotificationType.CLAN_APPLICATION_REJECTED]: "Candidature refusée",
+  [NotificationType.CLAN_INVITE_RECEIVED]: "Invitation dans un clan",
 };
 
 export function notificationTypeLabel(type: NotificationType): string {

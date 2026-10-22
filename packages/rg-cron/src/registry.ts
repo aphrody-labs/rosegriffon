@@ -156,6 +156,7 @@ export const REGISTRE_TACHES: Readonly<Record<string, DefinitionTache>> = Object
   "achillea:casts": { executer: () => import("./tasks/achillea-casts").then(m => m.runAchilleaCastReminders()) },
   "achillea:guildes": { executer: () => import("./tasks/achillea-guildes").then(m => m.runAchilleaGuildes()) },
   "achillea:seasons": { executer: () => import("./tasks/achillea-seasons").then(m => m.runAchilleaSeasonRollover()) },
+  "achillea:clans": { executer: () => import("./tasks/achillea-clans").then(m => m.runAchilleaClans()) },
   "achillea:weekly-payout": {
     executer: () => import("./tasks/achillea-weekly-payout").then(m => m.runAchilleaWeeklyPayout()),
   },

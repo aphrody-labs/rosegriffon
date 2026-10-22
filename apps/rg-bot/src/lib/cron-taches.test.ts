@@ -32,6 +32,7 @@ describe("catalogue", () => {
 
   test("les tâches historiques sont toujours servies", () => {
     expect(TACHES_CRON).toContain("achillea:guildes");
+    expect(TACHES_CRON).toContain("achillea:clans");
     expect(TACHES_CRON).toContain("db");
     expect(TACHES_CRON).toContain("stats:achillea");
     expect(TACHES_CRON).toContain("achillea:weekly-payout");
