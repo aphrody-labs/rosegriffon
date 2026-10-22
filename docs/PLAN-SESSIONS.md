@@ -78,10 +78,13 @@ et `bun test packages/rg-app-shell`. Un seul build lourd à la fois.
 
 ## Chantiers restants (par priorité)
 
-0. **Build du site bloqué par Neon** : le projet Neon `inagle` (wiki, `INAGLE_DATABASE_URL`) a dépassé son quota de
-   calcul gratuit (≈63 h, remise à zéro le 2026-11-01) ; le pré-rendu de `/wiki/*` échoue (`53000 exceeded the
-   quota`) et aucun nouveau build de `rg-website` ne passe. La prod sert l'ancienne release. À trancher :
-   offre Neon payante, ou base Inagle déplacée (Supabase / Postgres local).
+0. **Base Inagle sortie de Neon** (résolu 2026-10-22) : le blocage venait de la bande passante sortante du plan gratuit
+   (5,5 Go > 5 Go/mois), pas du calcul ; même `run_sql` répondait 402. `INAGLE_DATABASE_URL` pointe désormais sur un
+   Postgres 18 + pgvector local (conteneur `rg-inagle-pg`, 127.0.0.1:5433, données `/home/ubuntu/data/inagle-pg`, mot de
+   passe `/home/ubuntu/data/inagle-pg.motdepasse`), peuplé depuis les tables `inagle_*` de Supabase (copie du 17/10,
+   dump `/home/ubuntu/backups/inagle/`). Anciennes valeurs : `/etc/rg/rg.env.bak-20261022-neon` et idem pour
+   `/etc/aphrody/rg-core.env`. À faire : sauvegarde planifiée de ce conteneur ; le projet Neon `inagle` est conservé
+   (reprise possible au 2026-11-01), sa fraîcheur par rapport à Supabase n'a pas pu être comparée.
 1. **Crawl complet jamais prouvé** : zukan passe (5 456 personnages), mais aucun run n'est allé au bout sans
    être coupé. Relancer `crawl` seul, sans aucun redéploiement, et lire le bilan (`Cron Runner … crawl`).
    `reddit` répond 403 (étape non critique).
