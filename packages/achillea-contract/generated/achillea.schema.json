@@ -3571,7 +3571,14 @@
         2,
         3,
         4,
-        5
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
       ],
       "x-enum-varnames": [
         "NEW_ORGANIZATION_CREATION_REQUEST",
@@ -3579,7 +3586,14 @@
         "NEW_ORGANIZATION_EDIT_REPLY",
         "NEW_ORGANIZATION_ACCEPT_REPLY",
         "NEW_ORGANIZATION_REJECT_REPLY",
-        "CLAN_MEMBER_KICK"
+        "CLAN_MEMBER_KICK",
+        "RANKED_MATCH_FOUND",
+        "REALTIME_EVENT",
+        "CLAN_DISBANDED",
+        "CLAN_APPLICATION_RECEIVED",
+        "CLAN_APPLICATION_ACCEPTED",
+        "CLAN_APPLICATION_REJECTED",
+        "CLAN_INVITE_RECEIVED"
       ]
     },
     "OpenRegistrationsResult": {
@@ -7266,6 +7280,10 @@
         },
         "origin": {
           "type": "string"
+        },
+        "isInactive": {
+          "type": "boolean",
+          "description": "Bascule « clan inactif » — l'API ne l'accepte que d'un administrateur Achilléa."
         }
       }
     },

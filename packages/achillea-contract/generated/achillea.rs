@@ -1379,6 +1379,15 @@ pub enum NotificationType {
 	NewOrganizationAcceptReply = 3,
 	NewOrganizationRejectReply = 4,
 	ClanMemberKick = 5,
+	/// Appariement ranked relayé par `POST /notifications/emit-match-found`.
+	RankedMatchFound = 6,
+	/// Évènement temps réel relayé par `POST /notifications/emit-to-users`.
+	RealtimeEvent = 7,
+	ClanDisbanded = 8,
+	ClanApplicationReceived = 9,
+	ClanApplicationAccepted = 10,
+	ClanApplicationRejected = 11,
+	ClanInviteReceived = 12,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -2843,6 +2852,9 @@ pub struct UpdateClanPayload {
 	pub languages: Option<Vec<String>>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub origin: Option<String>,
+	/// Bascule « clan inactif » — l'API ne l'accepte que d'un administrateur Achilléa.
+	#[serde(rename = "isInactive", default, skip_serializing_if = "Option::is_none")]
+	pub is_inactive: Option<bool>,
 }
 
 /// Champs modifiables par le titulaire du profil.

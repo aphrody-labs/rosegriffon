@@ -1067,6 +1067,15 @@ public enum NotificationType: Int, Codable, Sendable, CaseIterable {
 	case newOrganizationAcceptReply = 3
 	case newOrganizationRejectReply = 4
 	case clanMemberKick = 5
+	/// Appariement ranked relayé par `POST /notifications/emit-match-found`.
+	case rankedMatchFound = 6
+	/// Évènement temps réel relayé par `POST /notifications/emit-to-users`.
+	case realtimeEvent = 7
+	case clanDisbanded = 8
+	case clanApplicationReceived = 9
+	case clanApplicationAccepted = 10
+	case clanApplicationRejected = 11
+	case clanInviteReceived = 12
 }
 
 public struct OpenRegistrationsResult: Codable, Sendable {
@@ -2048,6 +2057,8 @@ public struct UpdateClanPayload: Codable, Sendable {
 	public let autoAcceptMembers: Bool?
 	public let languages: [String]?
 	public let origin: String?
+	/// Bascule « clan inactif » — l'API ne l'accepte que d'un administrateur Achilléa.
+	public let isInactive: Bool?
 }
 
 /// Champs modifiables par le titulaire du profil.

@@ -1172,6 +1172,22 @@ enum class NotificationType {
 	NEW_ORGANIZATION_REJECT_REPLY,
 	@SerialName("5")
 	CLAN_MEMBER_KICK,
+	/// Appariement ranked relayé par `POST /notifications/emit-match-found`.
+	@SerialName("6")
+	RANKED_MATCH_FOUND,
+	/// Évènement temps réel relayé par `POST /notifications/emit-to-users`.
+	@SerialName("7")
+	REALTIME_EVENT,
+	@SerialName("8")
+	CLAN_DISBANDED,
+	@SerialName("9")
+	CLAN_APPLICATION_RECEIVED,
+	@SerialName("10")
+	CLAN_APPLICATION_ACCEPTED,
+	@SerialName("11")
+	CLAN_APPLICATION_REJECTED,
+	@SerialName("12")
+	CLAN_INVITE_RECEIVED,
 }
 
 @Serializable
@@ -2320,6 +2336,8 @@ data class UpdateClanPayload(
 	val autoAcceptMembers: Boolean? = null,
 	val languages: List<String>? = null,
 	val origin: String? = null,
+	/// Bascule « clan inactif » — l'API ne l'accepte que d'un administrateur Achilléa.
+	val isInactive: Boolean? = null,
 )
 
 /// Champs modifiables par le titulaire du profil.
