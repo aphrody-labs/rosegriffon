@@ -6,11 +6,12 @@
  *   aux futurs outils Rust internes ; elle ne sert que /health et renvoie 404
  *   {"error":"unknown service"} pour tout le reste). Chaque route vit dans l'app
  *   Next.js qui l'implémente :
- *     - /api/cron/publish-scheduled        → Azalée  (azalee.rosegriffon.fr)
+ *     - /api/cron/publish-scheduled        → Website (rosegriffon.fr, Azalée absorbée)
  *     - /api/cron/patreon-refresh|reminders → Website (rosegriffon.fr)
  */
 
-const AZALEE_URL = process.env.AZALEE_URL || "https://azalee.rosegriffon.fr";
+/** Azalée est absorbée par le site : `azalee.rosegriffon.fr` ne fait plus que rediriger. */
+const AZALEE_URL = process.env.AZALEE_URL || "https://rosegriffon.fr";
 const WEBSITE_URL = process.env.WEBSITE_URL || "https://rosegriffon.fr";
 
 export async function triggerPublishScheduled(): Promise<{ success: boolean; error?: string }> {
