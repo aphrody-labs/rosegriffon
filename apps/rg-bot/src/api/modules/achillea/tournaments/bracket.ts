@@ -183,6 +183,23 @@ export async function rebuildTournamentBracket(db: Kysely<Database>, tournamentI
   return true;
 }
 
+/** Matchs de l'étape en cours (legacy `getCurrentStage` + `storage.select("match")`) ; `null` sans étape. */
+export async function currentStageMatches(
+  tournamentId: number,
+): Promise<{ stageId: number; matches: Array<{ id: number; opponent1: { id: Id | null } | null; opponent2: { id: Id | null } | null }> } | null> {
+  const stage = await manager.get.currentStage(tournamentId);
+  if (!stage) return null;
+  const matches = (await manager.storage.select("match", { stage_id: stage.id })) ?? [];
+  return {
+    stageId: Number(stage.id),
+    matches: matches.map(match => ({
+      id: Number(match.id),
+      opponent1: match.opponent1 ? { id: match.opponent1.id ?? null } : null,
+      opponent2: match.opponent2 ? { id: match.opponent2.id ?? null } : null,
+    })),
+  };
+}
+
 export async function tournamentBracketData(tournamentId: number) {
   return manager.get.tournamentData(tournamentId);
 }

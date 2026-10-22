@@ -7,6 +7,7 @@ import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 import { rebuildTournamentBracket, tournamentBracketData } from "./bracket";
 import { applyPlacementPrizes } from "./placement";
+import { demarrerTournoi } from "./start";
 import { circuitRanking, circuitStats, playerCircuitProfile, tournamentSummary } from "./circuit";
 import { verifyAdminBearerToken } from "@rosegriffon/achillea-core/auth";
 
@@ -940,29 +941,48 @@ export const tournamentController = new Elysia({ prefix: "/tournaments" })
     async ({ db, headers, params: { id } }) => {
       const auth = await organizer(db, headers, id);
       if (auth.error) return auth.error;
-      if (auth.tournament.internal_state !== "Preparing")
-        return status(400, { message: "Tournament is not preparing" as const });
-      await db.updateTable("event").set({ internal_state: "Ongoing" }).where("id", "=", id).execute();
-      await db
-        .insertInto("tournament_event")
-        .values({
-          tournament_id: id,
-          type: "TOURNAMENT_STARTED",
-          actor_id: auth.session.id,
-          target_id: null,
-          payload: null,
-          reason: null,
-        })
-        .execute();
-      return { success: true as const, internalState: "Ongoing" as const };
+      // Sans phase, l'arbre du tournoi est la phase unique : les lobbys de son
+      // premier tour sont ouverts ici (legacy `startTournament` → `generateLobbies`).
+      const issue = await demarrerTournoi(db, id, auth.session.id);
+      if (!issue.ok)
+        return issue.status === 404
+          ? status(404, { message: "Tournament not found" as const })
+          : status(400, { message: issue.message });
+      return { success: true as const, internalState: "Ongoing" as const, phases: issue.phases, lobbies: issue.lobbies };
     },
     {
       params: t.Object({ id: t.Numeric() }),
       response: {
-        200: t.Object({ success: t.Literal(true), internalState: t.Literal("Ongoing") }),
+        200: TournamentModel.started,
         400: t.Object({ message: t.String() }),
         401: t.Object({ message: t.Literal("Authentication required") }),
         403: t.Object({ message: t.Literal("Tournament organizer required") }),
+        404: TournamentModel.notFound,
+      },
+    },
+  )
+  .post(
+    "/internal/:id/start",
+    async ({ db, headers, params: { id }, set }) => {
+      const bearer = headers.authorization?.replace(/^Bearer\s+/i, "");
+      if (!verifyAdminBearerToken(bearer, process.env.API_ADMIN_TOKEN)) {
+        set.status = 401;
+        return { message: "Internal authentication required" as const };
+      }
+      // Démarrage automatique (`achillea:tournois-phases`) : même chemin que le clic.
+      const issue = await demarrerTournoi(db, id, null);
+      if (!issue.ok)
+        return issue.status === 404
+          ? status(404, { message: "Tournament not found" as const })
+          : status(400, { message: issue.message });
+      return { success: true as const, internalState: "Ongoing" as const, phases: issue.phases, lobbies: issue.lobbies };
+    },
+    {
+      params: t.Object({ id: t.Numeric() }),
+      response: {
+        200: TournamentModel.started,
+        400: t.Object({ message: t.String() }),
+        401: t.Object({ message: t.Literal("Internal authentication required") }),
         404: TournamentModel.notFound,
       },
     },
