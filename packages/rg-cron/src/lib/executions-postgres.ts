@@ -30,7 +30,7 @@
  */
 
 import { hostname } from "node:os";
-import { sql } from "./db.js";
+import { signalerErreurSql, sql } from "./db.js";
 import { tronquerErreur, type ResultatExecution } from "./executions.js";
 
 /** SQLSTATE « la relation n'existe pas ». */
@@ -255,6 +255,9 @@ export async function prendreBail(nom: string, dureeMs: number): Promise<string 
     if (sqlstate(err) !== SQLSTATE_TABLE_ABSENTE) {
       console.warn("[cron-bail] bail indisponible :", err instanceof Error ? err.message.slice(0, 200) : err);
     }
+    // Première requête de chaque exécution : un pool empoisonné est recréé ici,
+    // AVANT que la tâche ne s'en serve.
+    signalerErreurSql(err);
     return BAIL_LIBRE;
   }
 }

@@ -14,8 +14,8 @@
  *
  * Chaque vue est un onglet du MÊME Chrome, lancé à la première vue du
  * processus. `rg-core` est un service permanent : le navigateur ne doit pas lui
- * survivre entre deux tâches. Le compteur ci-dessous le tue quand la dernière
- * vue ouverte par ce module se ferme.
+ * survivre entre deux tâches. Le compteur ci-dessous le tue peu après la
+ * fermeture de la dernière vue ouverte par ce module.
  */
 
 /** Réponse de navigation, au format attendu par les crawlers existants (alias : signature d'index implicite). */
@@ -37,11 +37,43 @@ let vuesOuvertes = 0;
 const vuesFermees = new WeakSet<Bun.WebView>();
 
 /**
+ * Chrome n'est tué qu'après ce délai sans vue ouverte.
+ *
+ * `Bun.WebView.closeAll()` rend la main avant que Chrome ne soit mort : une vue
+ * créée dans la foulée s'accroche au tube mourant et toute navigation échoue
+ * (« view is closed », « Chrome process closed the pipe »). C'est exactement
+ * l'enchaînement d'`ouvrirVue()`/`fermerVue()` puis `PageWebView.connect()` de
+ * `feed:sync`. Différer la fermeture laisse la vue suivante réutiliser le
+ * Chrome vivant ; une vue ouverte entre-temps annule la fermeture.
+ */
+const DELAI_FERMETURE_CHROME_MS = 2_000;
+/** Temps laissé à Chrome pour mourir après `closeAll()` avant d'ouvrir une vue (mesuré : 10 ms suffisent). */
+const DELAI_APRES_FERMETURE_MS = 100;
+
+let minuteurFermeture: ReturnType<typeof setTimeout> | undefined;
+let chromeFermeLe = Number.NEGATIVE_INFINITY;
+
+function fermerChrome(): void {
+  minuteurFermeture = undefined;
+  if (vuesOuvertes !== 0) return;
+  Bun.WebView.closeAll();
+  chromeFermeLe = performance.now();
+}
+
+/** Attend, si besoin, que le Chrome fermé par `closeAll()` soit vraiment mort. */
+async function chromeDisponible(): Promise<void> {
+  const reste = chromeFermeLe + DELAI_APRES_FERMETURE_MS - performance.now();
+  if (reste > 0) await Bun.sleep(reste);
+}
+
+/**
  * Ouvre un onglet headless. `url: false` interdit de se brancher sur un Chrome
  * déjà lancé avec le débogage distant : le cron a toujours son propre
  * navigateur, éphémère.
  */
 export function ouvrirVue(options: { largeur?: number; hauteur?: number } = {}): Bun.WebView {
+  clearTimeout(minuteurFermeture);
+  minuteurFermeture = undefined;
   const vue = new Bun.WebView({
     width: options.largeur ?? 1440,
     height: options.hauteur ?? 900,
@@ -53,13 +85,17 @@ export function ouvrirVue(options: { largeur?: number; hauteur?: number } = {}):
   return vue;
 }
 
-/** Ferme la vue ; ferme Chrome quand c'était la dernière. Idempotent par vue. */
+/** Ferme la vue ; ferme Chrome peu après quand c'était la dernière. Idempotent par vue. */
 export function fermerVue(vue: Bun.WebView): void {
   if (vuesFermees.has(vue)) return;
   vuesFermees.add(vue);
   vue.close();
   vuesOuvertes = Math.max(0, vuesOuvertes - 1);
-  if (vuesOuvertes === 0) Bun.WebView.closeAll();
+  if (vuesOuvertes === 0 && minuteurFermeture === undefined) {
+    minuteurFermeture = setTimeout(fermerChrome, DELAI_FERMETURE_CHROME_MS);
+    // Ne retient pas le processus : Bun ferme de toute façon Chrome à la sortie.
+    minuteurFermeture.unref?.();
+  }
 }
 
 /** Code HTTP du document principal (Navigation Timing, `responseStatus`). */
@@ -89,6 +125,7 @@ export async function naviguer(
 
 /** Charge une page dans un onglet dédié et rend son HTML après exécution des scripts. */
 export async function chargerDocument(url: string, delaiMs = DELAI_NAVIGATION_MS): Promise<DocumentCharge> {
+  await chromeDisponible();
   const vue = ouvrirVue();
   try {
     const reponse = await naviguer(vue, url, delaiMs);
@@ -114,6 +151,7 @@ export class PageWebView {
 
   /** L'argument (point de terminaison CDP) n'existe plus : Bun lance son navigateur. */
   static async connect(_endpoint?: string): Promise<PageWebView> {
+    await chromeDisponible();
     return new PageWebView(ouvrirVue());
   }
 

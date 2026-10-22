@@ -26,6 +26,12 @@ export interface WebReconOptions {
   probeAssets?: boolean;
   /** Nombre max de ressources sondées (sécurité, défaut 2000). */
   maxProbes?: number;
+  /**
+   * Moteur de crawl. Défaut : `WebService` d'`@aphrody/agent-browser`, qui lance
+   * `aphrody-web` par le runtime natif (`aphrody_ffi`). Injectable pour tester
+   * la classification sans ce runtime.
+   */
+  service?: Pick<WebService, "crawl">;
 }
 
 export interface Endpoint {
@@ -241,7 +247,7 @@ Bounded rendered discovery through aphrody-web-crawl. DNS/framework detection is
     }
   };
 
-  const service = new WebService();
+  const service = opts.service ?? new WebService();
   const report = await service.crawl([root, ...(opts.seeds ?? [])], {
     maxPages: 120,
     render: true,

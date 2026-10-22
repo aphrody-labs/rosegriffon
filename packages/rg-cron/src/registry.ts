@@ -27,6 +27,7 @@
 
 import { CATALOGUE_TACHES, normaliserNomTache, PLANIFICATIONS, TACHES_CRON } from "@rosegriffon/types/cron";
 import { signalerDecisionAlerte } from "./lib/alertes-cron.js";
+import { signalerErreurSql } from "./lib/db.js";
 import { decisionDepuisHistorique, type OrigineExecution, type ResultatExecution } from "./lib/executions.js";
 import {
   echecsConsecutifsAvant,
@@ -303,7 +304,11 @@ export async function executeTask(
   }
 
   if (resultat.success) console.log(`[Cron Runner] Tâche complétée avec succès : ${nom} en ${resultat.dureeMs}ms`);
-  else console.error(`[Cron Runner] Échec de la tâche : ${nom} en ${resultat.dureeMs}ms : ${resultat.error}`);
+  else {
+    console.error(`[Cron Runner] Échec de la tâche : ${nom} en ${resultat.dureeMs}ms : ${resultat.error}`);
+    // La tâche a pu rencontrer le pool empoisonné après le bail : la suivante repartira sur un pool neuf.
+    signalerErreurSql(resultat.error);
+  }
 
   await consignerExecution({
     nom,
