@@ -79,7 +79,7 @@ export default function WalletPage() {
   if (etatAcces === "non_connecte" || etatAcces === "discord_absent") {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
-        <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+        <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
         <h2 className="text-xl font-bold">Connexion requise</h2>
         <p className="text-sm text-muted-foreground">
           {etatAcces === "discord_absent"
@@ -101,7 +101,7 @@ export default function WalletPage() {
   if (etatAcces === "indisponible") {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-3">
-        <ShieldAlert className="w-12 h-12 text-rose-400 mx-auto" />
+        <ShieldAlert className="w-12 h-12 text-destructive mx-auto" />
         <h2 className="text-xl font-bold">Portefeuille temporairement indisponible</h2>
         <p className="text-sm text-muted-foreground">
           La base Achilléa ne répond pas encore. Réessayez dans un instant.
@@ -124,7 +124,7 @@ export default function WalletPage() {
           Retour au hub Achilléa
         </Link>
         <div className="flex items-center gap-2">
-          <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
             <Wallet className="w-5 h-5" />
           </span>
           <h1 className="text-3xl font-bold tracking-tight">Portefeuille Virtuel (ACH)</h1>
@@ -142,15 +142,15 @@ export default function WalletPage() {
       ) : (
         <div className="space-y-8">
           {/* Balance Card */}
-          <div className="border-2 border-border bg-gradient-to-br from-card via-card to-amber-500/5 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="border-2 border-border bg-gradient-to-br from-card via-card to-warning/5 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2 text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-2">
-                <Coins className="w-5 h-5 text-amber-400" />
+                <Coins className="w-5 h-5 text-warning" />
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Solde disponible
                 </span>
               </div>
-              <div className="text-4xl md:text-5xl font-black text-amber-400 font-mono tracking-tight">
+              <div className="text-4xl md:text-5xl font-black text-warning font-mono tracking-tight">
                 {formatAchCurrency(currentAmount)}
               </div>
               <p className="text-xs text-muted-foreground">Crédits cumulés utilisables lors des évènements Achilléa.</p>
@@ -192,8 +192,8 @@ export default function WalletPage() {
                         <div
                           className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                             isCredit
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                              ? "bg-success/10 text-success border border-success/20"
+                              : "bg-destructive/10 text-destructive border border-destructive/20"
                           }`}
                         >
                           {isCredit ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
@@ -215,7 +215,7 @@ export default function WalletPage() {
                         </div>
                       </div>
 
-                      <div className={`font-mono font-bold text-sm ${isCredit ? "text-emerald-400" : "text-rose-400"}`}>
+                      <div className={`font-mono font-bold text-sm ${isCredit ? "text-success" : "text-destructive"}`}>
                         {isCredit ? "+" : "-"}
                         {formatAchCurrency(tx.amount)}
                       </div>

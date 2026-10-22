@@ -18,6 +18,7 @@ import {
   AlertCircle,
   AlertTriangle,
 } from "lucide-react";
+import { MARQUE } from "@/components/achillea/couleurs-donnees";
 
 export default function OrganizationValidationPage({ id }: { id: string }) {
   const orgId = id;
@@ -121,7 +122,7 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
           Retour aux organisations en attente
         </Link>
         <div className="flex items-center gap-3">
-          <span className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <span className="p-2.5 rounded-xl bg-warning/10 text-warning border border-warning/20">
             <Building2 className="w-6 h-6" />
           </span>
           <div>
@@ -215,7 +216,7 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
                     href={bm.canonicalUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-400 font-medium hover:bg-purple-500/20 transition"
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border ${MARQUE.twitchPastille} font-medium transition`}
                   >
                     <Radio className="w-3 h-3" />
                     <span>{bm.username}</span>
@@ -241,7 +242,7 @@ export default function OrganizationValidationPage({ id }: { id: string }) {
               type="button"
               onClick={handleApprove}
               disabled={actionRunning}
-              className="inline-flex items-center gap-1.5 px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-sm disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-6 py-2 bg-success hover:bg-success/90 text-success-foreground rounded-xl text-xs font-bold transition shadow-sm disabled:opacity-50"
             >
               {actionRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               Approuver et valider la structure

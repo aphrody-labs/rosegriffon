@@ -10,6 +10,7 @@ import type { SeedOrdering } from "@rosegriffon/achillea-types/domain/brackets";
 import type { OrganizationDTO } from "@rosegriffon/achillea-types/domain/organization";
 import { isPlacementPrizeEligible, prizeTableForTournamentSize } from "@rosegriffon/achillea-core";
 import { AlertCircle, ArrowLeft, Bot, Calendar, Check, ChevronLeft, ChevronRight, Clock, FileText, Image as ImageIcon, Layers, Loader2, Medal, ShieldAlert, ShieldCheck, SlidersHorizontal, Trophy, Users } from "lucide-react";
+import { MEDAILLE } from "@/components/achillea/couleurs-donnees";
 
 const MATCH_FORMAT_OPTIONS = [
   { label: "BO1 (1 manche gagnante)", value: MatchFormat.BO1 },
@@ -255,7 +256,7 @@ export default function TournamentCreationPage() {
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
-        <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+        <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
         <h2 className="text-xl font-bold">Connexion requise</h2>
         <p className="text-sm text-muted-foreground">
           Vous devez être connecté avec un compte organisateur pour créer un tournoi.
@@ -530,15 +531,15 @@ export default function TournamentCreationPage() {
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div className="p-2.5 rounded-lg bg-background/80 border border-border text-center">
                     <div className="text-muted-foreground">1ère place (Vainqueur)</div>
-                    <div className="text-base font-bold font-mono text-amber-400 mt-0.5">+{prizeTable.first} AP</div>
+                    <div className={`text-base font-bold font-mono ${MEDAILLE.or.texte} mt-0.5`}>+{prizeTable.first} AP</div>
                   </div>
                   <div className="p-2.5 rounded-lg bg-background/80 border border-border text-center">
                     <div className="text-muted-foreground">2ème place (Finaliste)</div>
-                    <div className="text-base font-bold font-mono text-slate-300 mt-0.5">+{prizeTable.second} AP</div>
+                    <div className={`text-base font-bold font-mono ${MEDAILLE.argent.texte} mt-0.5`}>+{prizeTable.second} AP</div>
                   </div>
                   <div className="p-2.5 rounded-lg bg-background/80 border border-border text-center">
                     <div className="text-muted-foreground">Demi-finalistes (Top 4)</div>
-                    <div className="text-base font-bold font-mono text-amber-600 mt-0.5">+{prizeTable.semi} AP</div>
+                    <div className={`text-base font-bold font-mono ${MEDAILLE.bronze.texte} mt-0.5`}>+{prizeTable.semi} AP</div>
                   </div>
                 </div>
               </div>
@@ -731,9 +732,9 @@ export default function TournamentCreationPage() {
             </div>
 
             {/* SuperAdmin bypass */}
-            <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-center justify-between">
+            <div className="p-3 rounded-xl bg-warning/5 border border-warning/20 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-amber-500" />
+                <ShieldCheck className="w-4 h-4 text-warning" />
                 <div>
                   <div className="text-xs font-bold text-foreground">Déroger aux règles de préavis</div>
                   <div className="text-xs text-muted-foreground">
@@ -745,7 +746,7 @@ export default function TournamentCreationPage() {
                 type="checkbox"
                 checked={bypassRules}
                 onChange={e => setBypassRules(e.target.checked)}
-                className="w-4 h-4 accent-amber-500 rounded cursor-pointer"
+                className="w-4 h-4 accent-warning rounded cursor-pointer"
               />
             </div>
           </div>

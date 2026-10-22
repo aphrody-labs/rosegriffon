@@ -6,6 +6,7 @@ import { createAchilleaClient } from "@/lib/achillea";
 import type { LeagueSeasonPayload, LeagueMatchRow } from "@rosegriffon/achillea-types/domain/league";
 import { Trophy, ArrowLeft, Calendar, Users, Sparkles, Layers, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
+import { MEDAILLE } from "@/components/achillea/couleurs-donnees";
 
 interface PlayoffResult {
   round: string;
@@ -98,7 +99,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
           Retour au hub Achilléa
         </Link>
         <div className="flex items-center gap-2">
-          <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
             <Trophy className="w-5 h-5" />
           </span>
           <h1 className="text-2xl font-bold tracking-tight min-[840px]:text-3xl">Astral League</h1>
@@ -113,7 +114,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
             {totalMatchdays} journées
           </span>
           <span className="flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-amber-400" />
+            <Sparkles className="w-4 h-4 text-warning" />
             Top 4 Play-offs
           </span>
         </div>
@@ -154,7 +155,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <Sparkles className="w-3.5 h-3.5 text-warning" />
           Play-offs (Final Four)
         </button>
         <button
@@ -212,11 +213,11 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                             <span
                               className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-extrabold ${
                                 row.rank === 1
-                                  ? "bg-amber-400 text-black"
+                                  ? MEDAILLE.or.pastille
                                   : row.rank === 2
-                                    ? "bg-slate-300 text-black"
+                                    ? MEDAILLE.argent.pastille
                                     : row.rank === 3
-                                      ? "bg-amber-700 text-white"
+                                      ? MEDAILLE.bronze.pastille
                                       : isPlayoffSpot
                                         ? "bg-primary/20 text-primary"
                                         : "text-muted-foreground"
@@ -234,26 +235,26 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                             </div>
                           </td>
                           <td className="py-3 px-3 text-center text-muted-foreground font-mono">{row.played}</td>
-                          <td className="py-3 px-3 text-center font-semibold text-emerald-400 font-mono">{row.wins}</td>
-                          <td className="py-3 px-3 text-center font-semibold text-emerald-300 font-mono">
+                          <td className="py-3 px-3 text-center font-semibold text-success font-mono">{row.wins}</td>
+                          <td className="py-3 px-3 text-center font-semibold text-success/80 font-mono">
                             {row.winsOt}
                           </td>
-                          <td className="py-3 px-3 text-center text-rose-400 font-mono">{row.losses}</td>
-                          <td className="py-3 px-3 text-center text-rose-300 font-mono">{row.lossesOt}</td>
+                          <td className="py-3 px-3 text-center text-destructive font-mono">{row.losses}</td>
+                          <td className="py-3 px-3 text-center text-destructive/80 font-mono">{row.lossesOt}</td>
                           <td className="py-3 px-3 text-center text-muted-foreground font-mono">{row.mapsFor}</td>
                           <td className="py-3 px-3 text-center text-muted-foreground font-mono">{row.mapsAgainst}</td>
                           <td
                             className={`py-3 px-3 text-center font-mono font-semibold ${
                               row.mapDiff > 0
-                                ? "text-emerald-400"
+                                ? "text-success"
                                 : row.mapDiff < 0
-                                  ? "text-rose-400"
+                                  ? "text-destructive"
                                   : "text-muted-foreground"
                             }`}
                           >
                             {row.mapDiff > 0 ? `+${row.mapDiff}` : row.mapDiff}
                           </td>
-                          <td className="py-3 px-4 text-right font-black text-amber-400 font-mono text-sm">
+                          <td className="py-3 px-4 text-right font-black text-warning font-mono text-sm">
                             {row.points} pts
                           </td>
                         </tr>
@@ -340,7 +341,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
             <div className="space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border">
                 <div className="flex items-center gap-3">
-                  <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
                     <Trophy className="w-5 h-5" />
                   </span>
                   <div>
@@ -352,13 +353,13 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                     </p>
                   </div>
                 </div>
-                <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-bold border border-amber-500/20">
+                <span className="px-3 py-1 rounded-full bg-warning/10 text-warning text-xs font-bold border border-warning/20">
                   Saison 1
                 </span>
               </div>
 
               {season?.meta?.champion && (
-                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-300">
+                <div className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm font-bold text-warning/80">
                   Champion de la saison : {teamsMap.get(season.meta.champion) ?? season.meta.champion}
                 </div>
               )}

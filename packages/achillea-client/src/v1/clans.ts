@@ -202,13 +202,30 @@ export type ClanListQuery = {
   state?: ClanState;
 };
 
-/** 20 routes. */
+export type AdminClanListQuery = {
+  state?: ClanState;
+  page?: number;
+  /** Taille de page, 50 au plus. */
+  pageSize?: number;
+  /** Recherche sur le nom ou le tag. */
+  q?: string;
+};
+
+/** 21 routes. */
 export class ClansResource extends AchilleaResource {
   /** `GET /clans` — annuaire paginé, filtré par état de validation. */
   list(query: ClanListQuery = {}): Promise<AchilleaClientResult<Paginated<ClanDTO>>> {
     return this.http.get("/clans", clanListSchema, {
       query,
     });
+  }
+
+  /**
+   * `GET /admin/clans` — liste staff : projection complète, clans masqués et
+   * inactifs compris, filtre par état et recherche (nom ou tag).
+   */
+  adminList(query: AdminClanListQuery = {}): Promise<AchilleaClientResult<Paginated<ClanDTO>>> {
+    return this.http.get("/admin/clans", canonicalClanListSchema, { query });
   }
 
   /** `GET /clans/:id` — fiche publique d'un clan. */

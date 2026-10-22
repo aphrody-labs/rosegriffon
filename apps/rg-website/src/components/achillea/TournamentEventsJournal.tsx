@@ -80,30 +80,30 @@ export function TournamentEventsJournal({ tournamentId }: TournamentEventsJourna
       case TournamentEventType.REGISTRATIONS_OPENED:
         return {
           label: "Ouverture des inscriptions",
-          icon: <Calendar className="w-4 h-4 text-emerald-400" />,
+          icon: <Calendar className="w-4 h-4 text-success" />,
         };
       case TournamentEventType.REGISTRATIONS_CLOSED:
         return {
           label: "Clôture des inscriptions",
-          icon: <Calendar className="w-4 h-4 text-amber-400" />,
+          icon: <Calendar className="w-4 h-4 text-warning" />,
         };
       case TournamentEventType.PARTICIPANT_REGISTERED:
         return {
           label: evt.target ? `${evt.target.displayName || evt.target.username} s'est inscrit` : "Nouvelle inscription",
-          icon: <UserPlus className="w-4 h-4 text-emerald-400" />,
+          icon: <UserPlus className="w-4 h-4 text-success" />,
         };
       case TournamentEventType.PARTICIPANT_UNREGISTERED:
       case TournamentEventType.PARTICIPANT_REMOVED:
         return {
           label: evt.target ? `${evt.target.displayName || evt.target.username} a été désinscrit` : "Désinscription",
-          icon: <AlertCircle className="w-4 h-4 text-rose-400" />,
+          icon: <AlertCircle className="w-4 h-4 text-destructive" />,
         };
       case TournamentEventType.PARTICIPANT_DISQUALIFIED:
         return {
           label: evt.target
             ? `Disqualification de ${evt.target.displayName || evt.target.username}`
             : "Disqualification",
-          icon: <Gavel className="w-4 h-4 text-rose-400" />,
+          icon: <Gavel className="w-4 h-4 text-destructive" />,
         };
       case TournamentEventType.BRACKET_GENERATED:
         return {
@@ -123,22 +123,22 @@ export function TournamentEventsJournal({ tournamentId }: TournamentEventsJourna
       case TournamentEventType.SCORE_REPORTED:
         return {
           label: "Saisie d'un score de manche",
-          icon: <FileEdit className="w-4 h-4 text-blue-400" />,
+          icon: <FileEdit className="w-4 h-4 text-primary" />,
         };
       case TournamentEventType.SCORE_VALIDATED:
         return {
           label: "Score de manche validé",
-          icon: <CheckCircle className="w-4 h-4 text-emerald-400" />,
+          icon: <CheckCircle className="w-4 h-4 text-success" />,
         };
       case TournamentEventType.TOURNAMENT_CLOSED:
         return {
           label: "Clôture du tournoi",
-          icon: <Trophy className="w-4 h-4 text-amber-400" />,
+          icon: <Trophy className="w-4 h-4 text-warning" />,
         };
       case TournamentEventType.TOURNAMENT_CANCELED:
         return {
           label: "Annulation du tournoi",
-          icon: <Gavel className="w-4 h-4 text-rose-400" />,
+          icon: <Gavel className="w-4 h-4 text-destructive" />,
         };
       default:
         return {
@@ -182,7 +182,7 @@ export function TournamentEventsJournal({ tournamentId }: TournamentEventsJourna
                         Par <strong className="text-foreground">{evt.actor.displayName || evt.actor.username}</strong>
                       </span>
                     )}
-                    {evt.reason && <span className="italic text-rose-400">({evt.reason})</span>}
+                    {evt.reason && <span className="italic text-destructive">({evt.reason})</span>}
                     <span>·</span>
                     <span>{dateStr}</span>
                   </div>

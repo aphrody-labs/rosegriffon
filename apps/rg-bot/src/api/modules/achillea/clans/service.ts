@@ -1,7 +1,24 @@
 import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 import { normalizeNames, resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core";
+import { COUNTRIES } from "@rosegriffon/achillea-core/reference";
 import type { ClanDTO } from "./model";
+
+/** Codes pays acceptés pour l'origine et les langues d'un clan (référentiel partagé). */
+export const CODES_PAYS_CLAN: ReadonlySet<string> = new Set(COUNTRIES.map(pays => pays.code));
+
+/**
+ * Valide origine et langues : codes du référentiel, dédoublonnés, au moins une
+ * langue. Rend le message d'erreur, ou `null` si tout est valide.
+ */
+export function erreurPaysClan(patch: { origin?: string; languages?: string[] }): string | null {
+  if (patch.origin !== undefined && !CODES_PAYS_CLAN.has(patch.origin)) return "Origine inconnue.";
+  if (patch.languages !== undefined) {
+    if (patch.languages.length === 0) return "Choisis au moins une langue.";
+    if (patch.languages.some(code => !CODES_PAYS_CLAN.has(code))) return "Langue inconnue.";
+  }
+  return null;
+}
 
 const CLAN_MANAGER_ROLE = 2;
 
@@ -16,6 +33,9 @@ type ClanUpdate = {
   isRecruiting?: boolean;
   autoAcceptMembers?: boolean;
   isInactive?: boolean;
+  isHidden?: boolean;
+  origin?: string;
+  languages?: string[];
 };
 
 function socialUrl(value: string, platform: "x" | "instagram" | "tiktok"): string | null {
@@ -297,6 +317,10 @@ export abstract class ClanService {
         return { ok: false as const, status: 403, message: "Reserved for clan captain or administrator" };
       if (!isAdmin && patch.isInactive !== undefined)
         return { ok: false as const, status: 403, message: "Only administrators can change inactivity" };
+      if (!isAdmin && patch.isHidden !== undefined)
+        return { ok: false as const, status: 403, message: "Only administrators can hide a clan" };
+      const erreurPays = erreurPaysClan(patch);
+      if (erreurPays) return { ok: false as const, status: 400, message: erreurPays };
 
       let name = clan.name;
       let normalizedName = clan.normalized_name;
@@ -384,6 +408,9 @@ export abstract class ClanService {
           is_recruiting: patch.isRecruiting ?? clan.is_recruiting,
           auto_accept_members: patch.autoAcceptMembers ?? clan.auto_accept_members,
           is_inactive: patch.isInactive ?? clan.is_inactive,
+          is_hidden: patch.isHidden ?? clan.is_hidden,
+          origin: patch.origin ?? clan.origin,
+          languages: patch.languages ? [...new Set(patch.languages)] : clan.languages,
           updated_at: new Date(),
         })
         .where("id", "=", clanId)
@@ -440,6 +467,40 @@ export abstract class ClanService {
     }));
 
     return { data, count: Number(countRow?.count ?? data.length) };
+  }
+
+  /**
+   * Liste staff : projection complète (origine, langues, inactif, masqué…),
+   * clans masqués et inactifs compris, filtrable par état de validation. La
+   * liste publique `findAll` écarte les masqués et ne rend qu'un résumé : le
+   * back-office ne pouvait ni filtrer par état ni rouvrir un clan masqué.
+   */
+  public static async adminList(
+    db: Kysely<Database>,
+    options: { state?: number; page?: number; pageSize?: number; q?: string },
+  ) {
+    const page = Math.max(1, Math.floor(options.page ?? 1));
+    const limit = Math.min(50, Math.max(1, Math.floor(options.pageSize ?? 25)));
+    let base = db.selectFrom("clan").where("is_disbanded", "=", false);
+    if (options.state !== undefined) base = base.where("state", "=", options.state);
+    const terme = options.q?.trim();
+    if (terme) {
+      const motif = `%${terme}%`;
+      base = base.where(eb => eb.or([eb("name", "ilike", motif), eb("shortened_name", "ilike", motif)]));
+    }
+    const [ids, compte] = await Promise.all([
+      base
+        .select("id")
+        .orderBy("clan_fame", "desc")
+        .orderBy("id")
+        .limit(limit)
+        .offset((page - 1) * limit)
+        .execute(),
+      base.select(({ fn }) => fn.countAll<number>().as("count")).executeTakeFirst(),
+    ]);
+    const data = await Promise.all(ids.map(row => ClanService.clanProjection(db, row.id)));
+    const total = Number(compte?.count ?? 0);
+    return { data, meta: { page, limit, total, pageCount: Math.ceil(total / limit) } };
   }
 
   public static async findById(db: Kysely<Database>, id: number): Promise<ClanDTO | null> {

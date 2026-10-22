@@ -202,7 +202,7 @@ export default function RankedHistoryPage({
             Retour au hub classé
           </Link>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="p-2 rounded-lg bg-success/10 text-success border border-success/20">
               <History className="w-5 h-5" />
             </span>
             <h1 className="text-3xl font-bold tracking-tight">
@@ -341,7 +341,7 @@ export default function RankedHistoryPage({
         </div>
       ) : !isAuthenticated && !playerId ? (
         <div className="p-8 border border-border bg-card rounded-2xl text-center space-y-4">
-          <ShieldAlert className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
+          <ShieldAlert className="w-12 h-12 text-warning mx-auto opacity-80" />
           <h2 className="text-xl font-bold">Consulter les matchs classés</h2>
           <p className="text-lg text-muted-foreground max-w-md mx-auto">
             Choisissez un joueur dans le classement pour consulter son historique public. Connectez-vous pour retrouver
@@ -367,7 +367,7 @@ export default function RankedHistoryPage({
           <p className="text-lg text-muted-foreground">Chargement de votre historique...</p>
         </div>
       ) : error ? (
-        <div role="alert" className="border border-rose-500/30 rounded-2xl p-8 text-center text-lg text-rose-400">
+        <div role="alert" className="border border-destructive/30 rounded-2xl p-8 text-center text-lg text-destructive">
           {error}
         </div>
       ) : (
@@ -393,9 +393,9 @@ export default function RankedHistoryPage({
                 <span
                   className={`px-2.5 py-0.5 rounded-full font-mono font-bold text-lg ${
                     stats.totalDelta > 0
-                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                      ? "bg-success/10 text-success border border-success/30"
                       : stats.totalDelta < 0
-                        ? "bg-rose-500/10 text-rose-400 border border-rose-500/30"
+                        ? "bg-destructive/10 text-destructive border border-destructive/30"
                         : "bg-muted text-muted-foreground"
                   }`}
                 >
@@ -407,19 +407,19 @@ export default function RankedHistoryPage({
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-lg">
               <div className="p-3 rounded-xl bg-background/60 border border-border">
                 <div className="text-muted-foreground">Victoires</div>
-                <div className="text-lg font-bold text-emerald-400">{stats.wins}</div>
+                <div className="text-lg font-bold text-success">{stats.wins}</div>
               </div>
               <div className="p-3 rounded-xl bg-background/60 border border-border">
                 <div className="text-muted-foreground">Défaites</div>
-                <div className="text-lg font-bold text-rose-400">{stats.losses}</div>
+                <div className="text-lg font-bold text-destructive">{stats.losses}</div>
               </div>
               <div className="p-3 rounded-xl bg-background/60 border border-border">
                 <div className="text-muted-foreground">Nuls</div>
-                <div className="text-lg font-bold text-sky-400">{stats.draws}</div>
+                <div className="text-lg font-bold text-primary">{stats.draws}</div>
               </div>
               <div className="p-3 rounded-xl bg-background/60 border border-border">
                 <div className="text-muted-foreground">Forfaits</div>
-                <div className="text-lg font-bold text-amber-400">{stats.forfeits}</div>
+                <div className="text-lg font-bold text-warning">{stats.forfeits}</div>
               </div>
               <div className="p-3 rounded-xl bg-background/60 border border-border">
                 <div className="text-muted-foreground">Winrate</div>
@@ -462,19 +462,19 @@ export default function RankedHistoryPage({
                     {/* Status badge & Date */}
                     <div className="flex items-center gap-3">
                       {isWin ? (
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-success/10 border border-success/30 flex items-center justify-center text-success shrink-0">
                           <CheckCircle2 className="w-5 h-5" />
                         </div>
                       ) : isDraw ? (
-                        <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shrink-0">
                           <History className="w-5 h-5" />
                         </div>
                       ) : isForfeit ? (
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-warning/10 border border-warning/30 flex items-center justify-center text-warning shrink-0">
                           <AlertTriangle className="w-5 h-5" />
                         </div>
                       ) : (
-                        <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-destructive/10 border border-destructive/30 flex items-center justify-center text-destructive shrink-0">
                           <XCircle className="w-5 h-5" />
                         </div>
                       )}
@@ -484,12 +484,12 @@ export default function RankedHistoryPage({
                           <span
                             className={`text-lg font-bold uppercase ${
                               isWin
-                                ? "text-emerald-400"
+                                ? "text-success"
                                 : isDraw
-                                  ? "text-sky-400"
+                                  ? "text-primary"
                                   : isForfeit
-                                    ? "text-amber-400"
-                                    : "text-rose-400"
+                                    ? "text-warning"
+                                    : "text-destructive"
                             }`}
                           >
                             {isWin ? "Victoire" : isDraw ? "Match nul" : isForfeit ? "Forfait" : "Défaite"}
@@ -527,7 +527,7 @@ export default function RankedHistoryPage({
                       {/* Delta AP */}
                       <div
                         className={`w-20 text-right font-mono font-bold text-lg ${
-                          delta > 0 ? "text-emerald-400" : delta < 0 ? "text-rose-400" : "text-muted-foreground"
+                          delta > 0 ? "text-success" : delta < 0 ? "text-destructive" : "text-muted-foreground"
                         }`}
                       >
                         {delta > 0 ? `+${delta}` : delta} AP
@@ -549,7 +549,7 @@ export default function RankedHistoryPage({
                 {loadingMore ? "Chargement…" : "Charger 100 matchs supplémentaires"}
               </button>
               {loadMoreError && (
-                <p role="alert" className="text-lg text-rose-400">
+                <p role="alert" className="text-lg text-destructive">
                   {loadMoreError}
                 </p>
               )}

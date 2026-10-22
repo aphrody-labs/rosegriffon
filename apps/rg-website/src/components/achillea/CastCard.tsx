@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { CasterPublic } from "@rosegriffon/achillea-types";
 import { Badge, Button } from "@rosegriffon/ui";
 import { FaTwitch } from "react-icons/fa6";
+import { MARQUE } from "@/components/achillea/couleurs-donnees";
 
 interface CastCardProps {
   caster: CasterPublic;
@@ -39,7 +40,7 @@ export function CastCard({ caster, className }: CastCardProps) {
             asChild
             variant="outline"
             size="icon"
-            className="size-7 rounded-full text-purple-600 hover:text-purple-700"
+            className={`size-7 rounded-full ${MARQUE.twitchBouton}`}
           >
             <a href={caster.twitchUrl} target="_blank" rel="noopener noreferrer" aria-label="Chaîne Twitch">
               <FaTwitch className="size-3.5" />

@@ -59,7 +59,7 @@ export default function CastAvailabilityPage({ id }: { id: string }) {
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
-        <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+        <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
         <h2 className="text-xl font-bold">Connexion requise</h2>
         <p className="text-sm text-muted-foreground">
           Connectez-vous pour renseigner vos créneaux de disponibilité en régie.
@@ -87,7 +87,7 @@ export default function CastAvailabilityPage({ id }: { id: string }) {
           Retour aux casters
         </Link>
         <div className="flex items-center gap-2">
-          <span className="p-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20">
+          <span className="p-2 rounded-lg bg-tertiary/10 text-tertiary border border-tertiary/20">
             <Tv className="w-5 h-5" />
           </span>
           <h1 className="text-2xl font-bold tracking-tight">Disponibilité Caster</h1>
@@ -99,7 +99,7 @@ export default function CastAvailabilityPage({ id }: { id: string }) {
 
       {submitted ? (
         <div className="border border-border bg-card rounded-2xl p-8 text-center space-y-4">
-          <Check className="w-12 h-12 text-emerald-400 mx-auto" />
+          <Check className="w-12 h-12 text-success mx-auto" />
           <h2 className="text-xl font-bold">Disponibilité enregistrée !</h2>
           <p className="text-xs text-muted-foreground">
             Votre réponse a bien été prise en compte par le responsable régie.

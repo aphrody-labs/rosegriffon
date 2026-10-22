@@ -28,7 +28,13 @@ export function Sparkline({ data = [], width = 120, height = 36, showLastPoint =
 
   const last = cumulative[cumulative.length - 1] ?? 0;
   const trend = last > 0 ? "up" : last < 0 ? "down" : "flat";
-  const strokeColor = trend === "up" ? "#34d399" : trend === "down" ? "#f87171" : "#94a3b8";
+  // Tendance = statut : jetons du thème, lisibles en clair comme en sombre.
+  const strokeColor =
+    trend === "up"
+      ? "var(--color-success)"
+      : trend === "down"
+        ? "var(--color-destructive)"
+        : "var(--color-muted-foreground)";
 
   const pad = 2;
   const min = Math.min(...cumulative);
@@ -55,13 +61,13 @@ export function Sparkline({ data = [], width = 120, height = 36, showLastPoint =
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={strokeColor} stopOpacity="0.45" />
-          <stop offset="100%" stopColor={strokeColor} stopOpacity="0" />
+          <stop offset="0%" style={{ stopColor: strokeColor, stopOpacity: 0.45 }} />
+          <stop offset="100%" style={{ stopColor: strokeColor, stopOpacity: 0 }} />
         </linearGradient>
       </defs>
       <path d={area} fill={`url(#${gradientId})`} />
-      <path d={line} fill="none" stroke={strokeColor} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      {showLastPoint && <circle cx={lastPt.x} cy={lastPt.y} r="2.4" fill={strokeColor} />}
+      <path d={line} fill="none" style={{ stroke: strokeColor }} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      {showLastPoint && <circle cx={lastPt.x} cy={lastPt.y} r="2.4" style={{ fill: strokeColor }} />}
     </svg>
   );
 }

@@ -78,10 +78,12 @@ export function BoutonActualiser({ onClick, enCours }: { onClick: () => void; en
  * « service indisponible » qui laisserait chercher une panne de l'API.
  */
 export function messageEchecLecture(contexte: string, resultat: AchilleaClientResult<unknown>): string {
-  const generique = signalerEchec(contexte, resultat);
-  if (!resultat.ok && resultat.kind === "http" && resultat.status === 503)
+  const message = signalerEchec(contexte, resultat);
+  // `signalerEchec` montre déjà le texte de l'API (« Bot Discord Achilléa
+  // indisponible : … ») ; le texte propre au 503 ne sert que s'il n'y en a pas.
+  if (!resultat.ok && resultat.kind === "http" && resultat.status === 503 && !resultat.message?.trim())
     return "Le bot Discord Achilléa est injoignable : ces mesures viennent de lui.";
-  return generique;
+  return message;
 }
 
 export interface Lecture<T> {

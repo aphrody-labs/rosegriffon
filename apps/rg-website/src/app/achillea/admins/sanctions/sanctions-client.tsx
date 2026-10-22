@@ -157,7 +157,7 @@ export default function AchilleaAdminSanctionsPage() {
             Retour au backoffice
           </Link>
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-lg bg-rose-500/10 text-rose-500 border border-rose-500/20">
+            <span className="p-2 rounded-lg bg-destructive/10 text-destructive border border-destructive/20">
               <ShieldAlert className="size-5" />
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Registre des Sanctions</h1>
@@ -193,7 +193,7 @@ export default function AchilleaAdminSanctionsPage() {
           <Button
             size="sm"
             onClick={() => setCreateOpen(true)}
-            className="gap-1.5 text-xs bg-rose-600 hover:bg-rose-700 text-white"
+            className="gap-1.5 text-xs bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           >
             <Plus className="size-3.5" />
             Émettre une sanction
@@ -209,7 +209,7 @@ export default function AchilleaAdminSanctionsPage() {
         </div>
       ) : sanctions.length === 0 ? (
         <div className="p-12 text-center border border-border/60 rounded-xl bg-card/40 space-y-3">
-          <CheckCircle2 className="size-10 text-emerald-400 mx-auto" />
+          <CheckCircle2 className="size-10 text-success mx-auto" />
           <div className="font-bold text-base">Aucune sanction trouvée</div>
           <p className="text-xs text-muted-foreground">
             {activeOnly
@@ -249,10 +249,10 @@ export default function AchilleaAdminSanctionsPage() {
                           variant="outline"
                           className={`text-xs uppercase font-bold ${
                             s.type === "ban"
-                              ? "border-red-500 text-red-400 bg-red-500/10"
+                              ? "border-destructive text-destructive bg-destructive/10"
                               : s.type === "warn"
-                                ? "border-amber-500 text-amber-400 bg-amber-500/10"
-                                : "border-sky-500 text-sky-400 bg-sky-500/10"
+                                ? "border-warning text-warning bg-warning/10"
+                                : "border-primary text-primary bg-primary/10"
                           }`}
                         >
                           {s.type}
@@ -270,11 +270,11 @@ export default function AchilleaAdminSanctionsPage() {
                         ) : isExpired ? (
                           <span className="text-muted-foreground">Expirée</span>
                         ) : s.expiresAt ? (
-                          <span className="text-amber-400 font-medium">
+                          <span className="text-warning font-medium">
                             {new Date(s.expiresAt).toLocaleDateString("fr-FR")}
                           </span>
                         ) : (
-                          <span className="text-rose-400 font-bold">Permanente</span>
+                          <span className="text-destructive font-bold">Permanente</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -286,7 +286,7 @@ export default function AchilleaAdminSanctionsPage() {
                               setSelectedSanction(s);
                               setRevokeOpen(true);
                             }}
-                            className="text-xs gap-1 border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
+                            className="text-xs gap-1 border-destructive/30 text-destructive hover:bg-destructive/10"
                           >
                             <Undo2 className="size-3" />
                             Révoquer
@@ -306,7 +306,7 @@ export default function AchilleaAdminSanctionsPage() {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-rose-500">
+            <DialogTitle className="flex items-center gap-2 text-destructive">
               <Ban className="size-5" />
               Émettre une Sanction
             </DialogTitle>
@@ -383,7 +383,7 @@ export default function AchilleaAdminSanctionsPage() {
             <Button
               onClick={handleCreateSanction}
               disabled={creating || !targetUserId.trim()}
-              className="bg-rose-600 hover:bg-rose-700 text-white gap-2"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground gap-2"
             >
               {creating && <Loader2 className="size-4 animate-spin" />}
               Confirmer la sanction

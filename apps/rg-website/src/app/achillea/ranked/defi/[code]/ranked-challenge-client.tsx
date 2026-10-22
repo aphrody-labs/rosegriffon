@@ -103,7 +103,7 @@ export default function RankedChallengePage({ code }: { code: string }) {
         </Link>
 
         <div className="border border-border bg-card rounded-2xl p-8 shadow-sm text-center space-y-6">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mx-auto">
+          <div className="w-14 h-14 rounded-2xl bg-warning/10 border border-warning/30 flex items-center justify-center text-warning mx-auto">
             <Swords className="w-7 h-7" />
           </div>
 
@@ -138,7 +138,7 @@ export default function RankedChallengePage({ code }: { code: string }) {
             </div>
           ) : notFound || !preview ? (
             <div className="space-y-4 py-4">
-              <ShieldAlert className="w-10 h-10 text-rose-400 mx-auto opacity-80" />
+              <ShieldAlert className="w-10 h-10 text-destructive mx-auto opacity-80" />
               <div className="space-y-1">
                 <h2 className="text-lg font-bold">Défi introuvable ou expiré</h2>
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto">
@@ -166,7 +166,7 @@ export default function RankedChallengePage({ code }: { code: string }) {
                 <UserAvatar avatar={preview.fromAvatar} displayName={preview.fromDisplayName} className="w-12 h-12" />
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-sm truncate">{preview.fromDisplayName}</div>
-                  <div className="text-xs text-amber-400 font-mono font-semibold">{preview.fromElo} AP</div>
+                  <div className="text-xs text-warning font-mono font-semibold">{preview.fromElo} AP</div>
                 </div>
                 <div className="text-right">
                   <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20">
@@ -181,7 +181,7 @@ export default function RankedChallengePage({ code }: { code: string }) {
                   type="button"
                   onClick={handleAccept}
                   disabled={accepting}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition shadow-sm"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-success hover:bg-success/90 text-success-foreground font-bold text-xs rounded-xl transition shadow-sm"
                 >
                   {accepting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                   Accepter le match

@@ -41,6 +41,7 @@ import {
   Loader2,
   Activity,
 } from "lucide-react";
+import { MEDAILLE } from "@/components/achillea/couleurs-donnees";
 
 export default function TournamentDetailPage({ id }: { id: string }) {
   const tournamentId = parseInt(id, 10);
@@ -147,7 +148,7 @@ export default function TournamentDetailPage({ id }: { id: string }) {
   if (error || !tournament) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
-        <AlertCircle className="w-12 h-12 text-rose-500 mx-auto" />
+        <AlertCircle className="w-12 h-12 text-destructive mx-auto" />
         <h2 className="text-xl font-bold">{error ?? "Tournoi introuvable"}</h2>
         <Button asChild variant="outline">
           <Link href="/achillea/tournaments">
@@ -244,7 +245,7 @@ export default function TournamentDetailPage({ id }: { id: string }) {
                   <Image src={tournament.logo} alt={tournament.name} fill unoptimized className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                    <Trophy className="w-8 h-8 text-amber-400" />
+                    <Trophy className="w-8 h-8 text-warning" />
                   </div>
                 )}
               </div>
@@ -279,7 +280,7 @@ export default function TournamentDetailPage({ id }: { id: string }) {
                 disabled={isRegistering}
                 className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs transition shadow-sm self-stretch sm:self-auto justify-center ${
                   isUserRegistered
-                    ? "bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 border border-rose-600/30"
+                    ? "bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/30"
                     : "bg-primary text-primary-foreground hover:bg-primary/90"
                 }`}
               >
@@ -325,7 +326,7 @@ export default function TournamentDetailPage({ id }: { id: string }) {
             </div>
             <div className="p-3 rounded-xl bg-background/60 border border-border">
               <div className="text-muted-foreground">Cashprize 1er</div>
-              <div className="font-bold text-amber-400 mt-0.5">{firstPrize} AP</div>
+              <div className="font-bold text-warning mt-0.5">{firstPrize} AP</div>
             </div>
             <div className="p-3 rounded-xl bg-background/60 border border-border">
               <div className="text-muted-foreground">Jeu officiel</div>
@@ -356,7 +357,7 @@ export default function TournamentDetailPage({ id }: { id: string }) {
             tabIndex={activeTab === tabId ? 0 : -1}
             onClick={() => selectTab(tabId)}
             onKeyDown={onTabKeyDown}
-            className={`min-h-11 shrink-0 px-4 py-2 text-lg font-semibold border-b-2 transition -mb-px flex items-center gap-2 rounded-t-lg focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[-3px] focus-visible:outline-amber-300 ${activeTab === tabId ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            className={`min-h-11 shrink-0 px-4 py-2 text-lg font-semibold border-b-2 transition -mb-px flex items-center gap-2 rounded-t-lg focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[-3px] focus-visible:outline-warning ${activeTab === tabId ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             <Icon aria-hidden="true" className="w-5 h-5" />
             {label}
@@ -368,7 +369,7 @@ export default function TournamentDetailPage({ id }: { id: string }) {
         id={`tournament-panel-${activeTab}`}
         aria-labelledby={`tournament-tab-${activeTab}`}
         tabIndex={0}
-        className="focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-amber-300 rounded-lg"
+        className="focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-warning rounded-lg"
       >
         {/* Tab 1: Overview */}
         {activeTab === "overview" && (
@@ -392,20 +393,20 @@ export default function TournamentDetailPage({ id }: { id: string }) {
 
             <div className="border border-border bg-card rounded-2xl p-6 space-y-4">
               <h3 className="font-bold text-base flex items-center gap-2">
-                <Coins className="w-4 h-4 text-amber-400" />
+                <Coins className="w-4 h-4 text-warning" />
                 Récompenses (AP)
               </h3>
               <div className="space-y-2.5 text-xs">
-                <div className="flex items-center justify-between p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                  <span className="font-bold text-amber-400">1ère Place</span>
+                <div className={`flex items-center justify-between p-2.5 rounded-lg ${MEDAILLE.or.encartDoux}`}>
+                  <span className={`font-bold ${MEDAILLE.or.texte}`}>1ère Place</span>
                   <span className="font-mono font-bold text-foreground">+{firstPrize} AP</span>
                 </div>
-                <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-400/10 border border-slate-400/20">
-                  <span className="font-bold text-slate-300">2ème Place</span>
+                <div className={`flex items-center justify-between p-2.5 rounded-lg ${MEDAILLE.argent.encartDoux}`}>
+                  <span className={`font-bold ${MEDAILLE.argent.texte}`}>2ème Place</span>
                   <span className="font-mono font-bold text-foreground">+{secondPrize} AP</span>
                 </div>
-                <div className="flex items-center justify-between p-2.5 rounded-lg bg-amber-700/10 border border-amber-700/20">
-                  <span className="font-bold text-amber-600">Demi-finalistes</span>
+                <div className={`flex items-center justify-between p-2.5 rounded-lg ${MEDAILLE.bronze.encartDoux}`}>
+                  <span className={`font-bold ${MEDAILLE.bronze.texte}`}>Demi-finalistes</span>
                   <span className="font-mono font-bold text-foreground">+{semiPrize} AP</span>
                 </div>
               </div>

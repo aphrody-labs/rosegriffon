@@ -143,7 +143,7 @@ export default function AchilleaAdminRankedDisputesPage() {
             Retour au backoffice
           </Link>
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
               <Gavel className="size-5" />
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Chambre d&apos;Arbitrage Ranked</h1>
@@ -175,7 +175,7 @@ export default function AchilleaAdminRankedDisputesPage() {
         </div>
       ) : disputes.length === 0 ? (
         <div className="p-12 text-center border border-border/60 rounded-xl bg-card/40 space-y-3">
-          <CheckCircle2 className="size-10 text-emerald-400 mx-auto" />
+          <CheckCircle2 className="size-10 text-success mx-auto" />
           <div className="font-bold text-base">Aucun litige en attente</div>
           <p className="text-xs text-muted-foreground">
             Tous les matchs classés se sont conclus dans le respect du fair-play.
@@ -188,7 +188,7 @@ export default function AchilleaAdminRankedDisputesPage() {
               <CardHeader className="p-5 pb-3 border-b border-border/40 bg-muted/20">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
-                    <Badge variant="outline" className="border-amber-500/30 text-amber-400">
+                    <Badge variant="outline" className="border-warning/30 text-warning">
                       Lobby #{d.lobbyId}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
@@ -334,7 +334,7 @@ export default function AchilleaAdminRankedDisputesPage() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Gavel className="size-5 text-amber-500" />
+              <Gavel className="size-5 text-warning" />
               Décision d&apos;Arbitrage — Lobby #{selectedDispute?.lobbyId}
             </DialogTitle>
             <DialogDescription>

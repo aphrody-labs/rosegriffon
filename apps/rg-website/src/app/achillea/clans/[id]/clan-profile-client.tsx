@@ -128,7 +128,7 @@ export default function ClanProfilePage({
   if (error || !clan) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
-        <ShieldAlert className="size-12 mx-auto text-amber-500" />
+        <ShieldAlert className="size-12 mx-auto text-warning" />
         <h2 className="text-xl font-bold text-on-surface">{error ?? "Clan introuvable"}</h2>
         <Button asChild variant="outline">
           <Link href="/achillea/clans">
@@ -298,7 +298,7 @@ export default function ClanProfilePage({
         </div>
 
         {membersError ? (
-          <output className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-on-surface-variant">
+          <output className="rounded-xl border border-warning/30 bg-warning/10 p-4 text-sm text-on-surface-variant">
             {membersError}
           </output>
         ) : activeTab === "members" ? (
@@ -346,7 +346,7 @@ export default function ClanProfilePage({
           </DialogHeader>
 
           {applicationSuccess ? (
-            <div className="py-6 text-center space-y-2 text-green-600 font-bold">
+            <div className="py-6 text-center space-y-2 text-success font-bold">
               <Check className="size-10 mx-auto" />
               <p>Ta candidature a été transmise au clan avec succès !</p>
             </div>

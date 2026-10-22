@@ -63,7 +63,7 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
             Retour au hub classé
           </Link>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            <span className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20">
               <Layers className="w-5 h-5" />
             </span>
             <h1 className="text-3xl font-bold tracking-tight">Paliers Compétitifs</h1>
@@ -116,14 +116,14 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
         {loading && tiers.length === 0 ? (
           <output className="text-lg text-muted-foreground">Chargement des paliers…</output>
         ) : error && tiers.length === 0 ? (
-          <p role="alert" className="text-lg text-rose-400">
+          <p role="alert" className="text-lg text-destructive">
             {error}
           </p>
         ) : (
           <TierDistribution tiers={tiers} />
         )}
         {error && tiers.length > 0 && (
-          <output className="text-lg text-amber-400">{error} Les dernières données chargées restent affichées.</output>
+          <output className="text-lg text-warning">{error} Les dernières données chargées restent affichées.</output>
         )}
       </div>
 
@@ -143,11 +143,11 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
               <div
                 key={tier.key}
                 className={`border rounded-2xl p-5 bg-card relative overflow-hidden transition hover:shadow-md ${
-                  isTopTier ? "border-amber-500/40" : "border-border"
+                  isTopTier ? "border-warning/40" : "border-border"
                 }`}
               >
                 {isTopTier && (
-                  <div className="absolute -right-8 -top-8 w-24 h-24 bg-amber-500/10 rounded-full blur-xl pointer-events-none" />
+                  <div className="absolute -right-8 -top-8 w-24 h-24 bg-warning/10 rounded-full blur-xl pointer-events-none" />
                 )}
 
                 <div className="flex items-start gap-4">
@@ -167,7 +167,7 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
                   <div className="space-y-1 flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <h4 className="font-bold text-base truncate">{tier.key}</h4>
-                      <span className="text-lg font-mono font-bold text-amber-400">
+                      <span className="text-lg font-mono font-bold text-warning">
                         {tier.minElo} {tier.maxElo < 9000 ? `- ${tier.maxElo}` : "+"} AP
                       </span>
                     </div>
@@ -189,7 +189,7 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
       {/* Progression note */}
       <div className="p-6 rounded-2xl bg-muted/30 border border-border space-y-2 text-lg text-muted-foreground">
         <h4 className="font-semibold text-foreground text-lg flex items-center gap-1.5">
-          <ScrollText className="w-4 h-4 text-amber-400" aria-hidden />
+          <ScrollText className="w-4 h-4 text-warning" aria-hidden />
           Règles du système d'AP (Achilléa Points)
         </h4>
         <p>

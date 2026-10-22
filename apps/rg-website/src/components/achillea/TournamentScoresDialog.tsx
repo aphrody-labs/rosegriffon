@@ -147,7 +147,7 @@ export function TournamentScoresDialog({
             </div>
           ) : error && !lobby ? (
             <div className="py-8 text-center space-y-3">
-              <AlertCircle className="w-8 h-8 text-amber-500 mx-auto" />
+              <AlertCircle className="w-8 h-8 text-warning mx-auto" />
               <p className="text-xs text-muted-foreground">{error}</p>
             </div>
           ) : (
@@ -193,7 +193,7 @@ export function TournamentScoresDialog({
                         </span>
                         <div className="flex items-center gap-2">
                           {m.team1Validated && m.team2Validated ? (
-                            <Badge variant="outline" className="text-xs border-emerald-500/40 text-emerald-400">
+                            <Badge variant="outline" className="text-xs border-success/40 text-success">
                               Validé
                             </Badge>
                           ) : (
@@ -204,7 +204,7 @@ export function TournamentScoresDialog({
                               onClick={() => handleValidateScore(m.id)}
                               disabled={submitting}
                             >
-                              <Check className="w-3 h-3 text-emerald-400" />
+                              <Check className="w-3 h-3 text-success" />
                               Valider
                             </Button>
                           )}
@@ -259,7 +259,7 @@ export function TournamentScoresDialog({
                 </div>
 
                 {error && (
-                  <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
+                  <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                     {error}
                   </div>

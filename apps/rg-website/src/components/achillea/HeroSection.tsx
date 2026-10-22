@@ -112,7 +112,7 @@ export function HeroSection({
             <div className="achillea-home__section-head">
               <div className="flex items-center gap-3">
                 {isLive ? (
-                  <Radio className="size-5 text-red-300" aria-hidden="true" />
+                  <Radio className="size-5 text-destructive/80" aria-hidden="true" />
                 ) : (
                   <Trophy
                     className="size-5 text-achillea-lime"

@@ -56,14 +56,14 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
       {/* Level 1: CEO / President */}
       <div className="flex flex-col items-center">
         <div className="text-center mb-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center justify-center gap-1.5">
+          <span className="text-xs font-bold uppercase tracking-wider text-warning flex items-center justify-center gap-1.5">
             <Crown className="size-3.5" />
             Direction générale
           </span>
         </div>
 
         {president ? (
-          <Card className="w-full max-w-sm border-amber-500/40 bg-surface/90 backdrop-blur-sm shadow-xl hover:border-amber-400 transition-colors">
+          <Card className="w-full max-w-sm border-warning/40 bg-surface/90 backdrop-blur-sm shadow-xl hover:border-warning transition-colors">
             <CardContent className="p-4 flex items-center gap-4">
               <UserAvatar
                 userId={president.user?.id}
@@ -89,7 +89,7 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
                     {president.distinctions.map(d => (
                       <span
                         key={d}
-                        className="px-1.5 py-0.5 rounded text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium"
+                        className="px-1.5 py-0.5 rounded text-xs bg-warning/10 text-warning border border-warning/20 font-medium"
                       >
                         {distinctionLabel(d)}
                       </span>
@@ -161,7 +161,7 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
       {staffMembers.length > 0 && (
         <div className="space-y-4">
           <div className="text-center">
-            <span className="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center justify-center gap-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center justify-center gap-1.5">
               <Award className="size-3.5" />
               Staff & Encadrement ({staffMembers.length})
             </span>
@@ -171,7 +171,7 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
             {staffMembers.map(st => (
               <div
                 key={st.user?.id}
-                className="flex items-center gap-3 p-3 rounded-xl border border-sky-500/20 bg-surface/60 hover:border-sky-500/40 transition-colors"
+                className="flex items-center gap-3 p-3 rounded-xl border border-primary/20 bg-surface/60 hover:border-primary/40 transition-colors"
               >
                 <UserAvatar userId={st.user?.id} avatar={st.user?.avatar} name={st.user?.username} size="md" />
                 <div className="min-w-0 flex-1">
@@ -182,7 +182,7 @@ export function ClanOrgchart({ members }: ClanOrgchartProps) {
                     {st.user?.username}
                   </Link>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    <Badge variant="outline" className="text-xs border-sky-500/30 text-sky-400">
+                    <Badge variant="outline" className="text-xs border-primary/30 text-primary">
                       Staff
                     </Badge>
                     {st.distinctions?.map(d => (

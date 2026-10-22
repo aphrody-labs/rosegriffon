@@ -48,7 +48,7 @@ export function ClanCard({ clan, className }: ClanCardProps) {
             {clan.biography && <p className="text-lg text-on-surface-variant line-clamp-2">{clan.biography}</p>}
             <p className="text-lg text-on-surface-variant">Notoriété : {clan.fame}</p>
             {clan.isRecruiting ? (
-              <Badge variant="default" className="gap-1 bg-green-600 text-white text-lg">
+              <Badge variant="default" className="gap-1 bg-success text-success-foreground text-lg">
                 <Check className="size-3" />
                 Recrute
               </Badge>

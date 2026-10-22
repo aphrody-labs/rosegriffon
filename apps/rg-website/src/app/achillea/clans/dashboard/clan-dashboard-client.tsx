@@ -241,7 +241,7 @@ export default function ClanDashboardPage() {
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
-        <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+        <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
         <h2 className="text-xl font-bold">Connexion requise</h2>
         <p className="text-sm text-muted-foreground">
           Vous devez être membre ou officier d'un clan pour accéder au tableau de bord.
@@ -260,7 +260,7 @@ export default function ClanDashboardPage() {
   if (!canManageClan) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
-        <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+        <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
         <h2 className="text-xl font-bold">Accès réservé aux officiers</h2>
         <p className="text-sm text-muted-foreground">
           Seuls les vice-présidents et présidents de clan peuvent gérer cet espace.
@@ -448,7 +448,7 @@ export default function ClanDashboardPage() {
                         <button
                           type="button"
                           onClick={() => handleAcceptApp(app)}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition"
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-success hover:bg-success/90 text-success-foreground rounded-lg text-xs font-semibold transition"
                         >
                           <Check className="w-3.5 h-3.5" />
                           Accepter
@@ -503,7 +503,7 @@ export default function ClanDashboardPage() {
                 </div>
 
                 {inviteError && (
-                  <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl">
+                  <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 p-2.5 rounded-xl">
                     {inviteError}
                   </p>
                 )}
@@ -547,13 +547,13 @@ export default function ClanDashboardPage() {
                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-border bg-background hover:bg-muted text-xs text-muted-foreground transition"
                             title="Relancer le joueur avec une mention sur Discord"
                           >
-                            <Bell className="w-3 h-3 text-amber-400" />
+                            <Bell className="w-3 h-3 text-warning" />
                             Relancer
                           </button>
                           <button
                             type="button"
                             onClick={() => handleRevokeInvite(inv)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-rose-500/30 hover:bg-rose-500/10 text-xs text-rose-400 transition"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-destructive/30 hover:bg-destructive/10 text-xs text-destructive transition"
                           >
                             <X className="w-3 h-3" />
                             Révoquer
@@ -605,7 +605,7 @@ export default function ClanDashboardPage() {
 
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
                 {settingsSaved && (
-                  <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                  <span className="text-xs text-success font-semibold flex items-center gap-1">
                     <Check className="w-3.5 h-3.5" />
                     Enregistré !
                   </span>

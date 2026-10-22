@@ -61,26 +61,54 @@ const COMPOSANTS_EXTRAITS: ReadonlyArray<readonly [AdminTab, string]> = [
   ["ranked-telemetry", "ranked-telemetry-tab.tsx"],
 ];
 
-const SUPER_ADMIN_SEULEMENT: AdminTab[] = ["bot-health", "guilds", "database", "audit", "wallets"];
+/**
+ * Onglets portant `superAdmin: true` dans `admin-dashboard.ts` legacy. Ce drapeau
+ * est testé AVANT la règle « orgs / tournois / sanctions → admin » : les
+ * sanctions sont donc réservées au Super-Admin, pas à l'Admin.
+ */
+const SUPER_ADMIN_SEULEMENT: AdminTab[] = ["bot-health", "guilds", "database", "audit", "wallets", "sanctions"];
+
+/** Tout le reste est visible du staff dès le rôle Modérateur, comme dans le legacy. */
+const ROLE_ATTENDU: Record<AdminTab, number> = {
+  overview: ROLE_MODERATEUR,
+  "bot-health": ROLE_SUPER_ADMIN,
+  guilds: ROLE_SUPER_ADMIN,
+  database: ROLE_SUPER_ADMIN,
+  audit: ROLE_SUPER_ADMIN,
+  users: ROLE_MODERATEUR,
+  clans: ROLE_MODERATEUR,
+  leagues: ROLE_MODERATEUR,
+  casts: ROLE_MODERATEUR,
+  "ranked-active": ROLE_MODERATEUR,
+  disputes: ROLE_MODERATEUR,
+  seasons: ROLE_MODERATEUR,
+  "ranked-telemetry": ROLE_MODERATEUR,
+  wallets: ROLE_SUPER_ADMIN,
+  sanctions: ROLE_SUPER_ADMIN,
+  notes: ROLE_MODERATEUR,
+  licenses: ROLE_MODERATEUR,
+};
 
 describe("visibilité des onglets du back-office", () => {
+  test("chaque onglet exige exactement le rôle du legacy", () => {
+    for (const groupe of GROUPES_ONGLETS)
+      for (const onglet of groupe.onglets) expect([onglet.id, onglet.roleMinimal]).toEqual([onglet.id, ROLE_ATTENDU[onglet.id]]);
+  });
+
   test("un membre sans rôle staff ne voit rien", () => {
     expect(ongletsVisibles(0)).toEqual([]);
     expect(ongletsVisibles(null)).toEqual([]);
   });
 
-  test("un modérateur voit les onglets staff, ni sanctions ni ops sensibles", () => {
+  test("un modérateur voit les onglets staff, sans les onglets Super-Admin", () => {
     const visibles = ongletsVisibles(ROLE_MODERATEUR);
     for (const id of ["overview", "clans", "casts", "leagues", "licenses", "ranked-active", "ranked-telemetry"] as const)
       expect(visibles).toContain(id);
-    expect(visibles).not.toContain("sanctions");
     for (const id of SUPER_ADMIN_SEULEMENT) expect(visibles).not.toContain(id);
   });
 
-  test("un admin gagne les sanctions mais pas les ops SuperAdmin", () => {
-    const visibles = ongletsVisibles(ROLE_ADMIN);
-    expect(visibles).toContain("sanctions");
-    for (const id of SUPER_ADMIN_SEULEMENT) expect(visibles).not.toContain(id);
+  test("un admin voit la même chose qu'un modérateur (aucun onglet n'est réservé au rôle 2)", () => {
+    expect(ongletsVisibles(ROLE_ADMIN)).toEqual(ongletsVisibles(ROLE_MODERATEUR));
   });
 
   test("un super-admin voit tous les onglets", () => {

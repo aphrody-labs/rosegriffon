@@ -13,6 +13,7 @@ import {
 import { UserPlus, Users, Trophy, Megaphone, Palette, ExternalLink, ShieldCheck, Scale } from "lucide-react";
 import { FaDiscord, FaXTwitter, FaYoutube, FaTwitch } from "react-icons/fa6";
 import { metadonneesAchillea } from "@/app/achillea/metadonnees";
+import { MARQUE } from "@/components/achillea/couleurs-donnees";
 
 export const metadata = metadonneesAchillea({
   // Le suffixe « — Achilléa » était recopié dans chaque titre ALORS QUE le
@@ -126,13 +127,13 @@ export default function AchilleaGuidePage() {
               <Badge variant="outline" className="border-border text-muted-foreground">
                 À l&apos;essai
               </Badge>
-              <Badge variant="outline" className="border-sky-500/30 text-sky-400 bg-sky-500/10">
+              <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10">
                 Membre
               </Badge>
-              <Badge variant="outline" className="border-amber-500/30 text-amber-400 bg-amber-500/10">
+              <Badge variant="outline" className="border-warning/30 text-warning bg-warning/10">
                 Vice-Président
               </Badge>
-              <Badge variant="outline" className="border-rose-500/30 text-rose-400 bg-rose-500/10">
+              <Badge variant="outline" className="border-destructive/30 text-destructive bg-destructive/10">
                 Président
               </Badge>
             </div>
@@ -211,14 +212,14 @@ export default function AchilleaGuidePage() {
       <Card className="border-border/60">
         <CardHeader className="p-6 pb-2">
           <CardTitle className="text-xl flex items-center gap-2.5">
-            <Trophy className="size-5 text-amber-500" />
+            <Trophy className="size-5 text-warning" />
             Règles Officielles des Tournois
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 pt-2 space-y-6 text-sm">
           <div className="space-y-2">
             <div className="font-semibold flex items-center gap-2">
-              <ShieldCheck className="size-4 text-emerald-400" />
+              <ShieldCheck className="size-4 text-success" />
               Éthique & Fair-play
             </div>
             <p className="text-muted-foreground text-xs leading-relaxed">
@@ -248,7 +249,7 @@ export default function AchilleaGuidePage() {
           {/* Restrictions & Bannissements */}
           <div className="space-y-3 pt-2">
             <div className="font-semibold flex items-center gap-2">
-              <Scale className="size-4 text-rose-400" />
+              <Scale className="size-4 text-destructive" />
               Restrictions d&apos;Équipe & Tactiques Bannies
             </div>
             <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground">
@@ -270,7 +271,7 @@ export default function AchilleaGuidePage() {
                   <Badge
                     key={t}
                     variant="outline"
-                    className="border-rose-500/30 text-rose-400 bg-rose-500/10 text-[11px]"
+                    className="border-destructive/30 text-destructive bg-destructive/10 text-[11px]"
                   >
                     {t}
                   </Badge>
@@ -295,7 +296,7 @@ export default function AchilleaGuidePage() {
                   <Badge
                     key={t}
                     variant="outline"
-                    className="border-amber-500/30 text-amber-400 bg-amber-500/10 text-[11px]"
+                    className="border-warning/30 text-warning bg-warning/10 text-[11px]"
                   >
                     {t}
                   </Badge>
@@ -310,7 +311,7 @@ export default function AchilleaGuidePage() {
       <Card className="border-border/60">
         <CardHeader className="p-6 pb-2">
           <CardTitle className="text-xl flex items-center gap-2.5">
-            <Megaphone className="size-5 text-sky-400" />
+            <Megaphone className="size-5 text-primary" />
             Réseaux Officiels Achilléa
           </CardTitle>
         </CardHeader>
@@ -349,7 +350,7 @@ export default function AchilleaGuidePage() {
               className="flex items-center justify-between p-3 rounded-lg border border-border/60 hover:bg-muted/40 transition"
             >
               <div className="flex items-center gap-2.5">
-                <FaTwitch className="size-4 text-purple-400" />
+                <FaTwitch className={`size-4 ${MARQUE.twitch}`} />
                 <span className="font-semibold">Twitch</span>
               </div>
               <ExternalLink className="size-3.5 text-muted-foreground" />
@@ -362,7 +363,7 @@ export default function AchilleaGuidePage() {
               className="flex items-center justify-between p-3 rounded-lg border border-border/60 hover:bg-muted/40 transition"
             >
               <div className="flex items-center gap-2.5">
-                <FaYoutube className="size-4 text-red-500" />
+                <FaYoutube className={`size-4 ${MARQUE.youtube}`} />
                 <span className="font-semibold">YouTube</span>
               </div>
               <ExternalLink className="size-3.5 text-muted-foreground" />

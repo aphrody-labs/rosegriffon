@@ -55,11 +55,15 @@ import {
 
 const LIGNES_PAR_PAGE = 25;
 
-/** Message d'échec : statut traduit selon le contrat `/admin/db`, sinon message générique. */
+/**
+ * Message d'échec : le texte de l'API (« Requête refusée : … ») quand il existe,
+ * sinon le statut traduit selon le contrat `/admin/db`, sinon le message générique.
+ */
 function messageEchec(contexte: string, resultat: AchilleaClientResult<unknown>): string {
   if (resultat.ok) return "";
-  const generique = signalerEchec(contexte, resultat);
-  return (resultat.kind === "http" ? messageRefusDb(resultat.status) : null) ?? generique;
+  const affiche = signalerEchec(contexte, resultat);
+  if (resultat.kind !== "http" || resultat.message?.trim()) return affiche;
+  return messageRefusDb(resultat.status) ?? affiche;
 }
 
 function GrilleResultats({ colonnes, lignes }: { colonnes: string[]; lignes: Array<Record<string, unknown>> }) {
