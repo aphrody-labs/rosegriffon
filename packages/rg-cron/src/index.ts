@@ -62,6 +62,7 @@ const TOUTES = [
   "seo:indexnow",
   "stats:achillea",
   "achillea:seasons",
+  "achillea:clans",
   "achillea:weekly-payout",
 ] as const;
 

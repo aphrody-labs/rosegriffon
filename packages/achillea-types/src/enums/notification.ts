@@ -5,6 +5,12 @@ export enum NotificationType {
   NEW_ORGANIZATION_ACCEPT_REPLY,
   NEW_ORGANIZATION_REJECT_REPLY,
   CLAN_MEMBER_KICK,
+  // Ajouts en fin d'enum : les valeurs numériques déjà stockées ne bougent pas.
+  CLAN_DISBANDED,
+  CLAN_APPLICATION_RECEIVED,
+  CLAN_APPLICATION_ACCEPTED,
+  CLAN_APPLICATION_REJECTED,
+  CLAN_INVITE_RECEIVED,
 }
 
 export enum NotificationCategory {

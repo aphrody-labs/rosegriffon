@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
-import { absoluteUrl } from "@/lib/site-url";
+import { COFONDATEURS_REQUIS, LOGO_TYPES, erreurLogo, lireCofondateurs, messageErreurCreation } from "./erreurs";
 import type { Country } from "@rosegriffon/achillea-types/domain/common";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
 import { ArrowLeft, Shield, AlertCircle } from "lucide-react";
@@ -20,6 +20,7 @@ export default function CreateClanPage() {
   const [xUrl, setXUrl] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
   const [tiktokUrl, setTiktokUrl] = useState("");
+  const [logo, setLogo] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,17 +43,34 @@ export default function CreateClanPage() {
       setError("Ajoute au moins un lien X, Instagram ou TikTok pour le clan.");
       return;
     }
+    const cofondateurs = lireCofondateurs(founderIds);
+    if (!cofondateurs || cofondateurs.length !== COFONDATEURS_REQUIS) {
+      setError(`Indique exactement ${COFONDATEURS_REQUIS} identifiants Discord de co-fondateurs (17 à 20 chiffres).`);
+      return;
+    }
+    const logoInvalide = erreurLogo(logo);
+    if (logoInvalide || !logo) {
+      setError(logoInvalide);
+      return;
+    }
 
     setSubmitting(true);
     setError(null);
 
     try {
       const client = createAchilleaClient({ credentials: "include" });
-      const founders = founderIds
-        .split(",")
-        .map(s => s.trim())
-        .filter(Boolean)
-        .map(id => ({ id }));
+      // Logo propre au clan : `clan.clan_avatar_url` est unique en base, un
+      // visuel partagé faisait refuser (409) chaque création après la première.
+      const depot = await client.admin.uploadImage(logo, logo.name || "logo-clan");
+      if (!depot.ok) {
+        setError(
+          depot.kind === "http" && depot.status === 401
+            ? messageErreurCreation(depot)
+            : "Le logo n'a pas pu être téléversé. Réessaie avec une autre image.",
+        );
+        return;
+      }
+      const founders = cofondateurs.map(id => ({ id }));
       const clanName = name.trim();
       const clanTag = tag.trim().toUpperCase();
       const paysFrance: Country = {
@@ -64,7 +82,7 @@ export default function CreateClanPage() {
 
       const res = await client.clans.create({
         founders,
-        logo: absoluteUrl("/achillea/achillea.png"),
+        logo: depot.value.url,
         name: clanName,
         normalizedName: clanName
           .toLowerCase()
@@ -89,7 +107,7 @@ export default function CreateClanPage() {
           router.push("/achillea/clans");
         }
       } else {
-        setError(res.detail || "Impossible de créer le clan.");
+        setError(messageErreurCreation(res));
       }
     } catch {
       setError("Une erreur inattendue est survenue.");
@@ -211,18 +229,40 @@ export default function CreateClanPage() {
                 htmlFor="route-create-clan-create-client-tsx-4"
                 className="text-xs font-bold text-on-surface uppercase tracking-wider"
               >
-                Identifiants des co-fondateurs (Discord IDs)
+                Identifiants des co-fondateurs (Discord IDs) <span className="text-red-500">*</span>
               </label>
               <input
                 id="route-create-clan-create-client-tsx-4"
                 type="text"
+                required
                 value={founderIds}
                 onChange={e => setFounderIds(e.target.value)}
                 placeholder="ID1, ID2, ID3..."
                 className="w-full px-3.5 py-2.5 rounded-xl border border-outline/30 bg-surface-variant/20 text-sm text-on-surface focus:outline-none focus:border-primary"
               />
               <p className="text-[11px] text-on-surface-variant">
-                Optionnel : sépare les IDs Discord par des virgules pour lancer le vote de fondation.
+                Exactement {COFONDATEURS_REQUIS} IDs Discord séparés par des virgules : ils recevront le vote de
+                fondation et doivent être présents sur le Discord d&apos;Achilléa.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                htmlFor="route-create-clan-create-client-tsx-logo"
+                className="text-xs font-bold text-on-surface uppercase tracking-wider"
+              >
+                Logo du clan <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="route-create-clan-create-client-tsx-logo"
+                type="file"
+                required
+                accept={LOGO_TYPES.join(",")}
+                onChange={e => setLogo(e.target.files?.[0] ?? null)}
+                className="w-full text-sm text-on-surface file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-primary"
+              />
+              <p className="text-[11px] text-on-surface-variant">
+                PNG, JPEG, GIF ou WebP, 256 Ko maximum. Il devient aussi l&apos;émoji du clan sur Discord.
               </p>
             </div>
 

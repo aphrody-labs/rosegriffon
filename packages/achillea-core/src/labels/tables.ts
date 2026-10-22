@@ -489,6 +489,11 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   [NotificationType.NEW_ORGANIZATION_ACCEPT_REPLY]: "Organisation validée",
   [NotificationType.NEW_ORGANIZATION_REJECT_REPLY]: "Organisation refusée",
   [NotificationType.CLAN_MEMBER_KICK]: "Exclusion d'un membre de clan",
+  [NotificationType.CLAN_DISBANDED]: "Dissolution du clan",
+  [NotificationType.CLAN_APPLICATION_RECEIVED]: "Nouvelle candidature au clan",
+  [NotificationType.CLAN_APPLICATION_ACCEPTED]: "Candidature acceptée",
+  [NotificationType.CLAN_APPLICATION_REJECTED]: "Candidature refusée",
+  [NotificationType.CLAN_INVITE_RECEIVED]: "Invitation dans un clan",
 };
 
 export function notificationTypeLabel(type: NotificationType): string {

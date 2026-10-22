@@ -52,6 +52,7 @@ export const TACHES_CRON = [
   "sync:achillea",
   "achillea:guildes",
   "achillea:seasons",
+  "achillea:clans",
   "achillea:weekly-payout",
 ] as const;
 
@@ -367,6 +368,16 @@ export const CATALOGUE_TACHES: readonly DescriptionTache[] = Object.freeze([
     titre: "Rollover des saisons Achilléa",
     role: "ouvre les saisons arrivées à échéance et clôture celles terminées",
     planification: "0 0 * * *",
+    famille: "donnees",
+    niveau: "admin",
+    motifInterdiction: null,
+    dureeIndicative: "quelques secondes",
+  },
+  {
+    nom: "achillea:clans",
+    titre: "Dissolution des clans en sous-effectif",
+    role: "dissout les clans restés sous 5 membres pendant 24 h et retire l'alerte des clans revenus au-dessus",
+    planification: "*/15 * * * *",
     famille: "donnees",
     niveau: "admin",
     motifInterdiction: null,

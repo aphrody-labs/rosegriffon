@@ -76,6 +76,8 @@ export interface ClanTable {
   languages: Generated<string[]>;
   origin: Generated<string>;
   under_member_limit: Generated<boolean>;
+  /** Passage sous 5 membres ; lu par la tâche `achillea:clans` (migration 20261022). */
+  under_member_limit_since: Date | null;
 }
 
 export interface ClanExperienceTable {

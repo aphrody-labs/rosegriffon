@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./achillea.css";
 import "./primeicons.css";
 
+import { AchilleaNotificationsLive } from "@/components/achillea/AchilleaNotificationsLive";
 import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -65,6 +66,7 @@ export default function AchilleaLayout({ children }: { children: React.ReactNode
        * Le menu latéral ouvre son groupe « E-sport » dès qu'on est sous
        * `/achillea/**` : la navigation du domaine est là, une seule fois.
        */}
+      <AchilleaNotificationsLive />
       <div className="achillea-shell">{children}</div>
     </div>
   );
