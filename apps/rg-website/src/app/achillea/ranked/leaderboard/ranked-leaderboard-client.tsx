@@ -7,6 +7,7 @@ import type { LeaderboardPage, RankedTierInfo } from "@rosegriffon/achillea-type
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import { Trophy, Search, Loader2, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
+import { MEDAILLE } from "@/components/achillea/couleurs-donnees";
 
 export default function RankedLeaderboardPage({
   initialData,
@@ -140,7 +141,7 @@ export default function RankedLeaderboardPage({
             Retour au hub classé
           </Link>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
               <Trophy className="w-5 h-5" />
             </span>
             <h1 className="text-3xl font-bold tracking-tight">Classement Général (Leaderboard)</h1>
@@ -224,7 +225,7 @@ export default function RankedLeaderboardPage({
           </select>
         </label>
         {tiersError && (
-          <output className="text-lg text-amber-400">Paliers indisponibles. Le classement reste consultable.</output>
+          <output className="text-lg text-warning">Paliers indisponibles. Le classement reste consultable.</output>
         )}
 
         <div className="text-lg text-muted-foreground self-end sm:self-auto">
@@ -241,7 +242,7 @@ export default function RankedLeaderboardPage({
             <p className="text-lg text-muted-foreground">Chargement du classement...</p>
           </div>
         ) : error && !data ? (
-          <div role="alert" className="py-16 text-center text-rose-400 text-lg">
+          <div role="alert" className="py-16 text-center text-destructive text-lg">
             {error}
           </div>
         ) : entries.length === 0 ? (
@@ -301,15 +302,15 @@ export default function RankedLeaderboardPage({
                       <tr key={entry.userId} className="hover:bg-muted/30 transition-colors">
                         <td className="py-3 px-4 text-center font-bold">
                           {actualRank === 1 ? (
-                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-400 text-black text-lg font-extrabold">
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${MEDAILLE.or.pastille} text-lg font-extrabold`}>
                               1
                             </span>
                           ) : actualRank === 2 ? (
-                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-300 text-black text-lg font-extrabold">
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${MEDAILLE.argent.pastille} text-lg font-extrabold`}>
                               2
                             </span>
                           ) : actualRank === 3 ? (
-                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-700 text-white text-lg font-extrabold">
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${MEDAILLE.bronze.pastille} text-lg font-extrabold`}>
                               3
                             </span>
                           ) : (
@@ -330,7 +331,7 @@ export default function RankedLeaderboardPage({
                             {tiers?.find(tier => entry.elo >= tier.minElo && entry.elo <= tier.maxElo)?.key ?? "—"}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-right font-bold text-amber-400 font-mono text-lg">
+                        <td className="py-3 px-4 text-right font-bold text-warning font-mono text-lg">
                           {entry.elo} AP
                         </td>
                         <td className="py-3 px-4 text-right text-muted-foreground">{entry.gamesPlayed}</td>
@@ -353,7 +354,7 @@ export default function RankedLeaderboardPage({
               {entries.map(entry => (
                 <article key={entry.userId} className="space-y-3 p-4 text-lg">
                   <div className="flex items-center gap-3">
-                    <span className="min-w-12 font-bold text-amber-400">#{entry.rank}</span>
+                    <span className="min-w-12 font-bold text-warning">#{entry.rank}</span>
                     <Link
                       href={`/achillea/users/${entry.userId}`}
                       className="inline-flex min-h-11 min-w-0 items-center gap-2 font-semibold hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -365,7 +366,7 @@ export default function RankedLeaderboardPage({
                   <dl className="grid grid-cols-2 gap-2 text-muted-foreground">
                     <div>
                       <dt>Points classés</dt>
-                      <dd className="font-bold text-amber-400">{entry.elo} AP</dd>
+                      <dd className="font-bold text-warning">{entry.elo} AP</dd>
                     </div>
                     <div>
                       <dt>Palier</dt>

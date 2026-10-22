@@ -71,7 +71,7 @@ export default function OrganizationsPendingValidationPage() {
           Retour au dashboard admin
         </Link>
         <div className="flex items-center gap-2">
-          <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
             <Building2 className="w-5 h-5" />
           </span>
           <h1 className="text-3xl font-bold tracking-tight">Organisations en Attente de Revue</h1>
@@ -85,7 +85,7 @@ export default function OrganizationsPendingValidationPage() {
         </div>
       ) : !isAuthenticated ? (
         <div className="py-16 text-center space-y-4">
-          <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+          <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
           <p className="text-sm text-muted-foreground">Connectez-vous pour accéder à cette file de validation.</p>
           <button
             type="button"
@@ -97,7 +97,7 @@ export default function OrganizationsPendingValidationPage() {
         </div>
       ) : (user?.role ?? 0) < 2 ? (
         <div className="py-16 text-center space-y-3">
-          <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+          <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
           <p className="text-sm text-muted-foreground">Cette file est réservée aux administrateurs.</p>
         </div>
       ) : loading ? (

@@ -7,6 +7,7 @@ import { UserAvatar } from "@/components/achillea/UserAvatar";
 import type { CircuitRanking } from "@rosegriffon/achillea-types";
 import { Trophy, ArrowLeft, Crown, Shield, Users, Loader2, ChevronRight } from "lucide-react";
 import { signalerException } from "@/lib/achillea/signaler";
+import { MEDAILLE } from "@/components/achillea/couleurs-donnees";
 
 export default function CircuitRankingPage() {
   const [data, setData] = useState<CircuitRanking | null>(null);
@@ -80,7 +81,7 @@ export default function CircuitRankingPage() {
           Retour aux tournois
         </Link>
         <div className="flex items-center gap-2">
-          <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
             <Trophy className="w-5 h-5" />
           </span>
           <h1 className="text-3xl font-bold tracking-tight">Circuit Achilléa — Classement Officiel</h1>
@@ -95,15 +96,15 @@ export default function CircuitRankingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 pb-2 items-end">
           {/* #2 */}
           {top3[1] && (
-            <div className="order-2 sm:order-1 border border-slate-700/60 bg-gradient-to-b from-slate-800/40 to-card rounded-2xl p-5 text-center space-y-3 relative shadow-md">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold bg-slate-300 text-black shadow">
+            <div className={`order-2 sm:order-1 ${MEDAILLE.argent.carte} rounded-2xl p-5 text-center space-y-3 relative shadow-md`}>
+              <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold ${MEDAILLE.argent.pastille} shadow`}>
                 #2 Argent
               </span>
               <div className="pt-2">
                 <UserAvatar
                   avatar={top3[1].avatar}
                   displayName={top3[1].displayName}
-                  className="w-16 h-16 mx-auto ring-2 ring-slate-300"
+                  className={`w-16 h-16 mx-auto ring-2 ${MEDAILLE.argent.anneau}`}
                 />
               </div>
               <div>
@@ -114,7 +115,7 @@ export default function CircuitRankingPage() {
                   {top3[1].displayName}
                 </Link>
                 {top3[1].clan && <span className="text-lg text-muted-foreground">[{top3[1].clan.shortName}]</span>}
-                <div className="text-xl font-extrabold text-slate-300 mt-1">{top3[1].points} pts</div>
+                <div className={`text-xl font-extrabold ${MEDAILLE.argent.texte} mt-1`}>{top3[1].points} pts</div>
                 <div className="text-lg text-muted-foreground mt-0.5">
                   {top3[1].wins} titre{top3[1].wins > 1 ? "s" : ""} · {top3[1].tournamentsPlayed} tournoi
                   {top3[1].tournamentsPlayed > 1 ? "s" : ""}
@@ -125,8 +126,8 @@ export default function CircuitRankingPage() {
 
           {/* #1 Champion */}
           {top3[0] && (
-            <div className="order-1 sm:order-2 border-2 border-amber-500/80 bg-gradient-to-b from-amber-500/10 via-card to-card rounded-2xl p-6 text-center space-y-3 relative shadow-xl sm:-translate-y-2">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3.5 py-1 rounded-full text-lg font-bold bg-amber-400 text-black shadow-lg">
+            <div className={`order-1 sm:order-2 ${MEDAILLE.or.carte} rounded-2xl p-6 text-center space-y-3 relative shadow-xl sm:-translate-y-2`}>
+              <div className={`absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3.5 py-1 rounded-full text-lg font-bold ${MEDAILLE.or.pastille} shadow-lg`}>
                 <Crown className="w-3.5 h-3.5 fill-black" />
                 #1 Leader Circuit
               </div>
@@ -134,18 +135,18 @@ export default function CircuitRankingPage() {
                 <UserAvatar
                   avatar={top3[0].avatar}
                   displayName={top3[0].displayName}
-                  className="w-20 h-20 mx-auto ring-4 ring-amber-400 shadow-amber-500/20"
+                  className={`w-20 h-20 mx-auto ring-4 ${MEDAILLE.or.anneau}`}
                 />
               </div>
               <div>
                 <Link
                   href={`/achillea/users/${top3[0].userId}`}
-                  className="inline-flex min-h-11 items-center font-bold text-lg hover:text-amber-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  className={`inline-flex min-h-11 items-center font-bold text-lg ${MEDAILLE.or.survolTexte} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`}
                 >
                   {top3[0].displayName}
                 </Link>
                 {top3[0].clan && <span className="text-lg text-muted-foreground">[{top3[0].clan.shortName}]</span>}
-                <div className="text-2xl font-black text-amber-400 mt-1">{top3[0].points} pts</div>
+                <div className={`text-2xl font-black ${MEDAILLE.or.texte} mt-1`}>{top3[0].points} pts</div>
                 <div className="text-lg text-muted-foreground mt-0.5">
                   {top3[0].wins} titre{top3[0].wins > 1 ? "s" : ""} · {top3[0].tournamentsPlayed} tournoi
                   {top3[0].tournamentsPlayed > 1 ? "s" : ""}
@@ -156,15 +157,15 @@ export default function CircuitRankingPage() {
 
           {/* #3 */}
           {top3[2] && (
-            <div className="order-3 border border-amber-800/60 bg-gradient-to-b from-amber-950/20 to-card rounded-2xl p-5 text-center space-y-3 relative shadow-md">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold bg-amber-700 text-amber-100 shadow">
+            <div className={`order-3 ${MEDAILLE.bronze.carte} rounded-2xl p-5 text-center space-y-3 relative shadow-md`}>
+              <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold ${MEDAILLE.bronze.pastilleClaire} shadow`}>
                 #3 Bronze
               </span>
               <div className="pt-2">
                 <UserAvatar
                   avatar={top3[2].avatar}
                   displayName={top3[2].displayName}
-                  className="w-16 h-16 mx-auto ring-2 ring-amber-700"
+                  className={`w-16 h-16 mx-auto ring-2 ${MEDAILLE.bronze.anneau}`}
                 />
               </div>
               <div>
@@ -175,7 +176,7 @@ export default function CircuitRankingPage() {
                   {top3[2].displayName}
                 </Link>
                 {top3[2].clan && <span className="text-lg text-muted-foreground">[{top3[2].clan.shortName}]</span>}
-                <div className="text-xl font-extrabold text-amber-600 mt-1">{top3[2].points} pts</div>
+                <div className={`text-xl font-extrabold ${MEDAILLE.bronze.texte} mt-1`}>{top3[2].points} pts</div>
                 <div className="text-lg text-muted-foreground mt-0.5">
                   {top3[2].wins} titre{top3[2].wins > 1 ? "s" : ""} · {top3[2].tournamentsPlayed} tournoi
                   {top3[2].tournamentsPlayed > 1 ? "s" : ""}
@@ -290,8 +291,8 @@ export default function CircuitRankingPage() {
                           className="rounded-2xl border border-border bg-card p-4 text-lg space-y-3"
                         >
                           <div className="flex items-center justify-between gap-3">
-                            <span className="font-bold text-amber-400">#{leaderboard.indexOf(player) + 1}</span>
-                            <strong className="text-amber-400">{player.points} pts</strong>
+                            <span className="font-bold text-warning">#{leaderboard.indexOf(player) + 1}</span>
+                            <strong className="text-warning">{player.points} pts</strong>
                           </div>
                           <Link
                             href={`/achillea/users/${player.userId}`}
@@ -372,10 +373,10 @@ export default function CircuitRankingPage() {
                                   <span className="text-muted-foreground">-</span>
                                 )}
                               </td>
-                              <td className="py-3 px-4 text-right font-bold text-amber-400 font-mono text-lg">
+                              <td className="py-3 px-4 text-right font-bold text-warning font-mono text-lg">
                                 {player.points} pts
                               </td>
-                              <td className="py-3 px-4 text-right font-semibold text-emerald-400">
+                              <td className="py-3 px-4 text-right font-semibold text-success">
                                 {player.wins > 0 ? `🏆 ${player.wins}` : "0"}
                               </td>
                               <td className="py-3 px-4 text-right font-mono">{player.podiums}</td>
@@ -425,7 +426,7 @@ export default function CircuitRankingPage() {
                     <article key={clan.id} className="rounded-2xl border border-border bg-card p-4 text-lg">
                       <div className="flex justify-between gap-3">
                         <strong>#{clanRanking.indexOf(clan) + 1}</strong>
-                        <strong className="text-amber-400">{clan.points} pts</strong>
+                        <strong className="text-warning">{clan.points} pts</strong>
                       </div>
                       <Link
                         href={`/achillea/clans/${clan.id}`}
@@ -465,10 +466,10 @@ export default function CircuitRankingPage() {
                               {clan.name} [{clan.shortName}]
                             </Link>
                           </td>
-                          <td className="py-3 px-4 text-right font-bold text-amber-400 font-mono text-lg">
+                          <td className="py-3 px-4 text-right font-bold text-warning font-mono text-lg">
                             {clan.points} pts
                           </td>
-                          <td className="py-3 px-4 text-right font-semibold text-emerald-400">
+                          <td className="py-3 px-4 text-right font-semibold text-success">
                             {clan.wins > 0 ? `🏆 ${clan.wins}` : "0"}
                           </td>
                           <td className="py-3 px-4 text-right text-muted-foreground font-mono">{clan.players}</td>

@@ -115,7 +115,7 @@ export function TournamentBracket({
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-muted/40 border border-border">
           <div className="flex items-center gap-3">
-            <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
               <Clock className="w-6 h-6" />
             </span>
             <div>
@@ -127,7 +127,7 @@ export function TournamentBracket({
               </p>
             </div>
           </div>
-          <Badge variant="outline" className="text-lg border-amber-500/40 text-amber-400">
+          <Badge variant="outline" className="text-lg border-warning/40 text-warning">
             {participants.length} / {totalSlots} participants inscrits
           </Badge>
         </div>
@@ -228,7 +228,7 @@ export function TournamentBracket({
           </div>
         </div>
 
-        <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 text-lg gap-1.5">
+        <Badge variant="outline" className="border-success/40 text-success text-lg gap-1.5">
           Matchs enregistrés
         </Badge>
       </div>
@@ -244,11 +244,11 @@ export function TournamentBracket({
                 <div
                   className={`text-center font-bold text-lg uppercase tracking-wider py-2 px-3 rounded-xl border shadow-xs flex items-center justify-center gap-1.5 ${
                     isFinal
-                      ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                      ? "bg-warning/10 border-warning/30 text-warning"
                       : "bg-card border-border text-foreground"
                   }`}
                 >
-                  {isFinal && <Trophy className="w-5 h-5 text-amber-400" />}
+                  {isFinal && <Trophy className="w-5 h-5 text-warning" />}
                   {title}
                 </div>
 
@@ -282,7 +282,7 @@ export function TournamentBracket({
                           {/* Opponent 1 */}
                           <div
                             className={`flex items-center justify-between gap-2 text-lg p-1.5 rounded-lg transition ${
-                              isWon1 ? "bg-emerald-500/10 text-emerald-400 font-bold" : "text-foreground font-medium"
+                              isWon1 ? "bg-success/10 text-success font-bold" : "text-foreground font-medium"
                             }`}
                           >
                             <div className="flex items-center gap-2 truncate">
@@ -306,7 +306,7 @@ export function TournamentBracket({
                           {/* Opponent 2 */}
                           <div
                             className={`flex items-center justify-between gap-2 text-lg p-1.5 rounded-lg transition ${
-                              isWon2 ? "bg-emerald-500/10 text-emerald-400 font-bold" : "text-foreground font-medium"
+                              isWon2 ? "bg-success/10 text-success font-bold" : "text-foreground font-medium"
                             }`}
                           >
                             <div className="flex items-center gap-2 truncate">

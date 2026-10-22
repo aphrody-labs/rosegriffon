@@ -8,6 +8,7 @@ import { absoluteUrl } from "@/lib/site-url";
 import { normalizeNames } from "@rosegriffon/achillea-core/names";
 import { SocialMedia, type SocialMediaDTO } from "@rosegriffon/achillea-types/domain/common";
 import { AlertCircle, ArrowLeft, Building2, Check, FileText, Globe, Image as ImageIcon, Loader2, Radio, Share2, ShieldAlert } from "lucide-react";
+import { MARQUE } from "@/components/achillea/couleurs-donnees";
 
 const COUNTRY_OPTIONS = [
   { code: "FR", name: "France (FR)" },
@@ -143,7 +144,7 @@ export default function OrganizationCreationPage() {
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
-        <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+        <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
         <h2 className="text-xl font-bold">Connexion requise</h2>
         <p className="text-sm text-muted-foreground">
           Connectez-vous pour enregistrer votre structure officielle sur Achilléa.
@@ -367,7 +368,7 @@ export default function OrganizationCreationPage() {
                   htmlFor="route-create-organization-create-client-tsx-9"
                   className="text-muted-foreground flex items-center gap-1"
                 >
-                  <Radio className="w-3 h-3 text-purple-400" />
+                  <Radio className={`w-3 h-3 ${MARQUE.twitch}`} />
                   Chaîne Twitch (Diffusion)
                 </label>
                 <input

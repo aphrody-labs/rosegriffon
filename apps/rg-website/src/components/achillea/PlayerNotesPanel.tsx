@@ -42,20 +42,20 @@ const CATEGORY_LABELS: Record<PlayerNoteCategory, string> = {
 const SEVERITY_CONFIG: Record<PlayerNoteSeverity, { label: string; color: string; badge: string; icon: any }> = {
   [PlayerNoteSeverity.INFO]: {
     label: "Information",
-    color: "text-blue-400",
-    badge: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    color: "text-primary",
+    badge: "bg-primary/10 text-primary border-primary/20",
     icon: Info,
   },
   [PlayerNoteSeverity.WARNING]: {
     label: "Avertissement",
-    color: "text-amber-400",
-    badge: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    color: "text-warning",
+    badge: "bg-warning/10 text-warning border-warning/20",
     icon: AlertTriangle,
   },
   [PlayerNoteSeverity.SERIOUS]: {
     label: "Grave",
-    color: "text-red-400",
-    badge: "bg-red-500/10 text-red-400 border-red-500/20",
+    color: "text-destructive",
+    badge: "bg-destructive/10 text-destructive border-destructive/20",
     icon: AlertOctagon,
   },
 };
@@ -227,7 +227,7 @@ export function PlayerNotesPanel({
       {/* Top Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div className="flex items-center gap-3">
-          <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
             <ShieldAlert className="w-5 h-5" />
           </span>
           <div>
@@ -366,12 +366,12 @@ export function PlayerNotesPanel({
 
                       {/* Resolved indicator */}
                       {note.resolved ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-success/10 text-success border border-success/20">
                           <CheckCircle2 className="w-3 h-3" />
                           Traité
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                        <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-warning/10 text-warning border border-warning/20">
                           À traiter
                         </span>
                       )}
@@ -400,7 +400,7 @@ export function PlayerNotesPanel({
                       className={`p-1.5 rounded-lg border transition text-xs flex items-center gap-1 font-semibold ${
                         note.resolved
                           ? "border-border hover:bg-muted text-muted-foreground"
-                          : "bg-emerald-600/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-600/20"
+                          : "bg-success/10 text-success border-success/30 hover:bg-success/20"
                       }`}
                     >
                       {note.resolved ? (

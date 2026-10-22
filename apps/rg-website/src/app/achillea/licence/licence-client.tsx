@@ -88,7 +88,7 @@ export default function LicencePage() {
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
-        <ShieldAlert className="w-12 h-12 text-amber-500 mx-auto" />
+        <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
         <h2 className="text-xl font-bold">Connexion requise</h2>
         <p className="text-sm text-muted-foreground">
           Connectez-vous pour afficher votre licence compétiteur officielle.
@@ -140,7 +140,7 @@ export default function LicencePage() {
           role="alert"
           className="border border-destructive/30 bg-destructive/5 rounded-2xl p-8 text-center space-y-4"
         >
-          <AlertCircle className="w-10 h-10 text-rose-400 mx-auto" />
+          <AlertCircle className="w-10 h-10 text-destructive mx-auto" />
           <h3 className="font-bold text-base">Licence temporairement indisponible</h3>
           <p className="text-sm text-muted-foreground">{loadError}</p>
           <button

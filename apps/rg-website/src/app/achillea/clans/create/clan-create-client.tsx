@@ -141,7 +141,7 @@ export default function CreateClanPage() {
 
         <CardContent className="p-6 sm:p-8">
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 text-sm flex items-center gap-2">
+            <div className="mb-6 p-4 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-sm flex items-center gap-2">
               <AlertCircle className="size-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -153,7 +153,7 @@ export default function CreateClanPage() {
                 htmlFor="route-create-clan-create-client-tsx-1"
                 className="text-xs font-bold text-on-surface uppercase tracking-wider"
               >
-                Nom du clan <span className="text-red-500">*</span>
+                Nom du clan <span className="text-destructive">*</span>
               </label>
               <input
                 id="route-create-clan-create-client-tsx-1"
@@ -172,7 +172,7 @@ export default function CreateClanPage() {
                 htmlFor="route-create-clan-create-client-tsx-2"
                 className="text-xs font-bold text-on-surface uppercase tracking-wider"
               >
-                Sigle / Tag court <span className="text-red-500">*</span>
+                Sigle / Tag court <span className="text-destructive">*</span>
               </label>
               <input
                 id="route-create-clan-create-client-tsx-2"
@@ -228,7 +228,7 @@ export default function CreateClanPage() {
 
             <fieldset className="space-y-3">
               <legend className="text-xs font-bold text-on-surface uppercase tracking-wider">
-                Réseaux sociaux <span className="text-red-500">*</span>
+                Réseaux sociaux <span className="text-destructive">*</span>
               </legend>
               <p className="text-[11px] text-on-surface-variant">Ajoute au moins un lien X, Instagram ou TikTok.</p>
               <input

@@ -202,7 +202,7 @@ export default function RankedMatchPage() {
             Retour au hub classé
           </Link>
           <div className="flex items-center gap-3">
-            <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
               <Swords className="w-5 h-5" />
             </span>
             <div>
@@ -211,22 +211,22 @@ export default function RankedMatchPage() {
                 <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-muted text-muted-foreground">
                   CODE : {roomCode}
                 </span>
-                <span className="text-xs text-amber-400 font-semibold">{matchMode}</span>
+                <span className="text-xs text-warning font-semibold">{matchMode}</span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-success/10 text-success border border-success/20">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
             {matchStatusLabel(match.statut)}
           </span>
         </div>
       </div>
 
       {match.statut === "waiting" && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-5 text-center space-y-3">
+        <div className="rounded-xl border border-warning/30 bg-warning/10 p-5 text-center space-y-3">
           <p className="text-sm">Les deux joueurs doivent confirmer avant le début de la rencontre.</p>
           <button
             type="button"
@@ -239,7 +239,7 @@ export default function RankedMatchPage() {
         </div>
       )}
       {match.statut === "playing" && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-center space-y-3">
+        <div className="rounded-xl border border-success/30 bg-success/10 p-5 text-center space-y-3">
           <p className="text-sm">Quand la rencontre est terminée, passez à la saisie du score.</p>
           <button
             type="button"
@@ -404,9 +404,9 @@ export default function RankedMatchPage() {
               </button>
             </div>
           ) : scoreSubmitted ? (
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-2">
-              <Check className="w-8 h-8 text-emerald-400 mx-auto" />
-              <div className="font-bold text-sm text-emerald-400">Score soumis avec succès !</div>
+            <div className="p-4 rounded-xl bg-success/10 border border-success/30 text-center space-y-2">
+              <Check className="w-8 h-8 text-success mx-auto" />
+              <div className="font-bold text-sm text-success">Score soumis avec succès !</div>
               <p className="text-xs text-muted-foreground">
                 En attente de validation par l'adversaire. La mise à jour de vos AP sera appliquée instantanément.
               </p>
@@ -423,8 +423,8 @@ export default function RankedMatchPage() {
 
           {/* Dispute block */}
           {match.statut === "disputed" && (
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-3 text-xs">
-              <div className="font-bold text-amber-400 flex items-center gap-1.5">
+            <div className="p-4 rounded-xl bg-warning/10 border border-warning/30 space-y-3 text-xs">
+              <div className="font-bold text-warning flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4" />
                 Fournir une preuve au dossier d'arbitrage
               </div>

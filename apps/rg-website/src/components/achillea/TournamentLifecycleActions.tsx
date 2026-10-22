@@ -101,8 +101,8 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
         <div
           className={`p-3 rounded-xl text-xs flex items-center gap-2 border ${
             message.type === "success"
-              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-              : "bg-rose-500/10 border-rose-500/30 text-rose-400"
+              ? "bg-success/10 border-success/30 text-success"
+              : "bg-destructive/10 border-destructive/30 text-destructive"
           }`}
         >
           {message.type === "success" ? (
@@ -164,7 +164,7 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
               {loadingAction === "seedByRanked" ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
+                <TrendingUp className="w-3.5 h-3.5 text-warning" />
               )}
               Seeding par Elo
             </Button>
@@ -192,7 +192,7 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
             size="sm"
             disabled={loadingAction !== null}
             onClick={() => executeAction("start", () => client.tournaments.start(tournament.id))}
-            className="text-xs font-bold gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white"
+            className="text-xs font-bold gap-1.5 bg-success hover:bg-success/90 text-success-foreground"
           >
             {loadingAction === "start" ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -227,7 +227,7 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
             variant="outline"
             disabled={loadingAction !== null}
             onClick={() => executeAction("close", () => client.tournaments.close(tournament.id, false))}
-            className="text-xs font-semibold gap-1.5 border-emerald-500/40 text-emerald-400"
+            className="text-xs font-semibold gap-1.5 border-success/40 text-success"
           >
             {loadingAction === "close" ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -247,12 +247,12 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
               onClick={() =>
                 executeAction("applyPlacementPrizes", () => client.tournaments.applyPlacementPrizes(tournament.id))
               }
-              className="text-xs font-semibold gap-1.5 border-amber-500/40 text-amber-400"
+              className="text-xs font-semibold gap-1.5 border-warning/40 text-warning"
             >
               {loadingAction === "applyPlacementPrizes" ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <Coins className="w-3.5 h-3.5 text-amber-400" />
+                <Coins className="w-3.5 h-3.5 text-warning" />
               )}
               Distribuer les AP Podium
             </Button>
@@ -276,7 +276,7 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
               variant="ghost"
               disabled={loadingAction !== null}
               onClick={() => setShowCancelPrompt(true)}
-              className="text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 ml-auto"
+              className="text-xs text-destructive hover:text-destructive/80 hover:bg-destructive/10 ml-auto"
             >
               <XCircle className="w-3.5 h-3.5 mr-1" />
               Annuler le tournoi
@@ -285,14 +285,14 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
       </div>
 
       {showCancelPrompt && (
-        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 space-y-3 mt-3">
-          <h4 className="text-xs font-bold text-rose-400">Confirmation d&apos;annulation du tournoi</h4>
+        <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/30 space-y-3 mt-3">
+          <h4 className="text-xs font-bold text-destructive">Confirmation d&apos;annulation du tournoi</h4>
           <input
             type="text"
             value={cancelReason}
             onChange={e => setCancelReason(e.target.value)}
             placeholder="Motif de l'annulation (obligatoire)"
-            className="w-full px-3 py-2 rounded-xl bg-background border border-border text-xs focus:outline-hidden focus:ring-1 focus:ring-rose-500"
+            className="w-full px-3 py-2 rounded-xl bg-background border border-border text-xs focus:outline-hidden focus:ring-1 focus:ring-destructive"
           />
           <div className="flex items-center justify-end gap-2">
             <Button size="sm" variant="ghost" onClick={() => setShowCancelPrompt(false)} className="text-xs">
@@ -305,7 +305,7 @@ export function TournamentLifecycleActions({ tournament, onUpdated }: Tournament
                 setShowCancelPrompt(false);
                 executeAction("cancel", () => client.tournaments.cancel(tournament.id, cancelReason));
               }}
-              className="text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white"
+              className="text-xs font-bold bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
               Confirmer l&apos;annulation
             </Button>

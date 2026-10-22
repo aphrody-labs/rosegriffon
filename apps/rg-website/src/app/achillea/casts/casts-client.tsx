@@ -57,7 +57,7 @@ export default function CastsPublicPage() {
         </Link>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            <span className="p-2 rounded-lg bg-tertiary/10 text-tertiary border border-tertiary/20">
               <Tv className="w-5 h-5" />
             </span>
             <h1 className="text-3xl font-bold tracking-tight">Casters & Régie Officiels</h1>
@@ -67,7 +67,7 @@ export default function CastsPublicPage() {
             href="https://twitch.tv/rosegriffon"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-tertiary hover:bg-tertiary/90 text-on-tertiary text-xs font-bold transition shadow-sm"
           >
             <FaTwitch className="w-4 h-4" />
             Chaîne Officielle
@@ -84,7 +84,7 @@ export default function CastsPublicPage() {
           <p className="text-sm text-muted-foreground">Chargement des casters...</p>
         </div>
       ) : loadError ? (
-        <div role="alert" className="border border-amber-500/30 bg-amber-500/5 rounded-2xl p-8 text-center space-y-3">
+        <div role="alert" className="border border-warning/30 bg-warning/5 rounded-2xl p-8 text-center space-y-3">
           <p className="text-sm text-muted-foreground">{loadError}</p>
           <button
             type="button"

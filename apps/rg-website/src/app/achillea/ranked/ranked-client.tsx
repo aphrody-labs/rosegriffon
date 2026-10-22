@@ -128,7 +128,7 @@ export default function RankedHubPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
               <Swords className="w-5 h-5" />
             </span>
             <h1 className="text-3xl font-bold tracking-tight">Système Classé (Ranked)</h1>
@@ -145,21 +145,21 @@ export default function RankedHubPage() {
             href="/achillea/ranked/leaderboard"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-card hover:bg-accent transition-colors"
           >
-            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            <Trophy className="w-3.5 h-3.5 text-warning" />
             Classement
           </Link>
           <Link
             href="/achillea/ranked/tiers"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-card hover:bg-accent transition-colors"
           >
-            <Layers className="w-3.5 h-3.5 text-blue-400" />
+            <Layers className="w-3.5 h-3.5 text-primary" />
             Paliers
           </Link>
           <Link
             href="/achillea/ranked/history"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-card hover:bg-accent transition-colors"
           >
-            <History className="w-3.5 h-3.5 text-emerald-400" />
+            <History className="w-3.5 h-3.5 text-success" />
             Historique
           </Link>
         </div>
@@ -197,7 +197,7 @@ export default function RankedHubPage() {
             type="button"
             onClick={() => setIsRanked(true)}
             className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
-              isRanked ? "bg-amber-500 text-black shadow-sm font-bold" : "text-muted-foreground hover:text-foreground"
+              isRanked ? "bg-warning text-warning-foreground shadow-sm font-bold" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Classé (ELO)
@@ -231,7 +231,7 @@ export default function RankedHubPage() {
         </div>
       ) : !isAuthenticated ? (
         <div className="p-8 border border-border/80 bg-card/40 backdrop-blur-sm rounded-2xl text-center space-y-4">
-          <ShieldAlert className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
+          <ShieldAlert className="w-12 h-12 text-warning mx-auto opacity-80" />
           <div className="space-y-1">
             <h2 className="text-xl font-bold">Connexion requise pour votre profil classé</h2>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
@@ -266,7 +266,7 @@ export default function RankedHubPage() {
       ) : profileError || !profile ? (
         <div
           role="alert"
-          className="p-8 border border-rose-500/30 bg-card rounded-2xl text-center text-sm text-rose-400"
+          className="p-8 border border-destructive/30 bg-card rounded-2xl text-center text-sm text-destructive"
         >
           {profileError ?? "Profil classé introuvable."}
         </div>
@@ -298,14 +298,14 @@ export default function RankedHubPage() {
               <div className="space-y-3 text-center sm:text-left flex-1">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                   <h2 className="text-2xl font-bold tracking-tight">{tierKey}</h2>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning/10 text-warning border border-warning/30">
                     {profile?.elo ?? 0} AP
                   </span>
                   <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-muted text-muted-foreground">
                     {mode === 2 ? "1v1" : "2v2"}
                   </span>
                   {profile.globalRank != null && (profile.totalPlayers ?? 0) > 0 && profile.percentile != null && (
-                    <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20">
                       Top {profile.percentile}%
                     </span>
                   )}
@@ -314,11 +314,11 @@ export default function RankedHubPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                   <div className="p-2 rounded-lg bg-background/60 border border-border">
                     <div className="text-muted-foreground">Victoires</div>
-                    <div className="text-base font-bold text-emerald-400">{profile?.wins ?? 0}</div>
+                    <div className="text-base font-bold text-success">{profile?.wins ?? 0}</div>
                   </div>
                   <div className="p-2 rounded-lg bg-background/60 border border-border">
                     <div className="text-muted-foreground">Défaites</div>
-                    <div className="text-base font-bold text-rose-400">{profile?.losses ?? 0}</div>
+                    <div className="text-base font-bold text-destructive">{profile?.losses ?? 0}</div>
                   </div>
                   <div className="p-2 rounded-lg bg-background/60 border border-border">
                     <div className="text-muted-foreground">Taux V</div>
@@ -326,7 +326,7 @@ export default function RankedHubPage() {
                   </div>
                   <div className="p-2 rounded-lg bg-background/60 border border-border">
                     <div className="text-muted-foreground">Pic ELO</div>
-                    <div className="text-base font-bold text-amber-400">{profile?.peakRating ?? 0} AP</div>
+                    <div className="text-base font-bold text-warning">{profile?.peakRating ?? 0} AP</div>
                   </div>
                 </div>
 
@@ -344,7 +344,7 @@ export default function RankedHubPage() {
           <div className="border border-border bg-card rounded-2xl p-6 flex flex-col justify-between space-y-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Swords className="w-4 h-4 text-amber-400" aria-hidden />
+                <Swords className="w-4 h-4 text-warning" aria-hidden />
                 <h3 className="font-semibold text-sm">Défi Direct</h3>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -362,10 +362,10 @@ export default function RankedHubPage() {
                     className="p-1.5 rounded-md hover:bg-muted transition text-muted-foreground hover:text-foreground"
                     title="Copier le lien"
                   >
-                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
-                <p className="text-[11px] text-emerald-400 font-medium">
+                <p className="text-[11px] text-success font-medium">
                   Lien généré ! Partagez-le à votre adversaire.
                 </p>
               </div>
@@ -379,7 +379,7 @@ export default function RankedHubPage() {
                 {creatingLink ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 ) : (
-                  <Play className="w-3.5 h-3.5 text-amber-400" />
+                  <Play className="w-3.5 h-3.5 text-warning" />
                 )}
                 Créer un lien de défi
               </button>
@@ -422,14 +422,14 @@ export default function RankedHubPage() {
           ) : (
             <div className="space-y-5 max-w-md mx-auto py-2">
               <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
-                <span className="absolute inset-0 rounded-full bg-amber-500/20 animate-ping" />
-                <span className="absolute inset-2 rounded-full border border-amber-500/40 animate-spin" />
-                <Search className="w-8 h-8 text-amber-400 relative z-10" />
+                <span className="absolute inset-0 rounded-full bg-warning/20 animate-ping" />
+                <span className="absolute inset-2 rounded-full border border-warning/40 animate-spin" />
+                <Search className="w-8 h-8 text-warning relative z-10" />
               </div>
 
               <div className="space-y-1">
                 <h3 className="text-lg font-bold">Recherche d'adversaire en cours...</h3>
-                <div className="text-2xl font-mono font-bold text-amber-400">{formatTimer(searchSeconds)}</div>
+                <div className="text-2xl font-mono font-bold text-warning">{formatTimer(searchSeconds)}</div>
                 <p className="text-xs text-muted-foreground">
                   {etaSecondes === null
                     ? "En attente d'une estimation du serveur…"

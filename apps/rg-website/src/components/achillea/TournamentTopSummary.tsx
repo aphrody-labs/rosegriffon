@@ -7,6 +7,7 @@ import { createAchilleaClient } from "@/lib/achillea";
 import { UserAvatar } from "./UserAvatar";
 import { Trophy, Loader2 } from "lucide-react";
 import type { TournamentSummary } from "@rosegriffon/achillea-types";
+import { MEDAILLE } from "@/components/achillea/couleurs-donnees";
 
 interface TournamentTopSummaryProps {
   tournamentId: number;
@@ -49,7 +50,7 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
   if (loading) {
     return (
       <output aria-live="polite" className="py-8 text-center space-y-2">
-        <Loader2 className="w-6 h-6 animate-spin text-amber-400 mx-auto" />
+        <Loader2 className="w-6 h-6 animate-spin text-warning mx-auto" />
         <p className="text-lg text-muted-foreground">Chargement des classements et du podium…</p>
       </output>
     );
@@ -57,12 +58,12 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
 
   if (error)
     return (
-      <div role="alert" className="rounded-2xl border border-rose-500/50 bg-rose-500/10 p-6 text-lg space-y-4">
+      <div role="alert" className="rounded-2xl border border-destructive/50 bg-destructive/10 p-6 text-lg space-y-4">
         <p>{error}</p>
         <button
           type="button"
           onClick={() => setAttempt(value => value + 1)}
-          className="min-h-11 rounded-lg border border-current px-5 font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-amber-300"
+          className="min-h-11 rounded-lg border border-current px-5 font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-warning"
         >
           Réessayer
         </button>
@@ -89,7 +90,7 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
       {/* Podium Section */}
       <div className="border border-border bg-card rounded-3xl p-6 shadow-xs space-y-6">
         <div className="flex items-center gap-2 border-b border-border pb-3">
-          <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
             <Trophy className="w-4 h-4" />
           </span>
           <h3 className="font-bold text-lg uppercase tracking-wider text-foreground">Classement (ex æquo inclus)</h3>
@@ -101,10 +102,10 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
             const isSecond = entry.rank === 2;
 
             const medalBg = isWinner
-              ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
+              ? MEDAILLE.or.encart
               : isSecond
-                ? "bg-slate-400/10 border-slate-400/30 text-slate-300"
-                : "bg-amber-700/10 border-amber-700/30 text-amber-600";
+                ? MEDAILLE.argent.encart
+                : MEDAILLE.bronze.encart;
 
             return (
               <div
@@ -129,7 +130,7 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
                 </div>
 
                 {entry.points > 0 && (
-                  <div className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 text-lg font-mono font-bold flex items-center gap-1">
+                  <div className="px-2.5 py-1 rounded-full bg-warning/20 text-warning text-lg font-mono font-bold flex items-center gap-1">
                     +{entry.points} points de circuit
                   </div>
                 )}
@@ -159,7 +160,7 @@ export function TournamentTopSummary({ tournamentId, isFinished = false }: Tourn
                 </div>
 
                 {entry.points > 0 && (
-                  <span className="font-mono font-bold text-amber-400">+{entry.points} points de circuit</span>
+                  <span className="font-mono font-bold text-warning">+{entry.points} points de circuit</span>
                 )}
               </div>
             ))}

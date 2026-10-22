@@ -35,6 +35,7 @@ import { useEffect, useState } from "react";
 import { FaTwitch, FaYoutube } from "react-icons/fa6";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import { createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
+import { MARQUE } from "@/components/achillea/couleurs-donnees";
 
 function winrate(wins?: number, losses?: number): string {
   const total = (wins ?? 0) + (losses ?? 0);
@@ -227,20 +228,20 @@ export default function UserProfilePage({ id }: { id: string }) {
                     />
                   )}
                   <span>{profile.clan.name}</span>
-                  {profile.clan.role === ClanMemberRole.Captain && <Crown className="size-3.5 text-amber-500" />}
+                  {profile.clan.role === ClanMemberRole.Captain && <Crown className="size-3.5 text-warning" />}
                 </Link>
               )}
             </div>
 
             {/* Niveau, XP, Badges */}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 font-medium">
-                <Star className="size-3.5 fill-amber-500" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-warning/10 text-warning font-medium">
+                <Star className="size-3.5 fill-warning" />
                 Niveau {profile.currentLevel ?? 1} · {profile.totalXp ?? 0} XP
               </span>
 
               {profile.hasYoutube && (
-                <span className="inline-flex items-center gap-1 text-red-500" title="YouTube lié">
+                <span className={`inline-flex items-center gap-1 ${MARQUE.youtube}`} title="YouTube lié">
                   <FaYoutube className="size-4" />
                 </span>
               )}
@@ -250,7 +251,7 @@ export default function UserProfilePage({ id }: { id: string }) {
                   href={profile.twitchUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-purple-400 hover:underline"
+                  className={`inline-flex items-center gap-1.5 ${MARQUE.twitch} hover:underline`}
                 >
                   <FaTwitch className="size-4" />
                   Twitch
@@ -391,11 +392,11 @@ export default function UserProfilePage({ id }: { id: string }) {
                   <div className="text-xs text-muted-foreground">Tournois joués</div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/30">
-                  <div className="text-xl font-bold text-amber-500">{circuit.wins}</div>
+                  <div className="text-xl font-bold text-warning">{circuit.wins}</div>
                   <div className="text-xs text-muted-foreground">Titres</div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/30">
-                  <div className="text-xl font-bold text-emerald-500">{circuit.podiums}</div>
+                  <div className="text-xl font-bold text-success">{circuit.podiums}</div>
                   <div className="text-xs text-muted-foreground">Podiums</div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/30">
@@ -490,7 +491,7 @@ export default function UserProfilePage({ id }: { id: string }) {
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-border/40 pb-3">
                 <div className="flex items-center gap-2">
-                  <Trophy className="size-5 text-amber-500" />
+                  <Trophy className="size-5 text-warning" />
                   <h3 className="font-bold">Tournois</h3>
                 </div>
                 <Badge variant="outline">{profile.tournaments?.total ?? 0} tournoi(s)</Badge>
@@ -502,11 +503,11 @@ export default function UserProfilePage({ id }: { id: string }) {
                   <div className="text-xs text-muted-foreground">Matchs</div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-muted/20">
-                  <div className="text-lg font-bold text-emerald-500">{profile.tournaments?.personalWins ?? 0}</div>
+                  <div className="text-lg font-bold text-success">{profile.tournaments?.personalWins ?? 0}</div>
                   <div className="text-xs text-muted-foreground">Victoires</div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-muted/20">
-                  <div className="text-lg font-bold text-rose-500">{profile.tournaments?.personalLosses ?? 0}</div>
+                  <div className="text-lg font-bold text-destructive">{profile.tournaments?.personalLosses ?? 0}</div>
                   <div className="text-xs text-muted-foreground">Défaites</div>
                 </div>
               </div>
@@ -526,7 +527,7 @@ export default function UserProfilePage({ id }: { id: string }) {
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-border/40 pb-3">
                 <div className="flex items-center gap-2">
-                  <Star className="size-5 text-cyan-500" />
+                  <Star className="size-5 text-primary" />
                   <h3 className="font-bold">Interclans</h3>
                 </div>
                 <Badge variant="outline">{profile.interclans?.total ?? 0} match(s)</Badge>
@@ -538,11 +539,11 @@ export default function UserProfilePage({ id }: { id: string }) {
                   <div className="text-xs text-muted-foreground">Victoires clan</div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-muted/20">
-                  <div className="text-lg font-bold text-emerald-500">{profile.interclans?.personalWins ?? 0}</div>
+                  <div className="text-lg font-bold text-success">{profile.interclans?.personalWins ?? 0}</div>
                   <div className="text-xs text-muted-foreground">Perso V</div>
                 </div>
                 <div className="p-2.5 rounded-lg bg-muted/20">
-                  <div className="text-lg font-bold text-rose-500">{profile.interclans?.personalLosses ?? 0}</div>
+                  <div className="text-lg font-bold text-destructive">{profile.interclans?.personalLosses ?? 0}</div>
                   <div className="text-xs text-muted-foreground">Perso D</div>
                 </div>
               </div>
@@ -607,7 +608,7 @@ export default function UserProfilePage({ id }: { id: string }) {
             </Button>
             <Button onClick={handleSaveProfile} disabled={saving} className="gap-2">
               {saving && <Loader2 className="size-4 animate-spin" />}
-              {saveSuccess && <Check className="size-4 text-emerald-400" />}
+              {saveSuccess && <Check className="size-4 text-success" />}
               {saving ? "Enregistrement..." : saveSuccess ? "Enregistré !" : "Enregistrer"}
             </Button>
           </DialogFooter>

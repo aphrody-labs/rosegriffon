@@ -4,7 +4,9 @@
  * Module PUR (ni `"use client"`, ni React) : la table est lue par le routeur
  * d'onglets et par les tests. Elle reprend `admin-dashboard.ts` de l'ancienne
  * application Angular : le drapeau `superAdmin` y réservait l'onglet au rôle 3,
- * organisations / tournois / sanctions au rôle 2, le reste au staff (rôle 1).
+ * et il était testé AVANT la règle « organisations / tournois / sanctions →
+ * rôle 2 » ; les sanctions, marquées `superAdmin`, sont donc Super-Admin. Le
+ * reste est ouvert au staff (rôle 1). Organisations et tournois ont leurs pages.
  *
  * La visibilité n'est qu'un confort : chaque route de l'API revérifie le rôle.
  */
@@ -152,7 +154,7 @@ export const GROUPES_ONGLETS: readonly GroupeOnglets[] = [
         id: "sanctions",
         libelle: "Sanctions",
         description: "Sanctions des membres",
-        roleMinimal: ROLE_ADMIN,
+        roleMinimal: ROLE_SUPER_ADMIN,
       },
       {
         id: "notes",

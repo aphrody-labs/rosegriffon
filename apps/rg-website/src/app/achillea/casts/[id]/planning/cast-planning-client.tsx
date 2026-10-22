@@ -79,7 +79,7 @@ export default function CastPlanningPage({ id }: { id: string }) {
           Retour aux casters
         </Link>
         <div className="flex items-center gap-2">
-          <span className="p-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20">
+          <span className="p-2 rounded-lg bg-tertiary/10 text-tertiary border border-tertiary/20">
             <Tv className="w-5 h-5" />
           </span>
           <h1 className="text-3xl font-bold tracking-tight">Planning de Régie</h1>
@@ -162,7 +162,7 @@ export default function CastPlanningPage({ id }: { id: string }) {
                       <div className="text-[10px] text-muted-foreground">Créneau #{att.slotId}</div>
                     </div>
 
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-tertiary/10 text-tertiary border border-tertiary/20">
                       Assigné
                     </span>
                   </div>

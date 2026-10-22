@@ -21,12 +21,13 @@ import {
   TableHeader,
   TableRow,
 } from "@rosegriffon/ui";
-import { ExternalLink, Info, Loader2, Pause, Play, Save } from "lucide-react";
+import { ExternalLink, Info, Loader2, Pause, Pencil, Play, Save } from "lucide-react";
 import { signalerEchec } from "@/lib/achillea/signaler";
 import type { ClanDTO } from "@rosegriffon/achillea-types/domain/clan";
 import { ClanState } from "@rosegriffon/achillea-types/enums/clanState";
 import { BoutonActualiser, Chargement, Erreur, Vide, formaterDate, useClientAchillea, useLecture } from "./etat";
 import { ROLE_ADMIN } from "./visibilite";
+import { EditionClanDialog } from "./clan-edition-dialog";
 
 function IdentiteClan({ clan }: { clan: ClanDTO }) {
   return (
@@ -139,21 +140,23 @@ function LimitesEffectif({ peutModifier }: { peutModifier: boolean }) {
 }
 
 /**
- * « Clans » — clans bloqués en revue, clans actifs (bascule inactif, Admin+)
- * et limites d'effectif. L'édition complète d'un clan reste sur sa fiche.
+ * « Clans » — clans bloqués en revue, clans actifs (édition complète et
+ * bascule inactif, Admin+) et limites d'effectif.
  */
 export function ClansTab({ role }: { role: number }) {
   const client = useClientAchillea();
   const estAdmin = role >= ROLE_ADMIN;
-  const enAttente = useLecture("clans?state=1", () =>
-    client.clans.list({ state: ClanState.PendingReview, page: 1, pagination: 50 }),
+  const enAttente = useLecture("admin/clans?state=1", () =>
+    client.clans.adminList({ state: ClanState.PendingReview, page: 1, pageSize: 50 }),
   );
-  const actifs = useLecture("clans?state=2", () =>
-    client.clans.list({ state: ClanState.Approved, page: 1, pagination: 50 }),
+  const actifs = useLecture("admin/clans?state=2", () =>
+    client.clans.adminList({ state: ClanState.Approved, page: 1, pageSize: 50 }),
   );
   const [bascule, setBascule] = useState<number | null>(null);
   const [inactifs, setInactifs] = useState<Record<number, boolean>>({});
   const [erreurBascule, setErreurBascule] = useState<string | null>(null);
+  const [edition, setEdition] = useState<ClanDTO | null>(null);
+  const [confirmation, setConfirmation] = useState<string | null>(null);
 
   const basculerInactif = async (clan: ClanDTO) => {
     const suivant = !(inactifs[clan.id] ?? clan.isInactive);
@@ -190,6 +193,11 @@ export function ClansTab({ role }: { role: number }) {
         <CardContent className="space-y-4">
           {actifs.erreur && <Erreur message={actifs.erreur} onReessayer={actifs.recharger} />}
           {erreurBascule && <Erreur message={erreurBascule} />}
+          {confirmation && (
+            <p role="status" className="text-sm text-success">
+              {confirmation}
+            </p>
+          )}
           {actifs.chargement && !actifs.donnees ? (
             <Chargement />
           ) : listeActifs.length === 0 && !actifs.erreur ? (
@@ -217,7 +225,10 @@ export function ClansTab({ role }: { role: number }) {
                         </TableCell>
                         <TableCell className="font-mono">{clan.shortenedName}</TableCell>
                         <TableCell>
-                          <Badge variant={inactif ? "warning" : "success"}>{inactif ? "Inactif" : "Actif"}</Badge>
+                          <span className="flex flex-wrap gap-1">
+                            <Badge variant={inactif ? "warning" : "success"}>{inactif ? "Inactif" : "Actif"}</Badge>
+                            {clan.isHidden && <Badge variant="outline">Masqué</Badge>}
+                          </span>
                         </TableCell>
                         <TableCell className="whitespace-nowrap text-right">
                           <Button asChild variant="ghost" className="min-h-11 gap-2">
@@ -226,6 +237,20 @@ export function ClansTab({ role }: { role: number }) {
                               Fiche
                             </Link>
                           </Button>
+                          {estAdmin && (
+                            <Button
+                              variant="ghost"
+                              className="min-h-11 gap-2"
+                              aria-label={`Éditer le clan ${clan.name}`}
+                              onClick={() => {
+                                setConfirmation(null);
+                                setEdition({ ...clan, isInactive: inactif });
+                              }}
+                            >
+                              <Pencil className="size-4" aria-hidden="true" />
+                              Éditer
+                            </Button>
+                          )}
                           {estAdmin && (
                             <Button
                               variant="ghost"
@@ -295,6 +320,18 @@ export function ClansTab({ role }: { role: number }) {
           )}
         </CardContent>
       </Card>
+
+      <EditionClanDialog
+        clan={edition}
+        estAdmin={estAdmin}
+        onFermer={() => setEdition(null)}
+        onEnregistre={nom => {
+          setEdition(null);
+          setInactifs({});
+          setConfirmation(`${nom} mis à jour.`);
+          actifs.recharger();
+        }}
+      />
     </div>
   );
 }

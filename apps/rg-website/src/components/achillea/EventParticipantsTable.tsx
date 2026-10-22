@@ -174,7 +174,7 @@ export function EventParticipantsTable({
             {active.length} / {participantsCount} inscrits
           </Badge>
           {waiting.length > 0 && (
-            <Badge variant="outline" className="text-lg font-semibold text-amber-400 border-amber-500/30">
+            <Badge variant="outline" className="text-lg font-semibold text-warning border-warning/30">
               {waiting.length} en attente
             </Badge>
           )}
@@ -205,7 +205,7 @@ export function EventParticipantsTable({
               disabled={bulkLoading || participants.length === 0}
               className="min-h-11 text-lg gap-1.5"
             >
-              <Shuffle className="size-3.5 text-sky-400" />
+              <Shuffle className="size-3.5 text-primary" />
               Mélange aléatoire
             </Button>
             <Button
@@ -213,7 +213,7 @@ export function EventParticipantsTable({
               size="sm"
               onClick={() => setConfirmAction("clearSeeds")}
               disabled={bulkLoading}
-              className="min-h-11 text-lg gap-1 text-muted-foreground hover:text-rose-400"
+              className="min-h-11 text-lg gap-1 text-muted-foreground hover:text-destructive"
             >
               <RotateCcw className="size-3.5" />
               Effacer
@@ -287,7 +287,7 @@ export function EventParticipantsTable({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="min-h-11 min-w-11 p-0 text-emerald-400"
+                            className="min-h-11 min-w-11 p-0 text-success"
                             aria-label={`Enregistrer la seed de ${p.user?.username ?? "ce participant"}`}
                             onClick={() => handleSaveSeed(p)}
                             disabled={savingSeed}
@@ -364,11 +364,11 @@ export function EventParticipantsTable({
                           Disqualifié
                         </Badge>
                       ) : st === ParticipantStatus.WAITLISTED ? (
-                        <Badge variant="outline" className="text-lg text-amber-400 border-amber-500/30">
+                        <Badge variant="outline" className="text-lg text-warning border-warning/30">
                           Attente #{p.waitlistPosition ?? "—"}
                         </Badge>
                       ) : (
-                        <Badge variant="secondary" className="text-lg font-semibold text-emerald-400">
+                        <Badge variant="secondary" className="text-lg font-semibold text-success">
                           Inscrit
                         </Badge>
                       )}
@@ -382,7 +382,7 @@ export function EventParticipantsTable({
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-lg min-h-11 px-2 text-emerald-400 border-emerald-500/30 gap-1"
+                              className="text-lg min-h-11 px-2 text-success border-success/30 gap-1"
                               onClick={() => {
                                 setTargetParticipant(p);
                                 setConfirmAction("promote");
@@ -397,7 +397,7 @@ export function EventParticipantsTable({
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-lg min-h-11 px-2 text-sky-400 border-sky-500/30 gap-1"
+                              className="text-lg min-h-11 px-2 text-primary border-primary/30 gap-1"
                               onClick={() => {
                                 setTargetParticipant(p);
                                 setConfirmAction("reinstate");
@@ -412,7 +412,7 @@ export function EventParticipantsTable({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-lg min-h-11 px-2 text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10"
+                              className="text-lg min-h-11 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                               onClick={() => {
                                 setTargetParticipant(p);
                                 setConfirmAction("disqualify");
@@ -428,7 +428,7 @@ export function EventParticipantsTable({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-lg min-h-11 px-2 text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10"
+                              className="text-lg min-h-11 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                               onClick={() => {
                                 setTargetParticipant(p);
                                 setConfirmAction("remove");

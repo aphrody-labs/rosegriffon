@@ -493,7 +493,7 @@ export default function AchilleaAdminDashboardPage() {
                 <div className="text-xs text-muted-foreground">Litiges ouverts</div>
                 <div
                   className={`text-2xl font-bold ${
-                    (ops?.ranked?.contestedMatches ?? 0) > 0 ? "text-rose-400" : "text-emerald-400"
+                    (ops?.ranked?.contestedMatches ?? 0) > 0 ? "text-destructive" : "text-success"
                   }`}
                 >
                   {ops?.ranked?.contestedMatches ?? disputes.length}
@@ -505,7 +505,7 @@ export default function AchilleaAdminDashboardPage() {
             <Card className="bg-card/50 border-border/60">
               <CardContent className="p-4 space-y-1">
                 <div className="text-xs text-muted-foreground">Matchs en cours</div>
-                <div className="text-2xl font-bold text-amber-400">{ops?.ranked?.activeMatches ?? "—"}</div>
+                <div className="text-2xl font-bold text-warning">{ops?.ranked?.activeMatches ?? "—"}</div>
                 <div className="text-xs text-muted-foreground">Lobbies actifs</div>
               </CardContent>
             </Card>
@@ -536,7 +536,7 @@ export default function AchilleaAdminDashboardPage() {
                 <div className="text-2xl font-bold font-mono">
                   {typeof ops?.bot?.uptime === "number" ? formaterDuree(ops.bot.uptime) : "—"}
                 </div>
-                <div className="text-xs text-emerald-400">
+                <div className="text-xs text-success">
                   {ops?.bot ? (ops.bot.online ? "En ligne" : "Inactif") : "Non mesuré"}
                 </div>
               </CardContent>
@@ -576,7 +576,7 @@ export default function AchilleaAdminDashboardPage() {
               <CardHeader className="p-5 pb-2">
                 <CardTitle className="text-base flex items-center justify-between">
                   <span className="flex items-center gap-2">
-                    <ShieldAlert className="size-4 text-rose-500" />
+                    <ShieldAlert className="size-4 text-destructive" />
                     Sanctions & Exclusions
                   </span>
                   <Link href="/achillea/admins/sanctions">
@@ -603,7 +603,7 @@ export default function AchilleaAdminDashboardPage() {
               <CardHeader className="p-5 pb-2">
                 <CardTitle className="text-base flex items-center justify-between">
                   <span className="flex items-center gap-2">
-                    <ShieldCheck className="size-4 text-amber-500" />
+                    <ShieldCheck className="size-4 text-warning" />
                     Organisations en Attente
                   </span>
                   <Link href="/achillea/organizations/validate">
@@ -644,7 +644,7 @@ export default function AchilleaAdminDashboardPage() {
 
           {disputes.length === 0 ? (
             <div className="p-12 text-center border border-border/60 rounded-xl bg-card/40 space-y-2">
-              <CheckCircle2 className="size-8 text-emerald-400 mx-auto" />
+              <CheckCircle2 className="size-8 text-success mx-auto" />
               <div className="font-semibold text-sm">Aucun litige en cours</div>
               <p className="text-xs text-muted-foreground">
                 Tous les scores de matchs classés ont été confirmés ou arbitrés.
@@ -656,7 +656,7 @@ export default function AchilleaAdminDashboardPage() {
                 <div key={d.lobbyId} className="p-4 flex items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-rose-400 border-rose-500/30">
+                      <Badge variant="outline" className="text-destructive border-destructive/30">
                         Litige #{d.lobbyId}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
@@ -766,7 +766,7 @@ export default function AchilleaAdminDashboardPage() {
                           size="sm"
                           onClick={() => handleRevokeSanction(s.id)}
                           disabled={revokingSanctionId === s.id}
-                          className="text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 h-7 px-2"
+                          className="text-xs text-destructive hover:text-destructive/80 hover:bg-destructive/10 h-7 px-2"
                         >
                           {revokingSanctionId === s.id ? <Loader2 className="size-3 animate-spin" /> : "Lever"}
                         </Button>
@@ -872,7 +872,7 @@ export default function AchilleaAdminDashboardPage() {
                         variant="outline"
                         onClick={() => handleResetLadder(season.id)}
                         disabled={resettingSeasonId === season.id}
-                        className="text-xs gap-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+                        className="text-xs gap-1.5 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
                       >
                         {resettingSeasonId === season.id ? (
                           <Loader2 className="size-3.5 animate-spin" />
@@ -1090,7 +1090,7 @@ export default function AchilleaAdminDashboardPage() {
             <Card className="border-border/60 bg-card/40">
               <CardHeader className="p-4 pb-2">
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
-                  <Wallet className="size-4 text-amber-500" />
+                  <Wallet className="size-4 text-warning" />
                   Principaux Portefeuilles ACH
                 </CardTitle>
               </CardHeader>
@@ -1106,7 +1106,7 @@ export default function AchilleaAdminDashboardPage() {
                           <div className="font-mono text-xs text-muted-foreground truncate">{w.userId}</div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="font-extrabold text-sm text-amber-400">
+                          <span className="font-extrabold text-sm text-warning">
                             {w.balance.toLocaleString("fr-FR")} {w.currency}
                           </span>
                           <Button
@@ -1149,7 +1149,7 @@ export default function AchilleaAdminDashboardPage() {
                           <span className="font-semibold uppercase tracking-wider text-muted-foreground">
                             {tx.type}
                           </span>
-                          <span className={`font-bold ${tx.amount >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                          <span className={`font-bold ${tx.amount >= 0 ? "text-success" : "text-destructive"}`}>
                             {tx.amount >= 0 ? `+${tx.amount}` : tx.amount} ACH
                           </span>
                         </div>

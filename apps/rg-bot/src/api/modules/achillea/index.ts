@@ -27,6 +27,7 @@ import { imagesController } from "./images";
 import { avatarResyncController } from "./users/avatar-resync";
 import { proxyController } from "./proxy";
 import { moderationSyncController } from "./moderation-sync";
+import { clansAdminController } from "./clans-admin";
 
 export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(tournamentController)
@@ -57,4 +58,5 @@ export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(imagesController)
   .use(avatarResyncController)
   .use(proxyController)
-  .use(moderationSyncController);
+  .use(moderationSyncController)
+  .use(clansAdminController);
