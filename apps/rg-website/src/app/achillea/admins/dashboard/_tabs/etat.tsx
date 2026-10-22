@@ -22,7 +22,7 @@ export function useClientAchillea(): AchilleaClient {
 
 export function Chargement({ lignes = 3, libelle = "Chargement…" }: { lignes?: number; libelle?: string }) {
   return (
-    <div role="status" aria-live="polite" aria-busy="true" className="space-y-3">
+    <div aria-live="polite" aria-busy="true" className="space-y-3">
       <span className="sr-only">{libelle}</span>
       {Array.from({ length: lignes }, (_, index) => (
         <Skeleton key={index} className="h-12 w-full rounded-xl" />
@@ -111,9 +111,9 @@ export function useLecture<T>(contexte: string, lire: () => Promise<AchilleaClie
     lireRef.current = lire;
   });
 
-  const recharger = useCallback(() => {
-    const courante = ++generation.current;
-    setChargement(true);
+  // Les mises à jour d'état n'arrivent qu'à la résolution de la lecture : l'effet initial
+  // n'appelle donc aucun `setState` de façon synchrone (`chargement` part déjà à vrai).
+  const lancer = useCallback((courante: number) => {
     lireRef
       .current()
       .then(resultat => {
@@ -134,12 +134,17 @@ export function useLecture<T>(contexte: string, lire: () => Promise<AchilleaClie
       });
   }, [contexte]);
 
+  const recharger = useCallback(() => {
+    setChargement(true);
+    lancer(++generation.current);
+  }, [lancer]);
+
   useEffect(() => {
-    recharger();
+    lancer(++generation.current);
     return () => {
       generation.current++;
     };
-  }, [recharger]);
+  }, [lancer]);
 
   return { donnees, chargement, erreur, recharger };
 }

@@ -261,9 +261,12 @@ export function BotHealthTab() {
             (logs.length === 0 ? (
               <Vide message="Aucune ligne de log." />
             ) : (
-              <pre className="max-h-96 overflow-auto rounded-lg bg-muted/40 p-3 text-xs" tabIndex={0}>
-                {logs.join("\n")}
-              </pre>
+              <textarea
+                readOnly
+                aria-label="Dernières lignes du journal du bot"
+                className="block h-96 w-full resize-none overflow-auto rounded-lg bg-muted/40 p-3 font-mono text-xs"
+                value={logs.join("\n")}
+              />
             ))}
         </CardContent>
       </Card>

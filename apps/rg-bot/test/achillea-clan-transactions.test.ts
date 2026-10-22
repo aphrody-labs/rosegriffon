@@ -24,7 +24,7 @@ function baseEnregistreuse(repondre: Repondeur) {
       journal.push({ sql: requete.sql, parametres: requete.parameters });
       return { rows: (repondre(requete.sql, requete.parameters) ?? []) as R[] };
     },
-    async *streamQuery() {
+    streamQuery() {
       throw new Error("non utilisé");
     },
   };

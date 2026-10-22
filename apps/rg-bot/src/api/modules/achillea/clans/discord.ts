@@ -72,7 +72,7 @@ export async function restAchillea<T = unknown>(
     const reponse = await fetch(`${API_DISCORD}${chemin}`, {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      ...(body === undefined || method === "GET" ? {} : { body: JSON.stringify(body) }),
       signal: AbortSignal.timeout(15_000),
     });
     if (!reponse.ok) {

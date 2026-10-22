@@ -560,9 +560,9 @@ function ConsoleSql() {
         {erreur && <Erreur message={erreur} />}
         {resultat && (
           <div className="space-y-2">
-            <p role="status" className="text-xs text-muted-foreground">
+            <output className="block text-xs text-muted-foreground">
               {resultat.rowCount} ligne{resultat.rowCount > 1 ? "s" : ""} · {resultat.durationMs} ms
-            </p>
+            </output>
             {resultat.data.length === 0 ? (
               <Vide message="Aucune ligne." />
             ) : (
@@ -580,7 +580,7 @@ export function DatabaseTab() {
   const [mode, setMode] = useState<"tables" | "sql" | "sauvegardes">("tables");
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Mode de l'onglet base de données">
+      <fieldset className="m-0 flex min-w-0 flex-wrap items-center gap-2 border-0 p-0" aria-label="Mode de l'onglet base de données">
         <Database className="size-5 text-muted-foreground" aria-hidden="true" />
         <Button
           variant={mode === "tables" ? "default" : "outline"}
@@ -606,7 +606,7 @@ export function DatabaseTab() {
         >
           Sauvegardes
         </Button>
-      </div>
+      </fieldset>
       {mode === "tables" && <NavigateurTables />}
       {mode === "sql" && <ConsoleSql />}
       {mode === "sauvegardes" && <SauvegardesBase />}

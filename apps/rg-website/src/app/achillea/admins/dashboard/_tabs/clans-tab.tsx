@@ -130,9 +130,9 @@ function LimitesEffectif({ peutModifier }: { peutModifier: boolean }) {
           </form>
         )}
         {message && (
-          <p role="status" className={`text-sm ${message.ok ? "text-success" : "text-destructive"}`}>
+          <output className={`block text-sm ${message.ok ? "text-success" : "text-destructive"}`}>
             {message.texte}
-          </p>
+          </output>
         )}
       </CardContent>
     </Card>
@@ -194,9 +194,9 @@ export function ClansTab({ role }: { role: number }) {
           {actifs.erreur && <Erreur message={actifs.erreur} onReessayer={actifs.recharger} />}
           {erreurBascule && <Erreur message={erreurBascule} />}
           {confirmation && (
-            <p role="status" className="text-sm text-success">
+            <output className="block text-sm text-success">
               {confirmation}
-            </p>
+            </output>
           )}
           {actifs.chargement && !actifs.donnees ? (
             <Chargement />
