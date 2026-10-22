@@ -125,6 +125,7 @@ export const adminWalletAdjustResultSchema = z.object({
 export const adminHealthResponseSchema = z.object({
   bot: z.object({
     online: z.boolean(),
+    /** Durée de fonctionnement de la passerelle, en secondes. */
     uptime: z.number(),
     username: z.string().nullable(),
     guilds: z.number(),
