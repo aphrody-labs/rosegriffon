@@ -21,6 +21,8 @@
  *    lectures MP4 de TikTok sont signées et périssables : on les sonde au moment de la synchronisation
  *    (durée, dimensions) et on n'en garde que ces mesures, jamais l'URL. YouTube et Instagram ne
  *    donnent aucun MP4 téléchargeable sans session : `Bun.Video` n'y sert pas.
+ *  - `Bun.Video` peut manquer (Bun 1.4.5 du VPS) : il est détecté (`moteurVideo`), jamais supposé.
+ *    Sans lui, la sonde lit l'en-tête MP4 (`sonderMp4`) et l'image d'affiche est abandonnée.
  */
 
 import { fichierMedia, objetPresent, televerserObjet } from "./storage-assets.js";
@@ -159,26 +161,129 @@ export interface MesuresVideo {
   codec: string;
 }
 
-/** Sonde un MP4 en mémoire (durée, dimensions, codec). `null` si `Bun.Video` ne le lit pas. */
-export async function sonderVideo(mp4: Uint8Array): Promise<MesuresVideo | null> {
-  if (!Bun.Video.available) return null;
+/** Ce que le Feed utilise de `Bun.Video` : de quoi le détecter et le remplacer dans les tests. */
+export type MoteurVideo = typeof Bun.Video;
+
+/**
+ * `Bun.Video` quand le runtime l'a ET peut s'en servir, sinon `undefined`.
+ *
+ * Le binaire du VPS (Bun 1.4.5) n'expose pas `Bun.Video` du tout : lire `Bun.Video.available`
+ * levait « undefined is not an object » et faisait tomber toute la synchronisation TikTok.
+ */
+export function moteurVideo(): MoteurVideo | undefined {
+  const moteur = (Bun as { Video?: MoteurVideo }).Video;
+  return typeof moteur === "function" && moteur.available ? moteur : undefined;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sondage MP4 sans `Bun.Video` : lecture des boîtes ISO-BMFF (`moov` → `mvhd`, `tkhd`, `stsd`).
+// Aucune image n'est décodée : durée, dimensions et codec sont écrits en clair dans l'en-tête.
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface Boite {
+  type: string;
+  debut: number;
+  fin: number;
+}
+
+/** Boîtes filles de `[debut, fin)` ; s'arrête à la première taille incohérente. */
+function boites(vue: DataView, debut: number, fin: number): Boite[] {
+  const sortie: Boite[] = [];
+  let p = debut;
+  while (p + 8 <= fin) {
+    let taille = vue.getUint32(p);
+    const type = String.fromCharCode(vue.getUint8(p + 4), vue.getUint8(p + 5), vue.getUint8(p + 6), vue.getUint8(p + 7));
+    let entete = 8;
+    if (taille === 1) {
+      if (p + 16 > fin) break;
+      taille = Number(vue.getBigUint64(p + 8));
+      entete = 16;
+    } else if (taille === 0) {
+      taille = fin - p;
+    }
+    if (taille < entete || p + taille > fin) break;
+    sortie.push({ type, debut: p + entete, fin: p + taille });
+    p += taille;
+  }
+  return sortie;
+}
+
+const fille = (vue: DataView, b: Boite | undefined, type: string): Boite | undefined =>
+  b ? boites(vue, b.debut, b.fin).find(x => x.type === type) : undefined;
+
+/** Durée (`mvhd`) et piste vidéo (`hdlr` = `vide`) d'un MP4 en mémoire ; `null` si illisible. */
+export function sonderMp4(mp4: Uint8Array): MesuresVideo | null {
   try {
-    const m = await new Bun.Video(mp4).metadata();
-    return { duree: m.duration == null ? undefined : Math.round(m.duration * 10) / 10, largeur: m.width, hauteur: m.height, codec: m.codec };
+    const vue = new DataView(mp4.buffer, mp4.byteOffset, mp4.byteLength);
+    const moov = boites(vue, 0, mp4.byteLength).find(b => b.type === "moov");
+    if (!moov) return null;
+    let duree: number | undefined;
+    const mvhd = fille(vue, moov, "mvhd");
+    if (mvhd) {
+      const version = vue.getUint8(mvhd.debut);
+      const echelle = vue.getUint32(mvhd.debut + (version === 1 ? 20 : 12));
+      const brute = version === 1 ? Number(vue.getBigUint64(mvhd.debut + 24)) : vue.getUint32(mvhd.debut + 16);
+      if (echelle > 0 && brute > 0 && brute !== 0xffffffff) duree = Math.round((brute / echelle) * 10) / 10;
+    }
+    for (const trak of boites(vue, moov.debut, moov.fin).filter(b => b.type === "trak")) {
+      const mdia = fille(vue, trak, "mdia");
+      const hdlr = fille(vue, mdia, "hdlr");
+      // hdlr : version/flags (4), pre_defined (4), handler_type (4).
+      if (!hdlr || hdlr.debut + 12 > hdlr.fin) continue;
+      const genre = String.fromCharCode(...mp4.subarray(hdlr.debut + 8, hdlr.debut + 12));
+      if (genre !== "vide") continue;
+      const tkhd = fille(vue, trak, "tkhd");
+      if (!tkhd) continue;
+      // tkhd : largeur et hauteur en virgule fixe 16.16, dans les 8 derniers octets.
+      const largeur = vue.getUint32(tkhd.fin - 8) >>> 16;
+      const hauteur = vue.getUint32(tkhd.fin - 4) >>> 16;
+      if (largeur === 0 || hauteur === 0) continue;
+      const stsd = fille(vue, fille(vue, fille(vue, mdia, "minf"), "stbl"), "stsd");
+      // stsd : version/flags (4), nombre d'entrées (4), puis la première entrée (taille, type).
+      const codec =
+        stsd && stsd.debut + 16 <= stsd.fin ? String.fromCharCode(...mp4.subarray(stsd.debut + 12, stsd.debut + 16)) : "";
+      return { duree, largeur, hauteur, codec };
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
-/** Image d'affiche d'un MP4 (repli quand la source ne fournit pas de vignette), recadrée en WebP. */
-export async function afficheVideo(mp4: Uint8Array, o: OptionsVignette, secondes = 1): Promise<VignetteNormalisee | null> {
-  if (!Bun.Video.available) return null;
+/**
+ * Sonde un MP4 en mémoire (durée, dimensions, codec). `Bun.Video` quand le runtime l'a, sinon
+ * lecture des boîtes de l'en-tête (`sonderMp4`) : la mesure ne dépend pas de la version de Bun.
+ * `null` si ni l'un ni l'autre ne lit le fichier.
+ */
+export async function sonderVideo(mp4: Uint8Array, moteur: MoteurVideo | undefined = moteurVideo()): Promise<MesuresVideo | null> {
+  if (moteur) {
+    try {
+      const m = await new moteur(mp4).metadata();
+      return { duree: m.duration == null ? undefined : Math.round(m.duration * 10) / 10, largeur: m.width, hauteur: m.height, codec: m.codec };
+    } catch {
+      // Codec que FilmCraft ne décode pas (HEVC…) : l'en-tête reste lisible.
+    }
+  }
+  return sonderMp4(mp4);
+}
+
+/**
+ * Image d'affiche d'un MP4 (repli quand la source ne fournit pas de vignette), recadrée en WebP.
+ * Exige un décodeur : sans `Bun.Video`, `null` (le post reste sans vignette, il n'échoue pas).
+ */
+export async function afficheVideo(
+  mp4: Uint8Array,
+  o: OptionsVignette,
+  secondes = 1,
+  moteur: MoteurVideo | undefined = moteurVideo(),
+): Promise<VignetteNormalisee | null> {
+  if (!moteur) return null;
   try {
-    const mesures = await new Bun.Video(mp4).metadata();
+    const mesures = await new moteur(mp4).metadata();
     const t = Math.min(secondes, Math.max(0, (mesures.duration ?? 2) / 2));
     const rect = rectangleRecadrage(mesures.width, mesures.height, o.ratio);
     const sortie = dimensionsSortie(rect.width, o);
-    const octets = await new Bun.Video(mp4)
+    const octets = await new moteur(mp4)
       .frame(t)
       .extract(rect)
       .resize(sortie.largeur, sortie.hauteur)

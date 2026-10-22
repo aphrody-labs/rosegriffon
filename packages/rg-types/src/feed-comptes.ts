@@ -14,7 +14,10 @@
 //  - YouTube : « Rose Griffon TV » (lien officiel du site) et « LEVEL5ch【公式】 » (lien du pied de
 //    page de level5.co.jp ; les vidéos d'Inazuma Eleven d'inazuma.jp y sont publiées, il n'existe
 //    pas de chaîne Inazuma Eleven distincte). L'identifiant de chaîne a été lu sur la page de la
-//    chaîne et le flux RSS vérifié. Le lien YouTube d'Achilléa du site répond 404 : non listé.
+//    chaîne et le flux RSS vérifié. Achilléa : `@Achillea_IE` (ancien lien du site) n'existe pas
+//    (404) ; la chaîne est « Achilléa 💮| Inazuma Eleven FR », `@AchilléaRG` (aussi `@AchilleaRG`,
+//    `@achillearg`), UCh2FiAYaOfuvwTaBVs7CpFw (lu sur la page de la chaîne, flux RSS vérifié :
+//    15 vidéos, octobre 2026 ; même identifiant que `api/public/rgtv/status`).
 import type { CompteSource, Groupe, Reseau } from "./feed";
 
 export const COMPTES = [
@@ -66,6 +69,7 @@ export const COMPTES_SOURCE_TIKTOK: readonly CompteSource[] = [
 /** `pseudo` = identifiant de chaîne (`UC…`), `nom` = nom affiché ; le flux RSS est public. */
 export const COMPTES_SOURCE_YOUTUBE: readonly CompteSource[] = [
   { reseau: "youtube", pseudo: "UCleqt3V_yTgxY6XLZeEFV8g", nom: "Rose Griffon TV", groupe: "Rose Griffon" },
+  { reseau: "youtube", pseudo: "UCh2FiAYaOfuvwTaBVs7CpFw", nom: "Achilléa", groupe: "Rose Griffon" },
   { reseau: "youtube", pseudo: "UClfhcLqicImW9Se7NKaFADQ", nom: "LEVEL5ch", groupe: "LEVEL-5" },
 ];
 
