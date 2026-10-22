@@ -229,7 +229,7 @@ export default function CreateClanPage() {
                 htmlFor="route-create-clan-create-client-tsx-4"
                 className="text-xs font-bold text-on-surface uppercase tracking-wider"
               >
-                Identifiants des co-fondateurs (Discord IDs) <span className="text-red-500">*</span>
+                Identifiants des co-fondateurs (Discord IDs) <span className="text-destructive">*</span>
               </label>
               <input
                 id="route-create-clan-create-client-tsx-4"
@@ -251,7 +251,7 @@ export default function CreateClanPage() {
                 htmlFor="route-create-clan-create-client-tsx-logo"
                 className="text-xs font-bold text-on-surface uppercase tracking-wider"
               >
-                Logo du clan <span className="text-red-500">*</span>
+                Logo du clan <span className="text-destructive">*</span>
               </label>
               <input
                 id="route-create-clan-create-client-tsx-logo"
