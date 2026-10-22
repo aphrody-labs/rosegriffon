@@ -21,7 +21,15 @@ export const DEFAULT_ACHILLEA_TIMEOUT_MS = 8000;
 
 export type AchilleaClientFailure =
   | { ok: false; kind: "unreachable"; detail: string; path: string }
-  | { ok: false; kind: "http"; detail: string; path: string; status: number }
+  | {
+      ok: false;
+      kind: "http";
+      detail: string;
+      path: string;
+      status: number;
+      /** Message lisible renvoyé par l'API (`{ message }`, `{ error }` ou `{ erreur }`), s'il y en a un. */
+      message?: string;
+    }
   | { ok: false; kind: "invalid_json"; detail: string; path: string }
   | { ok: false; kind: "invalid_response"; detail: string; path: string };
 
@@ -219,12 +227,14 @@ export class AchilleaHttp {
     }
 
     if (!response.ok) {
+      const message = await messageErreur(response);
       return {
         ok: false,
         kind: "http",
         detail: `HTTP ${response.status} for ${fullPath}`,
         path: fullPath,
         status: response.status,
+        ...(message ? { message } : {}),
       };
     }
 
@@ -355,5 +365,24 @@ export abstract class AchilleaResource {
 
   constructor(http: AchilleaHttp) {
     this.http = http;
+  }
+}
+
+/**
+ * Message lisible d'une réponse en erreur, borné à 500 caractères.
+ *
+ * L'API répond `{ message }` (Elysia), l'ancien bot `{ error }`, les serveurs
+ * d'administration `{ erreur }`. Sans ce champ, le back-office ne pouvait montrer
+ * que « HTTP 503 » là où l'API expliquait pourquoi le bot était injoignable.
+ */
+async function messageErreur(response: Response): Promise<string | undefined> {
+  try {
+    const texte = await response.text();
+    if (!texte) return undefined;
+    const corps = JSON.parse(texte) as Record<string, unknown>;
+    const brut = corps.message ?? corps.error ?? corps.erreur;
+    return typeof brut === "string" && brut.trim() !== "" ? brut.trim().slice(0, 500) : undefined;
+  } catch {
+    return undefined;
   }
 }

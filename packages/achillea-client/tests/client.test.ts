@@ -43,6 +43,7 @@ describe("v1 HTTP client", () => {
       detail: "HTTP 503 for /guilds/stats",
       path: "/guilds/stats",
       status: 503,
+      message: "maintenance",
     });
   });
 

@@ -128,6 +128,7 @@ describe("issues de requête", () => {
       kind: "http",
       detail: "HTTP 404 for /users/inconnu",
       path: "/users/inconnu",
+      message: "not found",
       status: 404,
     });
   });
@@ -300,5 +301,24 @@ describe("authentification", () => {
     expect(headerOf(calls[0], "Accept-Language")).toBe("fr");
     expect(headerOf(calls[0], "x-internal-secret")).toBe("chut");
     expect(headerOf(calls[0], "Accept")).toBe("application/json");
+  });
+});
+
+describe("message d'erreur de l'API", () => {
+  test("lu depuis { message }, { error } ou { erreur }", async () => {
+    const { AchilleaHttp } = await import("../src/v1/http");
+    for (const corps of [{ message: "Staff role required" }, { error: "Staff role required" }, { erreur: "Staff role required" }]) {
+      const http = new AchilleaHttp({ baseUrl: "http://x", fetch: (async () => Response.json(corps, { status: 403 })) });
+      const resultat = await http.request("/admin/ops/health");
+      expect(resultat).toMatchObject({ ok: false, kind: "http", status: 403, message: "Staff role required" });
+    }
+  });
+
+  test("absent quand le corps n'est pas du JSON", async () => {
+    const { AchilleaHttp } = await import("../src/v1/http");
+    const http = new AchilleaHttp({ baseUrl: "http://x", fetch: (async () => new Response("Bad Gateway", { status: 502 })) });
+    const resultat = await http.request("/clans");
+    expect(resultat.ok).toBe(false);
+    expect("message" in resultat).toBe(false);
   });
 });

@@ -23,6 +23,8 @@ interface ResultatEchec {
   kind?: string;
   detail?: unknown;
   status?: number;
+  /** Message lisible renvoyé par l'API, quand elle en donne un. */
+  message?: string;
 }
 
 /**
@@ -48,8 +50,19 @@ export function signalerEchec(contexte: string, resultat: unknown): string {
     // chercher une panne réseau qui n'existe pas.
     return "Le service a répondu dans un format inattendu. Les données existent mais n'ont pas pu être lues.";
   }
-  if (genre === "network" || genre === "timeout") {
+  // `unreachable` est le genre que produit le client ; `network`/`timeout` restent
+  // acceptés pour les appels `fetch` directs qui reprennent ce vocabulaire.
+  if (genre === "unreachable" || genre === "network" || genre === "timeout") {
     return "Service momentanément injoignable.";
+  }
+  // L'API dit pourquoi (« Staff role required », « Bot Discord Achilléa
+  // indisponible : … », « Clan name already taken ») : on le montre plutôt
+  // qu'un message générique qui laisserait chercher ailleurs.
+  if (genre === "http" && typeof echec.message === "string" && echec.message.trim() !== "") {
+    return echec.message.trim();
+  }
+  if (echec?.status === 403) {
+    return "Ton rôle ne permet pas cette action.";
   }
   return "Impossible de charger ces données pour le moment.";
 }
