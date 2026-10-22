@@ -308,3 +308,14 @@ describe("routes /admin/ops et /bot", () => {
     ).toEqual({ name: "clan infos", description: "d", type: 1 });
   });
 });
+
+describe("salon des preuves de litige", () => {
+  test("variable dédiée, puis salon TO configuré, puis salon TO du serveur Achilléa", async () => {
+    const { salonPreuvesRanked, SALON_TO_ACHILLEA } = await import("../src/lib/achillea-discord");
+    expect(salonPreuvesRanked({ RANKED_PROOF_CHANNEL_ID: "700000000000000001", ACHILLEA_TO_CHANNEL_ID: "700000000000000002" })).toBe(
+      "700000000000000001",
+    );
+    expect(salonPreuvesRanked({ ACHILLEA_TO_CHANNEL_ID: "700000000000000002" })).toBe("700000000000000002");
+    expect(salonPreuvesRanked({ RANKED_PROOF_CHANNEL_ID: "pas-un-id" })).toBe(SALON_TO_ACHILLEA);
+  });
+});

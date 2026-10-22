@@ -77,6 +77,18 @@ async function poster(chemin: string, message: MessageAchillea, env: EnvAchillea
   }
 }
 
+/** Salon des Tournament Organizers du serveur Achilléa (« discussion-to », preuves et alertes). */
+export const SALON_TO_ACHILLEA = "1436378680153608203";
+
+/** Salon des preuves de litige : `RANKED_PROOF_CHANNEL_ID`, sinon `ACHILLEA_TO_CHANNEL_ID`, sinon le salon TO. */
+export function salonPreuvesRanked(env: EnvAchillea = Bun.env): string {
+  for (const variable of ["RANKED_PROOF_CHANNEL_ID", "ACHILLEA_TO_CHANNEL_ID"]) {
+    const valeur = (env[variable] ?? "").trim();
+    if (/^\d{15,25}$/.test(valeur)) return valeur;
+  }
+  return SALON_TO_ACHILLEA;
+}
+
 /** Publie un message dans un salon où le bot Achilléa a accès. */
 export function publierSalonAchillea(
   salonId: string,

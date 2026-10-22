@@ -19,7 +19,7 @@ import { Elysia, status, t } from "elysia";
 import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
 import { NotificationCategory, NotificationType } from "@rosegriffon/achillea-core/enums";
-import { publierSalonAchillea, type MessageAchillea } from "../../../../lib/achillea-discord";
+import { publierSalonAchillea, SALON_TO_ACHILLEA, type MessageAchillea } from "../../../../lib/achillea-discord";
 import { dbPlugin } from "../../../plugins/db";
 import { isInternalCall } from "../guards";
 
@@ -94,7 +94,7 @@ export async function relayToUsers(
 
 /** Salon des Tournament Organizers (`ACHILLEA_TO_CHANNEL_ID`, salon de prod du legacy par défaut). */
 export function tournamentOrganizersChannel(): string {
-  return process.env.ACHILLEA_TO_CHANNEL_ID?.trim() || "1436378680153608203";
+  return process.env.ACHILLEA_TO_CHANNEL_ID?.trim() || SALON_TO_ACHILLEA;
 }
 
 /** Message de la preuve de litige, repris du `RankedDisputeNotifier` legacy. */

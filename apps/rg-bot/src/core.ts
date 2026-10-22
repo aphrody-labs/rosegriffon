@@ -274,9 +274,29 @@ async function demarrerCoeur(): Promise<void> {
 
   planifiees = await planifierTaches();
 
+  // Preuves de litige ranked → salon des Tournament Organizers d'Achilléa, par l'API REST
+  // et le jeton de l'application Achilléa. Elles passaient par la passerelle Rose Griffon
+  // et une variable jamais posée : en production, aucune preuve n'était relayée.
+  const { publierSalonAchillea, salonPreuvesRanked } = await import("./lib/achillea-discord");
+  definirRelaisPreuveRanked(async (lobbyId, userId, url) => {
+    const envoi = await publierSalonAchillea(salonPreuvesRanked(), {
+      embeds: [
+        {
+          title: `Preuve de litige — lobby #${lobbyId}`,
+          description: `Déposée par <@${userId}>.`,
+          url,
+          color: 0x6d00ce,
+          image: { url },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    });
+    if (!envoi.ok) throw new Error(`salon des preuves refusé (${envoi.statut ?? "réseau"}) : ${envoi.motif}`);
+  });
+
   // Passerelle du profil courant, en dernier : `index.ts` attend `login()`.
   if (!process.argv.includes("bot")) process.argv.push("bot");
-  const brancher = brancherPasserelle(definirRelaisPreuveRanked);
+  const brancher = brancherPasserelle();
   try {
     await import("./index");
   } catch (err) {
@@ -292,23 +312,10 @@ async function demarrerCoeur(): Promise<void> {
 
 type ClientPasserelle = import("@rosegriffon/cron").ClientPasserelle;
 
-/** Branche la veille temps réel et le relais des preuves dès que la passerelle existe. */
-async function brancherPasserelle(
-  definirRelais: (relais: ((lobbyId: number, userId: string, url: string) => Promise<void>) | null) => void,
-): Promise<void> {
+/** Branche la veille temps réel dès que la passerelle existe. */
+async function brancherPasserelle(): Promise<void> {
   const { attendreClientActif } = await import("./lib/client-actif");
   const client = await attendreClientActif();
-
-  const salonPreuves = Bun.env.RANKED_PROOF_CHANNEL_ID;
-  if (salonPreuves) {
-    definirRelais(async (lobbyId, userId, url) => {
-      const salon = await client.channels.fetch(salonPreuves);
-      if (!salon?.isSendable()) throw new Error(`salon ${salonPreuves} injoignable`);
-      await salon.send({
-        content: `Preuve de litige — lobby #${lobbyId}, joueur <@${userId}> : ${url}`,
-      });
-    });
-  }
 
   if (Bun.env.RG_PROFIL_BOT === "rg" && Bun.env.RG_CORE_VEILLE_MESSAGES !== "0") {
     const { brancherVeilleMessagesTempsReel } = await import("@rosegriffon/cron");
