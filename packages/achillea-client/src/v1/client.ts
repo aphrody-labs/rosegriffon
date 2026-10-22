@@ -8,8 +8,11 @@
 
 import { AdminResource } from "./admin";
 import { AuthResource } from "./auth";
+import { BlacklistResource } from "./blacklist";
 import { CastsResource } from "./casts";
+import { ClanTeamsResource } from "./clan-teams";
 import { ClansResource } from "./clans";
+import { InterclansResource } from "./interclans";
 import { GuildsResource } from "./guilds";
 import { AchilleaHttp, type AchilleaClientOptions, type AchilleaFetch } from "./http";
 import { LeaguesResource } from "./leagues";
@@ -29,9 +32,12 @@ export class AchilleaClient {
 
   readonly admin: AdminResource;
   readonly auth: AuthResource;
+  readonly blacklist: BlacklistResource;
   readonly casts: CastsResource;
+  readonly clanTeams: ClanTeamsResource;
   readonly clans: ClansResource;
   readonly guilds: GuildsResource;
+  readonly interclans: InterclansResource;
   readonly leagues: LeaguesResource;
   readonly licenses: LicensesResource;
   readonly notifications: NotificationsResource;
@@ -49,9 +55,12 @@ export class AchilleaClient {
 
     this.admin = new AdminResource(this.http);
     this.auth = new AuthResource(this.http);
+    this.blacklist = new BlacklistResource(this.http);
     this.casts = new CastsResource(this.http);
+    this.clanTeams = new ClanTeamsResource(this.http);
     this.clans = new ClansResource(this.http);
     this.guilds = new GuildsResource(this.http);
+    this.interclans = new InterclansResource(this.http);
     this.leagues = new LeaguesResource(this.http);
     this.licenses = new LicensesResource(this.http);
     this.notifications = new NotificationsResource(this.http);

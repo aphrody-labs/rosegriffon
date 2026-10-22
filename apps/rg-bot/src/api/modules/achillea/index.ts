@@ -28,11 +28,22 @@ import { avatarResyncController } from "./users/avatar-resync";
 import { proxyController } from "./proxy";
 import { moderationSyncController } from "./moderation-sync";
 import { clansAdminController } from "./clans-admin";
+import { clanCycleController } from "./clans/cycle";
+import { clanTeamsController } from "./clans/equipes";
+import { interclanController } from "./interclans";
+import { blacklistController } from "./blacklist";
+import { guildSettingsController } from "./guilds/reglages";
 
 export const achilleaModule = new Elysia({ prefix: "/achillea" })
   .use(tournamentController)
   .use(clanController)
   .use(clanManagementController)
+  // Équipes AVANT le cycle de vie : `/clans/teams/...` ne doit jamais tomber sur un `/clans/:id`.
+  .use(clanTeamsController)
+  .use(clanCycleController)
+  .use(interclanController)
+  .use(blacklistController)
+  .use(guildSettingsController)
   .use(miscController)
   .use(organizationController)
   .use(leaderboardController)
