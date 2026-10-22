@@ -290,7 +290,7 @@ export function cheminApiUnifiee(cheminApi: string): string {
  */
 export function avecCorpsLisible(requete: Request): Request {
   if (requete.body !== null || requete.method === "GET" || requete.method === "HEAD") return requete;
-  return new Request(requete, { body: new Uint8Array(0) });
+  return new Request(requete, { method: requete.method, body: new Uint8Array(0) });
 }
 
 /** Types de corps binaires : jamais acceptés par les routes Express du ranked. */
