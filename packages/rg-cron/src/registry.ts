@@ -158,6 +158,29 @@ export const REGISTRE_TACHES: Readonly<Record<string, DefinitionTache>> = Object
   "achillea:weekly-payout": {
     executer: () => import("./tasks/achillea-weekly-payout").then(m => m.runAchilleaWeeklyPayout()),
   },
+  // Équivalents des travaux de l'ancien bot Achilléa (BullMQ `SanctionJobs`/`ClanJobs`,
+  // `@Schedule` `CastReminders`/`PhaseTransitions`, minuteurs des intégrations ranked).
+  "achillea:sanctions": { executer: () => import("./tasks/achillea-sanctions").then(m => m.runAchilleaSanctions()) },
+  "achillea:clans-effectif": {
+    executer: () => import("./tasks/achillea-clans-effectif").then(m => m.runAchilleaClansEffectif()),
+  },
+  "achillea:casts-rappels": {
+    executer: () => import("./tasks/achillea-casts-rappels").then(m => m.runAchilleaCastsRappels()),
+  },
+  "achillea:tournois-phases": {
+    executer: () => import("./tasks/achillea-tournois-phases").then(m => m.runAchilleaTournoisPhases()),
+  },
+  "achillea:interclans": {
+    executer: () => import("./tasks/achillea-interclans").then(m => m.runAchilleaInterclans()),
+  },
+  "achillea:votes": { executer: () => import("./tasks/achillea-votes").then(m => m.runAchilleaVotes()) },
+  "achillea:classement-annonce": {
+    executer: () => import("./tasks/achillea-ranked").then(m => m.runAchilleaClassementAnnonce()),
+  },
+  "achillea:ranked-file": { executer: () => import("./tasks/achillea-ranked").then(m => m.runAchilleaRankedFile()) },
+  "achillea:ranked-promotions": {
+    executer: () => import("./tasks/achillea-ranked").then(m => m.runAchilleaRankedPromotions()),
+  },
 });
 
 const PAR_NOM_NORMALISE = new Map(Object.keys(REGISTRE_TACHES).map(nom => [normaliserNomTache(nom), nom]));
