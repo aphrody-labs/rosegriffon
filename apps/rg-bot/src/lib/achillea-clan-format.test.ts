@@ -71,3 +71,18 @@ describe("création", () => {
     expect(logoAccepte(null)).toBe(false);
   });
 });
+
+describe("miniature d'un clan pour Discord", () => {
+  test("marqueur de clan sans logo → logo PNG d'Achilléa", async () => {
+    const { miniatureClan, LOGO_ACHILLEA_PNG } = await import("./achillea-clan-format");
+    expect(miniatureClan("/achillea/default-clan-avatar.svg?clan=73")).toBe(LOGO_ACHILLEA_PNG);
+    expect(miniatureClan(null)).toBe(LOGO_ACHILLEA_PNG);
+  });
+
+  test("URL absolue conservée, chemin relatif résolu sur le site", async () => {
+    const { miniatureClan } = await import("./achillea-clan-format");
+    const stockage = "https://xzwfnxzkxtcpgmtqulbh.supabase.co/storage/v1/object/public/images/3TTlIgH3.png";
+    expect(miniatureClan(stockage)).toBe(stockage);
+    expect(miniatureClan("/achillea/clans/x.png")).toBe("https://rosegriffon.fr/achillea/clans/x.png");
+  });
+});

@@ -171,11 +171,26 @@ function lignesMembres(membres: ClanFiche["members"]): string {
     .join("\n");
 }
 
+/** Logo d'Achilléa (PNG), affiché pour un clan sans logo propre. */
+export const LOGO_ACHILLEA_PNG = "https://rosegriffon.fr/achillea/achillea.png";
+
+/**
+ * Miniature d'un clan pour Discord.
+ *
+ * Un clan sans logo porte en base le marqueur `/achillea/default-clan-avatar.svg?clan=<id>`
+ * (la colonne est unique, d'où l'identifiant). Discord n'affiche ni une URL relative ni
+ * un SVG : on montre le logo d'Achilléa à la place.
+ */
+export function miniatureClan(avatarUrl: string | null | undefined): string {
+  if (!avatarUrl || avatarUrl.startsWith("/achillea/default-clan-avatar.svg")) return LOGO_ACHILLEA_PNG;
+  return avatarUrl.startsWith("/") ? `https://rosegriffon.fr${avatarUrl}` : avatarUrl;
+}
+
 /** Fiche d'un clan actif ou dissous (legacy `createActiveClanInfosEmbed` / `createDisbandedClanInfosEmbed`). */
 export function embedFicheClan(clan: ClanFiche, urlSite: string | null = null): EmbedBuilder {
   const titre = `[${clan.shortName}] ${clan.name}`;
   if (clan.isDisbanded) {
-    return fiche({ titre, intention: "muet", icone: "🪦", miniature: clan.avatarUrl })
+    return fiche({ titre, intention: "muet", icone: "🪦", miniature: miniatureClan(clan.avatarUrl) })
       .description(`Ce Clan a été dissous.\n\n${borner(clan.biography, 1500)}`)
       .champ("Créé le", leJour(clan.createdAt, "D"), { enLigne: true })
       .finir();
@@ -185,7 +200,7 @@ export function embedFicheClan(clan: ClanFiche, urlSite: string | null = null): 
     clan.socials.instagram ? `[Instagram](${clan.socials.instagram})` : null,
     clan.socials.tiktok ? `[TikTok](${clan.socials.tiktok})` : null,
   ].filter(Boolean);
-  const carte = fiche({ titre, url: urlSite, miniature: clan.avatarUrl })
+  const carte = fiche({ titre, url: urlSite, miniature: miniatureClan(clan.avatarUrl) })
     .description(borner(clan.biography || "Pas de biographie fournie", 1500))
     .champ("Président", clan.president ? `<@${clan.president.id}>` : "—", { enLigne: true })
     .champ("Effectif", `${clan.members.length} membre${clan.members.length > 1 ? "s" : ""}`, { enLigne: true })

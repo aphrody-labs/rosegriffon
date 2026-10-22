@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Clan sans logo">
+  <rect width="256" height="256" rx="48" fill="#160d22"/>
+  <path d="M128 36 200 64v58c0 46-30 82-72 98-42-16-72-52-72-98V64Z" fill="#6d00ce"/>
+  <path d="M128 58 182 79v43c0 34-22 62-54 76-32-14-54-42-54-76V79Z" fill="none" stroke="#f3edf7" stroke-width="8" stroke-linejoin="round"/>
+  <path d="m128 92 11 22 24 3-17 17 4 24-22-12-22 12 4-24-17-17 24-3Z" fill="#dfff57"/>
+</svg>
