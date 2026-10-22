@@ -24,11 +24,17 @@ function base64url(value: Buffer | string): string {
   return Buffer.from(value).toString("base64").replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 }
 
-/** Signs the web-session JWT consumed by Achilléa services. */
+/**
+ * Signs the web-session JWT consumed by Achilléa services.
+ *
+ * `ttlSeconds` shortens the lifetime for delegated calls (Discord bot, CLI):
+ * a token minted for one interaction must not outlive it by thirty days.
+ */
 export function signAchilleaSessionToken(
   identity: AchilleaSessionIdentity,
   secret: string,
   now = Math.floor(Date.now() / 1000),
+  ttlSeconds = ACHILLEA_SESSION_TTL_SECONDS,
 ): string {
   if (!identity.id) throw new Error("Cannot sign an Achillea token without a Discord identifier");
 
@@ -41,7 +47,7 @@ export function signAchilleaSessionToken(
     iss: ACHILLEA_AUTH_ISSUER,
     aud: ACHILLEA_SESSION_AUDIENCE,
     iat: now,
-    exp: now + ACHILLEA_SESSION_TTL_SECONDS,
+    exp: now + Math.max(1, Math.floor(ttlSeconds)),
   };
 
   const header = base64url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
