@@ -15,6 +15,8 @@ type ClanUpdate = {
   tiktokUrl?: string | null;
   isRecruiting?: boolean;
   autoAcceptMembers?: boolean;
+  /** Masque le clan de l'annuaire public (bouton « Clan caché » de `/clan manage`). */
+  isHidden?: boolean;
   isInactive?: boolean;
 };
 
@@ -383,6 +385,7 @@ export abstract class ClanService {
           tiktok_url: tiktokUrl,
           is_recruiting: patch.isRecruiting ?? clan.is_recruiting,
           auto_accept_members: patch.autoAcceptMembers ?? clan.auto_accept_members,
+          is_hidden: patch.isHidden ?? clan.is_hidden,
           is_inactive: patch.isInactive ?? clan.is_inactive,
           updated_at: new Date(),
         })

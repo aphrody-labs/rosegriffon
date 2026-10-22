@@ -92,7 +92,23 @@ export type AchilleaGuildDetail = z.infer<typeof achilleaGuildDetailSchema>;
 export type AchilleaGuildPage = z.infer<typeof achilleaGuildPageSchema>;
 export type AchilleaGuildStats = z.infer<typeof achilleaGuildStatsSchema>;
 
-/** 3 routes. */
+/** Réglages du bot Achilléa sur un serveur : salon d’annonces de clan, annonces ranked, clan lié. */
+export const achilleaGuildSettingsSchema = z.object({
+  guildId: discordIdSchema,
+  broadcastChannel: discordIdSchema.nullable(),
+  rankedEnabled: z.boolean(),
+  clan: z.object({ id: z.number(), name: z.string(), shortName: z.string() }).nullable(),
+});
+
+export type AchilleaGuildSettings = z.infer<typeof achilleaGuildSettingsSchema>;
+
+/** Champs modifiables ; `broadcastChannel: null` retire le salon et dissocie le clan lié. */
+export interface AchilleaGuildSettingsPatch {
+  broadcastChannel?: string | null;
+  rankedEnabled?: boolean;
+}
+
+/** 7 routes. */
 export class GuildsResource extends AchilleaResource {
   /** `GET /guilds` — serveurs scannés, triés par nombre de membres. */
   list(page = 1, limit = 25): Promise<AchilleaClientResult<AchilleaGuildPage>> {
@@ -107,5 +123,25 @@ export class GuildsResource extends AchilleaResource {
   /** `GET /guilds/:id` — détail d'un serveur, rôles et salons compris. */
   get(id: string): Promise<AchilleaClientResult<AchilleaGuildDetail>> {
     return this.http.get(`/guilds/${encodeURIComponent(id)}`, achilleaGuildDetailSchema);
+  }
+
+  /** `GET /guilds/:id/settings` — réglages du bot sur le serveur (administrateur du serveur ou staff). */
+  settings(id: string): Promise<AchilleaClientResult<AchilleaGuildSettings>> {
+    return this.http.get(`/guilds/${encodeURIComponent(id)}/settings`, achilleaGuildSettingsSchema);
+  }
+
+  /** `PATCH /guilds/:id/settings` — salon d’annonces de clan et annonces ranked. */
+  updateSettings(id: string, patch: AchilleaGuildSettingsPatch): Promise<AchilleaClientResult<AchilleaGuildSettings>> {
+    return this.http.patch(`/guilds/${encodeURIComponent(id)}/settings`, achilleaGuildSettingsSchema, patch);
+  }
+
+  /** `POST /guilds/:id/clan` — lie le clan du compte connecté (président ou vice-président) au serveur. */
+  bindClan(id: string): Promise<AchilleaClientResult<AchilleaGuildSettings>> {
+    return this.http.post(`/guilds/${encodeURIComponent(id)}/clan`, achilleaGuildSettingsSchema);
+  }
+
+  /** `DELETE /guilds/:id/clan` — dissocie le clan lié au serveur. */
+  unbindClan(id: string): Promise<AchilleaClientResult<AchilleaGuildSettings>> {
+    return this.http.delete(`/guilds/${encodeURIComponent(id)}/clan`, achilleaGuildSettingsSchema);
   }
 }
