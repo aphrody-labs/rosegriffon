@@ -280,6 +280,19 @@ export function cheminApiUnifiee(cheminApi: string): string {
   return `/v1/achillea${cheminApi}`;
 }
 
+/**
+ * Requête dont le corps est lisible par le transport Express de Colyseus.
+ *
+ * `bun-serve-express` lit le corps de toute requête non GET/HEAD par
+ * `Bun.readableStreamToText(req.body)`, qui lève sur `null` : un `POST` SANS corps
+ * (`/api/auth/logout`, `/api/admin/lobbies/:id/cancel`, `/api/admin/seasons/:id/activate`…)
+ * répondait 500. On lui donne un corps vide.
+ */
+export function avecCorpsLisible(requete: Request): Request {
+  if (requete.body !== null || requete.method === "GET" || requete.method === "HEAD") return requete;
+  return new Request(requete, { body: new Uint8Array(0) });
+}
+
 /** Types de corps binaires : jamais acceptés par les routes Express du ranked. */
 const CORPS_BINAIRES = /^(multipart\/form-data|application\/octet-stream|image\/)/i;
 
@@ -343,7 +356,7 @@ class TransportRanked extends BunWebSockets {
         ...options,
         async fetch(requete: Request, serveur: Bun.Server<unknown>) {
           const reponse = await intercepter(requete, serveur);
-          return reponse ?? ((await options.fetch.call(serveur, requete, serveur)) as Response);
+          return reponse ?? ((await options.fetch.call(serveur, avecCorpsLisible(requete), serveur)) as Response);
         },
       } as Bun.Serve.Options<unknown>);
     try {

@@ -79,3 +79,16 @@ describe("routage direct des corps binaires", () => {
     expect(versApiUnifieeDirecte(autre)).toBeNull();
   });
 });
+
+describe("POST sans corps pour le transport Express", () => {
+  test("reçoit un corps vide lisible ; GET et corps existants inchangés", async () => {
+    const { avecCorpsLisible } = await import("./main");
+    const vide = avecCorpsLisible(new Request("http://x/api/auth/logout", { method: "POST" }));
+    expect(vide.body).not.toBeNull();
+    expect(await Bun.readableStreamToText(vide.body!)).toBe("");
+    const get = new Request("http://x/api/clans");
+    expect(avecCorpsLisible(get)).toBe(get);
+    const plein = new Request("http://x/api/clans/create", { method: "POST", body: "{}" });
+    expect(avecCorpsLisible(plein)).toBe(plein);
+  });
+});

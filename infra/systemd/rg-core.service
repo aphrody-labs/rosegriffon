@@ -44,7 +44,9 @@ ProtectKernelModules=true
 ProtectControlGroups=true
 RestrictSUIDSGID=true
 LockPersonality=true
-ReadWritePaths=/home/ubuntu/apps/nie/cache /home/ubuntu/apps/nie/var -/home/ubuntu/.bun/install/cache
+# Sauvegardes du schéma Achilléa (`ACHILLEA_BACKUP_DIR`, `POST /v1/achillea/database/backup`) : sur /home
+# (btrfs sdb+sdc), pas sur la racine. Sans cette ligne, ProtectHome=read-only les refuse.
+ReadWritePaths=/home/ubuntu/apps/nie/cache /home/ubuntu/apps/nie/var -/home/ubuntu/.bun/install/cache /home/ubuntu/backups/achillea
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=rg-core
