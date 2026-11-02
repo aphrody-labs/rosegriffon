@@ -487,5 +487,5 @@ même chrome, pour le même compte Discord. Un membre sans Discord lié reçoit 
   (`@rosegriffon/assets`, export `./public/*`) reste la destination des assets
   réellement partagés.
 - **Pages d'administration** : la couche de données croisée existe
-  (`admin-db.ts`) ; les 14 onglets du backoffice Achilléa restent à fusionner
+  (`admin-db.ts`) ; les 17 onglets du backoffice Achilléa sont portés dans `/achillea/admins/dashboard` (registre `_tabs/visibilite.ts`) ; reste à les fusionner
   dans `/admin` (phase 3 du §5).

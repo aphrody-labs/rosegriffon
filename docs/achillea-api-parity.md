@@ -30,3 +30,9 @@ Pour `GET /tournaments?page=1&pageSize=2`, l'API historique répond `meta={page:
 ## Méthode reproductible
 
 Comparer les deux préfixes `https://ranked.rosegriffon.fr/api` et `https://api.rosegriffon.fr/v1/achillea` avec les mêmes chemins et requêtes, sans cookie pour les lectures publiques. Relever code HTTP, clés, longueurs, `meta`, puis des échantillons de données sans publier de données privées. Le code source de référence est `packages/achillea-client/src/v1/{tournaments,ranked,users}.ts` et `apps/api/src/modules/achillea/{tournaments,ranked,users}`.
+
+## Décision pagination (2026-11-02)
+
+Le site demande `pageSize=50` puis suit `meta.pageCount` (`remainingTournamentPages`, testé) : il lit donc toutes
+les pages quelle que soit l'API, historique (`limit` fixe 25) ou RG (`limit` = `pageSize`). La divergence de
+`meta.limit` est sans effet visible ; le comportement RG (respect de `pageSize`, max 50) est retenu comme référence.
