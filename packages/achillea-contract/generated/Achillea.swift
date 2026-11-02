@@ -2055,6 +2055,8 @@ public struct UpdateClanPayload: Codable, Sendable {
 	public let tiktokUrl: String?
 	public let isRecruiting: Bool?
 	public let autoAcceptMembers: Bool?
+	/// Masque le clan de l'annuaire public.
+	public let isHidden: Bool?
 	public let languages: [String]?
 	public let origin: String?
 	/// Bascule « clan inactif » — l'API ne l'accepte que d'un administrateur Achilléa.

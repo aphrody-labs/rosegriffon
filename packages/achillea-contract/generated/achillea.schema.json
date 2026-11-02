@@ -7272,6 +7272,10 @@
         "autoAcceptMembers": {
           "type": "boolean"
         },
+        "isHidden": {
+          "type": "boolean",
+          "description": "Masque le clan de l'annuaire public."
+        },
         "languages": {
           "type": "array",
           "items": {

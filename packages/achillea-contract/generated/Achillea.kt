@@ -2334,6 +2334,8 @@ data class UpdateClanPayload(
 	val tiktokUrl: String? = null,
 	val isRecruiting: Boolean? = null,
 	val autoAcceptMembers: Boolean? = null,
+	/// Masque le clan de l'annuaire public.
+	val isHidden: Boolean? = null,
 	val languages: List<String>? = null,
 	val origin: String? = null,
 	/// Bascule « clan inactif » — l'API ne l'accepte que d'un administrateur Achilléa.

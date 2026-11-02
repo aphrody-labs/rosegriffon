@@ -2848,6 +2848,9 @@ pub struct UpdateClanPayload {
 	pub is_recruiting: Option<bool>,
 	#[serde(rename = "autoAcceptMembers", default, skip_serializing_if = "Option::is_none")]
 	pub auto_accept_members: Option<bool>,
+	/// Masque le clan de l'annuaire public.
+	#[serde(rename = "isHidden", default, skip_serializing_if = "Option::is_none")]
+	pub is_hidden: Option<bool>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub languages: Option<Vec<String>>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
