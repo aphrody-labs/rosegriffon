@@ -27,7 +27,7 @@ describe("achillea:votes", () => {
     expect(resultat).toEqual({ success: true, closes: 3 });
     expect(appels[0]?.url).toBe("http://127.0.0.1:9100/api/clans/internal/votes/expire");
     expect(appels[0]?.init?.method).toBe("POST");
-    expect((appels[0]?.init?.headers as Record<string, string>).Authorization).toBe("Bearer jeton-interne");
+    expect((appels[0]?.init?.headers as Record<string, string> | undefined)?.Authorization).toBe("Bearer jeton-interne");
     expect(JSON.parse(String(appels[0]?.init?.body))).toEqual({ now: "2026-10-22T12:00:00.000Z" });
   });
 

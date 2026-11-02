@@ -232,7 +232,7 @@ async function SectionPages() {
 
 function Squelette({ titre }: { titre: string }) {
   return (
-    <Card role="status" aria-busy="true">
+    <Card aria-live="polite" aria-busy="true">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <FileText className="size-4" aria-hidden />

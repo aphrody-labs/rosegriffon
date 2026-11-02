@@ -85,7 +85,7 @@ export function construireTaches(
   const parNom = new Map(catalogue.map(t => [t.nom as string, t]));
 
   // Ordre : catalogue d'abord, puis les tâches du registre qu'il ne décrit pas.
-  const noms = [...catalogue.map(t => t.nom as string)];
+  const noms = catalogue.map(t => t.nom as string);
   for (const nom of [...(reponse?.registre ?? []), ...(reponse?.tasks ?? [])]) {
     if (!noms.includes(nom)) noms.push(nom);
   }

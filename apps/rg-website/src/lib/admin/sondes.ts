@@ -15,7 +15,7 @@ export interface ResultatSonde {
 
 /** Applique `fn` à chaque élément avec au plus `limite` appels simultanés, ordre conservé. */
 export async function executerBorne<T, R>(items: readonly T[], limite: number, fn: (item: T) => Promise<R>): Promise<R[]> {
-  const resultats = new Array<R>(items.length);
+  const resultats = Array.from({ length: items.length }) as R[];
   let suivant = 0;
   const ouvriers = Array.from({ length: Math.max(1, Math.min(limite, items.length)) }, async () => {
     while (true) {

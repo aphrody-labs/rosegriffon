@@ -56,6 +56,7 @@ export function BanquePortraits({
 
   useEffect(() => {
     let annule = false;
+    // oxlint-disable-next-line react/set-state-in-effect -- état de chargement de la requête
     setChargement(true);
     void chercherBanque({ q, serie, page })
       .then(r => {
@@ -134,13 +135,13 @@ export function BanquePortraits({
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground" role="status" aria-live="polite">
+      <output className="block text-xs text-muted-foreground" aria-live="polite">
         {erreur
           ? ""
           : resultat
             ? `${resultat.total} personnage${resultat.total > 1 ? "s" : ""} — page ${resultat.page + 1} sur ${resultat.pages}`
             : "Chargement de la banque…"}
-      </p>
+      </output>
 
       {erreur ? (
         <div role="alert" className="flex flex-col items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">

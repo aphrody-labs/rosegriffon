@@ -45,7 +45,7 @@
     "build": "bun ../../scripts/next-build.ts",
     "qa:browser": "bash ../../scripts/qa/agent-browser-rg.sh",
     "start": "next-bun start",
-    "lint": "bun lint -A style -A pedantic -A restriction -A react/react-in-jsx-scope -A unicorn/consistent-function-scoping -A promise/no-multiple-resolved -A react-perf .",
+    "lint": "bun lint --ignore-pattern public/vendor -A style -A pedantic -A restriction -A react/react-in-jsx-scope -A unicorn/consistent-function-scoping -A promise/no-multiple-resolved -A react-perf .",
     "lint:fix": "bun lint -A style -A pedantic -A restriction -A react/react-in-jsx-scope -A unicorn/consistent-function-scoping -A promise/no-multiple-resolved -A react-perf --fix .",
     "format": "bun fmt .",
     "format:check": "bun fmt --check .",

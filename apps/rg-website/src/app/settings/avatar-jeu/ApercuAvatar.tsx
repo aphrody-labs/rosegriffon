@@ -82,6 +82,7 @@ export function ApercuAvatar({ url, handleRef }: { url: string; handleRef: Ref<A
   useEffect(() => {
     let annule = false;
     let element: Viewer | null = null;
+    // oxlint-disable-next-line react/set-state-in-effect -- état de chargement du viewer externe
     setEtat("chargement");
     loadModelViewer()
       .then(() => {
@@ -131,11 +132,11 @@ export function ApercuAvatar({ url, handleRef }: { url: string; handleRef: Ref<A
         data-pret={instance ? etat : "chargement"}
         className="relative aspect-square w-full max-w-72 overflow-hidden rounded-2xl border border-border bg-muted"
       />
-      <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
+      <output className="block text-sm text-muted-foreground" aria-live="polite">
         {etat === "chargement" && "Assemblage du modèle 3D…"}
         {etat === "pret" && "Fais pivoter le modèle : l'avatar enregistré est la vue affichée."}
         {etat === "erreur" && "Assemblage 3D indisponible."}
-      </p>
+      </output>
       {etat === "erreur" && (
         <Button variant="outline" className="h-11" onClick={() => setEssai(n => n + 1)}>
           Réessayer
