@@ -14,8 +14,11 @@ export const metadata = metadonneesAchillea({
 });
 
 export default async function RankedLeaderboardPage() {
-  const result = await createAchilleaClient().ranked.leaderboard({ mode: 2, page: 0, pageSize: 25 });
-  const tiers = await createAchilleaClient().ranked.tiers(2);
+  const client = createAchilleaClient();
+  const [result, tiers] = await Promise.all([
+    client.ranked.leaderboard({ mode: 2, page: 0, pageSize: 25 }),
+    client.ranked.tiers(2),
+  ]);
   return (
     <RankedLeaderboardClient
       initialData={result.ok ? result.value : null}
