@@ -116,6 +116,8 @@ function commandeSoiMeme(...args: string[]): string[] {
 
 const ENTETES_SAUT = ["connection", "keep-alive", "proxy-connection", "transfer-encoding", "upgrade", "host"];
 
+const dernierEchecRelais = new Map<string, number>();
+
 /** Relaie une requête telle quelle (corps et encodage en flux, sans décompression). */
 async function relayer(requete: Request, cible: string): Promise<Response> {
   const headers = new Headers(requete.headers);
@@ -137,10 +139,14 @@ async function relayer(requete: Request, cible: string): Promise<Response> {
       headers: sortie,
     });
   } catch (err) {
-    console.error(
-      `[rg-core] relais vers ${new URL(cible).origin} en échec :`,
-      err instanceof Error ? err.message : err,
-    );
+    // Un amont éteint (ex. serveur de modèles désactivé) reçoit des dizaines de requêtes par minute :
+    // une ligne par origine et par 5 minutes suffit à le signaler sans noyer le journal.
+    const origine = new URL(cible).origin;
+    const maintenant = Date.now();
+    if (maintenant - (dernierEchecRelais.get(origine) ?? 0) > 300_000) {
+      dernierEchecRelais.set(origine, maintenant);
+      console.error(`[rg-core] relais vers ${origine} en échec :`, err instanceof Error ? err.message : err);
+    }
     return Response.json({ error: "upstream_unavailable" }, { status: 502 });
   }
 }
