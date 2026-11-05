@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { absoluteUrl } from "@/lib/site-url";
+import { withDefaultOgImage } from "@/lib/seo";
 
 /**
  * La page de contact est un composant client (react-hook-form + TanStack
@@ -15,12 +16,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: absoluteUrl("/a-propos/contact"),
   },
-  openGraph: {
+  openGraph: withDefaultOgImage({
     title: "Nous contacter · Rose Griffon",
     description: "Une question, une suggestion ou un projet de collaboration ? Écrivez à l'association Rose Griffon.",
     url: absoluteUrl("/a-propos/contact"),
     type: "website",
-  },
+  }),
 };
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {

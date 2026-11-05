@@ -321,16 +321,12 @@ export async function generateMetadata({
     openGraph: {
       authors: news.author?.full_name ? [news.author.full_name] : undefined,
       description: seoDescription,
-      images: news.featured_image_url
-        ? [
-            {
-              url: news.featured_image_url,
-              width: 1200,
-              height: 630,
-              alt: news.title,
-            },
-          ]
-        : [],
+      // Sans image mise en avant, la clé `images` reste ABSENTE : Next n'applique
+      // l'`opengraph-image.tsx` du segment que si la page ne la déclare pas
+      // (`images: []` suffisait à le masquer).
+      ...(news.featured_image_url && {
+        images: [{ alt: news.title, height: 630, url: news.featured_image_url, width: 1200 }],
+      }),
       locale: "fr_FR",
       modifiedTime: modifiedDate,
       publishedTime: publishedDate,

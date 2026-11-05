@@ -8,7 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPgPool } from "@/lib/db/pg";
 import { getAuthorInfo } from "@/lib/author";
-import { clampText, TITLE_MAX, titleWithSuffix } from "@/lib/seo";
+import { clampText, TITLE_MAX, titleWithSuffix, withDefaultOgImage } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-static";
@@ -123,12 +123,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     alternates: { canonical: url },
     description,
-    openGraph: {
+    openGraph: withDefaultOgImage({
       description,
       url,
       title: clampText(title, TITLE_MAX),
       ...(image && { images: [{ url: image }] }),
-    },
+    }),
     title: pageTitle,
     twitter: {
       card: "summary_large_image",

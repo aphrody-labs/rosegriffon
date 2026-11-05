@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { lienCompte, MARQUES } from "@/lib/feed/comptes";
 import type { FiltreFil } from "@/lib/feed/comptes";
 import type { CompteSource, PostFeed, ProfilFeed, StatutSource } from "@/lib/feed/types";
+import { initiale } from "@/lib/unicode";
 
 import { CartePost, entier, SquelettePosts, TexteAvecLiens } from "./carte-post";
 import { BadgeReseau } from "./marque";
@@ -274,7 +275,7 @@ function EnteteProfil({ compte, profil }: { compte: CompteSource; profil?: Profi
               aria-hidden
               className="flex size-[72px] items-center justify-center rounded-full border-4 border-surface-container-low bg-primary-container text-2xl font-bold text-on-primary-container"
             >
-              {nom.charAt(0).toUpperCase()}
+              {initiale(nom)}
             </span>
           )}
           <a

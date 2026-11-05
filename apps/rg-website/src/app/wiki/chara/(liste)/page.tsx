@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
-import { buildCanonical, LIST_CANONICAL_KEYS, wikiTitle } from "@/lib/seo";
+import { buildCanonical, LIST_CANONICAL_KEYS, wikiTitle, withDefaultOgImage } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 import { PlayersClient } from "../players-client";
@@ -47,14 +47,14 @@ export async function generateMetadata({
       canonical: buildCanonical(wiki("/chara"), rawParams, LIST_CANONICAL_KEYS),
     },
     description: `Base de données des joueurs Inazuma Eleven: Victory Road. ${filters.length > 0 ? `Filtres : ${filters.join(", ")}. ` : ""}Retrouvez les stats, techniques et méthodes de recrutement de tous les personnages.`,
-    openGraph: {
+    openGraph: withDefaultOgImage({
       description: "Wiki complet Inazuma Eleven Victory Road",
       locale: "fr_FR",
       siteName: "Azalée - Inazuma Eleven Victory Road Wiki",
       title: `${title} | Azalée`,
       type: "website",
       url: "/wiki/chara",
-    },
+    }),
     title: wikiTitle(title),
   };
 }

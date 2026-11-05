@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { Metadata } from "next";
+
+import { tronquerUnicode } from "./unicode";
+
 /**
  * Fabrique d'URL canoniques pour les listes filtrables (`/chara`, `/skill`,
  * `/aura/<categorie>`…).
@@ -45,6 +49,36 @@ export function buildCanonical(
   return qs ? `${path}?${qs}` : path;
 }
 
+type OpenGraph = NonNullable<Metadata["openGraph"]>;
+
+/** Image de partage par défaut (`app/opengraph-image.png`, 1200×630). */
+export const DEFAULT_OG_IMAGE = {
+  alt: "Rose Griffon - Association Inazuma Eleven",
+  height: 630,
+  url: "/opengraph-image.png",
+  width: 1200,
+} as const;
+
+/**
+ * Bloc `openGraph` avec un titre obligatoire et une image garantie.
+ *
+ * Next fusionne les métadonnées de façon superficielle : un segment qui
+ * déclare `openGraph` remplace tout l'objet du parent, y compris l'image que
+ * `app/opengraph-image.png` attache au segment racine (et celles des
+ * `opengraph-image.tsx` des segments parents). Seize pages publiques
+ * partaient ainsi sans `og:image`. Sans image (absente, vide ou `undefined`),
+ * {@link DEFAULT_OG_IMAGE} est posée.
+ */
+export function withDefaultOgImage<T extends OpenGraph & { title: NonNullable<OpenGraph["title"]> }>(
+  og: T,
+): Omit<T, "images"> & { images: NonNullable<OpenGraph["images"]> } {
+  const { images } = og;
+  if (Array.isArray(images) ? images.length > 0 : Boolean(images)) {
+    return og as Omit<T, "images"> & { images: NonNullable<OpenGraph["images"]> };
+  }
+  return { ...og, images: [DEFAULT_OG_IMAGE] };
+}
+
 /** Longueur au-delà de laquelle Google tronque une méta-description. */
 export const DESCRIPTION_MAX = 160;
 
@@ -63,7 +97,7 @@ export function clampText(text: string | null | undefined, max: number = DESCRIP
   if (clean.length <= max) {
     return clean;
   }
-  const cut = clean.slice(0, max - 1);
+  const cut = tronquerUnicode(clean, max - 1);
   const lastSpace = cut.lastIndexOf(" ");
   // Un mot unique plus long que la moitié de la limite : couper net plutôt
   // que de ne garder qu'un fragment.

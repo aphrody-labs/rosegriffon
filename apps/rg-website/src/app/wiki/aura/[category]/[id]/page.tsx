@@ -10,6 +10,7 @@ import { AuraDetail } from "@/components/wiki/AuraDetail";
 import { wikiService } from "@/lib/wiki-service";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
+import { withDefaultOgImage } from "@/lib/seo";
 
 const SUBTYPE_INFO: Record<string, { label: string; icon: string; color: string }> = {
   Aura: { color: "text-primary", icon: "wifi_tethering", label: "Aura" },
@@ -45,14 +46,14 @@ export async function generateMetadata({
   return {
     alternates: { canonical: wiki(`/aura/${category}/${id}`) },
     description,
-    openGraph: {
+    openGraph: withDefaultOgImage({
       description,
       locale: "fr_FR",
       siteName: "Azalée - Inazuma Eleven Victory Road",
       title: `${name} | Azalée`,
       type: "article",
       url: `/wiki/aura/${category}/${id}`,
-    },
+    }),
     title,
     twitter: {
       card: "summary",

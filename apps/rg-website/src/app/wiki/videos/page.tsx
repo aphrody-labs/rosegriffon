@@ -33,6 +33,7 @@ import { videoLabel } from "@/lib/cpk/media-names";
 import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
 import { aDuSon, type FilmDto, fetchVideoCatalogueOrNull, type LangueDto } from "@rosegriffon/azalee/cpk/video";
 import { wiki } from "@rosegriffon/app-shell";
+import { withDefaultOgImage } from "@/lib/seo";
 
 // Rendu à la requête : le prerender interroge le catalogue CPK en direct et dépasse
 // le délai de génération statique du build.
@@ -43,14 +44,14 @@ export const metadata: Metadata = {
   alternates: { canonical: wiki("/videos") },
   description:
     "Cinématiques et vidéos d'Inazuma Eleven: Victory Road (écrans-titre, événements), décodées à la volée depuis les fichiers du jeu (USM → MP4).",
-  openGraph: {
+  openGraph: withDefaultOgImage({
     description: "Toutes les cinématiques d'Inazuma Eleven: Victory Road, décodées live depuis les CPK.",
     locale: "fr_FR",
     siteName: "Azalée - Inazuma Eleven Victory Road",
     title: "Vidéos & cinématiques | Azalée",
     type: "website",
     url: "/wiki/videos",
-  },
+  }),
   title: "Vidéos & cinématiques — Inazuma Eleven Victory Road - Azalée",
 };
 

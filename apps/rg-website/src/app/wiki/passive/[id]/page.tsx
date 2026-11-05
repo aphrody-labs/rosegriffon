@@ -5,7 +5,7 @@ import { PASSIVE_CATEGORY_LABELS, PassiveDetailView } from "@/components/wiki/Pa
 import { wikiService } from "@/lib/wiki-service";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
-import { wikiTitle } from "@/lib/seo";
+import { wikiTitle, withDefaultOgImage } from "@/lib/seo";
 
 /** Données de miroir en lecture seule : la fiche est servie en ISR. */
 export const dynamic = "force-static";
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     alternates: { canonical: wiki(`/passive/${id}`) },
     description,
-    openGraph: {
+    openGraph: withDefaultOgImage({
       description,
       images: passive?.imageUrl ? [{ alt: cleanName, url: passive.imageUrl }] : [],
       locale: "fr_FR",
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title: `${cleanName} | Azalée`,
       type: "article",
       url: `/wiki/passive/${id}`,
-    },
+    }),
     title,
     twitter: {
       card: "summary",

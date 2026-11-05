@@ -19,6 +19,7 @@ import { audioBankKind } from "@rosegriffon/azalee/cpk/audio";
 import { lsOrNull } from "@rosegriffon/azalee/cpk/live";
 import { bankOwner, ownerIndex } from "@/lib/cpk/audio-names";
 import { wiki } from "@rosegriffon/app-shell";
+import { withDefaultOgImage } from "@/lib/seo";
 
 // Rendu à la requête : le prerender liste ~20 000 entrées CPK en direct et dépasse
 // le délai de génération statique du build.
@@ -29,14 +30,14 @@ export const metadata: Metadata = {
   alternates: { canonical: wiki("/sons") },
   description:
     "Toutes les banques sonores d'Inazuma Eleven: Victory Road — voix des personnages, musiques, techniques et effets, décodées à la volée depuis les fichiers du jeu.",
-  openGraph: {
+  openGraph: withDefaultOgImage({
     description: "Voix, musiques, techniques et effets d'Inazuma Eleven: Victory Road, décodés live depuis les CPK.",
     locale: "fr_FR",
     siteName: "Azalée - Inazuma Eleven Victory Road",
     title: "Sons & voix | Azalée",
     type: "website",
     url: "/wiki/sons",
-  },
+  }),
   title: "Sons & voix — Inazuma Eleven Victory Road - Azalée",
 };
 

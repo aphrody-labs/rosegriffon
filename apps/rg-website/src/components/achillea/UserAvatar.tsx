@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core";
+import { initiale } from "@/lib/unicode";
 import { cn } from "@/lib/utils";
 
 interface UserAvatarProps {
@@ -18,7 +19,7 @@ export function UserAvatar({ userId, avatar, name, displayName, size = "md", cla
   const [broken, setBroken] = useState(false);
 
   const resolvedName = (name ?? displayName ?? "Joueur").trim();
-  const initial = resolvedName.charAt(0).toUpperCase() || "?";
+  const initial = initiale(resolvedName);
   const effectiveUserId =
     userId?.trim() || (typeof avatar === "string" ? avatar.match(/\/avatars\/(\d+)\//)?.[1] : undefined) || "0";
   const defaultAvatarIndex = (() => {

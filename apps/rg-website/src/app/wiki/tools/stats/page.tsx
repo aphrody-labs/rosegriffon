@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { StatCalculator } from "@/components/wiki/StatCalculator";
 import { wiki } from "@rosegriffon/app-shell";
+import { withDefaultOgImage } from "@/lib/seo";
 
 export const metadata: Metadata = {
   alternates: { canonical: wiki("/tools/stats") },
   description:
     "Calculateur de statistiques Inazuma Eleven: Victory Road (Lv1→99) — tables de croissance réelles du jeu. Choisissez position, rareté et pattern de croissance.",
-  openGraph: {
+  openGraph: withDefaultOgImage({
     description:
       "Simulez les statistiques d'un joueur du niveau 1 à 99 avec les vraies tables de croissance d'Inazuma Eleven: Victory Road.",
     locale: "fr_FR",
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
     title: "Calculateur de statistiques | Azalée",
     type: "website",
     url: "/wiki/tools/stats",
-  },
+  }),
   title: "Calculateur de statistiques (Lv1→99) - Azalée",
 };
 

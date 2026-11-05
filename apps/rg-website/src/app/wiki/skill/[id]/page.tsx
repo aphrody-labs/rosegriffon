@@ -185,7 +185,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     ].filter(Boolean) as string[],
     openGraph: {
       description,
-      images: ogImageUrl ? [{ url: ogImageUrl, alt: name }] : [],
+      // Clé absente sans visuel : l'`opengraph-image.tsx` du segment prend le relais.
+      ...(ogImageUrl && { images: [{ alt: name, url: ogImageUrl }] }),
       locale: "fr_FR",
       siteName: "Azalée - Inazuma Eleven Victory Road",
       title: `${name} | Azalée`,

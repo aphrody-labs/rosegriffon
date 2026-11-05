@@ -5,7 +5,7 @@ import { ItemDetail } from "@/components/wiki/ItemDetail";
 import { wikiService } from "@/lib/wiki-service";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
-import { wikiTitle } from "@/lib/seo";
+import { wikiTitle, withDefaultOgImage } from "@/lib/seo";
 
 /** Données de miroir en lecture seule : la fiche est servie en ISR. */
 export const dynamic = "force-static";
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     alternates: { canonical: wiki(`/item/${id}`) },
     description,
-    openGraph: {
+    openGraph: withDefaultOgImage({
       description,
       images: item?.imageUrl ? [{ url: item.imageUrl, alt: name }] : [],
       locale: "fr_FR",
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title: `${name} | Azalée`,
       type: "article",
       url: `/wiki/item/${id}`,
-    },
+    }),
     title,
     twitter: {
       card: "summary",

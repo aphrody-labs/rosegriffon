@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { absoluteUrl } from "@/lib/site-url";
+import { withDefaultOgImage } from "@/lib/seo";
 
 // La page est un composant client (`"use client"`) : elle ne peut pas exporter de
 // `metadata`. Sans ce layout elle héritait du titre, de la description ET du
@@ -11,13 +12,13 @@ export const metadata: Metadata = {
   alternates: { canonical: absoluteUrl("/evenements") },
   description:
     "L'agenda des événements Inazuma Eleven de l'association Rose Griffon : rencontres, tournois et conventions en France.",
-  openGraph: {
+  openGraph: withDefaultOgImage({
     description:
       "L'agenda des événements Inazuma Eleven de l'association Rose Griffon : rencontres, tournois et conventions en France.",
     title: "Événements | Rose Griffon",
     type: "website",
     url: absoluteUrl("/evenements"),
-  },
+  }),
   title: "Événements | Rose Griffon",
 };
 

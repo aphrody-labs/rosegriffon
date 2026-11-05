@@ -8,6 +8,7 @@ import type { MetriquesFeed, PostFeed, ProfilFeed, Reseau } from "@/lib/feed/typ
 import { cleProfil } from "@/lib/feed/types";
 
 import { MARQUES } from "@/lib/feed/comptes";
+import { initiale } from "@/lib/unicode";
 
 import { BadgeReseau } from "./marque";
 
@@ -136,7 +137,7 @@ export function Avatar({ profil, nom, taille }: { profil?: Pick<ProfilFeed, "ava
       className="flex shrink-0 items-center justify-center rounded-full bg-primary-container text-sm font-bold text-on-primary-container"
       style={style}
     >
-      {nom.trim().charAt(0).toUpperCase() || "?"}
+      {initiale(nom)}
     </span>
   );
 }

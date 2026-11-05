@@ -16,6 +16,7 @@ import { parseSearchParams } from "@/lib/validations";
 
 import { CarteSondage } from "./_components/CarteSondage";
 import { FiltresSondages } from "./_components/FiltresSondages";
+import { withDefaultOgImage } from "@/lib/seo";
 
 // Les sondages sont archivés par le cron une fois par jour : une page figée une
 // heure suffit largement et évite de rejouer les requêtes à chaque visite.
@@ -25,12 +26,12 @@ export const metadata: Metadata = {
   alternates: { canonical: absoluteUrl("/sondages") },
   description:
     "Les sondages posés à la communauté Rose Griffon sur Discord : questions, choix, résultats détaillés et participation.",
-  openGraph: {
+  openGraph: withDefaultOgImage({
     description: "Questions, choix et résultats des sondages de la communauté Rose Griffon sur Discord.",
     title: "Sondages de la communauté · Rose Griffon",
     type: "website",
     url: absoluteUrl("/sondages"),
-  },
+  }),
   title: "Sondages de la communauté · Rose Griffon",
 };
 

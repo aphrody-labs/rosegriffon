@@ -11,6 +11,7 @@
 // des totaux non ré-identifiants.
 
 import { CONTEXTE_MENTIONS_VIDE, analyserInline, texteBrut } from "./markdown-ast";
+import { tronquerUnicode } from "../unicode";
 
 /**
  * D'où viennent les DÉCOMPTES d'un sondage (pas ses métadonnées) :
@@ -235,7 +236,7 @@ export function libelleAvecEmoji(option: OptionSondage): string {
 export function resumeQuestion(question: string, longueurMax = 80): string {
   const brut = texteBrut(analyserInline(question, CONTEXTE_MENTIONS_VIDE)).replace(/\s+/g, " ").trim();
   if (brut.length <= longueurMax) return brut;
-  return `${brut.slice(0, longueurMax - 1).trimEnd()}…`;
+  return `${tronquerUnicode(brut, longueurMax - 1).trimEnd()}…`;
 }
 
 /** Lien vers le message d'origine, uniquement si les trois identifiants existent. */

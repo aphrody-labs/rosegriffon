@@ -9,7 +9,7 @@ import { notFound } from "next/navigation";
 import { getStadium } from "@/lib/wiki/stadiums";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
-import { wikiTitle } from "@/lib/seo";
+import { wikiTitle, withDefaultOgImage } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     alternates: { canonical: wiki(`/stade/${id}`) },
     description,
-    openGraph: {
+    openGraph: withDefaultOgImage({
       description,
       images: stadium?.full ? [{ url: stadium.full }] : undefined,
       locale: "fr_FR",
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title: `${name} | Azalée`,
       type: "article",
       url: `/wiki/stade/${id}`,
-    },
+    }),
     title: wikiTitle(name),
   };
 }

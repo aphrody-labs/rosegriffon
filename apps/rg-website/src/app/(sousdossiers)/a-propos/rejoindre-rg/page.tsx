@@ -27,6 +27,7 @@ import {
   Users,
 } from "@/lib/icons-config";
 import { absoluteUrl } from "@/lib/site-url";
+import { withDefaultOgImage } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -37,12 +38,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: absoluteUrl("/a-propos/rejoindre-rg"),
   },
-  openGraph: {
+  openGraph: withDefaultOgImage({
     title: "Rejoindre Rose Griffon · Recrutement",
     description: "Contribuez à l'essor de la communauté Inazuma Eleven en France selon vos disponibilités.",
     url: absoluteUrl("/a-propos/rejoindre-rg"),
     type: "website",
-  },
+  }),
 };
 
 /**

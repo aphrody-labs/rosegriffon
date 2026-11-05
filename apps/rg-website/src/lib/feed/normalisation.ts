@@ -4,6 +4,7 @@
 // Les normaliseurs des autres réseaux vivent dans `@rosegriffon/types/feed-normalisation`, partagés
 // avec le cron `feed:sync`.
 import type { XProfil, XTweet } from "./live";
+import { sansCaracteresIllisibles } from "../unicode";
 import { RESEAUX } from "./comptes";
 import type { CompteSource, MediaFeed, PostFeed, ProfilFeed, Reseau } from "./types";
 
@@ -22,8 +23,9 @@ export function postDepuisTweet(t: XTweet, compte?: CompteSource): PostFeed {
     id: `x:${t.id}`,
     idOrigine: t.id,
     reseau: "x",
-    auteur: { pseudo, nom: t.author.name, lien: `https://x.com/${pseudo}` },
-    texte: t.text,
+    auteur: { pseudo, nom: sansCaracteresIllisibles(t.author.name), lien: `https://x.com/${pseudo}` },
+    // La CLI X livre parfois un U+FFFD (octets déjà invalides en amont, irréparables ici).
+    texte: sansCaracteresIllisibles(t.text),
     medias: (t.media ?? [])
       .filter(m => m.url || m.preview_url)
       .map(m => ({

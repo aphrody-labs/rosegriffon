@@ -36,7 +36,7 @@ import {
   resumeQuestion,
   varianteBadgeEtat,
 } from "@/lib/discord/polls-types";
-import { clampText, titleWithSuffix } from "@/lib/seo";
+import { clampText, titleWithSuffix, withDefaultOgImage } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site-url";
 
 import { ResultatsSondage } from "../_components/ResultatsSondage";
@@ -75,13 +75,13 @@ export async function generateMetadata({
   return {
     alternates: { canonical: url },
     description,
-    openGraph: {
+    openGraph: withDefaultOgImage({
       description,
       ...(sondage.visuel && { images: [{ url: sondage.visuel.url }] }),
       title: titrePage,
       type: "article",
       url,
-    },
+    }),
     title: titrePage,
   };
 }

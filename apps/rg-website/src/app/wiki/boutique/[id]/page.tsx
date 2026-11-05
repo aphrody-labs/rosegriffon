@@ -6,7 +6,7 @@ import { ShopItemsGrid } from "@/components/wiki/ShopItemsGrid";
 import { SHOP_CATEGORY_FR, getShop } from "@/lib/wiki/shops";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
-import { wikiTitle } from "@/lib/seo";
+import { wikiTitle, withDefaultOgImage } from "@/lib/seo";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -46,14 +46,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     // Canonique construite sur l'identifiant normalisé, jamais sur le segment brut.
     alternates: { canonical: wiki(`/boutique/${shopId}`) },
     description,
-    openGraph: {
+    openGraph: withDefaultOgImage({
       description,
       locale: "fr_FR",
       siteName: "Azalée - Inazuma Eleven Victory Road",
       title: `${name} | Azalée`,
       type: "article",
       url: `/wiki/boutique/${shopId}`,
-    },
+    }),
     title: wikiTitle(name),
   };
 }

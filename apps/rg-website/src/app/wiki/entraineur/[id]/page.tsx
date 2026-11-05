@@ -7,7 +7,7 @@ import { CoachDetail } from "@/components/wiki/CoachDetail";
 import { getCoach } from "@/lib/wiki/coaches";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
-import { wikiTitle } from "@/lib/seo";
+import { wikiTitle, withDefaultOgImage } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -21,14 +21,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     alternates: { canonical: wiki(`/entraineur/${id}`) },
     description,
-    openGraph: {
+    openGraph: withDefaultOgImage({
       description,
       locale: "fr_FR",
       siteName: "Azalée - Inazuma Eleven Victory Road",
       title: `${name} | Azalée`,
       type: "article",
       url: `/wiki/entraineur/${id}`,
-    },
+    }),
     title: wikiTitle(name),
   };
 }

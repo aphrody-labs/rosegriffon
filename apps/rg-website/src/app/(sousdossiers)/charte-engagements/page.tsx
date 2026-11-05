@@ -5,6 +5,7 @@ import { PageContainer, PageHero, SectionCard, SectionHeading } from "@/componen
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { Award, Eye, Handshake, Palette, Scale, Users } from "@/lib/icons-config";
 import { absoluteUrl } from "@/lib/site-url";
+import { withDefaultOgImage } from "@/lib/seo";
 
 // Page statique avec ISR - Revalidate toutes les semaines (charte rarement modifiée)
 export const dynamic = "force-static";
@@ -17,12 +18,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: absoluteUrl("/charte-engagements"),
   },
-  openGraph: {
+  openGraph: withDefaultOgImage({
     title: "Charte d'engagements · Rose Griffon",
     description: "Les cinq engagements que Rose Griffon, Achilléa et Azalée tiennent dans toutes leurs activités.",
     url: absoluteUrl("/charte-engagements"),
     type: "website",
-  },
+  }),
 };
 
 /**
