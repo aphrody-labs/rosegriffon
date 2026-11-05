@@ -216,8 +216,7 @@ composant de bannière.
 
 ## 6. Cron & types (écosystème)
 
-- **Cron RG** = `rg-cron.service` → `bun run src/index.ts` dans `packages/cron` (tâches `tasks/` +
-  `check_team_members.ts` ; schedules `*/15`, `*/30`, `0 2`, `45 2`, `0 3`, `0 4`). Route vers
+- **Cron RG** = `rg-cron.service` → `bun run src/index.ts` dans `packages/cron` (tâches `tasks/` ; schedules `*/15`, `*/30`, `0 2`, `45 2`, `0 3`, `0 4`). Route vers
   `azalee.rosegriffon.fr` / `rosegriffon.fr`. **Ne touche pas Achillea.**
 - **Cron Achillea** = interne au bot (décorateur `@Schedule` maison basé sur `cron` + tsyringe :
   backup DB, rappels casts, transitions de phases…). Séparé du cron RG.
