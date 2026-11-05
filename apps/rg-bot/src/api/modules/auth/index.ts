@@ -222,13 +222,15 @@ export const authController = new Elysia({ prefix: "/auth" })
   )
   .get(
     "/oauth/callback",
-    async ({ db, query, set }) => {
+    async ({ db, query, redirect }) => {
       if (!query.provider || !query.code || !query.state)
         return status(400, { message: "OAuth parameters missing" as const });
       const result = await ProviderOAuthService.handle(db, query.provider, query.code, query.state);
       if (!result.ok) return status(result.status, { message: result.message });
-      set.redirect = result.redirect;
-      return status(302, { message: "Redirecting" as const });
+      // `set.redirect` followed by `return status(302, …)`: the returned status
+      // replaced the response and dropped `Location`, leaving the browser on a
+      // JSON "Redirecting" page after linking Twitch or Challonge.
+      return redirect(result.redirect, 302);
     },
     {
       query: t.Object({
