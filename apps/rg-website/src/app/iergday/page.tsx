@@ -6,7 +6,7 @@ import Link from "next/link";
 import { PageContainer, PageHero } from "@/components/shared/PageShell";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { WikiPagination } from "@/components/shared/WikiPagination";
-import { dimensionsImage } from "@/lib/images/dimensions";
+import { sonderImage } from "@/lib/images/dimensions";
 import { SITE_URL } from "@/lib/site-url";
 import { parseSearchParams } from "@/lib/validations";
 import {
@@ -288,7 +288,7 @@ export default async function IergDayPage({
     );
   }
 
-  const [stats, posts, enAvant, tailleAffiche, tailleReglement, depotDiscord] = await Promise.all([
+  const [stats, posts, enAvant, sondageAffiche, sondageReglement, depotDiscord] = await Promise.all([
     compterPostsCampagne(campagne.slug),
     listerPostsCampagne(campagne.slug, pageCourante, POSTS_PAR_PAGE),
     pageCourante === 1 ? listerPostsEnAvant(campagne.slug, 6) : Promise.resolve([]),
@@ -296,10 +296,14 @@ export default async function IergDayPage({
     // Les deviner (un cadre carré, puis 3/4) bordait chaque document de bandes
     // vides ; les écrire en dur serait faux dès la campagne suivante, dont les
     // visuels seront téléversés par l'équipe sans passer par le code.
-    dimensionsImage(campagne.imageAffiche),
-    dimensionsImage(campagne.imageReglement),
+    sonderImage(campagne.imageAffiche),
+    sonderImage(campagne.imageReglement),
     lienDepotDiscord(campagne.slug),
   ]);
+  // Un visuel que le stockage déclare absent n'est pas émis : réserver sa place
+  // puis la retirer au premier `onError` faisait sauter toute la page (CLS 0,52).
+  const imageAffiche = sondageAffiche.absente ? null : campagne.imageAffiche;
+  const imageReglement = sondageReglement.absente ? null : campagne.imageReglement;
 
   /*
    * ── LE TIRAGE AU SORT ──────────────────────────────────────────────────
@@ -464,7 +468,7 @@ export default async function IergDayPage({
          * affiche en `object-cover` sous un voile marine à 90 %, c'est-à-dire
          * en décor par construction illisible, tout en répétant son texte.
          */}
-        {(campagne.imageAffiche || campagne.imageReglement) && (
+        {(imageAffiche || imageReglement) && (
           <section aria-label="Visuels officiels de la campagne">
             {/* Pas de sous-titre « cliquez pour agrandir » : le pictogramme de
 						    la vignette le dit déjà, et une phrase de plus au-dessus de
@@ -478,12 +482,12 @@ export default async function IergDayPage({
               slug={campagne.slug}
               titreCampagne={campagne.titre}
               description={campagne.description}
-              imageAffiche={campagne.imageAffiche}
-              imageReglement={campagne.imageReglement}
+              imageAffiche={imageAffiche}
+              imageReglement={imageReglement}
               noteAffiche={campagne.noteAffiche}
               presentation="grand"
-              tailleAffiche={tailleAffiche}
-              tailleReglement={tailleReglement}
+              tailleAffiche={sondageAffiche.dimensions}
+              tailleReglement={sondageReglement.dimensions}
             />
           </section>
         )}

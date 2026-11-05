@@ -60,8 +60,43 @@ const connues = new Map<string, DimensionsImage | null>();
 export const dimensionsImage = cache(async function dimensionsImage(
   url: string | null | undefined,
 ): Promise<DimensionsImage | null> {
-  if (typeof url !== "string" || !/^https?:\/\//.test(url)) return null;
-  if (connues.has(url)) return connues.get(url) ?? null;
+  return (await sonderImage(url)).dimensions;
+});
+
+/** Résultat d'un sondage : la mesure, et si le stockage a dit que le fichier n'existe pas. */
+export interface SondageImage {
+  dimensions: DimensionsImage | null;
+  /**
+   * `true` seulement sur une réponse 4xx (objet absent, chemin refusé) : un avis
+   * DÉFINITIF du stockage. Un délai dépassé ou un hôte injoignable laisse `false`,
+   * l'image a alors encore sa chance côté navigateur.
+   */
+  absente: boolean;
+}
+
+/**
+ * Une absence n'est retenue que quelques minutes : un visuel téléversé après coup
+ * doit réapparaître sans redémarrer le processus.
+ */
+const DUREE_ABSENCE_MS = 5 * 60 * 1000;
+const absentes = new Map<string, number>();
+
+/**
+ * Sonde une image distante : dimensions ET existence.
+ *
+ * ⚠ C'EST CE QUI ÉVITE LE SAUT DE MISE EN PAGE. Une URL morte (le stockage répond
+ * 400 `NoSuchKey`) rendue quand même réservait un cadre 3/4 en tête de page, que
+ * `onError` retirait ensuite côté client : tout le contenu remontait d'autant (CLS
+ * 0,52 sur `/iergday`, audit du 5/11/2026). Connue morte au rendu, l'image n'est
+ * tout simplement pas émise.
+ */
+export const sonderImage = cache(async function sonderImage(url: string | null | undefined): Promise<SondageImage> {
+  if (typeof url !== "string" || !/^https?:\/\//.test(url)) return { absente: false, dimensions: null };
+  const absenteDepuis = absentes.get(url);
+  if (absenteDepuis !== undefined && Date.now() - absenteDepuis < DUREE_ABSENCE_MS) {
+    return { absente: true, dimensions: null };
+  }
+  if (connues.has(url)) return { absente: false, dimensions: connues.get(url) ?? null };
 
   let mesure: DimensionsImage | null = null;
   try {
@@ -69,6 +104,10 @@ export const dimensionsImage = cache(async function dimensionsImage(
       headers: { Range: `bytes=0-${OCTETS_ENTETE - 1}` },
       signal: AbortSignal.timeout(DELAI_MS),
     });
+    if (reponse.status >= 400 && reponse.status < 500) {
+      absentes.set(url, Date.now());
+      return { absente: true, dimensions: null };
+    }
     if (reponse.ok || reponse.status === 206) {
       mesure = lireDimensions(new Uint8Array(await reponse.arrayBuffer()));
     }
@@ -78,6 +117,7 @@ export const dimensionsImage = cache(async function dimensionsImage(
     mesure = null;
   }
 
+  absentes.delete(url);
   connues.set(url, mesure);
-  return mesure;
+  return { absente: false, dimensions: mesure };
 });

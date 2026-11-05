@@ -1,7 +1,7 @@
 "use client";
 
 import { AspectRatio } from "@rosegriffon/ui";
-import { Maximize2, TriangleAlert } from "lucide-react";
+import { ImageOff, Maximize2, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 
@@ -87,17 +87,23 @@ export interface TailleVisuel {
 function Vignette({
   document,
   onOuvrir,
-  onIndisponible,
   grand = false,
   taille = null,
 }: {
   document: DocumentVisionne;
   onOuvrir: () => void;
-  /** Le fichier ne répond pas : la vignette se retire plutôt que montrer un cadre vide. */
-  onIndisponible: () => void;
   grand?: boolean;
   taille?: TailleVisuel | null;
 }) {
+  /*
+   * ⚠ UNE IMAGE EN ÉCHEC GARDE SA PLACE. La vignette se retirait au premier
+   * `onError` : tout ce qui la suivait remontait de la hauteur d'une affiche, le
+   * pire saut de mise en page de la page (CLS 0,52, audit du 5/11/2026). La page
+   * serveur écarte déjà les fichiers que le stockage déclare absents
+   * (`sonderImage`) ; ce repli ne couvre que l'échec tardif, et il le couvre
+   * sans rien déplacer : même cadre, un pictogramme à la place des pixels.
+   */
+  const [echec, setEchec] = useState(false);
   const image = document.images[0];
   if (!image) {
     return null;
@@ -106,6 +112,7 @@ function Vignette({
     <button
       type="button"
       onClick={onOuvrir}
+      disabled={echec}
       aria-label={`Agrandir : ${document.etiquette}`}
       className="group block w-full cursor-zoom-in overflow-hidden rounded-[24px] border-2 border-rg-or/40 bg-surface-container-low text-left shadow-[0_4px_0_0_rgba(0,0,0,0.5)] transition-transform duration-300 motion-safe:hover:-translate-y-1 focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-primary"
     >
@@ -115,7 +122,13 @@ function Vignette({
        * sans bande vide au-dessus ni en dessous. Le navigateur réserve la place
        * exacte avant le chargement — pas de saut de mise en page pour autant.
        */}
-      {taille ? (
+      {echec ? (
+        <AspectRatio ratio={taille ? taille.largeur / taille.hauteur : RATIO_REPLI}>
+          <div className="flex size-full items-center justify-center bg-surface-container-high text-on-surface-variant">
+            <ImageOff className="size-10" aria-hidden />
+          </div>
+        </AspectRatio>
+      ) : taille ? (
         <Image
           src={image.src}
           alt={image.alt}
@@ -123,7 +136,7 @@ function Vignette({
           height={taille.hauteur}
           sizes={grand ? TAILLES_GRAND : TAILLES_VIGNETTE}
           priority={grand}
-          onError={onIndisponible}
+          onError={() => setEchec(true)}
           className="h-auto w-full"
         />
       ) : (
@@ -134,7 +147,7 @@ function Vignette({
             fill
             sizes={grand ? TAILLES_GRAND : TAILLES_VIGNETTE}
             priority={grand}
-            onError={onIndisponible}
+            onError={() => setEchec(true)}
             className="object-contain"
           />
         </AspectRatio>
@@ -190,7 +203,6 @@ export function VisuelsCampagne({
   tailleReglement?: TailleVisuel | null;
 }) {
   const [indexOuvert, setIndexOuvert] = useState<number | null>(null);
-  const [indisponibles, setIndisponibles] = useState<ReadonlySet<string>>(() => new Set());
 
   const documents = useMemo<DocumentVisionne[]>(() => {
     const liste: DocumentVisionne[] = [];
@@ -223,8 +235,8 @@ export function VisuelsCampagne({
         titre: "Les règles, en image",
       });
     }
-    return liste.filter(document => !indisponibles.has(document.cle));
-  }, [slug, titreCampagne, description, noteAffiche, imageAffiche, imageReglement, indisponibles]);
+    return liste;
+  }, [slug, titreCampagne, description, noteAffiche, imageAffiche, imageReglement]);
 
   if (documents.length === 0) {
     return null;
@@ -264,7 +276,6 @@ export function VisuelsCampagne({
               grand={grand}
               taille={tailles[document.cle] ?? null}
               onOuvrir={() => setIndexOuvert(position)}
-              onIndisponible={() => setIndisponibles(actuels => new Set(actuels).add(document.cle))}
             />
             {document.cle === "affiche" && noteAffiche && (
               <p className="mt-2 flex items-start gap-2 rounded-2xl border border-error/50 bg-error-container px-3 py-2 text-xs leading-relaxed text-on-error-container">
