@@ -29,7 +29,7 @@ import { createSupabaseServiceClient } from "@rosegriffon/db/service";
 import { Database } from "bun:sqlite";
 import { readdirSync } from "node:fs";
 import path from "node:path";
-import { Client } from "pg";
+import { createBunPgClient } from "@rosegriffon/db/bun-sql";
 
 const { DATABASE_URL } = process.env;
 if (!DATABASE_URL) {
@@ -115,7 +115,7 @@ interface Tbl {
   hasUpdated: boolean;
 }
 
-const pg = new Client({ connectionString: DATABASE_URL });
+const pg = createBunPgClient(DATABASE_URL);
 await pg.connect();
 const colRes = await pg.query<{ table_name: string; column_name: string; data_type: string }>(`
 	SELECT table_name, column_name, data_type FROM information_schema.columns
