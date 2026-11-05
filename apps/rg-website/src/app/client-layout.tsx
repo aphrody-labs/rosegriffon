@@ -20,7 +20,7 @@ const SIDEBAR_WIDTH = "14rem";
 
 import { SkipToContent } from "@/components/accessibility/SkipToContent";
 import { AppSidebar } from "@/components/app-sidebar";
-import Footer from "@/components/layout/footer";
+import { PiedDePage } from "@/components/layout/PiedDePage";
 import { Header } from "@/components/layout/Header";
 import { isAdminRole } from "@/lib/auth-roles";
 import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigation";
@@ -317,7 +317,9 @@ export default function ClientLayout({
 										    liens légaux annoncés deux fois par les lecteurs d'écran. */}
                       {/* En compact, la barre basse porte déjà la navigation : le grand footer
 											    du site ferait doublon et ajouterait plusieurs écrans de défilement. */}
-                      {!isShopPage && !isCompact && <Footer />}
+                      {!isShopPage && !isCompact && (
+                        <PiedDePage />
+                      )}
                       <MobileWatermark />
                       {/* Affiche la barre de nav du bas uniquement sur mobile, hors shop/auth/admin */}
                       {isCompact && !shouldHideSidebar && <RoutedMobileNavigation />}

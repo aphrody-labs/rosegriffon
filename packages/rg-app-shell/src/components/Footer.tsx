@@ -2,6 +2,10 @@ import Link from "next/link";
 
 export interface FooterProps {
   className?: string;
+  /** Rouvre les réglages de consentement aux traceurs ; sans gestionnaire, le lien n'est pas affiché. */
+  onGererCookies?: () => void;
+  /** Libellé du lien de consentement. */
+  libelleCookies?: string;
 }
 
 /**
@@ -21,7 +25,7 @@ const LEGAL_LINKS = [
   { href: "/legal/confidentialite", label: "Confidentialité" },
 ] as const;
 
-export function Footer({ className }: FooterProps = {}) {
+export function Footer({ className, onGererCookies, libelleCookies }: FooterProps = {}) {
 
   return (
     <footer className={`mt-auto w-full border-t border-outline-variant/10 bg-surface-container ${className ?? ""}`}>
@@ -37,6 +41,15 @@ export function Footer({ className }: FooterProps = {}) {
               {label}
             </Link>
           ))}
+          {onGererCookies && libelleCookies && (
+            <button
+              type="button"
+              onClick={onGererCookies}
+              className="inline-flex min-h-6 cursor-pointer items-center pointer-coarse:min-h-11 rounded px-1.5 transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              {libelleCookies}
+            </button>
+          )}
         </nav>
       </div>
     </footer>

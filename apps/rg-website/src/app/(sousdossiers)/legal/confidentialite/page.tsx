@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { ReglagesCookies } from "@/components/shared/ReglagesCookies";
 import { absoluteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -365,6 +366,7 @@ export default function PrivacyPolicyPage() {
               <strong>Google Tag Manager</strong> : mesure d'audience (pages consultées, appareil, provenance).
             </li>
           </ul>
+          <ReglagesCookies />
           <p className="mt-4">
             Vous pouvez refuser la personnalisation des annonces à tout moment depuis les{" "}
             <a
