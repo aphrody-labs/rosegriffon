@@ -49,3 +49,27 @@ Points ouverts transmis à l'agent de parité web Achilléa :
 - Réglage du thème par l'utilisateur (ThemeTuner) dans le navigateur.
 - Lighthouse sur le build de prod.
 - Le déploiement en prod.
+
+## Déploiements en prod (VPS RG, via `prod` → `vps`)
+
+| | Déploiement 1 | Déploiement 2 |
+|---|---|---|
+| Commit | `972fc663` | `a03fbe7a` |
+| rg-core | redémarré 09:50:53 UTC, `cmp` binaire = build, NRestarts 0 | redémarré 10:59:23 UTC, `cmp` binaire = build, NRestarts 0 |
+| rg-website BUILD_ID | `ekHHwPMKZgZb-p8jStMCl` (10:03:40 UTC) | `TFu-T1mdhusiRm6TvkhaB` (11:10:20 UTC) |
+| Pages | `/`, `/wiki`, `/feed`, `/achillea`, `/wiki/chara`, `/legal/cgu`, sitemap, robots : 200, bons titres, 0 erreur SSR | idem + `/community` 211 837 o (3,84 Mo avant), `/settings` noindex |
+| Bots | rg prêt, bot-azalee et bot-achillea 0 redémarrage | idem |
+| Cron | 13 tâches réussies, 0 échec | 16 tâches réussies, 0 échec |
+| Rollback | `/usr/local/bin/rg-core.63f281a4`, `apps/rg/old-cur` | `/usr/local/bin/rg-core.972fc663`, `apps/rg/old-cur` |
+
+## Données du wiki corrigées en prod (`rg-inagle-pg`)
+
+- Noms : snapshot `inagle_characters-avant-noms-20261105T100617Z.dump`, puis `packages/azalee/scripts/plan-ievr-names-prod.ts`. Noms doublés : 4 098 lignes → 5 (doublons réels du jeu : Cao Cao, Pyon Pyon, Soyogi Soyogi). Public : `/wiki/chara` affiche « Jim Wraith » (18), plus aucun « Jim Jim ».
+- Genres : snapshot `inagle_characters-avant-genre-20261105T103245Z.dump`, puis `plan-ievr-gender-prod.ts`. F/M 4 925/1 186 → M 4 925, F 1 089, null 97. Mark Evans, Axel Blaze, Jude Sharp : M ; Celia Hills, Nelly Raimon, Silvia Woods : F. Public : 740 « Masculin », 60 « Féminin » sur `/wiki/chara`.
+
+## Consentement (prod, navigateur Chromium yolo-web, `https://rosegriffon.fr/`)
+
+1. Sans choix : bandeau « Cookies et mesure d'audience » (Personnaliser, Tout refuser, Tout accepter) ; après 29 s et défilement, 0 requête Google, `dataLayer` vide.
+2. Tout refuser : choix stocké `{mesure:false,pub:false}`, bandeau fermé, 0 requête Google.
+3. « Gérer les cookies » du pied de page : bandeau rouvert en mode détaillé, cases décochées (choix précédent), labels associés.
+4. Tout accepter puis un geste : `dataLayer` = `consent default` (tout `denied`) → `consent update` (tout `granted`) → `gtm.js` ; requêtes `googletagmanager.com/gtm.js` et `adsbygoogle.js` émises seulement à ce moment.
