@@ -16,11 +16,8 @@
  *     [--names C:/src/yolo-re/var/ie-export/azalee/names.jsonl] \
  *     [--mirror var/inagle-mirror.sqlite] [--out var/ievr-names-report.json]
  *
- * Les équipes ne sont pas encore reliées : les identifiants de inagle_teams
- * n’apparaissent ni comme hash ni comme ligne team_config dans l’export.
- * Les compétences ne sont pas traitées : yolo-re ne sait pas encore relier
- * leur hash de nom à une ligne (`refs` absent), et un rapprochement par nom
- * serait faux.
+ * Objets et passifs ne sont pas traités : le miroir n’a pas de clé commune
+ * avec l’export (passive_N, objets absents).
  */
 import { Database } from "bun:sqlite";
 import { parseArgs } from "node:util";
@@ -40,9 +37,13 @@ type Langue = (typeof LANGUES)[number];
 
 interface Ref {
   table: string;
-  row: string;
+  /** Type de ligne (`row` dans les premières versions de l’export, `type` ensuite). */
+  row?: string;
+  type?: string;
   id: string;
   code?: string;
+  /** Vrai quand `id` est un identifiant de club (belong_team_config), clé de inagle_teams. */
+  club?: boolean;
 }
 interface NomJeu {
   kind: "character" | "skill" | "team" | "item";
@@ -74,10 +75,34 @@ const equipes = new Map(
     .all()
     .map(r => [normaliserId(String(r.id)), r]),
 );
+const competences = new Map(
+  db
+    .query<{ internal_code: string; name_fr: string | null; name_en: string | null; name_ja: string | null }, []>(
+      "select internal_code, name_fr, name_en, name_ja from inagle_skills where internal_code is not null",
+    )
+    .all()
+    .map(r => [r.internal_code, r]),
+);
 db.close();
 
+type LigneMiroir = { name_fr: string | null; name_en: string | null; name_ja: string | null };
+
+/**
+ * Ligne du miroir désignée par une ref de l’export :
+ *   - personnage : chara_base → inagle_characters.chara_id ;
+ *   - équipe : club (belong_team_config) → inagle_teams.id ; les lignes
+ *     team_config sont des équipes de match, absentes du miroir ;
+ *   - technique : skill_config (code skillIDStr) → inagle_skills.internal_code.
+ */
+function ligneDuMiroir(kind: NomJeu["kind"], ref: Ref): LigneMiroir | undefined {
+  if (kind === "character" && ref.table === "chara_base") return personnages.get(normaliserId(ref.id));
+  if (kind === "team" && ref.club) return equipes.get(normaliserId(ref.id));
+  if (kind === "skill" && ref.table === "skill_config" && ref.code) return competences.get(ref.code);
+  return undefined;
+}
+
 interface Correction {
-  kind: "character" | "team";
+  kind: "character" | "team" | "skill";
   id: string;
   code?: string;
   langue: Langue;
@@ -92,14 +117,9 @@ let relies = 0;
 let orphelins = 0;
 
 for (const nom of lignes) {
-  if (nom.variant !== 0 || (nom.kind !== "character" && nom.kind !== "team")) continue;
+  if (nom.variant !== 0 || nom.kind === "item") continue;
   for (const ref of nom.refs ?? []) {
-    // Les équipes du miroir sont indexées par le hash du nom, les personnages
-    // par l’id de ligne (chara_id).
-    const ligne =
-      nom.kind === "character"
-        ? personnages.get(normaliserId(ref.id))
-        : (equipes.get(normaliserId(nom.hash)) ?? equipes.get(normaliserId(ref.id)));
+    const ligne = ligneDuMiroir(nom.kind, ref);
     if (!ligne) {
       orphelins++;
       continue;
@@ -116,7 +136,7 @@ for (const nom of lignes) {
       stats[cle] ??= {};
       stats[cle][ecart] = (stats[cle][ecart] ?? 0) + 1;
       if (ecart !== "identique")
-        corrections.push({ kind: nom.kind, id: ref.id, code: ref.code, langue, actuel, propose, ecart });
+        corrections.push({ kind: nom.kind, id: ref.code ?? ref.id, code: ref.code, langue, actuel, propose, ecart });
     }
   }
 }
