@@ -57,6 +57,8 @@ export async function estObjetAbsent(reponse: Response): Promise<boolean> {
   }
 }
 
+const DELAI_AMONT_MS = 15_000;
+
 const CORPS_ABSENT = JSON.stringify({ error: "not_found", message: "Object not found", statusCode: "404" });
 
 export async function relayerObjet(
@@ -78,9 +80,15 @@ export async function relayerObjet(
     headers: entetes,
     method: requete.method === "HEAD" ? "HEAD" : "GET",
     redirect: "follow",
-  });
+    // Un amont muet ne doit pas bloquer la page qui demande l’image.
+    signal: AbortSignal.timeout(DELAI_AMONT_MS),
+  }).catch(() => null);
+  if (!amont) return new Response(null, { status: 504 });
   if (await estObjetAbsent(amont)) {
-    await amont.body?.cancel().catch(() => {});
+    // On lit le (petit) corps d’erreur au lieu de l’annuler : le `fetch` patché
+    // par Next duplique le flux, et `cancel()` d’une copie attendait la lecture
+    // de l’autre. La requête restait pendue jusqu’au 504 du proxy (120 s en prod).
+    await amont.text().catch(() => "");
     return absent();
   }
   const sortie = new Headers();

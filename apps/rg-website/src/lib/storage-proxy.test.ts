@@ -52,6 +52,21 @@ describe("relayerObjet", () => {
     expect(vus).toEqual(["https://cdn.rosegriffon.fr/storage/v1/object/public/assets/campagnes/iergday/affiche-v2.webp"]);
   });
 
+  it("does not hang when the upstream body is one branch of a tee (Next's patched fetch)", async () => {
+    // Next duplique le corps des réponses `fetch` ; annuler une branche d'un
+    // `tee()` ne se résout qu'une fois l'autre annulée. En prod, la requête
+    // d'un objet absent restait pendue 120 s jusqu'au 504 du proxy.
+    const teeAvecCopieOubliee = () => {
+      const [branche] = new Response("Not Found").body!.tee();
+      return new Response(branche, { status: 404 });
+    };
+    const issue = await Promise.race([
+      relayerObjet(new Request(url), "assets", ["x.webp"], ORIGINES, fauxFetch(teeAvecCopieOubliee)).then(r => r.status),
+      Bun.sleep(1000).then(() => "pendu"),
+    ]);
+    expect(issue).toBe(404);
+  });
+
   it("passes an existing object through with its type, cache and validators", async () => {
     const r = await relayerObjet(
       new Request(url, { headers: { "if-none-match": '"abc"' } }),
