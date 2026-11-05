@@ -95,6 +95,11 @@ export interface ReminderEvent {
   twitchUrl: string | null;
 }
 
+/**
+ * Rappels J-2 / H-2 : `_buildJ2Embed` / `_buildH2Embed` de l'ancien
+ * `CastNotificationService`, mot pour mot (libellés sans accents, rôle brut,
+ * blurple pour J-2, rouge pour H-2).
+ */
 export function reminderMessage(kind: ReminderKind, event: ReminderEvent, role: string): MessageAchillea {
   const ts = unix(event.scheduledAt);
   const twitch = event.twitchUrl ? [{ name: "Twitch", value: event.twitchUrl, inline: false }] : [];
@@ -103,28 +108,28 @@ export function reminderMessage(kind: ReminderKind, event: ReminderEvent, role: 
       kind === "j2"
         ? {
             title: "Rappel de cast — J-2",
-            color: ACHILLEA_COLOR,
+            color: 0x58_65_f2,
             description: "Tu as un cast dans **2 jours** ! Voici les informations :",
             fields: [
-              { name: "Évènement", value: `${event.name} (${event.kind})`, inline: true },
-              { name: "Rôle", value: roleLabel(role), inline: true },
+              { name: "Evenement", value: `${event.name} (${event.kind})`, inline: true },
+              { name: "Role", value: role, inline: true },
               { name: "Date", value: `<t:${ts}:F>`, inline: false },
               ...twitch,
             ],
-            footer: { text: "Achilléa Cast — rappel J-2" },
+            footer: { text: "Achillea Cast — rappel J-2" },
             timestamp: new Date().toISOString(),
           }
         : {
             title: "Rappel de cast — H-2 (dans 2h !)",
-            color: ACHILLEA_COLOR,
-            description: "Tu cast dans **2 heures** ! Vérifie que tout est prêt.",
+            color: 0xed_42_45,
+            description: "Tu cast dans **2 heures** ! Verifie que tout est pret.",
             fields: [
-              { name: "Évènement", value: `${event.name} (${event.kind})`, inline: true },
-              { name: "Rôle", value: roleLabel(role), inline: true },
+              { name: "Evenement", value: `${event.name} (${event.kind})`, inline: true },
+              { name: "Role", value: role, inline: true },
               { name: "Heure", value: `<t:${ts}:t>`, inline: false },
               ...twitch,
             ],
-            footer: { text: "Achilléa Cast — rappel H-2" },
+            footer: { text: "Achillea Cast — rappel H-2" },
             timestamp: new Date().toISOString(),
           },
     ],
@@ -209,7 +214,7 @@ export async function dispatchReminders(db: CastDb, kind: ReminderKind, now = ne
           content: [
             `**[Cast ${label}]** Rappels envoyés pour **${event.name}**`,
             `Casters notifiés : ${mentioned.length > 0 ? mentioned.join(", ") : "_aucun_"}`,
-            `Bilan : ${eventSent} envoyé(s), ${eventFailed} échec(s)`,
+            `Bilan : ${eventSent} envoyé(s), ${eventFailed} echec(s)`,
           ].join("\n"),
         });
         if (!recap.ok) console.warn("[casts] récapitulatif staff non publié", recap);

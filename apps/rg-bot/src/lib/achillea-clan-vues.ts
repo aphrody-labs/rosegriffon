@@ -26,7 +26,7 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  type EmbedBuilder,
+  EmbedBuilder,
   FileUploadBuilder,
   LabelBuilder,
   ModalBuilder,
@@ -40,6 +40,7 @@ import { CLAN_MEMBER_ROLE_LABELS } from "@rosegriffon/achillea-core/labels";
 import type { ClanDTO, ClanInviteDTO, ClanMemberDTO } from "@rosegriffon/achillea-types/domain/clan";
 import type { ClanTeam } from "@rosegriffon/achillea-client";
 
+import { COULEUR_CARRIERE, COULEURS_LEGACY, dateBarree, miniatureClan, type AuteurEmbed } from "./achillea-clan-format";
 import { ABSENT, borner, fiche, leJour } from "./ui";
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
@@ -89,13 +90,38 @@ export function bornerPageMembres(page: number, total: number, parPage = MEMBRES
 
 // ─── Clan : panneau principal ────────────────────────────────────────────────
 
+/** Réseaux en liens, un par ligne (legacy `buildSocialMediaString`). */
 function chaineReseaux(clan: Pick<ClanDTO, "xUrl" | "instagramUrl" | "tiktokUrl">): string {
-  const liens = [
-    clan.xUrl ? `[X](${clan.xUrl})` : null,
-    clan.instagramUrl ? `[Instagram](${clan.instagramUrl})` : null,
-    clan.tiktokUrl ? `[TikTok](${clan.tiktokUrl})` : null,
-  ].filter(Boolean);
-  return liens.length > 0 ? liens.join(" · ") : ABSENT;
+  const lien = (u: string) => (u.startsWith("https") ? u : `https://${u}`);
+  return [
+    clan.xUrl ? `[Twitter](${lien(clan.xUrl)})\n` : "",
+    clan.instagramUrl ? `[Instagram](${lien(clan.instagramUrl)})\n` : "",
+    clan.tiktokUrl ? `[TikTok](${lien(clan.tiktokUrl)})\n` : "",
+  ].join("");
+}
+
+/** Discord refuse une valeur de champ vide ; l'ancien bot posait un espace. */
+function valeurChamp(texte: string): string {
+  return texte.trim().length > 0 ? borner(texte, 1024) : " ";
+}
+
+/** Auteur des embeds de l'ancien bot : l'utilisateur qui a lancé la commande. */
+function poserAuteur(embed: EmbedBuilder, auteur: AuteurEmbed | null | undefined): EmbedBuilder {
+  if (!auteur) return embed;
+  return embed.setAuthor(auteur.avatar ? { name: borner(auteur.nom, 256), iconURL: auteur.avatar } : { name: borner(auteur.nom, 256) });
+}
+
+/** Nom affiché d'un compte (legacy `displayName`), « Unknown » à défaut. */
+function nomAffiche(user: { username?: string | null; displayName?: string | null }): string {
+  return user.displayName || user.username || "Unknown";
+}
+
+/** Date courte de l'ancien bot (`formatDateForInvites` : « 05 nov. »), « — » sans date. */
+export function dateCourte(date: Date | string | null | undefined): string {
+  if (!date) return "—";
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "short" });
 }
 
 /** Membres triés comme l'ancien bot : rôle décroissant, puis arrivée la plus récente. */
@@ -105,19 +131,33 @@ export function trierMembres(membres: readonly ClanMemberDTO[]): ClanMemberDTO[]
   );
 }
 
-export function embedInfosClan(clan: ClanDTO, membres: readonly ClanMemberDTO[]): EmbedBuilder {
+/**
+ * Fiche du clan en tête du panneau (legacy `createActiveClanInfosEmbed`).
+ * `discord` : le clan a-t-il lié un serveur (lu dans la fiche, `null` si inconnu).
+ */
+export function embedInfosClan(
+  clan: ClanDTO,
+  membres: readonly ClanMemberDTO[],
+  auteur: AuteurEmbed | null = null,
+  discord: boolean | null = null,
+): EmbedBuilder {
   const president = membres.find(m => m.clanRole === ClanMemberRole.Captain)?.user.id ?? clan.president?.id ?? null;
   const vices = membres.filter(m => m.clanRole === ClanMemberRole.SubCaptain).map(m => `- ${mention(m.user.id)}`);
-  const fondateurs = clan.founders.map(id => `- ${mention(id)}`);
-  return fiche({ titre: `[${clan.shortenedName}] ${clan.name}`, description: clan.clanBiography || undefined, icone: "" })
-    .miniature(clan.clanAvatarUrl)
-    .champ("Président", president ? mention(president) : ABSENT, { enLigne: true })
-    .champ("Vice-Présidents", vices.join("\n") || ABSENT, { enLigne: true })
-    .champ("Fondateurs", fondateurs.join("\n") || ABSENT, { enLigne: true })
-    .champ("Membres", String(membres.length || clan.membersCount), { enLigne: true })
-    .champ("Recrute", clan.isRecruiting ? "Oui" : "Non", { enLigne: true })
-    .champ("Réseaux sociaux", chaineReseaux(clan), { enLigne: true })
-    .finir();
+  const fondateurs = clan.founders.map(id => `- ${mention(id)}\n`).join("");
+  const embed = new EmbedBuilder()
+    .setColor(COULEUR_CARRIERE)
+    .setTitle(borner(`[${clan.shortenedName}] ${clan.name}\n`, 256))
+    .setThumbnail(miniatureClan(clan.clanAvatarUrl));
+  if (clan.clanBiography.trim().length > 0) embed.setDescription(borner(clan.clanBiography, 4096));
+  poserAuteur(embed, auteur);
+  return embed.setFields(
+    { name: "Président", value: president ? mention(president) : " ", inline: true },
+    { name: "Vice-Présidents", value: valeurChamp(vices.join("\n")), inline: true },
+    { name: "Fondateurs", value: valeurChamp(fondateurs), inline: true },
+    { name: "Membres", value: String(membres.length || clan.membersCount), inline: true },
+    { name: "Discord", value: discord ? "Yes" : "No", inline: true },
+    { name: "Réseaux sociaux", value: valeurChamp(chaineReseaux(clan)), inline: true },
+  );
 }
 
 export function rangeeMenuPrincipal(): ActionRowBuilder<ButtonBuilder> {
@@ -186,66 +226,80 @@ function boutonMenu(): ButtonBuilder {
 
 // ─── Membres ─────────────────────────────────────────────────────────────────
 
-export function embedListeMembres(clan: ClanDTO, membres: readonly ClanMemberDTO[], page: number): EmbedBuilder {
+/** Liste des membres (legacy `buildAllClanMembersEmbed`). */
+export function embedListeMembres(
+  clan: ClanDTO,
+  membres: readonly ClanMemberDTO[],
+  page: number,
+  auteur: AuteurEmbed | null = null,
+): EmbedBuilder {
   const tries = trierMembres(membres);
-  const pages = Math.max(1, Math.ceil(tries.length / MEMBRES_PAR_PAGE));
+  const pages = Math.ceil(tries.length / MEMBRES_PAR_PAGE);
   const tranche = tries.slice((page - 1) * MEMBRES_PAR_PAGE, page * MEMBRES_PAR_PAGE);
-  return fiche({
-    titre: `[${clan.shortenedName}] ${clan.name} — Membres`,
-    description: `Membres du clan, par rôle puis ancienneté.\n\n**${tries.length} membres** — page ${page}/${pages}`,
-    icone: "",
-  })
-    .miniature(clan.clanAvatarUrl)
-    .champ("Membre", tranche.map(m => mention(m.user.id)).join("\n") || ABSENT, { enLigne: true })
-    .champ("Rôle", tranche.map(m => libelleRoleClan(m.clanRole)).join("\n") || ABSENT, { enLigne: true })
-    .champ("Dernière activité", tranche.map(m => (m.user.lastInteract ? leJour(m.user.lastInteract, "d") : ABSENT)).join("\n") || ABSENT, {
-      enLigne: true,
-    })
-    .finir();
+  const embed = new EmbedBuilder()
+    .setColor(COULEUR_CARRIERE)
+    .setTitle(borner(`[${clan.shortenedName}] ${clan.name} - Members`, 256))
+    .setDescription(`Liste des membres du clan ordonnées par rôle et ancienneté\n\n**${tries.length} Membres** - Page ${page}/${pages}`)
+    .setThumbnail(miniatureClan(clan.clanAvatarUrl));
+  poserAuteur(embed, auteur);
+  return embed.setFields(
+    { name: "Membre", value: valeurChamp(tranche.map(m => mention(m.user.id)).join("\n")), inline: true },
+    { name: "Rôle", value: valeurChamp(tranche.map(m => libelleRoleClan(m.clanRole)).join("\n")), inline: true },
+    { name: "Dernière activité", value: valeurChamp(tranche.map(m => dateCourte(m.user.lastInteract)).join("\n")), inline: true },
+  );
 }
 
-/** Rangée ⏮ ◀ ▶ ⏭ + Menu ; identifiants uniques (Discord refuse deux fois le même dans un message). */
+/** Les quatre boutons de page de l'ancien bot (`buildPaginationButtons`). */
+const BOUTONS_PAGE = [
+  { cle: "first", libelle: "Début", emoji: "⏪" },
+  { cle: "prev", libelle: "Précédent", emoji: "◀️" },
+  { cle: "next", libelle: "Suivant", emoji: "▶️" },
+  { cle: "last", libelle: "Fin", emoji: "⏩" },
+] as const;
+
+/** Début / Précédent / Suivant / Fin + « Menu » ; identifiants uniques (Discord refuse deux fois le même). */
 export function rangeePaginationGestion(vue: "members" | "invites", page: number, pages: number) {
   const p = Math.max(1, pages);
+  const cibles = { first: 1, prev: Math.max(1, page - 1), next: Math.min(p, page + 1), last: p };
+  const auDebut = pages === 0 || page === 1;
+  const aLaFin = pages === 0 || page === pages;
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    bouton(idGestion(vue, 1, "first"), "⏮", undefined, ButtonStyle.Secondary).setDisabled(page <= 1),
-    bouton(idGestion(vue, Math.max(1, page - 1), "prev"), "◀", undefined, ButtonStyle.Secondary).setDisabled(page <= 1),
-    bouton(idGestion(vue, Math.min(p, page + 1), "next"), "▶", undefined, ButtonStyle.Secondary).setDisabled(page >= p),
-    bouton(idGestion(vue, p, "last"), "⏭", undefined, ButtonStyle.Secondary).setDisabled(page >= p),
+    ...BOUTONS_PAGE.map(b =>
+      bouton(idGestion(vue, cibles[b.cle], b.cle), b.libelle, b.emoji).setDisabled(
+        b.cle === "first" || b.cle === "prev" ? auDebut : aLaFin,
+      ),
+    ),
     boutonMenu(),
   );
 }
 
+/** Menu des membres de la page (legacy `buildClanMembersSelector`). */
 export function selecteurMembres(membres: readonly ClanMemberDTO[], page: number) {
   const tranche = trierMembres(membres).slice((page - 1) * MEMBRES_PAR_PAGE, page * MEMBRES_PAR_PAGE);
   if (tranche.length === 0) return null;
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId(idGestion("member_select"))
-      .setPlaceholder("Sélectionnez un membre")
-      .addOptions(
-        tranche.map(m =>
-          new StringSelectMenuOptionBuilder()
-            .setLabel(borner(m.user.username || m.user.id, 100))
-            .setDescription(libelleRoleClan(m.clanRole))
-            .setValue(m.user.id),
-        ),
-      ),
+      .setPlaceholder("Sélectionnez un Membre")
+      .addOptions(tranche.map(m => new StringSelectMenuOptionBuilder().setLabel(borner(nomAffiche(m.user), 100)).setValue(m.user.id))),
   );
 }
 
-export function embedMembre(membre: ClanMemberDTO, titre = "Gestion du membre"): EmbedBuilder {
-  return fiche({
-    titre: `${membre.user.username} — ${titre}`,
-    description: `*Clan rejoint ${leJour(membre.createdAt, "D")}*`,
-    icone: "",
-  })
-    .miniature(membre.user.avatar ?? null)
-    .champ("Rôle", libelleRoleClan(membre.clanRole), { enLigne: true })
-    .champ("Distinctions", membre.distinctions.join("\n") || ABSENT, { enLigne: true })
-    .champ("Dernière activité", membre.user.lastInteract ? leJour(membre.user.lastInteract, "d") : ABSENT, { enLigne: true })
-    .champ("Contribution (renommée)", String(membre.clanFameContributed), { enLigne: true })
-    .finir();
+/** Fiche d'un membre (legacy `buildClanMemberEmbed`) : vert pour un « Nouveau » membre, bleu sinon. */
+export function embedMembre(membre: ClanMemberDTO, titre = "Gestion du membre", avatar: string | null = null): EmbedBuilder {
+  const embed = new EmbedBuilder()
+    .setColor(titre.toLowerCase().includes("nouveau") ? COULEURS_LEGACY.succes : COULEUR_CARRIERE)
+    .setTitle(borner(`${nomAffiche(membre.user)} - ${titre}`, 256))
+    .setDescription(`__*Clan rejoint le ${dateBarree(membre.createdAt)}*__`);
+  if (avatar) embed.setThumbnail(avatar);
+  return embed.setFields(
+    { name: "Rôle", value: libelleRoleClan(membre.clanRole), inline: true },
+    { name: "Distinctions", value: valeurChamp(membre.distinctions.join("\n")), inline: true },
+    { name: "Dernière activité", value: dateCourte(membre.user.lastInteract), inline: true },
+    { name: "Contributions", value: String(membre.clanFameContributed), inline: true },
+    { name: "Stats Interclan", value: "0", inline: true },
+    { name: "Stats Coupes des Clans", value: "0", inline: true },
+  );
 }
 
 /**
@@ -266,9 +320,9 @@ export function rangeeGestionMembre(membre: ClanMemberDTO, acteurRole: number, c
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     roleBouton,
     bouton(idGestion("role", id, ClanMemberRole.SubCaptain), "Promouvoir Vice-Président", "🎖️", ButtonStyle.Success).setDisabled(
-      acteurRole < ClanMemberRole.Captain || membre.clanRole > ClanMemberRole.Member,
+      acteurRole < ClanMemberRole.SubCaptain || membre.clanRole > ClanMemberRole.Member,
     ),
-    bouton(`editDistinctions:${id}:${clanId}`, "Éditer les distinctions", "✏️").setDisabled(
+    bouton(`editDistinctions:${id}:${clanId}`, "Editer les distinctions", "✏️").setDisabled(
       acteurRole !== ClanMemberRole.Captain && acteurRole <= membre.clanRole,
     ),
     bouton(idGestion("kick", id), "Expulser", "👢", ButtonStyle.Danger).setDisabled(
@@ -318,48 +372,64 @@ export function distinctionsDepuisValeurs(valeurs: readonly string[]): ClanMembe
 
 // ─── Invitations ─────────────────────────────────────────────────────────────
 
-export function embedListeInvitations(clan: ClanDTO, invitations: readonly ClanInviteDTO[], page: number): EmbedBuilder {
-  const triees = [...invitations].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  const pages = Math.max(1, Math.ceil(triees.length / MEMBRES_PAR_PAGE));
-  const tranche = triees.slice((page - 1) * MEMBRES_PAR_PAGE, page * MEMBRES_PAR_PAGE);
-  return fiche({
-    titre: `[${clan.shortenedName}] ${clan.name} — Invitations`,
-    description: `Invitations émises par le clan, de la plus récente à la plus ancienne.\n\n**${triees.length}** — page ${page}/${pages}`,
-    icone: "",
-  })
-    .miniature(clan.clanAvatarUrl)
-    .champ("Invité", tranche.map(i => mention(i.user.id)).join("\n") || ABSENT, { enLigne: true })
-    .champ("Invitant", tranche.map(i => mention(i.inviter.user.id)).join("\n") || ABSENT, { enLigne: true })
-    .champ("Invité le", tranche.map(i => leJour(i.createdAt, "d")).join("\n") || ABSENT, { enLigne: true })
-    .finir();
+function trierInvitations(invitations: readonly ClanInviteDTO[]): ClanInviteDTO[] {
+  return [...invitations].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export function selecteurInvitations(invitations: readonly ClanInviteDTO[], page: number) {
-  const triees = [...invitations].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+/** Liste des invitations (legacy `buildClanInvitesEmbed`). */
+export function embedListeInvitations(
+  clan: ClanDTO,
+  invitations: readonly ClanInviteDTO[],
+  page: number,
+  auteur: AuteurEmbed | null = null,
+): EmbedBuilder {
+  const triees = trierInvitations(invitations);
+  const pages = Math.ceil(triees.length / MEMBRES_PAR_PAGE);
   const tranche = triees.slice((page - 1) * MEMBRES_PAR_PAGE, page * MEMBRES_PAR_PAGE);
+  const colonne = (lignes: string[]) => (lignes.length > 0 ? borner(lignes.join("\n"), 1024) : "-");
+  const embed = new EmbedBuilder()
+    .setColor(COULEUR_CARRIERE)
+    .setTitle(borner(`[${clan.shortenedName}] ${clan.name} - Invites`, 256))
+    .setDescription(
+      `Liste des invitations émises par le clan ordonnées par ancienneté\n\n**${triees.length}/100** - Page ${page}/${pages === 0 ? 1 : pages}`,
+    )
+    .setThumbnail(miniatureClan(clan.clanAvatarUrl));
+  poserAuteur(embed, auteur);
+  return embed.setFields(
+    { name: "Invité", value: colonne(tranche.map(i => mention(i.user.id))), inline: true },
+    { name: "Invitant", value: colonne(tranche.map(i => mention(i.inviter.user.id))), inline: true },
+    { name: "Invité le", value: colonne(tranche.map(i => dateCourte(i.createdAt))), inline: true },
+  );
+}
+
+/** Menu des invitations de la page (legacy `buildClanInvitesSelector`). */
+export function selecteurInvitations(invitations: readonly ClanInviteDTO[], page: number) {
+  const tranche = trierInvitations(invitations).slice((page - 1) * MEMBRES_PAR_PAGE, page * MEMBRES_PAR_PAGE);
   if (tranche.length === 0) return null;
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId(idGestion("invite_select"))
       .setPlaceholder("Sélectionnez une invitation")
-      .addOptions(
-        tranche.map(i =>
-          new StringSelectMenuOptionBuilder().setLabel(borner(i.user.username || i.user.id, 100)).setValue(String(i.id)),
-        ),
-      ),
+      .addOptions(tranche.map(i => new StringSelectMenuOptionBuilder().setLabel(borner(nomAffiche(i.user), 100)).setValue(String(i.id)))),
   );
 }
 
-export function embedInvitation(invitation: ClanInviteDTO): EmbedBuilder {
-  return fiche({
-    titre: `${invitation.user.username} — Gestion de l'invitation`,
-    description: `*Invitation émise ${leJour(invitation.createdAt, "D")} par ${mention(invitation.inviter.user.id)}*`,
-    icone: "",
-  })
-    .miniature(invitation.user.avatar ?? null)
-    .champ("Distinctions proposées", invitation.distinctions.join("\n") || ABSENT, { enLigne: true })
-    .champ("Dernière relance", leJour(invitation.lastNotifiedAt, "R"), { enLigne: true })
-    .finir();
+/** Fiche d'une invitation (legacy `buildClanInviteManagementEmbed`, compteurs figés de l'ancien bot). */
+export function embedInvitation(invitation: ClanInviteDTO, auteur: AuteurEmbed | null = null, avatar: string | null = null): EmbedBuilder {
+  const embed = new EmbedBuilder()
+    .setColor(COULEUR_CARRIERE)
+    .setTitle(borner(`${nomAffiche(invitation.user)} - Gestion de l'invitation`, 256))
+    .setDescription(`__*Invitation émise le ${dateCourte(invitation.createdAt)}*__`);
+  poserAuteur(embed, auteur);
+  if (avatar) embed.setThumbnail(avatar);
+  return embed.setFields(
+    { name: "Dernière activité", value: dateCourte(invitation.user.lastInteract), inline: true },
+    { name: "Elo", value: "Non classé", inline: true },
+    { name: "Tournois gagnés", value: "0", inline: true },
+    { name: "Participations Interclan", value: "0", inline: true },
+    { name: "Victoires Interclan", value: "0", inline: true },
+    { name: "Victoires Coupes des Clans", value: "0", inline: true },
+  );
 }
 
 export function rangeeGestionInvitation(invitation: ClanInviteDTO) {
@@ -369,11 +439,17 @@ export function rangeeGestionInvitation(invitation: ClanInviteDTO) {
   );
 }
 
+/** Confirmer / Annuler de l'ancien bot (`buildConfirmCancelButtons`), sur la demande privée de révocation. */
 export function rangeeConfirmationRevocation(invitationId: number) {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    bouton(idGestion("revoke_ok", invitationId), "Confirmer la révocation", "✅", ButtonStyle.Danger),
-    bouton(idGestion("invite", invitationId), "Annuler", "↩️", ButtonStyle.Secondary),
+    bouton(idGestion("revoke_ok", invitationId), "Confirmer", "✅", ButtonStyle.Success),
+    bouton(idGestion("revoke_no", invitationId), "Annuler", "✖️", ButtonStyle.Danger),
   );
+}
+
+/** Question posée avant de révoquer (texte de l'ancien bot). */
+export function questionRevocation(invitation: ClanInviteDTO): string {
+  return `Voulez-vous révoquer l'invitation envoyée à ${nomAffiche(invitation.user)} ?`;
 }
 
 // ─── Modales de gestion ──────────────────────────────────────────────────────
@@ -395,33 +471,38 @@ export function modaleNom(clan: Pick<ClanDTO, "name" | "shortenedName">): ModalB
     .setCustomId(idGestion("name_modal"))
     .setTitle("Changement de nom du Clan")
     .addLabelComponents(
-      champTexte("nameInput", "Nom du Clan", { valeur: clan.name, max: 100 }),
-      champTexte("shortNameInput", "Sigle du Clan", { valeur: clan.shortenedName, max: 10 }),
+      champTexte("nameInput", "Nom du Clan", { valeur: clan.name }),
+      champTexte("shortNameInput", "Sigle du Clan", { valeur: clan.shortenedName }),
     );
 }
 
 export function modaleBiographie(clan: Pick<ClanDTO, "clanBiography">): ModalBuilder {
   return new ModalBuilder()
     .setCustomId(idGestion("bio_modal"))
-    .setTitle("Biographie du Clan")
-    .addLabelComponents(champTexte("textInput", "Biographie", { valeur: clan.clanBiography, long: true, min: 5, max: 1500 }));
+    .setTitle("Change Clan Biography")
+    .addLabelComponents(champTexte("textInput", "Clan biography", { valeur: clan.clanBiography, long: true, min: 5, max: 1500 }));
 }
 
 export function modaleReseaux(clan: Pick<ClanDTO, "xUrl" | "instagramUrl" | "tiktokUrl">): ModalBuilder {
   return new ModalBuilder()
     .setCustomId(idGestion("socials_modal"))
-    .setTitle("Réseaux du Clan")
+    .setTitle("Modifier les Réseaux du Clan")
     .addLabelComponents(
-      champTexte("xInput", "Lien du compte X", { valeur: clan.xUrl, requis: false, aide: "https://x.com/votrecompte" }),
+      // L'ancien bot posait la valeur actuelle, ou à défaut l'exemple.
+      champTexte("xInput", "Lien du compte X", {
+        valeur: clan.xUrl,
+        requis: false,
+        aide: clan.xUrl ? undefined : "https://twitter.com/youraccount",
+      }),
       champTexte("instagramInput", "Lien du compte Instagram", {
         valeur: clan.instagramUrl,
         requis: false,
-        aide: "https://instagram.com/votrecompte",
+        aide: clan.instagramUrl ? undefined : "https://instagram.com/youraccount",
       }),
       champTexte("tikTokInput", "Lien du compte TikTok", {
         valeur: clan.tiktokUrl,
         requis: false,
-        aide: "https://tiktok.com/@votrecompte",
+        aide: clan.tiktokUrl ? undefined : "https://tiktok.com/@youraccount",
       }),
     );
 }

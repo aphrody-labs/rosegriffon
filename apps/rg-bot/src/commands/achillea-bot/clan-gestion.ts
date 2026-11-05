@@ -27,12 +27,20 @@ import {
   MessageFlags,
   type ModalSubmitInteraction,
   type StringSelectMenuInteraction,
+  type User,
 } from "discord.js";
 import { ClanMemberRole } from "@rosegriffon/achillea-core/enums";
 import type { ClanDTO, ClanInviteDTO, ClanMemberDTO } from "@rosegriffon/achillea-types/domain/clan";
 
 import { lireApi } from "../../lib/achillea-ui";
 import type { AchilleaClientResult, ClientAchilleaDelegue } from "../../lib/achillea-api";
+import {
+  embedErreurLegacy,
+  embedRefusLegacy,
+  embedSuccesLegacy,
+  REFUS_LEGACY,
+  type AuteurEmbed,
+} from "../../lib/achillea-clan-format";
 import {
   bornerPageMembres,
   decoderIdGestion,
@@ -50,6 +58,7 @@ import {
   modaleNom,
   modaleReseaux,
   patchBascule,
+  questionRevocation,
   rangeeConfirmationRevocation,
   rangeeEditionInfos,
   rangeeGestionInvitation,
@@ -62,7 +71,7 @@ import {
   selecteurInvitations,
   selecteurMembres,
 } from "../../lib/achillea-clan-vues";
-import { differer, echec, repondre, succes } from "../../lib/ui";
+import { differer } from "../../lib/ui";
 
 type Interaction = ChatInputCommandInteraction | ButtonInteraction | StringSelectMenuInteraction | ModalSubmitInteraction;
 type Rangee = ActionRowBuilder<MessageActionRowComponentBuilder>;
@@ -75,6 +84,14 @@ export interface ContexteClan {
   role: number;
   clan: ClanDTO;
   membres: ClanMemberDTO[];
+  /** Le clan a-t-il lié un serveur Discord (champ « Discord » de la fiche) ? */
+  discord?: boolean | null;
+}
+
+/** Auteur des embeds de l'ancien bot : celui qui a lancé la commande. */
+function auteurDe(interaction: { user: User }): AuteurEmbed {
+  const u = interaction.user as User & { displayAvatarURL?: () => string };
+  return { nom: u.displayName ?? u.username, avatar: typeof u.displayAvatarURL === "function" ? u.displayAvatarURL() : null };
 }
 
 /**
@@ -82,23 +99,24 @@ export interface ContexteClan {
  * différée devient l'échec ; sur un composant, l'échec part en message privé
  * et le panneau reste tel quel.
  */
-async function signaler(interaction: Interaction, titre: string, motif: string): Promise<void> {
+async function signaler(interaction: Interaction, motif: string, garde = false): Promise<void> {
+  const embed = garde ? embedRefusLegacy(motif) : embedErreurLegacy(motif);
   if (interaction.isChatInputCommand()) {
-    await repondre(interaction, echec(titre, motif));
+    await interaction.editReply({ content: "", components: [], embeds: [embed] });
     return;
   }
-  await interaction.followUp({ ...echec(titre, motif), flags: MessageFlags.Ephemeral });
+  await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }
 
 /** Appel API au nom de qui clique ; `null` après avoir signalé l'échec. */
 async function api<T>(
   interaction: Interaction,
   appel: (client: ClientAchilleaDelegue) => Promise<AchilleaClientResult<T>>,
-  titre: string,
+  _titre: string,
 ): Promise<T | null> {
   const resultat = await lireApi(interaction, appel);
   if (resultat.ok) return resultat.valeur;
-  await signaler(interaction, titre, resultat.motif);
+  await signaler(interaction, resultat.motif);
   return null;
 }
 
@@ -107,30 +125,50 @@ export async function chargerContexte(interaction: Interaction): Promise<Context
   const appartenance = await api(interaction, c => c.clanTeams.membership(), "Clan introuvable");
   if (!appartenance) return null;
   if (appartenance.clanId === null || appartenance.clanRole === null) {
-    await signaler(interaction, "Aucun clan", "Tu n'es membre d'aucun clan actif.");
+    await signaler(interaction, REFUS_LEGACY.horsClan, true);
     return null;
   }
   if (appartenance.clanRole < RANG_PANNEAU) {
-    await signaler(interaction, "Accès refusé", "La gestion du clan est réservée au Président et aux Vice-Présidents.");
+    await signaler(interaction, REFUS_LEGACY.permission, true);
     return null;
   }
   const clanId = appartenance.clanId;
-  const [clan, membres] = await Promise.all([
+  const [clan, membres, ficheClan] = await Promise.all([
     api(interaction, c => c.clans.get(clanId), "Fiche du clan indisponible"),
     api(interaction, c => c.clans.members(clanId), "Effectif du clan indisponible"),
+    lireApi(interaction, c => c.clans.fiche(clanId)),
   ]);
   if (!clan || !membres) return null;
-  return { clanId, role: appartenance.clanRole, clan, membres };
+  return { clanId, role: appartenance.clanRole, clan, membres, discord: ficheClan.ok ? ficheClan.valeur.guildId !== null : null };
 }
 
-async function afficher(interaction: Interaction, embeds: unknown[], components: Array<Rangee | ActionRowBuilder<never>>) {
-  await interaction.editReply({ embeds, components } as never);
+async function afficher(
+  interaction: Interaction,
+  embeds: unknown[],
+  components: Array<Rangee | ActionRowBuilder<never>>,
+  content = "",
+) {
+  await interaction.editReply({ content, embeds, components } as never);
+}
+
+function infos(interaction: Interaction, ctx: ContexteClan, clan: ClanDTO = ctx.clan, membres = ctx.membres) {
+  return embedInfosClan(clan, membres, auteurDe(interaction), ctx.discord ?? null);
+}
+
+/** Avatar Discord d'un compte, lu chez Discord (l'ancien bot affichait `displayAvatarURL`). */
+async function avatarDe(interaction: Interaction, id: string): Promise<string | null> {
+  try {
+    const u = await interaction.client.users.fetch(id);
+    return u.displayAvatarURL();
+  } catch {
+    return null;
+  }
 }
 
 // ─── Vues composées ──────────────────────────────────────────────────────────
 
 export async function vueMenu(interaction: Interaction, ctx: ContexteClan) {
-  await afficher(interaction, [embedInfosClan(ctx.clan, ctx.membres)], [rangeeMenuPrincipal() as never]);
+  await afficher(interaction, [infos(interaction, ctx)], [rangeeMenuPrincipal() as never]);
 }
 
 export async function vueMembres(interaction: Interaction, ctx: ContexteClan, page: number) {
@@ -139,17 +177,30 @@ export async function vueMembres(interaction: Interaction, ctx: ContexteClan, pa
   const rangees: Rangee[] = [rangeePaginationGestion("members", p, pages) as never];
   const selecteur = selecteurMembres(ctx.membres, p);
   if (selecteur) rangees.push(selecteur as never);
-  await afficher(interaction, [embedListeMembres(ctx.clan, ctx.membres, p)], rangees);
+  await afficher(interaction, [embedListeMembres(ctx.clan, ctx.membres, p, auteurDe(interaction))], rangees);
 }
 
-export async function vueMembre(interaction: Interaction, ctx: ContexteClan, membreId: string) {
+export async function vueMembre(interaction: Interaction, ctx: ContexteClan, membreId: string, contenu = "") {
   const membre = ctx.membres.find(m => m.user.id === membreId);
   if (!membre) {
-    await signaler(interaction, "Membre introuvable", "Ce joueur n'est plus membre du clan.");
+    await signaler(interaction, "Membre du Clan introuvable !");
     await vueMembres(interaction, ctx, 1);
     return;
   }
-  await afficher(interaction, [embedMembre(membre)], [rangeeGestionMembre(membre, ctx.role, ctx.clanId) as never]);
+  await afficher(
+    interaction,
+    [embedMembre(membre, "Gestion du membre", await avatarDe(interaction, membre.user.id))],
+    [rangeeGestionMembre(membre, ctx.role, ctx.clanId) as never],
+    contenu,
+  );
+}
+
+async function vueInvitation(interaction: Interaction, invitation: ClanInviteDTO) {
+  await afficher(
+    interaction,
+    [embedInvitation(invitation, auteurDe(interaction), await avatarDe(interaction, invitation.user.id))],
+    [rangeeGestionInvitation(invitation) as never],
+  );
 }
 
 async function vueInvitations(interaction: Interaction, ctx: ContexteClan, page: number) {
@@ -160,14 +211,14 @@ async function vueInvitations(interaction: Interaction, ctx: ContexteClan, page:
   const rangees: Rangee[] = [rangeePaginationGestion("invites", p, pages) as never];
   const selecteur = selecteurInvitations(invitations, p);
   if (selecteur) rangees.push(selecteur as never);
-  await afficher(interaction, [embedListeInvitations(ctx.clan, invitations, p)], rangees);
+  await afficher(interaction, [embedListeInvitations(ctx.clan, invitations, p, auteurDe(interaction))], rangees);
 }
 
 async function trouverInvitation(interaction: Interaction, id: number): Promise<ClanInviteDTO | null> {
   const invitations = await api(interaction, c => c.clans.invites(), "Invitations indisponibles");
   if (!invitations) return null;
   const invitation = invitations.find(i => i.id === id);
-  if (!invitation) await signaler(interaction, "Invitation introuvable", "Elle a déjà été acceptée, refusée ou révoquée.");
+  if (!invitation) await signaler(interaction, "Invitation de Clan introuvable !");
   return invitation ?? null;
 }
 
@@ -182,7 +233,8 @@ async function televerserLogo(
     if (!reponse.ok) throw new Error(`HTTP ${reponse.status}`);
     octets = new Blob([await reponse.arrayBuffer()], { type: piece.contentType ?? "image/png" });
   } catch (err) {
-    await signaler(interaction, "Logo illisible", `Discord n'a pas rendu le fichier (${err instanceof Error ? err.message : String(err)}).`);
+    console.warn("[clan manage] logo illisible :", err);
+    await signaler(interaction, "Echec du téléchargement du logo, veuillez réessayer !");
     return null;
   }
   const image = await api(interaction, c => c.admin.uploadImage(octets, piece.name), "Échec du téléversement du logo");
@@ -217,7 +269,7 @@ export class ClanGestion {
       if (action === "socials") return interaction.showModal(modaleReseaux(ctx.clan));
       const membre = ctx.membres.find(m => m.user.id === args[0]);
       if (!membre) {
-        await interaction.reply({ ...echec("Membre introuvable", "Ce joueur n'est plus membre du clan."), flags: MessageFlags.Ephemeral });
+        await interaction.reply({ embeds: [embedErreurLegacy("Membre du Clan introuvable !")], flags: MessageFlags.Ephemeral });
         return;
       }
       return interaction.showModal(modaleExpulsion(membre.user.id, membre.user.username));
@@ -233,10 +285,10 @@ export class ClanGestion {
         return vueMenu(interaction, ctx);
       }
       case "infos": {
-        return afficher(interaction, [embedInfosClan(ctx.clan, ctx.membres)], [rangeeEditionInfos() as never]);
+        return afficher(interaction, [infos(interaction, ctx)], [rangeeEditionInfos() as never]);
       }
       case "settings": {
-        return afficher(interaction, [embedInfosClan(ctx.clan, ctx.membres)], [rangeeParametres(ctx.clan) as never]);
+        return afficher(interaction, [infos(interaction, ctx)], [rangeeParametres(ctx.clan) as never]);
       }
       case "members": {
         return vueMembres(interaction, ctx, Number(args[0] ?? 1));
@@ -250,14 +302,14 @@ export class ClanGestion {
         const resultat = await api(interaction, c => c.clans.update(ctx.clanId, patch), "Paramètre non modifié");
         if (!resultat) return;
         const clan = { ...ctx.clan, ...patch };
-        return afficher(interaction, [embedInfosClan(clan, ctx.membres)], [rangeeParametres(clan) as never]);
+        return afficher(interaction, [infos(interaction, ctx, clan)], [rangeeParametres(clan) as never]);
       }
       case "role": {
         const [membreId, roleBrut] = args;
         const membre = ctx.membres.find(m => m.user.id === membreId);
         const role = Number(roleBrut);
         if (!membre || !Number.isInteger(role)) {
-          await signaler(interaction, "Membre introuvable", "Ce joueur n'est plus membre du clan.");
+          await signaler(interaction, "Membre du Clan introuvable !");
           return;
         }
         const reponse = await api(
@@ -267,40 +319,35 @@ export class ClanGestion {
         );
         if (!reponse) return;
         const membres = reponse.members ?? ctx.membres.map(m => (m.user.id === membre.user.id ? { ...m, clanRole: role } : m));
-        const promu = role > membre.clanRole;
-        await interaction.followUp({
-          ...succes(
-            promu ? "Promotion" : "Rétrogradation",
-            `<@${membre.user.id}> est désormais **${role === ClanMemberRole.SubCaptain ? "Vice-Président" : "Membre"}**.`,
-          ),
-          flags: MessageFlags.Ephemeral,
-        });
-        return vueMembre(interaction, { ...ctx, membres }, membre.user.id);
+        return vueMembre(interaction, { ...ctx, membres }, membre.user.id, messagePromotion(membre, role));
       }
       case "revoke": {
+        // Comme l'ancien bot : une question privée, le panneau reste en place.
         const invitation = await trouverInvitation(interaction, Number(args[0]));
         if (!invitation) return;
-        return afficher(
-          interaction,
-          [embedInvitation(invitation)],
-          [rangeeConfirmationRevocation(invitation.id) as never],
-        );
+        await interaction.followUp({
+          content: questionRevocation(invitation),
+          components: [rangeeConfirmationRevocation(invitation.id)],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
       }
       case "revoke_ok": {
         const invitation = await trouverInvitation(interaction, Number(args[0]));
         if (!invitation) return;
         const fait = await api(interaction, c => c.clans.revokeInvite(invitation), "Révocation refusée");
         if (!fait) return;
-        await interaction.followUp({
-          ...succes("Invitation révoquée", `L'invitation de <@${invitation.user.id}> est retirée.`),
-          flags: MessageFlags.Ephemeral,
-        });
-        return vueInvitations(interaction, ctx, 1);
+        await interaction.deleteReply().catch(() => undefined);
+        return;
+      }
+      case "revoke_no": {
+        await interaction.deleteReply().catch(() => undefined);
+        return;
       }
       case "invite": {
         const invitation = await trouverInvitation(interaction, Number(args[0]));
         if (!invitation) return;
-        return afficher(interaction, [embedInvitation(invitation)], [rangeeGestionInvitation(invitation) as never]);
+        return vueInvitation(interaction, invitation);
       }
       default: {
         return;
@@ -320,7 +367,7 @@ export class ClanGestion {
     }
     const invitation = await trouverInvitation(interaction, Number(valeur));
     if (!invitation) return;
-    await afficher(interaction, [embedInvitation(invitation)], [rangeeGestionInvitation(invitation) as never]);
+    await vueInvitation(interaction, invitation);
   }
 
   @ModalComponent({ id: /^clan_manage:(name|bio|socials|logo|kick)_modal/ })
@@ -336,18 +383,18 @@ export class ClanGestion {
         const name = interaction.fields.getTextInputValue("nameInput").trim();
         const shortenedName = interaction.fields.getTextInputValue("shortNameInput").trim();
         if (name === ctx.clan.name && shortenedName === ctx.clan.shortenedName) {
-          await signaler(interaction, "Aucun changement", "Ces noms sont déjà ceux de votre Clan.");
+          await signaler(interaction, "Ces noms sont déjà employés par votre Clan !");
           return;
         }
         const patch = {
           ...(name === ctx.clan.name ? {} : { name }),
           ...(shortenedName === ctx.clan.shortenedName ? {} : { shortenedName }),
         };
-        return this.modifier(interaction, ctx, patch, "Nom du clan changé");
+        return this.modifier(interaction, ctx, patch, "Nom du clan changé avec succès !");
       }
       case "bio_modal": {
         const clanBiography = interaction.fields.getTextInputValue("textInput").trim();
-        return this.modifier(interaction, ctx, { clanBiography }, "Biographie du clan changée");
+        return this.modifier(interaction, ctx, { clanBiography }, "Biographie du clan changée avec succès !");
       }
       case "socials_modal": {
         const lire = (champ: string) => interaction.fields.getTextInputValue(champ).trim() || null;
@@ -355,30 +402,32 @@ export class ClanGestion {
           interaction,
           ctx,
           { xUrl: lire("xInput"), instagramUrl: lire("instagramInput"), tiktokUrl: lire("tikTokInput") },
-          "Réseaux du clan mis à jour",
+          "Clan socials changed successfully !",
         );
       }
       case "logo_modal": {
         const piece = interaction.fields.getUploadedFiles("logoInput")?.first();
         if (!piece) {
-          await signaler(interaction, "Aucun fichier", "Dépose une image png, jpg ou jpeg.");
+          await signaler(interaction, "Ce logo n'est pas une image !");
           return;
         }
         if (!logoAccepte(piece.contentType)) {
-          await signaler(interaction, "Format refusé", "Le logo doit être une image png, jpg ou jpeg.");
+          await signaler(interaction, "Ce logo n'est pas un format d'image pris en charge !");
           return;
         }
         const url = await televerserLogo(interaction, piece);
         if (!url) return;
-        return this.modifier(interaction, ctx, { clanAvatarUrl: url }, "Logo changé");
+        return this.modifier(interaction, ctx, { clanAvatarUrl: url }, "Logo changé !");
       }
       case "kick_modal": {
         const membreId = id.args[0] ?? "";
         const raison = interaction.fields.getTextInputValue("textInput").trim();
         const reponse = await api(interaction, c => c.clans.kickMember(membreId, raison), "Expulsion refusée");
         if (!reponse) return;
+        const expulse = ctx.membres.find(m => m.user.id === membreId)?.user.username ?? `<@${membreId}>`;
+        const auteur = (interaction.user as { displayName?: string }).displayName ?? interaction.user.username;
         await interaction.followUp({
-          ...succes("Membre expulsé", `<@${membreId}> a été exclu du clan.\nRaison : ${raison}`),
+          embeds: [embedSuccesLegacy(`User ${expulse} kicked from clan by ${auteur} !`)],
           flags: MessageFlags.Ephemeral,
         });
         return vueMenu(interaction, { ...ctx, membres: reponse.members ?? ctx.membres.filter(m => m.user.id !== membreId) });
@@ -397,9 +446,14 @@ export class ClanGestion {
   ): Promise<void> {
     const resultat = await api(interaction, c => c.clans.update(ctx.clanId, patch), "Modification refusée");
     if (!resultat) return;
-    await interaction.followUp({ ...succes(message), flags: MessageFlags.Ephemeral });
+    // « Logo changé ! » était un simple message ; les autres, un embed de succès privé.
+    await interaction.followUp(
+      message === "Logo changé !"
+        ? { content: message, flags: MessageFlags.Ephemeral }
+        : { embeds: [embedSuccesLegacy(message)], flags: MessageFlags.Ephemeral },
+    );
     const clan = { ...ctx.clan, ...patch } as ClanDTO;
-    await afficher(interaction, [embedInfosClan(clan, ctx.membres)], [rangeeEditionInfos() as never]);
+    await afficher(interaction, [infos(interaction, ctx, clan)], [rangeeEditionInfos() as never]);
   }
 
   // ─── Identifiants legacy : distinctions d'un membre ────────────────────────
@@ -412,10 +466,10 @@ export class ClanGestion {
     if (!ctx) return;
     const membre = ctx.membres.find(m => m.user.id === membreId);
     if (!membre) {
-      await signaler(interaction, "Membre introuvable", "Membre sélectionné introuvable.");
+      await signaler(interaction, "Membre sélectionné introuvable");
       return;
     }
-    await afficher(interaction, [embedMembre(membre)], [
+    await afficher(interaction, [embedMembre(membre, "Gestion du membre", await avatarDe(interaction, membre.user.id))], [
       selecteurDistinctions(membre, ctx.clanId) as never,
       rangeeRetourMembre(membre.user.id, ctx.clanId) as never,
     ]);
@@ -438,12 +492,12 @@ export class ClanGestion {
     if (!ctx) return;
     const membre = ctx.membres.find(m => m.user.id === membreId);
     if (!membre) {
-      await signaler(interaction, "Membre introuvable", "Membre cible introuvable.");
+      await signaler(interaction, "Membre cible introuvable.");
       return;
     }
     const distinctions = distinctionsDepuisValeurs(interaction.values);
     if (distinctions.length === 0) {
-      await signaler(interaction, "Distinctions invalides", "Choisis au moins une distinction connue.");
+      await signaler(interaction, "Choisis au moins une distinction connue.");
       return;
     }
     const reponse = await api(
@@ -453,7 +507,7 @@ export class ClanGestion {
     );
     if (!reponse) return;
     await interaction.followUp({
-      ...succes("Distinctions éditées", `Distinctions de <@${membre.user.id}> : ${distinctions.join(", ")}.`),
+      embeds: [embedSuccesLegacy(`Distinctions éditées pour le membre ${membre.user.username}`)],
       flags: MessageFlags.Ephemeral,
     });
     const membres = reponse.members ?? ctx.membres.map(m => (m.user.id === membre.user.id ? { ...m, distinctions } : m));
@@ -466,8 +520,8 @@ export class ClanGestion {
  * PREMIÈRE réponse, donc pas de `deferUpdate`. Un échec répond en privé.
  */
 async function chargerContexteSansDiffere(interaction: ButtonInteraction): Promise<ContexteClan | null> {
-  const repondreEchec = async (titre: string, motif: string) => {
-    await interaction.reply({ ...echec(titre, motif), flags: MessageFlags.Ephemeral });
+  const repondreEchec = async (_titre: string, motif: string, garde = false) => {
+    await interaction.reply({ embeds: [garde ? embedRefusLegacy(motif) : embedErreurLegacy(motif)], flags: MessageFlags.Ephemeral });
   };
   const appartenance = await lireApi(interaction, c => c.clanTeams.membership());
   if (!appartenance.ok) {
@@ -476,11 +530,11 @@ async function chargerContexteSansDiffere(interaction: ButtonInteraction): Promi
   }
   const { clanId, clanRole } = appartenance.valeur;
   if (clanId === null || clanRole === null) {
-    await repondreEchec("Aucun clan", "Tu n'es membre d'aucun clan actif.");
+    await repondreEchec("", REFUS_LEGACY.horsClan, true);
     return null;
   }
   if (clanRole < RANG_PANNEAU) {
-    await repondreEchec("Accès refusé", "La gestion du clan est réservée au Président et aux Vice-Présidents.");
+    await repondreEchec("", REFUS_LEGACY.permission, true);
     return null;
   }
   const [clan, membres] = await Promise.all([
@@ -492,4 +546,13 @@ async function chargerContexteSansDiffere(interaction: ButtonInteraction): Promi
     return null;
   }
   return { clanId, role: clanRole, clan: clan.valeur, membres: membres.valeur };
+}
+
+/** Texte posé au-dessus de la fiche après un changement de rôle (ancien bot). */
+export function messagePromotion(membre: ClanMemberDTO, role: number): string {
+  const nom = membre.user.username;
+  if (role === ClanMemberRole.SubCaptain) return `L'utilisateur ${nom} a été promu au rang de vice-président.`;
+  return role > membre.clanRole
+    ? `L'utilisateur ${nom} a été promu au rang de membre.`
+    : `L'utilisateur ${nom} a été rétrogradé au rang de membre.`;
 }

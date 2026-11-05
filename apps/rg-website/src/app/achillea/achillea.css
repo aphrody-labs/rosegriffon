@@ -634,33 +634,10 @@
 }
 
 /*
- * Titres en `Achillea Title` (HUMANE), avec les métriques de l'original :
- * échelle fluide et léger interlettrage positif. HUMANE est une condensée très
- * haute — sans `line-height` resserré elle ouvre des trous verticaux que la
- * maquette n'a pas.
+ * Échelle typographique du front Angular : Inter partout, titres compris
+ * (`styles.css:156-170`), et les tailles Tailwind telles quelles. HUMANE ne
+ * sert qu'aux titres de tournoi et de ligue, qui la posent eux-mêmes.
  */
-.achillea-scope h1,
-.achillea-scope h2 {
-  font-family: "Achillea Title", "Achillea Sans", sans-serif;
-  letter-spacing: 0.02em;
-  line-height: 1.05;
-}
-
-/*
- * Contrat basse vision Achilléa : le texte de lecture et les commandes ne
- * descendent jamais sous 18 px. Le portage gardait plusieurs centaines de
- * `text-xs`/`text-sm` (12–14 px), y compris dans les classements et les
- * tableaux d'administration. La règle reste strictement limitée au domaine.
- */
-.achillea-scope .text-xs,
-.achillea-scope .text-sm,
-.achillea-scope .text-base,
-.achillea-scope .text-\[10px\],
-.achillea-scope .text-\[11px\] {
-  font-size: 1.125rem;
-  line-height: 1.5rem;
-}
-
 .achillea-scope :is(input, select, textarea) {
   min-height: 2.75rem;
   color: #f3edf7;
@@ -721,60 +698,15 @@
 	 * (`--md-sys-color-surface` / `--md-sys-color-on-surface`), en littéral pour
 	 * qu'ils ne dépendent d'aucun ancêtre.
 	 */
-  background-color: #0d0814;
-  color: #f3edf7;
+  /* `main.outlet-wrapper` du front Angular : image en cover sur toute la
+   * hauteur du contenu, texte blanc. */
+  background-color: #1e1e1e;
+  color: #fff;
   background-image: url("/achillea/site_bg_dark.png");
-  background-position: center top;
+  background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  background-attachment: fixed;
   min-height: 100%;
-}
-
-/*
- * Les pages données utilisent le même conteneur `max-w-7xl` que le portail
- * général. Après la barre latérale, cela laissait plus de 500 px vides sur un
- * écran large. Achilléa emploie la largeur disponible pour ses grilles et ses
- * tableaux, tandis que les paragraphes gardent déjà leur propre `max-w-*`.
- */
-.achillea-scope .max-w-7xl {
-  max-width: 112rem;
-}
-
-.achillea-scope .max-w-6xl {
-  max-width: 104rem;
-}
-
-.achillea-scope .max-w-5xl {
-  max-width: 96rem;
-}
-
-@media (min-width: 600px) {
-  .achillea-scope .max-w-7xl,
-  .achillea-scope .max-w-6xl,
-  .achillea-scope .max-w-5xl {
-    width: calc(100% - 3rem);
-  }
-}
-
-@media (min-width: 840px) {
-  .achillea-scope .max-w-7xl,
-  .achillea-scope .max-w-6xl,
-  .achillea-scope .max-w-5xl {
-    width: calc(100% - 4rem);
-  }
-}
-
-@media (max-width: 599px) {
-  .achillea-scope {
-    background-attachment: scroll;
-  }
-
-  .achillea-scope .max-w-7xl,
-  .achillea-scope .max-w-6xl,
-  .achillea-scope .max-w-5xl {
-    width: 100%;
-  }
 }
 
 /* Gradients de Paliers ELO */

@@ -44,7 +44,7 @@ describe("/clan manage", () => {
     const appels = api(routesClan(1));
     const interaction = commande({ commande: "clan", sousCommande: "manage" });
     await gestion.manage(interaction as never);
-    expect(interaction.texte()).toContain("réservée au Président et aux Vice-Présidents");
+    expect(interaction.texte()).toContain("❌ You do not have permission to run this command.");
     expect(appels.map(a => a.chemin)).toEqual(["/clans/teams/membership"]);
   });
 
@@ -52,7 +52,7 @@ describe("/clan manage", () => {
     api(routesClan(null));
     const interaction = commande({ commande: "clan", sousCommande: "manage" });
     await gestion.manage(interaction as never);
-    expect(interaction.texte()).toContain("Tu n'es membre d'aucun clan actif");
+    expect(interaction.texte()).toContain("❌ Vous ne faites pas partie d'un Clan.");
   });
 });
 
@@ -100,7 +100,7 @@ describe("composants clan_manage", () => {
     const corps = appels.find(a => a.chemin === "/clans/updateMember")?.corps as { clanRole: number; user: { id: string } };
     expect(corps.clanRole).toBe(1);
     expect(corps.user.id).toBe(MEMBRE);
-    expect(interaction.texte()).toContain("Promotion");
+    expect(interaction.texte()).toContain("L'utilisateur Kabeyama a été promu au rang de membre.");
   });
 
   test("le bouton « Nom » ouvre la modale sans différer", async () => {
@@ -121,7 +121,7 @@ describe("composants clan_manage", () => {
     const confirme = commande({ customId: `clan_manage:revoke_ok:${INVITATION.id}` });
     await gestion.bouton(confirme as never);
     expect(appels.some(a => a.chemin === "/clans/invites/revoke")).toBe(true);
-    expect(confirme.texte()).toContain("Invitation révoquée");
+    expect(confirme.texte()).toContain("supprime");
   });
 });
 
@@ -152,7 +152,7 @@ describe("modales clan_manage", () => {
       first: () => ({ url: "https://cdn.test/x.gif", name: "x.gif", contentType: "image/gif" }),
     });
     await gestion.modale(interaction as never);
-    expect(interaction.texte()).toContain("png, jpg ou jpeg");
+    expect(interaction.texte()).toContain("❌ Ce logo n'est pas un format d'image pris en charge !");
     expect(appels.some(a => a.chemin.startsWith("/proxy"))).toBe(false);
   });
 });
