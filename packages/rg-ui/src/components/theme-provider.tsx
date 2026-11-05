@@ -6,7 +6,7 @@ import {
   useTheme as useNextTheme,
 } from "next-themes";
 import * as React from "react";
-import { THEMES, type ThemeType } from "../lib/themes";
+import { THEME_PACKS, THEMES, type ThemeType } from "../lib/themes";
 
 export interface RGThemeProviderProps extends ThemeProviderProps {
   children: React.ReactNode;
@@ -87,5 +87,8 @@ export function useTheme() {
     // RG TV en compte une trentaine — plantait en
     // « undefined is not an object ».
     colors: THEMES[ctx.theme as ThemeType]?.colors ?? THEMES.roy.colors,
+    // Pack du thème actif : logo, titre, fond, compagnon. Même repli que
+    // `colors` pour le rendu serveur, où le thème n'est pas encore connu.
+    pack: THEME_PACKS[ctx.theme as ThemeType] ?? THEME_PACKS.roy,
   };
 }

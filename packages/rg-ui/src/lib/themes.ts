@@ -79,3 +79,77 @@ export const THEMES = {
 >;
 
 export type ThemeType = ThemeId;
+
+/**
+ * Pack de thème : ce que le changement de thème remplace d'un coup, au-delà
+ * des couleurs. Le chrome lit ce manifeste au lieu de chemins codés en dur.
+ *
+ * `seed` est la graine des couleurs calculées (teinte et chroma OKLCH,
+ * mode clair ou sombre) ; les palettes écrites à la main des blocs CSS
+ * migrent vers elle.
+ */
+export interface ThemePack {
+  /** Nom de marque affiché dans la barre d'application. */
+  title: string;
+  logo: string;
+  wallpaper: string;
+  /** Compagnon du thème ; `null` tant qu'aucune mascotte n'existe. */
+  pet: { name: string; emotes: { hello: string; proud?: string; surprised?: string } } | null;
+  seed: { hue: number; chroma: number; mode: "light" | "dark" };
+}
+
+export const THEME_PACKS = {
+  roy: {
+    title: "Rose Griffon",
+    logo: "/RG_Logo_V2.5.webp",
+    wallpaper: "/roy_bg.webp",
+    pet: { name: "Roy", emotes: { hello: "/emote/RG_Roy_salut.webp", proud: "/emote/RG_roy_fine.webp" } },
+    seed: { hue: 265, chroma: 0.107, mode: "light" },
+  },
+  gaelle: {
+    title: "Rose Griffon",
+    logo: "/RG_Logo_V2.5.webp",
+    wallpaper: "/gaelle_bg.webp",
+    pet: {
+      name: "Gaëlle",
+      emotes: {
+        hello: "/emote/RG_Gaelle_salut.webp",
+        proud: "/emote/RG_Gaelle_fiere.webp",
+        surprised: "/emote/RG_Gaelle_surprise.webp",
+      },
+    },
+    seed: { hue: 34, chroma: 0.164, mode: "light" },
+  },
+  "azalee-light": {
+    title: "Azalée",
+    logo: "/RG_Azalee-logo.webp",
+    wallpaper: "/azalee-bg.webp",
+    pet: { name: "Reika", emotes: { hello: "/emote/RG_Reika_zukan.webp" } },
+    seed: { hue: 73, chroma: 0.147, mode: "light" },
+  },
+  "azalee-dark": {
+    title: "Azalée",
+    logo: "/RG_Azalee-logo.webp",
+    wallpaper: "/azalee_fond.webp",
+    pet: { name: "Reika", emotes: { hello: "/emote/RG_Reika_zukan.webp" } },
+    seed: { hue: 77, chroma: 0.126, mode: "dark" },
+  },
+  achillea: {
+    title: "Achilléa",
+    logo: "/achillea/logo1.svg",
+    wallpaper: "/fond_achilea.webp",
+    pet: null,
+    seed: { hue: 297, chroma: 0.25, mode: "dark" },
+  },
+} as const satisfies Record<ThemeId, ThemePack>;
+
+/**
+ * Thème imposé par une section du site (posé sur le conteneur, sans toucher
+ * au choix enregistré de l'utilisateur). `undefined` : la section suit le
+ * thème choisi.
+ */
+export function sectionTheme(section: "association" | "wiki" | "esport"): ThemeId | undefined {
+  if (section === "esport") return "achillea";
+  if (section === "wiki") return "azalee-dark";
+  return undefined;
+}

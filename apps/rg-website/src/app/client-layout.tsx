@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { SidebarInset, SidebarProvider, Toaster, useBreakpoint } from "@rosegriffon/ui";
+import {
+  sectionTheme,
+  SidebarInset,
+  SidebarProvider,
+  THEME_PACKS,
+  type ThemeType,
+  Toaster,
+  useBreakpoint,
+  useTheme,
+} from "@rosegriffon/ui";
 import { ThemeToggle, domaineDeLaRoute, type NavItem } from "@rosegriffon/app-shell";
 import { WebsiteNavigationRail } from "@/components/layout/WebsiteNavigationRail";
 
@@ -75,10 +84,8 @@ function SidebarWrapper({ children, isMedium }: { children: React.ReactNode; isM
  * d'un changement de thème après hydratation.
  */
 function classeThemeDuDomaine(pathname: string): string | undefined {
-  const domaine = domaineDeLaRoute(pathname);
-  if (domaine === "esport") return "theme-achillea";
-  if (domaine === "wiki") return "theme-azalee-dark";
-  return undefined;
+  const impose = sectionTheme(domaineDeLaRoute(pathname));
+  return impose ? `theme-${impose}` : undefined;
 }
 
 function RoutedHeader({ isMobile, showSidebarToggle }: { isMobile?: boolean; showSidebarToggle?: boolean }) {
@@ -88,6 +95,10 @@ function RoutedHeader({ isMobile, showSidebarToggle }: { isMobile?: boolean; sho
   const { profile: rgProfile } = useProfile();
   const isEsport = activeDomaine === "esport";
   const isWiki = activeDomaine === "wiki";
+  // Thème effectif : celui imposé par la section, sinon celui de l’utilisateur.
+  // Son pack fournit le nom et le logo du chrome.
+  const { theme } = useTheme();
+  const pack = THEME_PACKS[sectionTheme(activeDomaine) ?? (theme as ThemeType)] ?? THEME_PACKS.roy;
 
   // L'identité affichée dans le chrome est toujours celle de la session RG.
   // Le jeton Achilléa est une capacité dérivée pour l'API e-sport, pas une
@@ -96,8 +107,8 @@ function RoutedHeader({ isMobile, showSidebarToggle }: { isMobile?: boolean; sho
   const user = rgUser;
   const profile = rgProfile;
 
-  const appName = isEsport ? "Achilléa" : isWiki ? "Azalée" : "Rose Griffon";
-  const logoSrc = isEsport ? "/achillea/logo1.svg" : isWiki ? "/RG_Azalee-logo.webp" : "/RG_Logo_V2.5.webp";
+  const appName = pack.title;
+  const logoSrc = pack.logo;
   const homeHref = isEsport ? "/achillea" : isWiki ? "/wiki" : "/";
   const accountHref = profile?.username ? `/profil/${encodeURIComponent(profile.username)}` : "/profil";
 
