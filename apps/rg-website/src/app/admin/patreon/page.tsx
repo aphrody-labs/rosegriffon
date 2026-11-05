@@ -69,7 +69,7 @@ export default async function AdminPatreonPage() {
   const liveTotal = live?.members.length ?? 0;
   const liveTierOptions = live ? [...new Set(live.members.flatMap(m => m.tier_titles))].toSorted() : [];
 
-  const redirectUri = absoluteUrl("/api/auth/oauth2/callback/patreon");
+  const redirectUri = absoluteUrl("/api/auth/callback/patreon");
   const clientId = process.env.PATREON_CLIENT_ID;
   const clientIdMasked = clientId ? `${clientId.slice(0, 8)}…${clientId.slice(-4)}` : null;
 

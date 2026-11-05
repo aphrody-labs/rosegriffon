@@ -1,7 +1,11 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { ACHILLEA_SESSION_COOKIE_NAME, ACHILLEA_SESSION_TTL_SECONDS } from "@rosegriffon/auth/achillea-session";
+import {
+  ACHILLEA_SESSION_COOKIE_NAME,
+  ACHILLEA_SESSION_TTL_SECONDS,
+  achilleaSessionCookieAttributes,
+} from "@rosegriffon/auth/achillea-session";
 import { getServerSession } from "@/lib/auth-helpers";
 
 /**
@@ -39,15 +43,10 @@ import { getServerSession } from "@/lib/auth-helpers";
  * Attributs du cookie de session.
  *
  * Domaine parent : le jeton doit valoir pour `rosegriffon.fr` ET
- * `ranked.rosegriffon.fr`, que le front appelle directement.
+ * `ranked.rosegriffon.fr`, que le front appelle directement. Définition partagée
+ * avec l'effacement à la déconnexion Rose Griffon (`createRoseGriffonAuth`).
  */
-const COOKIE = {
-  domain: process.env.NODE_ENV === "production" ? ".rosegriffon.fr" : undefined,
-  httpOnly: true,
-  path: "/",
-  sameSite: "lax",
-  secure: process.env.NODE_ENV === "production",
-} as const;
+const COOKIE = achilleaSessionCookieAttributes();
 
 export async function POST() {
   const internalToken = process.env.API_ADMIN_TOKEN;
