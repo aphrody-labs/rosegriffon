@@ -1,0 +1,383 @@
+{
+  "level5-news": {
+    "level5News": [
+      {
+        "id": "20260801",
+        "url": "https://www.level5.co.jp/news/20260801/",
+        "title": "2026.08.01『イナズマイレブン 英雄たちのヴィクトリーロード』Ver.7.2 配信決定！",
+        "date": "2026.08.01"
+      },
+      {
+        "id": "20260715",
+        "url": "https://www.level5.co.jp/news/20260715/?utm=1&ref=top",
+        "title": "2026.07.15LEVEL-5 Vision 2026 & 新作発表",
+        "date": "2026.07.15"
+      },
+      {
+        "id": "20260620",
+        "url": "https://www.level5.co.jp/news/20260620/",
+        "title": "LEVEL-5 Announcement",
+        "date": "2026.06.20"
+      }
+    ]
+  },
+  "level5-blog-ja": {
+    "level5BlogIndex": [
+      {
+        "id": "blog",
+        "url": "https://www.level5.co.jp/blog/",
+        "title": "AIをめぐる騒動について",
+        "date": "2025.12.28"
+      },
+      {
+        "id": "250303",
+        "url": "https://www.level5.co.jp/blog/250303/",
+        "title": "来たぞ！最終段階‼",
+        "date": "2025.3.3"
+      },
+      {
+        "id": "latest",
+        "url": "https://www.level5.co.jp/blog/",
+        "title": "AIをめぐる騒動について",
+        "date": "2025.12.28"
+      }
+    ]
+  },
+  "level5-blog-250303": {
+    "level5BlogTexte": "開発ブログ ５つ星工房日記 始動！\n              \n              \n                \n                  レベルファイブCEOの日野です。今年２０２５年はレベルファイブにとって、試練の年でもあり、大躍進にもなる年となりました。なんと、大型タイトル３本を世に送りだす予定となっているのです。ユーザーの皆様に至っては、本当に出るのか？また遅れないのか？とご心配の方もいらっしゃるでしょう。そこで、今回、その開発状況を定期的に、ユーザーの皆様に伝えていく場を作りたいと思いました。きっとそこには、グッドニュースもあれば、予測不能のアクシデントもあるでしょう。そんな内情を可能な限りユーザーの皆様にお伝えし、ファンの皆様と共に、作品の完成に向かって歩んでいく、そんなブログにしたいと考えています。会社には大人の事情もあり、公式的には言えないこともあり、それでも、個人的には、状況を空気感だけでもなんとか伝えたいときがあります。そんなときに、このブログを活用し、＜非公式的？＞に情報共有していこうかなと思います。社長でありながら『非公式』というのも変なのですが、会社の代表としての視点と、クリエイター視点とで言うべきことが大きく違っていたりします。そんなとき、ギリギリのところでユーザーの皆様に情報発信し、完成までの時間を楽しいものにしていきたいと考えていますので、よろしくお願いします。"
+  },
+  "victory-road-topics-ja": {
+    "topics": [
+      {
+        "id": "18th",
+        "url": "https://www.inazuma.jp/18th/",
+        "title": "「イナズマイレブン18周年記念 特設サイト」を公開しました！",
+        "date": "2026.8.22"
+      },
+      {
+        "id": "18th",
+        "url": "https://www.inazuma.jp/18th/",
+        "title": "『イナズマイレブン 英雄たちのヴィクトリーロード』「コロツアー2026」開催中止のお知らせ",
+        "date": "2026.7.31"
+      },
+      {
+        "id": "260715",
+        "url": "https://www.inazuma.jp/victory-road/topics/260715/",
+        "title": "ver.7.1.2配信のお知らせ（Nintendo Switch 2／Nintendo Switch）",
+        "date": "2026.7.28"
+      },
+      {
+        "id": "ver_7_1_2",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/switch/ver_7_1_2/",
+        "title": "ver.7.1.2配信のお知らせ（PlayStation®5／PlayStation®4／Steam）",
+        "date": "2026.7.28"
+      },
+      {
+        "id": "ver_7_1_2",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/ps-steam/ver_7_1_2/",
+        "title": "ver.7.1.2配信のお知らせ（XBOX Series X｜S）",
+        "date": "2026.7.28"
+      },
+      {
+        "id": "ver_7_1_2",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/xbox/ver_7_1_2/",
+        "title": "『ヴィクトリーロードβ』大会報酬受け取りの不具合について",
+        "date": "2026.7.27"
+      },
+      {
+        "id": "260727",
+        "url": "https://www.inazuma.jp/victory-road/topics/260727",
+        "title": "ver.7.1.0配信のお知らせ（Nintendo Switch 2／Nintendo Switch）",
+        "date": "2026.7.22"
+      },
+      {
+        "id": "ver_7_1_0",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/switch/ver_7_1_0/",
+        "title": "ver.7.1.1配信のお知らせ（PlayStation®5／PlayStation®4／Steam）",
+        "date": "2026.7.22"
+      },
+      {
+        "id": "ver_7_1_1",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/ps-steam/ver_7_1_1/",
+        "title": "ver.7.1.1配信のお知らせ（XBOX Series X｜S）",
+        "date": "2026.7.22"
+      },
+      {
+        "id": "ver_7_1_1",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/xbox/ver_7_1_1/",
+        "title": "【ヴィクトリーロードβ 大会】通信切断およびオウンゴールへの対応と、不正プレイヤーのランキング除外についてのお知らせ",
+        "date": "2026.7.17"
+      },
+      {
+        "id": "260717",
+        "url": "https://www.inazuma.jp/victory-road/topics/260717",
+        "title": "『イナズマイレブン 英雄たちのヴィクトリーロード』「コロツアー2026」へのブース出展が決定！",
+        "date": "2026.7.15"
+      },
+      {
+        "id": "260715",
+        "url": "https://www.inazuma.jp/victory-road/topics/260715",
+        "title": "『イナズマイレブン 英雄たちのヴィクトリーロード』期間限定で30%OFF！",
+        "date": "2026.7.10"
+      }
+    ],
+    "patchNotes": [
+      {
+        "id": "ver_7_1_2",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/switch/ver_7_1_2/",
+        "title": "ver.7.1.2配信のお知らせ（Nintendo Switch 2／Nintendo Switch）",
+        "date": ""
+      },
+      {
+        "id": "ver_7_1_0",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/switch/ver_7_1_0/",
+        "title": "ver.7.1.0配信のお知らせ（Nintendo Switch 2／Nintendo Switch）",
+        "date": ""
+      },
+      {
+        "id": "ver_7_1_1",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/ps-steam/ver_7_1_1/",
+        "title": "ver.7.1.1配信のお知らせ（PlayStation®5／PlayStation®4／Steam）",
+        "date": ""
+      },
+      {
+        "id": "ver_7_0_2",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/ps-steam/ver_7_0_2/",
+        "title": "Patch Note",
+        "date": ""
+      },
+      {
+        "id": "ver_7_0_0",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/switch/ver_7_0_0/",
+        "title": "Patch Note",
+        "date": ""
+      },
+      {
+        "id": "ver_7_0_1",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/ps-steam/ver_7_0_1/",
+        "title": "Patch Note",
+        "date": ""
+      },
+      {
+        "id": "ver_6_1_0",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/switch/ver_6_1_0/",
+        "title": "Patch Note",
+        "date": ""
+      },
+      {
+        "id": "ver_6_1_1",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/ps-steam/ver_6_1_1/",
+        "title": "Patch Note",
+        "date": ""
+      },
+      {
+        "id": "ver_6_0_2",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/ps-steam/ver_6_0_2/",
+        "title": "Patch Note",
+        "date": ""
+      },
+      {
+        "id": "ver_6_0_0",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/switch/ver_6_0_0/",
+        "title": "Patch Note",
+        "date": ""
+      },
+      {
+        "id": "ver_6_0_1",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/ps-steam/ver_6_0_1/",
+        "title": "Patch Note",
+        "date": ""
+      },
+      {
+        "id": "ver_5_0_2",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/ps-steam/ver_5_0_2/",
+        "title": "Patch Note",
+        "date": ""
+      },
+      {
+        "id": "ver_5_0_0",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/switch/ver_5_0_0/",
+        "title": "Patch Note",
+        "date": ""
+      },
+      {
+        "id": "ver_5_0_1",
+        "url": "https://www.inazuma.jp/victory-road/patchnote/ps-steam/ver_5_0_1/",
+        "title": "Patch Note",
+        "date": ""
+      }
+    ]
+  },
+  "victory-road-topics-fr": {
+    "topics": [
+      {
+        "id": "260331_02",
+        "url": "https://www.inazuma.jp/victory-road/fr/topics/260331_02/",
+        "title": "LINE Stickers Out now!",
+        "date": "2026.3.31"
+      },
+      {
+        "id": "hlGTWPgkZ4s?rel=0",
+        "url": "https://www.youtube.com/embed/hlGTWPgkZ4s?rel=0",
+        "title": "“Free Major Update \"The Rising Bond DLC\" Trailer” est disponible !",
+        "date": "2026.3.27"
+      },
+      {
+        "id": "260225",
+        "url": "https://www.inazuma.jp/victory-road/fr/topics/260225/",
+        "title": "The Third Free Major Update \"Orion & Lumen DLC\" Now Available！",
+        "date": "2026.2.25"
+      },
+      {
+        "id": "ver_4_0_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_4_0_0/",
+        "title": "Announcement of Version 4.0.0 Release（Nintendo Switch 2／Nintendo Switch）",
+        "date": "2026.2.25"
+      },
+      {
+        "id": "ver_4_0_1",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/ps-steam/ver_4_0_1/",
+        "title": "Announcement of Version 4.0.1 Release（PlayStation®5／PlayStation®4／Steam）",
+        "date": "2026.2.25"
+      },
+      {
+        "id": "ver_4_0_1",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/xbox/ver_4_0_1/",
+        "title": "Announcement of Version 4.0.1 Release（Xbox Series X｜S）",
+        "date": "2026.2.25"
+      },
+      {
+        "id": "J9VkQ9EybXY?rel=0",
+        "url": "https://www.youtube.com/embed/J9VkQ9EybXY?rel=0",
+        "title": "“Free Major Update \"Orion & Lumen DLC\" Trailer” est disponible !",
+        "date": "2026.2.19"
+      },
+      {
+        "id": "ver_3_1_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_3_1_0/",
+        "title": "Announcement of Version 3.1.0 Release（Nintendo Switch 2／Nintendo Switch）",
+        "date": "2026.2.10"
+      },
+      {
+        "id": "ver_3_1_1",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/ps-steam/ver_3_1_1/",
+        "title": "Announcement of Version 3.1.1 Release（PlayStation®5／PlayStation®4／Steam）",
+        "date": "2026.2.10"
+      },
+      {
+        "id": "ver_3_1_1",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/xbox/ver_3_1_1/",
+        "title": "Announcement of Version 3.1.1 Release（Xbox Series X｜S）",
+        "date": "2026.2.10"
+      },
+      {
+        "id": "best-shot",
+        "url": "https://www.inazuma.jp/victory-road/en/best-shot/",
+        "title": "Inazuma Best Snapshot Campaign — Winners Announced!",
+        "date": "2026.1.30"
+      },
+      {
+        "id": "260128",
+        "url": "https://www.inazuma.jp/victory-road/fr/topics/260128/",
+        "title": "The Second Free Major Update \"Ares & Fabled Seed DLC\" Now Available！",
+        "date": "2026.1.28"
+      }
+    ],
+    "patchNotes": [
+      {
+        "id": "ver_4_0_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_4_0_0/",
+        "title": "Announcement of Version 4.0.0 Release（Nintendo Switch 2／Nintendo Switch）",
+        "date": ""
+      },
+      {
+        "id": "ver_4_0_1",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/ps-steam/ver_4_0_1/",
+        "title": "Announcement of Version 4.0.1 Release（PlayStation®5／PlayStation®4／Steam）",
+        "date": ""
+      },
+      {
+        "id": "ver_3_1_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_3_1_0/",
+        "title": "Announcement of Version 3.1.0 Release（Nintendo Switch 2／Nintendo Switch）",
+        "date": ""
+      },
+      {
+        "id": "ver_3_1_1",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/ps-steam/ver_3_1_1/",
+        "title": "Announcement of Version 3.1.1 Release（PlayStation®5／PlayStation®4／Steam）",
+        "date": ""
+      }
+    ]
+  },
+  "victory-road-patchnote-en-switch": {
+    "patchNotes": [
+      {
+        "id": "ver_7_2_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_7_2_0/",
+        "title": "Announcement of Version 7.2.0 Release Switch 2 Switch",
+        "date": "2026.10.19"
+      },
+      {
+        "id": "ver_7_1_2",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_7_1_2/",
+        "title": "Announcement of Version 7.1.2 Release Switch 2 Switch",
+        "date": "2026.7.28"
+      },
+      {
+        "id": "ver_7_1_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_7_1_0/",
+        "title": "Announcement of Version 7.1.0 Release Switch 2 Switch",
+        "date": "2026.7.22"
+      },
+      {
+        "id": "ver_7_0_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_7_0_0/",
+        "title": "Announcement of Version 7.0.0 Release Switch 2 Switch",
+        "date": "2026.7.6"
+      },
+      {
+        "id": "ver_6_1_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_6_1_0/",
+        "title": "Announcement of Version 6.1.0 Release Switch 2 Switch",
+        "date": "2026.6.17"
+      },
+      {
+        "id": "ver_6_0_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_6_0_0/",
+        "title": "[*2026.6.11 Update] Announcement of Version 6.0.0 Release Switch 2 Switch",
+        "date": "2026.6.10"
+      },
+      {
+        "id": "ver_5_0_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_5_0_0/",
+        "title": "Announcement of Version 5.0.0 Release Switch 2 Switch",
+        "date": "2026.3.31"
+      },
+      {
+        "id": "ver_4_0_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_4_0_0/",
+        "title": "Announcement of Version 4.0.0 Release Switch 2 Switch",
+        "date": "2026.2.25"
+      },
+      {
+        "id": "ver_3_1_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_3_1_0/",
+        "title": "Announcement of Version 3.1.0 Release Switch 2 Switch",
+        "date": "2026.2.10"
+      },
+      {
+        "id": "ver_3_0_0",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_3_0_0/",
+        "title": "Announcement of Version 3.0.0 Release Switch 2 Switch",
+        "date": "2026.1.28"
+      },
+      {
+        "id": "ver_2_0_1",
+        "url": "https://www.inazuma.jp/victory-road/en/patchnote/switch/ver_2_0_1/",
+        "title": "Announcement of Version 2.0.1 Release Switch 2 Switch",
+        "date": "2025.12.25"
+      }
+    ]
+  }
+}

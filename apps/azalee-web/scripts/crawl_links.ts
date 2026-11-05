@@ -1,6 +1,29 @@
-import * as cheerio from "cheerio";
-
 const BASE_URL = "http://127.0.0.1:3003";
+
+const ENTITES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: String.fromCodePoint(0xa0) };
+
+/** `href` bruts de HTMLRewriter → valeurs décodées (références numériques et entités XML). */
+function decoder(valeur: string): string {
+  return valeur.replace(/&(#\d+|#[xX][\da-fA-F]+|[a-zA-Z]+);/g, (entite, ref: string) => {
+    if (!ref.startsWith("#")) return ENTITES[ref] ?? entite;
+    const hex = ref[1] === "x" || ref[1] === "X";
+    const cp = Number.parseInt(ref.slice(hex ? 2 : 1), hex ? 16 : 10);
+    return cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : entite;
+  });
+}
+
+function hrefs(html: string): string[] {
+  const liste: string[] = [];
+  new HTMLRewriter()
+    .on("a[href]", {
+      element(el) {
+        const href = el.getAttribute("href");
+        if (href) liste.push(decoder(href));
+      },
+    })
+    .transform(html);
+  return liste;
+}
 
 async function crawl() {
   const visited = new Set<string>();
@@ -21,11 +44,8 @@ async function crawl() {
         continue;
       }
       const html = await res.text();
-      const $ = cheerio.load(html);
-
-      $("a").each((i, el) => {
-        const href = $(el).attr("href");
-        if (href) {
+      for (const href of hrefs(html)) {
+        {
           // Resolve relative links
           let resolvedUrl = href;
           if (href.startsWith("/")) {
@@ -51,17 +71,17 @@ async function crawl() {
               const isDeepPassive = cleanUrl.includes("/passive/") && cleanUrl.split("/passive/")[1]?.length > 5;
               const isDeepCoach = cleanUrl.includes("/entraineur/") && cleanUrl.split("/entraineur/")[1]?.length > 0;
 
-              if (isDeepChara && !cleanUrl.includes("mark-evans")) return;
-              if (isDeepSkill && !cleanUrl.includes("whd00010")) return;
-              if (isDeepItem && !cleanUrl.includes("0x5F0F1EAC")) return;
-              if (isDeepAura && !cleanUrl.includes("keshin_0x8CEAA470")) return;
-              if (isDeepTactic && !cleanUrl.includes("0x790F3F39")) return;
-              if (isDeepQuest && !cleanUrl.includes("0x8933A62B")) return;
-              if (isDeepTrophy && !cleanUrl.includes("activity_story_miniquest_006")) return;
-              if (isDeepStade && !cleanUrl.includes("0x2FF907D4")) return;
-              if (isDeepShop && !cleanUrl.includes("1526934762")) return;
-              if (isDeepPassive && !cleanUrl.includes("0xE0BC6774")) return;
-              if (isDeepCoach && !cleanUrl.includes("1")) return;
+              if (isDeepChara && !cleanUrl.includes("mark-evans")) continue;
+              if (isDeepSkill && !cleanUrl.includes("whd00010")) continue;
+              if (isDeepItem && !cleanUrl.includes("0x5F0F1EAC")) continue;
+              if (isDeepAura && !cleanUrl.includes("keshin_0x8CEAA470")) continue;
+              if (isDeepTactic && !cleanUrl.includes("0x790F3F39")) continue;
+              if (isDeepQuest && !cleanUrl.includes("0x8933A62B")) continue;
+              if (isDeepTrophy && !cleanUrl.includes("activity_story_miniquest_006")) continue;
+              if (isDeepStade && !cleanUrl.includes("0x2FF907D4")) continue;
+              if (isDeepShop && !cleanUrl.includes("1526934762")) continue;
+              if (isDeepPassive && !cleanUrl.includes("0xE0BC6774")) continue;
+              if (isDeepCoach && !cleanUrl.includes("1")) continue;
 
               // Avoid static files or API routes
               if (
@@ -70,14 +90,14 @@ async function crawl() {
                 cleanUrl.endsWith(".jpg") ||
                 cleanUrl.endsWith(".webp")
               ) {
-                return;
+                continue;
               }
 
               queue.push(cleanUrl);
             }
           }
         }
-      });
+      }
     } catch (error) {
       console.error(`Error fetching ${url}:`, error);
     }

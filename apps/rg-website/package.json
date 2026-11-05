@@ -106,7 +106,6 @@
     "@types/pica": "catalog:",
     "better-auth": "catalog:",
     "browser-image-compression": "catalog:",
-    "cheerio": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "catalog:",

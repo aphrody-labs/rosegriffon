@@ -6,7 +6,7 @@
 
 import { crawlDataPath } from "../../lib/shared-path";
 import { WebCdpPage, waitForSelector } from "../../lib/web-cdp";
-import * as cheerio from "cheerio";
+import { extrairePatchNotes, extraireTopics } from "./html-extract";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
@@ -50,25 +50,7 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
         const topicsIndexHtml = await page.content();
         await writeFile(join(topicsDir, "index.html"), topicsIndexHtml);
 
-        const $topics = cheerio.load(topicsIndexHtml);
-        const topicLinks: { id: string; url: string; title: string; date: string }[] = [];
-
-        $topics("ul.list li").each((_, el) => {
-          const dt = $topics(el).find("dt").text().trim();
-          const dd = $topics(el).find("dd");
-          const link = dd.find("a");
-          const href = link.attr("href") || "";
-          const title = link.text().trim();
-
-          if (!href || !title) return;
-
-          const absoluteUrl = href.startsWith("http") ? href : `https://www.inazuma.jp${href}`;
-          const id = absoluteUrl.split("/").filter(Boolean).pop() || "";
-
-          if (id && id !== "topics" && id !== "fr" && id !== "en") {
-            topicLinks.push({ id, url: absoluteUrl, title, date: dt });
-          }
-        });
+        const topicLinks = extraireTopics(topicsIndexHtml);
 
         console.log(`[Crawl News] Topics [${locale}] : ${topicLinks.length} trouvés. Traitement des détails...`);
 
@@ -131,25 +113,7 @@ export async function crawlNews(): Promise<{ success: boolean; error?: string }>
           await waitForSelector(page, "body", 15000).catch(() => {});
           const platformHtml = await page.content();
 
-          const $patch = cheerio.load(platformHtml);
-          const patchLinks: { id: string; url: string; title: string; date: string }[] = [];
-
-          $patch("a").each((_, el) => {
-            const href = $patch(el).attr("href");
-            if (!href || !href.includes("/ver_")) return;
-
-            const fullText = $patch(el).text().trim();
-            const dateMatch = fullText.match(/(\d{4}\.\d{1,2}\.\d{1,2})/);
-            const date = dateMatch ? dateMatch[0] : "";
-            const title = fullText.replace(date, "").replace("[JST]", "").replace(/\s+/g, " ").trim();
-
-            const absoluteUrl = href.startsWith("http") ? href : `https://www.inazuma.jp${href}`;
-            const id = absoluteUrl.split("/").filter(Boolean).pop() || "";
-
-            if (id && !patchLinks.find(p => p.id === id)) {
-              patchLinks.push({ id, url: absoluteUrl, title: title || "Patch Note", date });
-            }
-          });
+          const patchLinks = extrairePatchNotes(platformHtml);
 
           await writeFile(join(platformDir, "index.json"), JSON.stringify(patchLinks, null, 2));
           console.log(`[Crawl News] Platform [${locale}] ${platform} : ${patchLinks.length} patch notes trouvés.`);
