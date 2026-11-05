@@ -43,16 +43,13 @@ const db = new Database(sortie, { create: true, strict: true });
 db.exec("pragma journal_mode = off; pragma synchronous = off;");
 
 /** Valeur Postgres → valeur SQLite : objets et tableaux en JSON, dates en ISO. */
-const versSqlite = (v: unknown) =>
-  v === null || v === undefined
-    ? null
-    : v instanceof Date
-      ? v.toISOString()
-      : typeof v === "object"
-        ? JSON.stringify(v)
-        : typeof v === "boolean"
-          ? Number(v)
-          : v;
+const versSqlite = (v: unknown): string | number | bigint | null => {
+  if (v === null || v === undefined) return null;
+  if (v instanceof Date) return v.toISOString();
+  if (typeof v === "boolean") return Number(v);
+  if (typeof v === "number" || typeof v === "bigint" || typeof v === "string") return v;
+  return JSON.stringify(v);
+};
 
 const ident = (n: string) => `"${n.replaceAll('"', '""')}"`;
 let total = 0;
