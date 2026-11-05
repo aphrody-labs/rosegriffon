@@ -71,6 +71,9 @@ describe("/player settings", () => {
     await new CommandePlayer().settings(interaction as never);
     expect(appels.map(a => a.chemin)).toEqual([`/users/${MOI}`, "/auth/oauth/twitch/start"]);
     expect(interaction.texte()).toContain("id.twitch.tv");
+    // Embed et boutons de `OAuthService` de l'ancien bot.
+    for (const legacy of ["Twitch - OAuth", "Powered by alessss_", "Me connecter à Twitch", "Je refuse la connexion", "dismiss-message"])
+      expect(interaction.texte()).toContain(legacy);
   });
 
   test("Twitch déjà lié", async () => {
@@ -116,7 +119,8 @@ describe("/blacklist", () => {
     api({ "GET /blacklist": { data: [entree] } });
     const interaction = fausseInteraction();
     await new CommandeListeNoire().blacklist(undefined, interaction as never);
-    expect(interaction.texte()).toContain(`\`${AUTRE.id}\` : Akira`);
+    // Texte brut de `blacklist-view.ts` de l'ancien bot (JSON : saut de ligne échappé).
+    expect(interaction.texte()).toContain(`Liste des utilisateurs sur la liste noire:\\n- ${AUTRE.id}: Akira (akira)`);
   });
 
   test("un joueur présent / absent", async () => {

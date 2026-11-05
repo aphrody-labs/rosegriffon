@@ -44,6 +44,9 @@ describe("/ping", () => {
     expect(installation.appels.map(a => a.chemin).toSorted()).toEqual(["/bot/maintenance", "/health"]);
     expect(interaction.texte()).toContain("Tous systèmes opérationnels");
     expect(interaction.texte()).toContain("Guilds");
+    // Couleur et pied de l'ancien bot : Colors.Green, « Latence totale : N ms » seul.
+    expect(interaction.texte()).toContain('"color":5763719');
+    expect(interaction.texte()).toMatch(/"footer":{"text":"Latence totale : [0-9]+ ms"}/);
   });
 
   test("API en échec : dégradé, avec le motif", async () => {
@@ -53,5 +56,6 @@ describe("/ping", () => {
     await new CommandesGenerales().ping(true, interaction as never);
     expect(interaction.texte()).toContain("Dégradé");
     expect(interaction.texte()).toContain("base injoignable");
+    expect(interaction.texte()).toContain('"color":16705372');
   });
 });

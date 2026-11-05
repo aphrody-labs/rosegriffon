@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 
 import { fausseInteraction, installerApi, type AppelApi } from "../../../test/achillea-kit";
-import { CommandeOwner, roleCible } from "./owner";
+import { CommandeOwner, roleCible, texteMaintenance } from "./owner";
 
 let restaurer: (() => void) | null = null;
 afterEach(() => {
@@ -66,7 +66,7 @@ describe("/owner bot-role", () => {
     const interaction = fausseInteraction();
     await new CommandeOwner().botRole("add", CIBLE as never, "admin", interaction as never);
     expect(appels[0]?.corps).toEqual({ role: 2 });
-    expect(interaction.texte()).toContain("est désormais administrateur");
+    expect(interaction.texte()).toContain("is now a bot admin !");
   });
 
   test("refus (403)", async () => {
@@ -83,7 +83,8 @@ describe("/owner maintenance et resync-users", () => {
     const interaction = fausseInteraction();
     await new CommandeOwner().maintenance(true, interaction as never);
     expect(appels[0]?.corps).toEqual({ maintenance: true });
-    expect(interaction.texte()).toContain("activé");
+    expect(interaction.texte()).toContain("✅ Le mode maintenance a été définie à `on`.");
+    expect(texteMaintenance(false, "en-US")).toBe("Maintenance mode set to `off`.");
   });
 
   test("maintenance refusée (403)", async () => {

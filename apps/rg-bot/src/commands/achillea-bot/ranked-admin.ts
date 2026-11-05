@@ -18,11 +18,26 @@ import {
 
 import { appelApi } from "../../lib/achillea-ui";
 import { horodatage, libelleMode, lienCapture, signe, utilisateurDe } from "../../lib/achillea-moderation";
-import { echapper, fiche, piedDeCommande } from "../../lib/ui";
+import { COULEURS_LEGACY, finirCommeLegacy } from "../../lib/achillea-legacy";
+import { echapper, fiche } from "../../lib/ui";
 
 /** Origine publique du ranked, qui sert les captures de litige (`/storage/disputes/*`). */
 export function origineRanked(env: Record<string, string | undefined> = Bun.env): string {
   return (env.RANKED_PUBLIC_URL ?? "https://ranked.rosegriffon.fr").replace(/\/$/u, "");
+}
+
+/**
+ * ΔElo des deux joueurs, comme l'ancien embed (« ΔELO joueur 1 / joueur 2 »).
+ * Le ranked rend `{ p1, p2 }` ; une réponse réduite à un seul nombre ne
+ * renseigne que le joueur 1.
+ */
+export function deltasElo(delta: unknown): [string, string] {
+  if (typeof delta === "number") return [signe(delta), "—"];
+  if (delta && typeof delta === "object") {
+    const { p1, p2 } = delta as { p1?: unknown; p2?: unknown };
+    return [typeof p1 === "number" ? signe(p1) : "—", typeof p2 === "number" ? signe(p2) : "—"];
+  }
+  return ["—", "—"];
 }
 
 @Discord()
@@ -35,14 +50,16 @@ export class CommandeRankedAdmin {
     const litiges = await appelApi(interaction, c => c.ranked.adminDisputes(), "Litiges illisibles");
     if (!litiges) return;
     if (litiges.length === 0) {
-      const embed = fiche({ intention: "succes", icone: "🎖️", titre: "Litiges ranked", description: "Aucun litige en attente. ✅" }).finir();
-      await interaction.editReply({ embeds: [piedDeCommande(embed, interaction)] });
+      const embed = finirCommeLegacy(
+        fiche({ icone: "🎖️", titre: "Litiges ranked", description: "Aucun litige en attente. ✅" }),
+        COULEURS_LEGACY.vert,
+      );
+      await interaction.editReply({ embeds: [embed] });
       return;
     }
     const origine = origineRanked();
     const vus = litiges.slice(0, 10);
     const embed = fiche({
-      intention: "attention",
       icone: "🎖️",
       titre: `Litiges ranked en attente (${litiges.length})`,
       description: "Utilisez `/ranked-admin valider` ou `/ranked-admin annuler` avec l'ID du lobby.",
@@ -57,9 +74,11 @@ export class CommandeRankedAdmin {
     }
     await interaction.editReply({
       embeds: [
-        piedDeCommande(embed.finir(), interaction, {
-          note: litiges.length > vus.length ? `… et ${litiges.length - vus.length} autre(s) litige(s)` : null,
-        }),
+        finirCommeLegacy(
+          embed,
+          COULEURS_LEGACY.orange,
+          litiges.length > vus.length ? `… et ${litiges.length - vus.length} autre(s) litige(s) non affiché(s).` : null,
+        ),
       ],
     });
   }
@@ -89,13 +108,17 @@ export class CommandeRankedAdmin {
       `Validation du lobby #${lobbyId} refusée`,
     );
     if (!resultat) return;
-    const embed = fiche({ intention: "succes", titre: `Litige tranché — Lobby #${lobbyId}` })
-      .champ("Score appliqué", `**${score1}** — **${score2}**`, { enLigne: true })
-      .champ("ΔELO", resultat.eloDelta === undefined ? "—" : signe(resultat.eloDelta), { enLigne: true })
-      .champ("Forfait", forfeitUserId ? `<@${forfeitUserId}>` : "Aucun")
-      .champ("Arbitre", `<@${interaction.user.id}>`)
-      .finir();
-    await interaction.editReply({ embeds: [piedDeCommande(embed, interaction)] });
+    const [delta1, delta2] = deltasElo(resultat.eloDelta);
+    const embed = finirCommeLegacy(
+      fiche({ icone: "✅", titre: `Litige tranché — Lobby #${lobbyId}` })
+        .champ("Score appliqué", `**${score1}** — **${score2}**`, { enLigne: true })
+        .champ("ΔELO joueur 1", delta1, { enLigne: true })
+        .champ("ΔELO joueur 2", delta2, { enLigne: true })
+        .champ("Forfait", forfeitUserId ? `<@${forfeitUserId}>` : "Aucun")
+        .champ("Arbitre", `<@${interaction.user.id}>`),
+      COULEURS_LEGACY.vert,
+    );
+    await interaction.editReply({ embeds: [embed] });
   }
 
   @Slash({ name: "annuler", description: "Annuler un match (aucun ELO appliqué)" })
@@ -107,15 +130,15 @@ export class CommandeRankedAdmin {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const resultat = await appelApi(interaction, c => c.ranked.adminCancelLobby(lobbyId), `Annulation du lobby #${lobbyId} refusée`);
     if (!resultat) return;
-    const embed = fiche({
-      intention: "echec",
-      icone: "🚫",
-      titre: `Match annulé — Lobby #${lobbyId}`,
-      description: "Aucun point d'ELO n'a été appliqué.",
-    })
-      .champ("Arbitre", `<@${interaction.user.id}>`)
-      .finir();
-    await interaction.editReply({ embeds: [piedDeCommande(embed, interaction)] });
+    const embed = finirCommeLegacy(
+      fiche({
+        icone: "🚫",
+        titre: `Match annulé — Lobby #${lobbyId}`,
+        description: "Aucun point d'ELO n'a été appliqué.",
+      }).champ("Arbitre", `<@${interaction.user.id}>`),
+      COULEURS_LEGACY.rouge,
+    );
+    await interaction.editReply({ embeds: [embed] });
   }
 
   @Slash({ name: "logs", description: "Consulter le journal des événements ranked" })
@@ -139,13 +162,12 @@ export class CommandeRankedAdmin {
       return `${horodatage(e.createdAt, "t")} · \`${e.type}\` · ${acteur}${lobby}`;
     });
     const embed = fiche({
-      intention: "info",
       icone: "📜",
       titre: `Journal ranked${portee}`,
       description: lignes.length ? lignes.join("\n").slice(0, 4000) : "Aucun événement.",
-    }).finir();
+    });
     await interaction.editReply({
-      embeds: [piedDeCommande(embed, interaction, { note: `${evenements.length} dernier(s) événement(s)` })],
+      embeds: [finirCommeLegacy(embed, COULEURS_LEGACY.bleu, lignes.length ? `${evenements.length} dernier(s) événement(s)` : null)],
     });
   }
 }

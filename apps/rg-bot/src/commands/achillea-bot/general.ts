@@ -14,7 +14,8 @@ import {
 } from "discord.js";
 
 import { lireApi, urlAchillea } from "../../lib/achillea-ui";
-import { fiche, formaterDuree, formaterOctets, piedDeCommande } from "../../lib/ui";
+import { COULEURS_LEGACY, dureeLegacy, finirCommeLegacy, octetsLegacy } from "../../lib/achillea-legacy";
+import { fiche } from "../../lib/ui";
 
 export interface Controle {
   nom: string;
@@ -96,7 +97,6 @@ export class CommandesGenerales {
     const memoire = process.memoryUsage();
     const toutVa = controles.every(c => c.ok);
     const embed = fiche({
-      intention: toutVa ? "succes" : "attention",
       icone: "🏓",
       titre: "Pong — Achilléa Bot",
       description: toutVa ? "🟢 Tous systèmes opérationnels" : "🟠 Dégradé",
@@ -105,9 +105,9 @@ export class CommandesGenerales {
       .champ(
         "Process",
         [
-          `⏱️ Uptime : \`${formaterDuree(process.uptime() * 1000)}\``,
-          `💾 RSS : \`${formaterOctets(memoire.rss)}\``,
-          `🧠 Heap : \`${formaterOctets(memoire.heapUsed)} / ${formaterOctets(memoire.heapTotal)}\``,
+          `⏱️ Uptime : \`${dureeLegacy(process.uptime())}\``,
+          `💾 RSS : \`${octetsLegacy(memoire.rss)}\``,
+          `🧠 Heap : \`${octetsLegacy(memoire.heapUsed)} / ${octetsLegacy(memoire.heapTotal)}\``,
           `📦 Bun : \`v${Bun.version}\``,
         ].join("\n"),
         { enLigne: true },
@@ -121,10 +121,12 @@ export class CommandesGenerales {
           `🆔 Shard : \`${interaction.guild?.shardId ?? 0}\``,
         ].join("\n"),
         { enLigne: true },
-      )
-      .finir();
+      );
+    // Ancien bot : vert (Colors.Green) si tout va, jaune (Colors.Yellow) sinon ; pied = latence seule.
     await interaction.editReply({
-      embeds: [piedDeCommande(embed, interaction, { note: `Latence totale : ${Date.now() - debut} ms` })],
+      embeds: [
+        finirCommeLegacy(embed, toutVa ? COULEURS_LEGACY.vert : COULEURS_LEGACY.jaune, `Latence totale : ${Date.now() - debut} ms`),
+      ],
     });
   }
 }

@@ -19,6 +19,7 @@ import {
   AttachmentBuilder,
   ButtonBuilder,
   ButtonStyle,
+  EmbedBuilder,
   MessageFlags,
   type ChatInputCommandInteraction,
   type GuildMember,
@@ -26,8 +27,9 @@ import {
 } from "discord.js";
 
 import { appelApi, urlAchillea } from "../../lib/achillea-ui";
+import { COULEURS_LEGACY, dateFrancaiseLegacy, embedEchecLegacy, embedSuccesLegacy } from "../../lib/achillea-legacy";
 import { horodatage, utilisateurDe } from "../../lib/achillea-moderation";
-import { boutonLien, echapper, fiche, piedDeCommande, succes, repondre } from "../../lib/ui";
+import { echapper, fiche } from "../../lib/ui";
 
 type StatsCompetition = { total: number; wins: number; losses: number; draws: number };
 
@@ -77,11 +79,14 @@ export class CommandePlayer {
     );
     if (!joueur) return;
 
+    // Cadre de `buildUserEmbed(…, "Infos", Colors.Blue)` de l'ancien bot :
+    // « <nom affiché> - Infos », bleu, avatar Discord, ni pied ni horodatage.
     const embed = fiche({
-      intention: "marque",
-      titre: joueur.rgProfileUsername ?? joueur.username,
+      couleur: COULEURS_LEGACY.bleu,
+      horodater: false,
+      titre: `${cible.displayName ?? cible.username} - Infos`,
       url: urlAchillea(`/users/${joueur.id}`),
-      miniature: joueur.avatar ?? null,
+      miniature: cible.displayAvatarURL?.() ?? joueur.avatar ?? null,
       description: joueur.bio ? echapper(joueur.bio) : undefined,
     })
       .champ(
@@ -106,7 +111,7 @@ export class CommandePlayer {
     if (joueur.lastInteract) embed.champ("Dernière activité", horodatage(joueur.lastInteract, "R"), { enLigne: true });
 
     await interaction.editReply({
-      embeds: [piedDeCommande(embed.finir(), interaction)],
+      embeds: [embed.embed],
       components: [boutonsFicheJoueur(joueur.id)],
     });
   }
@@ -117,7 +122,7 @@ export class CommandePlayer {
     const moi = await appelApi(interaction, c => c.users.get(interaction.user.id), "Profil joueur introuvable");
     if (!moi) return;
     if (moi.twitchUrl) {
-      await repondre(interaction, succes("Twitch déjà lié", `Votre compte Twitch est déjà lié à cette application : ${moi.twitchUrl}`));
+      await interaction.editReply({ embeds: [embedSuccesLegacy("Votre compte Twitch est déjà lié à cette application !")] });
       return;
     }
     const lien = await appelApi(
@@ -126,18 +131,50 @@ export class CommandePlayer {
       "Liaison Twitch indisponible",
     );
     if (!lien) return;
-    const embed = fiche({
-      intention: "info",
-      titre: "Lier votre compte Twitch",
-      description:
-        "Associez votre chaîne Twitch à votre profil Achilléa : elle s'affichera sur votre fiche et sur le site.\n" +
-        "Le lien ci-dessous est personnel et valable 10 minutes.",
-    }).finir();
-    await interaction.editReply({
-      embeds: [piedDeCommande(embed, interaction)],
-      components: [new ActionRowBuilder<ButtonBuilder>().addComponents(boutonLien({ libelle: "Lier Twitch", url: lien.url }))],
-    });
+    await interaction.editReply({ embeds: [embedOAuthTwitch()], components: [boutonsOAuthTwitch(lien.url)] });
   }
+}
+
+/** Émoji Twitch du serveur de production de l'ancien bot. */
+const EMOJI_TWITCH = "<:twitch_logo:1436631494146658326>";
+
+/** `OAuthService.OAuthTwitchEmbed()` de l'ancien bot, mot pour mot. */
+export function embedOAuthTwitch(): EmbedBuilder {
+  return new EmbedBuilder()
+    .setDescription(
+      "Ce procédé appelé OAuth permet à AchilleaBot :\n" +
+        "- De récupérer votre identifiant Twitch \n" +
+        "- De récupérer l'adresse mail utilisée pour créer le compte Twitch\n" +
+        "\n" +
+        "__AchilleaBot ne reçoit et ne stocke que l'identifiant Twitch.__\n" +
+        "\n\n" +
+        "**Pour quoi faire ?**\n" +
+        "__Pour pouvoir vous mettre en avant lorsque vous streamez, le bot a besoin de cet identifiant pour interroger Twitch sur votre statut.__" +
+        '\nEn effet, pour pouvoir demander à Twitch *"Monsieur X est-il en stream ?"*, il nous faut un moyen de lui indiquer de quel Monsieur X nous parlons !\n' +
+        "\n\n" +
+        "**Toujours pas convaincu ?**\n" +
+        "[L'article 15 du RGPD](https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article15) nous impose un devoir de transparence quant au traitement de vos données.\n" +
+        "__Vous pouvez donc à tout moment vous adresser à nous afin de confirmer les données vous concernant et la manière dont elles sont utilisées.__\n",
+    )
+    .setTitle(`${EMOJI_TWITCH} Twitch - OAuth`)
+    .setColor(0x91_46_ff)
+    .setFooter({
+      text: "Powered by alessss_",
+      iconURL: "https://cdn.discordapp.com/avatars/238660901375442954/00febf9a57a91e1f922411b0531a9684",
+    })
+    .setTimestamp(new Date());
+}
+
+/** `OAuthService.OAuthButtons(url)` : lien Twitch + refus (`dismiss-message`). */
+export function boutonsOAuthTwitch(url: string): ActionRowBuilder<ButtonBuilder> {
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder().setLabel("Me connecter à Twitch").setStyle(ButtonStyle.Link).setURL(url).setEmoji(EMOJI_TWITCH),
+    new ButtonBuilder()
+      .setLabel("Je refuse la connexion")
+      .setStyle(ButtonStyle.Danger)
+      .setCustomId("dismiss-message")
+      .setEmoji("🙅‍♂️"),
+  );
 }
 
 @Discord()
@@ -175,40 +212,43 @@ export class CommandeListeNoire {
       const statut = await appelApi(interaction, c => c.blacklist.get(cible.id), "Impossible de trouver cet utilisateur");
       if (!statut) return;
       if (!statut.entry) {
-        const embed = fiche({ intention: "succes", titre: `${echapper(cible.username)} n'est pas sur la liste noire` }).finir();
-        await interaction.editReply({ embeds: [piedDeCommande(embed, interaction)] });
+        await interaction.editReply({
+          embeds: [embedEchecLegacy(`L'utilisateur ${cible.displayName ?? cible.username} n'est pas sur la liste noire`)],
+        });
         return;
       }
-      const entree = statut.entry;
-      const embed = fiche({
-        intention: "echec",
-        icone: "⛔",
-        titre: `${echapper(entree.displayName)} - Liste Noire`,
-        description: `**Raison :** ${
-          entree.reason || "Cet utilisateur est présent sur la Liste Noire d'Achilléa sur décision des Administrateurs."
-        }`,
-      })
-        .champ("Identifiant", entree.userId, { enLigne: true })
-        .champ("Nom d'utilisateur", entree.username ?? "—", { enLigne: true })
-        .champ("Depuis le", horodatage(entree.since, "f"), { enLigne: true })
-        .finir();
-      await interaction.editReply({ embeds: [piedDeCommande(embed, interaction)] });
+      await interaction.editReply({ embeds: [ficheListeNoire(statut.entry)] });
       return;
     }
     const liste = await appelApi(interaction, c => c.blacklist.list(), "Liste noire illisible");
     if (!liste) return;
-    if (liste.data.length === 0) {
-      const embed = fiche({ intention: "muet", titre: "Il n'y a aucun utilisateur sur la liste noire." }).finir();
-      await interaction.editReply({ embeds: [piedDeCommande(embed, interaction)] });
-      return;
-    }
-    const embed = fiche({
-      intention: "marque",
-      titre: `Liste noire (${liste.data.length})`,
-      description: liste.data
-        .map(e => `- \`${e.userId}\` : ${echapper(e.displayName)} (${echapper(e.username ?? "—")})`)
-        .join("\n"),
-    }).finir();
-    await interaction.editReply({ embeds: [piedDeCommande(embed, interaction)] });
+    await interaction.editReply({ content: texteListeNoire(liste.data) });
   }
+}
+
+type EntreeListeNoire = { userId: string; displayName: string; username?: string | null; reason?: string | null; since?: string | Date | null };
+
+/** `blacklistedUserEmbed` de l'ancien bot. */
+export function ficheListeNoire(entree: EntreeListeNoire): EmbedBuilder {
+  return new EmbedBuilder()
+    .setColor(COULEURS_LEGACY.presqueNoir)
+    .setTitle(`${entree.displayName} - Liste Noire`.slice(0, 256))
+    .setDescription(
+      `**Raison:** ${
+        entree.reason || "Cet utilisateur est présent sur la Liste Noire d'Achillea sur décision des Administrateurs."
+      }`.slice(0, 4096),
+    )
+    .addFields(
+      { name: "Identifiant", value: `${entree.userId}`, inline: true },
+      { name: "Nom d'utilisateur", value: `${entree.username ?? "—"}`, inline: true },
+      { name: "Depuis le", value: dateFrancaiseLegacy(entree.since), inline: true },
+    )
+    .setTimestamp();
+}
+
+/** Liste complète, en texte brut comme l'ancien bot (bornée aux 2 000 caractères d'un message). */
+export function texteListeNoire(entrees: readonly EntreeListeNoire[]): string {
+  if (entrees.length === 0) return "Il n'y a aucun utilisateur sur la liste noire.";
+  const lignes = entrees.map(e => `- ${e.userId}: ${e.displayName} (${e.username ?? "—"})`).join("\n");
+  return `Liste des utilisateurs sur la liste noire:\n${lignes}`.slice(0, 2000);
 }

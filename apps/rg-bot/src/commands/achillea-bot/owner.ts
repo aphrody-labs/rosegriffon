@@ -24,13 +24,23 @@ import {
 
 import { appelApi } from "../../lib/achillea-ui";
 import { utilisateurDe } from "../../lib/achillea-moderation";
+import { embedSuccesLegacy } from "../../lib/achillea-legacy";
 import { attention, echapper, repondre, succes } from "../../lib/ui";
 
 export const ROLES_BOT: Readonly<Record<string, { role: UserRole; libelle: string }>> = Object.freeze({
-  mod: { role: UserRole.Moderator, libelle: "modérateur" },
-  admin: { role: UserRole.Administrator, libelle: "administrateur" },
-  superadmin: { role: UserRole.SuperAdministrator, libelle: "super-administrateur" },
+  mod: { role: UserRole.Moderator, libelle: "bot moderator" },
+  admin: { role: UserRole.Administrator, libelle: "bot admin" },
+  superadmin: { role: UserRole.SuperAdministrator, libelle: "bot super admin" },
 });
+
+/** `COMMANDS.MAINTENANCE.EMBED.DESCRIPTION` de l'ancien bot, dans la langue du membre (fr par défaut). */
+export function texteMaintenance(actif: boolean, locale?: string | null): string {
+  const etat = actif ? "on" : "off";
+  if (locale?.startsWith("en")) return `Maintenance mode set to \`${etat}\`.`;
+  if (locale === "ru") return `Режим Технического Обслуживания установлен на \`${etat}\`.`;
+  if (locale === "uk") return `Режим технічних робіт встановлено на \`${etat}\`.`;
+  return `Le mode maintenance a été définie à \`${etat}\`.`;
+}
 
 /** Rôle à écrire : celui demandé à l'ajout, `User` au retrait (comportement de l'ancien dépôt). */
 export function roleCible(action: string, role: string): UserRole | null {
@@ -59,7 +69,7 @@ export class CommandeOwner {
     const cible = utilisateurDe(brut);
     const entree = await appelApi(interaction, c => c.blacklist.add(cible.id, raison), "Ajout à la liste noire refusé");
     if (!entree) return;
-    await repondre(interaction, succes("Liste noire", `L'utilisateur ${nomDe(cible)} a été ajouté à la liste noire.`));
+    await interaction.editReply({ embeds: [embedSuccesLegacy(`L'utilisateur ${nomDe(cible)} a été ajouté à la liste noire`)] });
   }
 
   @Slash({ name: "blacklist-remove", description: "Retirer un joueur de la liste noire" })
@@ -75,7 +85,7 @@ export class CommandeOwner {
     const retrait = await appelApi(interaction, c => c.blacklist.remove(cible.id), "Retrait de la liste noire refusé");
     if (!retrait) return;
     console.info(`[owner] ${interaction.user.id} retire ${cible.id} de la liste noire : ${raison}`);
-    await repondre(interaction, succes("Liste noire", `L'utilisateur ${nomDe(cible)} a été retiré de la liste noire.`));
+    await interaction.editReply({ embeds: [embedSuccesLegacy(`L'utilisateur ${nomDe(cible)} a été retiré de la liste noire`)] });
   }
 
   @Slash({ name: "bot-role", description: "Donner ou retirer un rôle du bot à un utilisateur" })
@@ -115,13 +125,10 @@ export class CommandeOwner {
       }
     }
     const libelle = ROLES_BOT[role]?.libelle ?? role;
-    await repondre(
-      interaction,
-      succes(
-        "Rôle du bot",
-        `${nomDe(cible)} ${action === "add" ? "est désormais" : "n'est plus"} ${libelle} du bot.${note}`,
-      ),
-    );
+    // Texte de `bot-role.ts` de l'ancien bot : « X is now a bot admin ! ».
+    const embed = embedSuccesLegacy(`${nomDe(cible)} is ${action === "add" ? "now" : "no longer"} a ${libelle} !`);
+    if (note) embed.setDescription(note.trim());
+    await interaction.editReply({ embeds: [embed] });
   }
 
   @Slash({ name: "maintenance", description: "Met le mode maintenance du bot." })
@@ -133,10 +140,7 @@ export class CommandeOwner {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     const resultat = await appelApi(interaction, c => c.admin.setMaintenance(etat), "Maintenance non modifiée");
     if (!resultat) return;
-    await repondre(
-      interaction,
-      succes("Maintenance", `Le mode maintenance est désormais **${resultat.maintenance ? "activé" : "désactivé"}**.`),
-    );
+    await interaction.editReply({ embeds: [embedSuccesLegacy(texteMaintenance(resultat.maintenance, interaction.locale))] });
   }
 
   @Slash({ name: "resync-users", description: "Réindexe pseudo, nom et avatar de tous les comptes depuis Discord" })

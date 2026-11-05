@@ -37,7 +37,8 @@ import {
   type Sanction,
   type ServeurModerable,
 } from "../../lib/achillea-moderation";
-import { echapper, echec, fiche, piedDeCommande, repondre } from "../../lib/ui";
+import { COULEURS_LEGACY, finirCommeLegacy } from "../../lib/achillea-legacy";
+import { echapper, echec, fiche, repondre } from "../../lib/ui";
 
 /** Serveur Discord où appliquer l'effet, ou `null` hors serveur. */
 async function serveurDe(interaction: ChatInputCommandInteraction, guildId: string): Promise<ServeurModerable | null> {
@@ -125,11 +126,13 @@ export class CommandeSanction {
     );
     if (!sanction) return;
 
-    const embed = fiche({ intention: "attention", icone: "⚠️", titre: "Avertissement émis" })
-      .champ("Utilisateur", ligneUtilisateur(cible), { enLigne: true })
-      .champ("ID sanction", `\`${sanction.id}\``, { enLigne: true })
-      .champ("Raison", raison)
-      .finir();
+    const embed = finirCommeLegacy(
+      fiche({ icone: "⚠️", titre: "Avertissement émis" })
+        .champ("Utilisateur", ligneUtilisateur(cible), { enLigne: true })
+        .champ("Raison", raison)
+        .champ("ID sanction", `\`${sanction.id}\``, { enLigne: true }),
+      COULEURS_LEGACY.jaune,
+    );
 
     // Escalade : relue sur la liste de l'API, jamais bloquante pour l'avertissement lui-même.
     const historique = await sanctionsActives(interaction, cible.id, guildId);
@@ -158,7 +161,6 @@ export class CommandeSanction {
           (probleme ? `\nEffet Discord échoué : ${probleme}` : ""),
       });
     }
-    piedDeCommande(embed, interaction);
     await interaction.editReply({ embeds: [embed] });
   }
 
@@ -187,6 +189,8 @@ export class CommandeSanction {
     await this.emettre(interaction, cible, SanctionType.Mute, raison, duree, {
       titre: "Mute appliqué",
       icone: "🔇",
+      couleur: COULEURS_LEGACY.orange,
+      sansExpiration: "—",
       echecEffet: "effet Discord échoué",
     });
   }
@@ -205,6 +209,8 @@ export class CommandeSanction {
     await this.emettre(interaction, cible, SanctionType.Kick, raison, null, {
       titre: "Utilisateur expulsé",
       icone: "👢",
+      couleur: COULEURS_LEGACY.rouge,
+      sansExpiration: "Jamais",
       echecEffet: "expulsion échouée",
     });
   }
@@ -233,6 +239,8 @@ export class CommandeSanction {
     await this.emettre(interaction, cible, SanctionType.Ban, raison, duree, {
       titre: "Utilisateur banni",
       icone: "🔨",
+      couleur: COULEURS_LEGACY.rougeFonce,
+      sansExpiration: "Jamais",
       echecEffet: "bannissement Discord échoué",
     });
   }
@@ -254,22 +262,23 @@ export class CommandeSanction {
     const sanctions = page.data;
     const titre = `${echapper(cible.username)} — Sanctions actives${sanctions.length ? ` (${sanctions.length})` : ""}`;
     if (sanctions.length === 0) {
-      const embed = fiche({ intention: "succes", titre, description: "Aucune sanction active." }).finir();
-      await interaction.editReply({ embeds: [piedDeCommande(embed, interaction)] });
+      const embed = finirCommeLegacy(fiche({ titre, description: "Aucune sanction active." }), COULEURS_LEGACY.vert);
+      await interaction.editReply({ embeds: [embed] });
       return;
     }
     const MAX = 20;
     const vus = sanctions.slice(0, MAX);
-    const embed = fiche({ intention: "attention", titre, description: `<@${cible.id}>` })
+    const liste = fiche({ titre, description: `<@${cible.id}>` })
       .champ("Type", vus.map(s => s.type).join("\n"), { enLigne: true })
       .champ("Raison", vus.map(s => (s.reason ? s.reason.slice(0, 40) : "—")).join("\n"), { enLigne: true })
       .champ("Durée", vus.map(s => (s.durationSec ? formaterDureeCourte(s.durationSec) : "—")).join("\n"), { enLigne: true })
       .champ("Expire", vus.map(s => horodatage(s.expiresAt, "R")).join("\n"), { enLigne: true })
-      .champ("ID", vus.map(s => `\`${s.id}\``).join("\n"), { enLigne: true })
-      .finir();
-    piedDeCommande(embed, interaction, {
-      note: sanctions.length > MAX ? `… et ${sanctions.length - MAX} autre(s) non affichée(s)` : null,
-    });
+      .champ("ID (tronqué)", vus.map(s => `\`${s.id.slice(0, 8)}…\``).join("\n"), { enLigne: true });
+    const embed = finirCommeLegacy(
+      liste,
+      COULEURS_LEGACY.orange,
+      sanctions.length > MAX ? `… et ${sanctions.length - MAX} autre(s) sanction(s) non affichée(s).` : null,
+    );
     await interaction.editReply({ embeds: [embed] });
   }
 
@@ -285,14 +294,16 @@ export class CommandeSanction {
     const sanction = await appelApi(interaction, c => c.sanctions.revoke(id.trim(), raison), "Révocation refusée");
     if (!sanction) return;
     const probleme = await effet(interaction, sanction, true);
-    const embed = fiche({ intention: "succes", titre: "Sanction révoquée" })
-      .champ("ID sanction", `\`${sanction.id}\``, { enLigne: true })
-      .champ("Type", sanction.type, { enLigne: true })
-      .champ("Utilisateur", `<@${sanction.userId}>`, { enLigne: true })
-      .champ("Raison de révocation", raison)
-      .finir();
+    const embed = finirCommeLegacy(
+      fiche({ icone: "✅", titre: "Sanction révoquée" })
+        .champ("ID sanction", `\`${sanction.id}\``, { enLigne: true })
+        .champ("Type", sanction.type, { enLigne: true })
+        .champ("Utilisateur", `<@${sanction.userId}>`, { enLigne: true })
+        .champ("Raison de révocation", raison),
+      COULEURS_LEGACY.vert,
+    );
     if (probleme) embed.addFields({ name: "Effet Discord", value: `Révoquée en base mais effet Discord échoué : ${probleme}` });
-    await interaction.editReply({ embeds: [piedDeCommande(embed, interaction)] });
+    await interaction.editReply({ embeds: [embed] });
   }
 
   /** Enregistre la sanction, applique son effet, rend compte. */
@@ -302,7 +313,7 @@ export class CommandeSanction {
     type: SanctionType,
     raison: string,
     duree: number | null,
-    textes: { titre: string; icone: string; echecEffet: string },
+    textes: { titre: string; icone: string; echecEffet: string; couleur: number; sansExpiration: string },
   ): Promise<void> {
     const guildId = interaction.guildId as string;
     const sanction = await appelApi(
@@ -319,14 +330,14 @@ export class CommandeSanction {
       );
       return;
     }
-    const embed = fiche({ intention: "echec", icone: textes.icone, titre: textes.titre })
+    const embed = fiche({ icone: textes.icone, titre: textes.titre })
       .champ("Utilisateur", ligneUtilisateur(cible), { enLigne: true });
     if (type !== SanctionType.Kick)
       embed.champ("Durée", sanction.durationSec ? formaterDureeCourte(sanction.durationSec) : "Permanent", { enLigne: true });
     embed.champ("Raison", raison).champ("ID sanction", `\`${sanction.id}\``, { enLigne: true });
     if (type !== SanctionType.Kick)
-      embed.champ("Expire le", sanction.expiresAt ? horodatage(sanction.expiresAt) : "Jamais", { enLigne: true });
-    await interaction.editReply({ embeds: [piedDeCommande(embed.finir(), interaction)] });
+      embed.champ("Expire le", sanction.expiresAt ? horodatage(sanction.expiresAt) : textes.sansExpiration, { enLigne: true });
+    await interaction.editReply({ embeds: [finirCommeLegacy(embed, textes.couleur)] });
   }
 }
 
