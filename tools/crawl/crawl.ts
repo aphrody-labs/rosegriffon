@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // Read-only crawl of https://rosegriffon.fr: sitemap seeds + internal links to depth 3, cap 400.
 // Usage: bun tools/crawl/crawl.ts [--max 400] [--depth 3]
-import { ORIGIN, fetchChain, gate, isOwnHost, loadRobots, normalize, robotsAllowed, UA, writeJson, type Hop } from "./lib.ts";
+import { ORIGIN, decodeEntities, fetchChain, gate, isOwnHost, loadRobots, normalize, robotsAllowed, UA, writeJson, type Hop } from "./lib.ts";
 import { copyCheck, type CopyHit } from "./copy.ts";
 
 const argv = Bun.argv.slice(2);
@@ -204,8 +204,8 @@ async function crawlOne(url: string, depth: number) {
     const p = await parsePage(html, rec.finalUrl);
     Object.assign(rec, {
       canonical: p.canonical,
-      title: p.title.trim() || null,
-      description: p.description,
+      title: decodeEntities(p.title).trim() || null,
+      description: p.description == null ? null : decodeEntities(p.description),
       h1Count: p.h1Count,
       lang: p.lang,
       robotsMeta: p.robotsMeta,
@@ -216,7 +216,7 @@ async function crawlOne(url: string, depth: number) {
     });
     rec.mixedContent = rec.assets.filter(a => a.startsWith("http:"));
     rec.thirdPartyHosts = [...new Set(rec.assets.map(a => new URL(a).host).filter(h => !isOwnHost(h)))];
-    rec.copy = copyCheck(p.text.join(""), p.attrText);
+    rec.copy = copyCheck(decodeEntities(p.text.join("")), p.attrText.map(decodeEntities));
   } else if (res) {
     await res.body?.cancel();
   }

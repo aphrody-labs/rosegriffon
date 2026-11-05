@@ -109,9 +109,18 @@ export async function fetchChain(
   return { hops, res: null, error: "redirect loop", ms: performance.now() - t0 };
 }
 
+// HTMLRewriter exposes raw attribute values, so character references must be decoded here.
+const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+export const decodeEntities = (s: string) =>
+  s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) =>
+    e[0] === "#"
+      ? String.fromCodePoint(e[1] === "x" || e[1] === "X" ? parseInt(e.slice(2), 16) : Number(e.slice(1)))
+      : (ENTITIES[e.toLowerCase()] ?? m),
+  );
+
 export function normalize(href: string, base: string): string | null {
   try {
-    const u = new URL(href, base);
+    const u = new URL(decodeEntities(href.trim()), base);
     if (u.protocol !== "http:" && u.protocol !== "https:") return null;
     u.hash = "";
     return u.href;
