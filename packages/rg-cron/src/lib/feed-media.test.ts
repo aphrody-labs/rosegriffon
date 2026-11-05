@@ -91,15 +91,21 @@ describe("recadrage", () => {
   });
 });
 
+/**
+ * `Bun.Image#extract` (recadrage) manque à certains canaris 1.4.4 : les tests qui recadrent sont
+ * alors sautés, le code de production reste inchangé (il exige `extract`).
+ */
+const imageRecadrable = typeof (Bun.Image?.prototype as { extract?: unknown } | undefined)?.extract === "function";
+
 describe("Bun.Image : vignette normalisée", () => {
-  test("recadre au ratio, borne la largeur et encode en WebP", async () => {
+  test.skipIf(!imageRecadrable)("recadre au ratio, borne la largeur et encode en WebP", async () => {
     const sortie = await normaliserVignette(png(480, 360), { ratio: 16 / 9, largeurMax: 320 });
     expect(sortie).toMatchObject({ largeur: 320, hauteur: 180 });
     const meta = await new Bun.Image(sortie.octets).metadata();
     expect(meta).toMatchObject({ width: 320, height: 180, format: "webp" });
   });
 
-  test("source portrait → carré", async () => {
+  test.skipIf(!imageRecadrable)("source portrait → carré", async () => {
     const sortie = await normaliserVignette(png(200, 400), { ratio: 1, largeurMax: 640 });
     expect(sortie).toMatchObject({ largeur: 200, hauteur: 200 });
   });
@@ -116,7 +122,7 @@ describe("Bun.Video : sondage", () => {
   });
 
   const ffmpeg = Bun.which("ffmpeg");
-  test.skipIf(!ffmpeg || !Bun.Video.available)("MP4 H.264 : durée, dimensions et affiche WebP", async () => {
+  test.skipIf(!ffmpeg || !moteurVideo() || !imageRecadrable)("MP4 H.264 : durée, dimensions et affiche WebP", async () => {
     const dossier = mkdtempSync(join(tmpdir(), "feed-video-"));
     try {
       const fichier = join(dossier, "clip.mp4");
