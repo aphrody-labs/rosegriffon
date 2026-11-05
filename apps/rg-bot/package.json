@@ -61,7 +61,6 @@
     "@rosegriffon/azalee": "workspace:*",
     "@rosegriffon/cron": "workspace:*",
     "@rosegriffon/db": "workspace:*",
-    "@rosegriffon/inagle": "catalog:",
     "@rosegriffon/types": "workspace:*",
     "@rosegriffon/ui": "workspace:*",
     "@vercel/functions": "catalog:",
