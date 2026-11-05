@@ -651,8 +651,15 @@
 }
 
 .achillea-scope :is(a, button, input, select, textarea):focus-visible {
-  outline: 0.25rem solid #9039ff;
+  outline: 0.25rem solid var(--achillea-lime);
   outline-offset: 0.25rem;
+}
+
+/* Le violet legacy #9039ff ne fait que 3,73:1 sur #131313 : assez pour une
+ * bordure ou un contour (3:1), pas pour du texte (4,5:1). Le texte prend la
+ * même teinte éclaircie, à 5,34:1 (mesure yolo-ui, luminance WCAG). */
+.achillea-scope .text-achillea-lime {
+  color: var(--achillea-primary-text);
 }
 
 /* Les chiffres de score et d'ELO sont monospacés dans l'original
@@ -878,6 +885,7 @@
   --achillea-primary: var(--achillea-primary-500);
   --achillea-lime: #9039ff;
   --achillea-lime-rgb: 144, 57, 255;
+  --achillea-primary-text: #a966ff;
   /* Le front Angular n'a aucun citron vert : son accent est
    * `--p-primary-color` = primary.400 du preset Aura (app.config.ts:28-90).
    * Le nom `lime` reste pour ne pas toucher les classes `*-achillea-lime`. */
