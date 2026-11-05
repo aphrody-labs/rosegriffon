@@ -26,10 +26,10 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   alternates: { canonical: absoluteUrl("/notre-equipe") },
   description:
-    "Découvrez l'organigramme officiel de l'association Rose Griffon : le bureau, les équipes de création Azalée et Achilléa, les dessinateurs, le lore, la production et l'ensemble de nos membres.",
+    "L'organigramme de l'association Rose Griffon : le bureau, les équipes Azalée et Achilléa, les dessinateurs, le lore, la production et tous nos membres.",
   openGraph: {
     description:
-      "Découvrez l'organigramme officiel de l'association Rose Griffon : le bureau, les équipes de création Azalée et Achilléa, les dessinateurs, le lore, la production et l'ensemble de nos membres.",
+      "L'organigramme de l'association Rose Griffon : le bureau, les équipes Azalée et Achilléa, les dessinateurs, le lore, la production et tous nos membres.",
     images: [
       {
         alt: "Rose Griffon - Notre Équipe",
@@ -91,7 +91,7 @@ const REFERENTIEL_EQUIPES: DefinitionEquipe[] = [
     glowColor: "rgba(245, 158, 11, 0.25)",
     icon: Crown,
     id: "bureauteam",
-    medailleLibelle: "Médailles d'Honneur du Bureau",
+    medailleLibelle: "Médailles d'Honneur",
     nom: "Bureau de l'Association",
   },
   {

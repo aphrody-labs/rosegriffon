@@ -40,6 +40,8 @@ import { Badge } from "@rosegriffon/ui";
 import { isRemoteAvatar } from "@/lib/avatar";
 import { getPgPoolOrNull } from "@/lib/db/pg";
 import { extractTableOfContents } from "@/lib/lexical-utils";
+import { libelleRedondantAvecTitre } from "@/lib/libelle-redondant";
+import { clampText, titleWithSuffix } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site-url";
 
 interface ArticlePageProps {
@@ -301,10 +303,9 @@ export async function generateMetadata({
   }
 
   const seoTitle = news.meta_title || news.title;
-  const seoDescription =
-    news.meta_description ||
-    news.excerpt ||
-    `${news.title} - Actualites Inazuma Eleven Victory Road`;
+  const seoDescription = clampText(
+    news.meta_description || news.excerpt || `${news.title} - Actualites Inazuma Eleven Victory Road`,
+  );
   const publishedDate = news.published_at || news.created_at;
   const modifiedDate = news.updated_at || publishedDate;
   // Pas `azalee.rosegriffon.fr` : cette route est servie par `apps/website` sous
@@ -339,7 +340,7 @@ export async function generateMetadata({
       url: canonicalUrl,
     },
     robots: { follow: true, index: news.status === "published" },
-    title: `${seoTitle} - Azalee`,
+    title: titleWithSuffix(seoTitle, " - Azalee"),
     twitter: {
       card: news.featured_image_url
         ? "summary_large_image"
@@ -551,9 +552,11 @@ export default async function ArticlePage({
           <div className="relative -mt-20 sm:-mt-28 md:-mt-36 px-4 sm:px-6 md:px-8 lg:px-12 max-w-[900px] mx-auto z-10">
             {/* Category + meta chips */}
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <Badge className="bg-primary text-on-primary rounded-full border-none px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-lg">
-                {categoryLabel}
-              </Badge>
+              {!libelleRedondantAvecTitre(categoryLabel, news.title) && (
+                <Badge className="bg-primary text-on-primary rounded-full border-none px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-lg">
+                  {categoryLabel}
+                </Badge>
+              )}
             </div>
 
             {/* Title */}

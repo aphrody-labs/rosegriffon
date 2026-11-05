@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { isRemoteAvatar } from "@/lib/avatar";
 import { getAuthorInfo } from "@/lib/author";
+import { libelleRedondantAvecTitre } from "@/lib/libelle-redondant";
 
 interface Article {
   id: string;
@@ -47,8 +48,17 @@ const CATEGORY_LABELS: Record<string, string> = {
   event: "Événement",
 };
 
-function CategoryBadge({ category, variant }: { category: string | null; variant: "overlay" | "card" }) {
+function CategoryBadge({
+  category,
+  title,
+  variant,
+}: {
+  category: string | null;
+  title: string;
+  variant: "overlay" | "card";
+}) {
   const label = CATEGORY_LABELS[category || ""] || category || "News";
+  if (libelleRedondantAvecTitre(label, title)) return null;
   return (
     <span
       className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm border border-white/10 ${
@@ -324,7 +334,7 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
                     <div className="absolute top-3 left-3">
-                      <CategoryBadge category={item.category} variant="overlay" />
+                      <CategoryBadge category={item.category} title={item.title} variant="overlay" />
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <h3 className="text-base font-bold text-white leading-snug line-clamp-2 drop-shadow-lg">
@@ -389,7 +399,7 @@ export function LatestNewsSection({ articles, tweets = [] }: LatestNewsSectionPr
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                     <div className="absolute top-3 left-3">
-                      <CategoryBadge category={item.category} variant="card" />
+                      <CategoryBadge category={item.category} title={item.title} variant="card" />
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col p-4">

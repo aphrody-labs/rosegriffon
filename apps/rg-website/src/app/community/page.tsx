@@ -58,7 +58,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const VUES = [
-  { cle: "communaute", libelle: "Communauté" },
+  { cle: "communaute", libelle: "Membres" },
   { cle: "staff", libelle: "Staff" },
 ] as const;
 
@@ -166,8 +166,12 @@ export default async function CommunityPage({
               />
             </form>
 
-            <Suspense key={`${serveur.cle}-${recherche}`} fallback={<SquelettedeSection />}>
-              <HierarchieServeur cle={cleServeur} recherche={recherche} />
+            <Suspense key={`${serveur.cle}-${recherche}-${String(params.page ?? "")}`} fallback={<SquelettedeSection />}>
+              <HierarchieServeur
+                cle={cleServeur}
+                recherche={recherche}
+                page={typeof params.page === "string" ? params.page : undefined}
+              />
             </Suspense>
           </section>
         </div>
@@ -176,7 +180,7 @@ export default async function CommunityPage({
           <section className="flex flex-col gap-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
-                <h2 className="text-lg font-bold text-on-surface">Staff Discord — {serveur.nom}</h2>
+                <h2 className="text-lg font-bold text-on-surface">Équipe Discord — {serveur.nom}</h2>
                 <p className="text-xs text-on-surface-variant/70">
                   Déduit des permissions réellement accordées aux rôles, pas d&apos;une liste tenue à la main.
                 </p>

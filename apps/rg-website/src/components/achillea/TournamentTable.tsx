@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import type { TournamentListItem } from "@rosegriffon/achillea-types/domain/tournament";
+import { eventTypeLabel } from "@rosegriffon/achillea-core/labels";
+import type { EventTypeEnum } from "@rosegriffon/achillea-types";
 import { Badge, Skeleton } from "@rosegriffon/ui";
 import { Calendar, ChevronRight, Trophy } from "lucide-react";
 
@@ -73,7 +75,10 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
               >
                 {statusLabel(t.status)}
               </Badge>
-              <span>{t.type === "TOURNAMENT" ? "Tournoi" : t.type}</span>
+              {/* La liste ne contient que des tournois : le type « Tournoi » y
+                  serait redondant (et précédait une description commençant
+                  souvent par « Tournoi … »). Seuls les autres types s’affichent. */}
+              {t.type !== "TOURNAMENT" && <span>{eventTypeLabel(t.type as EventTypeEnum)}</span>}
             </div>
             <p className="mt-3 text-on-surface-variant">{summary(t.description)}</p>
             <p className="mt-3 flex items-center gap-2 text-on-surface-variant">
@@ -127,7 +132,7 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
                     {t.name}
                   </Link>
                 </th>
-                <td className="px-4 py-4">{t.type === "TOURNAMENT" ? "Tournoi" : t.type}</td>
+                <td className="px-4 py-4">{eventTypeLabel(t.type as EventTypeEnum)}</td>
                 <td className="max-w-sm px-4 py-4 text-on-surface-variant">{summary(t.description)}</td>
                 <td className="px-4 py-4 whitespace-nowrap">{publicationDate(t.createdAt)}</td>
                 <td className="px-4 py-4">
