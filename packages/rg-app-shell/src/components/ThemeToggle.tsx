@@ -2,6 +2,7 @@
 
 import { Check, Moon, SlidersHorizontal } from "lucide-react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useState, useSyncExternalStore } from "react";
 import {
@@ -20,6 +21,7 @@ import {
   type ThemeType,
 } from "@rosegriffon/ui";
 
+import { domaineDeLaRoute } from "../config/navigation";
 import { ThemeTuner } from "./ThemeTuner";
 
 export interface ThemeOption {
@@ -62,6 +64,7 @@ export const DEFAULT_THEMES: ThemeOption[] = [
 
 export function ThemeToggle({ themes = DEFAULT_THEMES, className }: { themes?: ThemeOption[]; className?: string }) {
   const { setTheme, theme } = useTheme();
+  const chemin = usePathname() ?? "/";
   const [reglageOuvert, setReglageOuvert] = useState(false);
   const mounted = useSyncExternalStore(
     subscribeNever,
@@ -80,6 +83,9 @@ export function ThemeToggle({ themes = DEFAULT_THEMES, className }: { themes?: T
   }
 
   const active = themes.find(entry => entry.id === theme) ?? themes[0]!;
+  // Le wiki et l’e-sport imposent leur thème à la zone de contenu : les
+  // réglages y restent sans effet visible, il faut le dire dans le dialogue.
+  const sectionImposee = domaineDeLaRoute(chemin) !== "association";
   const ActiveIcon = active.icon;
 
   return (
@@ -143,6 +149,11 @@ export function ThemeToggle({ themes = DEFAULT_THEMES, className }: { themes?: T
           <DialogHeader>
             <DialogTitle>Couleurs du thème {active.label}</DialogTitle>
             <DialogDescription>Réglages enregistrés sur cet appareil, pour ce thème uniquement.</DialogDescription>
+            {sectionImposee && (
+              <p className="text-sm text-on-surface-variant">
+                Cette section garde ses propres couleurs : vos réglages s’appliquent au reste du site.
+              </p>
+            )}
           </DialogHeader>
           <ThemeTuner key={active.id} themeId={active.id} />
         </DialogContent>
