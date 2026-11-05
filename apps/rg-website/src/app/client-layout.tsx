@@ -30,6 +30,7 @@ import SidebarNavigationHandler from "@/components/layout/SidebarNavigationHandl
 import EdgeSwipeDetector from "@/components/shared/EdgeSwipeDetector";
 import MobileWatermark from "@/components/shared/MobileWatermark";
 import { DynamicUniverseHead } from "@/components/layout/DynamicUniverseHead";
+import { ThemeBackdrop } from "@/components/layout/ThemeBackdrop";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { LanguageProvider, type Language, useLanguage } from "@/components/providers/language-provider";
 import { ProfileProvider, useProfile } from "@/contexts/profile-context";
@@ -247,6 +248,7 @@ export default function ClientLayout({
                 <SidebarWrapper isMedium={isMedium}>
                   {/* Gestionnaire dynamique de Favicon, Titre et SEO selon l'univers */}
                   <DynamicUniverseHead />
+                  <ThemeBackdrop />
 
                   {/* Accessibilité: lien pour sauter au contenu principal */}
                   <SkipToContent />

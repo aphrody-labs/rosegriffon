@@ -1124,3 +1124,19 @@
     overflow: hidden;
   }
 }
+
+/* Fond d'écran du thème (pack) : `--theme-wallpaper` est posé sur <html> par
+   ThemeBackdrop une fois la page chargée. Le voile reprend la surface de la
+   zone de contenu à 93 % pour garder le contraste du texte ; sans la variable,
+   seule la couleur de fond s'applique. */
+main[data-slot="sidebar-inset"] {
+  background-image:
+    linear-gradient(
+      color-mix(in oklch, var(--background) 93%, transparent),
+      color-mix(in oklch, var(--background) 93%, transparent)
+    ),
+    var(--theme-wallpaper, none);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
