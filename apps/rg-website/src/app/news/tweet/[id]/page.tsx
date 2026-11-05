@@ -8,6 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPgPool } from "@/lib/db/pg";
 import { getAuthorInfo } from "@/lib/author";
+import { absoluteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-static";
 export const revalidate = 86400;
@@ -115,10 +116,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const description = title.slice(0, 160);
   const image = tweet?.media?.[0]?.preview_url || tweet?.media?.[0]?.url;
 
+  const url = absoluteUrl(`/news/tweet/${id}`);
+
   return {
+    alternates: { canonical: url },
     description,
     openGraph: {
       description,
+      url,
       title: title.slice(0, 60),
       ...(image && { images: [{ url: image }] }),
     },

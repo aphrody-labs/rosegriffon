@@ -45,6 +45,48 @@ export function buildCanonical(
   return qs ? `${path}?${qs}` : path;
 }
 
+/** Longueur au-delà de laquelle Google tronque une méta-description. */
+export const DESCRIPTION_MAX = 160;
+
+/**
+ * Coupe un texte libre à `max` caractères au plus, sur une frontière de mot,
+ * avec une ellipse : jamais au milieu d'un mot, jamais d'espace ou de
+ * ponctuation pendante avant l'ellipse. Les sauts de ligne et espaces
+ * multiples sont réduits à un espace (une méta-description est une ligne).
+ *
+ * Sert aux méta-descriptions et aux titres construits depuis du contenu
+ * (tweets, articles, sondages) : `slice(0, n)` coupait en plein mot et
+ * laissait des descriptions de 300 caractères passer telles quelles.
+ */
+export function clampText(text: string | null | undefined, max: number = DESCRIPTION_MAX): string {
+  const clean = (text ?? "").replace(/\s+/g, " ").trim();
+  if (clean.length <= max) {
+    return clean;
+  }
+  const cut = clean.slice(0, max - 1);
+  const lastSpace = cut.lastIndexOf(" ");
+  // Un mot unique plus long que la moitié de la limite : couper net plutôt
+  // que de ne garder qu'un fragment.
+  const base = lastSpace > max / 2 ? cut.slice(0, lastSpace) : cut;
+  return `${base.replace(/[\s,;:.!?\-–—|·]+$/u, "")}…`;
+}
+
+/** Longueur au-delà de laquelle un `<title>` est tronqué dans les résultats. */
+export const TITLE_MAX = 65;
+
+/**
+ * Titre construit depuis du contenu, suivi d'un suffixe de marque si la place
+ * le permet. Ordre de préférence : `base + suffix` s'il tient, sinon `base`
+ * seul, sinon `base` coupé proprement. La marque est sacrifiée avant le sujet.
+ */
+export function titleWithSuffix(base: string, suffix: string, max: number = TITLE_MAX): string {
+  const clean = clampText(base, Number.MAX_SAFE_INTEGER);
+  if (clean.length + suffix.length <= max) {
+    return `${clean}${suffix}`;
+  }
+  return clampText(clean, max);
+}
+
 /**
  * Clés de filtre communes aux listes du wiki (sous-ensemble de
  * `searchParamsSchema` : uniquement celles qui changent réellement le contenu

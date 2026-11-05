@@ -26,6 +26,7 @@
  * `menu_text`, pas d'une liste écrite à la main.
  */
 import type { Metadata } from "next";
+import { wiki } from "@rosegriffon/app-shell";
 import { cdnOrigin } from "@rosegriffon/assets";
 import { Editeur } from "./Editeur";
 import type { Catalogue } from "./types";
@@ -41,6 +42,7 @@ export const revalidate = 86_400;
 export const runtime = "nodejs";
 
 export const metadata: Metadata = {
+  alternates: { canonical: wiki("/avatar") },
   title: "Éditeur d'avatar — Azalée",
   description:
     "Les 502 parts, 470 couleurs, 218 curseurs et 38 visages prédéfinis de l'éditeur de personnage d'Inazuma Eleven: Victory Road, lus dans les fichiers du jeu.",
@@ -78,6 +80,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ c
      rounded-[32px] border border-dashed border-outline-variant bg-surface-container-low py-20 text-center
    "
       >
+        {/* L'Atelier porte le `h1` quand le catalogue répond ; sans lui, la page en garde un. */}
+        <h1 className="mb-2 text-xl font-semibold text-on-surface">Éditeur d&apos;avatar</h1>
         <p className="italic text-on-surface-variant">Catalogue injoignable pour le moment.</p>
       </div>
     );

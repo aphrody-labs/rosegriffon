@@ -1,6 +1,12 @@
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { getServerUser, requireAdmin } from "@/lib/auth-helpers";
 import { isPatreonAdmin } from "@/lib/patreon/admin-access";
+import type { Metadata } from "next";
+
+// Back-office : jamais indexable, quelle que soit la page.
+export const metadata: Metadata = {
+  robots: { follow: false, index: false },
+};
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
