@@ -881,7 +881,7 @@
   /* Le front Angular n'a aucun citron vert : son accent est
    * `--p-primary-color` = primary.400 du preset Aura (app.config.ts:28-90).
    * Le nom `lime` reste pour ne pas toucher les classes `*-achillea-lime`. */
-  --color-achillea-lime: #9039ff;
+  --color-achillea-lime: var(--achillea-lime);
 
   /* Bleu Discord officiel, et son état survolé. */
   --discord-blurple: #5865f2;
