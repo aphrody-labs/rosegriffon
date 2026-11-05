@@ -115,9 +115,9 @@ function RoutedHeader({ isMobile, showSidebarToggle }: { isMobile?: boolean; sho
       portalHref="/"
       accountHref={accountHref}
       themeToggleSlot={
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 text-sidebar-foreground">
           <LanguageSwitcher />
-          <ThemeToggle />
+          <ThemeToggle className="!text-sidebar-foreground hover:!bg-sidebar-accent" />
         </div>
       }
       user={user}

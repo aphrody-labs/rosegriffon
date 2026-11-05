@@ -61,7 +61,7 @@ function WidgetDiscord({
     return (
       <div className="flex size-full items-center justify-center gap-3 p-6">
         <DiscordIcon className="size-6 text-discord" aria-hidden />
-        <Button asChild className="bg-discord font-bold text-rg-sur-marine hover:bg-discord/90">
+        <Button asChild className="bg-discord-strong font-bold text-rg-sur-marine hover:brightness-90">
           <a href={lienInvitation} target="_blank" rel="noopener noreferrer">
             Rejoindre le Discord
           </a>
@@ -77,7 +77,7 @@ function WidgetDiscord({
           <DiscordIcon className="size-5 shrink-0 text-discord" aria-hidden />
           <h3 className="truncate text-base font-bold text-foreground sm:text-lg">{donnees.name}</h3>
         </div>
-        <Button asChild size="sm" className="bg-discord font-bold text-rg-sur-marine hover:bg-discord/90">
+        <Button asChild size="sm" className="bg-discord-strong font-bold text-rg-sur-marine hover:brightness-90">
           <a href={donnees.instant_invite ?? lienInvitation} target="_blank" rel="noopener noreferrer">
             Rejoindre
           </a>

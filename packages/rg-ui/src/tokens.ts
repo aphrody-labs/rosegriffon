@@ -51,6 +51,7 @@ export const MARQUE = {
 /** Couleurs imposées par des marques tierces (constantes, hors thème). */
 export const MARQUES_TIERCES = {
   discord: "#5865f2",
+  discordStrong: "#4752c4",
   patreon: "#ff424d",
   twitch: "#9146ff",
 } as const;

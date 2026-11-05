@@ -30,7 +30,7 @@ export function LanguageSwitcher() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-12 min-w-11 gap-1 px-2 md:h-10"
+          className="h-12 min-w-11 gap-1 px-2 text-inherit hover:bg-sidebar-accent hover:text-inherit md:h-10"
           title={`${t("ui.language.current")}: ${currentName}`}
           aria-label={`${t("ui.language.current")}: ${currentName}. ${t("ui.language.change")}`}
         >

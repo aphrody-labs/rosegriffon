@@ -219,6 +219,9 @@
   /* Couleurs de marque tierces — constantes imposées par chaque marque, pas
 	 * des choix de design system : elles ne varient donc pas selon le thème. */
   --color-discord: #5865f2;
+  /* Blurple foncé officiel (hover Discord) : fond des boutons à texte clair,
+   * 6,3:1 avec --rg-sur-marine contre 4,34:1 pour #5865f2 (WCAG AA). */
+  --color-discord-strong: #4752c4;
   --color-patreon: #ff424d;
   --color-twitch: #9146ff;
   --color-youtube: #ff0000;
