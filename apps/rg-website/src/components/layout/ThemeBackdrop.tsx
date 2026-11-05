@@ -17,6 +17,26 @@ import { sectionTheme, THEME_PACKS, type ThemeType, useTheme } from "@rosegriffo
  * chargement : une grande image peinte tôt deviendrait l'élément LCP. Rien
  * n'est chargé quand l'utilisateur demande moins de données.
  */
+/**
+ * Exécute `tache` en tâche de fond, avec détection de fonctionnalité :
+ * `scheduler.postTask` (priorité `background`) quand il existe, sinon
+ * `requestIdleCallback`, sinon un délai. Aucune de ces API n'est disponible
+ * partout (Safari n'a pas `scheduler`, et n'a eu `requestIdleCallback` que
+ * tard) ; les appeler sans test lèverait une exception dans l'effet.
+ */
+function planifierEnArrierePlan(tache: () => void) {
+  const w = window as typeof window & {
+    scheduler?: { postTask?: (cb: () => void, o: { priority: "background" }) => Promise<unknown> };
+  };
+  if (w.scheduler?.postTask) {
+    void w.scheduler.postTask(tache, { priority: "background" });
+  } else if ("requestIdleCallback" in w) {
+    w.requestIdleCallback(tache, { timeout: 3000 });
+  } else {
+    setTimeout(tache, 1500);
+  }
+}
+
 export function ThemeBackdrop() {
   const chemin = usePathname() || "/";
   const { theme } = useTheme();
@@ -24,14 +44,17 @@ export function ThemeBackdrop() {
 
   useEffect(() => {
     if (matchMedia("(prefers-reduced-data: reduce)").matches) return;
-    const demarrer = () => setPret(true);
-    if (document.readyState === "complete") {
-      const id = requestIdleCallback(demarrer, { timeout: 3000 });
-      return () => cancelIdleCallback(id);
-    }
-    const auChargement = () => requestIdleCallback(demarrer, { timeout: 3000 });
-    addEventListener("load", auChargement, { once: true });
-    return () => removeEventListener("load", auChargement);
+    let annule = false;
+    const demarrer = () => {
+      if (!annule) setPret(true);
+    };
+    const enArrierePlan = () => planifierEnArrierePlan(demarrer);
+    if (document.readyState === "complete") enArrierePlan();
+    else addEventListener("load", enArrierePlan, { once: true });
+    return () => {
+      annule = true;
+      removeEventListener("load", enArrierePlan);
+    };
   }, []);
 
   const pack = THEME_PACKS[sectionTheme(domaineDeLaRoute(chemin)) ?? (theme as ThemeType)] ?? THEME_PACKS.roy;
