@@ -2,7 +2,10 @@ import { couleurRole } from "@rosegriffon/types/discord-hierarchie";
 
 import { chercherMembres, lireHierarchie, type CleServeur } from "@/lib/discord/hierarchie";
 
+import { WikiPagination } from "@/components/shared/WikiPagination";
+
 import { GrilleMembres, TitreSection } from "./membre-carte";
+import { MEMBRES_PAR_PAGE, lirePage, trancherSections } from "./pagination-membres";
 
 /**
  * Hiérarchie d'un serveur Discord — la vraie, celle du serveur.
@@ -17,9 +20,12 @@ export async function HierarchieServeur({
   cle,
   recherche,
   staffSeulement = false,
+  page: pageBrute,
 }: {
   cle: CleServeur;
   recherche?: string;
+  /** `?page=` brut : seule la vue communauté est paginée (voir `pagination-membres.ts`). */
+  page?: string;
   /** Ne montrer que ceux qui ont des pouvoirs réels sur le serveur. */
   staffSeulement?: boolean;
 }) {
@@ -72,18 +78,22 @@ export async function HierarchieServeur({
     );
   }
 
+  const total = hierarchie.sections.reduce((somme, section) => somme + section.membres.length, 0);
+  const page = lirePage(pageBrute, total);
+
   return (
     <div className="flex flex-col gap-6">
-      {hierarchie.sections.map(section => (
+      {trancherSections(hierarchie.sections, page).map(({ section, debut, fin }) => (
         <section key={section.role?.role_id ?? "sans-role"} className="flex flex-col gap-3">
           <TitreSection
             titre={section.role?.name ?? "Membres"}
             effectif={section.membres.length}
             couleur={couleurRole(section.role)}
           />
-          <GrilleMembres membres={section.membres} compacte />
+          <GrilleMembres membres={section.membres.slice(debut, fin)} compacte />
         </section>
       ))}
+      <WikiPagination totalItems={total} itemsPerPage={MEMBRES_PAR_PAGE} currentPage={page} />
     </div>
   );
 }

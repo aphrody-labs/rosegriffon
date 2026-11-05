@@ -47,9 +47,12 @@ export function CarteMembre({
         <Image
           src={avatar || "/default-avatar.webp"}
           alt=""
-          fill
+          // Taille intrinsèque explicite (et non `fill`) : le HTML porte `width`/`height`,
+          // la place est réservée avant le chargement, et `loading="lazy"` reste le défaut.
+          width={compacte ? 40 : 56}
+          height={compacte ? 40 : 56}
           sizes={compacte ? "40px" : "56px"}
-          className="object-cover"
+          className="size-full object-cover"
         />
       </div>
       <div className="min-w-0 flex-1">
