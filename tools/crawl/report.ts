@@ -42,6 +42,8 @@ const fourXX = allStatuses.filter(s => s >= 400 && s < 500).length;
 const missing = new Map<string, { status: number; pages: Set<string> }>();
 for (const p of pages)
   for (const m of p.missingAssets ?? []) {
+    // Data from crawls before the entity-decoding fix kept "&amp;" in query strings: false 400s.
+    if (m.url.includes("&amp;")) continue;
     if (!missing.has(m.url)) missing.set(m.url, { status: m.status, pages: new Set() });
     missing.get(m.url)!.pages.add(path(p.url));
   }
@@ -125,6 +127,7 @@ const out = `# Crawl audit ${date}
 Read-only crawl of ${ORIGIN} (UA \`RoseGriffonAudit/1.0\`, 2 concurrent, robots.txt honored), run ${meta.at.slice(0, 16)}Z.
 Tooling: \`tools/crawl/\` (\`crawl.ts\`, \`lighthouse.ts\`, \`report.ts\`). Raw JSON: \`var/crawl/\`.
 Production still runs the build from before the pending perf fixes, so Lighthouse numbers are pre-fix.
+${process.env.CRAWL_NOTE ?? ""}
 
 ## Counts
 
