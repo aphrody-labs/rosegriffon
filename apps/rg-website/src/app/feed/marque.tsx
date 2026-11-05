@@ -21,18 +21,31 @@ function IconeTiktok({ className }: { className?: string }) {
 
 const ICONES = { x: Twitter, instagram: Instagram, tiktok: IconeTiktok, youtube: Youtube } as const;
 
-/** Pastille du réseau : la couleur de marque est la seule couleur brute de la page. */
-export function BadgeReseau({ reseau, taille = 20 }: { reseau: Reseau; taille?: number }) {
+/**
+ * Pastille du réseau : la couleur de marque est la seule couleur brute de la page.
+ * `decoratif` quand le nom du réseau est déjà écrit à côté (puces de filtre) : sans lui, le
+ * nom en `sr-only` doublait le libellé visible (« Instagram Instagram », « X X »).
+ */
+export function BadgeReseau({
+  reseau,
+  taille = 20,
+  decoratif = false,
+}: {
+  reseau: Reseau;
+  taille?: number;
+  decoratif?: boolean;
+}) {
   const Icone = ICONES[reseau];
   const marque = MARQUES[reseau];
   return (
     <span
-      title={marque.nom}
+      title={decoratif ? undefined : marque.nom}
+      aria-hidden={decoratif || undefined}
       className="inline-flex shrink-0 items-center justify-center rounded-full text-white ring-1 ring-outline-variant"
       style={{ backgroundColor: marque.couleur, width: taille, height: taille }}
     >
       <Icone className="size-[60%]" aria-hidden />
-      <span className="sr-only">{marque.nom}</span>
+      {!decoratif && <span className="sr-only">{marque.nom}</span>}
     </span>
   );
 }

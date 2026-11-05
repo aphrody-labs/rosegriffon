@@ -142,7 +142,7 @@ export default function NousSoutenirPage() {
         />
         <PublicTiers />
         <p className="mx-auto mt-8 max-w-2xl text-center text-xs text-muted-foreground">
-          Patreon prélève une commission de 8 à 12 % plus les frais de paiement. Pour maximiser le soutien net à
+          Sur chaque contribution, Patreon prélève 8 à 12 % de commission plus les frais de paiement. Pour maximiser le soutien net à
           l&apos;association, un don unique PayPal est plus efficace côté frais.
         </p>
       </section>

@@ -37,7 +37,7 @@ export function Filtres({ filtre }: { filtre: FiltreFil }) {
         </Puce>
         {RESEAUX.map(r => (
           <Puce key={r} href={lien({ reseau: r, groupe: filtre.groupe })} actif={filtre.reseau === r}>
-            <BadgeReseau reseau={r} taille={18} />
+            <BadgeReseau reseau={r} taille={18} decoratif />
             {MARQUES[r].nom}
           </Puce>
         ))}
