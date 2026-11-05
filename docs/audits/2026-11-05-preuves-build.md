@@ -73,3 +73,20 @@ Points ouverts transmis à l'agent de parité web Achilléa :
 2. Tout refuser : choix stocké `{mesure:false,pub:false}`, bandeau fermé, 0 requête Google.
 3. « Gérer les cookies » du pied de page : bandeau rouvert en mode détaillé, cases décochées (choix précédent), labels associés.
 4. Tout accepter puis un geste : `dataLayer` = `consent default` (tout `denied`) → `consent update` (tout `granted`) → `gtm.js` ; requêtes `googletagmanager.com/gtm.js` et `adsbygoogle.js` émises seulement à ce moment.
+
+## Déploiements 3 et 4
+
+| | Déploiement 3 | Déploiement 4 |
+|---|---|---|
+| Commit | `c46860ba` | `a85cdedb` |
+| rg-core | redémarré 11:44:10 UTC, `cmp` = build | redémarré 20:09:37 UTC, `cmp` = build, NRestarts 0 |
+| rg-website BUILD_ID | `NBQTdKGMAmHmiobBBvJ_j` (11:53 UTC) | `4jmJfvtUOqqyh3TLvBCYl` (20:17:03 UTC) |
+| Pages publiques | 15 en 200, 0 erreur SSR, security.txt 200, plus de preconnect AdSense | 12 en 200 (dont `/design-system`), 0 erreur SSR |
+| Stockage, objet absent | CDN 404 (nginx `rg-core.conf` installé, `nginx -t` OK, sauvegarde `~/backups/rg-core.conf.avant-404`) ; via le site : **504 après 120 s** (régression) | via le site : **404 en 1,65 s** ; objet existant 200 en 0,50 s |
+| Cron | n/a | 17 tâches réussies, 0 échec |
+
+Régression du déploiement 3 : la route de stockage attendait `body.cancel()` sur une branche du `tee()` que fait le `fetch` patché de Next ; cette promesse ne se résout qu'une fois l'autre branche annulée. Corrigé en `a72534b1` (test qui pend sans le correctif).
+
+Build VPS du déploiement 4 : deux échecs de suite dans `next/font/google` (`null.exec(googleFontFileUrl)`). Les polices sont désormais auto-hébergées (`a85cdedb`, `src/fonts`, `next/font/local`) : le HTML de l'accueil ne référence plus `fonts.gstatic.com`/`fonts.googleapis.com`, les `@font-face` pointent vers `/_next/static/media/*.woff2` servis en 200 `font/woff2`. Le contrôle visuel des polices au navigateur n'a pas pu être fait (navigateur yolo-web fermé pendant une pénurie de mémoire locale).
+
+Textures de jeu `cdn.rosegriffon.fr/dx11/…` : 502, car rg-core répond 404 (décodage des textures désactivé sur le VPS, pas de `NIE_GAME_DIR`). Non corrigé : décision de ne pas copier le jeu sur le VPS. `/news` remplace côté serveur les couvertures mortes.
