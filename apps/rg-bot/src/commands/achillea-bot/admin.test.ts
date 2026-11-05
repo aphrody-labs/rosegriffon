@@ -204,7 +204,7 @@ const CAS: Cas[] = [
   {
     nom: "litige valider",
     route: "POST /admin/lobbies/42/validate",
-    reponse: { ok: true, eloDelta: 12 },
+    reponse: { ok: true, eloDelta: { p1: 12, p2: -12 } },
     lancer: i => new AdminLitige().valider(42, 3, 1, undefined, i),
     attendu: "Litige tranché",
   },

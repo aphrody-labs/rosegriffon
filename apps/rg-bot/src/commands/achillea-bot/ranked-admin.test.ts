@@ -44,7 +44,7 @@ describe("/ranked-admin", () => {
   });
 
   test("valider : score, forfait et Elo", async () => {
-    const appels = api({ "POST /admin/lobbies/7/validate": { ok: true, eloDelta: 12 } });
+    const appels = api({ "POST /admin/lobbies/7/validate": { ok: true, eloDelta: { p1: 12, p2: -12 } } });
     const interaction = fausseInteraction();
     await new CommandeRankedAdmin().valider(7, 3, 1, { id: "999999999999999991", username: "x" } as never, interaction as never);
     expect(appels[0]?.corps).toEqual({ scoreTeam1: 3, scoreTeam2: 1, forfeitUserId: "999999999999999991" });

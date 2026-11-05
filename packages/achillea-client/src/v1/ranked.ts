@@ -237,7 +237,7 @@ export const rankedAdminSeasonSchema = z
 
 export const rankedAdminValidateResultSchema = z.object({
   ok: z.boolean(),
-  eloDelta: z.number().optional(),
+  eloDelta: z.object({ p1: z.number(), p2: z.number() }).optional(),
 }) satisfies z.ZodType<RankedAdminValidateResult>;
 
 export const rankedLadderResetResultSchema = z.object({

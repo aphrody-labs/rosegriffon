@@ -98,12 +98,14 @@ describe("parité legacy : /ranked-admin", () => {
   });
 
   test("valider : ΔELO joueur 1 et joueur 2, vert", async () => {
-    api({ "POST /admin/lobbies/7/validate": { ok: true, eloDelta: 12 } });
+    api({ "POST /admin/lobbies/7/validate": { ok: true, eloDelta: { p1: 12, p2: -12 } } });
     const interaction = fausseInteraction();
     await new CommandeRankedAdmin().valider(7, 3, 1, undefined, interaction as never);
     const embed = dernierEmbed(interaction);
     expect(embed.color).toBe(0x57_f2_87);
     expect(embed.title).toBe("✅ Litige tranché — Lobby #7");
+    // Le serveur ranked renvoie { p1, p2 } : les deux deltas doivent s'afficher.
+    expect(embed.fields?.slice(1, 3).map(f => f.value)).toEqual(["+12", "-12"]);
     expect(embed.fields?.map(f => [f.name, f.inline])).toEqual([
       ["Score appliqué", true],
       ["ΔELO joueur 1", true],

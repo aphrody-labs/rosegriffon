@@ -301,7 +301,8 @@ export interface RankedProofUploaded {
 
 export interface RankedAdminValidateResult {
   ok: boolean;
-  eloDelta?: number;
+  /** Variation appliquée à chaque joueur, telle que la renvoie le serveur ranked. */
+  eloDelta?: { p1: number; p2: number };
 }
 
 export interface RankedLadderResetResult {
