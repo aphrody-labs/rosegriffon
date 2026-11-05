@@ -6,8 +6,10 @@ import { createIntlFormatters, directionForLocale, type DateValue } from "@roseg
 import type { LocaleId } from "@rosegriffon/preferences";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-// Import default locale directly to prevent hydration mismatch and flash of keys
-import frDictionary from "@/public/locales/fr.json";
+// Import default locale directly to prevent hydration mismatch and flash of keys.
+// Interface keys only (~7 KB): the ~4,000 game-text keys (0x…) of public/locales/fr.json
+// weighed 230 KB in the JS of every page and no component reads them (see lib/i18n/cles.ts).
+import frDictionary from "@/lib/i18n/fr-interface.json";
 
 export type Language = LocaleId;
 

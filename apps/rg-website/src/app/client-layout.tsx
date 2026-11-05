@@ -35,7 +35,8 @@ import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { LanguageProvider, type Language, useLanguage } from "@/components/providers/language-provider";
 import { ProfileProvider, useProfile } from "@/contexts/profile-context";
 import { ThemeProvider } from "@/contexts/theme-context";
-import { AchilleaAuthProvider, createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
+// Module direct, pas le baril `@/lib/achillea` : la coque ne doit pas embarquer le client API.
+import { AchilleaAuthProvider, useAchilleaAuth } from "@/lib/achillea/auth-context";
 import { Providers } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/stores/sidebar-store";
@@ -170,8 +171,9 @@ function useAchilleaNavigationVisibility(pathname: string) {
 
     let cancelled = false;
 
-    void createAchilleaClient({ credentials: "include" })
-      .clans.myRole()
+    // Import différé : seul un membre connecté sur l'e-sport en a besoin.
+    void import("@/lib/achillea/client")
+      .then(({ createAchilleaClient }) => createAchilleaClient({ credentials: "include" }).clans.myRole())
       .then(result => {
         if (!cancelled && result.ok) setClanRole(result.value.role);
       });

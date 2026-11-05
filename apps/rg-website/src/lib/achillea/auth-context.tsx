@@ -12,7 +12,17 @@ import {
 import { useAuth } from "@/contexts/auth-context";
 import { safeReturnUrl } from "@rosegriffon/auth/redirect";
 import { failedIdentityStatus } from "./auth-status";
-import { createAchilleaClient } from "./client";
+
+/**
+ * Client Achilléa chargé à la demande : ce fournisseur est monté dans la coque de
+ * TOUTES les pages, et un import statique y embarquait `@rosegriffon/achillea-client`
+ * et zod (~220 Ko bruts) jusque sur les pages sans rapport avec l'e-sport, alors
+ * qu'il ne sert qu'une fois un compte connecté.
+ */
+async function clientAchillea() {
+  const { createAchilleaClient } = await import("./client");
+  return createAchilleaClient({ credentials: "include" });
+}
 
 export type AchilleaAuthStatus =
   "unknown" | "loading" | "authenticated" | "anonymous" | "error";
@@ -66,7 +76,7 @@ export function AchilleaAuthProvider({ children }: { children: ReactNode }) {
 
   const lireSession = useCallback(
     async (isCurrent: () => boolean = () => true): Promise<boolean> => {
-      const client = createAchilleaClient({ credentials: "include" });
+      const client = await clientAchillea();
       const res = await client.auth.me();
       if (!isCurrent()) return false;
       if (res.ok && res.value?.id) {
