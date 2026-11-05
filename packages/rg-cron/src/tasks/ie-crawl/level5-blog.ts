@@ -6,7 +6,7 @@
 
 import { crawlDataPath } from "../../lib/shared-path";
 import { WebCdpPage, waitForSelector } from "../../lib/web-cdp";
-import * as cheerio from "cheerio";
+import { extraireLevel5BlogIndex, extraireLevel5BlogTexte } from "./html-extract";
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -56,52 +56,11 @@ export async function crawlLevel5Blog(): Promise<{
         await safeGoto(page, target.url);
         await waitForSelector(page, "body", 15000).catch(() => {});
         const indexHtml = await page.content();
-        const $ = cheerio.load(indexHtml);
-
-        // Extraire les articles listés dans la section "recent" de l'aside
-        $("aside #recent ul li.item").each((_, el) => {
-          const link = $(el).find("a");
-          const href = link.attr("href") || "";
-          const date = $(el).find("dt").text().trim();
-          const title = $(el).find("dd").text().trim();
-
-          if (!href) return;
-
-          // Exemples d'href : "/blog/250303/", "/blog/en/250303/", etc.
-          // Résoudre l'URL absolute
-          const absoluteUrl = href.startsWith("http") ? href : `https://www.level5.co.jp${href}`;
-
-          // Extraire l'ID (e.g. "250303")
-          const urlParts = href.split("/").filter(Boolean);
-          const id = urlParts[urlParts.length - 1] || "index";
-
-          if (id && !articles.find(a => a.id === id && a.locale === target.locale)) {
-            articles.push({
-              id,
-              url: absoluteUrl,
-              title: title || "LEVEL-5 Blog Post",
-              date: date || "Unknown",
-              locale: target.locale,
-            });
-          }
-        });
-
-        // Récupérer également l'article à la une actuellement affiché en entier sur la page d'accueil
-        const latestTitleEl = $("article h2 dd");
-        const latestDateEl = $("article h2 dt");
-        const latestTitle = latestTitleEl.text().trim();
-        const latestDate = latestDateEl.text().trim();
-
-        if (latestTitle && latestDate) {
-          const id = "latest";
-          if (!articles.find(a => a.id === id && a.locale === target.locale)) {
-            articles.push({
-              id,
-              url: target.url,
-              title: latestTitle,
-              date: latestDate,
-              locale: target.locale,
-            });
+        // Articles de la section "recent" de l'aside (hrefs "/blog/250303/", "/blog/en/250303/"…),
+        // puis l'article à la une affiché en entier sur la page d'accueil (id "latest").
+        for (const entree of extraireLevel5BlogIndex(indexHtml, target.url)) {
+          if (!articles.find(a => a.id === entree.id && a.locale === target.locale)) {
+            articles.push({ ...entree, locale: target.locale });
           }
         }
       } catch (err) {
@@ -129,8 +88,7 @@ export async function crawlLevel5Blog(): Promise<{
         const detailHtml = await page.content();
         await writeFile(indexPath, detailHtml);
 
-        const $detail = cheerio.load(detailHtml);
-        const contentText = $detail("article section.all").text().trim() || "";
+        const contentText = extraireLevel5BlogTexte(detailHtml);
 
         const meta = {
           id: art.id,

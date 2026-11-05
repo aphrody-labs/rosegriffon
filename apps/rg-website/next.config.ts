@@ -96,8 +96,6 @@ const nextConfig: NextConfig = {
     "stripe",
     "pica",
     "xlsx",
-    "cheerio",
-    "bcryptjs",
     "jsonwebtoken",
     "web-push",
     "konva",

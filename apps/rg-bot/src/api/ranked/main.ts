@@ -1,9 +1,9 @@
 // Entry-point Colyseus dédié au ranked Achillea.
 // Lance Bun.serve via @colyseus/bun-websockets, monte les rooms, et expose
-// les routes REST (profil, contestation upload, admin validate) via la couche
-// Express compat de BunWebSockets.
+// les routes REST (profil, contestation upload, admin validate) par un routeur
+// Fetch servi avant Colyseus sur le même `Bun.serve` (cf. `./http`).
 
-import { defineServer, defineRoom } from "@colyseus/core";
+import { defineServer, defineRoom, matchMaker } from "@colyseus/core";
 import { BunWebSockets } from "@colyseus/bun-websockets";
 import {
   activeChallengeCount,
@@ -13,9 +13,10 @@ import {
   getChallenge,
   parseMode,
 } from "@rosegriffon/achillea-core";
-import express from "express";
 import path from "node:path";
 import fs from "node:fs/promises";
+
+import { PASSER, RouteurRanked, type ReponseRanked, type RequeteRanked } from "./http";
 
 import { QueueRoom } from "./rooms/QueueRoom";
 import { MatchRoom } from "./rooms/MatchRoom";
@@ -74,7 +75,7 @@ const ALLOWED_ORIGINS = [
 await fs.mkdir(STORAGE_DIR, { recursive: true });
 
 // Resolve auth from a request (cookie ou Authorization header).
-async function resolveAuth(req: express.Request): Promise<SessionUser | null> {
+async function resolveAuth(req: RequeteRanked): Promise<SessionUser | null> {
   const cookieHeader = req.headers.cookie ?? null;
   const fromCookie = await authFromCookieHeader(cookieHeader);
   if (fromCookie) return fromCookie;
@@ -92,7 +93,7 @@ async function userRole(userId: string): Promise<number> {
 // Discord ; on accepte via un secret partagé (même .env que le bot TSed). Header optionnel
 // `x-internal-actor` = id Discord de l'admin (pour la télémétrie).
 const INTERNAL_SECRET = process.env.RANKED_INTERNAL_SECRET ?? "";
-function isInternal(req: express.Request): boolean {
+function isInternal(req: RequeteRanked): boolean {
   return INTERNAL_SECRET.length > 0 && req.headers["x-internal-secret"] === INTERNAL_SECRET;
 }
 
@@ -198,7 +199,7 @@ type AuthorizeResult = { ok: true; actorId: string | null } | { ok: false; statu
 // UserRole : Member=0, Moderator=1, Administrator=2, SuperAdministrator=3.
 // Lecture (litiges + télémétrie) → Modérateurs+ ; actions (valider/annuler) → Admins+.
 // `needAdmin=false` ⇒ Modérateur+ suffit. Les appels internes (secret) passent toujours.
-async function authorizeStaff(req: express.Request, needAdmin: boolean): Promise<AuthorizeResult> {
+async function authorizeStaff(req: RequeteRanked, needAdmin: boolean): Promise<AuthorizeResult> {
   if (isInternal(req)) {
     const actor = req.headers["x-internal-actor"];
     return { ok: true, actorId: typeof actor === "string" ? actor : null };
@@ -210,11 +211,9 @@ async function authorizeStaff(req: express.Request, needAdmin: boolean): Promise
   return { ok: true, actorId: auth.id };
 }
 
-// Preuves de litige : l'upload binaire est IMPOSSIBLE via ce serveur — bun-serve-express
-// reconstruit le corps en `Buffer.from(await req.text(), "utf8")`, ce qui CORROMPT tout
-// octet non-UTF8 (multer/busboy casse aussi : "Request closed"). Seul un corps TEXTE
-// survit. Le front envoie donc l'image encodee en BASE64 (Content-Type text/plain), lue
-// via express.text et decodee ici. On VALIDE ensuite par magic bytes : seules png/jpeg/webp
+// Preuves de litige : le front envoie l'image encodee en BASE64 (Content-Type text/plain),
+// contrat herite de l'ancien transport Express qui corrompait tout corps binaire. Le corps
+// est lu en texte (route `texte`) et decode ici. On VALIDE ensuite par magic bytes : seules png/jpeg/webp
 // passent (svg/html rejetes), et l'extension est DERIVEE du contenu (jamais du client)
 // → impossible d'heberger du contenu actif sur le sous-domaine de confiance ranked.
 const DISPUTE_MAX_BYTES = 5 * 1024 * 1024;
@@ -232,7 +231,17 @@ function sniffImageExt(buf: Buffer): string | null {
   return null;
 }
 
-function corsMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+/**
+ * En-têtes CORS des routes REST, posés comme sous l'ancien transport Express : d'abord ceux de
+ * Colyseus (`matchMaker.controller`), puis ceux du ranked par-dessus. Les pré-vols `OPTIONS`
+ * restent répondus par Colyseus avant toute route (inchangé).
+ */
+function appliquerCors(req: RequeteRanked, res: ReponseRanked, requete: Request): void {
+  const colyseus = {
+    ...matchMaker.controller.DEFAULT_CORS_HEADERS,
+    ...matchMaker.controller.getCorsHeaders(requete.headers),
+  };
+  for (const [nom, valeur] of Object.entries(colyseus)) res.setHeader(nom, String(valeur));
   // On ne pose `Allow-Credentials: true` QUE pour les origines connues (ALLOWED_ORIGINS) —
   // sinon « reflet de n'importe quelle origine + credentials » est un anti-pattern. Les
   // autres origines (et les appels sans Origin : sondes, server-to-server) restent
@@ -249,11 +258,6 @@ function corsMiddleware(req: express.Request, res: express.Response, next: expre
   }
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,Cookie,apikey,x-client-info");
-  if (req.method === "OPTIONS") {
-    res.status(204).end();
-    return;
-  }
-  next();
 }
 
 /** Appel de l'API unifiée (`/v1/*`) : en processus sous `rg-core`, HTTP sinon. */
@@ -281,28 +285,27 @@ export function cheminApiUnifiee(cheminApi: string): string {
 }
 
 /**
- * Requête dont le corps est lisible par le transport Express de Colyseus.
+ * Requête dont le corps est lisible par Colyseus.
  *
- * `bun-serve-express` lit le corps de toute requête non GET/HEAD par
- * `Bun.readableStreamToText(req.body)`, qui lève sur `null` : un `POST` SANS corps
- * (`/api/auth/logout`, `/api/admin/lobbies/:id/cancel`, `/api/admin/seasons/:id/activate`…)
- * répondait 500. On lui donne un corps vide.
+ * L'ancien transport Express (`bun-serve-express`) lisait le corps de toute requête non
+ * GET/HEAD par `Bun.readableStreamToText(req.body)`, qui lève sur `null` : un `POST` SANS
+ * corps répondait 500. Les routes REST ne passent plus par là ; on garde le corps vide pour
+ * ce qui reste confié à Colyseus.
  */
 export function avecCorpsLisible(requete: Request): Request {
   if (requete.body !== null || requete.method === "GET" || requete.method === "HEAD") return requete;
   return new Request(requete, { method: requete.method, body: new Uint8Array(0) });
 }
 
-/** Types de corps binaires : jamais acceptés par les routes Express du ranked. */
+/** Types de corps binaires : jamais acceptés par les routes REST du ranked. */
 const CORPS_BINAIRES = /^(multipart\/form-data|application\/octet-stream|image\/)/i;
 
 /**
  * Requête `/api/*` à corps binaire, routée DIRECTEMENT vers l'API unifiée, ou `null`.
  *
- * Le transport Express de Colyseus (`bun-serve-express`) lit tout corps en TEXTE
- * UTF-8 avant Express (\`IncomingMessage.readBody\`) : un upload d'image
- * (\`POST /api/proxy/upload\`) y arrivait corrompu. L'intercepteur de \`rg-core\`
- * appelle cette fonction AVANT Colyseus, sur la requête Bun d'origine, intacte.
+ * L'intercepteur de `rg-core` appelle cette fonction AVANT les routes ranked et Colyseus :
+ * un upload d'image (`POST /api/proxy/upload`) part tel quel, en processus, sans passer
+ * par le relais `/api` (qui ne réémet que les corps texte ou JSON).
  */
 export function versApiUnifieeDirecte(requete: Request, origine = "http://localhost"): Request | null {
   const url = new URL(requete.url);
@@ -313,8 +316,8 @@ export function versApiUnifieeDirecte(requete: Request, origine = "http://localh
   return new Request(cible.href, requete);
 }
 
-/** Traduit une requête Express `/api/*` (corps texte ou JSON) en requête Fetch vers l'API unifiée. */
-export function versRequeteUnifiee(req: express.Request): Request {
+/** Traduit une requête `/api/*` du routeur ranked (corps texte ou JSON) en requête Fetch vers l'API unifiée. */
+export function versRequeteUnifiee(req: RequeteRanked): Request {
   const [chemin = "/", query] = req.originalUrl.replace(/^\/api(?=\/|$)/, "").split("?", 2);
   const cible = new URL(cheminApiUnifiee(chemin || "/"), URL_API_UNIFIEE);
   if (query) cible.search = query;
@@ -345,17 +348,28 @@ export type IntercepteurHttp = (
 
 let intercepteur: IntercepteurHttp | null = null;
 
+/** Routes REST du ranked, servies avant Colyseus (cf. `monterRoutes`). */
+const routeur = new RouteurRanked({
+  preparer: appliquerCors,
+  surErreur: err => console.error("[ranked] requête en erreur (body-parser/middleware)", err),
+});
+
+/** Routes REST du ranked pour une requête HTTP ordinaire ; pré-vols et WebSocket restent à Colyseus. */
+function servirRoutesRanked(requete: Request): Promise<Response | undefined> | undefined {
+  if (requete.method === "OPTIONS" || requete.headers.get("upgrade")?.toLowerCase() === "websocket") return undefined;
+  return routeur.servir(requete);
+}
+
 class TransportRanked extends BunWebSockets {
   override listen(port: number, hostname?: string, backlog?: number, listeningListener?: () => void) {
     const intercepter = intercepteur;
-    if (!intercepter) return super.listen(port, hostname, backlog, listeningListener);
     const serveOriginal = Bun.serve;
     type FetchColyseus = (this: Bun.Server<unknown>, requete: Request, serveur: Bun.Server<unknown>) => unknown;
     (Bun as { serve: unknown }).serve = (options: Bun.Serve.Options<unknown> & { fetch: FetchColyseus }) =>
       serveOriginal({
         ...options,
         async fetch(requete: Request, serveur: Bun.Server<unknown>) {
-          const reponse = await intercepter(requete, serveur);
+          const reponse = (await intercepter?.(requete, serveur)) ?? (await servirRoutesRanked(requete));
           return reponse ?? ((await options.fetch.call(serveur, avecCorpsLisible(requete), serveur)) as Response);
         },
       } as Bun.Serve.Options<unknown>);
@@ -377,10 +391,11 @@ const server = defineServer({
     // Salon de présence partagé (défi direct) — une seule instance pour tous.
     lobby: defineRoom(LobbyRoom),
   },
-  express: (rawApp: any) => {
-    const app = rawApp as express.Express;
-    app.use(corsMiddleware);
-    app.use(express.json({ limit: "100kb" }));
+});
+
+/** Routes REST du ranked, dans l'ordre d'évaluation (la première qui répond l'emporte). */
+function monterRoutes(app: RouteurRanked): void {
+  {
 
     // Healthcheck
     app.get("/api/health", (_req, res) => {
@@ -554,9 +569,9 @@ const server = defineServer({
     });
 
     // POST /api/ranked/:lobbyId/dispute — capture encodee en base64 (corps text/plain).
-    // express.text bufferise le corps en string (robuste, contrairement au binaire) ;
+    // Le corps est lu en texte (tout Content-Type, 8 Mio max, comme l'ancien express.text) ;
     // on decode le base64 puis on valide le contenu.
-    app.post("/api/ranked/:lobbyId/dispute", express.text({ type: () => true, limit: "8mb" }), async (req, res) => {
+    app.post("/api/ranked/:lobbyId/dispute", { texte: { limite: 8 * 1024 * 1024 } }, async (req, res) => {
       const auth = await resolveAuth(req);
       if (!auth) {
         res.status(401).json({ error: "unauthenticated" });
@@ -636,16 +651,19 @@ const server = defineServer({
     // navigateur de re-deviner le type (defense en profondeur vs le fileFilter
     // images-only) et Content-Disposition: attachment force le telechargement sur
     // navigation directe (le <img> du dashboard reste affiche, lui).
+    // Noms plats écrits par /dispute : tout séparateur ou fichier caché est refusé.
     if ((process.env.NODE_ENV ?? "development") !== "production") {
-      app.use(
-        "/storage/disputes",
-        express.static(STORAGE_DIR, {
-          setHeaders: res => {
-            res.setHeader("X-Content-Type-Options", "nosniff");
-            res.setHeader("Content-Disposition", "attachment");
-          },
-        }),
-      );
+      app.get("/storage/disputes/:fichier", async (req, res) => {
+        const nom = req.params.fichier ?? "";
+        if (!nom || nom.startsWith(".") || nom.includes("/") || nom.includes("\\")) return PASSER;
+        const fichier = Bun.file(path.join(STORAGE_DIR, nom));
+        if (!(await fichier.exists())) return PASSER;
+        res.setHeader("Content-Type", fichier.type);
+        res.setHeader("X-Content-Type-Options", "nosniff");
+        res.setHeader("Content-Disposition", "attachment");
+        res.send(await fichier.bytes());
+        return undefined;
+      });
     }
 
     // GET /api/admin/lobbies/disputes — liste matches contestés (admin only)
@@ -1069,23 +1087,13 @@ const server = defineServer({
       }
     });
 
-    // Error-handler TERMINAL (4 args) — DOIT être le dernier middleware. Sans lui, une
-    // erreur de body-parser/raw-body (ex. POST /dispute avec une image trop lourde →
-    // 413 « entity.too.large ») remonte NON RATTRAPÉE jusqu'au fetch de Bun.serve
-    // (BunWebSockets) → la requête ne reçoit jamais de réponse propre et l'upload reste
-    // figé côté front (le « crash » ressenti). On la convertit en réponse JSON propre.
-    app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-      const e = err as { status?: number; statusCode?: number; type?: string } | null;
-      const status = Number(e?.status ?? e?.statusCode) || 500;
-      const tooLarge = e?.type === "entity.too.large" || status === 413;
-      console.error("[ranked] requête en erreur (body-parser/middleware)", err);
-      if (res.headersSent) return;
-      res
-        .status(tooLarge ? 413 : status >= 400 && status < 600 ? status : 500)
-        .json({ error: tooLarge ? "too_large" : "bad_request" });
-    });
-  },
-});
+    // Les erreurs de corps (ex. POST /dispute trop lourd → 413 « too_large ») et toute
+    // exception d'une route sont converties en réponse JSON par `RouteurRanked.servir` :
+    // une requête ne reste jamais sans réponse (upload figé côté front).
+  }
+}
+
+monterRoutes(routeur);
 
 // Filets de sécurité du sous-process ranked : une requête malformée (ex. la lib
 // @colyseus/bun-websockets fait `new URL(req.url)` qui throw sur un req.url == "/" sans

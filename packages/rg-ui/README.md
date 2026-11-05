@@ -233,7 +233,6 @@ Les apps `website` et `azalee` ont des copies locales de certains composants UI.
 - **clsx** + **tailwind-merge** via `cn()` helper
 - **lucide-react** (icônes)
 - **sonner** + **next-themes** (toaster theming-aware)
-- **vaul** (drawer iOS-like)
 - **embla-carousel-react** (carousel)
 - **react-day-picker** (calendar)
 - **react-hook-form** (form)

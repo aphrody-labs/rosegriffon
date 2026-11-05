@@ -32,15 +32,13 @@
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/types": "workspace:*",
     "better-auth": "catalog:",
-    "nodemailer": "catalog:",
-    "zod": "catalog:"
+    "nodemailer": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
     "@types/nodemailer": "catalog:",
     "next": "catalog:",
-    "react": "catalog:",
-    "vitest": "catalog:"
+    "react": "catalog:"
   },
   "engines": {
     "bun": ">=1.4.4"
@@ -49,8 +47,7 @@
   "files": [
     "README.md",
     "src",
-    "tsconfig.json",
-    "vitest.config.ts"
+    "tsconfig.json"
   ],
   "repository": {
     "type": "git",

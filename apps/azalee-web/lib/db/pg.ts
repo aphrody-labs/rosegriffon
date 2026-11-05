@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { createPgPool } from "@rosegriffon/db/pg";
 
 // Connexion Postgres DIRECTE (bypass le Data API PostgREST de Supabase) —
 // utilisée pour les lectures publiques qui ne doivent PAS dépendre de la
@@ -7,7 +7,7 @@ import { Pool } from "pg";
 // directe restait fonctionnelle tout du long — cf. docs/rag-unified.md).
 // Azalée tourne exclusivement en self-host VPS : pas de
 // réécriture pooler nécessaire (IPv6 direct dispo, cf. lib/auth.ts).
-// Miroir de apps/website/src/lib/db/pg.ts (même pattern, adapté azalee).
+// Le pool vient de `@rosegriffon/db/pg` (mêmes délais, même borne DATABASE_POOL_MAX ≤ 4).
 
 export const getDatabaseURL = (): string => {
   const url = process.env.DATABASE_URL;
@@ -17,21 +17,12 @@ export const getDatabaseURL = (): string => {
   return url;
 };
 
-let _pgPool: Pool | null = null;
+type PgPool = ReturnType<typeof createPgPool>;
 
-const configuredPoolMax = Number.parseInt(process.env.DATABASE_POOL_MAX ?? "", 10);
-const poolMax = configuredPoolMax > 0 ? Math.min(configuredPoolMax, 4) : 4;
+let _pgPool: PgPool | null = null;
 
 /** Pool Postgres direct partagé (singleton lazy) — réutiliser ce pool, ne jamais en créer un par requête. */
-export function getPgPool(): Pool {
-  if (!_pgPool) {
-    _pgPool = new Pool({
-      connectionString: getDatabaseURL(),
-      application_name: "azalee-web",
-      connectionTimeoutMillis: 5_000,
-      idleTimeoutMillis: 30_000,
-      max: poolMax,
-    });
-  }
+export function getPgPool(): PgPool {
+  _pgPool ??= createPgPool(getDatabaseURL(), { applicationName: "azalee-web" });
   return _pgPool;
 }

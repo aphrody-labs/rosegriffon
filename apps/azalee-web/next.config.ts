@@ -158,8 +158,6 @@ const nextConfig: NextConfig = {
     "pg",
     "sharp",
     "nodemailer",
-    "cheerio",
-    "bcryptjs",
     "jsonwebtoken",
     "googleapis",
     "web-push",

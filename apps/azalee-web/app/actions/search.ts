@@ -1,6 +1,6 @@
 "use server";
 
-import type { QueryResultRow } from "pg";
+import type { QueryResultRow } from "@rosegriffon/db/pg";
 import { isKana, toKatakana } from "wanakana";
 import { getPgPool } from "@/lib/db/pg";
 import {

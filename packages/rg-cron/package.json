@@ -31,7 +31,6 @@
     "@rosegriffon/inagle": "catalog:",
     "@rosegriffon/types": "workspace:*",
     "@vercel/functions": "catalog:",
-    "cheerio": "catalog:",
     "discord.js": "catalog:"
   },
   "devDependencies": {

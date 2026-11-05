@@ -25,7 +25,7 @@
 import { Database } from "bun:sqlite";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
-import { Client } from "pg";
+import { createBunPgClient } from "@rosegriffon/db/bun-sql";
 
 const { DATABASE_URL } = process.env;
 
@@ -77,7 +77,7 @@ function affinityFor(pgType: string): ColumnInfo["sqliteAffinity"] {
 }
 
 const tables: TableInfo[] = [];
-const pg = new Client({ connectionString: DATABASE_URL });
+const pg = createBunPgClient(DATABASE_URL);
 await pg.connect();
 
 {

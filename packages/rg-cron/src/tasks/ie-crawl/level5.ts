@@ -6,19 +6,12 @@
 
 import { crawlDataPath } from "../../lib/shared-path";
 import { WebCdpPage, waitForSelector } from "../../lib/web-cdp";
-import * as cheerio from "cheerio";
+import { extraireLevel5News } from "./html-extract";
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const DATA_ROOT = crawlDataPath("level5.co.jp/inazuma");
-
-interface NewsItem {
-  id: string;
-  url: string;
-  title: string;
-  date: string;
-}
 
 async function safeGoto(page: WebCdpPage, url: string, timeout = 30000): Promise<unknown> {
   return Promise.race([
@@ -41,30 +34,8 @@ export async function crawlLevel5(): Promise<{ success: boolean; error?: string 
     await waitForSelector(page, "body", 15000).catch(() => {});
     const indexHtml = await page.content();
 
-    const $ = cheerio.load(indexHtml);
-    const articles: NewsItem[] = [];
-
-    // Recherche des liens vers les articles d'actualités (format news/YYYYMMDD/)
-    $("a").each((_, el) => {
-      const href = $(el).attr("href") || "";
-      const text = $(el).text().trim();
-
-      const match = href.match(/\/news\/(\d{8})\//);
-      if (match) {
-        const id = match[1] || "";
-        const absoluteUrl = href.startsWith("http") ? href : `https://www.level5.co.jp${href}`;
-
-        if (id && !articles.find(a => a.id === id)) {
-          articles.push({
-            id,
-            url: absoluteUrl,
-            title: text || "LEVEL-5 Announcement",
-            // Formater la date YYYYMMDD en YYYY.MM.DD ou YYYY-MM-DD
-            date: `${id.substring(0, 4)}.${id.substring(4, 6)}.${id.substring(6, 8)}`,
-          });
-        }
-      }
-    });
+    // Liens vers les articles d'actualités (format news/YYYYMMDD/)
+    const articles = extraireLevel5News(indexHtml);
 
     console.log(`[Crawl Level5] ${articles.length} communiqués trouvés au total. Filtrage pour Inazuma Eleven...`);
     let crawlCount = 0;

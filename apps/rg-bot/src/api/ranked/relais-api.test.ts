@@ -1,30 +1,30 @@
 /**
  * Ancien préfixe `/api/*` (port Colyseus de `rg-core`) → API unifiée.
  *
- * Deux voies : le relais Express pour les corps texte ou JSON, et le routage direct
- * avant Colyseus pour les corps binaires, que le transport Express décoderait en
- * texte UTF-8 (`bun-serve-express`, `IncomingMessage.readBody`) — un upload d'image
- * y arrivait corrompu.
+ * Deux voies : le relais `/api` du routeur ranked pour les corps texte ou JSON, et le
+ * routage direct de `rg-core` pour les corps binaires, relayés tels quels.
  */
 import { describe, expect, test } from "bun:test";
-import type express from "express";
 
+import type { RequeteRanked } from "./http";
 import { versApiUnifieeDirecte, versRequeteUnifiee } from "./main";
 
-/** Requête Express minimale : les champs lus par le relais. */
-function requeteExpress(options: { method: string; url: string; headers?: Record<string, string>; body?: unknown }) {
+/** Requête minimale du routeur ranked : les champs lus par le relais. */
+function requeteRanked(options: { method: string; url: string; headers?: Record<string, string>; body?: unknown }) {
   return {
     method: options.method,
     originalUrl: options.url,
     headers: options.headers ?? {},
+    params: {},
+    query: {},
     body: options.body,
-  } as unknown as express.Request;
+  } satisfies RequeteRanked;
 }
 
-describe("relais Express /api (texte et JSON)", () => {
+describe("relais /api (texte et JSON)", () => {
   test("chemin et requête traduits, auth relayée, hôte retiré", () => {
     const r = versRequeteUnifiee(
-      requeteExpress({ method: "GET", url: "/api/clans?page=2", headers: { cookie: "token=abc", host: "ranked.rosegriffon.fr" } }),
+      requeteRanked({ method: "GET", url: "/api/clans?page=2", headers: { cookie: "token=abc", host: "ranked.rosegriffon.fr" } }),
     );
     expect(new URL(r.url).pathname).toBe("/v1/achillea/clans");
     expect(new URL(r.url).search).toBe("?page=2");
@@ -32,14 +32,14 @@ describe("relais Express /api (texte et JSON)", () => {
     expect(r.headers.get("host")).not.toBe("ranked.rosegriffon.fr");
   });
 
-  test("JSON analysé par express.json : resérialisé", async () => {
-    const r = versRequeteUnifiee(requeteExpress({ method: "POST", url: "/api/clans/create", body: { name: "Zoo" } }));
+  test("JSON analysé par le routeur : resérialisé", async () => {
+    const r = versRequeteUnifiee(requeteRanked({ method: "POST", url: "/api/clans/create", body: { name: "Zoo" } }));
     expect(await r.json()).toEqual({ name: "Zoo" });
     expect(r.headers.get("content-type")).toBe("application/json");
   });
 
   test("POST sans corps (objet vide) : relayé sans corps, sans lire de flux", async () => {
-    const r = versRequeteUnifiee(requeteExpress({ method: "POST", url: "/api/auth/logout", body: {} }));
+    const r = versRequeteUnifiee(requeteRanked({ method: "POST", url: "/api/auth/logout", body: {} }));
     expect(new URL(r.url).pathname).toBe("/v1/auth/logout");
     expect(await r.text()).toBe("");
   });
@@ -70,7 +70,7 @@ describe("routage direct des corps binaires", () => {
     expect(new Uint8Array(await directe!.arrayBuffer())).toEqual(corps);
   });
 
-  test("JSON, texte et routes hors /api : laissés au relais Express / à Colyseus", () => {
+  test("JSON, texte et routes hors /api : laissés au relais /api / à Colyseus", () => {
     const json = new Request("http://x/api/clans/create", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
     const texte = new Request("http://x/api/ranked/1/dispute", { method: "POST", headers: { "content-type": "text/plain" }, body: "aGk=" });
     const autre = new Request("http://x/matchmake/joinOrCreate/queue", { method: "POST", headers: { "content-type": "image/png" } });
@@ -80,7 +80,7 @@ describe("routage direct des corps binaires", () => {
   });
 });
 
-describe("POST sans corps pour le transport Express", () => {
+describe("POST sans corps pour Colyseus", () => {
   test("reçoit un corps vide lisible ; GET et corps existants inchangés", async () => {
     const { avecCorpsLisible } = await import("./main");
     const vide = avecCorpsLisible(new Request("http://x/api/auth/logout", { method: "POST" }));
