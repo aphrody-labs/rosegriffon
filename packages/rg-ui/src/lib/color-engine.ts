@@ -9,8 +9,8 @@
  *   - Chaque rôle est une clarté OKLCH tirée des tables `TONS` (une par mode),
  *     une chroma relative à la chroma de sa famille, et la teinte de la famille.
  *   - Familles : primaire = teinte de la graine ; secondaire = teinte + 180°
- *     (accent complémentaire, cf. l'or de Roy et le lime d'Achilléa), chroma
- *     × 0,6 ; tertiaire = teinte + 60° (analogue), chroma × 0,5 ; erreur =
+ *     (accent complémentaire, cf. l'or de Roy), chroma × 0,6, sauf si la
+ *     graine impose `secondary` ; tertiaire = teinte + 60° (analogue), chroma × 0,5 ; erreur =
  *     teinte fixe 27°, chroma 0,19 ; neutres = teinte de la graine, chroma ×
  *     0,1 (bornée à 0,03), variante neutre × 2.
  *   - Hors gamut sRGB : la chroma baisse (clarté et teinte conservées) jusqu'à
@@ -29,6 +29,14 @@ export interface ThemeSeed {
   /** Chroma OKLCH de la couleur de marque. */
   chroma: number;
   mode: ThemeMode;
+  /**
+   * Accent secondaire imposé par la marque, quand le complémentaire calculé
+   * la trahit (Achilléa : violet + or, le complémentaire du violet donnerait
+   * un vert citron). La teinte suit la rotation réglée par l'utilisateur.
+   */
+  secondary?: { hue: number; chroma: number };
+  /** Chroma des neutres ; 0 donne des gris purs. Défaut : chroma × 0,1 bornée à 0,03. */
+  neutralChroma?: number;
 }
 
 export interface ThemeAdjustments {
@@ -370,10 +378,13 @@ export function computeRoles(seed: ThemeSeed, adjustments?: Partial<ThemeAdjustm
   const tons = TONS[seed.mode];
   const teinte = (((seed.hue + adj.hueShift) % 360) + 360) % 360;
   const chroma = seed.chroma * adj.chroma;
-  const neutre = Math.min(chroma * 0.1, 0.03);
+  const neutre = seed.neutralChroma ?? Math.min(chroma * 0.1, 0.03);
+  const secondaire = seed.secondary
+    ? { h: (((seed.secondary.hue + adj.hueShift) % 360) + 360) % 360, c: seed.secondary.chroma * adj.chroma }
+    : { h: (teinte + 180) % 360, c: chroma * 0.6 };
   const familles: Record<Famille, { h: number; c: number }> = {
     primary: { h: teinte, c: chroma },
-    secondary: { h: (teinte + 180) % 360, c: chroma * 0.6 },
+    secondary: secondaire,
     tertiary: { h: (teinte + 60) % 360, c: chroma * 0.5 },
     error: { h: 27, c: 0.19 },
     neutral: { h: teinte, c: neutre },

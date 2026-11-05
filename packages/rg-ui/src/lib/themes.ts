@@ -7,6 +7,8 @@
  */
 import type { ThemeId } from "@rosegriffon/preferences";
 
+import type { ThemeSeed } from "./color-engine";
+
 export const THEMES = {
   roy: {
     name: "Roy",
@@ -95,7 +97,7 @@ export interface ThemePack {
   wallpaper: string;
   /** Compagnon du thème ; `null` tant qu'aucune mascotte n'existe. */
   pet: { name: string; emotes: { hello: string; proud?: string; surprised?: string } } | null;
-  seed: { hue: number; chroma: number; mode: "light" | "dark" };
+  seed: ThemeSeed;
 }
 
 export const THEME_PACKS = {
@@ -139,7 +141,9 @@ export const THEME_PACKS = {
     logo: "/achillea/logo1.svg",
     wallpaper: "/fond_achilea.webp",
     pet: null,
-    seed: { hue: 297, chroma: 0.25, mode: "dark" },
+    // Charte legacy (achillea-web, preset PrimeNG) : violet #9039ff, or
+    // #fbbf24 en accent, surfaces en gris neutres (#131313, #1e1e1e).
+    seed: { hue: 297, chroma: 0.267, mode: "dark", secondary: { hue: 84, chroma: 0.164 }, neutralChroma: 0 },
   },
 } as const satisfies Record<ThemeId, ThemePack>;
 
