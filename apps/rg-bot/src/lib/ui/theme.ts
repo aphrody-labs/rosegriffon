@@ -165,12 +165,20 @@ export interface Marque {
 const ICONES_MARQUE: Readonly<Record<string, string>> = Object.freeze({
   rg: "https://rosegriffon.fr/RG_Logo_V2.5.webp",
   azalee: "https://azalee.rosegriffon.fr/RG_Azalee-logo.webp",
+  // Casque violet #6d00ce de l'ancien site Achilléa (200 image/png vérifié le
+  // 5/11/2026) : sans cette entrée, les pieds Achilléa portaient le logo RG.
+  achillea: "https://rosegriffon.fr/achillea/achillea_ico.png",
 });
+
+/** Icône de pied d'un profil (repli : logo Rose Griffon). */
+export function iconeDeMarque(nomProfil: string): string {
+  return ICONES_MARQUE[nomProfil] ?? ICONES_MARQUE.rg!;
+}
 
 export const MARQUE: Marque = Object.freeze({
   nom: PROFIL.titre,
   domaine: PROFIL.marque.piedDePage,
-  icone: ICONES_MARQUE[PROFIL.nom] ?? ICONES_MARQUE.rg!,
+  icone: iconeDeMarque(PROFIL.nom),
 });
 
 // ─── Limites DURES de l'API Discord ─────────────────────────────────────────

@@ -26,6 +26,8 @@ import {
 
 const WIDTH = 1080;
 const HEIGHT = 1920;
+/** Le « ? » du logo absent est en 96 px dans `ClanPosterService` legacy (pas la moitié du disque). */
+export const LOGO_PLACEHOLDER_FONT_SIZE = 96;
 
 export interface PosterMember {
   userId: string;
@@ -136,7 +138,7 @@ export async function renderClanPoster(
   const logoSize = 280;
   const lx = (WIDTH - logoSize) / 2;
   const ly = 220;
-  drawCircleImage(ctx, logo, lx, ly, logoSize);
+  drawCircleImage(ctx, logo, lx, ly, logoSize, undefined, LOGO_PLACEHOLDER_FONT_SIZE);
   ctx.beginPath();
   ctx.arc(lx + logoSize / 2, ly + logoSize / 2, logoSize / 2 + 6, 0, Math.PI * 2);
   ctx.lineWidth = 8;

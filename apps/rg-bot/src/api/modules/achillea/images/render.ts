@@ -158,6 +158,8 @@ export function drawCircleImage(
   y: number,
   size: number,
   placeholder = "#2a2233",
+  /** Corps du « ? » de repli (legacy : moitié du disque, 96 px pour le logo de l'affiche). */
+  placeholderFontSize = Math.floor(size / 2),
 ): void {
   ctx.save();
   ctx.beginPath();
@@ -170,7 +172,7 @@ export function drawCircleImage(
     ctx.fillStyle = placeholder;
     ctx.fillRect(x, y, size, size);
     ctx.fillStyle = "#ffffff";
-    ctx.font = `bold ${Math.floor(size / 2)}px ${FONT_SANS}`;
+    ctx.font = `bold ${placeholderFontSize}px ${FONT_SANS}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("?", x + size / 2, y + size / 2);
