@@ -128,7 +128,6 @@
     "@vercel/functions": "3.10.1",
     "@webgpu/types": "^0.1.74",
     "babel-plugin-react-compiler": "1.0.0",
-    "bcryptjs": "^3.0.3",
     "better-auth": "1.7.7",
     "brackets-manager": "^1.11.1",
     "brackets-model": "^1.7.0",

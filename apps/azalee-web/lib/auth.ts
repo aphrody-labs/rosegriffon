@@ -1,12 +1,12 @@
 import crypto from "node:crypto";
 import { createPostgresClient } from "@rosegriffon/db/service";
-import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { bearer } from "better-auth/plugins";
 import { agentAuth } from "@better-auth/agent-auth";
 import { logAudit } from "@/lib/audit";
 import { ADMIN_ROLES } from "@/lib/auth-roles";
+import { isLegacyBcryptHash, verifyLegacyBcrypt } from "@/lib/bcrypt-legacy";
 import { getPgPool } from "@/lib/db/pg";
 import { getIPIntelligence } from "@/lib/ip-intelligence";
 import { getPublicOrigin } from "@/lib/site-url";
@@ -114,8 +114,8 @@ function createAuth() {
       enabled: true,
       password: {
         verify: async ({ hash, password }) => {
-          if (hash.startsWith("$2a$") || hash.startsWith("$2b$")) {
-            return bcrypt.compare(password, hash);
+          if (isLegacyBcryptHash(hash)) {
+            return verifyLegacyBcrypt(password, hash);
           }
           const { verifyPassword } = await import("better-auth/crypto");
           return verifyPassword({ hash, password });

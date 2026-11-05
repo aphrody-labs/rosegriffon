@@ -48,7 +48,6 @@
     "@sentry/nextjs": "catalog:",
     "@supabase/supabase-js": "catalog:",
     "@types/nodemailer": "catalog:",
-    "bcryptjs": "catalog:",
     "better-auth": "catalog:",
     "cheerio": "catalog:",
     "class-variance-authority": "catalog:",

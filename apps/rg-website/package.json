@@ -104,7 +104,6 @@
     "@tiptap/starter-kit": "catalog:",
     "@types/nodemailer": "catalog:",
     "@types/pica": "catalog:",
-    "bcryptjs": "catalog:",
     "better-auth": "catalog:",
     "browser-image-compression": "catalog:",
     "cheerio": "catalog:",
