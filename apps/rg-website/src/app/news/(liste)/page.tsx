@@ -3,6 +3,7 @@ import { getCommentCounts } from "@/app/actions/comments";
 import { getReactionCounts } from "@/app/actions/reactions";
 import { getContinueReading } from "@/app/actions/reading-history";
 import { getPgPool } from "@/lib/db/pg";
+import { sansImagesMortes } from "@/lib/images/disponibilite";
 import { sanitizeNewsSearchQuery } from "@/lib/news-search";
 import { parseSearchParams } from "@/lib/validations";
 import { absoluteUrl, SITE_URL } from "@/lib/site-url";
@@ -217,6 +218,14 @@ export default async function NewsFeedPage({
     ...featuredArticles.map(i => i.id),
   ];
 
+  // Une couverture qui ne répond pas (CDN en 502) est remplacée dès le HTML : sinon le repli
+  // n'arrivait qu'après hydratation, et la une devenait un LCP de 14 à 52 s (audit du 5/11/2026).
+  // (Sondage lancé en parallèle des lectures secondaires ci-dessous.)
+  const sondages = Promise.all([
+    sansImagesMortes(featuredArticles),
+    sansImagesMortes(feedItems.filter(i => i.type === "article")),
+  ]);
+
   const [popularTags, reactionCounts, popularArticles, trendingArticles, commentCounts, continueReadingArticles] =
     await Promise.all([
       currentPage === 1 && !searchQuery ? getPopularTags(20) : Promise.resolve([]),
@@ -226,6 +235,11 @@ export default async function NewsFeedPage({
       articleIds.length > 0 ? getCommentCounts(articleIds) : Promise.resolve({}),
       currentPage === 1 && !searchQuery ? getContinueReading(4) : Promise.resolve([]),
     ]);
+
+  const [featuredServis, articlesServis] = await sondages;
+  featuredArticles = featuredServis;
+  const articlesParId = new Map(articlesServis.map(a => [a.id, a]));
+  const feedItemsServis = feedItems.map(i => (i.type === "article" ? (articlesParId.get(i.id) ?? i) : i));
 
   const collectionJsonLd = {
     "@context": "https://schema.org",
@@ -254,7 +268,7 @@ export default async function NewsFeedPage({
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
       <NewsFeedClient
-        feedItems={feedItems}
+        feedItems={feedItemsServis}
         totalItems={totalItems}
         currentPage={currentPage}
         categoryFilter={categoryFilter}

@@ -25,6 +25,9 @@ const OPTIMIZED_HOST_SUFFIXES = [".supabase.co"];
 
 export function isOptimizedImageSource(src: ImageProps["src"]): boolean {
   if (typeof src !== "string") return true;
+  // Un SVG n'a rien à gagner à l'optimiseur (vectoriel, déjà léger) : servi tel quel, il évite
+  // un aller-retour par `/_next/image` (le repli des couvertures de `/news` était l'élément LCP).
+  if (src.split("?", 1)[0]!.toLowerCase().endsWith(".svg")) return false;
   if (src.startsWith("/") && !src.startsWith("//")) return !src.startsWith("/api/");
   try {
     const { hostname } = new URL(src);
