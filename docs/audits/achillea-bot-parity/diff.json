@@ -1,0 +1,54 @@
+{
+  "threshold": "summed RGB delta > 6",
+  "beforeFix": "3c36d153",
+  "cases": [
+    {
+      "case": "card-latin",
+      "width": 1080,
+      "height": 1350,
+      "differingPixels": 0,
+      "percent": 0,
+      "rows": null
+    },
+    {
+      "case": "card-cjk",
+      "width": 1080,
+      "height": 1350,
+      "differingPixels": 8824,
+      "percent": 0.605,
+      "rows": "600-682"
+    },
+    {
+      "case": "poster-logo",
+      "width": 1080,
+      "height": 1920,
+      "differingPixels": 0,
+      "percent": 0,
+      "rows": null
+    },
+    {
+      "case": "poster-nologo-before-fix",
+      "width": 1080,
+      "height": 1920,
+      "differingPixels": 2807,
+      "percent": 0.135,
+      "rows": "305-415"
+    },
+    {
+      "case": "poster-nologo-after-fix",
+      "width": 1080,
+      "height": 1920,
+      "differingPixels": 0,
+      "percent": 0,
+      "rows": null
+    },
+    {
+      "case": "poster-empty",
+      "width": 1080,
+      "height": 1920,
+      "differingPixels": 0,
+      "percent": 0,
+      "rows": null
+    }
+  ]
+}
