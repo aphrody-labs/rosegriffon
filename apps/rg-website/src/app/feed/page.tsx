@@ -1,13 +1,59 @@
 import { Search } from "lucide-react";
+import { Suspense } from "react";
 
 import { comptesDuFiltre, lireFiltre, parametresDuFiltre } from "@/lib/feed/comptes";
 import { lireFil, rechercherX } from "@/lib/feed";
 
+import { SquelettePosts } from "./carte-post";
 import { Filtres } from "./filtres";
 import { FilFeed, ResultatsRecherche } from "./fil-feed";
 import type { PageFeed } from "./fil-feed";
+import type { CompteSource } from "@/lib/feed/types";
+import type { FiltreFil } from "@/lib/feed/comptes";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Attente maximale des sources avant de rendre la liste. La coque de la page part tout de suite
+ * (Suspense) ; au-delà de ce délai, la liste arrive vide et le client prend le relais sur
+ * `/api/feed/live`, qui rejoint la lecture déjà en vol (`memo`). Sans borne, une CLI X lente
+ * retenait tout le HTML (12 à 52 s sur `/feed?reseau=x&compte=*`, audit du 5/11/2026).
+ */
+const BUDGET_SERVEUR_MS = 2000;
+
+function auPlus<T>(promesse: Promise<T>, ms: number): Promise<T | null> {
+  let minuteur: ReturnType<typeof setTimeout> | undefined;
+  const delai = new Promise<null>(resoudre => {
+    minuteur = setTimeout(() => resoudre(null), ms);
+  });
+  return Promise.race([promesse.catch(() => null), delai]).finally(() => clearTimeout(minuteur));
+}
+
+async function ListeInitiale({
+  q,
+  filtre,
+  compte,
+  parametres,
+}: {
+  q: string;
+  filtre: FiltreFil;
+  compte: CompteSource | undefined;
+  parametres: string;
+}) {
+  // Le client retente seul ; la page reste utile sans les données du serveur.
+  const initial: PageFeed | null = await auPlus<PageFeed>(q ? rechercherX(q) : lireFil(filtre), BUDGET_SERVEUR_MS);
+  return q ? (
+    <ResultatsRecherche key={q} q={q} initial={initial} />
+  ) : (
+    <FilFeed
+      key={parametres}
+      url={`/api/feed/live${parametres ? `?${parametres}` : ""}`}
+      filtre={filtre}
+      compte={compte}
+      initial={initial}
+    />
+  );
+}
 
 export const metadata = {
   alternates: { canonical: "/feed" },
@@ -25,13 +71,6 @@ export default async function PageFeedInazuma({
   const q = brut.q?.trim().slice(0, 200) ?? "";
   const filtre = lireFiltre({ get: nom => (nom in brut ? ((brut as Record<string, string | undefined>)[nom] ?? null) : null) });
   const compte = filtre.compte ? comptesDuFiltre(filtre)[0] : undefined;
-
-  let initial: PageFeed | null = null;
-  try {
-    initial = q ? await rechercherX(q) : await lireFil(filtre);
-  } catch {
-    // Le client retente seul ; la page reste utile sans les données du serveur.
-  }
 
   const parametres = parametresDuFiltre(filtre);
   return (
@@ -66,20 +105,10 @@ export default async function PageFeedInazuma({
         <div className="mb-4">
           <Filtres filtre={filtre} />
         </div>
-        {q ? (
-          <>
-            <h2 className="mb-3 text-lg leading-6 font-bold text-on-surface">Résultats pour « {q} » sur X</h2>
-            <ResultatsRecherche key={q} q={q} initial={initial} />
-          </>
-        ) : (
-          <FilFeed
-            key={parametres}
-            url={`/api/feed/live${parametres ? `?${parametres}` : ""}`}
-            filtre={filtre}
-            compte={compte}
-            initial={initial}
-          />
-        )}
+        {q && <h2 className="mb-3 text-lg leading-6 font-bold text-on-surface">Résultats pour « {q} » sur X</h2>}
+        <Suspense key={q || parametres} fallback={<SquelettePosts />}>
+          <ListeInitiale q={q} filtre={filtre} compte={compte} parametres={parametres} />
+        </Suspense>
         <details className="mt-6 rounded-2xl border border-outline-variant bg-surface-container-low text-sm leading-6 text-on-surface-variant">
           <summary className="flex min-h-11 cursor-pointer items-center px-4 font-medium text-on-surface">
             À propos des sources

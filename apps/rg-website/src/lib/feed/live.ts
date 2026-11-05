@@ -112,9 +112,33 @@ async function lireProfilBrut(compte: string): Promise<XProfil> {
   };
 }
 
-/** Profil d'un compte, mis en cache dix minutes (il change rarement, et coûte un appel par compte). */
+/** Un profil en échec n'est pas relu avant ce délai. */
+const TTL_ECHEC_PROFIL_MS = 120_000;
+const echecsProfil = new Map<string, number>();
+
+/**
+ * Profil d'un compte, mis en cache dix minutes (il change rarement, et coûte un appel par compte).
+ *
+ * ⚠ L'ÉCHEC AUSSI EST RETENU (deux minutes). Sans cela, un profil illisible relançait la CLI à
+ * chaque lecture, et la source X, qui attend profil ET posts, retenait toute la réponse le temps
+ * du délai de la CLI, même avec les posts en cache (`/api/feed/live?compte=…` : 20 s mesurées
+ * avec une CLI lente, 12 à 52 s en prod d'après l'audit du 5/11/2026).
+ */
 export function lireProfil(compte: string): Promise<XProfil> {
-  return memo(`profil:${compte}`, TTL_PROFIL_MS, () => lireProfilBrut(compte));
+  const echec = echecsProfil.get(compte);
+  if (echec !== undefined && Date.now() - echec < TTL_ECHEC_PROFIL_MS) {
+    return Promise.reject(new Error(`profil X indisponible : ${compte}`));
+  }
+  return memo(`profil:${compte}`, TTL_PROFIL_MS, () => lireProfilBrut(compte)).then(
+    profil => {
+      echecsProfil.delete(compte);
+      return profil;
+    },
+    (erreur: unknown) => {
+      echecsProfil.set(compte, Date.now());
+      throw erreur;
+    },
+  );
 }
 
 /** Une page de posts et le curseur de la suivante (absent à la fin). */
