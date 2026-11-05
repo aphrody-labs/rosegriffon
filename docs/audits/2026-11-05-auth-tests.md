@@ -1,0 +1,44 @@
+# 2026-11-05: auth tests, Rose Griffon and Achilléa
+
+Order: "les tests doivent tester l'auth et l'OAuth Achilléa ET RG, qui sont distincts".
+Every test runs offline. Secrets are generated inside the tests. Stores are in memory (Better Auth memory adapter, or a recording Kysely driver), and provider endpoints are answered by an intercepted `fetch`. No env files and no prod values are read.
+
+## The two systems
+
+| | Rose Griffon | Achilléa |
+|---|---|---|
+| Engine | Better Auth 1.7.7 (`createRoseGriffonAuth`, packages/rg-auth) | HS256 JWT signed and checked by the unified API (apps/rg-bot `modules/auth`, verifier in `achillea-core/auth`) |
+| Origin and endpoints | `https://rosegriffon.fr/api/auth/*` | `https://api.rosegriffon.fr/v1/auth/{session/exchange,me,realtime-token,logout,oauth/*}` |
+| Cookie | `__Secure-better-auth.session_token` (prod): Secure, HttpOnly, SameSite=Lax, host-only | `token`: Domain=.rosegriffon.fr (prod), HttpOnly, SameSite=Lax, Secure, 30 days |
+| Secret | `BETTER_AUTH_SECRET` | `JWT_SECRET_KEY` (the API only; the website never signs) |
+| Identity and store | `public."user"` / `session` / `account` (uuid) | `achillea."user"` keyed by the **Discord id** |
+| Login | email/password (verified email, 12+ chars), Discord, Twitch, GitHub, Google (PKCE), Patreon (genericOAuth), plus 2FA and passkey | none of its own. The session is derived from an RG session through the bridge |
+| OAuth | sign-in: `/sign-in/social` -> `/callback/<id>`, DB-stored state + signed state cookie, account linking for trusted providers | linking only (Twitch, Challonge): `/oauth/:provider/start` writes a one-time `oauth_csrf` row, state = `<discordId>:<48 hex>`, and the callback is `https://api.rosegriffon.fr/v1/auth/oauth/callback?provider=...` |
+
+The **only link** between the two is `POST /api/achillea/session` on the website. It reads the RG session, calls `/v1/auth/session/exchange` with `API_ADMIN_TOKEN` and `{ betterAuthUserId }`, and the API resolves the Discord account linked to that RG user. With no Discord account the API answers 409 and no Achilléa user is created.
+
+## Test files
+
+| File | Tests | Covers |
+|---|---|---|
+| `packages/rg-auth/src/rg-auth-flows.test.ts` (+ `test-fixtures/prod-auth-probe.ts`) | 17 | Sign-up with no session before verification, 12-char minimum, unverified sign-in refused (403), verification link, wrong password 401, sign-in/get-session/sign-out, cookie attributes. Authorize URLs for Discord/Twitch/GitHub/Patreon (client_id, `redirect_uri` on rosegriffon.fr, state, fresh per start). Forged state, missing state cookie and replayed state are refused before any token call. Callback with mocked Discord token and userinfo, code sent with the same redirect_uri, linking to a verified email account (credential + discord), provider tokens encrypted at rest, provider-rejected code gives no session. 2FA and passkey plugins mounted. In a production child process: `__Secure-` cookie with Secure/HttpOnly/Lax and no Domain, no localhost trusted origins, Google with PKCE S256, CSRF (cookie POST from an untrusted origin gets 403 and the session survives), open-redirect callbackURL gets 403. RG vs Achilléa: an RG cookie or bearer is not an Achilléa JWT, an Achilléa JWT (with either secret) opens no RG session as cookie, as RG cookie name or as bearer, and an email-only member has no Discord account to derive from. |
+| `apps/rg-bot/src/api/modules/auth/achillea-auth-flows.test.ts` | 15 | Exchange is internal only (no bearer, a wrong one or an RG token: 401, zero SQL). Linked Discord gives a JWT (iss/aud/tokenUse/sub = Discord id, RG id absent) and an upsert of the Achilléa user. No Discord: 409, nothing written. No secret: 503. `/me` takes bearer or `token` cookie and refuses anonymous, expired, foreign-secret, realtime, tampered and `alg:none` tokens, and a deleted player. The realtime token is 300 s, has its own audience and is not a session. Logout cookie local and prod (Domain, Secure, no-store). Twitch start: session required (RG cookies 401), unsupported provider 400, CSRF row, URL, fresh state. Callback: malformed, unknown or expired state gives 400 with no provider call; a valid one consumes the state, exchanges with the same redirect_uri, writes `user_connection` and redirects 302. RG cookies or bearers are refused on `/me` and `/realtime-token`, and a JWT signed with the RG secret is refused. |
+| `apps/rg-website/src/app/api/achillea/session/route.test.ts` | 7 | Bridge: no RG session gives 401 with no API call. Exchange call (URL, internal bearer, body). `token` cookie attributes. 409 erases a stale cookie. API failure and missing internal token give 503. DELETE erases only `token`. Plus the Patreon admin callback regression. |
+
+Gates before each commit: rg-auth typecheck/lint/test (50 pass), rg-bot typecheck/lint/`bun run test` (1827 pass, 87 skip, 0 fail), rg-website typecheck/lint/test (542 pass).
+
+## Defects found and fixed (each with a regression test)
+
+1. **RG sign-out left the Achilléa session alive** (`8dbb4ff9`). The `token` JWT is stateless and valid for 30 days on `.rosegriffon.fr`. Only the Achilléa provider's own logout erased it, so leaving the site through the header or the server actions kept the Achilléa API authenticated. Fix: an after hook on `/sign-out` in `createRoseGriffonAuth` clears it using the shared `achilleaSessionCookieAttributes`. It runs before `nextCookies`, so it covers server actions too.
+2. **The session profile sync never ran** (`8dbb4ff9`). `session.create.after` passed `session.user`, which is undefined because the hook receives the session row. Every sign-in logged `[auth] session profile sync failed`. Fix: load the user by `session.userId`.
+3. **The provider OAuth callback returned a 302 with no `Location`** (`d91d28a8`). The code set `set.redirect` and then returned `status(302, ...)`, so after linking Twitch or Challonge the browser stayed on `{"message":"Redirecting"}`. Fix: Elysia `redirect(url, 302)`.
+4. **The Patreon admin page advertised the wrong redirect URI** (`b1bd7ced`). It showed `/api/auth/oauth2/callback/patreon`. Better Auth 1.7 serves genericOAuth on `/api/auth/callback/patreon`, which is what the sign-in button and the test observe.
+
+## Not testable offline
+
+- The provider portals: whether Discord, Twitch, GitHub, Google and Patreon (and Twitch/Challonge for Achilléa) have the exact redirect URIs registered. Patreon in particular must list `https://rosegriffon.fr/api/auth/callback/patreon`.
+- Real token and userinfo payloads beyond the mocked shapes, Twitch `id_token` validation against Twitch JWKS, and Google's ID token.
+- Passkey (WebAuthn) ceremonies and TOTP enrolment: they need an authenticator. Only the configuration is checked.
+- The Postgres SQL for the Discord-link lookup and the `oauth_csrf` / `user_connection` constraints: they need a disposable DB (`RG_TEST_DATABASE_URL`).
+- Browser behaviour: cookie scoping across `ranked.rosegriffon.fr`, and dropping the `token` cookie on a real sign-out.
+- Observation: the API also mounts a second Better Auth instance (`@rosegriffon/auth/elysia`, `/v1/auth/*` on api.rosegriffon.fr) with the same secret and tables. Its cookies are host-only on the API host, so it is RG identity, not Achilléa. It was not exercised here.
