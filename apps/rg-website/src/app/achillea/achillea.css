@@ -142,7 +142,7 @@
   position: relative;
   min-height: min(760px, calc(100dvh - 3.5rem));
   overflow: clip;
-  border-bottom: 1px solid rgba(223, 255, 87, 0.22);
+  border-bottom: 1px solid rgba(144, 57, 255, 0.22);
 }
 
 .achillea-home__backdrop {
@@ -178,7 +178,7 @@
 .achillea-home__wordmark {
   width: min(100%, 35rem);
   height: auto;
-  filter: drop-shadow(0 0 2rem rgba(223, 255, 87, 0.18));
+  filter: drop-shadow(0 0 2rem rgba(144, 57, 255, 0.18));
 }
 
 .achillea-home__intro > p {
@@ -261,7 +261,7 @@
   display: block;
   overflow: hidden;
   min-height: 25rem;
-  border: 1px solid rgba(223, 255, 87, 0.46);
+  border: 1px solid rgba(144, 57, 255, 0.46);
   border-radius: 1.25rem;
   background: #160d22;
   color: #f3edf7;
@@ -651,7 +651,7 @@
 }
 
 .achillea-scope :is(a, button, input, select, textarea):focus-visible {
-  outline: 0.25rem solid #dfff57;
+  outline: 0.25rem solid #9039ff;
   outline-offset: 0.25rem;
 }
 
@@ -755,7 +755,7 @@
 }
 
 .achillea-glow-lime {
-  box-shadow: 0 0 25px -5px rgba(223, 255, 87, 0.4);
+  box-shadow: 0 0 25px -5px rgba(144, 57, 255, 0.4);
 }
 
 /*
@@ -767,14 +767,14 @@
 .achillea-card {
   background: rgba(18, 12, 28, 0.75);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(223, 255, 87, 0.12);
+  border: 1px solid rgba(144, 57, 255, 0.12);
   border-radius: 1rem;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .achillea-card:hover {
-  border-color: rgba(223, 255, 87, 0.35);
-  box-shadow: 0 4px 20px -2px rgba(223, 255, 87, 0.15);
+  border-color: rgba(144, 57, 255, 0.35);
+  box-shadow: 0 4px 20px -2px rgba(144, 57, 255, 0.15);
   transform: translateY(-2px);
 }
 
@@ -876,8 +876,12 @@
 	 * pouvoir servir dans un `rgba()` de `drop-shadow`, que Tailwind ne sait
 	 * pas composer depuis une couleur hexadécimale. */
   --achillea-primary: var(--achillea-primary-500);
-  --achillea-lime: #dfff57;
-  --achillea-lime-rgb: 223, 255, 87;
+  --achillea-lime: #9039ff;
+  --achillea-lime-rgb: 144, 57, 255;
+  /* Le front Angular n'a aucun citron vert : son accent est
+   * `--p-primary-color` = primary.400 du preset Aura (app.config.ts:28-90).
+   * Le nom `lime` reste pour ne pas toucher les classes `*-achillea-lime`. */
+  --color-achillea-lime: #9039ff;
 
   /* Bleu Discord officiel, et son état survolé. */
   --discord-blurple: #5865f2;
