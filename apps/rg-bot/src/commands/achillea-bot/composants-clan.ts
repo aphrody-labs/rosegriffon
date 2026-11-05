@@ -30,6 +30,8 @@ import {
 } from "discord.js";
 import type { ClanVoteResult } from "@rosegriffon/achillea-client";
 
+import { ClanMemberRole } from "@rosegriffon/achillea-core/enums";
+
 import { lireApi } from "../../lib/achillea-ui";
 import {
   boutonInviter,
@@ -37,16 +39,48 @@ import {
   CLES_DISTINCTION,
   distinctionsDepuis,
   embedCarriere,
+  embedErreurLegacy,
+  embedRefusLegacy,
+  embedSuccesLegacy,
+  REFUS_LEGACY,
   segments,
   selecteurDistinctions,
 } from "../../lib/achillea-clan-format";
-import { echapper, echec, repondre, succes } from "../../lib/ui";
 
 type Composant = ButtonInteraction | StringSelectMenuInteraction;
 
-/** Échec rendu à celui qui a cliqué, sans toucher au message d'origine. */
-export async function echecPrive(interaction: Composant, titre: string, motif: string): Promise<void> {
-  await interaction.followUp({ ...echec(titre, motif), flags: MessageFlags.Ephemeral } as InteractionReplyOptions);
+/** Échec rendu à celui qui a cliqué, sans toucher au message d'origine (legacy `followUpWithErrorEmbed(…, true)`). */
+export async function echecPrive(interaction: Composant, motif: string): Promise<void> {
+  await interaction.followUp({ embeds: [embedErreurLegacy(motif)], flags: MessageFlags.Ephemeral } as InteractionReplyOptions);
+}
+
+/** Succès privé (legacy `followUpWithSuccessEmbed(…, true)`). */
+async function succesPrive(interaction: Composant, message: string): Promise<void> {
+  await interaction.followUp({ embeds: [embedSuccesLegacy(message)], flags: MessageFlags.Ephemeral } as InteractionReplyOptions);
+}
+
+/** Remplace la réponse (privée) par un seul embed. */
+async function afficher(interaction: Composant, embed: EmbedBuilder): Promise<void> {
+  await interaction.editReply({ content: "", components: [], embeds: [embed] });
+}
+
+/** Refus d'une garde de l'ancien bot pour ce rôle (`null` = `NoClan`), ou `null` si l'action peut suivre. */
+export function refusGarde(actuel: { role: number } | undefined, role: ClanMemberRole | null): string | null {
+  if (role === null) return actuel ? REFUS_LEGACY.dejaEnClan : null;
+  if (!actuel) return REFUS_LEGACY.horsClan;
+  return actuel.role < role ? REFUS_LEGACY.permission : null;
+}
+
+/** Gardes `NoClan` / `ClanEnabled` + `ClanRole`, lues dans la carrière de l'auteur. */
+async function garde(interaction: Composant, role: ClanMemberRole | null): Promise<boolean> {
+  const carriere = await lireApi(interaction, c => c.clans.history(interaction.user.id));
+  if (!carriere.ok) {
+    await afficher(interaction, embedErreurLegacy(carriere.motif));
+    return false;
+  }
+  const refus = refusGarde(carriere.valeur.current.at(-1), role);
+  if (refus) await afficher(interaction, embedRefusLegacy(refus));
+  return refus === null;
 }
 
 /** Retire un message, en tolérant qu'il ait déjà disparu (fil d'invitation supprimé par l'API). */
@@ -83,12 +117,11 @@ export class ComposantsClan {
     const id = Number(segments(interaction.customId)[0]);
     const issue = await lireApi(interaction, c => c.clans.acceptApplicationById(id));
     if (!issue.ok) {
-      await echecPrive(interaction, "Candidature non acceptée", issue.motif);
+      await echecPrive(interaction, issue.motif);
       return;
     }
     // L'API a déjà réécrit le message de candidature ; on retire les boutons au cas où.
     await interaction.editReply({ components: [] }).catch(() => undefined);
-    await interaction.followUp({ ...succes("Candidature acceptée"), flags: MessageFlags.Ephemeral } as InteractionReplyOptions);
   }
 
   @ButtonComponent({ id: /^refuse_application:.+/ })
@@ -97,28 +130,29 @@ export class ComposantsClan {
     const id = Number(segments(interaction.customId)[0]);
     const issue = await lireApi(interaction, c => c.clans.rejectApplicationById(id));
     if (!issue.ok) {
-      await echecPrive(interaction, "Candidature non refusée", issue.motif);
+      await echecPrive(interaction, issue.motif);
       return;
     }
     await interaction.editReply({ components: [] }).catch(() => undefined);
-    await interaction.followUp({ ...succes("Candidature refusée."), flags: MessageFlags.Ephemeral } as InteractionReplyOptions);
+    await succesPrive(interaction, "Candidature refusée.");
   }
 
   @ButtonComponent({ id: /^init_application:.+/ })
   async ouvrirCandidature(interaction: ButtonInteraction): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    if (!(await garde(interaction, null))) return;
     const clanId = Number(segments(interaction.customId)[0]);
     const clan = await lireApi(interaction, c => c.clans.fiche(clanId));
     if (!clan.ok || clan.valeur.isDisbanded) {
-      await repondre(interaction, echec("Clan introuvable", clan.ok ? "Ce Clan n'existe plus." : clan.motif));
+      await afficher(interaction, embedErreurLegacy("Ce Clan n'existe plus"));
       return;
     }
     if (!clan.valeur.isRecruiting) {
-      await repondre(interaction, echec("Recrutement fermé", "Ce Clan ne recrute pas pour le moment !"));
+      await afficher(interaction, embedErreurLegacy("Ce Clan ne recrute pas pour le moment !"));
       return;
     }
     await interaction.editReply({
-      content: `Sélectionnez vos distinctions avant de postuler à [${clan.valeur.shortName}] ${echapper(clan.valeur.name)} :`,
+      content: `Sélectionnez vos distinctions avant de postuler à [${clan.valeur.shortName}] ${clan.valeur.name} :`,
       components: [selecteurDistinctions("apply", clan.valeur.id)],
     });
   }
@@ -130,13 +164,14 @@ export class ComposantsClan {
     const cles = interaction.values.filter(v => (CLES_DISTINCTION as readonly string[]).includes(v));
     const clan = await lireApi(interaction, c => c.clans.fiche(clanId));
     if (!clan.ok) {
-      await interaction.editReply({ content: "", components: [], ...echec("Clan introuvable", clan.motif) });
+      await interaction.deleteReply().catch(() => undefined);
+      await echecPrive(interaction, "Clan introuvable.");
       return;
     }
     await interaction.editReply({
       content:
-        `Vous allez postuler au Clan [${clan.valeur.shortName}] ${echapper(clan.valeur.name)} avec les distinctions suivantes : ` +
-        `**${distinctionsDepuis(cles).join(", ")}**.\nSouhaitez-vous continuer ?`,
+        `Vous allez postuler au Clan [${clan.valeur.shortName}] ${clan.valeur.name} avec les distinctions suivantes : ` +
+        `**${distinctionsDepuis(cles).join(", ")}**.\nSouhaitez-vous confirmer ?`,
       components: [boutonsCreationCandidature(clanId, cles)],
     });
   }
@@ -150,11 +185,13 @@ export class ComposantsClan {
     const issue = await lireApi(interaction, c => c.clans.createApplication(clanId, distinctions));
     if (!issue.ok || !issue.valeur.success) {
       const motif = issue.ok ? (issue.valeur.error ?? "Candidature refusée par l'API.") : issue.motif;
-      await interaction.editReply({ content: "", components: [], ...echec("Candidature impossible", motif) });
+      await afficher(interaction, embedErreurLegacy(motif));
       return;
     }
-    const texte = issue.valeur.autojoin ? "Vous avez rejoint le Clan !" : "Votre candidature a été envoyée au Clan.";
-    await interaction.editReply({ content: "", components: [], ...succes(texte) });
+    const clan = await lireApi(interaction, c => c.clans.fiche(clanId));
+    const nom = clan.ok ? clan.valeur.name : "";
+    const texte = issue.valeur.autojoin ? `Vous avez rejoint le Clan ${nom}` : `Votre candidature a été envoyée à ${nom}`;
+    await afficher(interaction, embedSuccesLegacy(texte.trimEnd()));
   }
 
   @ButtonComponent({ id: /^cancel_application:.+/ })
@@ -171,12 +208,12 @@ export class ComposantsClan {
     const id = Number(segments(interaction.customId)[0]);
     const issue = await lireApi(interaction, c => c.clans.acceptInvite(id));
     if (!issue.ok) {
-      await echecPrive(interaction, "Invitation non acceptée", issue.motif);
+      await echecPrive(interaction, issue.motif);
       return;
     }
     // Dans un fil, l'API l'a déjà supprimé : l'édition peut échouer sans dommage.
     await interaction
-      .editReply({ content: "", components: [], ...succes(`Vous avez rejoint le Clan ${issue.valeur.clanName} !`) })
+      .editReply({ content: "", components: [], embeds: [embedSuccesLegacy(`Vous avez rejoint le Clan ${issue.valeur.clanName} !`)] })
       .catch(() => undefined);
   }
 
@@ -186,24 +223,25 @@ export class ComposantsClan {
     const id = Number(segments(interaction.customId)[0]);
     const issue = await lireApi(interaction, c => c.clans.declineInvite(id));
     if (!issue.ok) {
-      await echecPrive(interaction, "Invitation non refusée", issue.motif);
+      await echecPrive(interaction, issue.motif);
       return;
     }
     await interaction
-      .editReply({ content: "", components: [], ...succes(`Invitation de ${issue.valeur.clanName} refusée.`) })
+      .editReply({ content: "", components: [], embeds: [embedSuccesLegacy(`Invitation de ${issue.valeur.clanName} refusée.`)] })
       .catch(() => undefined);
   }
 
   @ButtonComponent({ id: /^init_invite:.+/ })
   async ouvrirInvitation(interaction: ButtonInteraction): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    if (!(await garde(interaction, ClanMemberRole.SubCaptain))) return;
     const joueurId = segments(interaction.customId)[0] ?? "";
     if (!/^\d{5,25}$/.test(joueurId)) {
-      await repondre(interaction, echec("Joueur introuvable", "Utilisateur cible introuvable."));
+      await afficher(interaction, embedErreurLegacy("Utilisateur cible introuvable."));
       return;
     }
     await interaction.editReply({
-      content: `Sélectionnez les distinctions à proposer à <@${joueurId}> :`,
+      content: "Sélectionnez les distinctions à proposer à l'utilisateur à inviter:",
       components: [selecteurDistinctions("invite", joueurId)],
     });
   }
@@ -216,14 +254,12 @@ export class ComposantsClan {
     const issue = await lireApi(interaction, c => c.clans.createInvite(joueurId, distinctions));
     if (!issue.ok || !issue.valeur.success) {
       const motif = issue.ok ? (issue.valeur.error ?? "Invitation refusée par l'API.") : issue.motif;
-      await interaction.editReply({ content: "", components: [], ...echec("Invitation impossible", motif) });
+      await echecPrive(interaction, motif);
+      await interaction.deleteReply().catch(() => undefined);
       return;
     }
-    await interaction.editReply({
-      content: "",
-      components: [],
-      ...succes("Invitation envoyée", `<@${joueurId}> a reçu l'invitation (fil d'invitation et message privé).`),
-    });
+    // L'ancien bot retirait simplement le menu : l'invitation part dans son fil.
+    await interaction.deleteReply().catch(() => undefined);
   }
 
   // ─── Votes ─────────────────────────────────────────────────────────────
@@ -234,11 +270,11 @@ export class ComposantsClan {
     const [, choix, proposition] = /vote:(approve|reject):(\d+)/.exec(interaction.customId) ?? [];
     const issue = await lireApi(interaction, c => c.clans.vote(Number(proposition), choix === "approve"));
     if (!issue.ok) {
-      await echecPrive(interaction, "Vote non pris en compte", issue.motif);
+      await echecPrive(interaction, issue.motif);
       return;
     }
     await interaction.editReply(messageVoteApres(interaction.message.embeds as never, issue.valeur)).catch(() => undefined);
-    await interaction.followUp({ ...succes(issue.valeur.message), flags: MessageFlags.Ephemeral } as InteractionReplyOptions);
+    await succesPrive(interaction, issue.valeur.message);
   }
 
   // ─── Divers ────────────────────────────────────────────────────────────
@@ -249,7 +285,7 @@ export class ComposantsClan {
     const joueurId = segments(interaction.customId)[0] ?? "";
     const carriere = await lireApi(interaction, c => c.clans.history(joueurId));
     if (!carriere.ok) {
-      await repondre(interaction, echec("Carrière indisponible", carriere.motif));
+      await afficher(interaction, embedErreurLegacy(carriere.motif));
       return;
     }
     // Lecture purement Discord : l'avatar affiché est celui du compte, pas une donnée Achilléa.

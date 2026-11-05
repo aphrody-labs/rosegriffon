@@ -7,7 +7,9 @@ import { MetadataStorage } from "discordx";
 
 import { fausseInteraction, installerApi, type Gestionnaire } from "../../../test/achillea-kit";
 import { carriereFactice, ficheFactice } from "../../../test/achillea-clans-fixtures";
-import { ComposantsClan, messageVoteApres } from "./composants-clan";
+import { ClanMemberRole } from "@rosegriffon/achillea-core/enums";
+
+import { ComposantsClan, messageVoteApres, refusGarde } from "./composants-clan";
 
 const JOUEUR = "222222222222222222";
 
@@ -60,7 +62,9 @@ describe("candidatures", () => {
     const i = fausseInteraction({ customId: "confirm_application:17" });
     await c.accepterCandidature(i as never);
     expect(appels[0]).toMatchObject({ chemin: "/clans/applications/accept", corps: { id: 17 } });
-    expect(i.texte()).toContain("Candidature acceptée");
+    // L'ancien bot n'envoyait aucun message privé : seul le message public change.
+    expect(i.envois.some(e => e.via === "followUp")).toBe(false);
+    expect(i.texte()).toContain('"components":[]');
   });
 
   test("accepter sans droit : réponse privée, message intact", async () => {
@@ -86,15 +90,24 @@ describe("candidatures", () => {
   });
 
   test("init_application ouvre le menu, refuse un clan fermé", async () => {
-    api({ "GET /clans/fiche/:ref": ficheFactice() });
+    api({ "GET /clans/history/:userId": carriereFactice(null), "GET /clans/fiche/:ref": ficheFactice() });
     const i = fausseInteraction({ customId: "init_application:42" });
     await c.ouvrirCandidature(i as never);
     expect(i.texte()).toContain("apply_distinctions:42");
+    expect(i.texte()).toContain("Sélectionnez vos distinctions avant de postuler à [PSG] Paris Griffon :");
     restaurer?.();
-    api({ "GET /clans/fiche/:ref": ficheFactice({ isRecruiting: false }) });
+    api({ "GET /clans/history/:userId": carriereFactice(null), "GET /clans/fiche/:ref": ficheFactice({ isRecruiting: false }) });
     const j = fausseInteraction({ customId: "init_application:42" });
     await c.ouvrirCandidature(j as never);
-    expect(j.texte()).toContain("ne recrute pas");
+    expect(j.texte()).toContain("❌ Ce Clan ne recrute pas pour le moment !");
+  });
+
+  test("gardes de l'ancien bot : NoClan, ClanEnabled, ClanRole", () => {
+    expect(refusGarde({ role: ClanMemberRole.Member }, null)).toBe("You are already in a Clan !");
+    expect(refusGarde(undefined, ClanMemberRole.SubCaptain)).toBe("Vous ne faites pas partie d'un Clan.");
+    expect(refusGarde({ role: ClanMemberRole.Member }, ClanMemberRole.SubCaptain)).toBe("You do not have permission to run this command.");
+    expect(refusGarde({ role: ClanMemberRole.SubCaptain }, ClanMemberRole.SubCaptain)).toBeNull();
+    expect(refusGarde(undefined, null)).toBeNull();
   });
 
   test("apply_distinctions demande confirmation avec les clés choisies", async () => {
@@ -157,15 +170,19 @@ describe("invitations", () => {
   });
 
   test("init_invite ouvre le menu, invite_distinctions invite", async () => {
+    api({ "GET /clans/history/:userId": carriereFactice(ClanMemberRole.SubCaptain) });
     const i = fausseInteraction({ customId: `init_invite:${JOUEUR}` });
     await c.ouvrirInvitation(i as never);
     expect(i.texte()).toContain(`invite_distinctions:${JOUEUR}`);
+    expect(i.texte()).toContain("Sélectionnez les distinctions à proposer à l'utilisateur à inviter:");
+    restaurer?.();
 
     const appels = api({ "POST /clans/invites/create": { success: true } });
     const j = fausseInteraction({ customId: `invite_distinctions:${JOUEUR}`, valeurs: ["Player"] });
     await c.choisirDistinctionsInvitation(j as never);
     expect(appels[0]?.corps).toEqual({ userId: JOUEUR, distinctions: ["Joueur"] });
-    expect(j.texte()).toContain("Invitation envoyée");
+    // Comme l'ancien bot : le menu disparaît, l'invitation part dans son fil.
+    expect(j.texte()).toContain("supprime");
   });
 
   test("invite_distinctions sans droit : motif de l'API", async () => {
