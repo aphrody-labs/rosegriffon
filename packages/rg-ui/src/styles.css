@@ -334,11 +334,9 @@
     --md-sys-color-surface-container: oklch(0.94 0.005 264);
     --md-sys-color-surface-container-high: oklch(0.92 0.006 264);
     --md-sys-color-surface-container-highest: oklch(0.9 0.007 264);
-  }
 
-  /* États sémantiques succès / avertissement (clair). Les couleurs de statut ne
-	 * s'écrivent jamais en palette Tailwind brute : elles suivent le thème. */
-  :root {
+    /* États sémantiques succès / avertissement (clair). Les couleurs de statut
+     * ne s'écrivent jamais en palette Tailwind brute : elles suivent le thème. */
     --success: oklch(0.5 0.14 150);
     --success-foreground: oklch(0.99 0.005 150);
     --success-container: oklch(0.93 0.06 150);
