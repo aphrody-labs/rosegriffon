@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { chargerPacks, cheminPublic, convertirPack, oklchVersTeinteChroma } from "../scripts/charger-packs";
+import type { ThemeSeed } from "../src/lib/color-engine";
 import { THEME_PACKS } from "../src/lib/themes";
 
 describe("charger-packs", () => {
@@ -17,12 +18,7 @@ describe("charger-packs", () => {
   });
 
   test("une clé inconnue est refusée (deny_unknown_fields)", () => {
-    const base = {
-      id: "x",
-      name: "X",
-      title: { product_name: "X", window_title_template: "{page}", ntp_heading: "X", extra: 1 },
-    };
-    expect(() => convertirPack(base)).toThrow(/clé inconnue/);
+    expect(() => convertirPack({ id: "x", name: "X", extra: 1 })).toThrow(/clé inconnue "extra"/);
   });
 
   test("chaque theme.toml correspond à THEME_PACKS", async () => {
