@@ -138,7 +138,8 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_THEME }} />
         <link rel="preconnect" href="https://cdn.discordapp.com" />
         <link rel="dns-prefetch" href="https://cdn.discordapp.com" />
-        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+        {/* Pas de preconnect vers AdSense : il ouvrirait une connexion à Google
+            (et lui transmettrait l'adresse IP) avant tout consentement. */}
         <link rel="author" href="/humans.txt" />
         {/* Données structurées site-wide : Organization + WebSite (rich results Google). */}
         <script
