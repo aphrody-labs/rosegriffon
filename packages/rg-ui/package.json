@@ -16,6 +16,7 @@
     "./styles.css": "./src/styles.css",
     "./themes.generated.css": "./src/themes.generated.css",
     "./lib/color-engine": "./src/lib/color-engine.ts",
+    "./lib/theme-tune": "./src/lib/theme-tune.ts",
     "./brands.css": "./src/brands.css",
     "./hooks/*": "./src/hooks/*.ts",
     "./*": "./src/components/*.tsx"

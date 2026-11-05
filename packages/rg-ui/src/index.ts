@@ -122,4 +122,6 @@ export * from "./components/tooltip";
 
 // Lib & Themes
 export * from "./lib/themes";
+export * from "./lib/color-engine";
+export * from "./lib/theme-tune";
 export * from "./lib/utils";
