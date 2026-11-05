@@ -85,7 +85,6 @@
     "typecheck": "bun check --noEmit"
   },
   "dependencies": {
-    "@rosegriffon/assets": "workspace:*",
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/inagle": "catalog:",
     "@rosegriffon/inagle-cross": "catalog:",
