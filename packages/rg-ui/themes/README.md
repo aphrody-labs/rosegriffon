@@ -57,9 +57,11 @@ Only wallpapers carry a `sha256` field in the schema; the other hashes are recor
 
 ## Open decisions
 
-- Licence: every wallpaper is `pending-owner-decision`. The schema treats any id starting with
-  `pending` as non distributable, so the packs cannot ship until the owner picks an SPDX or
-  `LicenseRef-*` id. Logos and pets have no licence field.
+- Licence (decided by the repository owner): every wallpaper carries
+  `LicenseRef-RoseGriffon-Proprietary` (all rights reserved Rose Griffon). The yolo-theme-pack
+  schema treats this id as distributable by id (only empty, `unverified` and `pending*` are not);
+  publication itself stays under the control of the repository admin. Logos and pets have no
+  licence field. Achillea keeps no pet.
 - Icon set: `phosphor` outlined 400 is a placeholder (RoseGriffon declares none).
 - Shell: `sidebar`, density 0, radii `[6,8,10]` (Roy, Gaelle, Achillea) and `[20,22,24]` (Azalee)
   are not measured from the sites.

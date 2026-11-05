@@ -32,7 +32,7 @@ weight = 400
 
 [[wallpapers]]
 file = "packages/rg-assets/public/fond_achilea.webp"
-license = "pending-owner-decision"
+license = "LicenseRef-RoseGriffon-Proprietary"
 source = "rosegriffon:packages/rg-assets/public/fond_achilea.webp"
 fit = "cover"
 focal = [77, 50]

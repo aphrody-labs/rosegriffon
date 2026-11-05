@@ -27,7 +27,7 @@ weight = 400
 
 [[wallpapers]]
 file = "packages/rg-assets/public/gaelle_bg.webp"
-license = "pending-owner-decision"
+license = "LicenseRef-RoseGriffon-Proprietary"
 source = "rosegriffon:packages/rg-assets/public/gaelle_bg.webp"
 fit = "contain"
 focal = [51, 13]

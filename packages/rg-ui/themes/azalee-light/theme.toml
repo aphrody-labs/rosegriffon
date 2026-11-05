@@ -27,7 +27,7 @@ weight = 400
 
 [[wallpapers]]
 file = "packages/rg-assets/public/azalee-bg.webp"
-license = "pending-owner-decision"
+license = "LicenseRef-RoseGriffon-Proprietary"
 source = "rosegriffon:packages/rg-assets/public/azalee-bg.webp"
 fit = "cover"
 focal = [86, 47]
