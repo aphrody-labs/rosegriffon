@@ -1,0 +1,58 @@
+# Rose Griffon, Roy: light, navy seed, Roy as companion.
+# Source: packages/rg-ui/src/lib/themes.ts THEME_PACKS.roy. Asset paths are repo-relative (from the
+# repository root) and point at RoseGriffon originals; nothing is copied. See ../README.md.
+id = "roy"
+name = "Roy"
+
+[title]
+product_name = "Rose Griffon"
+window_title_template = "{page} - Rose Griffon"
+ntp_heading = "Rose Griffon"
+
+[logo]
+mark = "packages/rg-assets/public/RG_Logo_V2.5.webp"
+monochrome = "packages/rg-assets/public/RG_Logo_V2.5_NB.webp"
+
+[color]
+seed = "oklch(0.55 0.107 265)"
+source = "seed"
+variant = "tonal-spot"
+contrast = 0.0
+mode = "light"
+
+[icons]
+set = "phosphor"
+style = "outlined"
+weight = 400
+
+[[wallpapers]]
+file = "packages/rg-assets/public/roy_bg.webp"
+license = "pending-owner-decision"
+source = "rosegriffon:packages/rg-assets/public/roy_bg.webp"
+fit = "contain"
+focal = [71, 21]
+sha256 = "b56649fef011b32b36f88eb4eef13f6d164c58d5b2a59d7f5b957420c9fd7a85"
+
+[pet]
+id = "roy"
+provider = "pack"
+name = "Roy"
+anchor = "bottom-right"
+states = ["hello", "proud"]
+size = 96
+
+[pet.files]
+hello = "packages/rg-assets/public/emote/RG_Roy_salut.webp"
+proud = "packages/rg-assets/public/emote/RG_roy_fine.webp"
+
+[typography]
+display = "Poppins"
+body = "Roboto"
+mono = "Liberation Mono"
+
+[shell]
+layout = "sidebar"
+density = 0
+radius = [6, 8, 10]
+glass_blur = 0
+motion = "calm"

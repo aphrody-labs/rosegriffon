@@ -1,0 +1,53 @@
+# Achillea esport: dark, violet seed with gold secondary and pure grey neutrals, no companion.
+# Source: packages/rg-ui/src/lib/themes.ts THEME_PACKS.achillea. Asset paths are repo-relative (from the
+# repository root) and point at RoseGriffon originals; nothing is copied. See ../README.md.
+id = "achillea"
+name = "Achilléa"
+
+[title]
+product_name = "Achilléa"
+window_title_template = "{page} - Achilléa"
+ntp_heading = "Achilléa"
+
+[logo]
+mark = "packages/rg-assets/public/achillea/logo1.svg"
+monochrome = "packages/rg-assets/public/achillea/logo1.svg"
+
+[color]
+seed = "oklch(0.55 0.267 297)"
+source = "seed"
+variant = "tonal-spot"
+contrast = 0.0
+mode = "dark"
+neutral_chroma = 0
+
+[color.secondary]
+hue = 84
+chroma = 0.164
+
+[icons]
+set = "phosphor"
+style = "outlined"
+weight = 400
+
+[[wallpapers]]
+file = "packages/rg-assets/public/fond_achilea.webp"
+license = "pending-owner-decision"
+source = "rosegriffon:packages/rg-assets/public/fond_achilea.webp"
+fit = "cover"
+focal = [77, 50]
+sha256 = "ed87732c232e009fe870f542f9a231ccf4a7dca77517f2c050b29416eee0e1b7"
+
+# No [pet]: THEME_PACKS.achillea.pet is null.
+
+[typography]
+display = "Humane"
+body = "Inter"
+mono = "Liberation Mono"
+
+[shell]
+layout = "sidebar"
+density = 0
+radius = [6, 8, 10]
+glass_blur = 0
+motion = "calm"

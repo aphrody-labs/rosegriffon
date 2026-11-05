@@ -1,0 +1,57 @@
+# Azalee wiki, dark: amber seed, Reika as companion.
+# Source: packages/rg-ui/src/lib/themes.ts THEME_PACKS.azalee-dark. Asset paths are repo-relative (from the
+# repository root) and point at RoseGriffon originals; nothing is copied. See ../README.md.
+id = "azalee-dark"
+name = "Azalée"
+
+[title]
+product_name = "Azalée"
+window_title_template = "{page} - Azalée"
+ntp_heading = "Azalée"
+
+[logo]
+mark = "packages/rg-assets/public/RG_Azalee-logo.webp"
+monochrome = "packages/rg-assets/public/RG_Azalee-logo.webp"
+
+[color]
+seed = "oklch(0.55 0.126 77)"
+source = "seed"
+variant = "tonal-spot"
+contrast = 0.0
+mode = "dark"
+
+[icons]
+set = "phosphor"
+style = "outlined"
+weight = 400
+
+[[wallpapers]]
+file = "packages/rg-assets/public/azalee_fond.webp"
+license = "pending-owner-decision"
+source = "rosegriffon:packages/rg-assets/public/azalee_fond.webp"
+fit = "cover"
+focal = [87, 49]
+sha256 = "ea58a12f9ff0b62de207906e9368e070c7a8bc3de33e56e1717e51c34d22b62b"
+
+[pet]
+id = "reika"
+provider = "pack"
+name = "Reika"
+anchor = "bottom-right"
+states = ["hello"]
+size = 96
+
+[pet.files]
+hello = "apps/rg-website/public/emote/RG_Reika_zukan.webp"
+
+[typography]
+display = "Google Sans Flex"
+body = "Google Sans Flex"
+mono = "Geist Mono"
+
+[shell]
+layout = "sidebar"
+density = 0
+radius = [20, 22, 24]
+glass_blur = 0
+motion = "calm"

@@ -1,0 +1,59 @@
+# Rose Griffon, Gaelle: light, terracotta seed, Gaelle as companion.
+# Source: packages/rg-ui/src/lib/themes.ts THEME_PACKS.gaelle. Asset paths are repo-relative (from the
+# repository root) and point at RoseGriffon originals; nothing is copied. See ../README.md.
+id = "gaelle"
+name = "Gaëlle"
+
+[title]
+product_name = "Rose Griffon"
+window_title_template = "{page} - Rose Griffon"
+ntp_heading = "Rose Griffon"
+
+[logo]
+mark = "packages/rg-assets/public/RG_Logo_V2.5.webp"
+monochrome = "packages/rg-assets/public/RG_Logo_V2.5_NB.webp"
+
+[color]
+seed = "oklch(0.55 0.164 34)"
+source = "seed"
+variant = "tonal-spot"
+contrast = 0.0
+mode = "light"
+
+[icons]
+set = "phosphor"
+style = "outlined"
+weight = 400
+
+[[wallpapers]]
+file = "packages/rg-assets/public/gaelle_bg.webp"
+license = "pending-owner-decision"
+source = "rosegriffon:packages/rg-assets/public/gaelle_bg.webp"
+fit = "contain"
+focal = [51, 13]
+sha256 = "92918c46a869a1876bb0c38bd9a71ea981a4e1af87b5f54fef8b3e100e2e6570"
+
+[pet]
+id = "gaelle"
+provider = "pack"
+name = "Gaëlle"
+anchor = "bottom-right"
+states = ["hello", "proud", "surprised"]
+size = 96
+
+[pet.files]
+hello = "packages/rg-assets/public/emote/RG_Gaelle_salut.webp"
+proud = "packages/rg-assets/public/emote/RG_Gaelle_fiere.webp"
+surprised = "packages/rg-assets/public/emote/RG_Gaelle_surprise.webp"
+
+[typography]
+display = "Poppins"
+body = "Roboto"
+mono = "Liberation Mono"
+
+[shell]
+layout = "sidebar"
+density = 0
+radius = [6, 8, 10]
+glass_blur = 0
+motion = "calm"
