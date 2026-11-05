@@ -32,7 +32,7 @@ export function Footer({ className }: FooterProps = {}) {
             <Link
               key={href}
               href={href}
-              className="inline-flex min-h-6 items-center rounded px-1.5 transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="inline-flex min-h-6 items-center pointer-coarse:min-h-11 rounded px-1.5 transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               {label}
             </Link>
