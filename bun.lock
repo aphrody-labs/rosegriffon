@@ -405,7 +405,6 @@
         "@rosegriffon/types": "workspace:*",
         "better-auth": "catalog:",
         "nodemailer": "catalog:",
-        "zod": "catalog:",
       },
       "devDependencies": {
         "@types/bun": "catalog:",

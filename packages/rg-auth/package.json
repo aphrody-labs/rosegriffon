@@ -32,8 +32,7 @@
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/types": "workspace:*",
     "better-auth": "catalog:",
-    "nodemailer": "catalog:",
-    "zod": "catalog:"
+    "nodemailer": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
