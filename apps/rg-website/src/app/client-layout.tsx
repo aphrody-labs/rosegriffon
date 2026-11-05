@@ -227,6 +227,7 @@ export default function ClientLayout({
   const isMedium = breakpoint === "medium";
 
   const pathname = usePathname();
+  const themeSection = classeThemeDuDomaine(pathname || "/");
   const isAdminPage = pathname?.startsWith("/admin");
   const isShopPage = pathname?.startsWith("/shop");
   const isAuthPage =
@@ -276,6 +277,10 @@ export default function ClientLayout({
                     <div
                       className={cn(
                         "flex flex-col min-h-[100dvh] w-full",
+                        // Section à thème imposé : la réserve du header fixe prend le
+                        // fond de la section, sinon une bande du thème utilisateur
+                        // apparaît au-dessus du contenu (vu sur /achillea).
+                        themeSection && cn(themeSection, "bg-background text-foreground"),
                         !shouldHideSidebar && "pt-[calc(4rem+env(safe-area-inset-top))] md:pt-14",
                         isCompact && !shouldHideSidebar && "pb-[calc(5.5rem+env(safe-area-inset-bottom))]",
                       )}
@@ -300,7 +305,7 @@ export default function ClientLayout({
                           id="main-content"
                           className={cn(
                             "min-h-full w-full flex-1 overflow-x-hidden",
-                            classeThemeDuDomaine(pathname || "/"),
+                            themeSection,
                           )}
                         >
                           {children}
