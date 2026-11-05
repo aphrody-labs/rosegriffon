@@ -12,9 +12,10 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  Colors,
+  EmbedBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
-  type EmbedBuilder,
 } from "discord.js";
 import type { z } from "zod";
 import type { ClanCareer, ClanFiche, clanDtoSchema } from "@rosegriffon/achillea-client";
@@ -23,9 +24,8 @@ import type { ClanCareer, ClanFiche, clanDtoSchema } from "@rosegriffon/achillea
 export type ClanDTO = z.output<typeof clanDtoSchema>;
 import { ClanMemberDistinction, ClanMemberRole } from "@rosegriffon/achillea-core/enums";
 import { toDistinction } from "@rosegriffon/achillea-core/clans";
-import { CLAN_MEMBER_ROLE_LABELS } from "@rosegriffon/achillea-core/labels";
 
-import { borner, echapper, fiche, leJour } from "./ui";
+import { borner, echapper } from "./ui";
 
 /** Clans par page de `/clan infos` (valeur de l'ancien bot). */
 export const CLANS_PAR_PAGE = 15;
@@ -121,11 +121,80 @@ export function segments(customId: string): string[] {
   return customId.split(":").slice(1);
 }
 
+// ─── Embeds simples de l'ancien bot ──────────────────────────────────────────
+
+/**
+ * Couleurs des embeds « une ligne » de l'ancien bot (`utils/functions/embeds.ts`).
+ * `followUpWithErrorEmbed` prenait `Colors.Red`, `buildErrorEmbed` et les gardes
+ * (`replyWithSimpleErrorEmbed`) le rouge Discord `0xed4245`.
+ */
+export const COULEURS_LEGACY = Object.freeze({
+  succes: 0x57_f2_87,
+  erreur: Colors.Red,
+  refus: 0xed_42_45,
+});
+
+/** `buildSuccessEmbed` / `followUpWithSuccessEmbed` : `✅ message`, vert, rien d'autre. */
+export function embedSuccesLegacy(message: string): EmbedBuilder {
+  return new EmbedBuilder().setColor(COULEURS_LEGACY.succes).setTitle(borner(`✅ ${message}`, 256));
+}
+
+/** `followUpWithErrorEmbed` : `❌ message`, `Colors.Red`. */
+export function embedErreurLegacy(message: string): EmbedBuilder {
+  return new EmbedBuilder().setColor(COULEURS_LEGACY.erreur).setTitle(borner(`❌ ${message}`, 256));
+}
+
+/** Refus des gardes (`replyWithSimpleErrorEmbed` : `NoClan`, `ClanEnabled`, `ClanRole`) : `❌ message`, `0xed4245`. */
+export function embedRefusLegacy(message: string): EmbedBuilder {
+  return new EmbedBuilder().setColor(COULEURS_LEGACY.refus).setTitle(borner(`❌ ${message}`, 256));
+}
+
+/** Messages des gardes de l'ancien bot, mot pour mot. */
+export const REFUS_LEGACY = Object.freeze({
+  dejaEnClan: "You are already in a Clan !",
+  horsClan: "Vous ne faites pas partie d'un Clan.",
+  permission: "You do not have permission to run this command.",
+});
+
 // ─── Liste paginée ─────────────────────────────────────────────────────────
 
-/** Identifiant d'une page de `/clan infos`. */
-export function idPageClans(page: number): string {
-  return `clan_infos_page:${page}`;
+/** Les quatre boutons de page de l'ancien bot (`buildPaginationButtons`), dans leur ordre. */
+const BOUTONS_PAGE = [
+  { cle: "first", libelle: "Début", emoji: "⏪" },
+  { cle: "previous", libelle: "Précédent", emoji: "◀️" },
+  { cle: "next", libelle: "Suivant", emoji: "▶️" },
+  { cle: "last", libelle: "Fin", emoji: "⏩" },
+] as const;
+
+/**
+ * Identifiant d'une page de `/clan infos`. Le suffixe distingue les quatre
+ * boutons : « Début » et « Précédent » mènent à la même page en page 2, et
+ * Discord refuse deux `custom_id` identiques dans une rangée.
+ */
+export function idPageClans(page: number, bouton?: string): string {
+  return bouton ? `clan_infos_page:${page}:${bouton}` : `clan_infos_page:${page}`;
+}
+
+/** Rangée Début / Précédent / Suivant / Fin, toujours affichée (legacy `buildPaginationButtons`). */
+export function rangeePaginationClans(page: number, pages: number) {
+  const cibles = { first: 1, previous: Math.max(1, page - 1), next: Math.min(pages, page + 1), last: pages };
+  const auDebut = pages === 0 || page === 1;
+  const aLaFin = pages === 0 || page === pages;
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    BOUTONS_PAGE.map(b =>
+      new ButtonBuilder()
+        .setLabel(b.libelle)
+        .setStyle(ButtonStyle.Primary)
+        .setCustomId(idPageClans(Math.max(1, cibles[b.cle]), b.cle))
+        .setEmoji(b.emoji)
+        .setDisabled(b.cle === "first" || b.cle === "previous" ? auDebut : aLaFin),
+    ),
+  );
+}
+
+/** Bouton « Retour » de l'ancien bot (`buildReturnButton`), ramené ici à l'annuaire. */
+export function boutonRetourClans(page = 1) {
+  return new ButtonBuilder().setLabel("Retour").setStyle(ButtonStyle.Primary).setCustomId(idPageClans(page)).setEmoji("↩️");
 }
 
 /** Menu de sélection des clans de la page (legacy `buildClansSelector`, `clanSelector`). */
@@ -144,32 +213,47 @@ export function selecteurClans(clans: readonly ClanDTO[]) {
   );
 }
 
-export function embedListeClans(clans: readonly ClanDTO[], page: number, pages: number, total: number): EmbedBuilder {
-  const lignes = clans.map(
-    (clan, index) =>
-      `**${(page - 1) * CLANS_PAR_PAGE + index + 1}.** [${echapper(clan.shortenedName)}] ${echapper(clan.name)}` +
-      ` — ${clan.fame ?? 0} renommée${clan.isRecruiting ? " · 📝 recrute" : ""}`,
+/** Auteur d'un embed de l'ancien bot : l'utilisateur qui a lancé la commande. */
+export interface AuteurEmbed {
+  nom: string;
+  avatar?: string | null;
+}
+
+function poserAuteur(embed: EmbedBuilder, auteur: AuteurEmbed | null | undefined): EmbedBuilder {
+  if (!auteur) return embed;
+  return embed.setAuthor(auteur.avatar ? { name: borner(auteur.nom, 256), iconURL: auteur.avatar } : { name: borner(auteur.nom, 256) });
+}
+
+/** Valeur de champ : Discord refuse une valeur vide, l'ancien bot posait alors un espace. */
+function valeurChamp(texte: string): string {
+  return texte.trim().length > 0 ? borner(texte, 1024) : " ";
+}
+
+/** Liste des clans actifs (legacy `createAllActiveClansEmbed`). */
+export function embedListeClans(
+  clans: readonly ClanDTO[],
+  page: number,
+  pages: number,
+  auteur: AuteurEmbed | null = null,
+): EmbedBuilder {
+  const embed = new EmbedBuilder()
+    .setColor(COULEUR_CARRIERE)
+    .setTitle("Liste des Clans")
+    .setDescription("Liste des clans en activité. Sélectionnez-en un ci-dessous pour voir ses informations détaillées.");
+  poserAuteur(embed, auteur);
+  return embed.setFields(
+    { name: "Clan", value: valeurChamp(clans.map(c => c.name).join("\n")), inline: true },
+    { name: "Id", value: valeurChamp(clans.map(c => String(c.id)).join("\n")), inline: true },
+    {
+      name: "Présidence",
+      value: valeurChamp(clans.map(c => (/^\d+$/.test(c.president.id) ? `<@${c.president.id}>` : "")).join("\n")),
+      inline: true,
+    },
+    { name: `Page ${page}/${pages}`, value: " ", inline: true },
   );
-  return fiche({
-    titre: "Clans Achilléa",
-    icone: "🛡️",
-    description: lignes.length > 0 ? lignes.join("\n") : "Aucun Clan actif pour le moment.",
-    contexte: `${total} clan${total > 1 ? "s" : ""} actif${total > 1 ? "s" : ""}`,
-  }).finir({ page, pages });
 }
 
 // ─── Fiche ────────────────────────────────────────────────────────────────
-
-function lignesMembres(membres: ClanFiche["members"]): string {
-  const roles = [ClanMemberRole.Captain, ClanMemberRole.SubCaptain, ClanMemberRole.Member, ClanMemberRole.Trial];
-  return roles
-    .map(role => {
-      const noms = membres.filter(m => m.role === role).map(m => `<@${m.id}>`);
-      return noms.length > 0 ? `**${CLAN_MEMBER_ROLE_LABELS[role]}** : ${noms.join(", ")}` : null;
-    })
-    .filter((ligne): ligne is string => ligne !== null)
-    .join("\n");
-}
 
 /** Logo d'Achilléa (PNG), affiché pour un clan sans logo propre. */
 export const LOGO_ACHILLEA_PNG = "https://rosegriffon.fr/achillea/achillea.png";
@@ -186,60 +270,96 @@ export function miniatureClan(avatarUrl: string | null | undefined): string {
   return avatarUrl.startsWith("/") ? `https://rosegriffon.fr${avatarUrl}` : avatarUrl;
 }
 
-/** Fiche d'un clan actif ou dissous (legacy `createActiveClanInfosEmbed` / `createDisbandedClanInfosEmbed`). */
-export function embedFicheClan(clan: ClanFiche, urlSite: string | null = null): EmbedBuilder {
-  const titre = `[${clan.shortName}] ${clan.name}`;
+/** Liste « - <@id> » de l'ancien bot. */
+function listeMentions(ids: readonly string[]): string {
+  return ids.map(id => `- <@${id}>\n`).join("");
+}
+
+/** Préfixe `https://` manquant (legacy `formatUrl`). */
+function avecHttps(u: string): string {
+  return u.startsWith("https") ? u : `https://${u}`;
+}
+
+/** Réseaux en liens, un par ligne (legacy `buildSocialMediaString`). */
+function lignesReseaux(socials: ClanFiche["socials"]): string {
+  return [
+    socials.x ? `[Twitter](${avecHttps(socials.x)})\n` : "",
+    socials.instagram ? `[Instagram](${avecHttps(socials.instagram)})\n` : "",
+    socials.tiktok ? `[TikTok](${avecHttps(socials.tiktok)})\n` : "",
+  ].join("");
+}
+
+/**
+ * Fiche d'un clan actif ou dissous (legacy `createActiveClanInfosEmbed` /
+ * `createDisbandedClanInfosEmbed`). La fiche de l'API ne porte pas les
+ * fondateurs : l'appelant les lit à part (`clans.get`).
+ */
+export function embedFicheClan(
+  clan: ClanFiche,
+  auteur: AuteurEmbed | null = null,
+  fondateurs: readonly string[] = [],
+): EmbedBuilder {
+  const embed = new EmbedBuilder().setThumbnail(miniatureClan(clan.avatarUrl));
+  if (clan.biography.trim().length > 0) embed.setDescription(borner(clan.biography, 4096));
+  poserAuteur(embed, auteur);
   if (clan.isDisbanded) {
-    return fiche({ titre, intention: "muet", icone: "🪦", miniature: miniatureClan(clan.avatarUrl) })
-      .description(`Ce Clan a été dissous.\n\n${borner(clan.biography, 1500)}`)
-      .champ("Créé le", leJour(clan.createdAt, "D"), { enLigne: true })
-      .finir();
+    return embed
+      .setColor(Colors.Red)
+      .setTitle(borner(`[${clan.shortName}] ${clan.name}\n - Clan dissout`, 256))
+      .setFields({ name: "Fondateurs", value: valeurChamp(listeMentions(fondateurs)), inline: true });
   }
-  const reseaux = [
-    clan.socials.x ? `[X](${clan.socials.x})` : null,
-    clan.socials.instagram ? `[Instagram](${clan.socials.instagram})` : null,
-    clan.socials.tiktok ? `[TikTok](${clan.socials.tiktok})` : null,
-  ].filter(Boolean);
-  const carte = fiche({ titre, url: urlSite, miniature: miniatureClan(clan.avatarUrl) })
-    .description(borner(clan.biography || "Pas de biographie fournie", 1500))
-    .champ("Président", clan.president ? `<@${clan.president.id}>` : "—", { enLigne: true })
-    .champ("Effectif", `${clan.members.length} membre${clan.members.length > 1 ? "s" : ""}`, { enLigne: true })
-    .champ("Renommée", String(clan.fame), { enLigne: true })
-    .champ("Niveau", `${clan.level} (${clan.totalXp} XP)`, { enLigne: true })
-    .champ("Recrutement", clan.isRecruiting ? (clan.autoAcceptMembers ? "Ouvert (admission directe)" : "Ouvert") : "Fermé", {
-      enLigne: true,
-    })
-    .champ("Créé le", leJour(clan.createdAt, "D"), { enLigne: true });
-  if (reseaux.length > 0) carte.champ("Réseaux", reseaux.join(" · "), { enLigne: true });
-  if (clan.languages.length > 0) carte.champ("Langues", clan.languages.join(", "), { enLigne: true });
-  if (clan.isInactive) carte.champ("État", "Inactif", { enLigne: true });
-  const membres = lignesMembres(clan.members);
-  if (membres) carte.bloc("Membres", membres, 2);
-  return carte.finir();
+  const vices = clan.members.filter(m => m.role === ClanMemberRole.SubCaptain).map(m => `- <@${m.id}>`);
+  return embed
+    .setColor(COULEUR_CARRIERE)
+    .setTitle(borner(`[${clan.shortName}] ${clan.name}\n`, 256))
+    .setFields(
+      { name: "Président", value: clan.president ? `<@${clan.president.id}>` : " ", inline: true },
+      { name: "Vice-Présidents", value: valeurChamp(vices.join("\n")), inline: true },
+      { name: "Fondateurs", value: valeurChamp(listeMentions(fondateurs)), inline: true },
+      { name: "Membres", value: String(clan.members.length), inline: true },
+      { name: "Discord", value: clan.guildId ? "Yes" : "No", inline: true },
+      { name: "Réseaux sociaux", value: valeurChamp(lignesReseaux(clan.socials)), inline: true },
+    );
 }
 
 // ─── Carrière ──────────────────────────────────────────────────────────────
 
-function nomClanAvecEmoji(clan: { shortName: string; emojiId: string; clanName: string }): string {
-  const emoji = /^\d+$/.test(clan.emojiId) ? `<:${clan.shortName.replace(/[^A-Za-z0-9_]/g, "") || "clan"}:${clan.emojiId}> ` : "";
-  return `${emoji}${echapper(clan.clanName)}`;
+/** Émojis personnalisés des flèches de l'ancien bot (serveur Achilléa de production). */
+export const EMOJI_ENTREE = "<:green_arrow:1436631712368168971>";
+export const EMOJI_SORTIE = "<:red_arrow:1436631768483627068>";
+
+/** `JJ/MM/AAAA`, heure de Paris (legacy `formatDateToSlashDate`, serveur à Paris). */
+export function dateBarree(iso: string | Date): string {
+  return new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "2-digit", year: "numeric" }).format(
+    new Date(iso),
+  );
 }
 
-/** Carrière d'un joueur (legacy `createMemberHistoryEmbed`), du plus ancien au plus récent. */
+function nomClanAvecEmoji(clan: { shortName: string; emojiId: string; clanName: string }): string {
+  return `<:${clan.shortName.replace(/[^A-Za-z0-9_]/g, "") || "clan"}:${clan.emojiId}> ${clan.clanName}`;
+}
+
+/**
+ * Carrière d'un joueur (legacy `createMemberHistoryEmbed`) : clans quittés du
+ * plus récent au plus ancien (ordre de l'API), puis le clan actuel.
+ */
 export function embedCarriere(carriere: ClanCareer, avatar: string | null = null): EmbedBuilder {
-  const passes = [...carriere.past].toReversed();
-  const clans = [...passes.map(nomClanAvecEmoji), ...carriere.current.map(nomClanAvecEmoji)];
-  const entrees = [...passes.map(p => `🟢 ${leJour(p.joinedAt, "d")}`), ...carriere.current.map(c => `🟢 ${leJour(c.joinedAt, "d")}`)];
-  const sorties = [...passes.map(p => `🔴 ${leJour(p.leftAt, "d")}`), ...carriere.current.map(() => "-")];
-  const carte = fiche({ titre: `${carriere.displayName} - Carrière`, icone: "", couleur: COULEUR_CARRIERE, miniature: avatar }).description(
-    `Historique des clans auxquels ${echapper(carriere.displayName)} a appartenu\n\n*__Ce joueur a débuté sa carrière le ${leJour(carriere.since, "D")}__*`,
+  const clans = [...carriere.past.map(nomClanAvecEmoji), ...carriere.current.map(nomClanAvecEmoji)];
+  const entrees = [...carriere.past, ...carriere.current].map(c => `${EMOJI_ENTREE} ${dateBarree(c.joinedAt)}`);
+  const sorties = [...carriere.past.map(p => `${EMOJI_SORTIE} ${dateBarree(p.leftAt)}`), ...carriere.current.map(() => "-")];
+  const nom = echapper(carriere.displayName);
+  const embed = new EmbedBuilder()
+    .setColor(COULEUR_CARRIERE)
+    .setTitle(borner(`${nom} - Carrière`, 256))
+    .setDescription(
+      `Historique des clans auxquels ${nom} a appartenu\n\n*__Ce joueur a débuté sa carrière le ${dateBarree(carriere.since)}__*`,
+    );
+  if (avatar) embed.setThumbnail(avatar);
+  return embed.setFields(
+    { name: "Clan", value: valeurChamp(clans.join("\n")), inline: true },
+    { name: "Rejoint le", value: valeurChamp(entrees.join("\n")), inline: true },
+    { name: "Quitté le", value: valeurChamp(sorties.join("\n")), inline: true },
   );
-  if (clans.length === 0) return carte.champ("Clan", "Aucun clan pour le moment.").finir();
-  return carte
-    .champ("Clan", borner(clans.join("\n"), 1024), { enLigne: true })
-    .champ("Rejoint le", borner(entrees.join("\n"), 1024), { enLigne: true })
-    .champ("Quitté le", borner(sorties.join("\n"), 1024), { enLigne: true })
-    .finir();
 }
 
 // ─── Création de clan ──────────────────────────────────────────────────────

@@ -1,11 +1,19 @@
 import { describe, expect, test } from "bun:test";
+import { Colors } from "discord.js";
 
 import { carriereFactice, ficheFactice } from "../../test/achillea-clans-fixtures";
 import {
   boutonsCreationCandidature,
   distinctionsDepuis,
   embedCarriere,
+  embedErreurLegacy,
   embedFicheClan,
+  embedListeClans,
+  embedRefusLegacy,
+  embedSuccesLegacy,
+  EMOJI_ENTREE,
+  EMOJI_SORTIE,
+  rangeePaginationClans,
   logoAccepte,
   reseauDe,
   selecteurDistinctions,
@@ -27,31 +35,79 @@ describe("distinctions", () => {
   });
 });
 
-describe("fiche et carrière", () => {
-  test("clan actif : président, effectif, membres par rôle", () => {
-    const texte = JSON.stringify(embedFicheClan(ficheFactice() as never).toJSON());
-    expect(texte).toContain("[PSG] Paris Griffon");
-    expect(texte).toContain("Président");
-    expect(texte).toContain("1 membre");
+describe("fiche et carrière (legacy createActiveClanInfosEmbed / createMemberHistoryEmbed)", () => {
+  test("clan actif : couleur 0x206694, auteur, six champs en ligne dans l'ordre de l'ancien bot", () => {
+    const e = embedFicheClan(ficheFactice() as never, { nom: "joueur", avatar: "https://cdn/a.png" }, ["222222222222222222", "3"]).toJSON();
+    expect(e.color).toBe(0x206694);
+    expect(e.title).toBe("[PSG] Paris Griffon\n");
+    expect(e.author).toEqual({ name: "joueur", icon_url: "https://cdn/a.png" });
+    expect(e.footer).toBeUndefined();
+    expect(e.timestamp).toBeUndefined();
+    expect(e.fields?.map(f => [f.name, f.inline])).toEqual([
+      ["Président", true],
+      ["Vice-Présidents", true],
+      ["Fondateurs", true],
+      ["Membres", true],
+      ["Discord", true],
+      ["Réseaux sociaux", true],
+    ]);
+    expect(e.fields?.[2]?.value).toBe("- <@222222222222222222>\n- <@3>\n");
+    expect(e.fields?.[3]?.value).toBe("1");
+    expect(e.fields?.[4]?.value).toBe("No");
+    expect(e.fields?.[5]?.value).toBe("[Twitter](https://x.com/psg)\n");
   });
 
-  test("clan dissous : fiche réduite", () => {
-    const texte = JSON.stringify(embedFicheClan(ficheFactice({ isDisbanded: true }) as never).toJSON());
-    expect(texte).toContain("dissous");
-    expect(texte).not.toContain("Effectif");
+  test("clan dissous : rouge, « - Clan dissout », fondateurs seuls", () => {
+    const e = embedFicheClan(ficheFactice({ isDisbanded: true }) as never, null, ["9"]).toJSON();
+    expect(e.color).toBe(Colors.Red);
+    expect(e.title).toBe("[PSG] Paris Griffon\n - Clan dissout");
+    expect(e.fields).toEqual([{ name: "Fondateurs", value: "- <@9>\n", inline: true }]);
   });
 
-  test("carrière : clans passés puis actuel, « - » pour le départ en cours", () => {
+  test("annuaire : « Liste des Clans », colonnes Clan / Id / Présidence et page", () => {
+    const clan = { id: 42, name: "Paris Griffon", president: { id: "222222222222222222", username: "p" } };
+    const e = embedListeClans([clan] as never, 1, 3, { nom: "joueur" }).toJSON();
+    expect(e.title).toBe("Liste des Clans");
+    expect(e.color).toBe(0x206694);
+    expect(e.description).toBe("Liste des clans en activité. Sélectionnez-en un ci-dessous pour voir ses informations détaillées.");
+    expect(e.fields).toEqual([
+      { name: "Clan", value: "Paris Griffon", inline: true },
+      { name: "Id", value: "42", inline: true },
+      { name: "Présidence", value: "<@222222222222222222>", inline: true },
+      { name: "Page 1/3", value: " ", inline: true },
+    ]);
+  });
+
+  test("pagination : Début / Précédent / Suivant / Fin, bleus, toujours là", () => {
+    const rangee = rangeePaginationClans(1, 3).toJSON() as unknown as { components: Array<Record<string, unknown>> };
+    expect(rangee.components.map(b => [b.label, b.style, b.disabled, b.custom_id])).toEqual([
+      ["Début", 1, true, "clan_infos_page:1:first"],
+      ["Précédent", 1, true, "clan_infos_page:1:previous"],
+      ["Suivant", 1, false, "clan_infos_page:2:next"],
+      ["Fin", 1, false, "clan_infos_page:3:last"],
+    ]);
+  });
+
+  test("carrière : clans quittés (ordre de l'API) puis actuel, flèches et JJ/MM/AAAA", () => {
     const carriere = {
       ...carriereFactice(1),
       past: [
         { clanId: 7, clanName: "Ancien", shortName: "ANC", emojiId: "123", role: 1, joinedAt: "2025-07-01T00:00:00.000Z", leftAt: "2025-12-01T00:00:00.000Z", leaveReason: 3 },
+        { clanId: 8, clanName: "Premier", shortName: "PRE", emojiId: "124", role: 1, joinedAt: "2025-01-01T00:00:00.000Z", leftAt: "2025-02-01T00:00:00.000Z", leaveReason: 3 },
       ],
     };
-    const texte = JSON.stringify(embedCarriere(carriere as never).toJSON());
-    expect(texte).toContain("<:ANC:123> Ancien");
-    expect(texte.indexOf("Ancien")).toBeLessThan(texte.indexOf("Paris Griffon"));
-    expect(texte).toContain("\\n-");
+    const e = embedCarriere(carriere as never).toJSON();
+    expect(e.color).toBe(0x206694);
+    expect(e.fields?.[0]?.value.split("\n").slice(0, 2)).toEqual(["<:ANC:123> Ancien", "<:PRE:124> Premier"]);
+    expect(e.fields?.[1]?.value.split("\n")[0]).toBe(`${EMOJI_ENTREE} 01/07/2025`);
+    expect(e.fields?.[2]?.value).toBe(`${EMOJI_SORTIE} 01/12/2025\n${EMOJI_SORTIE} 01/02/2025\n-`);
+    expect(e.footer).toBeUndefined();
+  });
+
+  test("embeds simples : ✅ vert 0x57f287, ❌ Colors.Red, refus de garde 0xed4245", () => {
+    expect(embedSuccesLegacy("ok").toJSON()).toEqual({ color: 0x57f287, title: "✅ ok" });
+    expect(embedErreurLegacy("ko").toJSON()).toEqual({ color: Colors.Red, title: "❌ ko" });
+    expect(embedRefusLegacy("non").toJSON()).toEqual({ color: 0xed4245, title: "❌ non" });
   });
 });
 

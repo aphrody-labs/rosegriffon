@@ -48,11 +48,11 @@ describe("/clan infos", () => {
     expect(i.texte()).toContain("Paris Griffon");
   });
 
-  test("sigle inconnu : le motif de l'API", async () => {
+  test("sigle inconnu : le message de l'ancien bot", async () => {
     api({ "GET /clans/fiche/:ref": [404, { success: false, error: "Aucun Clan ne correspond à « ZZZ »." }] });
     const i = fausseInteraction();
     await commandes.infos("ZZZ", i as never);
-    expect(i.texte()).toContain("Aucun Clan ne correspond");
+    expect(i.texte()).toContain("❌ Le Clan recherché avec le sigle ZZZ n'existe pas.");
   });
 
   test("bouton de page et sélection d'un clan", async () => {
@@ -63,28 +63,38 @@ describe("/clan infos", () => {
     const page = fausseInteraction({ customId: "clan_infos_page:3" });
     await commandes.page(page as never);
     expect(page.envois[0]?.via).toBe("deferUpdate");
-    expect(page.texte()).toContain("Aucun Clan actif");
+    expect(page.texte()).toContain("Liste des Clans");
+    expect(page.texte()).toContain("Page 1/0");
 
     const choix = fausseInteraction({ customId: "clanSelector", valeurs: ["42"] });
     await commandes.choisir(choix as never);
     expect(choix.texte()).toContain("clan_infos_page:1");
     expect(choix.texte()).toContain("[PSG] Paris Griffon");
+    // Depuis l'annuaire, l'ancien bot ne montrait que « Retour ».
+    expect(choix.texte()).not.toContain("init_application");
   });
 });
 
 describe("/clan apply", () => {
   test("clan qui recrute : le menu apply_distinctions", async () => {
-    api({ "GET /clans/fiche/:ref": ficheFactice() });
+    api({ "GET /clans/history/:userId": carriereFactice(null), "GET /clans/fiche/:ref": ficheFactice() });
     const i = fausseInteraction();
     await commandes.apply("PSG", i as never);
     expect(i.texte()).toContain("apply_distinctions:42");
   });
 
-  test("clan fermé : refus", async () => {
-    api({ "GET /clans/fiche/:ref": ficheFactice({ isRecruiting: false }) });
+  test("déjà membre d'un Clan : refus de la garde NoClan", async () => {
+    api({ "GET /clans/history/:userId": carriereFactice(ClanMemberRole.Member) });
     const i = fausseInteraction();
     await commandes.apply("PSG", i as never);
-    expect(i.texte()).toContain("ne recrute pas");
+    expect(i.texte()).toContain("❌ You are already in a Clan !");
+  });
+
+  test("clan fermé : refus", async () => {
+    api({ "GET /clans/history/:userId": carriereFactice(null), "GET /clans/fiche/:ref": ficheFactice({ isRecruiting: false }) });
+    const i = fausseInteraction();
+    await commandes.apply("PSG", i as never);
+    expect(i.texte()).toContain("This Clan is not currently recruiting !");
   });
 });
 
@@ -102,7 +112,7 @@ describe("/clan invite-member", () => {
     api({ "GET /clans/history/:userId": carriereFactice(ClanMemberRole.Member) });
     const i = fausseInteraction();
     await commandes.inviteMember(cible as never, i as never);
-    expect(i.texte()).toContain("Accès refusé");
+    expect(i.texte()).toContain("You do not have permission to run this command.");
     expect(i.texte()).not.toContain("invite_distinctions");
   });
 });
@@ -151,14 +161,15 @@ describe("/clan disband", () => {
     const clic = fausseInteraction({ customId: "clan_disband_confirm:42" });
     await commandes.confirmerDissolution(clic as never);
     expect(appels.at(-1)?.chemin).toBe("/clans/42/disband");
-    expect(clic.texte()).toContain("a été dissous");
+    expect(i.texte()).toContain("Do you really want to __disband__ Paris Griffon ?");
+    expect(clic.texte()).toContain("✅ Clan Paris Griffon has been disbanded successfully !");
   });
 
   test("Vice-Président : refusé localement", async () => {
     api({ "GET /clans/history/:userId": carriereFactice(ClanMemberRole.SubCaptain) });
     const i = fausseInteraction();
     await commandes.disband(undefined, i as never);
-    expect(i.texte()).toContain("Seul le Président");
+    expect(i.texte()).toContain("You do not have permission to run this command.");
   });
 
   test("clan désigné par un non-administrateur : refus 403 de l'API", async () => {
@@ -171,7 +182,7 @@ describe("/clan disband", () => {
   test("Annuler efface la demande", async () => {
     const clic = fausseInteraction({ customId: "clan_action_cancel" });
     await commandes.annuler(clic as never);
-    expect(clic.texte()).toContain("Action annulée");
+    expect(clic.texte()).toContain("\"supprime\":true");
   });
 });
 
@@ -192,7 +203,7 @@ describe("/clan transfer-ownership", () => {
     const modale = fausseInteraction({ customId: `clan_transfer_modal:${AUTRE}`, champs: { userInput: PHRASE_TRANSFERT } });
     await commandes.validerTransfert(modale as never);
     expect(appels[0]).toMatchObject({ chemin: "/clans/transfer-ownership", corps: { userId: AUTRE } });
-    expect(modale.texte()).toContain("nouveau Président");
+    expect(modale.texte()).toContain("est maintenant le nouveau Président de votre Clan");
   });
 
   test("mauvaise phrase : aucun appel", async () => {
@@ -227,6 +238,6 @@ describe("/clan poster", () => {
     api({ "GET /clans/history/:userId": carriereFactice(null) });
     const i = fausseInteraction();
     await commandes.poster(undefined, i as never);
-    expect(i.texte()).toContain("Vous ne faites pas partie d'un Clan");
+    expect(i.texte()).toContain("Vous n'êtes pas membre d'un Clan. Précisez un sigle.");
   });
 });
