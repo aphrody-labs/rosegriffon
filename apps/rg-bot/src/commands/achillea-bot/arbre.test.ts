@@ -126,6 +126,31 @@ describe("arbre du profil Achilléa", () => {
     expect(constats).toEqual(exemples.map(id => `${id}:1`));
   });
 
+  test("les descriptions reprennent mot pour mot celles de l'ancien bot (legacy/achillea-bot)", () => {
+    const description = (chemin: string): string | undefined => {
+      const [racine, ...reste] = chemin.split(" ");
+      let noeud: OptionJson | undefined = racines.find(r => r.name === racine);
+      for (const nom of reste) noeud = noeud?.options?.find(o => o.name === nom);
+      return noeud?.description;
+    };
+    const legacy: Record<string, string> = {
+      website: "Envoie le lien vers le site web d'Achillea",
+      ping: "Diagnostic complet du bot (Discord, DB, API, mémoire, uptime)",
+      clan: "Manage clans",
+      "clan apply": "Apply to join a Clan",
+      "clan invite-member user": "User to invite to your Clan",
+      "clan manage": "Gérez votre Clan",
+      "clan teams": "Manage your teams",
+      "clan disband": "Disband your Clan",
+      "clan transfer-ownership": "Permet de transférer la présidence du Clan à un autre membre",
+      "interclan request date": "La date et l'heure du défi au format JJ/mm HH:MM",
+      player: "Player commands",
+      owner: "Owner scope",
+      "owner maintenance": "Met le mode maintenance du bot.",
+    };
+    expect(Object.fromEntries(Object.keys(legacy).map(c => [c, description(c)]))).toEqual(legacy);
+  });
+
   test("la charge d'enregistrement reste sous le plafond de Discord (8 000 caractères par commande)", () => {
     // Discord borne la somme des noms, descriptions et valeurs d'une commande ;
     // le JSON complet est un majorant prudent de cette somme.

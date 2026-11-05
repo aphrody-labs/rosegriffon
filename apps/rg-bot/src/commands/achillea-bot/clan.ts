@@ -115,7 +115,7 @@ async function clanActuel(interaction: Interactif) {
 }
 
 @Discord()
-@SlashGroup({ name: "clan", description: "Les Clans Achilléa : fiches, adhésion, présidence" })
+@SlashGroup({ name: "clan", description: "Manage clans" })
 @SlashGroup("clan")
 export class ClanCommandes {
   @Slash({ name: "infos", description: "Récupère les informations d'un clan" })
@@ -151,7 +151,7 @@ export class ClanCommandes {
     await afficherFiche(interaction, id, true);
   }
 
-  @Slash({ name: "apply", description: "Postuler à un Clan" })
+  @Slash({ name: "apply", description: "Apply to join a Clan" })
   async apply(
     @SlashOption({
       name: "shortname",
@@ -183,7 +183,7 @@ export class ClanCommandes {
   async inviteMember(
     @SlashOption({
       name: "user",
-      description: "Joueur à inviter dans votre Clan",
+      description: "User to invite to your Clan",
       type: ApplicationCommandOptionType.User,
       required: true,
     })
@@ -237,7 +237,7 @@ export class ClanCommandes {
     await interaction.editReply({ content: "", components: [], ...succes(`Vous avez quitté le Clan ${issue.valeur.clanName} !`) });
   }
 
-  @Slash({ name: "disband", description: "Dissoudre votre Clan" })
+  @Slash({ name: "disband", description: "Disband your Clan" })
   async disband(
     @SlashOption({
       name: "sigle",
@@ -291,7 +291,7 @@ export class ClanCommandes {
     await interaction.editReply({ content: "", components: [], ...info("Action annulée") });
   }
 
-  @Slash({ name: "transfer-ownership", description: "Transférer la présidence du Clan à un autre membre" })
+  @Slash({ name: "transfer-ownership", description: "Permet de transférer la présidence du Clan à un autre membre" })
   async transferOwnership(
     @SlashOption({
       name: "member",

@@ -52,12 +52,12 @@ async function mesurer(
 
 @Discord()
 export class CommandesGenerales {
-  @Slash({ name: "website", description: "Envoie le lien vers le site web d'Achilléa" })
+  @Slash({ name: "website", description: "Envoie le lien vers le site web d'Achillea" })
   async website(interaction: ChatInputCommandInteraction): Promise<void> {
-    await interaction.reply({ content: `Le site web d'Achilléa est joignable à l'adresse suivante : ${urlAchillea("/")}` });
+    await interaction.reply({ content: `Le site web d'Achillea est joignable à l'adresse suivante : ${urlAchillea("/")}` });
   }
 
-  @Slash({ name: "ping", description: "Diagnostic complet du bot (Discord, API, base, ranked, mémoire, uptime)" })
+  @Slash({ name: "ping", description: "Diagnostic complet du bot (Discord, DB, API, mémoire, uptime)" })
   async ping(
     @SlashOption({
       name: "public",

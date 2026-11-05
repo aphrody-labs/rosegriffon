@@ -134,7 +134,7 @@ export function lireEffectif(
 @Discord()
 @SlashGroup("clan")
 export class ClanEquipes {
-  @Slash({ name: "teams", description: "Gérez les équipes de votre Clan" })
+  @Slash({ name: "teams", description: "Manage your teams" })
   async teams(interaction: ChatInputCommandInteraction): Promise<void> {
     await differer(interaction, { prive: true });
     const membre = await appartenance(interaction);

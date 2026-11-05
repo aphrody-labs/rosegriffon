@@ -54,7 +54,7 @@ export function boutonsFicheJoueur(userId: string): ActionRowBuilder<ButtonBuild
 }
 
 @Discord()
-@SlashGroup({ name: "player", description: "Commandes joueur" })
+@SlashGroup({ name: "player", description: "Player commands" })
 @SlashGroup("player")
 export class CommandePlayer {
   @Slash({ name: "infos", description: "Récupère les informations d'un joueur" })

@@ -194,7 +194,7 @@ async function televerserLogo(
 @Discord()
 @SlashGroup("clan")
 export class ClanGestion {
-  @Slash({ name: "manage", description: "Gérez votre Clan (Président et Vice-Présidents)" })
+  @Slash({ name: "manage", description: "Gérez votre Clan" })
   async manage(interaction: ChatInputCommandInteraction): Promise<void> {
     await differer(interaction, { prive: true });
     const ctx = await chargerContexte(interaction);

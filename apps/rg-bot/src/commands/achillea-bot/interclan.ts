@@ -55,7 +55,7 @@ export class InterclanCommande {
     sigle: string,
     @SlashOption({
       name: "date",
-      description: "La date et l'heure du défi au format JJ/mm HH:MM (heure de Paris)",
+      description: "La date et l'heure du défi au format JJ/mm HH:MM",
       type: ApplicationCommandOptionType.String,
       required: true,
       maxLength: 20,

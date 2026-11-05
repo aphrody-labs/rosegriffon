@@ -44,7 +44,7 @@ function nomDe(cible: User): string {
 }
 
 @Discord()
-@SlashGroup({ name: "owner", description: "Administration du bot Achilléa" })
+@SlashGroup({ name: "owner", description: "Owner scope" })
 @SlashGroup("owner")
 export class CommandeOwner {
   @Slash({ name: "blacklist-add", description: "Ajouter un joueur à la liste noire" })
@@ -124,7 +124,7 @@ export class CommandeOwner {
     );
   }
 
-  @Slash({ name: "maintenance", description: "Activer ou couper le mode maintenance" })
+  @Slash({ name: "maintenance", description: "Met le mode maintenance du bot." })
   async maintenance(
     @SlashOption({ name: "state", description: "Maintenance active ?", type: ApplicationCommandOptionType.Boolean, required: true })
     etat: boolean,
