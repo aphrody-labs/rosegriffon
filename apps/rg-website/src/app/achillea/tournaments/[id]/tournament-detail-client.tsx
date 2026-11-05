@@ -43,7 +43,7 @@ import {
 } from "lucide-react";
 import { MEDAILLE } from "@/components/achillea/couleurs-donnees";
 
-export default function TournamentDetailPage({ id }: { id: string }) {
+export default function TournamentDetailPage({ id, titre }: { id: string; titre?: string }) {
   const tournamentId = parseInt(id, 10);
 
   const { user, isAuthenticated, login } = useAchilleaAuth();
@@ -135,7 +135,11 @@ export default function TournamentDetailPage({ id }: { id: string }) {
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-12 space-y-6">
-        <Skeleton className="h-8 w-48 rounded-lg" />
+        {titre ? (
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{titre}</h1>
+        ) : (
+          <Skeleton className="h-8 w-48 rounded-lg" />
+        )}
         <Skeleton className="h-64 w-full rounded-2xl" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Skeleton className="h-48 md:col-span-2 rounded-2xl" />
@@ -149,7 +153,7 @@ export default function TournamentDetailPage({ id }: { id: string }) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
         <AlertCircle className="w-12 h-12 text-destructive mx-auto" />
-        <h2 className="text-xl font-bold">{error ?? "Tournoi introuvable"}</h2>
+        <h1 className="text-xl font-bold">{error ?? "Tournoi introuvable"}</h1>
         <Button asChild variant="outline">
           <Link href="/achillea/tournaments">
             <ArrowLeft className="w-4 h-4 mr-2" />

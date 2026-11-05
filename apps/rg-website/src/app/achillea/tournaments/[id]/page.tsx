@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { metadonneesAchillea, resume } from "@/app/achillea/metadonnees";
 import { createAchilleaClient, tournamentStateLabel } from "@/lib/achillea";
 import { signalerEchec } from "@/lib/achillea/signaler";
 import TournamentDetailClient from "./tournament-detail-client";
+
+/** Une seule requête par rendu : métadonnées et `h1` serveur lisent le même tournoi. */
+const lireTournoi = cache((numero: number) => createAchilleaClient().tournaments.get(numero));
 
 /*
  * Page serveur : elle n'existe que pour porter les métadonnées, que
@@ -23,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     });
   }
 
-  const resultat = await createAchilleaClient().tournaments.get(numero);
+  const resultat = await lireTournoi(numero);
   if (!resultat.ok) {
     signalerEchec(`tournaments/${id} — métadonnées`, resultat);
     return metadonneesAchillea({
@@ -46,5 +50,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function TournamentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <TournamentDetailClient id={id} />;
+  // Le nom est passé au client pour que le `h1` existe dès le HTML serveur,
+  // avant que le client ait rechargé le tournoi.
+  const numero = Number.parseInt(id, 10);
+  const resultat = Number.isFinite(numero) ? await lireTournoi(numero) : null;
+  return <TournamentDetailClient id={id} titre={resultat?.ok ? resultat.value[0].name : undefined} />;
 }

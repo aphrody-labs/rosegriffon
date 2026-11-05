@@ -54,7 +54,7 @@ function getRankImg(key?: string | null): string {
   return p.startsWith("/") ? p : `/${p}`;
 }
 
-export default function UserProfilePage({ id }: { id: string }) {
+export default function UserProfilePage({ id, titre }: { id: string; titre?: string }) {
   const { user: currentUser, isAuthenticated } = useAchilleaAuth();
 
   const [profile, setProfile] = useState<EnrichedUserDTO | null>(null);
@@ -151,7 +151,11 @@ export default function UserProfilePage({ id }: { id: string }) {
         <div className="flex items-center gap-4">
           <Skeleton className="size-20 rounded-full" />
           <div className="space-y-2">
-            <Skeleton className="h-8 w-48" />
+            {titre ? (
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{titre}</h1>
+            ) : (
+              <Skeleton className="h-8 w-48" />
+            )}
             <Skeleton className="h-4 w-32" />
           </div>
         </div>

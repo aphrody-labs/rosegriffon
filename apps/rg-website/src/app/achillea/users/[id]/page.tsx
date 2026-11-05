@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { metadonneesAchillea } from "@/app/achillea/metadonnees";
 import { createAchilleaClient } from "@/lib/achillea";
 import { signalerEchec } from "@/lib/achillea/signaler";
 import UserProfileClient from "./user-profile-client";
+
+/** Une seule requête par rendu : métadonnées et `h1` serveur lisent le même joueur. */
+const lireJoueur = cache((id: string) => createAchilleaClient().users.get(id));
 
 interface ProfilJoueurProps {
   params: Promise<{ id: string }>;
@@ -20,7 +24,7 @@ export async function generateMetadata({ params }: ProfilJoueurProps): Promise<M
   const { id } = await params;
   const chemin = `/achillea/users/${id}`;
 
-  const resultat = await createAchilleaClient().users.get(id);
+  const resultat = await lireJoueur(id);
   if (!resultat.ok) {
     signalerEchec(`users/${id} — métadonnées`, resultat);
     return metadonneesAchillea({
@@ -43,5 +47,8 @@ export async function generateMetadata({ params }: ProfilJoueurProps): Promise<M
 
 export default async function UserProfilePage({ params }: ProfilJoueurProps) {
   const { id } = await params;
-  return <UserProfileClient id={id} />;
+  // Le pseudo est passé au client pour que le `h1` existe dès le HTML serveur,
+  // avant que le client ait rechargé le profil.
+  const resultat = await lireJoueur(id);
+  return <UserProfileClient id={id} titre={resultat.ok ? resultat.value.username : undefined} />;
 }
