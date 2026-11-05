@@ -16,6 +16,7 @@ import {
 } from "@/lib/x-campagnes/types";
 
 import { TexteDiscord } from "./TexteDiscord";
+import { VignetteVideo } from "./VignetteVideo";
 
 /*
  * Carte d'une publication de campagne — purement présentationnelle.
@@ -167,30 +168,8 @@ export function PostCarte({
       >
         <AspectRatio ratio={4 / 5}>
           {image?.kind === "video" ? (
-            /*
-             * Vignette d'une participation VIDÉO. `muted` + `playsInline` sont
-             * obligatoires pour que la lecture automatique soit tolérée par les
-             * navigateurs mobiles ; `preload="metadata"` ne télécharge que
-             * l'en-tête tant que la carte n'est pas survolée. Le pictogramme en
-             * coin dit ce que c'est sans qu'il faille cliquer.
-             */
-            // eslint-disable-next-line jsx-a11y/media-has-caption
-            <video
-              src={image.src}
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              aria-label={`Vidéo publiée sur ${reseau} par ${post.auteurNom}`}
-              className="size-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-105"
-              onMouseEnter={evenement => {
-                void evenement.currentTarget.play().catch(() => {});
-              }}
-              onMouseLeave={evenement => {
-                evenement.currentTarget.pause();
-                evenement.currentTarget.currentTime = 0;
-              }}
-            />
+            /* Rien n'est téléchargé avant le survol : voir `VignetteVideo`. */
+            <VignetteVideo src={image.src} ariaLabel={`Vidéo publiée sur ${reseau} par ${post.auteurNom}`} />
           ) : image ? (
             <Image
               src={image.src}

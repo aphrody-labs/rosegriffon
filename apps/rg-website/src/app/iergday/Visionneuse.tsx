@@ -9,6 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { extraitTexteDiscord } from "@/lib/x-campagnes/discord-texte";
 import { clePost, type PostCampagne, urlMessageDiscord, urlPostX } from "@/lib/x-campagnes/types";
+import { videoLisibleNavigateur } from "@/lib/x-campagnes/video";
 
 import { TexteDiscord } from "./TexteDiscord";
 
@@ -249,6 +250,10 @@ export function Visionneuse({
   }
 
   const image = documentOuvert.images[indexImage] ?? documentOuvert.images[0];
+  // Conteneur non web (`.mov`) : aucun `<video>`, qui téléchargerait des mégaoctets
+  // pour un cadre noir. La zone tombe sur « Média indisponible » et le bouton
+  // « Télécharger » de l'en-tête sert toujours le fichier d'origine (`image`).
+  const media = image?.kind === "video" && !videoLisibleNavigateur(image.src) ? undefined : image;
 
   const telecharger = async () => {
     if (!image || telechargement) {
@@ -346,7 +351,7 @@ export function Visionneuse({
 
         {/* Image + flèches de navigation entre documents. */}
         <div className="relative flex h-[52dvh] items-center justify-center bg-surface-container-low sm:h-[62dvh]">
-          {image?.kind === "video" ? (
+          {media?.kind === "video" ? (
             /*
              * Une vidéo n'est ni optimisée ni redimensionnée par Next : elle est
              * servie telle qu'elle a été déposée. `controls` sans lecture
@@ -355,14 +360,14 @@ export function Visionneuse({
             // eslint-disable-next-line jsx-a11y/media-has-caption
             <video
               key={`${documentOuvert.cle}-${indexImage}`}
-              src={image.src}
+              src={media.src}
               controls
               playsInline
               preload="metadata"
-              aria-label={image.alt}
+              aria-label={media.alt}
               className="max-h-full max-w-full object-contain"
             />
-          ) : image ? (
+          ) : media ? (
             /*
              * ⚠ PAS DE `unoptimized` ICI. La boîte plafonne à `max-w-[96vw]`,
              * `sm:max-w-4xl` (896 px) puis `lg:max-w-5xl` (1024 px) : servir
@@ -376,8 +381,8 @@ export function Visionneuse({
              */
             <Image
               key={`${documentOuvert.cle}-${indexImage}`}
-              src={image.src}
-              alt={image.alt}
+              src={media.src}
+              alt={media.alt}
               fill
               sizes="(max-width: 639px) 96vw, (max-width: 1023px) 896px, 1024px"
               priority
