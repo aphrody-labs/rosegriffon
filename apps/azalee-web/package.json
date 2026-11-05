@@ -12,7 +12,6 @@
     "format:check": "bun fmt --check .",
     "type-check": "bun check --noEmit",
     "test": "bun test app lib src tests",
-    "test:run": "bun --bun vitest run",
     "create-draft": "bun scripts/create-draft.ts",
     "backup:supabase": "bun scripts/ops/backup-supabase-to-sqlite.ts",
     "sync:supabase": "bun scripts/ops/sync-supabase-to-sqlite.ts",
@@ -93,14 +92,11 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/web-push": "catalog:",
-    "@vitejs/plugin-react": "catalog:",
     "babel-plugin-react-compiler": "catalog:",
-    "jsdom": "catalog:",
     "tailwindcss": "catalog:",
     "tailwindcss-animate": "catalog:",
     "turbo": "catalog:",
-    "typescript": "catalog:",
-    "vitest": "catalog:"
+    "typescript": "catalog:"
   },
   "overrides": {
     "kysely": "0.28.2"

@@ -24,10 +24,7 @@
     "supabase",
     "tests",
     "tsconfig.json",
-    "vercel.ts",
-    "vitest.config.ts",
-    "vitest.setup.ts",
-    "vitest.shims.d.ts"
+    "vercel.ts"
   ],
   "exports": {
     "./package.json": "./package.json"
@@ -40,8 +37,6 @@
     "predev": "bun ../../packages/rg-assets/scripts/sync-website-public.ts --to public",
     "dev": "next-bun dev --webpack",
     "test": "bun test src",
-    "test:ui": "bun --bun vitest --ui",
-    "test:run": "bun --bun vitest run",
     "build": "bun ../../scripts/next-build.ts",
     "qa:browser": "bash ../../scripts/qa/agent-browser-rg.sh",
     "start": "next-bun start",
@@ -167,7 +162,6 @@
     "@next/bundle-analyzer": "catalog:",
     "@rosegriffon/config": "workspace:*",
     "@tailwindcss/typography": "catalog:",
-    "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",
     "@theatre/studio": "catalog:",
     "@types/google.maps": "catalog:",
@@ -178,14 +172,11 @@
     "@types/three": "catalog:",
     "@types/web-push": "catalog:",
     "@vercel/config": "catalog:",
-    "@vitejs/plugin-react": "catalog:",
     "@webgpu/types": "catalog:",
     "babel-plugin-react-compiler": "catalog:",
-    "jsdom": "catalog:",
     "shadcn": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:",
-    "vitest": "catalog:"
+    "typescript": "catalog:"
   },
   "engines": {
     "bun": ">=1.4.4"

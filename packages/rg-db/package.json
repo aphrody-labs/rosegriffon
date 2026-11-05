@@ -51,7 +51,6 @@
   "devDependencies": {
     "@types/pg": "catalog:",
     "kysely-supabase": "catalog:",
-    "vitest": "catalog:",
     "@aphrody/bun-types": "catalog:"
   },
   "engines": {
