@@ -47,8 +47,8 @@ Points ouverts transmis à l'agent de parité web Achilléa :
 ## Pas encore prouvé
 
 - Réglage du thème par l'utilisateur (ThemeTuner) dans le navigateur.
-- Lighthouse sur le build de prod.
-- Le déploiement en prod.
+- Lighthouse « après » (passe yolo-web-e4 en cours sur `TFu-T1mdhusiRm6TvkhaB`).
+- Le déploiement en prod : prouvé, voir plus bas.
 
 ## Déploiements en prod (VPS RG, via `prod` → `vps`)
 
