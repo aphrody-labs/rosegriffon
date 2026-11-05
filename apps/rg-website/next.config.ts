@@ -366,18 +366,19 @@ const nextConfig: NextConfig = {
   },
 
   async rewrites() {
-    // Les URL relatives `/storage/v1/…` déjà enregistrées en base restent
-    // valides. Les buckets lourds (`tweets`, `assets`) vivent sur le disque de
-    // rg-core, servi par `cdn.rosegriffon.fr` (qui retombe lui-même sur Supabase) ;
-    // les relayer vers Supabase seul renvoyait 400 pour tous ces médias.
-    const origineMedias = (process.env.RG_MEDIA_PUBLIC_ORIGIN ?? "https://cdn.rosegriffon.fr").replace(/\/+$/, "");
-    const medias = {
-      destination: `${origineMedias}/storage/v1/object/public/:bucket/:path*`,
-      source: "/storage/v1/object/public/:bucket(tweets|assets)/:path*",
-    };
+    // Les URL relatives `/storage/v1/object/public/…` déjà enregistrées en base
+    // passent par la route `app/storage/v1/object/public/[bucket]/[...chemin]`
+    // (rg-core pour `tweets`/`assets`, Supabase sinon) : une réécriture
+    // recopiait le 400 « NoSuchKey » de Supabase, la route rend 404. Le reste de
+    // `/storage/v1/…` est relayé vers Supabase en `fallback`, c-à-d APRÈS les
+    // routes dynamiques (en `afterFiles`, il passerait avant la route).
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-    if (!supabaseUrl?.startsWith("https://")) return [medias];
-    return [medias, { destination: `${supabaseUrl}/storage/v1/:path*`, source: "/storage/v1/:path*" }];
+    if (!supabaseUrl?.startsWith("https://")) return [];
+    return {
+      afterFiles: [],
+      beforeFiles: [],
+      fallback: [{ destination: `${supabaseUrl}/storage/v1/:path*`, source: "/storage/v1/:path*" }],
+    };
   },
 
   async headers() {
