@@ -76,7 +76,6 @@
     "@lexical/rich-text": "catalog:",
     "@lexical/table": "catalog:",
     "@lexical/utils": "catalog:",
-    "@next/third-parties": "catalog:",
     "@origin-space/image-cropper": "catalog:",
     "@pixiv/three-vrm": "catalog:",
     "@react-three/drei": "catalog:",

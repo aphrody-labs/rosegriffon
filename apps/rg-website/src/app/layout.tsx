@@ -7,10 +7,11 @@ import { lato, notoSans, poppins, roboto } from "@/lib/fonts";
 import { NETWORK_SAME_AS } from "@/lib/social-links";
 import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 
-import { GoogleTagManager } from "@next/third-parties/google";
+import { DeferredThirdParties } from "@/components/shared/DeferredThirdParties";
+
 import { resolveLocale } from "@rosegriffon/i18n";
 import { isLocaleId } from "@rosegriffon/preferences";
-import { ADSENSE_CLIENT, AdSenseScript } from "@rosegriffon/ui";
+import { ADSENSE_CLIENT } from "@rosegriffon/ui";
 
 import ClientLayout from "./client-layout";
 
@@ -204,19 +205,10 @@ export default async function RootLayout({
         className={`${roboto.className} ${roboto.variable} ${poppins.variable} ${notoSans.variable} ${lato.variable}`}
         suppressHydrationWarning
       >
-        {/* Google Tag Manager — composant officiel de `@next/third-parties`.
-			    Il injecte le script du conteneur ET l'`<iframe>` de repli `noscript`,
-			    en respectant la stratégie de chargement de Next : pas de balise collée
-			    à la main dans le `<head>`, qui bloquerait le rendu.
-			    L'identifiant vient de l'environnement : sans lui, rien n'est chargé,
-			    ce qui laisse les environnements de développement propres. */}
-        {GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
-        {/* Google AdSense — chargeur unique du site. Les annonces automatiques
-				    sont pilotées depuis le tableau de bord, donc aucune page n'a
-				    d'emplacement à déclarer. La CSP de rosegriffon.fr est posée par
-				    nginx (`infra/nginx/rg-csp-website.inc`) : y ajouter les hôtes
-				    publicitaires avant toute bascule en mode bloquant. */}
-        <AdSenseScript />
+        {/* GTM au premier geste (repli à 8 s) et AdSense hors pages légales et
+            outils : voir `DeferredThirdParties`. Sans identifiant GTM, aucune
+            balise. La CSP est posée par nginx (`infra/nginx/rg-csp-website.inc`). */}
+        <DeferredThirdParties gtmId={GTM_ID} />
         <ClientLayout initialLanguage={initialLanguage}>
           {children}
         </ClientLayout>
