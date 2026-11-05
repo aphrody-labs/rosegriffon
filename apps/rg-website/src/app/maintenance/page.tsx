@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 
 import type { Metadata } from "next";
 
@@ -8,14 +8,16 @@ export const metadata: Metadata = {
   title: "Maintenance · Rose Griffon",
 };
 
-const geistSans = Geist({
-  subsets: ["latin"],
+const geistSans = localFont({
+  src: "../../fonts/geist-variable.woff2",
   variable: "--font-geist-sans",
+  weight: "100 900",
 });
 
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
+const geistMono = localFont({
+  src: "../../fonts/geist-mono-variable.woff2",
   variable: "--font-geist-mono",
+  weight: "100 900",
 });
 
 export default function MaintenancePage() {

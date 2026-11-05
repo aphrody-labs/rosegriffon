@@ -1,27 +1,31 @@
-import { Fraunces, JetBrains_Mono, Poppins } from "next/font/google";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
 
 import { absoluteUrl } from "@/lib/site-url";
 
-const fraunces = Fraunces({
-  axes: ["opsz", "SOFT", "WONK"],
+const fraunces = localFont({
   display: "swap",
-  subsets: ["latin"],
+  src: "../../fonts/fraunces-variable.woff2",
   variable: "--font-display-ds",
+  weight: "100 900",
 });
 
-const jetbrains = JetBrains_Mono({
+const jetbrains = localFont({
   display: "swap",
-  subsets: ["latin"],
+  src: "../../fonts/jetbrains-mono-variable.woff2",
   variable: "--font-mono-ds",
+  weight: "100 800",
 });
 
-const poppins = Poppins({
+const poppins = localFont({
   display: "swap",
-  subsets: ["latin"],
+  src: [
+    { path: "../../fonts/poppins-400.woff2", style: "normal", weight: "400" },
+    { path: "../../fonts/poppins-500.woff2", style: "normal", weight: "500" },
+    { path: "../../fonts/poppins-600.woff2", style: "normal", weight: "600" },
+    { path: "../../fonts/poppins-700.woff2", style: "normal", weight: "700" },
+  ],
   variable: "--font-body-ds",
-  weight: ["400", "500", "600", "700"],
 });
 
 const superCartoon = localFont({
