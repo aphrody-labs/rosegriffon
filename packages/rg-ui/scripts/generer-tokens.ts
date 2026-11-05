@@ -338,7 +338,7 @@ export function extraireTokens(css: string): TokensExtraits {
   }
 
   const marquesTierces: Record<string, string> = {};
-  for (const nom of ["--color-discord", "--color-patreon", "--color-twitch"]) {
+  for (const nom of ["--color-discord", "--color-discord-strong", "--color-patreon", "--color-twitch"]) {
     const valeur = theme.get(nom);
     if (valeur) marquesTierces[versCamel(nom.slice("--color-".length))] = normaliserCouleur(valeur);
   }

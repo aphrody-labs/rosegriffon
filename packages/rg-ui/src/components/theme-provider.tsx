@@ -6,6 +6,7 @@ import {
   useTheme as useNextTheme,
 } from "next-themes";
 import * as React from "react";
+import { applyThemeTune } from "../lib/theme-tune";
 import { THEME_PACKS, THEMES, type ThemeType } from "../lib/themes";
 
 export interface RGThemeProviderProps extends ThemeProviderProps {
@@ -46,9 +47,22 @@ export function ThemeProvider({
       disableTransitionOnChange={disableTransitionOnChange}
       {...props}
     >
+      <ThemeTuneSync />
       {children}
     </Provider>
   );
+}
+
+/**
+ * Recopie sur `<html>` les rôles réglés par l'utilisateur pour le thème actif
+ * (`lib/theme-tune.ts`) et retire ceux du thème précédent à chaque changement.
+ */
+function ThemeTuneSync() {
+  const { theme } = useNextTheme();
+  React.useEffect(() => {
+    applyThemeTune(theme);
+  }, [theme]);
+  return null;
 }
 
 /** Hook unifié — expose `mounted` pour éviter le mismatch SSR/CSR. */

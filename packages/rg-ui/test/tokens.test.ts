@@ -11,7 +11,10 @@ import {
   resoudreVar,
   versCamel,
 } from "../scripts/generer-tokens";
+import { computeRoles, ROLE_NAMES } from "../src/lib/color-engine";
+import { THEME_PACKS } from "../src/lib/themes";
 import { FORMES, MARQUE, MARQUES_TIERCES, THEMES } from "../src/tokens";
+import { rendreThemesCss } from "../scripts/generer-themes";
 
 const CHEMIN_CSS = new URL("../src/styles.css", import.meta.url);
 const CHEMIN_TOKENS = new URL("../src/tokens.ts", import.meta.url);
@@ -171,10 +174,12 @@ describe("tokens exposés", () => {
       "theme-achillea",
     ]);
     expect(Object.keys(THEMES)).toEqual([...NOMS_THEMES]);
-    expect(THEMES["theme-azalee-light"].md3.primary).toBe("#8b5023");
-    expect(THEMES["theme-azalee-light"].md3.background).toBe("#fff8f5");
-    expect(THEMES["theme-azalee-dark"].md3.primary).toBe("#ffb786");
-    expect(THEMES["theme-achillea"].md3.primary).toBe("#d7bafb");
+    // Les cinq thèmes du sélecteur portent les rôles calculés depuis leur graine.
+    for (const [id, pack] of Object.entries(THEME_PACKS)) {
+      const calcules = computeRoles(pack.seed);
+      const projetes: Record<string, string> = THEMES[`theme-${id}` as keyof typeof THEMES].md3;
+      for (const role of ROLE_NAMES) expect(projetes[versCamel(role)], `${id} ${role}`).toBe(calcules[role]);
+    }
     expect(THEMES["theme-rg"].md3.primary).toBe("#8e4957");
     expect(THEMES["theme-rg-dark"].md3.primary).toBe("#ffb2be");
     expect(THEMES["theme-rg"].md3.onPrimary).toBe("#ffffff");
@@ -280,6 +285,10 @@ describe("non-dérive", () => {
   test("src/tokens.ts est bien la projection de styles.css", async () => {
     const committe = await Bun.file(CHEMIN_TOKENS).text();
     expect(await rendreModule(extraireTokens(css))).toBe(committe);
+  });
+
+  test("src/themes.generated.css est bien la sortie du moteur de couleurs", async () => {
+    expect(await Bun.file(new URL("../src/themes.generated.css", import.meta.url)).text()).toBe(rendreThemesCss());
   });
 
   test("le module généré reste pur (aucun import)", async () => {

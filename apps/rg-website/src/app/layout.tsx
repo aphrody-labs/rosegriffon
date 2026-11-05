@@ -12,6 +12,7 @@ import { DeferredThirdParties } from "@/components/shared/DeferredThirdParties";
 import { resolveLocale } from "@rosegriffon/i18n";
 import { isLocaleId } from "@rosegriffon/preferences";
 import { ADSENSE_CLIENT } from "@rosegriffon/ui";
+import { TUNE_BOOT_SNIPPET } from "@rosegriffon/ui/lib/theme-tune";
 
 import ClientLayout from "./client-layout";
 
@@ -26,8 +27,12 @@ const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
  * Les thèmes de contenu (Azalée sombre pour le wiki, Achilléa pour l'e-sport)
  * sont appliqués isolément sur `#main-content`, préservant la lisibilité
  * et la stabilité de la barre latérale et de la barre supérieure.
+ *
+ * Il recopie aussi les rôles de couleur réglés par l'utilisateur pour ce thème
+ * (`rg-theme-tune`, précalculés par `@rosegriffon/ui/lib/theme-tune`) en
+ * propriétés inline sur `<html>`, avant la première peinture.
  */
-const SCRIPT_THEME = `(function(){try{var t=localStorage.getItem('rg-theme');var valid=['roy','gaelle','azalee-light','azalee-dark','achillea'];var theme=(t&&valid.indexOf(t)!==-1)?t:'roy';var cl=document.documentElement.classList;for(var i=0;i<valid.length;i++){cl.remove(valid[i],'theme-'+valid[i]);}cl.add(theme);}catch(e){document.documentElement.classList.add('roy');}})();`;
+const SCRIPT_THEME = `(function(){try{var t=localStorage.getItem('rg-theme');var valid=['roy','gaelle','azalee-light','azalee-dark','achillea'];var theme=(t&&valid.indexOf(t)!==-1)?t:'roy';var cl=document.documentElement.classList;for(var i=0;i<valid.length;i++){cl.remove(valid[i],'theme-'+valid[i]);}cl.add(theme);try{var t=theme,d=document.documentElement;${TUNE_BOOT_SNIPPET}}catch(e){}}catch(e){document.documentElement.classList.add('roy');}})();`;
 
 export const viewport: Viewport = {
   initialScale: 1,

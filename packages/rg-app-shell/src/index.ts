@@ -63,5 +63,6 @@ export {
   type UserProfile,
 } from "./components/TopAppBar";
 export { ThemeToggle, DEFAULT_THEMES, type ThemeOption } from "./components/ThemeToggle";
+export { ThemeTuner, CURSEURS as THEME_TUNER_SLIDERS } from "./components/ThemeTuner";
 export { UnifiedSearchBar, type UnifiedSearchBarProps } from "./components/UnifiedSearchBar";
 export { UniverseSwitch, type UniverseSwitchProps } from "./components/UniverseSwitch";
