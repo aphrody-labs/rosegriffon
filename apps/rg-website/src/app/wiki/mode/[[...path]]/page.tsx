@@ -227,14 +227,16 @@ export async function generateMetadata({ params }: { params: Promise<{ path?: st
   const slug = segments?.[0];
   if (!slug) {
     return {
-      title: "Modes de jeu",
+      alternates: { canonical: wiki("/mode") },
+      title: "Modes de jeu | Azalée",
       description: "Les modes d'Inazuma Eleven: Victory Road, et les fichiers dont ils sont faits.",
     };
   }
   const modes = await lireCatalogue();
   const mode = modes?.find(m => m.slug === slug);
   return {
-    title: mode ? `${mode.label} — mode de jeu` : "Mode inconnu",
+    ...(mode ? { alternates: { canonical: wiki(`/mode/${mode.slug}`) } } : { robots: { index: false } }),
+    title: mode ? `${mode.label} — mode de jeu | Azalée` : "Mode inconnu | Azalée",
     description: mode?.note ?? undefined,
   };
 }

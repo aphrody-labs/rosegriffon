@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { getQuest, getQuestNeighbors, type Quest } from "@/lib/wiki/quests";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
+import { wikiTitle } from "@/lib/seo";
 
 /** Libellé du type in-game (enum inagle pour 1/2/3 ; sinon « Étape N »). */
 function typeLabel(type: number): string {
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       type: "article",
       url: `/wiki/quete/${id}`,
     },
-    title: `${name} | Inazuma Eleven Victory Road - Azalée`,
+    title: wikiTitle(name),
   };
 }
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { clampText } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site-url";
 
 /**
@@ -71,7 +72,10 @@ export function resume(texte: string | null | undefined, maximum = 155): string 
   return propre.length <= maximum ? propre : `${propre.slice(0, maximum - 1).trimEnd()}…`;
 }
 
-export function metadonneesAchillea({ titre, description, chemin, indexable = true }: OptionsMetadonnees): Metadata {
+export function metadonneesAchillea({ titre, description: brute, chemin, indexable = true }: OptionsMetadonnees): Metadata {
+  // Les descriptions de repli (« <nom> — tournoi … , N inscrit(s). ») ne passent
+  // pas par `resume` : la borne est posée ici, pour toutes les pages du domaine.
+  const description = clampText(brute);
   const url = chemin === null ? undefined : `${ORIGINE}${chemin}`;
 
   return {

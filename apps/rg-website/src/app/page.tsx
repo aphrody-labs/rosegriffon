@@ -23,7 +23,7 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   alternates: { canonical: SITE_URL },
   description:
-    "Rose Griffon — Association et hub communautaire Inazuma Eleven en France : base de données et wiki Victory Road, ladder et tournois e-sport, actualités et communauté.",
+    "Rose Griffon, association et hub communautaire Inazuma Eleven en France : wiki Victory Road, ladder et tournois e-sport, actualités et communauté.",
   keywords: [
     "Rose Griffon",
     "Inazuma Eleven",

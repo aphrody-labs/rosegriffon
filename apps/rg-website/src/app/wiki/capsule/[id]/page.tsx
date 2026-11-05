@@ -9,6 +9,7 @@ import { CapsuleCard } from "@/components/wiki/GachaCard";
 import { getCapsulePoolPrizes, getCapsulePrize } from "@/lib/wiki/gacha";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
+import { wikiTitle } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       type: "article",
       url: `/wiki/capsule/${id}`,
     },
-    title: `${name} | Inazuma Eleven Victory Road - Azalée`,
+    title: wikiTitle(name),
   };
 }
 

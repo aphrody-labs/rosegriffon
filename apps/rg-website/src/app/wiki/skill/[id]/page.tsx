@@ -26,6 +26,7 @@ import { createPostgresClient } from "@rosegriffon/db/postgres-client";
 import { wikiService } from "@/lib/wiki-service";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
+import { wikiTitle } from "@/lib/seo";
 
 /**
  * getSkill() (lib/wiki-service.ts) spreads sheet_data — empty {} for the 993 real
@@ -153,7 +154,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const description = gameDesc
     ? `${truncate(gameDesc, 145 - facts.length)} ${facts}`.trim()
     : `${[name, ...metaParts].join(" - ")}. Technique spéciale Inazuma Eleven: Victory Road.`;
-  const title = `${name} | Inazuma Eleven Victory Road - Azalée`;
+  const title = wikiTitle(name);
 
   // getSkillImageUrl gate : `skill.image` brut (DB) contredisait la page (`SkillDetail` s'en
   // détourne déjà, cf. commentaire de la fonction) — servait un og:image 404 sur les 19

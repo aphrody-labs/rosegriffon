@@ -5,6 +5,7 @@ import { ItemDetail } from "@/components/wiki/ItemDetail";
 import { wikiService } from "@/lib/wiki-service";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
+import { wikiTitle } from "@/lib/seo";
 
 /** Données de miroir en lecture seule : la fiche est servie en ISR. */
 export const dynamic = "force-static";
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const rarity = (item as any)?.rarity || "";
   const metaParts = [name, cat, rarity].filter(Boolean);
   const description = `${metaParts.join(" - ")}. Objet Inazuma Eleven: Victory Road. Effet, prix et localisation.`;
-  const title = `${name} | Inazuma Eleven Victory Road - Azalée`;
+  const title = wikiTitle(name);
 
   return {
     alternates: { canonical: wiki(`/item/${id}`) },

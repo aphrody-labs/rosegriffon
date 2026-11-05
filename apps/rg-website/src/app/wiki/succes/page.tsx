@@ -14,7 +14,7 @@ import { absoluteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   alternates: { canonical: wiki("/succes") },
   description:
-    "Liste complète des succès et trophées d'Inazuma Eleven: Victory Road — trophées officiels et objectifs d'activité in-game, avec noms et descriptions localisés (FR / EN / JP).",
+    "Succès et trophées d'Inazuma Eleven: Victory Road : trophées officiels et objectifs d'activité in-game, noms et descriptions localisés (FR / EN / JP).",
   title: "Succès | Inazuma Eleven Victory Road - Azalée",
 };
 

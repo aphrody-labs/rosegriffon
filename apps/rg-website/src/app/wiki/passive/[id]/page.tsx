@@ -5,6 +5,7 @@ import { PASSIVE_CATEGORY_LABELS, PassiveDetailView } from "@/components/wiki/Pa
 import { wikiService } from "@/lib/wiki-service";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
+import { wikiTitle } from "@/lib/seo";
 
 /** Données de miroir en lecture seule : la fiche est servie en ISR. */
 export const dynamic = "force-static";
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const cleanName = name.replace(/\s*\n\s*/g, " ").trim();
   const cat = passive ? PASSIVE_CATEGORY_LABELS[passive.category] || "" : "";
   const description = `${[cleanName, cat].filter(Boolean).join(" - ")}. Passif Inazuma Eleven: Victory Road : effet, valeurs par variante, élément et rareté.`;
-  const title = `${cleanName} | Passifs Inazuma Eleven Victory Road - Azalée`;
+  const title = wikiTitle(cleanName, "Passifs");
 
   return {
     alternates: { canonical: wiki(`/passive/${id}`) },

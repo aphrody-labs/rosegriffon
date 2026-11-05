@@ -20,6 +20,7 @@ import { CharaVariantsComparison } from "@/components/wiki/CharaVariantsComparis
 import type { SkillCutinEntry } from "@rosegriffon/azalee/game/skills-cutin";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
+import { clampText, wikiTitle } from "@/lib/seo";
 
 /**
  * Variante représentative d'un personnage (accès par slug de base) : celle dont la
@@ -102,9 +103,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   }
 
   const charDesc = baseChar.descriptions?.fr || baseChar.descriptions?.en || "";
-  const shortDesc = charDesc
-    ? `${parts.join(" - ")}. ${charDesc.slice(0, 120)}${charDesc.length > 120 ? "..." : ""}`
-    : `${parts.join(" - ")}. Stats, techniques et détails dans Inazuma Eleven: Victory Road.`;
+  const shortDesc = clampText(
+    charDesc
+      ? `${parts.join(" - ")}. ${charDesc}`
+      : `${parts.join(" - ")}. Stats, techniques et détails dans Inazuma Eleven: Victory Road.`,
+  );
 
   const ogImageUrl = new URL(absoluteUrl("/api/og/character"));
   ogImageUrl.searchParams.set("id", id);
@@ -136,7 +139,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       type: "article",
       url: `/wiki/chara/${id}`,
     },
-    title: `${name} | Inazuma Eleven Victory Road - Azalée`,
+    title: wikiTitle(name),
     twitter: {
       card: "summary_large_image",
       description: shortDesc,

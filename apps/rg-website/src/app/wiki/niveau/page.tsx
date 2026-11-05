@@ -23,7 +23,7 @@ const OG_PAR_DEFAUT = {
 export const metadata: Metadata = {
   alternates: { canonical: wiki("/niveau") },
   description:
-    "Table d'expérience d'Inazuma Eleven: Victory Road : courbe d'EXP, coût de chaque palier de niveau, calculateur « du niveau X au niveau Y » et recherche inverse « j'ai tant d'EXP, je suis niveau ? ». Valeurs brutes extraites du jeu.",
+    "Table d'expérience d'Inazuma Eleven: Victory Road : courbe d'EXP, coût de chaque niveau, calculateur de palier et recherche inverse. Valeurs extraites du jeu.",
   openGraph: {
     description:
       "Courbe d'expérience, coût de chaque palier et calculateurs de niveau pour Inazuma Eleven: Victory Road.",

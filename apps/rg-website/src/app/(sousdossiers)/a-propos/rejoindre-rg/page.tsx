@@ -33,7 +33,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Rejoindre Rose Griffon · Recrutement",
   description:
-    "Rose Griffon recrute : staff convention, artistes, développeurs, rédacteurs et community managers pour Azalée, modérateurs Discord. Conditions, postes ouverts et processus de candidature.",
+    "Rose Griffon recrute : staff convention, artistes, développeurs, rédacteurs et community managers pour Azalée, modérateurs Discord. Postes et candidature.",
   alternates: {
     canonical: absoluteUrl("/a-propos/rejoindre-rg"),
   },

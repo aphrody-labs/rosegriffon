@@ -6,7 +6,7 @@ import { ItemFilterBar } from "@/components/wiki/filters/ItemFilterBar";
 import { ItemCard } from "@/components/wiki/ItemCard";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
-import { buildCanonical } from "@/lib/seo";
+import { buildCanonical, wikiTitle } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 import { wiki } from "@rosegriffon/app-shell";
@@ -46,7 +46,7 @@ export async function generateMetadata({
       canonical: buildCanonical(wiki("/item"), { category, page }, ["category", "page"]),
     },
     description: `Liste complète des ${categoryLabel.toLowerCase()} et objets dans Inazuma Eleven: Victory Road. Localisation, stats et effets.`,
-    title: `${title} | Inazuma Eleven Victory Road - Azalée`,
+    title: wikiTitle(title),
   };
 }
 

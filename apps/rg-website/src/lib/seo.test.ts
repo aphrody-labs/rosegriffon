@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import { clampText, DESCRIPTION_MAX, TITLE_MAX, titleWithSuffix } from "./seo";
+import { clampText, DESCRIPTION_MAX, TITLE_MAX, titleWithSuffix, wikiTitle } from "./seo";
 
 describe("clampText", () => {
   it("returns short text unchanged, whitespace collapsed", () => {
@@ -24,6 +24,12 @@ describe("clampText", () => {
     const base = "a ".repeat(30).trim();
     expect(titleWithSuffix(base, " | Azalée")).toBe(base);
     expect(titleWithSuffix("mot ".repeat(40), " | Azalée").length).toBeLessThanOrEqual(TITLE_MAX);
+  });
+
+  it("wikiTitle falls back to the short brand for long subjects", () => {
+    expect(wikiTitle("Kevin")).toBe("Kevin | Inazuma Eleven Victory Road - Azalée");
+    expect(wikiTitle("Kevin Dragonfly Archibald Nathan")).toBe("Kevin Dragonfly Archibald Nathan | Azalée");
+    expect(wikiTitle("Raimon", "Équipes")).toBe("Raimon | Équipes - Inazuma Eleven Victory Road - Azalée");
   });
 
   it("hard-cuts a single overlong word", () => {

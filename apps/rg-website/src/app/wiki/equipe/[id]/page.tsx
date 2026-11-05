@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { getTeamDetail, type TeamKit, type TeamRosterMember, SEASON_LABELS } from "@/lib/wiki/teams";
 import { wiki } from "@rosegriffon/app-shell";
+import { wikiTitle } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     alternates: { canonical: wiki(`/equipe/${id}`) },
     description: `${team.name} dans Inazuma Eleven: Victory Road — effectif (${team.roster.length} joueurs), emblème, uniformes et apparitions.`,
-    title: `${team.name} | Équipes - Inazuma Eleven Victory Road - Azalée`,
+    title: wikiTitle(team.name, "Équipes"),
   };
 }
 

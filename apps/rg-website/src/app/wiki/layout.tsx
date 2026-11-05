@@ -5,7 +5,10 @@ import { absoluteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   title: {
     default: "Azalée — Le Wiki Inazuma Eleven: Victory Road | Rose Griffon",
-    template: "%s | Wiki Azalée | Rose Griffon",
+    // Pas de suffixe : chaque page du wiki porte déjà sa marque (« … - Azalée »,
+    // « … | Azalée »). L'ancien gabarit « %s | Wiki Azalée | Rose Griffon » la
+    // répétait et poussait 169 titres au-delà de 65 caractères (crawl du 5/11/2026).
+    template: "%s",
   },
   description:
     "Base de données complète Inazuma Eleven: Victory Road. Personnages, techniques, objets, quêtes et wiki communautaire.",

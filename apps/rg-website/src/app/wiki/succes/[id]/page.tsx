@@ -9,6 +9,7 @@ import { getTrophy, getTrophyNeighbors } from "@/lib/wiki/trophies";
 import { CATEGORY_LABELS, type Trophy } from "@rosegriffon/azalee/wiki/trophies-shared";
 import { wiki } from "@rosegriffon/app-shell";
 import { absoluteUrl } from "@/lib/site-url";
+import { wikiTitle } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       type: "article",
       url: `/wiki/succes/${id}`,
     },
-    title: `${name} | Inazuma Eleven Victory Road - Azalée`,
+    title: wikiTitle(name),
   };
 }
 

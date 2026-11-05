@@ -36,6 +36,7 @@ import {
   resumeQuestion,
   varianteBadgeEtat,
 } from "@/lib/discord/polls-types";
+import { clampText, titleWithSuffix } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site-url";
 
 import { ResultatsSondage } from "../_components/ResultatsSondage";
@@ -66,7 +67,9 @@ export async function generateMetadata({
 
   // Un `<title>` ne doit contenir ni `**gras**`, ni `<:emote:id>`, ni `<@&rôle>`.
   const titre = resumeQuestion(sondage.question, 80);
-  const description = `Résultats du sondage « ${titre} » posé à la communauté Rose Griffon sur Discord.`;
+  const description = clampText(`Résultats du sondage « ${titre} » posé à la communauté Rose Griffon sur Discord.`);
+  // 80 caractères de question + « · Sondages · Rose Griffon » dépassaient 100 caractères.
+  const titrePage = titleWithSuffix(resumeQuestion(sondage.question, 500), " · Sondages · Rose Griffon");
   const url = absoluteUrl(`/sondages/${sondage.poll_id}`);
 
   return {
@@ -75,11 +78,11 @@ export async function generateMetadata({
     openGraph: {
       description,
       ...(sondage.visuel && { images: [{ url: sondage.visuel.url }] }),
-      title: `${titre} · Sondages · Rose Griffon`,
+      title: titrePage,
       type: "article",
       url,
     },
-    title: `${titre} · Sondages · Rose Griffon`,
+    title: titrePage,
   };
 }
 

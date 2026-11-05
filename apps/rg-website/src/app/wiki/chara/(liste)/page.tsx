@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
-import { buildCanonical, LIST_CANONICAL_KEYS } from "@/lib/seo";
+import { buildCanonical, LIST_CANONICAL_KEYS, wikiTitle } from "@/lib/seo";
 import { parseSearchParams } from "@/lib/validations";
 import { wikiService } from "@/lib/wiki-service";
 import { PlayersClient } from "../players-client";
@@ -55,7 +55,7 @@ export async function generateMetadata({
       type: "website",
       url: "/wiki/chara",
     },
-    title: `${title} | Inazuma Eleven Victory Road - Azalée`,
+    title: wikiTitle(title),
   };
 }
 

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPgPool } from "@/lib/db/pg";
 import { getAuthorInfo } from "@/lib/author";
+import { clampText, TITLE_MAX, titleWithSuffix } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-static";
@@ -113,7 +114,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   }
 
   const { title } = extractTitleAndBody(tweet?.translation || tweet?.text || "");
-  const description = title.slice(0, 160);
+  const description = clampText(title);
+  const pageTitle = titleWithSuffix(title, " | Azalée");
   const image = tweet?.media?.[0]?.preview_url || tweet?.media?.[0]?.url;
 
   const url = absoluteUrl(`/news/tweet/${id}`);
@@ -124,10 +126,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     openGraph: {
       description,
       url,
-      title: title.slice(0, 60),
+      title: clampText(title, TITLE_MAX),
       ...(image && { images: [{ url: image }] }),
     },
-    title: `${title.slice(0, 60)} | Azalée`,
+    title: pageTitle,
     twitter: {
       card: "summary_large_image",
       creator: tweet?.author_username ? `@${tweet.author_username}` : "@Azalee_IE",

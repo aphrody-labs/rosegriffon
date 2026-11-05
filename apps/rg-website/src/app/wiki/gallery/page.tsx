@@ -6,7 +6,7 @@ import { MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShel
 import { GalleryFilterBar } from "@/components/wiki/filters/GalleryFilterBar";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { WikiSearchToolbar } from "@/components/wiki/WikiSearchToolbar";
-import { buildCanonical } from "@/lib/seo";
+import { buildCanonical, wikiTitle } from "@/lib/seo";
 import { GALLERY_CATEGORIES, wikiService } from "@/lib/wiki-service";
 import { wiki } from "@rosegriffon/app-shell";
 
@@ -39,7 +39,7 @@ export async function generateMetadata({
     },
     description:
       "Galerie complète des illustrations in-game d'Inazuma Eleven: Victory Road : scènes d'histoire, chroniques, illustrations spéciales et liens.",
-    title: `${title} | Inazuma Eleven Victory Road - Azalée`,
+    title: wikiTitle(title),
   };
 }
 

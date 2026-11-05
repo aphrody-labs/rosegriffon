@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     canonical: wiki("/equipe"),
   },
   description:
-    "Liste complète des équipes d'Inazuma Eleven: Victory Road : emblèmes, kits/uniformes, apparitions et effectifs. Raimon, Royal Academy, et toutes les formations du jeu.",
+    "Toutes les équipes d'Inazuma Eleven: Victory Road : emblèmes, kits, apparitions et effectifs. Raimon, Royal Academy et toutes les formations du jeu.",
   title: "Équipes | Inazuma Eleven Victory Road - Azalée",
 };
 

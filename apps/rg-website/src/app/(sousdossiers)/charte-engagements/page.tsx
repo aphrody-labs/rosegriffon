@@ -13,7 +13,7 @@ export const revalidate = 604_800; // 1 semaine
 export const metadata: Metadata = {
   title: "Charte d'engagements · Rose Griffon",
   description:
-    "Les cinq engagements que Rose Griffon, Achilléa et Azalée tiennent dans toutes leurs activités : crédit des créateurs, transparence, refus de l'IA générative, respect inconditionnel, réinvestissement dans la communauté.",
+    "Les cinq engagements de Rose Griffon, Achilléa et Azalée : crédit des créateurs, transparence, refus de l'IA générative, respect, réinvestir dans la communauté.",
   alternates: {
     canonical: absoluteUrl("/charte-engagements"),
   },
