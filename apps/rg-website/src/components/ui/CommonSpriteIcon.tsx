@@ -12,12 +12,19 @@ interface CommonSpriteIconProps extends React.HTMLAttributes<HTMLDivElement> {
   name: SpriteCommonKey;
   variant?: "default" | "glow" | "shadow";
   scale?: number;
+  /**
+   * Nom accessible, localisé par l’appelant. Absent : l’icône est décorative
+   * (masquée aux lecteurs d’écran), car le libellé visible voisin la nomme déjà.
+   * La clé du sprite (« mountain », « girl »…) n’est jamais exposée.
+   */
+  label?: string;
 }
 
 export const CommonSpriteIcon = ({
   name,
   variant = "default",
   scale = 1,
+  label,
   className,
   style,
   ...props
@@ -41,9 +48,9 @@ export const CommonSpriteIcon = ({
         width: displayW,
         ...style,
       }}
+      {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
       {...props}
     >
-      <span className="sr-only">{name}</span>
       <div
         aria-hidden="true"
         className={cn(styles.sprite, styles[variant])}

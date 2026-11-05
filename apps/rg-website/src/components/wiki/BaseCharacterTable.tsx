@@ -322,7 +322,11 @@ function BaseCharacterRow({
       {/* Genre */}
       <TableCell className="text-center hidden lg:table-cell">
         <div className="flex justify-center" title={genderName}>
-          <CommonSpriteIcon name={isFemale ? "girl" : "boy"} scale={0.35} />
+          <CommonSpriteIcon
+            name={isFemale ? "girl" : "boy"}
+            scale={0.35}
+            label={genderName}
+          />
         </div>
       </TableCell>
 
@@ -531,6 +535,11 @@ function BaseCharacterCard({
     ? PLAYSTYLE_LABEL[playstyle] || playstyle
     : null;
 
+  const constellationName: string | undefined =
+    typeof charAny.constellation === "string"
+      ? charAny.constellation || undefined
+      : charAny.constellation?.names?.fr || undefined;
+
   const isFemale = isFemaleGender(character.gender);
   const genderName = isFemale ? t("common.female") : t("common.male");
 
@@ -557,7 +566,11 @@ function BaseCharacterCard({
         </div>
         <div className="flex items-center gap-2">
           <div title={genderName} className="opacity-80">
-            <CommonSpriteIcon name={isFemale ? "girl" : "boy"} scale={0.3} />
+            <CommonSpriteIcon
+              name={isFemale ? "girl" : "boy"}
+              scale={0.3}
+              label={genderName}
+            />
           </div>
           {activeVariant.stats?.lv99 && (
             <CharacterStatsPopover
@@ -642,41 +655,37 @@ function BaseCharacterCard({
                     className="object-contain"
                   />
                 </div>
-              ) : (
-                <span className="text-[9px]">{positionFr}</span>
-              )}
+              ) : null}
               <span>{positionFr}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Row: Constellation & Playstyle */}
-      <div className="flex items-center justify-between border-t border-outline-variant/35 pt-2 mt-1 text-[11px] text-on-surface-variant">
-        {/* Constellation */}
-        <div className="flex items-center gap-1">
-          <span className="opacity-60 text-[10px] uppercase font-bold">
-            Const :
-          </span>
-          <span className="font-medium">
-            {charAny.constellation
-              ? typeof charAny.constellation === "string"
-                ? charAny.constellation
-                : charAny.constellation.names?.fr || "—"
-              : "—"}
-          </span>
-        </div>
+      {/* Bottom Row: Constellation & Playstyle — une valeur absente n'est pas
+          affichée ; la ligne disparaît quand les deux manquent (plus de
+          « Const : — — »). */}
+      {(constellationName || playstyleSprite) && (
+        <div className="flex items-center justify-between border-t border-outline-variant/35 pt-2 mt-1 text-[11px] text-on-surface-variant">
+          {constellationName ? (
+            <div className="flex items-center gap-1">
+              <span className="opacity-60 text-[10px] uppercase font-bold">
+                Const :
+              </span>
+              <span className="font-medium">{constellationName}</span>
+            </div>
+          ) : (
+            <span />
+          )}
 
-        {/* Playstyle */}
-        {playstyleSprite ? (
-          <div className="inline-flex items-center gap-1 bg-surface-container-high/40 px-2.5 py-0.5 rounded-md">
-            <CommonSpriteIcon name={playstyleSprite} scale={0.25} />
-            <span className="font-bold text-[10px]">{playstyleLabel}</span>
-          </div>
-        ) : (
-          <span className="text-on-surface-variant/40">—</span>
-        )}
-      </div>
+          {playstyleSprite && (
+            <div className="inline-flex items-center gap-1 bg-surface-container-high/40 px-2.5 py-0.5 rounded-md">
+              <CommonSpriteIcon name={playstyleSprite} scale={0.25} />
+              <span className="font-bold text-[10px]">{playstyleLabel}</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

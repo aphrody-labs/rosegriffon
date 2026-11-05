@@ -19,6 +19,7 @@ import { SearchResultRow } from "@/components/wiki/SearchResultRow";
 import { TYPE_LABELS_PLURAL } from "@rosegriffon/azalee/search/search-ui-config";
 import type { SearchContext } from "@rosegriffon/azalee/search/smart-search";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/providers/language-provider";
 
 /**
  * Detect search context from current pathname
@@ -84,6 +85,7 @@ export function GlobalSearch({
   isMobileHero?: boolean;
   isHero?: boolean;
 }) {
+  const { t } = useLanguage();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [results, setResults] = React.useState<EnhancedSearchResult[]>([]);
@@ -173,9 +175,15 @@ export function GlobalSearch({
   const hasSuggestion = results.length === 1 && results[0].type === "suggestion";
 
   const SearchDialog = (
-    <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
+    <CommandDialog
+      open={open}
+      onOpenChange={setOpen}
+      shouldFilter={false}
+      title={t("search.palette.title")}
+      description={t("search.palette.description")}
+    >
       <CommandInput
-        placeholder="Rechercher personnages, techniques, auras, équipes..."
+        placeholder={t("search.palette.placeholder")}
         value={query}
         onValueChange={setQuery}
       />

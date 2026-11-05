@@ -286,7 +286,7 @@ export function CharacterSheet({
   statsLv50,
 }: CharacterSheetProps) {
   const displayPosition = POSITION_MAP[position] || "MIL";
-  const { t: _t } = useLanguage();
+  const { t } = useLanguage();
   const [activeMoveset, setActiveMoveset] = useState<"default" | "alt">("default");
   const [uniformError, setUniformError] = useState(false);
   const [level, setLevel] = useState<number>(99);
@@ -446,7 +446,11 @@ export function CharacterSheet({
                 </h1>
                 {genderSprite && (
                   <div className="shrink-0 drop-shadow-md">
-                    <CommonSpriteIcon name={genderSprite} scale={0.4} />
+                    <CommonSpriteIcon
+                      name={genderSprite}
+                      scale={0.4}
+                      label={t(gender === "F" ? "common.female" : "common.male")}
+                    />
                   </div>
                 )}
               </div>
