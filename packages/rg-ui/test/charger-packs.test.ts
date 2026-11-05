@@ -28,8 +28,7 @@ describe("charger-packs", () => {
       const pack = packs[id];
       expect(pack, id).toBeDefined();
       if (!pack) continue;
-      const seed: { hue: number; chroma: number; mode: string; secondary?: unknown; neutralChroma?: number } =
-        attendu.seed;
+      const seed: ThemeSeed = attendu.seed;
       expect(pack.title, `${id} title`).toBe(attendu.title);
       expect(pack.logo, `${id} logo`).toBe(attendu.logo);
       expect(pack.wallpaper, `${id} wallpaper`).toBe(attendu.wallpaper);
