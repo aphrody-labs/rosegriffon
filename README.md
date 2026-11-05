@@ -45,6 +45,15 @@ bun run turbo run typecheck --filter=@rosegriffon/cron...
 cargo clippy --workspace   # Rust edge crate
 ```
 
+### just
+
+The root `justfile` drives the same turbo tasks (`just` lists them):
+`just install` (`bun install --ignore-scripts`), `just check`, `just lint`, `just test`,
+`just build`, `just ci` (check, lint, test, build), `just compile [args]`, `just tokens`
+(rg-ui themes and tokens). `deploy-preflight`, `deploy-build`, `deploy-status`, `deploy-site`
+and `deploy-verify` only wrap the VPS steps of `docs/vps/RUNBOOK-2026-11-05.md` (section 4);
+run them by hand, in that order.
+
 ## Self-hosting: one executable
 
 `bun run compile` links `apps/rosegriffon` into a single file, `dist/rosegriffon-<target>[.exe]`,
