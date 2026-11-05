@@ -636,8 +636,13 @@
 /*
  * Échelle typographique du front Angular : Inter partout, titres compris
  * (`styles.css:156-170`), et les tailles Tailwind telles quelles. HUMANE ne
- * sert qu'aux titres de tournoi et de ligue, qui la posent eux-mêmes.
+ * sert qu'aux titres de tournoi et de ligue, qui la posent eux-mêmes. Le
+ * shell pose Poppins sur les titres : on rétablit Inter dans la section.
  */
+:where(.achillea-scope) :where(h1, h2, h3, h4, h5, h6) {
+  font-family: "Achillea Sans", system-ui, sans-serif;
+}
+
 .achillea-scope :is(input, select, textarea) {
   min-height: 2.75rem;
   color: #f3edf7;
