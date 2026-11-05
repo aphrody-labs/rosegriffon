@@ -73,7 +73,6 @@
     "express": "catalog:",
     "http-proxy-middleware": "catalog:",
     "kysely": "catalog:",
-    "pg": "catalog:",
     "qrcode-generator": "catalog:",
     "reflect-metadata": "catalog:",
     "zod": "catalog:"
