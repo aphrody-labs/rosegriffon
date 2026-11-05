@@ -470,10 +470,6 @@
       "name": "@rosegriffon/i18n",
       "version": "1.4.4",
     },
-    "packages/rg-identity": {
-      "name": "@rosegriffon/identity",
-      "version": "1.4.4",
-    },
     "packages/rg-preferences": {
       "name": "@rosegriffon/preferences",
       "version": "1.4.4",
@@ -1532,8 +1528,6 @@
     "@rosegriffon/discord-sync": ["@rosegriffon/discord-sync@workspace:packages/rg-discord-sync"],
 
     "@rosegriffon/i18n": ["@rosegriffon/i18n@workspace:packages/rg-i18n"],
-
-    "@rosegriffon/identity": ["@rosegriffon/identity@workspace:packages/rg-identity"],
 
     "@rosegriffon/inagle": ["@rosegriffon/inagle@2.0.11", "", { "dependencies": { "@aphrody/runtime-sdk": "0.1.3", "@leeoniya/ufuzzy": "^1.0.19", "@rosegriffon/assets": "1.4.4", "@rosegriffon/db": "1.4.4", "cheerio": "^1.2.0", "commander": "^15.0.0", "dotenv": "^18.0.4", "drizzle-orm": "^0.45.3", "kuroshiro": "^1.2.0", "kuroshiro-analyzer-kuromoji": "^1.1.0", "picocolors": "^1.1.1", "sharp": "^0.35.5", "wanakana": "^5.3.1", "zod": "^4.6.5" }, "peerDependencies": { "@aphrody/agent-browser": "1.0.0-canary.2" }, "optionalPeers": ["@aphrody/agent-browser"], "bin": { "inagle": "src/cli.ts" } }, "sha512-00oLCJjMlZgNJdwA7/yStGl7dh+qqaC1NTAE8bbIk2sEP4fWA2BoPaNBiUw/05YkLhDcKAkAANpvgXXjm0CuOw=="],
 
