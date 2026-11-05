@@ -69,7 +69,6 @@
     "discord.js": "catalog:",
     "discordx": "catalog:",
     "elysia": "catalog:",
-    "express": "catalog:",
     "kysely": "catalog:",
     "qrcode-generator": "catalog:",
     "reflect-metadata": "catalog:",
@@ -78,7 +77,6 @@
   "devDependencies": {
     "@rosegriffon/config": "workspace:*",
     "@types/bun": "catalog:",
-    "@types/express": "catalog:",
     "@vercel/config": "catalog:"
   },
   "engines": {
