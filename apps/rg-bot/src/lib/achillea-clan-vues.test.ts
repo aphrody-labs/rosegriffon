@@ -167,3 +167,58 @@ describe("modales d'équipe", () => {
     expect(options.find(o => o.value === "1001")?.default).toBe(true);
   });
 });
+
+describe("parité legacy du panneau /clan manage", () => {
+  const user = { id: "9", username: "Fubuki", lastInteract: null };
+  const membre = { clanRole: 1, distinctions: ["Joueur"], clanFameContributed: 0, createdAt: "2026-02-01T12:00:00.000Z", updatedAt: "2026-02-01T12:00:00.000Z", user };
+  const clan = { id: 42, shortenedName: "RMN", name: "Raimon", clanAvatarUrl: "https://cdn.test/r.png", founders: [], clanBiography: "", membersCount: 1 };
+
+  test("membres : titre « - Members », description et pagination Début/Précédent/Suivant/Fin + Menu", async () => {
+    const vues = await import("./achillea-clan-vues");
+    const e = vues.embedListeMembres(clan as never, [membre] as never, 1).toJSON();
+    expect(e.color).toBe(0x206694);
+    expect(e.title).toBe("[RMN] Raimon - Members");
+    expect(e.description).toBe("Liste des membres du clan ordonnées par rôle et ancienneté\n\n**1 Membres** - Page 1/1");
+    expect(e.fields?.map(f => f.name)).toEqual(["Membre", "Rôle", "Dernière activité"]);
+    const rangee = vues.rangeePaginationGestion("members", 1, 1).toJSON() as unknown as { components: Array<{ label: string; style: number }> };
+    expect(rangee.components.map(b => b.label)).toEqual(["Début", "Précédent", "Suivant", "Fin", "Menu"]);
+    expect(rangee.components.every(b => b.style === 1)).toBe(true);
+  });
+
+  test("membre : « Gestion du membre », six champs, « Editer les distinctions »", async () => {
+    const vues = await import("./achillea-clan-vues");
+    const e = vues.embedMembre(membre as never).toJSON();
+    expect(e.title).toBe("Fubuki - Gestion du membre");
+    expect(e.description).toBe("__*Clan rejoint le 01/02/2026*__");
+    expect(e.fields?.map(f => f.name)).toEqual(["Rôle", "Distinctions", "Dernière activité", "Contributions", "Stats Interclan", "Stats Coupes des Clans"]);
+    expect(JSON.stringify(vues.rangeeGestionMembre(membre as never, 2, 42).toJSON())).toContain("Editer les distinctions");
+  });
+
+  test("invitations : liste, fiche et question de révocation de l'ancien bot", async () => {
+    const vues = await import("./achillea-clan-vues");
+    const invitation = { id: 5, user, inviter: membre, distinctions: [], createdAt: "2026-11-05T12:00:00.000Z", updatedAt: "2026-11-05T12:00:00.000Z", lastNotifiedAt: "2026-11-05T12:00:00.000Z" };
+    const liste = vues.embedListeInvitations(clan as never, [], 1).toJSON();
+    expect(liste.title).toBe("[RMN] Raimon - Invites");
+    expect(liste.description).toBe("Liste des invitations émises par le clan ordonnées par ancienneté\n\n**0/100** - Page 1/1");
+    expect(liste.fields?.map(f => f.value)).toEqual(["-", "-", "-"]);
+    const fiche = vues.embedInvitation(invitation as never).toJSON();
+    expect(fiche.title).toBe("Fubuki - Gestion de l'invitation");
+    expect(fiche.fields?.map(f => `${f.name}=${f.value}`)).toEqual([
+      "Dernière activité=—", "Elo=Non classé", "Tournois gagnés=0", "Participations Interclan=0", "Victoires Interclan=0", "Victoires Coupes des Clans=0",
+    ]);
+    expect(vues.questionRevocation(invitation as never)).toBe("Voulez-vous révoquer l'invitation envoyée à Fubuki ?");
+    const confirmation = JSON.stringify(vues.rangeeConfirmationRevocation(5).toJSON());
+    expect(confirmation).toContain('"label":"Confirmer"');
+    expect(confirmation).toContain('"label":"Annuler"');
+  });
+
+  test("modales : biographie et réseaux de l'ancien bot", async () => {
+    const vues = await import("./achillea-clan-vues");
+    const bio = JSON.stringify(vues.modaleBiographie({ clanBiography: "x" }).toJSON());
+    expect(bio).toContain('"title":"Change Clan Biography"');
+    expect(bio).toContain('"label":"Clan biography"');
+    const reseaux = JSON.stringify(vues.modaleReseaux({ xUrl: null, instagramUrl: null, tiktokUrl: null }).toJSON());
+    expect(reseaux).toContain('"title":"Modifier les Réseaux du Clan"');
+    expect(reseaux).toContain("https://twitter.com/youraccount");
+  });
+});

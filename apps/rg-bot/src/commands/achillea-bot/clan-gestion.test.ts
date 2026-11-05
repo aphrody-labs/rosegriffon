@@ -142,7 +142,7 @@ describe("modales clan_manage", () => {
     const interaction = commande({ customId: `clan_manage:kick_modal:${MEMBRE}`, champs: { textInput: "Absences répétées" } });
     await gestion.modale(interaction as never);
     expect(appels.find(a => a.chemin === `/clans/kick/${MEMBRE}`)?.corps).toEqual({ reason: "Absences répétées" });
-    expect(interaction.texte()).toContain("Membre expulsé");
+    expect(interaction.texte()).toContain("✅ User Kabeyama kicked from clan by Endou !");
   });
 
   test("logo : un format refusé n'appelle pas l'API d'images", async () => {
