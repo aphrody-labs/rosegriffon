@@ -20,6 +20,23 @@ export {
   ACHILLEA_REALTIME_TTL_SECONDS,
 } from "@rosegriffon/achillea-core/auth";
 
+/**
+ * Attributes of the Achilléa session cookie posed by the website bridge.
+ *
+ * Parent domain in production: the token must reach `rosegriffon.fr` AND
+ * `ranked.rosegriffon.fr`. A cookie is only erased with the same name, domain
+ * and path, so every writer and eraser goes through this one definition.
+ */
+export function achilleaSessionCookieAttributes(production = process.env.NODE_ENV === "production") {
+  return {
+    domain: production ? ".rosegriffon.fr" : undefined,
+    httpOnly: true,
+    path: "/",
+    sameSite: "lax",
+    secure: production,
+  } as const;
+}
+
 function base64url(value: Buffer | string): string {
   return Buffer.from(value).toString("base64").replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 }

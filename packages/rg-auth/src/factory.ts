@@ -4,9 +4,11 @@ import { apiKey } from "@better-auth/api-key";
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
+import { createAuthMiddleware } from "better-auth/api";
 import { admin, bearer, genericOAuth, jwt } from "better-auth/plugins";
 import { type AccountEmailSender, createAccountOptions } from "./account-options";
 import { commonAuthOptions, ensureUserProfile, googleProvider } from "./core";
+import { ACHILLEA_SESSION_COOKIE_NAME, achilleaSessionCookieAttributes } from "./achillea-session";
 import { deuxFacteurs } from "./two-factor";
 import { resolveAuthSecret, resolveTrustedOrigins } from "./runtime-config";
 
@@ -192,6 +194,16 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
       },
     },
     trustedOrigins: resolveTrustedOrigins(options.baseURL),
+    hooks: {
+      // The Achilléa token is DERIVED from this session (`/api/achillea/session`)
+      // and is a stateless 30-day JWT: leaving the site must erase it too, or the
+      // Achilléa API keeps answering for a member who signed out. Runs before the
+      // plugin hooks, so `nextCookies` forwards it from server actions as well.
+      after: createAuthMiddleware(async ctx => {
+        if (ctx.path !== "/sign-out") return;
+        ctx.setCookie(ACHILLEA_SESSION_COOKIE_NAME, "", { ...achilleaSessionCookieAttributes(), maxAge: 0 });
+      }),
+    },
     advanced: {
       ...commonAuthOptions.advanced,
       database: { generateId: () => crypto.randomUUID() },
@@ -214,18 +226,13 @@ export function createRoseGriffonAuth(options: RoseGriffonAuthOptions) {
       },
       session: {
         create: {
-          after: async session => {
+          after: async (session, context) => {
             try {
-              await ensureUserProfile(
-                session.user as {
-                  id: string;
-                  name?: string | null;
-                  email?: string | null;
-                  image?: string | null;
-                },
-                undefined,
-                { appName: "Rose Griffon" },
-              );
+              // The hook receives the session ROW (`userId`, no `user`): passing
+              // `session.user` made every sign-in throw before reaching the profile.
+              const user = await context?.context.internalAdapter.findUserById(session.userId);
+              if (!user) return;
+              await ensureUserProfile(user, undefined, { appName: "Rose Griffon" });
             } catch (error) {
               console.error("[auth] session profile sync failed", error);
             }
