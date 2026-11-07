@@ -1,0 +1,868 @@
+{
+  "meta": {
+    "id": "astral-s1",
+    "aliases": [
+      "asytral-s1",
+      "astral"
+    ],
+    "name": "Astral League",
+    "season": "Saison 1",
+    "format": "league",
+    "description": "Championnat Inazuma Eleven Victory Road organisé par Achillea après l'Astral Cup Qualifier : phase régulière en single round-robin (BO3) puis play-offs doubl...",
+    "sourceRulesUrl": "https://docs.google.com/document/d/144jD-tQ9Bo63GqufcfsQ5hBukaW6gwBIdjSZARJyDK8",
+    "sourceSheetUrl": "https://docs.google.com/spreadsheets/d/1wsPYdS0B93Hdkw6E3FOJM08-9M2rzfM62RhjoGHfBEc",
+    "teamCount": 8,
+    "matchdays": 7,
+    "playoffTeams": 4,
+    "formatDetail": {
+      "game": "Inazuma Eleven Victory Road",
+      "startsAt": "2026-04-03",
+      "clans": 8,
+      "playersPerTeam": 6,
+      "playersPerMatch": 3,
+      "regularSeries": "bo3_all_games",
+      "mustPlayAllBo3Games": true,
+      "overtimeMatch": true,
+      "advantageJudgment": true,
+      "points": {
+        "winRegulation": 3,
+        "lossRegulation": 0,
+        "winOvertime": 2,
+        "lossOvertime": 1
+      },
+      "tiebreakers": [
+        "map_diff",
+        "head_to_head"
+      ],
+      "playoffs": {
+        "teams": 4,
+        "format": "double_elimination",
+        "series": "bo5",
+        "firstPickOpponent": true,
+        "extraGamesOnDraw": true
+      },
+      "durationWeeks": 10,
+      "regularWeeks": 7,
+      "playoffWeeks": 3
+    },
+    "champion": "GKO"
+  },
+  "format": {
+    "game": "Inazuma Eleven Victory Road",
+    "startsAt": "2026-04-03",
+    "clans": 8,
+    "playersPerTeam": 6,
+    "playersPerMatch": 3,
+    "regularSeries": "bo3_all_games",
+    "mustPlayAllBo3Games": true,
+    "overtimeMatch": true,
+    "advantageJudgment": true,
+    "points": {
+      "winRegulation": 3,
+      "lossRegulation": 0,
+      "winOvertime": 2,
+      "lossOvertime": 1
+    },
+    "tiebreakers": [
+      "map_diff",
+      "head_to_head"
+    ],
+    "playoffs": {
+      "teams": 4,
+      "format": "double_elimination",
+      "series": "bo5",
+      "firstPickOpponent": true,
+      "extraGamesOnDraw": true
+    },
+    "durationWeeks": 10,
+    "regularWeeks": 7,
+    "playoffWeeks": 3
+  },
+  "teams": [
+    {
+      "tag": "GKO",
+      "name": "GKO"
+    },
+    {
+      "tag": "OMP",
+      "name": "OMP"
+    }
+  ],
+  "pointsConfig": {
+    "win": 3,
+    "draw": 0,
+    "loss": 0,
+    "winOvertime": 2,
+    "lossOvertime": 1
+  },
+  "standings": [
+    {
+      "teamId": "GKO",
+      "rank": 1,
+      "played": 7,
+      "wins": 5,
+      "draws": 0,
+      "losses": 1,
+      "winsOt": 1,
+      "lossesOt": 0,
+      "points": 17,
+      "mapDiff": 9,
+      "mapsFor": 14,
+      "mapsAgainst": 5
+    },
+    {
+      "teamId": "OMP",
+      "rank": 2,
+      "played": 7,
+      "wins": 5,
+      "draws": 0,
+      "losses": 2,
+      "winsOt": 0,
+      "lossesOt": 0,
+      "points": 15,
+      "mapDiff": 7,
+      "mapsFor": 12,
+      "mapsAgainst": 5
+    }
+  ],
+  "results": [
+    {
+      "matchday": 1,
+      "homeId": "LMS",
+      "awayId": "DR",
+      "homeScore": 0,
+      "awayScore": 3
+    },
+    {
+      "matchday": 1,
+      "homeId": "ZOO",
+      "awayId": "GKO",
+      "homeScore": 0,
+      "awayScore": 3
+    }
+  ],
+  "playoffs": [
+    {
+      "round": "semi",
+      "label": "Demi 1",
+      "homeId": "OMP",
+      "awayId": "ASE",
+      "homeScore": 3,
+      "awayScore": 1
+    },
+    {
+      "round": "semi",
+      "label": "Demi 2",
+      "homeId": "GKO",
+      "awayId": "DR",
+      "homeScore": 3,
+      "awayScore": 0
+    }
+  ],
+  "schedule": [
+    {
+      "matchday": 1,
+      "homeId": "GKO",
+      "awayId": "ZOO"
+    },
+    {
+      "matchday": 1,
+      "homeId": "KOM",
+      "awayId": "OMP"
+    }
+  ],
+  "details": {
+    "regularMatchdays": [
+      {
+        "matchday": 1,
+        "date": "2026-04-10",
+        "matches": [
+          {
+            "time": "18h",
+            "home": "LMS",
+            "away": "DR",
+            "homeScore": 0,
+            "awayScore": 3,
+            "date": "2026-04-10",
+            "matchday": 1,
+            "games": [
+              {
+                "slotLabel": "Pseudo TO",
+                "homePlayer": "Zerion",
+                "awayPlayer": "Shinji",
+                "homeGoals": -1,
+                "awayGoals": 0,
+                "forfeitHome": true,
+                "forfeitAway": false
+              },
+              {
+                "slotLabel": "Shakka",
+                "homePlayer": "Saikyoo",
+                "awayPlayer": "Patachoo",
+                "homeGoals": -1,
+                "awayGoals": 0,
+                "forfeitHome": true,
+                "forfeitAway": false
+              }
+            ],
+            "phase": "regular",
+            "overtime": false,
+            "winnerId": "DR"
+          },
+          {
+            "time": "19h",
+            "home": "ZOO",
+            "away": "GKO",
+            "homeScore": 0,
+            "awayScore": 3,
+            "date": "2026-04-10",
+            "matchday": 1,
+            "games": [
+              {
+                "slotLabel": "Pseudo TO",
+                "homePlayer": "L'Éléphant",
+                "awayPlayer": "Woodzy",
+                "homeGoals": 1,
+                "awayGoals": 3,
+                "forfeitHome": false,
+                "forfeitAway": false
+              },
+              {
+                "slotLabel": "Shakka",
+                "homePlayer": "l'ornythorinque",
+                "awayPlayer": "gamewatch",
+                "homeGoals": -1,
+                "awayGoals": 0,
+                "forfeitHome": true,
+                "forfeitAway": false
+              }
+            ],
+            "phase": "regular",
+            "overtime": false,
+            "winnerId": "GKO"
+          }
+        ]
+      },
+      {
+        "matchday": 2,
+        "date": "2026-04-17",
+        "matches": [
+          {
+            "time": "19h",
+            "home": "FGS",
+            "away": "OMP",
+            "homeScore": 0,
+            "awayScore": 2,
+            "date": "2026-04-17",
+            "matchday": 2,
+            "games": [
+              {
+                "slotLabel": "Pseudo TO",
+                "homePlayer": "Kazemaru",
+                "awayPlayer": "Opposing",
+                "homeGoals": 3,
+                "awayGoals": 3,
+                "forfeitHome": false,
+                "forfeitAway": false
+              },
+              {
+                "slotLabel": "Shakka",
+                "homePlayer": "Hakai",
+                "awayPlayer": "Carillo",
+                "homeGoals": -1,
+                "awayGoals": 0,
+                "forfeitHome": true,
+                "forfeitAway": false
+              }
+            ],
+            "phase": "regular",
+            "overtime": false,
+            "winnerId": "OMP"
+          },
+          {
+            "time": "20h",
+            "home": "ASE",
+            "away": "KOM",
+            "homeScore": 3,
+            "awayScore": 0,
+            "date": "2026-04-17",
+            "matchday": 2,
+            "games": [
+              {
+                "slotLabel": "Pseudo TO",
+                "homePlayer": "Tiabox",
+                "awayPlayer": "Mathiuze",
+                "homeGoals": 3,
+                "awayGoals": 0,
+                "forfeitHome": false,
+                "forfeitAway": false
+              },
+              {
+                "slotLabel": "Shakka",
+                "homePlayer": "Karmaxe",
+                "awayPlayer": "Volfe",
+                "homeGoals": 4,
+                "awayGoals": 1,
+                "forfeitHome": false,
+                "forfeitAway": false
+              }
+            ],
+            "phase": "regular",
+            "overtime": false,
+            "winnerId": "ASE"
+          }
+        ]
+      }
+    ],
+    "playoffMatches": [
+      {
+        "time": "20h",
+        "home": "OMP",
+        "away": "ASE",
+        "homeScore": 3,
+        "awayScore": 1,
+        "date": "2026-05-29",
+        "matchday": 1,
+        "games": [
+          {
+            "slotLabel": "Pseudo TO",
+            "homePlayer": "Leo",
+            "awayPlayer": "Vince",
+            "homeGoals": 2,
+            "awayGoals": 0,
+            "forfeitHome": false,
+            "forfeitAway": false
+          },
+          {
+            "slotLabel": null,
+            "homePlayer": "Master",
+            "awayPlayer": "Flamme",
+            "homeGoals": 2,
+            "awayGoals": 3,
+            "forfeitHome": false,
+            "forfeitAway": false
+          }
+        ],
+        "label": "Demi 1",
+        "roundIndex": 0,
+        "phase": "playoff"
+      },
+      {
+        "time": "21h30",
+        "home": "GKO",
+        "away": "DR",
+        "homeScore": 3,
+        "awayScore": 0,
+        "date": "2026-05-29",
+        "matchday": 1,
+        "games": [
+          {
+            "slotLabel": "Pseudo TO",
+            "homePlayer": "Gamewatch",
+            "awayPlayer": "Astrokyo",
+            "homeGoals": 3,
+            "awayGoals": 0,
+            "forfeitHome": false,
+            "forfeitAway": false
+          },
+          {
+            "slotLabel": null,
+            "homePlayer": "Woodzy",
+            "awayPlayer": "Thunungu",
+            "homeGoals": 6,
+            "awayGoals": 1,
+            "forfeitHome": false,
+            "forfeitAway": false
+          }
+        ],
+        "label": "Demi 2",
+        "roundIndex": 0,
+        "phase": "playoff"
+      }
+    ],
+    "players": [
+      {
+        "name": "Vype",
+        "teams": [
+          "GKO"
+        ],
+        "primaryTeam": "GKO",
+        "games": 9,
+        "wins": 9,
+        "losses": 0,
+        "draws": 0,
+        "goalsFor": 23,
+        "goalsAgainst": 11,
+        "goalDiff": 12,
+        "winrate": 100,
+        "forfeitsGiven": 0,
+        "forfeitsReceived": 2,
+        "regularGames": 5,
+        "playoffGames": 4
+      },
+      {
+        "name": "gamewatch",
+        "teams": [
+          "GKO"
+        ],
+        "primaryTeam": "GKO",
+        "games": 6,
+        "wins": 6,
+        "losses": 0,
+        "draws": 0,
+        "goalsFor": 14,
+        "goalsAgainst": 5,
+        "goalDiff": 9,
+        "winrate": 100,
+        "forfeitsGiven": 0,
+        "forfeitsReceived": 1,
+        "regularGames": 3,
+        "playoffGames": 3
+      }
+    ],
+    "rosters": {
+      "LMS": [
+        "Colombo",
+        "Eren"
+      ],
+      "DR": [
+        "AstroKyo",
+        "Astrokyo"
+      ],
+      "ZOO": [
+        "L'Éléphant",
+        "LaScxlopendre"
+      ],
+      "GKO": [
+        "Fen",
+        "Gamewatch"
+      ],
+      "OMP": [
+        "Carillo",
+        "Leo"
+      ],
+      "ASE": [
+        "Eternity",
+        "Flamme"
+      ],
+      "FGS": [
+        "Evo",
+        "Hakai"
+      ],
+      "KOM": [
+        "Flavira",
+        "Kappa"
+      ]
+    },
+    "h2h": {
+      "GKO": {
+        "OMP": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 7,
+          "date": "2026-05-22",
+          "home": true
+        },
+        "ASE": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 6,
+          "date": "2026-05-15",
+          "home": true
+        },
+        "DR": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 2,
+          "date": "2026-04-17",
+          "home": false
+        },
+        "FGS": {
+          "scoreFor": 3,
+          "scoreAgainst": 0,
+          "matchday": 5,
+          "date": "2026-05-08",
+          "home": true
+        },
+        "LMS": {
+          "scoreFor": 1,
+          "scoreAgainst": 1,
+          "matchday": 3,
+          "date": "2026-04-24",
+          "home": false
+        },
+        "KOM": {
+          "scoreFor": 2,
+          "scoreAgainst": 0,
+          "matchday": 4,
+          "date": "2026-05-01",
+          "home": true
+        },
+        "ZOO": {
+          "scoreFor": 3,
+          "scoreAgainst": 0,
+          "matchday": 1,
+          "date": "2026-04-10",
+          "home": false
+        }
+      },
+      "OMP": {
+        "GKO": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 7,
+          "date": "2026-05-22",
+          "home": false
+        },
+        "ASE": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 1,
+          "date": "2026-04-10",
+          "home": true
+        },
+        "DR": {
+          "scoreFor": 2,
+          "scoreAgainst": 0,
+          "matchday": 5,
+          "date": "2026-05-08",
+          "home": false
+        },
+        "FGS": {
+          "scoreFor": 2,
+          "scoreAgainst": 0,
+          "matchday": 2,
+          "date": "2026-04-17",
+          "home": false
+        },
+        "LMS": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 4,
+          "date": "2026-05-01",
+          "home": false
+        },
+        "KOM": {
+          "scoreFor": 2,
+          "scoreAgainst": 0,
+          "matchday": 3,
+          "date": "2026-04-24",
+          "home": false
+        },
+        "ZOO": {
+          "scoreFor": 2,
+          "scoreAgainst": 0,
+          "matchday": 6,
+          "date": "2026-05-15",
+          "home": true
+        }
+      },
+      "ASE": {
+        "GKO": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 6,
+          "date": "2026-05-15",
+          "home": false
+        },
+        "OMP": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 1,
+          "date": "2026-04-10",
+          "home": false
+        },
+        "DR": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 4,
+          "date": "2026-05-01",
+          "home": false
+        },
+        "FGS": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 3,
+          "date": "2026-04-24",
+          "home": true
+        },
+        "LMS": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 5,
+          "date": "2026-05-08",
+          "home": false
+        },
+        "KOM": {
+          "scoreFor": 3,
+          "scoreAgainst": 0,
+          "matchday": 2,
+          "date": "2026-04-17",
+          "home": true
+        },
+        "ZOO": {
+          "scoreFor": 3,
+          "scoreAgainst": 0,
+          "matchday": 7,
+          "date": "2026-05-22",
+          "home": true
+        }
+      },
+      "DR": {
+        "GKO": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 2,
+          "date": "2026-04-17",
+          "home": true
+        },
+        "OMP": {
+          "scoreFor": 0,
+          "scoreAgainst": 2,
+          "matchday": 5,
+          "date": "2026-05-08",
+          "home": true
+        },
+        "ASE": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 4,
+          "date": "2026-05-01",
+          "home": true
+        },
+        "FGS": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 7,
+          "date": "2026-05-22",
+          "home": false
+        },
+        "LMS": {
+          "scoreFor": 3,
+          "scoreAgainst": 0,
+          "matchday": 1,
+          "date": "2026-04-10",
+          "home": false
+        },
+        "KOM": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 6,
+          "date": "2026-05-15",
+          "home": false
+        },
+        "ZOO": {
+          "scoreFor": 3,
+          "scoreAgainst": 0,
+          "matchday": 3,
+          "date": "2026-04-24",
+          "home": true
+        }
+      },
+      "FGS": {
+        "GKO": {
+          "scoreFor": 0,
+          "scoreAgainst": 3,
+          "matchday": 5,
+          "date": "2026-05-08",
+          "home": false
+        },
+        "OMP": {
+          "scoreFor": 0,
+          "scoreAgainst": 2,
+          "matchday": 2,
+          "date": "2026-04-17",
+          "home": true
+        },
+        "ASE": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 3,
+          "date": "2026-04-24",
+          "home": false
+        },
+        "DR": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 7,
+          "date": "2026-05-22",
+          "home": true
+        },
+        "LMS": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 6,
+          "date": "2026-05-15",
+          "home": true
+        },
+        "KOM": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 1,
+          "date": "2026-04-10",
+          "home": true
+        },
+        "ZOO": {
+          "scoreFor": 3,
+          "scoreAgainst": 0,
+          "matchday": 4,
+          "date": "2026-05-01",
+          "home": false
+        }
+      },
+      "LMS": {
+        "GKO": {
+          "scoreFor": 1,
+          "scoreAgainst": 1,
+          "matchday": 3,
+          "date": "2026-04-24",
+          "home": true
+        },
+        "OMP": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 4,
+          "date": "2026-05-01",
+          "home": true
+        },
+        "ASE": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 5,
+          "date": "2026-05-08",
+          "home": true
+        },
+        "DR": {
+          "scoreFor": 0,
+          "scoreAgainst": 3,
+          "matchday": 1,
+          "date": "2026-04-10",
+          "home": true
+        },
+        "FGS": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 6,
+          "date": "2026-05-15",
+          "home": false
+        },
+        "KOM": {
+          "scoreFor": 0,
+          "scoreAgainst": 3,
+          "matchday": 7,
+          "date": "2026-05-22",
+          "home": false
+        },
+        "ZOO": {
+          "scoreFor": 3,
+          "scoreAgainst": 0,
+          "matchday": 2,
+          "date": "2026-04-17",
+          "home": false
+        }
+      },
+      "KOM": {
+        "GKO": {
+          "scoreFor": 0,
+          "scoreAgainst": 2,
+          "matchday": 4,
+          "date": "2026-05-01",
+          "home": false
+        },
+        "OMP": {
+          "scoreFor": 0,
+          "scoreAgainst": 2,
+          "matchday": 3,
+          "date": "2026-04-24",
+          "home": true
+        },
+        "ASE": {
+          "scoreFor": 0,
+          "scoreAgainst": 3,
+          "matchday": 2,
+          "date": "2026-04-17",
+          "home": false
+        },
+        "DR": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 6,
+          "date": "2026-05-15",
+          "home": true
+        },
+        "FGS": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 1,
+          "date": "2026-04-10",
+          "home": false
+        },
+        "LMS": {
+          "scoreFor": 3,
+          "scoreAgainst": 0,
+          "matchday": 7,
+          "date": "2026-05-22",
+          "home": true
+        },
+        "ZOO": {
+          "scoreFor": 1,
+          "scoreAgainst": 2,
+          "matchday": 5,
+          "date": "2026-05-08",
+          "home": false
+        }
+      },
+      "ZOO": {
+        "GKO": {
+          "scoreFor": 0,
+          "scoreAgainst": 3,
+          "matchday": 1,
+          "date": "2026-04-10",
+          "home": true
+        },
+        "OMP": {
+          "scoreFor": 0,
+          "scoreAgainst": 2,
+          "matchday": 6,
+          "date": "2026-05-15",
+          "home": false
+        },
+        "ASE": {
+          "scoreFor": 0,
+          "scoreAgainst": 3,
+          "matchday": 7,
+          "date": "2026-05-22",
+          "home": false
+        },
+        "DR": {
+          "scoreFor": 0,
+          "scoreAgainst": 3,
+          "matchday": 3,
+          "date": "2026-04-24",
+          "home": false
+        },
+        "FGS": {
+          "scoreFor": 0,
+          "scoreAgainst": 3,
+          "matchday": 4,
+          "date": "2026-05-01",
+          "home": true
+        },
+        "LMS": {
+          "scoreFor": 0,
+          "scoreAgainst": 3,
+          "matchday": 2,
+          "date": "2026-04-17",
+          "home": true
+        },
+        "KOM": {
+          "scoreFor": 2,
+          "scoreAgainst": 1,
+          "matchday": 5,
+          "date": "2026-05-08",
+          "home": true
+        }
+      }
+    }
+  }
+}

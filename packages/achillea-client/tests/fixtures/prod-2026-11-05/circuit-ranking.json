@@ -1,0 +1,107 @@
+{
+  "leaderboard": [
+    {
+      "userId": "1270414402763620363",
+      "displayName": "ASE | Opposing_62",
+      "username": "opposing_62",
+      "avatar": "https://cdn.discordapp.com/avatars/1270414402763620363/3c889186753214f73fbee852609a9784.webp?size=256",
+      "clan": {
+        "id": 1,
+        "name": "Academy Show Esport",
+        "shortName": "ASE",
+        "avatar": "https://xzwfnxzkxtcpgmtqulbh.supabase.co/storage/v1/object/public/images/ZILULrlm.png"
+      },
+      "tournamentsPlayed": 3,
+      "points": 162,
+      "tournaments": 3,
+      "wins": 1,
+      "podiums": 1,
+      "top4": 2,
+      "top8": 3,
+      "bestRank": 1,
+      "bestRankLabel": "1er",
+      "tier": "Légendaire"
+    },
+    {
+      "userId": "698646977872920616",
+      "displayName": "Ban",
+      "username": "ban.slr",
+      "avatar": "https://cdn.discordapp.com/avatars/698646977872920616/3963b5ff746d2bf70b51d6659096bce0.webp?size=256",
+      "clan": {
+        "id": 64,
+        "name": "KnockOut",
+        "shortName": "KO",
+        "avatar": "https://xzwfnxzkxtcpgmtqulbh.supabase.co/storage/v1/object/public/images/s2JenRcB.png"
+      },
+      "tournamentsPlayed": 2,
+      "points": 140,
+      "tournaments": 2,
+      "wins": 1,
+      "podiums": 1,
+      "top4": 2,
+      "top8": 2,
+      "bestRank": 1,
+      "bestRankLabel": "1er",
+      "tier": "Supernova"
+    }
+  ],
+  "tournaments": [
+    {
+      "id": 32,
+      "name": "Summer Kama Club",
+      "size": 32,
+      "grandFinalAt": "2026-08-06T19:00:00.000Z",
+      "podium": [
+        {
+          "rank": 1,
+          "rankLabel": "1er",
+          "userId": "1270414402763620363",
+          "displayName": "ASE | Opposing_62",
+          "avatar": "https://cdn.discordapp.com/avatars/1270414402763620363/3c889186753214f73fbee852609a9784.webp?size=256"
+        },
+        {
+          "rank": 2,
+          "rankLabel": "2e",
+          "userId": "1242846728810401893",
+          "displayName": "LoRe ʕ°ᴥ°ʔ",
+          "avatar": "https://cdn.discordapp.com/avatars/1242846728810401893/f03ecc0a381d2319ff6fed975a74a870.webp?size=256"
+        }
+      ],
+      "standingsStatus": "resolved"
+    },
+    {
+      "id": 18,
+      "name": "La Masia Winter Cup V2",
+      "size": 128,
+      "grandFinalAt": "2026-03-01T17:00:00.000Z",
+      "podium": [],
+      "standingsStatus": "unresolved"
+    }
+  ],
+  "clanRanking": [
+    {
+      "id": 1,
+      "name": "Academy Show Esport",
+      "shortName": "ASE",
+      "avatar": "https://xzwfnxzkxtcpgmtqulbh.supabase.co/storage/v1/object/public/images/ZILULrlm.png",
+      "points": 492,
+      "players": 9,
+      "tournamentsPlayed": 18,
+      "wins": 2,
+      "podiums": 3,
+      "tier": "Légendaire"
+    },
+    {
+      "id": 64,
+      "name": "KnockOut",
+      "shortName": "KO",
+      "avatar": "https://xzwfnxzkxtcpgmtqulbh.supabase.co/storage/v1/object/public/images/s2JenRcB.png",
+      "points": 303,
+      "players": 6,
+      "tournamentsPlayed": 12,
+      "wins": 1,
+      "podiums": 1,
+      "tier": "Légendaire"
+    }
+  ]
+}

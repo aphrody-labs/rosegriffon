@@ -1,0 +1,383 @@
+[
+  {
+    "id": 32,
+    "name": "Summer Kama Club",
+    "description": "Tournoi Inazuma Eleven Victory Road de 32 joueurs, organisé par le serveur Discord Kama Club (représenté par Evo).\n\nAccrédité Achilléa : soutien à la gestion...",
+    "type": "TOURNAMENT",
+    "createdAt": "2026-07-23T19:06:45.367Z",
+    "updatedAt": "2026-08-06T11:52:09.555Z",
+    "internalState": "Finished",
+    "startsAt": "2026-07-31T10:00:00.000Z",
+    "grandFinalAt": "2026-08-06T19:00:00.000Z",
+    "series": null,
+    "organization": {
+      "id": 1,
+      "name": "Achillea",
+      "normalizedName": "Achillea",
+      "logo": "https://yftdclwvehxxffwqvhmc.supabase.co/storage/v1/object/public/images/DjdB0HkZ.png",
+      "description": "L'Organisation Achillea appartient au collectif Achillea, responsable du développement et du maintien des outils à destination de la communauté compétitive I...",
+      "state": 2,
+      "preapproved": true,
+      "origin": "fr",
+      "createdAt": "2026-01-02T19:06:14.501Z",
+      "updatedAt": "2026-01-02T19:06:14.501Z",
+      "owner": {
+        "id": "238660901375442954",
+        "username": "alessss_",
+        "displayName": "Aless",
+        "avatar": "https://cdn.discordapp.com/avatars/238660901375442954/00febf9a57a91e1f922411b0531a9684.webp?size=256"
+      },
+      "managers": [
+        {
+          "user": {
+            "id": "299502648317444096",
+            "username": "koltilasko",
+            "displayName": "Kolti",
+            "avatar": "https://cdn.discordapp.com/avatars/299502648317444096/e52dd7526128a3a8909dab1ab6e876a5.webp?size=256"
+          }
+        },
+        {
+          "user": {
+            "id": "261177131311038465",
+            "username": "louxivolt",
+            "displayName": "Louxi",
+            "avatar": "https://cdn.discordapp.com/guilds/1055585286320554055/users/261177131311038465/avatars/a2cea873d287aad0f723cbda9a178322.webp?size=256"
+          }
+        }
+      ]
+    },
+    "managers": [
+      {
+        "id": "299502648317444096",
+        "username": "koltilasko",
+        "displayName": "Kolti",
+        "avatar": "https://cdn.discordapp.com/avatars/299502648317444096/e52dd7526128a3a8909dab1ab6e876a5.webp?size=256"
+      },
+      {
+        "id": "261177131311038465",
+        "username": "louxivolt",
+        "displayName": "Louxi",
+        "avatar": "https://cdn.discordapp.com/guilds/1055585286320554055/users/261177131311038465/avatars/a2cea873d287aad0f723cbda9a178322.webp?size=256"
+      }
+    ],
+    "participants": [],
+    "tournamentType": "single_elimination",
+    "participantsNumber": 32,
+    "seedOrdering": "inner_outer",
+    "matchFormat": "double_leg",
+    "customFormatChildCount": null,
+    "groupStageEnabled": false,
+    "groupStageType": null,
+    "logo": "https://yftdclwvehxxffwqvhmc.supabase.co/storage/v1/object/public/images/proxy/502930ef71adc995db3f6748.webp",
+    "affiche": null,
+    "planning": "/",
+    "ruleset": "https://docs.google.com/document/d/10wW5z_HEmIAj4hEVqkNVxqX_BZ4oaUtrrlXzA55Jil8/edit?usp=sharing",
+    "placementEloApplied": false,
+    "registrationOpensAt": null,
+    "registrationClosesAt": null,
+    "autoStart": false,
+    "discordRoleEnabled": false,
+    "scoreReportPolicy": "players",
+    "discordRoleId": null,
+    "cancelReason": null,
+    "canceledAt": null,
+    "closedAt": null
+  },
+  [
+    {
+      "id": 487,
+      "tournament": {
+        "id": 32,
+        "name": "Summer Kama Club",
+        "description": "Tournoi Inazuma Eleven Victory Road de 32 joueurs, organisé par le serveur Discord Kama Club (représenté par Evo).\n\nAccrédité Achilléa : soutien à la gestion...",
+        "type": "TOURNAMENT",
+        "createdAt": "2026-07-23T19:06:45.367Z",
+        "updatedAt": "2026-08-06T11:52:09.555Z",
+        "internalState": "Finished",
+        "startsAt": "2026-07-31T10:00:00.000Z",
+        "grandFinalAt": "2026-08-06T19:00:00.000Z",
+        "series": null,
+        "organization": {
+          "id": 1,
+          "name": "Achillea",
+          "normalizedName": "Achillea",
+          "logo": "https://yftdclwvehxxffwqvhmc.supabase.co/storage/v1/object/public/images/DjdB0HkZ.png",
+          "description": "L'Organisation Achillea appartient au collectif Achillea, responsable du développement et du maintien des outils à destination de la communauté compétitive I...",
+          "state": 2,
+          "preapproved": true,
+          "origin": "fr",
+          "createdAt": "2026-01-02T19:06:14.501Z",
+          "updatedAt": "2026-01-02T19:06:14.501Z",
+          "owner": {
+            "id": "238660901375442954",
+            "username": "alessss_",
+            "displayName": "Aless",
+            "avatar": "https://cdn.discordapp.com/avatars/238660901375442954/00febf9a57a91e1f922411b0531a9684.webp?size=256"
+          },
+          "managers": [
+            {
+              "user": {
+                "id": "299502648317444096",
+                "username": "koltilasko",
+                "displayName": "Kolti",
+                "avatar": "https://cdn.discordapp.com/avatars/299502648317444096/e52dd7526128a3a8909dab1ab6e876a5.webp?size=256"
+              }
+            },
+            {
+              "user": {
+                "id": "261177131311038465",
+                "username": "louxivolt",
+                "displayName": "Louxi",
+                "avatar": "https://cdn.discordapp.com/guilds/1055585286320554055/users/261177131311038465/avatars/a2cea873d287aad0f723cbda9a178322.webp?size=256"
+              }
+            }
+          ]
+        },
+        "managers": [
+          {
+            "id": "299502648317444096",
+            "username": "koltilasko",
+            "displayName": "Kolti",
+            "avatar": "https://cdn.discordapp.com/avatars/299502648317444096/e52dd7526128a3a8909dab1ab6e876a5.webp?size=256"
+          },
+          {
+            "id": "261177131311038465",
+            "username": "louxivolt",
+            "displayName": "Louxi",
+            "avatar": "https://cdn.discordapp.com/guilds/1055585286320554055/users/261177131311038465/avatars/a2cea873d287aad0f723cbda9a178322.webp?size=256"
+          }
+        ],
+        "participants": [],
+        "tournamentType": "single_elimination",
+        "participantsNumber": 32,
+        "seedOrdering": "inner_outer",
+        "matchFormat": "double_leg",
+        "customFormatChildCount": null,
+        "groupStageEnabled": false,
+        "groupStageType": null,
+        "logo": "https://yftdclwvehxxffwqvhmc.supabase.co/storage/v1/object/public/images/proxy/502930ef71adc995db3f6748.webp",
+        "affiche": null,
+        "planning": "/",
+        "ruleset": "https://docs.google.com/document/d/10wW5z_HEmIAj4hEVqkNVxqX_BZ4oaUtrrlXzA55Jil8/edit?usp=sharing",
+        "placementEloApplied": false,
+        "registrationOpensAt": null,
+        "registrationClosesAt": null,
+        "autoStart": false,
+        "discordRoleEnabled": false,
+        "scoreReportPolicy": "players",
+        "discordRoleId": null,
+        "cancelReason": null,
+        "canceledAt": null,
+        "closedAt": null
+      },
+      "user": {
+        "id": "1270414402763620363",
+        "username": "opposing_62",
+        "avatar": "https://cdn.discordapp.com/avatars/1270414402763620363/3c889186753214f73fbee852609a9784.webp?size=256"
+      },
+      "bracketParticipantId": 320,
+      "seed": 1,
+      "hasCheckedIn": false,
+      "status": "Active",
+      "registeredAt": "2026-07-23T20:08:59.911Z",
+      "waitlistPosition": null,
+      "statusReason": null
+    },
+    {
+      "id": 491,
+      "tournament": {
+        "id": 32,
+        "name": "Summer Kama Club",
+        "description": "Tournoi Inazuma Eleven Victory Road de 32 joueurs, organisé par le serveur Discord Kama Club (représenté par Evo).\n\nAccrédité Achilléa : soutien à la gestion...",
+        "type": "TOURNAMENT",
+        "createdAt": "2026-07-23T19:06:45.367Z",
+        "updatedAt": "2026-08-06T11:52:09.555Z",
+        "internalState": "Finished",
+        "startsAt": "2026-07-31T10:00:00.000Z",
+        "grandFinalAt": "2026-08-06T19:00:00.000Z",
+        "series": null,
+        "organization": {
+          "id": 1,
+          "name": "Achillea",
+          "normalizedName": "Achillea",
+          "logo": "https://yftdclwvehxxffwqvhmc.supabase.co/storage/v1/object/public/images/DjdB0HkZ.png",
+          "description": "L'Organisation Achillea appartient au collectif Achillea, responsable du développement et du maintien des outils à destination de la communauté compétitive I...",
+          "state": 2,
+          "preapproved": true,
+          "origin": "fr",
+          "createdAt": "2026-01-02T19:06:14.501Z",
+          "updatedAt": "2026-01-02T19:06:14.501Z",
+          "owner": {
+            "id": "238660901375442954",
+            "username": "alessss_",
+            "displayName": "Aless",
+            "avatar": "https://cdn.discordapp.com/avatars/238660901375442954/00febf9a57a91e1f922411b0531a9684.webp?size=256"
+          },
+          "managers": [
+            {
+              "user": {
+                "id": "299502648317444096",
+                "username": "koltilasko",
+                "displayName": "Kolti",
+                "avatar": "https://cdn.discordapp.com/avatars/299502648317444096/e52dd7526128a3a8909dab1ab6e876a5.webp?size=256"
+              }
+            },
+            {
+              "user": {
+                "id": "261177131311038465",
+                "username": "louxivolt",
+                "displayName": "Louxi",
+                "avatar": "https://cdn.discordapp.com/guilds/1055585286320554055/users/261177131311038465/avatars/a2cea873d287aad0f723cbda9a178322.webp?size=256"
+              }
+            }
+          ]
+        },
+        "managers": [
+          {
+            "id": "299502648317444096",
+            "username": "koltilasko",
+            "displayName": "Kolti",
+            "avatar": "https://cdn.discordapp.com/avatars/299502648317444096/e52dd7526128a3a8909dab1ab6e876a5.webp?size=256"
+          },
+          {
+            "id": "261177131311038465",
+            "username": "louxivolt",
+            "displayName": "Louxi",
+            "avatar": "https://cdn.discordapp.com/guilds/1055585286320554055/users/261177131311038465/avatars/a2cea873d287aad0f723cbda9a178322.webp?size=256"
+          }
+        ],
+        "participants": [],
+        "tournamentType": "single_elimination",
+        "participantsNumber": 32,
+        "seedOrdering": "inner_outer",
+        "matchFormat": "double_leg",
+        "customFormatChildCount": null,
+        "groupStageEnabled": false,
+        "groupStageType": null,
+        "logo": "https://yftdclwvehxxffwqvhmc.supabase.co/storage/v1/object/public/images/proxy/502930ef71adc995db3f6748.webp",
+        "affiche": null,
+        "planning": "/",
+        "ruleset": "https://docs.google.com/document/d/10wW5z_HEmIAj4hEVqkNVxqX_BZ4oaUtrrlXzA55Jil8/edit?usp=sharing",
+        "placementEloApplied": false,
+        "registrationOpensAt": null,
+        "registrationClosesAt": null,
+        "autoStart": false,
+        "discordRoleEnabled": false,
+        "scoreReportPolicy": "players",
+        "discordRoleId": null,
+        "cancelReason": null,
+        "canceledAt": null,
+        "closedAt": null
+      },
+      "user": {
+        "id": "1242846728810401893",
+        "username": "lore_18__19108",
+        "avatar": "https://cdn.discordapp.com/avatars/1242846728810401893/f03ecc0a381d2319ff6fed975a74a870.webp?size=256"
+      },
+      "bracketParticipantId": 323,
+      "seed": 2,
+      "hasCheckedIn": false,
+      "status": "Active",
+      "registeredAt": "2026-07-24T10:57:19.974Z",
+      "waitlistPosition": null,
+      "statusReason": null
+    }
+  ],
+  {
+    "stage": [
+      {
+        "id": 353,
+        "tournament_id": 32,
+        "name": "Summer Kama Club",
+        "type": "single_elimination",
+        "settings": {
+          "size": 32,
+          "seedOrdering": [
+            "inner_outer"
+          ],
+          "consolationFinal": false,
+          "matchesChildCount": 0
+        },
+        "number": 2
+      }
+    ],
+    "group": [
+      {
+        "id": 418,
+        "stage_id": 353,
+        "number": 1
+      }
+    ],
+    "round": [
+      {
+        "id": 1805,
+        "stage_id": 353,
+        "group_id": 418,
+        "number": 1
+      },
+      {
+        "id": 1806,
+        "stage_id": 353,
+        "group_id": 418,
+        "number": 2
+      }
+    ],
+    "match": [
+      {
+        "id": 12318,
+        "stage_id": 353,
+        "group_id": 418,
+        "round_id": 1805,
+        "number": 1,
+        "status": 5,
+        "opponent1": {
+          "id": 320,
+          "score": 1,
+          "result": "win",
+          "position": 1
+        },
+        "opponent2": {
+          "id": 343,
+          "score": 0,
+          "result": "loss",
+          "position": 32
+        },
+        "child_count": 0
+      },
+      {
+        "id": 12319,
+        "stage_id": 353,
+        "group_id": 418,
+        "round_id": 1805,
+        "number": 2,
+        "status": 5,
+        "opponent1": {
+          "id": 345,
+          "score": 3,
+          "result": "loss",
+          "position": 16
+        },
+        "opponent2": {
+          "id": 330,
+          "score": 6,
+          "result": "win",
+          "position": 17
+        },
+        "child_count": 0
+      }
+    ],
+    "match_game": [],
+    "participant": [
+      {
+        "id": 317,
+        "tournament_id": 32,
+        "name": "Eternity"
+      },
+      {
+        "id": 318,
+        "tournament_id": 32,
+        "name": "La_Truite"
+      }
+    ]
+  }
+]

@@ -3,6 +3,7 @@ import { metadonneesAchillea } from "@/app/achillea/metadonnees";
 import { HeroSection } from "@/components/achillea/HeroSection";
 import { createAchilleaClient } from "@/lib/achillea";
 import { lireChiffresEsport } from "@/lib/achillea/classement";
+import { loadRecentTournaments } from "@/lib/achillea/home-tournaments";
 import { getPgPoolOrNull } from "@/lib/db/pg";
 import { ArrowRight, PlayCircle, Video } from "lucide-react";
 import type { ParticipantDTO, Tournament } from "@rosegriffon/achillea-types";
@@ -166,6 +167,9 @@ export default async function AchilleaHomePage() {
     lireChiffresEsport(),
     chargerPlaylists(),
   ]);
+  // Sans tournoi actif, l'encart montre les derniers tournois joués plutôt
+  // qu'un état vide : l'API en a, tous terminés.
+  const recent = featured ? [] : await loadRecentTournaments(createAchilleaClient());
 
   return (
     <div className="achillea-home-page">
@@ -173,6 +177,7 @@ export default async function AchilleaHomePage() {
         featured={featured}
         featuredParticipants={featuredParticipants}
         otherActive={otherActive}
+        recent={recent}
         stats={stats}
       />
       {playlists.length > 0 && (

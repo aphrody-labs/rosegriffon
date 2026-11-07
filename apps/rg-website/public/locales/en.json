@@ -1,4 +1,6 @@
 {
+	"achillea.home.recent.note": "No tournament is running or upcoming. Here are the latest ones played.",
+	"achillea.home.recent.label": "Latest tournaments",
 	"consent.policy.intro": "Both services load only with your consent, given in the banner on your first visit. You can change your mind at any time.",
 	"consent.title": "Cookies and analytics",
 	"consent.body": "With your consent, we measure traffic (Google Tag Manager) and show ads (Google AdSense). Without it, none of this loads and the site works the same.",

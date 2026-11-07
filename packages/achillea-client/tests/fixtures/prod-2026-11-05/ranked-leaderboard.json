@@ -1,0 +1,24 @@
+{
+  "mode": 2,
+  "total": 12,
+  "entries": [
+    {
+      "rank": 1,
+      "userId": "980132803272376370",
+      "displayName": "Richo",
+      "avatar": "https://cdn.discordapp.com/avatars/980132803272376370/259d5b1621c4106df89bd665b3bfa16b.webp?size=256",
+      "elo": 87,
+      "peakRating": 87,
+      "gamesPlayed": 3
+    },
+    {
+      "rank": 2,
+      "userId": "675479039028363310",
+      "displayName": "adriaarv",
+      "avatar": "https://cdn.discordapp.com/avatars/675479039028363310/a171812a39cb71988851e45d87dfe1c2.webp?size=256",
+      "elo": 37,
+      "peakRating": 41,
+      "gamesPlayed": 3
+    }
+  ]
+}

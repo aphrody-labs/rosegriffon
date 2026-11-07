@@ -9,6 +9,47 @@ function publicTournamentStatus(state: string | null): string | null {
   return state;
 }
 
+export interface ParticipantRank {
+  elo: number;
+  key: string;
+  gradient: string[];
+}
+
+/**
+ * Palier classé solo (mode 2) des inscrits, comme le `user_view` legacy : la
+ * colonne « Classement ELO » des participants l'affichait. Sans ligne
+ * `user_elo`, pas d'entrée : l'interface affiche « Non classé ».
+ */
+export async function participantSoloRanks(
+  db: Kysely<Database>,
+  userIds: readonly string[],
+): Promise<Map<string, ParticipantRank>> {
+  const ids = [...new Set(userIds)];
+  if (ids.length === 0) return new Map();
+  // Même saison que le classement public : la saison active, sinon les lignes
+  // hors saison (`season_id` nul).
+  const season = await db
+    .selectFrom("season")
+    .select("id")
+    .where("state", "=", "Active")
+    .orderBy("starts_at", "desc")
+    .executeTakeFirst();
+  const seasonElos = db.selectFrom("user_elo").select(["user_id", "elo"]).where("mode", "=", 2);
+  const [elos, ranks] = await Promise.all([
+    (season ? seasonElos.where("season_id", "=", season.id) : seasonElos.where("season_id", "is", null))
+      .where("user_id", "in", ids)
+      .execute(),
+    db.selectFrom("rank").select(["key", "min_elo", "max_elo", "gradient"]).orderBy("min_elo", "asc").execute(),
+  ]);
+  return new Map(
+    elos.map(row => {
+      const elo = Number(row.elo ?? 0);
+      const tier = ranks.find(rank => elo >= rank.min_elo && elo <= rank.max_elo);
+      return [row.user_id, { elo, key: tier?.key ?? "Non classé", gradient: tier?.gradient ?? [] }] as const;
+    }),
+  );
+}
+
 export abstract class TournamentService {
   public static async findDetail(db: Kysely<Database>, id: number, includeReasons = false) {
     const row = await db
@@ -56,6 +97,10 @@ export abstract class TournamentService {
       .orderBy("participant.seed", "asc")
       .orderBy("participant.registered_at", "asc")
       .execute();
+    const soloRanks = await participantSoloRanks(
+      db,
+      participants.map(participant => participant.user_id),
+    );
     const waitlisted = participants.filter(participant => participant.status === "Waitlisted");
     const tournament = {
       id: row.id,
@@ -103,6 +148,7 @@ export abstract class TournamentService {
           id: participant.user_id,
           username: participant.username ?? participant.user_id,
           avatar: participant.avatar ?? undefined,
+          ...(soloRanks.has(participant.user_id) ? { soloRank: soloRanks.get(participant.user_id) } : {}),
         },
         bracketParticipantId: participant.bracket_participant_id,
         seed: participant.seed,

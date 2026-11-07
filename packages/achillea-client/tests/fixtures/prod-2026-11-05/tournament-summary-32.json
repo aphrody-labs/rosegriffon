@@ -1,0 +1,54 @@
+{
+  "top10": [
+    {
+      "rank": 1,
+      "rankLabel": "1er",
+      "userId": "1270414402763620363",
+      "displayName": "ASE | Opposing_62",
+      "avatar": "https://cdn.discordapp.com/avatars/1270414402763620363/3c889186753214f73fbee852609a9784.webp?size=256",
+      "clan": null,
+      "points": 100,
+      "tier": "Rubis",
+      "goalsScored": 19,
+      "goalsConceded": 7,
+      "goalAverage": 2.71
+    },
+    {
+      "rank": 2,
+      "rankLabel": "2e",
+      "userId": "1242846728810401893",
+      "displayName": "LoRe ʕ°ᴥ°ʔ",
+      "avatar": "https://cdn.discordapp.com/avatars/1242846728810401893/f03ecc0a381d2319ff6fed975a74a870.webp?size=256",
+      "clan": null,
+      "points": 65,
+      "tier": "Diamant",
+      "goalsScored": 14,
+      "goalsConceded": 10,
+      "goalAverage": 1.4
+    }
+  ],
+  "stats": {
+    "matches": 31,
+    "totalGoals": 157,
+    "avgGoals": 5.06,
+    "topScore": 10,
+    "minMargin": 1,
+    "maxMargin": 7,
+    "biggestBlowout": {
+      "winnerDisplayName": "🕷️GVE | Spidey🕸️",
+      "winnerAvatar": "https://cdn.discordapp.com/avatars/1469425583417983261/32037debab7340d540a5be85564a02bb.webp?size=256",
+      "loserDisplayName": "Kazemaru",
+      "loserAvatar": "https://cdn.discordapp.com/avatars/494162450753519618/d9f09e79e20774e4646dd8fc592a437a.webp?size=256",
+      "scoreWinner": 8,
+      "scoreLoser": 1
+    },
+    "closestMatch": {
+      "winnerDisplayName": "Richo",
+      "winnerAvatar": "https://cdn.discordapp.com/avatars/980132803272376370/259d5b1621c4106df89bd665b3bfa16b.webp?size=256",
+      "loserDisplayName": "Salvuccio",
+      "loserAvatar": "https://cdn.discordapp.com/avatars/1006957787407974400/d72c4654884a4972ed9562cdaa5b91b6.webp?size=256",
+      "scoreWinner": 4,
+      "scoreLoser": 3
+    }
+  }
+}

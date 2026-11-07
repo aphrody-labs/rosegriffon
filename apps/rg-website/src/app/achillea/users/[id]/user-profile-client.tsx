@@ -237,12 +237,16 @@ export default function UserProfilePage({ id, titre }: { id: string; titre?: str
               )}
             </div>
 
-            {/* Niveau, XP, Badges */}
+            {/* Niveau, XP, Badges. `GET /users/:id` n'envoie pas de niveau
+                (aucun système d'XP joueur côté API) : pas de « Niveau 1 · 0 XP »
+                inventé, la pastille n'apparaît qu'avec une vraie valeur. */}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-warning/10 text-warning font-medium">
-                <Star className="size-3.5 fill-warning" />
-                Niveau {profile.currentLevel ?? 1} · {profile.totalXp ?? 0} XP
-              </span>
+              {profile.currentLevel !== undefined && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-warning/10 text-warning font-medium">
+                  <Star className="size-3.5 fill-warning" />
+                  Niveau {profile.currentLevel} · {profile.totalXp ?? 0} XP
+                </span>
+              )}
 
               {profile.hasYoutube && (
                 <span className={`inline-flex items-center gap-1 ${MARQUE.youtube}`} title="YouTube lié">

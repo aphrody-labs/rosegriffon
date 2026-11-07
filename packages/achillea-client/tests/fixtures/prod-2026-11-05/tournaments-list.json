@@ -1,0 +1,28 @@
+{
+  "data": [
+    {
+      "id": 32,
+      "name": "Summer Kama Club",
+      "description": "Tournoi Inazuma Eleven Victory Road de 32 joueurs, organisé par le serveur Discord Kama Club (représenté par Evo).\n\nAccrédité Achilléa : soutien à la gestion...",
+      "type": "TOURNAMENT",
+      "status": "Finished",
+      "createdAt": "2026-07-23T19:06:45.367Z",
+      "updatedAt": "2026-08-06T11:52:09.555Z"
+    },
+    {
+      "id": 23,
+      "name": "La Coupe d'Ilion #6",
+      "description": "La coupe d'Ilion est un tournoi organisé 2 fois par semaines avec 32 joueurs dont le but est d'éliminer le champion de l'édition précédente. 10 euros de cash...",
+      "type": "TOURNAMENT",
+      "status": "Finished",
+      "createdAt": "2026-02-25T16:27:06.428Z",
+      "updatedAt": "2026-09-08T12:37:26.339Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 3,
+    "total": 9,
+    "pageCount": 3
+  }
+}

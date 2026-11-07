@@ -1,0 +1,75 @@
+{
+  "id": "1006957787407974400",
+  "type": "user",
+  "username": "Salvuccio",
+  "sim": 0,
+  "avatar": "https://cdn.discordapp.com/avatars/1006957787407974400/d72c4654884a4972ed9562cdaa5b91b6.webp?size=256",
+  "clanId": null,
+  "soloRank": {
+    "elo": 16,
+    "key": "Fer",
+    "gradient": [
+      "#959595",
+      "#919191"
+    ]
+  },
+  "duoRank": {
+    "elo": 0,
+    "key": "Fer",
+    "gradient": [
+      "#959595",
+      "#919191"
+    ]
+  },
+  "lastInteract": "2026-07-25T12:36:04.612Z",
+  "role": 0,
+  "bio": null,
+  "twitchUrl": null,
+  "hasTwitch": false,
+  "hasChallonge": false,
+  "hasYoutube": false,
+  "interclans": {
+    "total": 0,
+    "wins": 0,
+    "losses": 0,
+    "draws": 0,
+    "goalsScoredAvg": 0,
+    "goalsReceivedAvg": 0,
+    "personalTotal": 0,
+    "personalWins": 0,
+    "personalLosses": 0,
+    "personalDraws": 0
+  },
+  "tournaments": {
+    "total": 0,
+    "wins": 0,
+    "losses": 0,
+    "draws": 0,
+    "goalsScoredAvg": 0,
+    "goalsReceivedAvg": 0,
+    "personalTotal": 0,
+    "personalWins": 0,
+    "personalLosses": 0,
+    "personalDraws": 0
+  },
+  "ranked": {
+    "solo": {
+      "mode": 2,
+      "total": 2,
+      "wins": 1,
+      "losses": 1,
+      "draws": 0,
+      "goalsScored": 9,
+      "goalsReceived": 4
+    },
+    "duo": {
+      "mode": 4,
+      "total": 0,
+      "wins": 0,
+      "losses": 0,
+      "draws": 0,
+      "goalsScored": 0,
+      "goalsReceived": 0
+    }
+  }
+}

@@ -1,4 +1,6 @@
 {
+	"achillea.home.recent.note": "開催中または開催予定の大会はありません。最近の大会はこちらです。",
+	"achillea.home.recent.label": "最近の大会",
 	"consent.policy.intro": "これらのサービスは、初回訪問時のバナーで同意した場合にのみ読み込まれます。設定はいつでも変更できます。",
 	"consent.title": "Cookie とアクセス解析",
 	"consent.body": "同意いただいた場合のみ、アクセス解析（Google タグマネージャー）と広告（Google AdSense）を読み込みます。同意しなくてもサイトは同じように使えます。",

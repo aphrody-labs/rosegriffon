@@ -230,7 +230,10 @@ export default function ClanDashboardPage() {
    * chargement — c'est ce qui donne l'impression qu'Achilléa refuse l'accès.
    * Les pages d'administration attendaient déjà, celles-ci non.
    */
-  if (authLoading || roleLoading) {
+  // `roleLoading` part à true et n'est remis à false que sur un CHANGEMENT
+  // d'identité : un visiteur déconnecté dès le premier rendu restait bloqué sur
+  // « Vérification de la session… ». Le rôle n'est attendu que connecté.
+  if (authLoading || (isAuthenticated && roleLoading)) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center text-sm text-muted-foreground">
         Vérification de la session…

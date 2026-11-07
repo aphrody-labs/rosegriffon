@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ParticipantDTO, Tournament } from "@rosegriffon/achillea-types";
+import type { ParticipantDTO, Tournament, TournamentListItem } from "@rosegriffon/achillea-types";
 import { TournamentState } from "@rosegriffon/achillea-types";
 import {
   stageTypeLabel,
@@ -9,6 +9,7 @@ import {
 } from "@rosegriffon/achillea-core";
 import { Badge } from "@rosegriffon/ui";
 import { badgeVariant } from "@/lib/achillea";
+import { RecentTournamentsList, RecentTournamentsNote } from "./RecentTournaments";
 import {
   ArrowRight,
   Calendar,
@@ -23,6 +24,8 @@ interface HeroSectionProps {
   featured: Tournament | null;
   featuredParticipants: ParticipantDTO[];
   otherActive: Tournament[];
+  /** Derniers tournois terminés, montrés quand aucun tournoi n'est actif. */
+  recent?: readonly TournamentListItem[];
   stats: { joueurs: number; clans: number; partiesClassees: number };
 }
 
@@ -55,6 +58,7 @@ export function HeroSection({
   featured,
   featuredParticipants,
   otherActive,
+  recent = [],
   stats,
 }: HeroSectionProps) {
   const isLive = featured?.internalState === TournamentState.ONGOING;
@@ -220,19 +224,26 @@ export function HeroSection({
             )}
           </section>
         ) : (
-          <section
-            className="achillea-home__featured achillea-home__empty"
-            aria-labelledby="tournaments-empty-title"
-          >
-            <Trophy aria-hidden="true" />
-            <div>
-              <h2 id="tournaments-empty-title">Calendrier des tournois</h2>
-              <p>Aucun tournoi n’est actuellement publié.</p>
-            </div>
-            <Link href="/achillea/tournaments">
-              Consulter le calendrier <ArrowRight aria-hidden="true" />
-            </Link>
-          </section>
+          <div className="achillea-home__featured">
+            <section
+              className="achillea-home__empty"
+              aria-labelledby="tournaments-empty-title"
+            >
+              <Trophy aria-hidden="true" />
+              <div>
+                <h2 id="tournaments-empty-title">Calendrier des tournois</h2>
+                {recent.length > 0 ? (
+                  <RecentTournamentsNote />
+                ) : (
+                  <p>Aucun tournoi n’est actuellement publié.</p>
+                )}
+              </div>
+              <Link href="/achillea/tournaments">
+                Consulter le calendrier <ArrowRight aria-hidden="true" />
+              </Link>
+            </section>
+            {recent.length > 0 && <RecentTournamentsList tournaments={recent} />}
+          </div>
         )}
 
         <nav

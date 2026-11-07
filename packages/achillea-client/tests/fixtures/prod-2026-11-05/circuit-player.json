@@ -1,0 +1,28 @@
+{
+  "tournamentsPlayed": 1,
+  "points": 10,
+  "tier": "Bronze",
+  "wins": 0,
+  "podiums": 0,
+  "top4": 0,
+  "top8": 0,
+  "bestRankLabel": "9e-16e",
+  "goalsScored": 9,
+  "goalsConceded": 4,
+  "goalAverage": 2.25,
+  "bestStreak": 1,
+  "history": [
+    {
+      "tournamentId": 32,
+      "tournamentName": "Summer Kama Club",
+      "grandFinalAt": "2026-08-06T19:00:00.000Z",
+      "size": 32,
+      "rank": 5,
+      "rankLabel": "9e-16e",
+      "points": 10,
+      "tier": "Bronze",
+      "goalsScored": 9,
+      "goalsConceded": 4
+    }
+  ]
+}

@@ -1,4 +1,6 @@
 {
+	"achillea.home.recent.note": "Aucun tournoi en cours ni à venir. Voici les derniers tournois joués.",
+	"achillea.home.recent.label": "Derniers tournois",
 	"consent.policy.intro": "Ces deux services ne sont chargés qu’avec votre accord, donné dans le bandeau de première visite. Vous pouvez changer d’avis à tout moment.",
 	"consent.title": "Cookies et mesure d'audience",
 	"consent.body": "Avec votre accord, nous mesurons la fréquentation (Google Tag Manager) et affichons des publicités (Google AdSense). Sans accord, rien de cela n'est chargé et le site fonctionne pareil.",

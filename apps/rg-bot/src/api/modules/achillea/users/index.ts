@@ -7,6 +7,7 @@ import { LeaderboardService } from "../leaderboard/service";
 import { UsersModel } from "./model";
 import { resolveAchilleaSession } from "../../auth/session";
 import { findLinkedPublicProfile, projectPublicIdentity } from "./public-profile";
+import { interclanStats, tournamentStats } from "./competition-stats";
 
 async function rankedHistory(
   db: Kysely<Database>,
@@ -174,7 +175,7 @@ export const usersController = new Elysia({ prefix: "/users" })
         .where("id", "=", id)
         .executeTakeFirst();
       if (!user) return status(404, { message: "User not found" as const });
-      const [elos, ranks, clan, publicProfile, rankedStats] = await Promise.all([
+      const [elos, ranks, clan, publicProfile, rankedStats, tournaments, interclans] = await Promise.all([
         db
           .selectFrom("user_elo")
           .select(["mode", "elo", "games_played", "wins", "losses"])
@@ -223,6 +224,8 @@ export const usersController = new Elysia({ prefix: "/users" })
 			`
           .execute(db)
           .then(result => result.rows),
+        tournamentStats(db, id),
+        interclanStats(db, id),
       ]);
       const modeStats = (mode: number) => {
         const row = elos.find(elo => Number(elo.mode) === mode);
@@ -250,18 +253,6 @@ export const usersController = new Elysia({ prefix: "/users" })
           return "https://cdn.discordapp.com/embed/avatars/0.png";
         }
       })();
-      const emptyCompetition = {
-        total: 0,
-        wins: 0,
-        losses: 0,
-        draws: 0,
-        goalsScoredAvg: 0,
-        goalsReceivedAvg: 0,
-        personalTotal: 0,
-        personalWins: 0,
-        personalLosses: 0,
-        personalDraws: 0,
-      };
       const identity = projectPublicIdentity(publicProfile, {
         username: user.display_name ?? user.username ?? user.id,
         avatar,
@@ -294,8 +285,8 @@ export const usersController = new Elysia({ prefix: "/users" })
               distinctions: clan.distinctions ?? [],
             }
           : undefined,
-        interclans: emptyCompetition,
-        tournaments: emptyCompetition,
+        interclans,
+        tournaments,
         ranked: { solo: { ...solo, rank: undefined }, duo: { ...duo, rank: undefined } },
       };
     },
