@@ -32,9 +32,6 @@ __pycache__/
 .codex/
 .cursor/
 .gemini/
-CLAUDE.md
-AGENTS.md
-GEMINI.md
 .mcp.json
 
 # Sorties locales des exécutions
