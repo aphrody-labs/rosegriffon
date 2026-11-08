@@ -1,6 +1,6 @@
 # Documentation — monorepo Rose Griffon
 
-> 🌟 **SOURCE UNIQUE DE VÉRITÉ** : Le document de référence canonique pour la navigation, l'architecture unifiée des trois univers et le design system est [`/PLAN.md`](../PLAN.md).
+>  **SOURCE UNIQUE DE VÉRITÉ** : Le document de référence canonique pour la navigation, l'architecture unifiée des trois univers et le design system est [`/PLAN.md`](../PLAN.md).
 
 Index de la documentation partagée. Convention du dépôt : `*.md` est gitignoré
 **sauf** `docs/**`, `PLAN.md`, les `README.md` de paquet et quelques exceptions listées

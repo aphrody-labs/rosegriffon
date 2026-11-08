@@ -62,11 +62,11 @@ hashtag, éditions précédentes comprises.
 (`campagnes:relais`).
 
 Le bot dépose **chaque création, quelle que soit sa source**, dans
-`x_campagnes.relais_salon`. Pour IERG Day c'est `⚙🍰〡iergday-staff`
+`x_campagnes.relais_salon`. Pour IERG Day c'est `〡iergday-staff`
 (`1537470522764304435`).
 
-> ⚠ **Le salon de relais n'est PAS le salon de dépôt.** `salons_depot`
-> (`🍰〡iergday`) est l'endroit **public** où les membres déposent eux-mêmes ;
+>  **Le salon de relais n'est PAS le salon de dépôt.** `salons_depot`
+> (`〡iergday`) est l'endroit **public** où les membres déposent eux-mêmes ;
 > `relais_salon` est le fil de suivi de l'équipe. Confondre les deux ferait
 > republier par le bot, dans le salon public, ce qu'un membre vient d'y poster.
 

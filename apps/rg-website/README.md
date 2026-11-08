@@ -60,11 +60,11 @@ Application Next.js 16 unifiée de **Rose Griffon** (`rosegriffon.fr`), fusionna
 
 Toutes les anciennes URLs `https://azalee.rosegriffon.fr/*` sont préservées sans régression :
 
-- `https://azalee.rosegriffon.fr/` ➔ `https://rosegriffon.fr/wiki` (301 Permanent).
-- `https://azalee.rosegriffon.fr/<section>/...` ➔ `https://rosegriffon.fr/wiki/<section>/...` (301 Permanent).
-- `https://azalee.rosegriffon.fr/news/...` ➔ `https://rosegriffon.fr/news/...` (301 Permanent).
-- `https://azalee.rosegriffon.fr/dashboard/...` ➔ `https://rosegriffon.fr/admin/...` (301 Permanent).
-- `https://azalee.rosegriffon.fr/api/...` ➔ proxifié directement vers le backend unifié (préservation des requêtes POST, PUT, webhooks et bots Discord).
+- `https://azalee.rosegriffon.fr/`  `https://rosegriffon.fr/wiki` (301 Permanent).
+- `https://azalee.rosegriffon.fr/<section>/...`  `https://rosegriffon.fr/wiki/<section>/...` (301 Permanent).
+- `https://azalee.rosegriffon.fr/news/...`  `https://rosegriffon.fr/news/...` (301 Permanent).
+- `https://azalee.rosegriffon.fr/dashboard/...`  `https://rosegriffon.fr/admin/...` (301 Permanent).
+- `https://azalee.rosegriffon.fr/api/...`  proxifié directement vers le backend unifié (préservation des requêtes POST, PUT, webhooks et bots Discord).
 
 ---
 

@@ -26,17 +26,17 @@ n'a pas de colonne `guild_id`, elle ne décrit que cette communauté.
 
 | Indice | Poids | Ce qu'il constate |
 | --- | --- | --- |
-| 🔗 Même compte du site | 70 | Deux comptes Discord rattachés au même profil, courriel, Steam ou Patreon. **Ce n'est pas une ressemblance** : la personne l'a établi elle-même en se connectant. Mais c'est aussi le plus rare — 16 membres sur 2 079 portent une liaison exploitable (voir *Limites*). |
-| 🖼️ Même avatar | 34 | Même condensat d'image — donc le même fichier téléversé. Dégressif : partagé par huit comptes, il ne vaut presque plus rien. |
-| 🏷️ Même surnom | 24 | Même surnom posé sur le serveur. |
-| 🔁 Relève | 24 | Un compte part, l'autre arrive dans la foulée. Le motif du contournement de sanction. |
-| 🔤 Même racine de pseudo | 22 | `markevans` et `markevans_alt2` tombent sur la même racine. Dégressif aussi. |
-| 🔤 Pseudos voisins | 18 | Ressemblance entre toutes les identités (pseudo, nom d'affichage, surnom) des deux comptes. |
-| 🕰️ Activités alternées | 18 | Jamais actifs dans le même créneau de dix minutes, alors qu'ils écrivent dans les mêmes salons. **Ne se déclenche pas encore** : l'archive manque de matière (voir *Limites*). |
-| 🥚 Créations rapprochées | 18 | Comptes créés à quelques heures d'intervalle (date lue dans le flocon). |
-| 🚪 Arrivées rapprochées | 16 | Arrivés sur le serveur à quelques minutes d'intervalle. |
-| 🌱 Compte neuf | 8 | Le plus récent a rejoint moins d'une semaine après sa création. Exige un indice **d'identité** à côté : « créé la veille de son arrivée » décrit la moitié des nouveaux membres. |
-| 👥 Activités simultanées | −8 | Souvent actifs en même temps. **Ne disculpe pas** — on tient très bien deux comptes sur deux appareils. |
+|  Même compte du site | 70 | Deux comptes Discord rattachés au même profil, courriel, Steam ou Patreon. **Ce n'est pas une ressemblance** : la personne l'a établi elle-même en se connectant. Mais c'est aussi le plus rare — 16 membres sur 2 079 portent une liaison exploitable (voir *Limites*). |
+| ️ Même avatar | 34 | Même condensat d'image — donc le même fichier téléversé. Dégressif : partagé par huit comptes, il ne vaut presque plus rien. |
+| ️ Même surnom | 24 | Même surnom posé sur le serveur. |
+|  Relève | 24 | Un compte part, l'autre arrive dans la foulée. Le motif du contournement de sanction. |
+|  Même racine de pseudo | 22 | `markevans` et `markevans_alt2` tombent sur la même racine. Dégressif aussi. |
+|  Pseudos voisins | 18 | Ressemblance entre toutes les identités (pseudo, nom d'affichage, surnom) des deux comptes. |
+| ️ Activités alternées | 18 | Jamais actifs dans le même créneau de dix minutes, alors qu'ils écrivent dans les mêmes salons. **Ne se déclenche pas encore** : l'archive manque de matière (voir *Limites*). |
+|  Créations rapprochées | 18 | Comptes créés à quelques heures d'intervalle (date lue dans le flocon). |
+|  Arrivées rapprochées | 16 | Arrivés sur le serveur à quelques minutes d'intervalle. |
+|  Compte neuf | 8 | Le plus récent a rejoint moins d'une semaine après sa création. Exige un indice **d'identité** à côté : « créé la veille de son arrivée » décrit la moitié des nouveaux membres. |
+|  Activités simultanées | −8 | Souvent actifs en même temps. **Ne disculpe pas** — on tient très bien deux comptes sur deux appareils. |
 
 **Les trois indices de date partagent un budget de 24 points** — le seuil de
 « à examiner », et pas un de plus. Ils ne sont pas indépendants : deux amis
@@ -50,9 +50,9 @@ Le score est la somme des poids, et le niveau en découle :
 
 | Niveau | Seuil | Lecture |
 | --- | --- | --- |
-| 🟥 Rattachement établi | 65 | Ou dès qu'une liaison déclarée existe. |
-| 🟧 Faisceau d'indices | 42 | Plusieurs constatations indépendantes concordent. |
-| 🟨 À examiner | 24 | La valeur par défaut du balayage. |
+|  Rattachement établi | 65 | Ou dès qu'une liaison déclarée existe. |
+|  Faisceau d'indices | 42 | Plusieurs constatations indépendantes concordent. |
+|  À examiner | 24 | La valeur par défaut du balayage. |
 | ⬜ Coïncidence | 12 | Deux comptes créés le même jour, rien de plus. |
 
 **Aucun indice observable n'atteint seul le seuil de « faisceau »**, et aucune
@@ -119,7 +119,7 @@ examinées, 469 ms à froid et 207 ms sur le cliché. 1 048 rapprochements —
 Déclenchements par indice : `creation` 781, `arrivee` 290, `pseudo` 59,
 `avatar` 36, `jeune` 35, `racine` 23, `releve` 4.
 
-⚠ **Un piège qui coûte cher, et qui ne se voit pas.** La normalisation plie les
+ **Un piège qui coûte cher, et qui ne se voit pas.** La normalisation plie les
 chiffres en lettres (`m4rk` → `mark`). Retirer les chiffres de queue APRÈS ce
 pliage ne retire rien : `christo931` vaut déjà `christo9ei`, qui ne finit plus
 par un chiffre. C'était le cas de 94 % des pseudos à suffixe numérique, et

@@ -67,7 +67,7 @@ bun run smoke:admin      # smoke test services + RBAC + audit (requiert DB live)
 bun run smoke:canvas     # smoke test canvas (génère /tmp/rg-{staff,profil,events}.png)
 ```
 
-⚠ Toujours lancer depuis `apps/bot` (ou avec ce répertoire comme
+ Toujours lancer depuis `apps/bot` (ou avec ce répertoire comme
 `WorkingDirectory`) : Bun lit le `tsconfig.json` du répertoire courant, et
 c'est celui-ci qui porte `experimentalDecorators` + `emitDecoratorMetadata`.
 Depuis la racine du dépôt, discordx meurt sur « TypeError: undefined is not an

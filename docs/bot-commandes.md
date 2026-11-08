@@ -236,7 +236,7 @@ Poids par racine : toutes **< 620 / 8 000** (< 8 %). `validation-annonce.ts` ne 
 C'est l'inverse du profil `rg`, où c'est le budget de 8 000 caractères qui
 serre (`/gestion`, `/moderation`), jamais le nombre de sous-commandes.
 
-⚠ **`/article` est enregistré sur le bot Azalée, pas sur le bot Rose
+ **`/article` est enregistré sur le bot Azalée, pas sur le bot Rose
 Griffon** — vérifié par `journalctl` et par `MODULES_AZALEE`. C'est une
 décision explicite (commit `08f96dda`, « /staff revient au bot Rose Griffon et
 /article passe au bot Azalée »), mais **deux sources documentaires
@@ -294,11 +294,11 @@ function poids(n) {
 }
 for (const c of MetadataStorage.instance.applicationCommands) {
   const t = poids(c.toJSON());
-  if (t > 3000) console.log(String(t).padStart(5), "/" + c.name, t > 8000 ? "⚠" : "");
+  if (t > 3000) console.log(String(t).padStart(5), "/" + c.name, t > 8000 ? "" : "");
 }
 ```
 
-⚠ Ne PAS mesurer `JSON.stringify(c.toJSON()).length` : le JSON brut compte les
+ Ne PAS mesurer `JSON.stringify(c.toJSON()).length` : le JSON brut compte les
 clés et la structure, et rend 26 672 pour `/gestion` — trois fois la vraie
 valeur. Discord ne compte que les `name`, `description` et valeurs de choix.
 | `azalee` | azalee | ≈ 2 368 | 30 % (mais 76 % du plafond de 25 sous-commandes) |
@@ -341,7 +341,7 @@ lecture, cumulés pour la liste complète (`/members` plafonne à 1 000 par
 page, la guilde compte 1 902 membres) :
 
 - `GET /guilds/{id}/integrations` → 19 intégrations, dont 16 bots tiers, les
-  deux bots du dépôt (« RG », « 𝓐𝔃𝓪𝓵𝓮́𝓮 🌸 ») et « Server Subscriptions Group »
+  deux bots du dépôt (« RG », « 𝓐𝔃𝓪𝓵𝓮́𝓮  ») et « Server Subscriptions Group »
   (l'intégration native des boosts Discord, pas un bot).
 - `GET /guilds/{id}/members?limit=1000` + `after=<dernier id>` → 18 comptes
   `bot:true` au total, confirmant la liste ci-dessus.

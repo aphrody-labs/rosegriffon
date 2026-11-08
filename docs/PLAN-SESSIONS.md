@@ -74,7 +74,7 @@ et `bun test packages/rg-app-shell`. Un seul build lourd à la fois.
   `images` du projet courant (`scripts/achillea/migrer-images-legacy.ts`, rejouable).
 - **Migrations appliquées** : `20261022_achillea_data_valeur_texte.sql`, `20261022_achillea_clans_temps_reel.sql`.
 - **Back-office Next** : les 17 onglets du BO Angular sont portés (`/achillea/admins/dashboard`), visibilité par
-  rôle identique au legacy. ⚠ Côté site, ces changements ne sont **pas encore en ligne** : voir chantier 0.
+  rôle identique au legacy.  Côté site, ces changements ne sont **pas encore en ligne** : voir chantier 0.
 
 ## Chantiers restants (par priorité)
 

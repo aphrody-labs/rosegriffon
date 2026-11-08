@@ -181,7 +181,7 @@ une redirection permanente dans `next.config` vers son équivalent préfixé
 | `ngx-lottie` / `lottie-web` | `lottie-web` dans un îlot client | dépendance conservée |
 | `socket.io-client` (notifications) | îlot client + hook `useNotifications` | dernier lot, cf. §5 phase 4 |
 | `@colyseus/sdk` (`ranked-room-service`) | îlot client dédié `ranked/match` | idem — seul endroit où Angular n'est pas un simple adaptateur |
-| `environment.ts` / `achillea-config.js` (runtime) | `NEXT_PUBLIC_ACHILLEA_API_URL` + variantes | ⚠️ `NEXT_PUBLIC_*` inliné au **build** : lancer `bun run deploy website` depuis `apps/website`, jamais depuis la racine |
+| `environment.ts` / `achillea-config.js` (runtime) | `NEXT_PUBLIC_ACHILLEA_API_URL` + variantes | ️ `NEXT_PUBLIC_*` inliné au **build** : lancer `bun run deploy website` depuis `apps/website`, jamais depuis la racine |
 | `@casl/ability` | `access` de `achillea-core` | à vérifier vue par vue ; si un cas manque, il va dans `core`, pas dans l'app |
 
 ---

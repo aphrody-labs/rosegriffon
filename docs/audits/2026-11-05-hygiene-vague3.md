@@ -83,7 +83,7 @@ Deux causes :
 
 1. **Initiale de l'avatar de repli** (`feed/carte-post.tsx`, `feed/fil-feed.tsx`,
    `components/achillea/UserAvatar.tsx`) : `nom.charAt(0)` sur un nom qui commence par un émoji
-   (« 👑シベリアチャンネル👑 », « 🥕沙々希🥕Ω », relevés en base) rend la moitié haute d'une paire
+   (« シベリアチャンネル », « 沙々希Ω », relevés en base) rend la moitié haute d'une paire
    de substitution. Elle n'est pas encodable en UTF-8 et sort en U+FFFD. Correction :
    `initiale()` (`src/lib/unicode.ts`) prend le premier graphème avec `Intl.Segmenter`.
    Dans le même esprit, `clampText` (`seo.ts`) et `resumeQuestion` (`polls-types.ts`)

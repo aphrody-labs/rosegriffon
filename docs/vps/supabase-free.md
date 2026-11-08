@@ -66,12 +66,12 @@ Fact-checké Context7 / doc officielle Supabase · 2026-04-19
 | Projets / organisation | **2** |
 | Log retention | **7 jours** |
 | Backups | 1 / jour, 7 jours de rétention |
-| Point-in-time recovery | ❌ (Pro uniquement) |
+| Point-in-time recovery |  (Pro uniquement) |
 | Assistance | Communauté (forum, Discord) |
 
 ---
 
-## ⚠ Auto-pause — critique pour la prod
+##  Auto-pause — critique pour la prod
 
 > **Les projets Free sont mis en pause après 7 jours d'inactivité.**
 >
@@ -87,7 +87,7 @@ Fact-checké Context7 / doc officielle Supabase · 2026-04-19
 
 **Mitigation pour prod publique** :
 - Cron externe (GitHub Actions, VPS systemd timer) qui ping `/rest/v1/` tous les 6 jours.
-- ✅ Recommandé : **upgrader Pro** ($25/mois) — pas d'auto-pause.
+-  Recommandé : **upgrader Pro** ($25/mois) — pas d'auto-pause.
 
 **Pour Rose Griffon** :
 - `website` + `azalee` en prod publique francophone → **risque réel d'auto-pause** pendant les vacances ou creux de trafic.
@@ -124,16 +124,16 @@ POSTGRES_PRISMA_URL=postgres://...:6543/postgres?pgbouncer=true&connect_timeout=
 Sur Vercel Functions (serverless), chaque invocation = nouveau process Node. Sans pooling, la DB plafonne à 60 connexions → erreur `FATAL: too many connections`.
 
 ```ts
-// ✅ SSR avec pooler
+//  SSR avec pooler
 import { createServerClient } from '@supabase/ssr'
 // Utilise automatiquement POSTGRES_URL (port 6543)
 
-// ✅ Prisma avec pgbouncer
+//  Prisma avec pgbouncer
 const prisma = new PrismaClient({
   datasources: { db: { url: process.env.POSTGRES_PRISMA_URL } }
 })
 
-// ❌ Direct connection — épuisera les 60 slots rapidement
+//  Direct connection — épuisera les 60 slots rapidement
 const prismaDirect = new PrismaClient({
   datasources: { db: { url: process.env.POSTGRES_URL_NON_POOLING } }
 })
@@ -188,9 +188,9 @@ export async function supabaseServer() {
 
 4. **Réduire les requêtes avec `select`** :
    ```ts
-   // ❌ download tout
+   //  download tout
    supabase.from('articles').select('*')
-   // ✅ colonnes nécessaires uniquement
+   //  colonnes nécessaires uniquement
    supabase.from('articles').select('id, title, excerpt, cover_url')
    ```
 
@@ -214,17 +214,17 @@ export async function supabaseServer() {
 
 | Feature | Free | Pro |
 |---|---|---|
-| Auto-pause | 7 jours | ❌ jamais |
+| Auto-pause | 7 jours |  jamais |
 | DB size | 500 MB | 8 GB (autoscale) |
 | Bandwidth | 10 GB | **250 GB** |
 | Storage | 1 GB | 100 GB |
 | MAU | 50k | 100k |
 | Realtime connections | 200 | 500 |
 | Log retention | 7 jours | 7 jours (+ $10/mois pour 28j) |
-| Point-in-time recovery | ❌ | $100/mois add-on |
+| Point-in-time recovery |  | $100/mois add-on |
 | Support | Communauté | Email (48h SLA) |
-| Compute upgrade | ❌ (small only) | Tous tiers (Micro → 16 XL) |
-| Spend Cap | ❌ | ✅ (désactivable pour autoscale) |
+| Compute upgrade |  (small only) | Tous tiers (Micro → 16 XL) |
+| Spend Cap |  |  (désactivable pour autoscale) |
 
 ### Upgrade
 
@@ -266,8 +266,8 @@ psql "$POSTGRES_URL" -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'ac
 
 ### Si Free (recommandations)
 
-- ✅ Garder bucket `menu` servi par nginx VPS (évite 10 GB bandwidth)
-- ⚠ Configurer un cron externe tous les 6 jours pour prévenir auto-pause :
+-  Garder bucket `menu` servi par nginx VPS (évite 10 GB bandwidth)
+-  Configurer un cron externe tous les 6 jours pour prévenir auto-pause :
   ```yaml
   # .github/workflows/supabase-keepalive.yml
   on:
@@ -279,14 +279,14 @@ psql "$POSTGRES_URL" -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'ac
       steps:
         - run: curl -sf -H "apikey:${{ secrets.SUPABASE_ANON_KEY }}" https://isbkaeltubqittywibeh.supabase.co/rest/v1/
   ```
-- ⚠ Surveiller bandwidth mensuel dans le dashboard (alertes email à 80%)
-- ❌ Pas d'Image Optimization Vercel (quota 1K/mois) — utiliser URLs directes `/storage/v1/object/public/menu/...`
+-  Surveiller bandwidth mensuel dans le dashboard (alertes email à 80%)
+-  Pas d'Image Optimization Vercel (quota 1K/mois) — utiliser URLs directes `/storage/v1/object/public/menu/...`
 
 ### Si Pro ($25/mois)
 
-- ✅ Pas d'auto-pause → migration Vercel sereine
-- ✅ 250 GB bandwidth → bucket `menu` peut aller sur Supabase Storage
-- ✅ Point-in-time recovery add-on ($100/mois) si données critiques
+-  Pas d'auto-pause → migration Vercel sereine
+-  250 GB bandwidth → bucket `menu` peut aller sur Supabase Storage
+-  Point-in-time recovery add-on ($100/mois) si données critiques
 
 ---
 

@@ -208,7 +208,7 @@ d'API porte `totalXp`, l'entrée de classement porte `userID`, et l'absence
 d'archive signale l'historique. Voir `couvertureImport()` et `provenanceDe()`
 dans `apps/website/src/lib/bot/membres.ts`.
 
-⚠ **Coupure serveur / client obligatoire.** `lib/bot/membres.ts` porte
+ **Coupure serveur / client obligatoire.** `lib/bot/membres.ts` porte
 `import "server-only"` (il ouvre le pool Postgres) ; le tableau est un îlot
 `"use client"` qui a besoin des mêmes libellés et des mêmes types. Ceux-ci
 vivent donc dans `lib/bot/membres-shared.ts`, que l'îlot importe DIRECTEMENT.

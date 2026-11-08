@@ -91,7 +91,7 @@ publique stable `https://ranked.rosegriffon.fr/api`, indépendante de l'IP du VP
 | `cdn.rosegriffon.fr/images/<hash invalide>` | **403** | validation content-addressed |
 | `https://achillea.rosegriffon.fr/` | **200** | front Achillea (nginx, VPS `51.255.162.6`) |
 
-> ⚠️ **Images legacy mortes** : d'anciennes lignes `image` (ancienne prod Achillea) pointent sur
+> ️ **Images legacy mortes** : d'anciennes lignes `image` (ancienne prod Achillea) pointent sur
 > `https://api.alessf.fr/images/<id>` qui **ne répond plus (000)**. Les uploads actuels utilisent
 > le Storage Supabase Achillea ; `IMAGE_SERVER_URL` reste un ancien chemin optionnel. Les URLs
 > legacy doivent être inventoriées avant toute réécriture vers le CDN RG.
@@ -185,7 +185,7 @@ Aligner sur l'approche `docs/la stratégie SEO du dépôt` (website + azalee, **
 | Données structurées | JSON-LD (`StructuredData`) | JSON-LD `BreadcrumbList`, `Organization`, `SportsTeam`/`Event` pour clans/tournois |
 | Canonical | oui | `<link rel="canonical">` par route |
 | `sitemap.xml` | `app/sitemap.ts` | sitemap dynamique (routes + entités) — **absent** côté Achillea (vérifié) |
-| `robots.txt` | oui | ✅ déjà présent (statique) |
+| `robots.txt` | oui |  déjà présent (statique) |
 
 > **Priorité** : sans prerender, Google n'indexe que l'index. `@angular/ssr` (prerender des pages entité)
 > = gain SEO #1, puis sitemap + JSON-LD + OG. Réutiliser les conventions titres/OG de `la stratégie SEO du dépôt`.

@@ -18,8 +18,8 @@ ne charge aucun de ces modules.
 
 | Publication automatique | Décidé le | Garde en place |
 | --- | --- | --- |
-| **Posts X du bot Azalée** (`🌸〡𝓐𝔃𝓪𝓵𝓮́𝓮`) | validé | carte de validation humaine dans `🌿📰〡général-azalée` — rien ne part sans un clic |
-| **Relais des créations iergday** (`⚙🍰〡iergday-staff`) | validé | salon de STAFF, pas public ; `relais_depuis` borne le déluge |
+| **Posts X du bot Azalée** (`〡𝓐𝔃𝓪𝓵𝓮́𝓮`) | validé | carte de validation humaine dans `〡général-azalée` — rien ne part sans un clic |
+| **Relais des créations iergday** (`〡iergday-staff`) | validé | salon de STAFF, pas public ; `relais_depuis` borne le déluge |
 
 Tout le reste (annonces de niveau, accueil, recrutements remarquables, annonces
 d'articles) est **éteint** tant qu'un humain ne l'a pas allumé.
@@ -44,8 +44,8 @@ côtés du fil (site et cron). Il a été remplacé par 32 octets aléatoires da
 les trois fichiers concernés, et `packages/cron/.env.example` ne livre plus de
 valeur utilisable.
 
-⚠ **À arbitrer par le staff** : `DISCORD_NEWS_CHANNEL_ID` vaut
-`1441915377754964061`, c'est-à-dire **`🚨〡live`**. Les annonces d'articles
+ **À arbitrer par le staff** : `DISCORD_NEWS_CHANNEL_ID` vaut
+`1441915377754964061`, c'est-à-dire **`〡live`**. Les annonces d'articles
 partent donc dans le salon des directs, faute de
 `DISCORD_WEBSITE_ANNOUNCEMENTS_CHANNEL_ID` et
 `DISCORD_WIKI_ANNOUNCEMENTS_CHANNEL_ID`. Ces deux variables existent
@@ -87,15 +87,15 @@ valeur plus fraîche déjà écrite.
 
 | Salon | Couverture | Trouvé |
 | --- | --- | ---: |
-| `#🤖〡bots` | intégrale, 2023→2026 | 19 (`/rank` + `/leaderboard`) |
-| `#🤪〡memes-inazuma` | intégrale, 2023→2026 | 3 |
-| `#🎈〡questions` | intégrale, 2023→2026 | 1 |
-| `#💬〡général` | arrêtée au 11/3/2026 | 207 |
-| `#📷〡médias` | arrêtée au 11/3/2026 | 45 |
-| `#🎨〡vos-fanarts` | arrêtée au 17/3/2026 | 7 |
+| `#〡bots` | intégrale, 2023→2026 | 19 (`/rank` + `/leaderboard`) |
+| `#〡memes-inazuma` | intégrale, 2023→2026 | 3 |
+| `#〡questions` | intégrale, 2023→2026 | 1 |
+| `#〡général` | arrêtée au 11/3/2026 | 207 |
+| `#〡médias` | arrêtée au 11/3/2026 | 45 |
+| `#〡vos-fanarts` | arrêtée au 17/3/2026 | 7 |
 
 L'essentiel du volume (54 des 65 membres) ne vient PAS d'une carte `/rank` ou
-`/leaderboard`, mais des embeds automatiques **« 🎉 Niveau supérieur ! »**
+`/leaderboard`, mais des embeds automatiques **«  Niveau supérieur ! »**
 postés dans les salons de discussion générale — ils mentionnent l'ID Discord
 en clair, donc aucune résolution par pseudo. Leur XP est le seuil OFFICIEL du
 palier annoncé (table `noctaly.com/table`), un minorant réel et non la valeur
@@ -111,7 +111,7 @@ C'était tout ce qui était atteignable **sans clé et sans session** :
   justifié d'arrêter les 3 autres dès qu'ils y remontaient sans rien trouver
   de plus.
 
-> ⚠ **Une affirmation de cette page était fausse** et a coûté du temps : « la
+>  **Une affirmation de cette page était fausse** et a coûté du temps : « la
 > page publique du classement charge ses données côté client (rien dans le HTML
 > brut) ». Vérifié le 14/8/2026 : les profils sont **dans le rendu serveur**,
 > sous la propriété `initProfiles` de la charge React. Ils n'apparaissent pas
@@ -149,7 +149,7 @@ applications qui insistent. D'où trois choix : cadence alignée sur le quota
 `X-RateLimit-Reset-After`, et **interruption pure et simple** sur un 429 plutôt
 qu'un réessai. L'import étant idempotent, reprendre plus tard ne coûte rien.
 
-> ⚠ **La documentation se trompe d'un facteur vingt-cinq.** Mesuré le 14/8/2026
+>  **La documentation se trompe d'un facteur vingt-cinq.** Mesuré le 14/8/2026
 > avec une vraie clé : les en-têtes annoncent `X-RateLimit-Limit: 120` et
 > `X-RateLimit-Reset-After: 60`, et `Remaining` décroît d'une unité par requête.
 > Le plafond réel est de **120 requêtes par fenêtre de 60 secondes**, soit
@@ -284,7 +284,7 @@ bun apps/bot/src/scripts/import-noctaly.ts --tous       # + membres partis
 Les 4 paliers de rôles ont été **confirmés sur le tableau de bord Noctaly le
 14/8/2026** — 10 → Joueur Intermédiaire, 25 → Joueur FF, 40 → Joueur FFI,
 60 → Joueur Route Victoire — identiques à ce que `import-xp-tiers.ts` avait
-déduit du salon `#🎀〡rôles`, donc rien à corriger en base.
+déduit du salon `#〡rôles`, donc rien à corriger en base.
 
 ---
 
@@ -415,7 +415,7 @@ taxe sur ceux qui n'y jouent pas.
 
 ## 6. Tickets — fils privés, rien chez un tiers
 
-- Un ticket est un **fil privé** dans `📩〡demandes-tickets`, nommé
+- Un ticket est un **fil privé** dans `〡demandes-tickets`, nommé
   `ticket-0086` — **le numéro, jamais le pseudo** : le nom d'un fil apparaît
   dans la liste du salon et dans le journal d'audit du serveur.
 - Cinq catégories. **Signalement** est *sensible* : il ne va **qu'à la
@@ -423,7 +423,7 @@ taxe sur ceux qui n'y jouent pas.
 - **Un seul ticket ouvert par membre.** Le second renvoie vers le premier au
   lieu de refuser.
 - Fermeture : **motif obligatoire**, fil **archivé et verrouillé** (jamais
-  supprimé), carte de fermeture dans `📦〡ticket-history` avec les mêmes champs
+  supprimé), carte de fermeture dans `〡ticket-history` avec les mêmes champs
   que les 84 cartes précédentes.
 
 ### Le piège qui rend un système de tickets inutile
@@ -486,7 +486,7 @@ membres ordinaires (confort d'interface) ; `exigerDroits` lit le rôle réel dan
 horodatage de présence, donc une donnée de comportement, sans rapport avec un
 classement.
 
-> ⚠ Toute table créée en `postgres` doit finir par `alter table … owner to rg;`.
+>  Toute table créée en `postgres` doit finir par `alter table … owner to rg;`.
 > Le bot se connecte sous le rôle `rg` : sans ça, il lève « permission denied »
 > à la première écriture, longtemps après la migration et loin d'elle.
 
@@ -582,7 +582,7 @@ qu'à celui qui pensait à l'ouvrir.
 
 Chaque action de `/moderation moderation` (avertissement, exclusion, levée,
 expulsion, bannissement, débannissement) paraît désormais dans le salon réglé
-par `/administration journal salon` — sur le serveur Rose Griffon, `#💬📖〡logs`
+par `/administration journal salon` — sur le serveur Rose Griffon, `#〡logs`
 (`1073752409387573339`), branché le 31/8/2026. La carte porte la mention **et**
 le nom **et** l'identifiant du membre visé (un pseudo change, une mention ne se
 résout plus quand le compte est parti), le motif, l'auteur de la sanction, et
@@ -597,7 +597,7 @@ supprimé, droits retirés), l'accusé de réception de la sanction le dit en cl
 à celui qui vient de sanctionner : une action déjà appliquée ne se rejoue pas,
 la seule chose utile est de savoir ce qui n'a PAS été écrit.
 
-⚠ Le salon nomme des membres et leurs motifs : il se réserve au staff. Sur le
+ Le salon nomme des membres et leurs motifs : il se réserve au staff. Sur le
 serveur Rose Griffon, `@everyone` n'y voit rien, seuls les Modérateurs y ont
 accès.
 
@@ -619,13 +619,13 @@ jour plutôt que de créer — une seconde création échoue avec une erreur ill
 anti-mentions, un filtre de mots-clés). Manquent l'**anti-spam** et les **jeux
 de mots-clés de Discord** — à activer par un admin, conformément au principe 3.
 
-⚠ Les rôles à permission « Gérer le serveur » échappent nativement à l'AutoMod :
+ Les rôles à permission « Gérer le serveur » échappent nativement à l'AutoMod :
 Discord ne les filtre pas, quelle que soit la règle.
 
 ## 12. Suggestions — le vote reste chez Discord
 
 `/suggestion proposer` publie dans le salon configuré (fermé par défaut) ; le
-bot pose 👍 et 👎, et **c'est tout**. Le registre de qui a voté quoi reste chez
+bot pose  et , et **c'est tout**. Le registre de qui a voté quoi reste chez
 Discord ; nous n'en lisons que les compteurs, au moment où le staff tranche.
 
 C'est la même ligne rouge que les sondages : le réflexe serait une table
@@ -668,7 +668,7 @@ sudo systemctl restart rg-bot.service
 journalctl -u rg-bot.service --since "-1 min" | tail -20
 ```
 
-Le démarrage doit afficher « ✓ Commandes enregistrées » et lister les guildes.
+Le démarrage doit afficher «  Commandes enregistrées » et lister les guildes.
 `initApplicationCommands failed` avec `Invalid Form Body` signale un dépassement
 du plafond de 8 000 caractères par racine de commande : c'est ce qui a déjà fait
 éclater `/administration` en trois racines (`/administration`, `/gestion`,

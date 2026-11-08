@@ -33,7 +33,7 @@ Et sur **le post réel de la campagne**
 | la page du post | **200**, 605 523 o, `<title>Instagram</title>` — **0 `og:image`, 0 `og:description`, 0 JSON-LD, 0 `_sharedData`** |
 | `?__a=1&__d=dis` | **500**, corps `Oops, an error occurred.` |
 | `/embed/` et `/embed/captioned/` | 200, **la même coquille vide** |
-| **`graph.facebook.com/v23.0/instagram_oembed`** | **200 ✅**, sans jeton |
+| **`graph.facebook.com/v23.0/instagram_oembed`** | **200 **, sans jeton |
 
 À un client non connecté, Instagram sert désormais **la même coquille SPA de
 ~605 Ko pour tout** — page de tag, page de post, page d'embed. Le scraping HTML
@@ -125,7 +125,7 @@ façon fiable et gratuite :
 | **400**, `code: 24`, `error_subcode: 2207045` | « Media Not Found » : inexistante, supprimée, ou compte passé en privé |
 | 5xx, réseau coupé | **`indeterminee` — le dépôt PASSE quand même** |
 
-> ⚠ **Une panne de Meta n'est pas un refus.** Refuser la création d'un
+>  **Une panne de Meta n'est pas un refus.** Refuser la création d'un
 > participant parce que *notre* vérification est en panne lui ferait payer une
 > panne qui n'est pas la sienne. Le dépôt est accepté, et le staff tranche
 > depuis son salon de suivi.
@@ -161,7 +161,7 @@ https://www.instagram.com/reel/Db_AxXAlywQ/
 instagram.com/p/Db_AxXAlywQ
 ```
 
-Toutes rendent le même `shortcode` et le même permalien canonique. ⚠ **`igsh` est
+Toutes rendent le même `shortcode` et le même permalien canonique.  **`igsh` est
 un jeton de traçage** — il identifie le partageur, pas la publication : le garder
 stockerait une donnée de pistage, et deux membres partageant le même post
 créeraient deux lignes au lieu d'une. Il est retiré.
@@ -198,13 +198,13 @@ PRIMARY KEY (campagne_slug, shortcode)
 ```
 
 Quatre index (galerie partielle, vedette, masquées, déposant), `revoke all` **puis**
-`grant select` à `anon`/`authenticated` — ⚠ un GRANT au niveau table masque
+`grant select` à `anon`/`authenticated` —  un GRANT au niveau table masque
 silencieusement tout REVOKE par colonne, l'ordre est impératif —, RLS en
 intersection (`not masque` ET campagne `publiee`), et **aucun trigger
 `rg_realtime_notify`** : il diffuserait `motif_masquage` et `soumis_par` sur un
 flux SSE non authentifié.
 
-⚠ `images[].chemin` pointe vers le bucket `assets`, **jamais** vers
+ `images[].chemin` pointe vers le bucket `assets`, **jamais** vers
 `scontent.cdninstagram.com` : ces URL sont signées et expirent, exactement comme
 celles de Discord.
 
@@ -250,7 +250,7 @@ Trois règles, et chacune répare un dégât précis :
    en une passe, sans qu'aucune interface ne dise pourquoi.
 2. **On ne défait jamais une décision humaine.** Le masquage automatique porte
    un motif unique — `post retiré par son auteur, ou compte passé en privé` —
-   qui sert de **signature** : lui seul est restaurable. ⚠ Le reformuler sans
+   qui sert de **signature** : lui seul est restaurable.  Le reformuler sans
    migrer les lignes existantes les rendrait définitivement non restaurables.
 3. **`a_media` veut dire « image servable ».** Chaque `images[].chemin` est
    contrôlé en `HEAD` dans le bucket ; si l'objet a disparu, la ligne retombe à
@@ -271,7 +271,7 @@ dans le salon de suivi comme si elle était encore en ligne.
 > accordée) livrerait du code que rien n'a jamais exercé. La tâche constate,
 > corrige le compteur, et le dit dans son journal.
 
-⚠ `masque`, `motif_masquage` et `mis_en_avant` sont **absents** de la clause
+ `masque`, `motif_masquage` et `mis_en_avant` sont **absents** de la clause
 `do update` de l'upsert — même règle que les deux autres sources. Sans ça, un
 membre dont la création vient d'être retirée la ferait réapparaître en la
 redéposant.

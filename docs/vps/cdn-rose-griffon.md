@@ -30,9 +30,9 @@ cdn.rosegriffon.fr  → nginx  ───────┤
 
 | App | Vhost origin | Phase 1 (assetPrefix) | Phase 2 (loader Image) |
 |---|---|---|---|
-| azalee | azalee.rosegriffon.fr | ✅ | ✅ |
-| website | rosegriffon.fr | ✅ | ✅ |
-| rpb-dashboard | rpbey.fr | ❌ (non opted-in) | ❌ |
+| azalee | azalee.rosegriffon.fr |  |  |
+| website | rosegriffon.fr |  |  |
+| rpb-dashboard | rpbey.fr |  (non opted-in) |  |
 
 ## Configuration nginx
 

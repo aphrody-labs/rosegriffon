@@ -9,7 +9,7 @@ du monorepo local).
 ## Périmètre
 
 - **Jeu cible** : Inazuma Eleven: Victory Road (IEVR), version PC/Steam.
-  **App ID Steam = 2799860** (éditeur LEVEL5). ⚠️ `3593770` est un autre jeu
+  **App ID Steam = 2799860** (éditeur LEVEL5). ️ `3593770` est un autre jeu
   homonyme (« Victory Road » / We Draw Straws) — piège de collision à éviter
   (`iecode/CLAUDE.md`, section Steam).
 - **Famille Level-5** : IEVR partage une lignée de formats avec les autres jeux
@@ -116,32 +116,32 @@ Rust for performance » (vérifié via `gh api`).
 ## Couverture par format
 
 Matrice format Level-5/IEVR × disponibilité d'un outil **open-source externe**
-(hors stack maison). « ✅ » = au moins un outil externe gère réellement le
+(hors stack maison). «  » = au moins un outil externe gère réellement le
 format pour IEVR ou un format CRIWARE équivalent ; « ~ » = couvert sur une autre
-génération Level-5 (3DS) ou partiellement ; « ❌ » = aucun outil externe mûr
+génération Level-5 (3DS) ou partiellement ; «  » = aucun outil externe mûr
 identifié pour la variante IEVR.
 
 | Format IEVR | Type | Outils externes | Statut |
 | --- | --- | --- | --- |
-| **CPK** (archive CRIWARE) | Conteneur | IEVR-Toolbox (Rust), Viola, CriFsV2Lib, YACpkTool, PyCriCodecs, vgmstream | ✅ (dont chiffrement IEVR via Viola/IEVR-Toolbox) |
-| **cfg.bin** (gamedata) | Config binaire | ievr_cfg_bin_editor (Rust), ievr_dataminer, CfgBinEditor (C#), Kuriimu | ✅ (générique + IEVR-spécifique) |
-| **HCA** | Audio | vgmstream, VGAudio, SonicAudioTools, PyCriCodecs, CriTools | ✅ |
-| **ADX** | Audio | vgmstream, VGAudio, PyCriCodecs | ✅ |
-| **ACB / AWB / AFS2 (@UTF)** | Banque/conteneur audio | SonicAudioTools, CriTools, PyCriCodecs, vgmstream | ✅ |
+| **CPK** (archive CRIWARE) | Conteneur | IEVR-Toolbox (Rust), Viola, CriFsV2Lib, YACpkTool, PyCriCodecs, vgmstream |  (dont chiffrement IEVR via Viola/IEVR-Toolbox) |
+| **cfg.bin** (gamedata) | Config binaire | ievr_cfg_bin_editor (Rust), ievr_dataminer, CfgBinEditor (C#), Kuriimu |  (générique + IEVR-spécifique) |
+| **HCA** | Audio | vgmstream, VGAudio, SonicAudioTools, PyCriCodecs, CriTools |  |
+| **ADX** | Audio | vgmstream, VGAudio, PyCriCodecs |  |
+| **ACB / AWB / AFS2 (@UTF)** | Banque/conteneur audio | SonicAudioTools, CriTools, PyCriCodecs, vgmstream |  |
 | **USM** | Vidéo (FMV) | vgmstream (audio), PyCriCodecs, CriTools | ~ (audio ok ; démux vidéo partiel) |
 | **G4TX** (texture) | Texture | AFGRocha Noesis (lecture pour rendu) | ~ (lecture seule via Noesis ; pas d'éditeur dédié) |
 | **G4MG** (mesh) | Géométrie | AFGRocha Noesis | ~ (import Noesis ; pas de lib réutilisable) |
-| **G4MD** (métadonnées mesh) | Métadonnées | — | ❌ |
+| **G4MD** (métadonnées mesh) | Métadonnées | — |  |
 | **G4SK** (skeleton) | Squelette | AFGRocha Noesis (partiel) | ~ |
-| **G4PKM / g4pkm** (animation) | Anim | — | ❌ |
-| **G4NV** (navmesh) | Navmesh | — | ❌ |
-| **G4RA** | Ressource/anim | — | ❌ |
-| **PXCL / COL** (collision) | Collision | — | ❌ |
+| **G4PKM / g4pkm** (animation) | Anim | — |  |
+| **G4NV** (navmesh) | Navmesh | — |  |
+| **G4RA** | Ressource/anim | — |  |
+| **PXCL / COL** (collision) | Collision | — |  |
 | **DXBC** (.vfxo/.pfxo) | Shader | (outils DXBC génériques hors Level-5) | ~ (générique, pas Level-5-aware) |
-| **FXBIN** (shader Level-5) | Shader | — | ❌ |
-| **OBJB / XPCK / XFSA** (archives IEVR) | Conteneur | XPCK : StudioElevenLib/Kuriimu (3DS) | ~ (XPCK 3DS ≠ variante IEVR ; OBJB/XFSA ❌) |
-| **mevbin** (Motion Event Binary) | Anim/event | — | ❌ |
-| **P3lip** (lip sync) | Lip sync | — | ❌ |
+| **FXBIN** (shader Level-5) | Shader | — |  |
+| **OBJB / XPCK / XFSA** (archives IEVR) | Conteneur | XPCK : StudioElevenLib/Kuriimu (3DS) | ~ (XPCK 3DS ≠ variante IEVR ; OBJB/XFSA ) |
+| **mevbin** (Motion Event Binary) | Anim/event | — |  |
+| **P3lip** (lip sync) | Lip sync | — |  |
 
 ## État maison (iecode + inagle)
 
