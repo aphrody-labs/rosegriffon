@@ -120,6 +120,18 @@ async function main() {
       break;
     }
 
+    case "achillea":
+    case "server": {
+      const serverEntry = resolve(import.meta.dir, "../../../apps/rosegriffon/src/main.ts");
+      const proc = Bun.spawn([process.execPath, serverEntry, ...subArgs], {
+        stdin: "inherit",
+        stdout: "inherit",
+        stderr: "inherit",
+      });
+      process.exit(await proc.exited);
+      break;
+    }
+
     default:
       console.error(`Unknown command: "${command}". Run "rg --help" for available commands.`);
       process.exit(1);
