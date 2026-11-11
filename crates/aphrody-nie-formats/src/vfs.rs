@@ -20,28 +20,35 @@
 
 use crate::FormatError;
 use crate::cpk::CpkReader;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
 
-/// Budget for archive bytes and parsed metadata (`NIE_CPK_CACHE_BUDGET_GIB`, default 16 GiB).
-/// Remote cache entries retain metadata only; LRU eviction enforces the same budget.
+/// Budget for archive bytes and parsed metadata (`NIE_CPK_CACHE_BUDGET_GIB`, default 2 GiB).
+/// Kept safely below `rg-core.service` MemoryHigh=10G / MemoryMax=12G by default; override via env.
 fn cpk_cache_budget() -> usize {
     let gib = std::env::var("NIE_CPK_CACHE_BUDGET_GIB")
         .ok()
         .and_then(|s| s.trim().parse::<usize>().ok())
         .filter(|&g| g > 0)
-        .unwrap_or(16);
+        .unwrap_or(2);
     gib.saturating_mul(1024 * 1024 * 1024)
 }
 
-/// Bounded LRU archive cache. An active read retains its Arc after eviction.
+struct LruSlot {
+    arc: Arc<(CpkReader, Vec<u8>)>,
+    size: usize,
+    prev: Option<String>,
+    next: Option<String>,
+}
+
+/// Bounded O(1) LRU archive cache. An active read retains its Arc after eviction.
 struct CpkCache {
-    map: HashMap<String, Arc<(CpkReader, Vec<u8>)>>,
-    /// Ordre d'utilisation : avant = moins récent (candidat à l'éviction).
-    order: VecDeque<String>,
+    map: HashMap<String, LruSlot>,
+    head: Option<String>,
+    tail: Option<String>,
     bytes: usize,
     budget: usize,
 }
@@ -56,36 +63,88 @@ impl CpkCache {
                 .map(|e| std::mem::size_of_val(e) + e.filename.len() + e.directory.len())
                 .sum::<usize>()
     }
+
     fn new(budget: usize) -> Self {
         Self {
             map: HashMap::new(),
-            order: VecDeque::new(),
+            head: None,
+            tail: None,
             bytes: 0,
             budget,
         }
     }
 
-    /// Récupère un CPK et le marque comme récemment utilisé.
-    fn get(&mut self, key: &str) -> Option<Arc<(CpkReader, Vec<u8>)>> {
-        let arc = self.map.get(key)?.clone();
-        if let Some(pos) = self.order.iter().position(|k| k == key) {
-            self.order.remove(pos);
+    fn detach(&mut self, key: &str) {
+        let (prev, next) = match self.map.get(key) {
+            Some(slot) => (slot.prev.clone(), slot.next.clone()),
+            None => return,
+        };
+        if let Some(ref p) = prev {
+            if let Some(ps) = self.map.get_mut(p) {
+                ps.next = next.clone();
+            }
+        } else {
+            self.head = next.clone();
         }
-        self.order.push_back(key.to_string());
+        if let Some(ref n) = next {
+            if let Some(ns) = self.map.get_mut(n) {
+                ns.prev = prev;
+            }
+        } else {
+            self.tail = prev;
+        }
+        if let Some(slot) = self.map.get_mut(key) {
+            slot.prev = None;
+            slot.next = None;
+        }
+    }
+
+    fn attach_tail(&mut self, key: String) {
+        let old_tail = self.tail.replace(key.clone());
+        if let Some(ref ot) = old_tail {
+            if let Some(ts) = self.map.get_mut(ot) {
+                ts.next = Some(key.clone());
+            }
+        } else {
+            self.head = Some(key.clone());
+        }
+        if let Some(slot) = self.map.get_mut(&key) {
+            slot.prev = old_tail;
+            slot.next = None;
+        }
+    }
+
+    /// Récupère un CPK et le marque comme récemment utilisé en O(1).
+    fn get(&mut self, key: &str) -> Option<Arc<(CpkReader, Vec<u8>)>> {
+        let arc = self.map.get(key)?.arc.clone();
+        if self.tail.as_deref() != Some(key) {
+            let owned = key.to_string();
+            self.detach(&owned);
+            self.attach_tail(owned);
+        }
         Some(arc)
     }
 
     /// Insère un CPK et évince les moins récents tant que le budget est dépassé.
     fn insert(&mut self, key: String, arc: Arc<(CpkReader, Vec<u8>)>) {
         let size = Self::size(&arc);
-        if let Some(old) = self.map.insert(key.clone(), arc) {
-            self.bytes = self.bytes.saturating_sub(Self::size(&old));
-            if let Some(pos) = self.order.iter().position(|k| k == &key) {
-                self.order.remove(pos);
+        if self.map.contains_key(&key) {
+            self.detach(&key);
+            if let Some(old) = self.map.remove(&key) {
+                self.bytes = self.bytes.saturating_sub(old.size);
             }
         }
         self.bytes += size;
-        self.order.push_back(key);
+        self.map.insert(
+            key.clone(),
+            LruSlot {
+                arc,
+                size,
+                prev: None,
+                next: None,
+            },
+        );
+        self.attach_tail(key);
         self.evincer();
     }
 
@@ -94,11 +153,13 @@ impl CpkCache {
     /// Garde toujours au moins une entrée : évincer le CPK qu'on vient de demander ferait
     /// boucler le prochain `read()` sur un rechargement disque immédiat.
     fn evincer(&mut self) {
-        while self.bytes > self.budget && self.order.len() > 1 {
-            if let Some(old_key) = self.order.pop_front()
-                && let Some(old) = self.map.remove(&old_key)
-            {
-                self.bytes = self.bytes.saturating_sub(Self::size(&old));
+        while self.bytes > self.budget && self.map.len() > 1 {
+            let Some(old_key) = self.head.clone() else {
+                break;
+            };
+            self.detach(&old_key);
+            if let Some(old) = self.map.remove(&old_key) {
+                self.bytes = self.bytes.saturating_sub(old.size);
             }
         }
     }
@@ -107,7 +168,8 @@ impl CpkCache {
     fn vider(&mut self) -> usize {
         let liberes = self.bytes;
         self.map.clear();
-        self.order.clear();
+        self.head = None;
+        self.tail = None;
         self.bytes = 0;
         liberes
     }

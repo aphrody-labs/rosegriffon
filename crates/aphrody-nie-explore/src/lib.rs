@@ -9,28 +9,28 @@
 
 #![forbid(unsafe_code)]
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub mod audio;
 pub mod bridge;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub mod cinema;
 // The original desktop application persists viewer sessions through aphrody-nie-sql.
 // That database adapter belongs to the app layer; this crate keeps analysis stateless.
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub mod depot;
 pub mod export;
 pub mod folder_roles;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub mod game_data;
 pub mod geometry;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub mod listing;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub mod mcp_vfs;
 pub mod menu_audio;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub mod menu_icons;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub mod menu_mode_analysis;
 pub mod menu_modes;
 pub mod menu_predecode;
@@ -41,10 +41,10 @@ pub mod native_video;
 pub mod raw_access;
 pub mod related;
 pub mod search_query;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub mod soundtrack;
 pub mod spatial_preview;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub mod uniform_map;
 pub mod vfs_policy;
 pub mod vn;

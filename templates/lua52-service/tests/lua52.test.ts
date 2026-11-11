@@ -2,6 +2,7 @@
 import { expect, test, describe } from "bun:test";
 import { getLuaAst } from "../src/ast";
 import { Lua52LanguageServer } from "../src/lsp";
+import { auditLuaBytecode } from "../src/rea";
 
 describe("Lua 5.2 Service Template Tests", () => {
   const luaCode = `
@@ -65,5 +66,28 @@ end
     const lsp = new Lua52LanguageServer();
     const diags = lsp.onDocumentOpen("file:///game_script.lua", scriptCode);
     expect(diags.length).toBe(0);
+  });
+
+  test("auditLuaBytecode audits Lua 5.2 compiled bytecode via depot_ffi.dll", async () => {
+    const fixturePath = `${import.meta.dir}/fixture.luac`;
+    const chunk = new Uint8Array([
+      0x1b, 0x4c, 0x75, 0x61, 0x52, 0x00, 0x01, 0x04, 0x08, 0x04, 0x08, 0x00,
+      0x19, 0x93, 0x0d, 0x0a, 0x1a, 0x0a,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2,
+      1, 0, 0, 0, 31, 0, 0, 1,
+      0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ]);
+    await Bun.write(fixturePath, chunk);
+
+    const report = auditLuaBytecode(fixturePath);
+    expect(report).not.toBeNull();
+    expect(report?.is_lua_bytecode).toBe(true);
+    expect(report?.lua_bytecode?.header.version).toBe("5.2");
+    expect(report?.lua_bytecode?.total_instructions).toBe(1);
+
+    try {
+      await (await import("node:fs/promises")).unlink(fixturePath);
+    } catch {}
   });
 });

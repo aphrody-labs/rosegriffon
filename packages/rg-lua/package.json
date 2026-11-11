@@ -1,7 +1,7 @@
 {
   "name": "@rosegriffon/lua-plugin",
-  "version": "1.4.8",
-  "description": "End-to-end Lua 5.2 loader, runtime and Next.js / Bun bundler plugin for RoseGriffon",
+  "version": "1.5.0",
+  "description": "End-to-end Lua 5.2 loader, runtime, LSP and Next.js / Bun bundler plugin for RoseGriffon",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -27,6 +27,26 @@
       "import": "./dist/vm.js",
       "default": "./dist/vm.js"
     },
+    "./bytecode": {
+      "types": "./dist/bytecode.d.ts",
+      "import": "./dist/bytecode.js",
+      "default": "./dist/bytecode.js"
+    },
+    "./ast": {
+      "types": "./dist/ast.d.ts",
+      "import": "./dist/ast.js",
+      "default": "./dist/ast.js"
+    },
+    "./lsp": {
+      "types": "./dist/lsp.d.ts",
+      "import": "./dist/lsp.js",
+      "default": "./dist/lsp.js"
+    },
+    "./loader": {
+      "types": "./dist/loader.d.ts",
+      "import": "./dist/loader.js",
+      "default": "./dist/loader.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -43,11 +63,15 @@
     "lua",
     "lua52",
     "nextjs",
+    "turbopack",
     "bun",
     "bun-plugin",
     "rosegriffon",
-    "webpack",
-    "ast"
+    "inazuma-eleven",
+    "rea",
+    "bytecode",
+    "lsp",
+    "webpack"
   ],
   "author": "RoseGriffon Team <contact@rosegriffon.fr>",
   "license": "Apache-2.0",

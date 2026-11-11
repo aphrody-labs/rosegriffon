@@ -1,18 +1,18 @@
 //! Shared original-file USM metadata, remux and explicit track export.
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 use std::collections::HashMap;
 
 use aphrody_nie_formats::usm::{self, CodecVideo};
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 use aphrody_nie_formats::vfs::Vfs;
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 use serde::{Deserialize, Serialize};
 
 /// Portable VFS description of one audio track attached to a native movie.
 ///
 /// This is deliberately independent from desktop IPC metadata: the CLI, HTTP
 /// service and desktop host all consume the same VFS-derived facts.
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MovieAudioTrack {
     pub channel: u8,
@@ -25,7 +25,7 @@ pub struct MovieAudioTrack {
 }
 
 /// Portable metadata for a movie file indexed by the game VFS.
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MovieInfo {
     pub path: String,
@@ -49,14 +49,14 @@ pub struct MovieInfo {
 
 /// A cheap VFS movie catalogue. Detailed fields are populated on demand by
 /// [`movie_info`], so listing the cinema never demuxes every USM.
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MovieCatalog {
     pub movies: Vec<MovieInfo>,
     pub sections: Vec<String>,
 }
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 fn quick_movie(path: &str, byte_length: u32) -> MovieInfo {
     let name = usm::radical_de(path);
     MovieInfo {
@@ -80,7 +80,7 @@ fn quick_movie(path: &str, byte_length: u32) -> MovieInfo {
     }
 }
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 fn game_movie_links(vfs: &Vfs) -> HashMap<String, (Option<String>, Option<String>)> {
     let mut links = HashMap::new();
     for path in vfs.iter().map(|(path, _)| path.to_owned()).filter(|path| {
@@ -125,7 +125,7 @@ fn game_movie_links(vfs: &Vfs) -> HashMap<String, (Option<String>, Option<String
     links
 }
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 fn populate_movie_info(movie: &mut MovieInfo, info: &usm::Apercu) {
     movie.codec = Some(info.codec.nom().to_owned());
     movie.browser_playable = Some(info.codec.lisible_par_navigateur());
@@ -150,7 +150,7 @@ fn populate_movie_info(movie: &mut MovieInfo, info: &usm::Apercu) {
         .collect();
 }
 
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 fn populate_external_audio(movie: &mut MovieInfo, vfs: &Vfs) {
     if !movie.audio_tracks.is_empty() {
         return;
@@ -171,7 +171,7 @@ fn populate_external_audio(movie: &mut MovieInfo, vfs: &Vfs) {
 }
 
 /// Lists game movies from the mounted VFS without reading their USM payloads.
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub fn movie_catalog(vfs: &Vfs) -> MovieCatalog {
     let mut entries: Vec<_> = vfs
         .iter()
@@ -202,7 +202,7 @@ pub fn movie_catalog(vfs: &Vfs) -> MovieCatalog {
 }
 
 /// Inspects one VFS movie and resolves its container or external audio track.
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub fn movie_info(vfs: &Vfs, path: &str) -> Result<MovieInfo, String> {
     let bytes = vfs.read(path).map_err(|error| error.to_string())?;
     let info =
@@ -236,7 +236,7 @@ pub fn web_video_stream(
 }
 
 /// Decodes the USM container audio, or the matching game soundtrack cue, to WAV.
-#[cfg(feature = "host")]
+#[cfg(all(feature = "host", not(target_arch = "wasm32")))]
 pub fn movie_audio_wav(
     vfs: &Vfs,
     cache_dir: &std::path::Path,

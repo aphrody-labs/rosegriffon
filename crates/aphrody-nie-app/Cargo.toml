@@ -20,9 +20,12 @@ aphrody-nie-core = { workspace = true, features = ["data"] }
 aphrody-nie-data = { workspace = true, features = ["serde", "std"] }
 aphrody-nie-runtime = { path = "../aphrody-nie-runtime", version = "1.4.8", default-features = false }
 aphrody-nie-geom = { workspace = true }
-aphrody-nie-explore = { path = "../aphrody-nie-explore", version = "1.4.8", default-features = true }
+aphrody-nie-explore = { path = "../aphrody-nie-explore", version = "1.4.8", default-features = false }
 specta = { version = "2.0.0-rc.25", features = ["derive", "serde_json"] }
 bcdec_rs = "0.2.0"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+aphrody-nie-explore = { path = "../aphrody-nie-explore", version = "1.4.8", default-features = false, features = ["host"] }
 
 [dev-dependencies]
 png = { version = "0.18.1", default-features = false }
