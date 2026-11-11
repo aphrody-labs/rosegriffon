@@ -20,7 +20,7 @@
   "scripts": {
     "type-check": "bun check --noEmit",
     "test": "bun test src",
-    "lint": "bun lint -c ../rg-config/oxlintrc.json src",
+    "lint": "oxlint -c ../rg-config/oxlintrc.json src",
     "typecheck": "bun check --noEmit"
   },
   "dependencies": {

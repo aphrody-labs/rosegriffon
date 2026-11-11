@@ -1,7 +1,7 @@
 {
   "name": "rosegriffon",
   "private": true,
-  "description": "Rose Griffon monorepo: website, Discord bot, unified API, Achillea ranked, Azalee and the self-hostable rosegriffon binary",
+  "description": "Rose Griffon monorepo: website, Discord bot, unified API, Achillea ranked, and Azalee",
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",
@@ -111,7 +111,7 @@
     "@tiptap/core": "^3.31.3",
     "@tiptap/extension-placeholder": "^3.31.3",
     "@tiptap/starter-kit": "^3.31.3",
-    "@types/bun": "npm:@aphrody/bun-types@1.4.4",
+    "@types/bun": "npm:@aphrody/bun-types@1.4.4-aphrody.2",
     "@types/google.maps": "^3.66.4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "26.6.3",

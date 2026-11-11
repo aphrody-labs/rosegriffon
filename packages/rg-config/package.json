@@ -33,7 +33,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "lint": "bun lint -c ./oxlintrc.json .",
+    "lint": "oxlint -c ./oxlintrc.json .",
     "typecheck": "bun check --noEmit"
   },
   "engines": {

@@ -4686,7 +4686,20 @@
           "type": "boolean"
         },
         "eloDelta": {
-          "type": "number"
+          "type": "object",
+          "properties": {
+            "p1": {
+              "type": "number"
+            },
+            "p2": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "p1",
+            "p2"
+          ],
+          "description": "Variation appliquée à chaque joueur, telle que la renvoie le serveur ranked."
         }
       },
       "required": [

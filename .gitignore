@@ -33,6 +33,8 @@ __pycache__/
 .cursor/
 .gemini/
 .mcp.json
+.coordkit-bus/
+.fleet-tick
 
 # Sorties locales des exécutions
 /var/

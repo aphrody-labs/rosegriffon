@@ -18,7 +18,7 @@
     "qa:website": "bun src/index.ts --run website:qa",
     "compile": "bun build src/index.ts --compile --minify --sourcemap --bytecode --format esm --outfile dist/rg-cron",
     "type-check": "bun check -p tsconfig.typecheck.json --noEmit",
-    "lint": "bun lint -c ../rg-config/oxlintrc.json src",
+    "lint": "oxlint -c ../rg-config/oxlintrc.json src",
     "typecheck": "bun check -p tsconfig.typecheck.json --noEmit"
   },
   "dependencies": {

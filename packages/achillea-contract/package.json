@@ -15,7 +15,7 @@
     "generate": "bun src/cli.ts",
     "check": "bun src/cli.ts --check",
     "compile": "bun build src/cli.ts --compile --minify --sourcemap --bytecode --format esm --outfile dist/achillea-contract",
-    "lint": "bun lint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction src tests",
+    "lint": "oxlint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction src tests",
     "type-check": "bun check --noEmit",
     "test": "bun test tests",
     "typecheck": "bun check --noEmit"

@@ -52,7 +52,7 @@
 import { checkoutRoot } from "@aphrody/paths";
 import { createBunSql } from "@rosegriffon/db/bun-sql";
 
-import { SQL_CREATIONS } from "../../../../apps/rg-website/src/lib/x-campagnes/sql-creations";
+import { SQL_CREATIONS } from "../../apps/rg-website/src/lib/x-campagnes/sql-creations";
 
 import {
   clePublique,
@@ -62,12 +62,12 @@ import {
   type ParticipantTirage,
   type PoidsMode,
   type SourceTirage,
-} from "../../../../apps/rg-website/src/lib/x-campagnes/tirage";
+} from "../../apps/rg-website/src/lib/x-campagnes/tirage";
 
 // ───────────────────────── Réglages ─────────────────────────
 
 const RACINE_REPO = Bun.env.RG_REPO_ROOT ?? checkoutRoot("rg");
-const DOSSIER_SORTIE = `${RACINE_REPO}/apps/website/src/data/campagnes`;
+const DOSSIER_SORTIE = `${RACINE_REPO}/apps/rg-website/src/data/campagnes`;
 
 /**
  * Analyse d'arguments en UN seul passage. Un `args.find(a => !a.startsWith("--"))` naïf

@@ -8,7 +8,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "lint": "bun lint -c ../rg-config/oxlintrc.json src",
+    "lint": "oxlint -c ../rg-config/oxlintrc.json src",
     "type-check": "bun check --noEmit",
     "test": "bun test test",
     "typecheck": "bun check --noEmit"

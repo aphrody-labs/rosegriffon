@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import useSWR from "swr";
 
@@ -79,8 +79,13 @@ export function TwitchProvider({
     if (data) setRetryCount(0);
   }
 
+  const contextValue = useMemo(
+    () => ({ channel, data: data ?? null, error, isLoading, mutate }),
+    [channel, data, error, isLoading, mutate],
+  );
+
   return (
-    <TwitchContext.Provider value={{ channel, data: data ?? null, error, isLoading, mutate }}>
+    <TwitchContext.Provider value={contextValue}>
       {children}
     </TwitchContext.Provider>
   );

@@ -51,22 +51,8 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_URL }}
         run: bun run turbo run build --continue
-      - name: Compile rosegriffon (no site)
-        run: bun run compile --site=skip
+      - name: Compile rg-core
+        run: bun run compile --target linux-x64
       - name: Smoke test
-        run: ./dist/rosegriffon-linux-x64 --help
+        run: ./dist/rg-core-linux-x64 --help
 
-  rust:
-    name: aphrody-rg-server
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - name: Toolchain (rust-toolchain.toml)
-        run: rustup toolchain install
-      - name: fmt
-        run: cargo fmt --all --check
-      - name: clippy
-        run: cargo clippy --workspace --all-targets --locked -- -D warnings
-      - name: test
-        run: cargo test --workspace --locked

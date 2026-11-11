@@ -1376,7 +1376,8 @@ public struct RankedAdminValidateRequest: Codable, Sendable {
 
 public struct RankedAdminValidateResult: Codable, Sendable {
 	public let ok: Bool
-	public let eloDelta: Double?
+	/// Variation appliquée à chaque joueur, telle que la renvoie le serveur ranked.
+	public let eloDelta: AnyCodable?
 }
 
 /// `POST /ranked/challenge/:code/accept` — la réservation temps réel est opaque.

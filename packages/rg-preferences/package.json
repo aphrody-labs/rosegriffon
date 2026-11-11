@@ -25,7 +25,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "lint": "bun lint src",
+    "lint": "oxlint src",
     "type-check": "bun check --noEmit",
     "test": "bun test test",
     "typecheck": "bun check --noEmit"

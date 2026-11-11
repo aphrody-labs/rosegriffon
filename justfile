@@ -2,7 +2,7 @@
 # `just` lists the recipes. Bun only: no node, npm, npx, pnpm or yarn.
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
-set windows-shell := ["bash", "-euo", "pipefail", "-c"]
+set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
 
 # Documented RG VPS hop (docs/vps/RUNBOOK-2026-11-05.md section 4): prod, then WireGuard to vps.
 vps := "ssh -o BatchMode=yes prod \"ssh -o BatchMode=yes vps bash -s\""
@@ -31,7 +31,7 @@ build:
 # Full gate: check, lint, test, build.
 ci: check lint test build
 
-# Single-file `rosegriffon` executable (scripts/compile.ts); extra args are forwarded.
+# Single-file `rg-core` executable (scripts/compile.ts); extra args are forwarded.
 compile *args:
     bun scripts/compile.ts {{args}}
 

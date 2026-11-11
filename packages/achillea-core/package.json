@@ -40,8 +40,8 @@
     "./wallet": "./src/wallet/index.ts"
   },
   "scripts": {
-    "lint": "bun lint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction src tests",
-    "lint:fix": "bun lint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction --fix src tests",
+    "lint": "oxlint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction src tests",
+    "lint:fix": "oxlint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction --fix src tests",
     "type-check": "bun check --noEmit",
     "format": "bun fmt .",
     "format:check": "bun fmt --check .",

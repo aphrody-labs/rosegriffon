@@ -45,7 +45,7 @@
 	},
 	"scripts": {
 		"test": "bun test --preload ./src/__tests__/server.ts src",
-		"lint": "bun lint -A style -A pedantic -A restriction src",
+		"lint": "oxlint -A style -A pedantic -A restriction src",
 		"typecheck": "bun check --noEmit",
 		"type-check": "bun check --noEmit"
 	},

@@ -1535,7 +1535,8 @@ data class RankedAdminValidateRequest(
 @Serializable
 data class RankedAdminValidateResult(
 	val ok: Boolean,
-	val eloDelta: Double? = null,
+	/// Variation appliquée à chaque joueur, telle que la renvoie le serveur ranked.
+	val eloDelta: JsonElement? = null,
 )
 
 /// `POST /ranked/challenge/:code/accept` — la réservation temps réel est opaque.

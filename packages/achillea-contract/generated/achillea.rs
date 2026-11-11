@@ -1828,8 +1828,9 @@ pub struct RankedAdminValidateRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RankedAdminValidateResult {
 	pub ok: bool,
+	/// Variation appliquée à chaque joueur, telle que la renvoie le serveur ranked.
 	#[serde(rename = "eloDelta", default, skip_serializing_if = "Option::is_none")]
-	pub elo_delta: Option<f64>,
+	pub elo_delta: Option<serde_json::Value>,
 }
 
 /// `POST /ranked/challenge/:code/accept` — la réservation temps réel est opaque.

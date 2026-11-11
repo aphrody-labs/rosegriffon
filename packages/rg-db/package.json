@@ -38,7 +38,7 @@
     "types:gen": "bun scripts/types-gen.ts",
     "type-check": "bun check --noEmit",
     "test": "bun test",
-    "lint": "bun lint src",
+    "lint": "oxlint src",
     "typecheck": "bun check --noEmit"
   },
   "dependencies": {

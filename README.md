@@ -1,9 +1,7 @@
 # Rose Griffon
 
 Monorepo of [Rose Griffon](https://rosegriffon.fr): the website, the Discord bots, the
-unified API, the Achillea ranked platform, Azalee and the self-hostable `rosegriffon`
-executable. Bun workspaces, Turborepo, Changesets, and one Rust crate for Vercel edge
-functions.
+unified API, the Achillea ranked platform, and Azalee. Bun workspaces, Turborepo, Changesets.
 
 History is preserved from `aphrody-labs/rg`, then `aphrody-labs/iecode` and
 `aphrody-labs/bun-distribution` (Bun OS), rewritten to the flat layout below.
@@ -14,12 +12,9 @@ History is preserved from `aphrody-labs/rg`, then `aphrody-labs/iecode` and
 | --- | --- | --- |
 | `apps/rg-website` | `@rosegriffon/website` | Next.js site (rosegriffon.fr) |
 | `apps/rg-bot` | `@rosegriffon/bot` | Discord gateways (profiles `rg`, `azalee`), unified Elysia API, Achillea ranked Colyseus server, `rg-core` VPS service |
-| `apps/azalee-web` | `@rosegriffon/azalee-web` (private) | Azalee Next.js app |
-| `apps/rosegriffon` | `@rosegriffon/server` (private) | the `rosegriffon` executable |
 | `packages/achillea-*` | `@rosegriffon/achillea-{client,contract,core,types}` | Achillea esport domain, API contract and client |
 | `packages/azalee` | `@rosegriffon/azalee` | Azalee library and CLI |
 | `packages/rg-*` | `@rosegriffon/{app-shell,assets,auth,config,cron,db,discord-sync,i18n,identity,preferences,search,types}`, `@rosegriffon/ui` (private) | shared site, data and service packages |
-| `crates/aphrody-rg-server` | — | Vercel Rust Functions: Discord HTTP interactions and health |
 | `supabase/` | — | Supabase CLI config and migrations of the `rg` project |
 | `scripts/` | — | build, deploy, operations and campaign scripts |
 | `infra/` | — | systemd units, nginx sites, cloud descriptors, VPS helper scripts |
@@ -34,7 +29,6 @@ Bun OS (`aphrody-labs/bun-distribution`, with nie and iecode) and consumed here 
 - [Aphrody Bun](https://github.com/aphrody-labs/bun) 1.4.4 or newer (`packageManager: bun@1.4.4`).
   Type checking, lint and format use its native `bun check`, `bun lint` and `bun fmt`;
   upstream Bun does not ship them. CI installs the fork with `.github/actions/setup-bun`.
-- Rust nightly pinned by `rust-toolchain.toml` for `crates/aphrody-rg-server`.
 
 ```sh
 bun install
@@ -42,7 +36,6 @@ bun run typecheck          # turbo run typecheck
 bun run lint               # turbo run lint
 bun run build              # turbo run build (Next builds, bundles)
 bun run turbo run typecheck --filter=@rosegriffon/cron...
-cargo clippy --workspace   # Rust edge crate
 ```
 
 ### just
@@ -54,31 +47,19 @@ The root `justfile` drives the same turbo tasks (`just` lists them):
 and `deploy-verify` only wrap the VPS steps of `docs/vps/RUNBOOK-2026-11-05.md` (section 4);
 run them by hand, in that order.
 
-## Self-hosting: one executable
+## VPS Service: `rg-core` executable
 
-`bun run compile` links `apps/rosegriffon` into a single file, `dist/rosegriffon-<target>[.exe]`,
-with the Next.js site embedded (its `output: "standalone"` build, packed as a gzip tarball and
-extracted once per build into the user cache directory).
+`bun run compile` links `apps/rg-bot/src/core.ts` into a single file, `dist/rg-core-<target>[.exe]`.
 
 ```sh
-bun run compile                                # host target, site built if missing
-bun run compile --target linux-x64 --site=build
-bun run compile --target windows-x64 --site=skip
-bun run compile --site-dir path/to/.next/standalone   # embed a prebuilt site
+bun run compile                                # host target
+bun run compile --target linux-x64
+bun run compile --target windows-x64
 ```
 
-The embedded site carries the native addons of the build host (sharp), so it is embedded only
-into executables of the host platform; the `rosegriffon binaries` workflow builds Linux x64 and
-Windows x64 on their own runners and attaches them to a GitHub Release.
-
 ```text
-rosegriffon serve              site + rg-core: Discord gateways, ranked Colyseus with the unified
-                               API on its port, cron schedules, model-serve relay (default)
-rosegriffon site               Next.js site only (RG_SITE_PORT, default 3100)
-rosegriffon api                unified Elysia API only (API_PORT, default 8800)
-rosegriffon bot                Discord gateway of RG_PROFIL_BOT (rg or azalee)
-rosegriffon ranked             Achillea ranked Colyseus server only
-rosegriffon cron --run <task>  run one cron task and exit
+rg-core                        service complet sur RG_CORE_PORT (défaut 8810)
+rg-core bot                    seule la passerelle Discord du profil RG_PROFIL_BOT
 ```
 
 Configuration comes from one dotenv file: `./.env` next to the working directory or
@@ -96,7 +77,6 @@ A VPS install is the executable, an env file and a systemd unit; `infra/systemd`
 | --- | --- | --- |
 | Website | Vercel (Fluid Compute, Bun runtime), prebuilt deploys | `apps/rg-website/vercel.ts` |
 | Unified API | Vercel Function (Bun), prebuilt Build Output | `apps/rg-bot/vercel.ts`, `apps/rg-bot/src/scripts/build-vercel.ts` |
-| Discord HTTP interactions, health | Vercel Rust Functions | `crates/aphrody-rg-server/vercel.json` |
 | Postgres, Auth, Storage, Realtime | Supabase project `rg` (ref `xzwfnxzkxtcpgmtqulbh`) | `supabase/config.toml`, `supabase/migrations` |
 | Game data mirror | Neon project `inagle` (pooled endpoint, `INAGLE_DATABASE_URL`) | schema owned by `@rosegriffon/inagle` in Bun OS |
 | Long-running services | VPS `rg-core` (`rosegriffon serve` or `apps/rg-bot/src/core.ts`) behind nginx | `infra/systemd`, `infra/nginx`, `scripts/assemble-vps-release.sh` |

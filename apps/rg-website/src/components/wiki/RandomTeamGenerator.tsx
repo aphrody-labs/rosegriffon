@@ -888,13 +888,13 @@ export function RandomTeamGenerator({ pools, coordinators }: RandomTeamGenerator
     (selectedSeries ? 1 : 0);
   const hasActiveFilters = activeFilterCount > 0;
 
-  // Staggered animation delay counter
-  let slotIndex = 0;
+  // Staggered animation delay offset per row
+  const ROW_OFFSETS: Record<"gk" | "df" | "mf" | "fw", number> = { gk: 0, df: 1, mf: 5, fw: 9 };
 
   const renderRow = (position: "gk" | "df" | "mf" | "fw", players: BaseCharacter[]) =>
     players.map((p, i) => {
       const key = `${position}-${i}`;
-      const delay = slotIndex++ * 40;
+      const delay = (ROW_OFFSETS[position] + i) * 40;
       return (
         <PlayerCard
           key={`${key}-${p.charaId}`}

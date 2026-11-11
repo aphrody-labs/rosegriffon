@@ -18,9 +18,9 @@ export function getStripe(): Stripe {
     throw new Error("[shop] STRIPE_SECRET_KEY missing — voir .env.example pour la config Stripe.");
   }
   cached = new Stripe(key, {
-    // Explicit monthly Dahlia version matching the installed SDK types.
+    // Explicit monthly Endive version matching the installed SDK types.
     // Same-major monthly releases preserve the existing Checkout contract.
-    apiVersion: "2026-08-26.dahlia",
+    apiVersion: "2026-10-28.endive",
     typescript: true,
     // Auto-retry idempotent sur erreurs réseau / 5xx
     maxNetworkRetries: 2,

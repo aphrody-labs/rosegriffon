@@ -34,7 +34,7 @@
   },
   "scripts": {
     "test": "bun test src",
-    "lint": "bun lint src",
+    "lint": "oxlint src",
     "type-check": "bun check --noEmit",
     "typecheck": "bun check --noEmit"
   },

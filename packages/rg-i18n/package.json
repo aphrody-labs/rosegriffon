@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "lint": "bun lint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction src test",
+    "lint": "oxlint -c ../rg-config/oxlintrc.json -A style -A pedantic -A restriction src test",
     "type-check": "bun check --noEmit",
     "test": "bun test test",
     "typecheck": "bun check --noEmit"
