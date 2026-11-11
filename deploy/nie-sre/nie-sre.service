@@ -1,0 +1,16 @@
+[Unit]
+Description=NIE SRE Headless Bridge & Reverse-Engineering Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/nie-sre-service
+Environment="RUST_LOG=info"
+Environment="NIE_BRIDGE_PORT=8791"
+ExecStart=/usr/local/bin/docker compose up
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

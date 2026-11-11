@@ -1,0 +1,30 @@
+services:
+  nie-bridge:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    container_name: nie-bridge-service
+    restart: unless-stopped
+    ports:
+      - "8899:8899"
+    environment:
+      - RUST_LOG=info
+      - NIE_BRIDGE_PORT=8899
+    volumes:
+      - ./workflows:/workflows:ro
+      - ./config:/config:ro
+    command: ["python3", "-m", "http.server", "8899"]
+
+  nie-lua-audit:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    container_name: nie-lua-pipeline
+    restart: unless-stopped
+    volumes:
+      - ./workflows:/workflows
+    command: ["sleep", "infinity"]
+
+  nie-cfg-sre:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    container_name: nie-cfg-pipeline
+    restart: unless-stopped
+    volumes:
+      - ./workflows:/workflows
+    command: ["sleep", "infinity"]
