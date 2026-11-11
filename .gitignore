@@ -38,3 +38,10 @@ __pycache__/
 
 # Sorties locales des exécutions
 /var/
+
+# Save editor binaries and upstream checkouts
+tools/ie/save-editor/*.exe
+tools/ie/save-editor/*.zip
+tools/ie/save-editor/extracted/
+tools/ie/save-editor/upstream-src/
+tools/ie/save-editor/alsobeta-src/
