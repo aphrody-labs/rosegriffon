@@ -52,4 +52,18 @@ end
     expect(hoverGoto).not.toBeNull();
     expect(hoverGoto?.contents.value).toContain("goto");
   });
+
+  test("Bevy game script extracts lifecycle hooks and validates without deprecations", async () => {
+    const scriptPath = `${import.meta.dir}/../src/game_script.lua`;
+    const scriptCode = await Bun.file(scriptPath).text();
+    const ast = getLuaAst("game_script.lua", scriptCode);
+
+    expect(ast.symbols.some((s) => s.name === "on_init")).toBeTrue();
+    expect(ast.symbols.some((s) => s.name === "on_update")).toBeTrue();
+    expect(ast.symbols.some((s) => s.name === "on_collision")).toBeTrue();
+
+    const lsp = new Lua52LanguageServer();
+    const diags = lsp.onDocumentOpen("file:///game_script.lua", scriptCode);
+    expect(diags.length).toBe(0);
+  });
 });

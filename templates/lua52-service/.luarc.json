@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime": {
+    "version": "Lua 5.2",
+    "path": [
+      "?.lua",
+      "?/init.lua",
+      "src/?.lua",
+      "src/?/init.lua"
+    ],
+    "builtin": {
+      "bit32": "enable"
+    }
+  },
+  "diagnostics": {
+    "enable": true,
+    "globals": [
+      "_ENV",
+      "bit32",
+      "rawlen",
+      "table.pack",
+      "table.unpack"
+    ],
+    "disable": [
+      "lowercase-global"
+    ]
+  },
+  "workspace": {
+    "checkThirdParty": false,
+    "ignoreDir": [
+      ".git",
+      "node_modules",
+      "dist",
+      "target"
+    ]
+  },
+  "format": {
+    "enable": true,
+    "defaultConfig": {
+      "indent_style": "space",
+      "indent_size": "2",
+      "quote_style": "double"
+    }
+  }
+}
