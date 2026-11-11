@@ -27,7 +27,7 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
       - name: Typecheck and lint
-        run: ./node_modules/.bin/turbo run typecheck lint --continue
+        run: bun run check:all
       - name: Build
         # The public pages are prerendered from the production databases.
         env:
@@ -50,7 +50,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_URL }}
-        run: ./node_modules/.bin/turbo run build --continue
+        run: bun run build
       - name: Compile rg-core
         run: bun run compile --target linux-x64
       - name: Smoke test
