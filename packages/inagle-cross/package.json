@@ -1,5 +1,5 @@
 {
-  "name": "@aphrody/inagle-cross",
+  "name": "@rosegriffon/inagle-cross",
   "version": "1.4.7",
   "private": false,
   "description": "API de données et de rétro-conception pour Inazuma Eleven Cross — types, schémas, et analyseurs d'assets",
@@ -26,7 +26,7 @@
   },
   "scripts": {
     "type-check": "bun check --noEmit",
-    "lint": "bun lint src",
+    "lint": "oxlint src",
     "typecheck": "bun check --noEmit"
   },
   "dependencies": {

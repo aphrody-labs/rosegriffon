@@ -211,6 +211,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
               <Link href="/play" className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-linear-to-r from-[#F07D7D] to-[#F4D03F] text-black font-black text-sm uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 transition">
                 Jouer à IEVR Web
               </Link>
+            </div>
           </div>
         </motion.div>
 

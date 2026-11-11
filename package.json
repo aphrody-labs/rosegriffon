@@ -18,7 +18,6 @@
   "catalog": {
     "@aphrody/agent-browser": "1.0.0-canary.4",
     "@aphrody/bun-plugin-tailwind": "0.1.0-aphrody.4",
-    "@aphrody/bun-types": "1.4.4-aphrody.2",
     "@aphrody/canvas": "1.0.9-aphrody.6",
     "@aphrody/discord-kit": "0.1.3",
     "@aphrody/m3-tokens": "3.3.11",
@@ -224,7 +223,9 @@
     "lint": "bun run --filter '*' lint",
     "test": "bun run --filter '*' test",
     "compile": "bun scripts/compile.ts",
-    "release": "bun scripts/publish.ts"
+    "release": "bun scripts/publish.ts",
+    "skills:sync": "bun .agents/skills/sync.ts",
+    "check:all": "bun run typecheck && bun run lint"
   },
   "devDependencies": {
     "@types/bun": "catalog:",

@@ -1,7 +1,7 @@
 {
   "extends": "../rg-config/tsconfig-nextjs.json",
   "compilerOptions": {
-    "types": ["react", "react-dom", "@aphrody/bun-types"],
+    "types": ["react", "react-dom", "bun"],
     "paths": {
       "@/*": ["./src/*"],
       "@/lib/utils": ["./src/lib/utils.ts"],

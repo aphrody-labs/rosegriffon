@@ -60,11 +60,11 @@
   },
   "devDependencies": {
     "@rosegriffon/config": "workspace:*",
-    "@aphrody/bun-types": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@typescript/typescript6": "catalog:",
-    "tailwindcss": "catalog:"
+    "tailwindcss": "catalog:",
+    "@types/bun": "catalog:"
   },
   "peerDependencies": {
     "next": "catalog:",

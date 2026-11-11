@@ -6,11 +6,7 @@ import {
   Gamepad2,
   Maximize2,
   Minimize2,
-  Volume2,
-  VolumeX,
-  RotateCcw,
   Sparkles,
-  Play,
   Info,
 } from "lucide-react";
 

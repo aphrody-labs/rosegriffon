@@ -1,23 +1,9 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ArrowLeft, Sparkles, Trophy, Cpu, ShieldCheck } from "lucide-react";
 import { absoluteUrl } from "@/lib/site-url";
 import { withDefaultOgImage } from "@/lib/seo";
-
-// Client-only canvas to prevent any SSR hydration divergence with WebAssembly
-const IevrGameCanvas = dynamic(
-  () => import("@/components/ievr/IevrGameCanvas").then(mod => mod.IevrGameCanvas),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full aspect-16/9 max-w-6xl mx-auto bg-black/90 rounded-2xl flex flex-col items-center justify-center p-6 text-center border border-white/10">
-        <div className="size-14 border-4 border-[#F4D03F]/20 border-t-[#F4D03F] rounded-full animate-spin mb-4" />
-        <p className="text-white/60 text-sm font-semibold">Initialisation du moteur IEVR WebAssembly...</p>
-      </div>
-    ),
-  }
-);
+import { IevrGameCanvasClient } from "@/components/ievr/IevrGameCanvasClient";
 
 export const metadata: Metadata = {
   title: "Jouer à Inazuma Eleven: Victory Road | Navigateur Web",
@@ -75,7 +61,7 @@ export default function PlayPage() {
 
       {/* Main Game Screen */}
       <section className="max-w-6xl mx-auto mb-10">
-        <IevrGameCanvas />
+        <IevrGameCanvasClient />
       </section>
 
       {/* Information & Architecture grid */}

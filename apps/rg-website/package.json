@@ -85,7 +85,7 @@
     "@rosegriffon/azalee": "workspace:*",
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/i18n": "workspace:*",
-    "@rosegriffon/inagle": "catalog:",
+    "@rosegriffon/inagle": "workspace:*",
     "@rosegriffon/patreon-bun": "catalog:",
     "@rosegriffon/preferences": "workspace:*",
     "@rosegriffon/search": "workspace:*",

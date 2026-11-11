@@ -1,7 +1,7 @@
 import { UiToEmu, EmuToUi, SaveType, saveTypes } from "../message";
 import { FileId, Files, dbLookup } from "./files";
 import { Input, Rect } from "./input";
-import { vertShaderSource, fragShaderSource } from "@aphrody/iecode-web/shaders";
+import { vertShaderSource, fragShaderSource } from "./shaders";
 import { isMobileBrowser } from "./utils";
 import { installConsoleSwitcher } from "./consoles";
 

@@ -28,7 +28,7 @@
     "@rosegriffon/assets": "workspace:*",
     "@rosegriffon/db": "workspace:*",
     "@rosegriffon/discord-sync": "workspace:*",
-    "@rosegriffon/inagle": "catalog:",
+    "@rosegriffon/inagle": "workspace:*",
     "@rosegriffon/types": "workspace:*",
     "@vercel/functions": "catalog:",
     "discord.js": "catalog:"

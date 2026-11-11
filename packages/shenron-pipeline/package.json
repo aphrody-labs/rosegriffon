@@ -69,8 +69,8 @@
   },
   "scripts": {
     "pipeline": "bun src/cli.ts",
-    "build": "bun build src/cli.ts --target=bun --external=sharp --external=zod --outfile=dist/pipeline",
-    "lint": "bun lint -c ../../.oxlintrc.json",
+    "build": "bun build src/cli.ts --target=bun --external=sharp --external=zod --external=ai --external='@ai-sdk/*' --outfile=dist/pipeline",
+    "lint": "oxlint src",
     "test": "bun test --path-ignore-patterns='**/*.live.test.ts'",
     "typecheck": "bun check --project tsconfig.json && bun check --project tsconfig.scripts.json",
     "rag:prepare": "bun scripts/prepare-live-rag.ts",

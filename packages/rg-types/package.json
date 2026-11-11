@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@rosegriffon/config": "workspace:*",
-    "@aphrody/bun-types": "catalog:"
+    "@types/bun": "catalog:"
   },
   "peerDependencies": {
     "@rosegriffon/db": "workspace:*"

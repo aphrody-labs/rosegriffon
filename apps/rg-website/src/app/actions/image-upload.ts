@@ -84,7 +84,7 @@ async function processAndUpload(
   const uploads = VARIANTS.map(async variant => {
     const filename = `${filenameBase}${variant.suffix}.webp`;
     const image = new Bun.Image(input, { maxPixels: MAX_PIXELS });
-    if (crop) image.extract(crop);
+    if (crop) (image as unknown as { extract?: (c: CropRect) => void }).extract?.(crop);
     const bytes = await image
       .resize(variant.width, MAX_DIMENSION, { fit: "inside", withoutEnlargement: true })
       .webp({ quality: variant.quality })

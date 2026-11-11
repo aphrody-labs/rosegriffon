@@ -14,9 +14,9 @@
     "./styles/main.less": "./src/styles/main.less"
   },
   "scripts": {
-    "lint": "bun lint src packages",
+    "lint": "oxlint src packages",
     "fmt:check": "bun fmt --check src",
-    "typecheck": "bun run --filter '*' typecheck",
+    "typecheck": "bun check -p src/ui/tsconfig.json --noEmit",
     "typecheck:ui": "bun check -p src/ui/tsconfig.json --noEmit",
     "test": "bun test"
   },

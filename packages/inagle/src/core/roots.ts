@@ -61,3 +61,14 @@ export function webAppPath(...parts: string[]): string {
 export function userHome(): string {
   return process.env.HOME?.trim() || process.env.USERPROFILE?.trim() || homedir();
 }
+
+/** Monorepo root (`rosegriffon`). */
+export function rgRoot(): string {
+  return firstEnv(["RG_ROOT", "ROSEGRIFFON_ROOT"]) ?? iecodeRoot();
+}
+
+/** Rose Griffon website root (`apps/rg-website`). */
+export function rgWebsiteRoot(): string {
+  return firstEnv(["RG_WEBSITE_ROOT", "WEB_APP_ROOT"]) ?? path.join(rgRoot(), "apps", "rg-website");
+}
+

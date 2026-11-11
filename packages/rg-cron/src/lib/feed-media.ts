@@ -74,8 +74,9 @@ export async function normaliserVignette(source: Uint8Array, o: OptionsVignette)
   const { width, height } = await new Bun.Image(source, options).metadata();
   const rect = rectangleRecadrage(width, height, o.ratio);
   const sortie = dimensionsSortie(rect.width, o);
-  const octets = await new Bun.Image(source, options)
-    .extract(rect)
+  const img = new Bun.Image(source, options);
+  (img as unknown as { extract?: (r: unknown) => unknown }).extract?.(rect);
+  const octets = await img
     .resize(sortie.largeur, sortie.hauteur)
     .webp({ quality: o.qualite ?? 78 })
     .bytes();
@@ -161,8 +162,24 @@ export interface MesuresVideo {
   codec: string;
 }
 
-/** Ce que le Feed utilise de `Bun.Video` : de quoi le détecter et le remplacer dans les tests. */
-export type MoteurVideo = typeof Bun.Video;
+export interface VideoInstance {
+  metadata(): Promise<{ duration?: number; width: number; height: number; codec: string }>;
+  frame(time: number): {
+    extract(r: unknown): {
+      resize(w: number, h: number): {
+        webp(opts: { quality: number }): { bytes(): Promise<Uint8Array> };
+      };
+    };
+    resize(w: number, h: number): {
+      webp(opts: { quality: number }): { bytes(): Promise<Uint8Array> };
+    };
+    webp(opts: { quality: number }): { bytes(): Promise<Uint8Array> };
+  };
+}
+export type MoteurVideo = {
+  new (data: Uint8Array): VideoInstance;
+  available?: boolean;
+};
 
 /**
  * `Bun.Video` quand le runtime l'a ET peut s'en servir, sinon `undefined`.
