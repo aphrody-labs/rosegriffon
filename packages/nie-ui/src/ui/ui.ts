@@ -494,5 +494,7 @@ export class Ui {
   }
 }
 
-export const ui = new Ui(isMobileBrowser());
-installConsoleSwitcher(() => ui.suspend());
+export const ui = typeof document !== "undefined" ? new Ui(isMobileBrowser()) : (null as unknown as Ui);
+if (typeof document !== "undefined") {
+  installConsoleSwitcher(() => ui?.suspend());
+}
