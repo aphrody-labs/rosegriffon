@@ -1,5 +1,6 @@
 {
   "name": "rosegriffon",
+  "version": "1.4.7",
   "private": true,
   "description": "Rose Griffon monorepo: website, Discord bot, unified API, Achillea ranked, and Azalee",
   "license": "MIT OR Apache-2.0",
