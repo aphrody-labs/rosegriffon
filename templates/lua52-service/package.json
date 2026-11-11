@@ -1,0 +1,30 @@
+{
+  "name": "@rosegriffon/lua52-template",
+  "version": "1.4.8",
+  "description": "Sovereign Lua 5.2 Service Template with Tree-sitter AST, LSP Language Server and REA Bytecode Inspection",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.d.ts",
+  "scripts": {
+    "test": "bun test",
+    "lsp": "bun run src/lsp.ts",
+    "ast": "bun run src/ast.ts",
+    "rea": "bun run src/rea.ts"
+  },
+  "keywords": [
+    "lua52",
+    "lua-5.2",
+    "tree-sitter",
+    "lsp",
+    "rea",
+    "bytecode",
+    "bun",
+    "rosegriffon"
+  ],
+  "author": "RoseGriffon Team <contact@rosegriffon.fr>",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}

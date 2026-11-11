@@ -1,0 +1,9 @@
+[install]
+lockfile = true
+production = false
+
+[test]
+coverage = false
+
+[run]
+shell = "system"

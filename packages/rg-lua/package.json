@@ -1,0 +1,58 @@
+{
+  "name": "@rosegriffon/lua-plugin",
+  "version": "1.4.8",
+  "description": "End-to-end Lua 5.2 loader, runtime and Next.js / Bun bundler plugin for RoseGriffon",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./bun": {
+      "types": "./dist/bun.d.ts",
+      "import": "./dist/bun.js",
+      "default": "./dist/bun.js"
+    },
+    "./next": {
+      "types": "./dist/next.d.ts",
+      "import": "./dist/next.js",
+      "default": "./dist/next.js"
+    },
+    "./vm": {
+      "types": "./dist/vm.d.ts",
+      "import": "./dist/vm.js",
+      "default": "./dist/vm.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "bun run build.ts",
+    "test": "bun test",
+    "prepublishOnly": "bun run build.ts"
+  },
+  "keywords": [
+    "lua",
+    "lua52",
+    "nextjs",
+    "bun",
+    "bun-plugin",
+    "rosegriffon",
+    "webpack",
+    "ast"
+  ],
+  "author": "RoseGriffon Team <contact@rosegriffon.fr>",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}
