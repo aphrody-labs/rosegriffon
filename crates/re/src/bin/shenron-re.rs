@@ -8,7 +8,7 @@ use std::{
     process::ExitCode,
 };
 
-use shenron_re::{
+use bun_re::{
     formats::emb_archive::EmbArchive,
     fs::cpk::{CpkArchive, CpkEntry},
     inventory::inventory_install,
@@ -34,7 +34,7 @@ fn main() -> ExitCode {
             if args.next().is_some() {
                 return usage();
             }
-            let catalog = shenron_re::get_dragon_ball_catalog();
+            let catalog = bun_re::get_dragon_ball_catalog();
             print_json(&catalog)
         },
         Some(arg) if arg == "emb" => {
