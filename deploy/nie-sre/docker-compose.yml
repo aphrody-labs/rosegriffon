@@ -1,6 +1,8 @@
 services:
   nie-bridge:
-    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: nie-bridge-service
     restart: unless-stopped
     ports:
@@ -11,7 +13,6 @@ services:
     volumes:
       - ./workflows:/workflows:ro
       - ./config:/config:ro
-    command: ["python3", "-m", "http.server", "8899"]
 
   nie-lua-audit:
     image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
