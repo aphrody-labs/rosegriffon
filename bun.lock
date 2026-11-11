@@ -35,6 +35,9 @@
       },
       "dependencies": {
         "@aphrody/bun-engine": "workspace:*",
+        "@aphrody/filmcraft": "workspace:*",
+        "@aphrody/hyperframes": "workspace:*",
+        "@aphrody/remotion": "workspace:*",
         "@rosegriffon/azalee": "workspace:*",
         "@rosegriffon/inagle": "workspace:*",
       },
@@ -298,6 +301,23 @@
         "yolo-console-formats": "src/main.ts",
       },
     },
+    "packages/filmcraft": {
+      "name": "@aphrody/filmcraft",
+      "version": "1.4.7",
+      "bin": {
+        "filmcraft-cli": "./src/cli.ts",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+      },
+    },
+    "packages/hyperframes": {
+      "name": "@aphrody/hyperframes",
+      "version": "1.4.7",
+      "devDependencies": {
+        "@types/bun": "catalog:",
+      },
+    },
     "packages/iecode-homebrew": {
       "name": "iecode-homebrew",
       "version": "1.4.7",
@@ -386,6 +406,14 @@
         "openapi-types": "catalog:",
         "ts-morph": "catalog:",
         "typescript": "catalog:",
+      },
+    },
+    "packages/remotion": {
+      "name": "@aphrody/remotion",
+      "version": "1.4.7",
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "@types/react": "catalog:",
       },
     },
     "packages/rg-app-shell": {
@@ -488,7 +516,7 @@
     },
     "packages/rg-lua": {
       "name": "@rosegriffon/lua-plugin",
-      "version": "1.4.8",
+      "version": "1.5.0",
     },
     "packages/rg-preferences": {
       "name": "@rosegriffon/preferences",
@@ -769,6 +797,10 @@
 
     "@aphrody/discord-kit": ["@aphrody/discord-kit@0.1.3", "", { "dependencies": { "@aphrody/bun": "3.3.13", "@aphrody/runtime-sdk": "0.1.4", "@discordjs/rest": "^2.6.3", "discord-api-types": "^0.38.56", "discord.js": "^14.27.0", "discordx": "11.13.3" } }, "sha512-3OQHNRre7gIVQCXtFNJNoOuNwWCvDe/sMHdgDGYYLwTfUnE6nqbKiUixFaIBDTVAk5J3VqsRcEnde/HrPgpwrg=="],
 
+    "@aphrody/filmcraft": ["@aphrody/filmcraft@workspace:packages/filmcraft"],
+
+    "@aphrody/hyperframes": ["@aphrody/hyperframes@workspace:packages/hyperframes"],
+
     "@aphrody/inagle-ui": ["@aphrody/inagle-ui@workspace:packages/inagle-ui"],
 
     "@aphrody/m3-tailwind": ["@aphrody/m3-tailwind@3.3.11", "", { "dependencies": { "@aphrody/m3-tokens": "3.3.11" }, "peerDependencies": { "tailwindcss": "^4.0.0" } }, "sha512-yKEKdjbMi4v1jBgTZpFA8S/ACiFSr2eL+CfqRzrXeJRrABX14CMyShiJtDghQZEJ5po2aCoO/RCWvi+iPb5UkA=="],
@@ -782,6 +814,8 @@
     "@aphrody/nie-web": ["@aphrody/nie-web@workspace:packages/nie-web"],
 
     "@aphrody/paths": ["@aphrody/paths@0.1.3", "", {}, "sha512-85c2cVe6KnkA94/6ZmBO71vrwZQVMKiEqznFzy8TzqaNEZy57y3NnviK+VNwE9ckKvYz5U6gyEFhdS3aUbCa2w=="],
+
+    "@aphrody/remotion": ["@aphrody/remotion@workspace:packages/remotion"],
 
     "@aphrody/runtime-sdk": ["@aphrody/runtime-sdk@0.1.3", "", {}, "sha512-lzyl6HAGhVHP68kniJ3y4/qby1092iAHicubcPiHZcaWzxYs1Eg4uQbuCaPWE4ZsJDEfmMKFvNpqFCizfEZ4GQ=="],
 

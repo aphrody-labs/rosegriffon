@@ -682,7 +682,11 @@ dependencies = [
  "aphrody-nie-core",
  "aphrody-nie-data",
  "aphrody-nie-formats",
+ "aphrody-nie-pe-inspect",
+ "aphrody-nie-save",
+ "aphrody-nie-video",
  "clap",
+ "png 0.18.1",
  "serde",
  "serde_json",
 ]

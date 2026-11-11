@@ -12,7 +12,15 @@ workspace = true
 
 [features]
 default = ["host"]
-host = ["dep:clap", "dep:aphrody-nie-core", "dep:aphrody-nie-data"]
+host = [
+    "dep:clap",
+    "dep:aphrody-nie-core",
+    "dep:aphrody-nie-data",
+    "dep:aphrody-nie-save",
+    "dep:aphrody-nie-pe-inspect",
+    "dep:aphrody-nie-video",
+    "dep:png",
+]
 
 [dependencies]
 anyhow = { workspace = true }
@@ -21,6 +29,10 @@ serde_json = { workspace = true }
 aphrody-nie-formats = { workspace = true, default-features = true }
 aphrody-nie-data = { workspace = true, optional = true }
 aphrody-nie-core = { workspace = true, optional = true }
+aphrody-nie-save = { path = "../aphrody-nie-save", optional = true }
+aphrody-nie-pe-inspect = { path = "../aphrody-nie-pe-inspect", optional = true }
+aphrody-nie-video = { path = "../aphrody-nie-video", optional = true }
+png = { workspace = true, optional = true }
 clap = { workspace = true, optional = true, features = ["derive", "color", "env"] }
 
 [[bin]]

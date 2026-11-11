@@ -7,6 +7,20 @@ use aphrody_nie_formats::{FileFormat, cfgbin, cpk, crilayla, detect};
 use serde::Serialize;
 use serde_json::Value;
 
+#[cfg(feature = "host")]
+pub mod memory_dump;
+#[cfg(feature = "host")]
+pub mod menu_capture;
+#[cfg(feature = "host")]
+pub mod save_runner;
+
+#[cfg(feature = "host")]
+pub use memory_dump::{MemoryDumpOptions, ProcessMemoryMap, execute_memory_dump};
+#[cfg(feature = "host")]
+pub use menu_capture::{CaptureSequenceManifest, GameScreen, MenuCaptureOptions, capture_all_menus};
+#[cfg(feature = "host")]
+pub use save_runner::{SaveEditOptions, SaveEditReport, create_mock_save_container, execute_save_edit};
+
 /// Largest byte buffer accepted by the interactive detailed detector.
 pub const MAX_INSPECTION_BYTES: usize = 128 * 1024 * 1024;
 
@@ -122,5 +136,79 @@ mod tests {
     fn inspection_is_bounded_before_parsing() {
         let bytes = vec![0_u8; MAX_INSPECTION_BYTES + 1];
         assert!(inspect_bytes(&bytes).is_err());
+    }
+
+    #[cfg(feature = "host")]
+    #[test]
+    fn test_save_runner_mock_and_edit() {
+        let temp_dir = std::env::temp_dir().join(format!("nie_test_save_{}", std::process::id()));
+        let _ = std::fs::create_dir_all(&temp_dir);
+        let save_path = temp_dir.join("002AB8F4-USERDATALIVE");
+
+        let options = SaveEditOptions {
+            input_path: save_path.clone(),
+            output_path: Some(save_path.clone()),
+            slot: "002AB8F4-USERDATALIVE".to_string(),
+            player_level: Some(99),
+            coins: Some(50000),
+            mock_if_missing: true,
+        };
+
+        let report = execute_save_edit(&options).expect("save edit should succeed");
+        assert_eq!(report.slot, "002AB8F4-USERDATALIVE");
+        assert_eq!(report.player_level_applied, Some(99));
+        assert_eq!(report.coins_applied, Some(50000));
+        assert!(report.crc32_valid);
+        assert!(save_path.is_file());
+        let _ = std::fs::remove_dir_all(&temp_dir);
+    }
+
+    #[cfg(feature = "host")]
+    #[test]
+    fn test_memory_dump_execution() {
+        let temp_dir = std::env::temp_dir().join(format!("nie_test_mem_{}", std::process::id()));
+        let _ = std::fs::create_dir_all(&temp_dir);
+        let bin_path = temp_dir.join("nie_mem.bin");
+        let json_path = temp_dir.join("nie_mem.json");
+
+        let options = MemoryDumpOptions {
+            output_bin: bin_path.clone(),
+            output_json: Some(json_path.clone()),
+            live_pid: None,
+            target_pe: None,
+            slot_name: "002AB8F4-USERDATALIVE".to_string(),
+        };
+
+        let map = execute_memory_dump(&options).expect("memory dump should succeed");
+        assert_eq!(map.process_name, "nie.exe");
+        assert_eq!(map.architecture, "x86_64");
+        assert!(map.total_dump_bytes > 0);
+        assert!(bin_path.is_file());
+        assert!(json_path.is_file());
+        let _ = std::fs::remove_dir_all(&temp_dir);
+    }
+
+    #[cfg(feature = "host")]
+    #[test]
+    fn test_menu_capture_execution() {
+        let temp_dir = std::env::temp_dir().join(format!("nie_test_capture_{}", std::process::id()));
+        let _ = std::fs::create_dir_all(&temp_dir);
+        let out_dir = temp_dir.join("frames");
+
+        let options = MenuCaptureOptions {
+            output_dir: out_dir.clone(),
+            width: 320,
+            height: 180,
+            frames_per_menu: 2,
+            fps: 30,
+            screens: vec![GameScreen::Boot, GameScreen::MainMenu],
+        };
+
+        let manifest = capture_all_menus(&options).expect("menu capture should succeed");
+        assert_eq!(manifest.total_frames, 4);
+        assert_eq!(manifest.filmcraft_clips.len(), 2);
+        assert!(out_dir.join("timeline.json").is_file());
+        assert!(out_dir.join(&manifest.frames[0].file_name).is_file());
+        let _ = std::fs::remove_dir_all(&temp_dir);
     }
 }

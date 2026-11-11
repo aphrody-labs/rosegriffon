@@ -15,7 +15,10 @@
   "dependencies": {
     "@rosegriffon/inagle": "workspace:*",
     "@rosegriffon/azalee": "workspace:*",
-    "@aphrody/bun-engine": "workspace:*"
+    "@aphrody/bun-engine": "workspace:*",
+    "@aphrody/filmcraft": "workspace:*",
+    "@aphrody/hyperframes": "workspace:*",
+    "@aphrody/remotion": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest"

@@ -106,6 +106,66 @@ enum Commande {
         #[arg(long)]
         away_stats: Option<String>,
     },
+    /// Edits or boots an IEVR save file headlessly.
+    SaveEdit {
+        /// Input save file path.
+        #[arg(long, default_value = "002AB8F4-USERDATALIVE")]
+        file: PathBuf,
+        /// Output save file path.
+        #[arg(long)]
+        out: Option<PathBuf>,
+        /// Slot name.
+        #[arg(long, default_value = "002AB8F4-USERDATALIVE")]
+        slot: String,
+        /// Set player level.
+        #[arg(long)]
+        level: Option<u32>,
+        /// Set coins amount.
+        #[arg(long)]
+        coins: Option<u32>,
+        /// Mock genuine container if input is missing.
+        #[arg(long, default_value_t = true)]
+        mock_if_missing: bool,
+    },
+    /// Captures all game menu screens (boot, title, main_menu, save_editor, match_ui, formation) as PNG sequence + timeline manifest.
+    CaptureMenus {
+        /// Directory where frames and timeline.json will be written.
+        #[arg(long, default_value = "capture_frames")]
+        out_dir: PathBuf,
+        /// Frame width in pixels.
+        #[arg(long, default_value = "1280")]
+        width: u32,
+        /// Frame height in pixels.
+        #[arg(long, default_value = "720")]
+        height: u32,
+        /// Number of animation frames per screen.
+        #[arg(long, default_value = "10")]
+        frames_per_menu: u32,
+        /// Sequence framerate (FPS).
+        #[arg(long, default_value = "30")]
+        fps: u32,
+    },
+    /// Dumps memory map and raw binary core of nie.exe / save manager runtime.
+    MemoryDump {
+        /// Binary dump output path.
+        #[arg(long, default_value = "nie_memory_dump.bin")]
+        out_bin: PathBuf,
+        /// Structured JSON memory map output path.
+        #[arg(long, default_value = "nie_memory_map.json")]
+        out_json: PathBuf,
+        /// Slot name for SaveManager simulation.
+        #[arg(long, default_value = "002AB8F4-USERDATALIVE")]
+        slot: String,
+    },
+    /// Runs full headless pipeline: save editor run + memory dump + menu frame capture.
+    Pipeline {
+        /// Working / output directory.
+        #[arg(long, default_value = "headless_out")]
+        out_dir: PathBuf,
+        /// Slot name.
+        #[arg(long, default_value = "002AB8F4-USERDATALIVE")]
+        slot: String,
+    },
 }
 
 // ---------------------------------------------------------------------------
@@ -124,6 +184,27 @@ fn main() -> Result<()> {
             home_stats,
             away_stats,
         } => cmd_match(home, away, seed, home_stats, away_stats),
+        Commande::SaveEdit {
+            file,
+            out,
+            slot,
+            level,
+            coins,
+            mock_if_missing,
+        } => cmd_save_edit(file, out, slot, level, coins, mock_if_missing),
+        Commande::CaptureMenus {
+            out_dir,
+            width,
+            height,
+            frames_per_menu,
+            fps,
+        } => cmd_capture_menus(out_dir, width, height, frames_per_menu, fps),
+        Commande::MemoryDump {
+            out_bin,
+            out_json,
+            slot,
+        } => cmd_memory_dump(out_bin, out_json, slot),
+        Commande::Pipeline { out_dir, slot } => cmd_pipeline(out_dir, slot),
     }
 }
 
@@ -346,5 +427,122 @@ fn cmd_match(
         "home={home_name} away={away_name} résultat={}-{} horloge={}",
         res.home_score, res.away_score, res.final_clock
     );
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Sous-commandes headless pipeline (save, capture, memory dump)
+// ---------------------------------------------------------------------------
+
+fn cmd_save_edit(
+    file: PathBuf,
+    out: Option<PathBuf>,
+    slot: String,
+    level: Option<u32>,
+    coins: Option<u32>,
+    mock_if_missing: bool,
+) -> Result<()> {
+    let options = aphrody_nie_headless::SaveEditOptions {
+        input_path: file,
+        output_path: out,
+        slot,
+        player_level: level,
+        coins,
+        mock_if_missing,
+    };
+    let report = aphrody_nie_headless::execute_save_edit(&options)?;
+    println!("{}", serde_json::to_string_pretty(&report)?);
+    Ok(())
+}
+
+fn cmd_capture_menus(
+    out_dir: PathBuf,
+    width: u32,
+    height: u32,
+    frames_per_menu: u32,
+    fps: u32,
+) -> Result<()> {
+    let options = aphrody_nie_headless::MenuCaptureOptions {
+        output_dir: out_dir,
+        width,
+        height,
+        frames_per_menu,
+        fps,
+        screens: aphrody_nie_headless::GameScreen::all().to_vec(),
+    };
+    let manifest = aphrody_nie_headless::capture_all_menus(&options)?;
+    println!("{}", serde_json::to_string_pretty(&manifest)?);
+    Ok(())
+}
+
+fn cmd_memory_dump(out_bin: PathBuf, out_json: PathBuf, slot: String) -> Result<()> {
+    let options = aphrody_nie_headless::MemoryDumpOptions {
+        output_bin: out_bin,
+        output_json: Some(out_json),
+        live_pid: None,
+        target_pe: None,
+        slot_name: slot,
+    };
+    let map = aphrody_nie_headless::execute_memory_dump(&options)?;
+    println!("{}", serde_json::to_string_pretty(&map)?);
+    Ok(())
+}
+
+fn cmd_pipeline(out_dir: PathBuf, slot: String) -> Result<()> {
+    std::fs::create_dir_all(&out_dir)?;
+
+    // 1. Save edit
+    let save_path = out_dir.join(format!("{slot}.bin"));
+    let save_report = aphrody_nie_headless::execute_save_edit(&aphrody_nie_headless::SaveEditOptions {
+        input_path: save_path.clone(),
+        output_path: Some(save_path.clone()),
+        slot: slot.clone(),
+        player_level: Some(99),
+        coins: Some(999_999),
+        mock_if_missing: true,
+    })?;
+
+    // 2. Memory dump
+    let mem_bin = out_dir.join("nie_memory_dump.bin");
+    let mem_json = out_dir.join("nie_memory_map.json");
+    let mem_map = aphrody_nie_headless::execute_memory_dump(&aphrody_nie_headless::MemoryDumpOptions {
+        output_bin: mem_bin,
+        output_json: Some(mem_json),
+        live_pid: None,
+        target_pe: None,
+        slot_name: slot.clone(),
+    })?;
+
+    // 3. Menu capture
+    let frames_dir = out_dir.join("frames");
+    let menu_manifest = aphrody_nie_headless::capture_all_menus(&aphrody_nie_headless::MenuCaptureOptions {
+        output_dir: frames_dir,
+        width: 1280,
+        height: 720,
+        frames_per_menu: 5,
+        fps: 30,
+        screens: aphrody_nie_headless::GameScreen::all().to_vec(),
+    })?;
+
+    let summary = serde_json::json!({
+        "status": "success",
+        "pipeline": "headless_nie_save_editor_and_menu_capture",
+        "save_report": save_report,
+        "memory_dump": {
+            "base_address": format!("0x{:X}", mem_map.base_address),
+            "entry_point": format!("0x{:X}", mem_map.entry_point),
+            "total_dump_bytes": mem_map.total_dump_bytes,
+            "region_count": mem_map.regions.len(),
+            "save_manager_address": format!("0x{:X}", mem_map.save_manager.address),
+        },
+        "menu_capture": {
+            "total_frames": menu_manifest.total_frames,
+            "duration_seconds": menu_manifest.duration_seconds,
+            "screens": menu_manifest.screens_captured,
+            "clips_count": menu_manifest.filmcraft_clips.len(),
+        }
+    });
+
+    println!("{}", serde_json::to_string_pretty(&summary)?);
     Ok(())
 }
