@@ -55,6 +55,7 @@ export const DICTIONNAIRE_NAV_FR: Record<string, string> = {
   "nav.esport.tournaments.list": "Tous les tournois",
   "nav.esport.wallet": "Portefeuille",
   "nav.home": "Accueil",
+  "nav.play": "Jouer à IEVR",
   "nav.cross": "Inazuma Eleven Cross",
   "nav.cross.data": "Données extraites",
   "nav.cross.overview": "Présentation",

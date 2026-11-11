@@ -77,23 +77,8 @@
     "rag:test": "bun scripts/test-live-rag.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "catalog:",
-    "@ai-sdk/provider": "catalog:",
-    "@aphrody/http": "catalog:",
-    "@aphrody/inference": "catalog:",
     "@aphrody/paths": "catalog:",
-    "@aphrody/runtime-sdk": "catalog:",
-    "@aphrody/shenron-config": "workspace:*",
-    "@aphrody/shenron-db": "workspace:*",
-    "@aphrody/shenron-koharu": "workspace:*",
-    "@aphrody/shenron-lexicon": "workspace:*",
-    "@aphrody/shenron-media": "workspace:*",
-    "@aphrody/shenron-native": "workspace:*",
-    "@aphrody/typesafe-sdk": "catalog:",
-    "ai": "catalog:",
-    "postgres": "catalog:",
     "sharp": "catalog:",
-    "sqlite-vec": "catalog:",
     "zod": "catalog:"
   },
   "engines": {

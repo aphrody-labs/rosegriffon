@@ -1,13 +1,3 @@
-/**
- * Pont navigateur vers le **JEU complet** niers (`nie-wasm`/`WasmGame`), 100 % Rust → WebAssembly.
- *
- * `WasmGame` est la machine à états interactive : écran-titre → menu principal (9 onglets réels) →
- * sélection de mode (Histoire / Chronique / Compétition / Victory Road / Stade BB) → **vrai match**
- * (moteur nie-runtime : physique, 22 joueurs, ballon, buts) / dialogues. Clavier in, framebuffer out.
- *
- * Ce module ne fait que : charger le wasm, fetcher la police réelle (gzippée same-origin), et adapter
- * input clavier + framebuffer ↔ canvas. ⚠ Navigateur uniquement — importer depuis `"use client"`.
- */
 import init, { WasmGame } from "./nie-wasm-web/nie_wasm.js";
 
 const WASM_URL = "/wasm/nie_wasm_bg.wasm";
@@ -24,33 +14,48 @@ async function ensureWasm(): Promise<void> {
   return initPromise;
 }
 
-/** Fetch d'un asset gzip + décompression streaming → octets bruts. */
+/** Fetch asset and gunzip to raw Uint8Array. */
 async function fetchGzipped(url: string): Promise<Uint8Array> {
   const res = await fetch(url);
-  if (!res.ok || res.body === null) throw new Error(`${url} → HTTP ${res.status}`);
+  if (!res.ok || res.body === null) throw new Error(`${url} -> HTTP ${res.status}`);
   const stream = res.body.pipeThrough(new DecompressionStream("gzip"));
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
-/** Poignée du jeu : dimensions + entrée clavier + tick + rendu + score. */
+/** Keyboard and gamepad input mapping to native IEVR menu and match commands. */
+export const KEY_TO_COMMAND: Record<string, string> = {
+  ArrowUp: "CMD_FCS_MTX_UP",
+  KeyW: "CMD_FCS_MTX_UP",
+  KeyZ: "CMD_FCS_MTX_UP",
+  ArrowDown: "CMD_FCS_MTX_DOWN",
+  KeyS: "CMD_FCS_MTX_DOWN",
+  ArrowLeft: "CMD_FCS_MTX_LEFT",
+  KeyA: "CMD_FCS_MTX_LEFT",
+  KeyQ: "CMD_FCS_MTX_LEFT",
+  ArrowRight: "CMD_FCS_MTX_RIGHT",
+  KeyD: "CMD_FCS_MTX_RIGHT",
+  Enter: "CMD_ENTER",
+  NumpadEnter: "CMD_ENTER",
+  Space: "CMD_ENTER",
+  Escape: "CMD_BACK",
+  Backspace: "CMD_BACK",
+  Tab: "CMD_FCS_NEXT",
+  KeyI: "CMD_INFO",
+};
+
 export interface GameHandle {
-  /** Largeur du framebuffer (px). */
   readonly width: number;
-  /** Hauteur du framebuffer (px). */
   readonly height: number;
-  /** Transmet une COMMANDE de menu IEVR réelle (CMD_ENTER, CMD_BACK, CMD_FCS_MTX_UP…) au jeu. */
   input(cmd: string): void;
-  /** Avance le temps de `dt` secondes (la physique du match tourne en match). */
+  setMatchInput(dx: number, dy: number, shoot: boolean): void;
   update(dt: number): void;
-  /** Rend l'écran courant en `ImageData` pour `putImageData`. */
   frame(): ImageData;
-  /** Score courant `[domicile, extérieur]`. */
   score(): [number, number];
-  /** `true` si un match est en cours. */
   inMatch(): boolean;
+  stateJson(): any;
 }
 
-/** Charge le jeu wasm complet + la police réelle, et renvoie une poignée pilotable. */
+/** Loads the complete WebAssembly IEVR game engine + fonts. */
 export async function loadGame(): Promise<GameHandle> {
   await ensureWasm();
   const [cfg, g4tx] = await Promise.all([fetchGzipped(FONT_CFG_URL), fetchGzipped(FONT_G4TX_URL)]);
@@ -58,10 +63,16 @@ export async function loadGame(): Promise<GameHandle> {
   const w = game.width;
   const h = game.height;
   const toImage = (rgba: Uint8Array): ImageData => new ImageData(new Uint8ClampedArray(rgba), w, h);
+
   return {
     width: w,
     height: h,
     input: cmd => game.input(cmd),
+    setMatchInput: (dx, dy, shoot) => {
+      if (typeof (game as any).set_match_input === "function") {
+        (game as any).set_match_input(dx, dy, shoot);
+      }
+    },
     update: dt => game.update(dt),
     frame: () => toImage(game.render()),
     score: () => {
@@ -69,5 +80,13 @@ export async function loadGame(): Promise<GameHandle> {
       return [s[0] ?? 0, s[1] ?? 0];
     },
     inMatch: () => game.in_match,
+    stateJson: () => {
+      try {
+        if (typeof (game as any).state_json === "function") {
+          return JSON.parse((game as any).state_json());
+        }
+      } catch {}
+      return null;
+    },
   };
 }

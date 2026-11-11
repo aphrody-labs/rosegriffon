@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { initSync, menu_presentation_json, WasmBitmapFont } from "../../../packages/nie-web/src/wasm/nie_wasm.js";
+import { initSync, menu_presentation_json, WasmBitmapFont } from "../../../../nie-web/src/nie-wasm-web/nie_wasm.js";
 const [report, directory] = process.argv.slice(2);
 assert(report && directory, "Expected native JSON and private font directory");
 const native = JSON.parse(readFileSync(report, "utf8"));

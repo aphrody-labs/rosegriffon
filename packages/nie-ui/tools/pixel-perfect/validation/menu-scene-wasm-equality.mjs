@@ -9,7 +9,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { initSync, menu_runtime_scene_json } from "../../../packages/nie-web/src/wasm/nie_wasm.js";
+import { initSync, menu_runtime_scene_json } from "../../../../nie-web/src/nie-wasm-web/nie_wasm.js";
 
 const paths = process.argv.slice(2);
 assert(paths.length > 0, "Pass at least one native runtime-layout JSON export");

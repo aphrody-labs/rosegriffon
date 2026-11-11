@@ -8,7 +8,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { initSync, menu_animation_bindings_json } from "../../../packages/nie-web/src/wasm/nie_wasm.js";
+import { initSync, menu_animation_bindings_json } from "../../../../nie-web/src/nie-wasm-web/nie_wasm.js";
 
 const args = process.argv.slice(2);
 assert(

@@ -127,6 +127,7 @@ export function construireNavigationItems(): NavItem[] {
   return [
     // Accueil : pictogramme Material, le logo Azalée reste réservé à l'entête du groupe.
     { icon: "home", label: "nav.home", path: w("/") },
+    { commonSprite: "justice", icon: "sports_esports", label: "nav.play", path: "/play" },
     // Sprite « lien » : connexion/collaboration, utilisé pour Inazuma Eleven Cross.
     { commonSprite: "lien", icon: "sports_soccer", label: "nav.cross", path: w("/cross") },
     // Les articles et notes de version décrivent l'actualité du jeu et du wiki.

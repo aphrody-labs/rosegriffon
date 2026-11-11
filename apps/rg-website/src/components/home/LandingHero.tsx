@@ -9,6 +9,7 @@ import {
   useTransform,
 } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 import type { WikiSectionStats } from "./WikiCarousel";
@@ -206,6 +207,10 @@ export function LandingHero({ stats }: LandingHeroProps) {
             <div className="mt-5 w-full max-w-[300px] hero-search-glow rounded-2xl">
               <GlobalSearch isMobileHero />
             </div>
+            <div className="mt-3 w-full max-w-[300px]">
+              <Link href="/play" className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-linear-to-r from-[#F07D7D] to-[#F4D03F] text-black font-black text-sm uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 transition">
+                Jouer à IEVR Web
+              </Link>
           </div>
         </motion.div>
 
@@ -272,6 +277,12 @@ export function LandingHero({ stats }: LandingHeroProps) {
           {/* Desktop Search */}
           <div className="w-full max-w-md hero-search-glow rounded-2xl animate-[fadeSlideUp_0.6s_ease-out_0.8s_both]">
             <GlobalSearch isHero />
+          </div>
+          <div className="flex items-center gap-3 animate-[fadeSlideUp_0.6s_ease-out_1s_both]">
+            <Link href="/play" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-linear-to-r from-[#F07D7D] to-[#F4D03F] text-black font-black text-sm uppercase tracking-wider shadow-xl hover:brightness-110 active:scale-95 transition">
+              Jouer à IEVR dans le navigateur
+            </Link>
+            <span className="text-xs text-white/50 font-medium">100% WebAssembly Rust · 60 FPS</span>
           </div>
         </motion.div>
 
