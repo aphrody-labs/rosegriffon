@@ -17,7 +17,7 @@ for m in / /home; do
 done
 
 # Cibles de build périmées (aucune écriture depuis 14 jours), jamais les sources.
-for d in /home/ubuntu/src/bun-os/build/rust/debug /home/ubuntu/src/bun-os/target/debug; do
+for d in /home/ubuntu/src/rosegriffon/build/rust/debug /home/ubuntu/src/rosegriffon/target/debug; do
   if [ -d "$d" ] && [ -z "$(find "$d" -maxdepth 1 -mtime -14 -print -quit 2>/dev/null)" ]; then
     echo "purge $d"; rm -rf "$d"
   fi

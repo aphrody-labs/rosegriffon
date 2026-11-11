@@ -1,0 +1,25 @@
+id = "RoseGriffon"
+name = "Rose Griffon"
+version = "0.1.0"
+author = "Rose Griffon (association loi 1901)"
+description = "Rose Griffon club pack: a Rose Griffon team with original kit textures (rose / griffon crest), the mascots Roy and Gaelle as original 3D models and menu art, a Rose Griffon title-screen theme, and an optional broadcast camera (VRFW match camera service). Offline play only. Ships original Rose Griffon artwork only; no base-game files are redistributed."
+priority = 0
+tags = ["Visual", "Team", "Camera"]
+updated = "2026-11-05"
+requires = ["VRFW>=3.10"]
+conflicts = []
+loader_min = "1.7.0"
+prefix = "RoseGriffon"
+folder = "RoseGriffon"
+# lua_bridge: the match Lua that requests the broadcast camera preset (VRFW match camera service, >= 3.10)
+loader_modules = ["lua_bridge"]
+permissions = ["command"]
+
+[exports]
+functions = []
+keys = []
+game_lua = ["RoseGriffon"]
+
+# Changes match presentation (camera) but not rules or data: kept out of shared online room mod sets.
+[VRFW.Mod]
+AffectsMatch = false

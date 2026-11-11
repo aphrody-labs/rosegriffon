@@ -1,0 +1,30 @@
+[package]
+name = "aphrody-nie-pg"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Static cfg.bin decoder and optional PostgreSQL importer for IEVR reverse engineering"
+
+[lints]
+workspace = true
+
+[features]
+default = []
+postgres = ["dep:tokio-postgres", "dep:tokio", "dep:futures-util", "dep:clap", "dep:anyhow"]
+
+[dependencies]
+aphrody-nie-formats = { workspace = true, features = ["std"] }
+sha2 = "0.11.0"
+thiserror = { workspace = true }
+tokio-postgres = { version = "0.7.15", optional = true }
+tokio = { version = "1.49.0", features = ["rt-multi-thread", "macros"], optional = true }
+futures-util = { version = "0.3.31", optional = true }
+clap = { version = "4.5.58", features = ["derive", "env"], optional = true }
+anyhow = { workspace = true, optional = true }
+
+[[bin]]
+name = "aphrody-nie-pg"
+path = "src/main.rs"
+required-features = ["postgres"]

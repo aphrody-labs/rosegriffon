@@ -6,7 +6,7 @@
 # supervised loopback child. One port, 127.0.0.1:8810, behind nginx (nginx/rg/rg-core.conf,
 # nginx/nie/nie.aphrody.app.conf). Replaces nie-model-serve.service.
 #
-# Build on the host (Linux checkout /home/ubuntu/src/bun-os; @napi-rs/canvas needs its linux .node):
+# Build on the host (Linux checkout /home/ubuntu/src/rosegriffon; @napi-rs/canvas needs its linux .node):
 #   cd apps/rg-bot && bun run compile:core
 #   sudo install -m 755 apps/rg-bot/dist/rg-core /usr/local/bin/rg-core
 # /etc/aphrody/rg-core.env (root:ubuntu 0640) holds the production environment: Discord tokens,

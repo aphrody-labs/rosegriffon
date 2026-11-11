@@ -1,0 +1,31 @@
+[package]
+name = "aphrody-nie-ffi"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license = "Apache-2.0"
+publish = false
+description = "Native C ABI for Inazuma Eleven binary-format inspection and extraction"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "iecode"
+
+[lints]
+workspace = true
+
+[features]
+default = ["formats", "textures"]
+formats = []
+textures = ["formats", "aphrody-nie-formats/textures"]
+
+[dependencies]
+anyhow = { workspace = true }
+aphrody-nie-core = { workspace = true, features = ["serde"] }
+aphrody-nie-app = { workspace = true }
+aphrody-nie-wiki = { workspace = true }
+aphrody-nie-data = { workspace = true, features = ["serde", "std"] }
+aphrody-nie-formats = { workspace = true, features = ["serde"] }
+aphrody-nie-save = { workspace = true }
+serde_json = { workspace = true }
+image = { version = "0.25.10", default-features = false, features = ["png"] }

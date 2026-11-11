@@ -1,0 +1,30 @@
+# Rose Griffon theme for the IEVR mod. Nothing is computed or hard-coded here:
+#   - colours: the official Material 3 roles Rose Griffon publishes in @rosegriffon/ui (tokens: md3(<theme>))
+#   - files:   @rosegriffon/assets (npm), falling back to cdn.rosegriffon.fr through its own sharedAssetUrl()
+#   - game:    the real game's packs, read through nie from your install
+# Dependencies are in package.json; `bun install` in this folder fetches them.
+schema = "aphrody.theme/3"
+
+# A theme name from @rosegriffon/ui NOMS_THEMES: theme-roy, theme-gaelle, theme-azalee-light,
+# theme-azalee-dark, theme-achillea.
+theme = "theme-roy"
+
+# Files from @rosegriffon/assets/public, by name. Missing slots leave the game's own asset untouched.
+[assets]
+logo = "RG_Logo_V2.5.png"
+title = "RG_Logo_V2.5.png"
+wallpaper = "roy_bg.webp"
+
+[pet]
+name = "Roy"
+hello = "emote/RG_Roy_salut.webp"
+proud = "emote/RG_roy_fine.webp"
+
+# Game side: which real kit is replaced, where its crest sits on the 2048x2048 diffuse (measured on the
+# game's own texture), and which md3 roles make the shadow / mid / highlight ramp.
+[kit]
+id = "u11600010"
+ramp = ["onPrimaryContainer", "primary", "primaryContainer"]
+crest = "logo"
+crest_size = 180
+crest_box = [784, 1053, 199, 164]

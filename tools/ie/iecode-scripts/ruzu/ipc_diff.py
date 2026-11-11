@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+"""Align ruzu vs zuyu IPC_REPLY logs and report first payload divergences.
+
+Both logs share the format:
+  IPC_REPLY seq=N service=<name> cmd=<id> words=<n> payload=<hex...>
+
+We key each reply by (service, cmd, rank) where rank is the per-key occurrence
+index within the run — this skips past differing session IDs / seq numbers.
+"""
+
+import re
+import sys
+from collections import defaultdict
+
+PAT = re.compile(
+    r"IPC_REPLY seq=(?P<seq>\d+) service=(?P<service>[^ ]+) cmd=(?P<cmd>\d+)"
+    r"(?:\s+ioctl=0x(?P<ioctl>[0-9a-fA-F]+))?"
+    r"\s+words=(?P<words>\d+) payload=(?P<payload>[0-9a-fA-F ]+)"
+)
+
+# Mirror PAT for IPC_REQUEST. Request log line omits the `words=` token
+# because the snapshot is always 16 u32s — the trailing zeros are part of
+# the dump and useful for diffing.
+PAT_REQ = re.compile(
+    r"IPC_REQUEST seq=(?P<seq>\d+) service=(?P<service>[^ ]+) cmd=(?P<cmd>\d+)"
+    r"(?:\s+ioctl=0x(?P<ioctl>[0-9a-fA-F]+))?"
+    r"\s+payload=(?P<payload>[0-9a-fA-F ]+)"
+)
+
+
+# Manual mapping from ruzu's Rust class names to zuyu's wire/short names.
+# ruzu logs the IPC service via std::any::type_name (Rust path),
+# zuyu logs the wire-protocol name registered with sm:. Without this map,
+# diffs misclassify identical IPC sequences as "only in zuyu / only in ruzu".
+#
+# Add new entries here as they show up in `only_in_*` summary output.
+_SERVICE_NAME_MAP = {
+    "IAudioRendererManager": "audren:u",
+    "IPlatformServiceManager": "pl:u",
+    "IApplicationProxyService": "appletOE",
+    "IStaticService": "mii:e",  # also used by other IStaticService classes; risk of collision
+}
+
+
+# Normalize Rust-qualified service names ("core::hle::service::...::IStorage")
+# down to the tail class name so they align with zuyu's short names.
+def _normalize_service(name):
+    name = name.rstrip(":")
+    if "::" in name:
+        name = name.split("::")[-1]
+    return _SERVICE_NAME_MAP.get(name, name)
+
+
+def parse(path, pattern=PAT):
+    records = []
+    per_key = defaultdict(int)
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            m = pattern.search(line)
+            if not m:
+                continue
+            service = _normalize_service(m.group("service"))
+            cmd = int(m.group("cmd"))
+            ioctl = int(m.group("ioctl"), 16) if m.group("ioctl") else 0
+            payload = m.group("payload").strip().split()
+            # Key on ioctl for nvdrv so distinct ioctls don't collapse onto one rank.
+            key = (service, cmd, ioctl)
+            rank = per_key[key]
+            per_key[key] += 1
+            records.append(((service, cmd, ioctl, rank), payload, int(m.group("seq"))))
+    return records
+
+
+def main():
+    if len(sys.argv) < 3 or len(sys.argv) > 4:
+        print("usage: ipc_diff.py <ruzu.log> <zuyu.log> [--request]", file=sys.stderr)
+        sys.exit(2)
+    use_request = "--request" in sys.argv[3:]
+    pattern = PAT_REQ if use_request else PAT
+    label = "request" if use_request else "reply"
+    print(f"# comparing IPC_{label.upper()} records", file=sys.stderr)
+    ruzu = parse(sys.argv[1], pattern)
+    zuyu = parse(sys.argv[2], pattern)
+
+    ruzu_idx = {k: (payload, seq) for k, payload, seq in ruzu}
+    zuyu_idx = {k: (payload, seq) for k, payload, seq in zuyu}
+
+    # Keys present in both, sorted by earliest zuyu seq so we report in time order.
+    shared = sorted(set(ruzu_idx) & set(zuyu_idx), key=lambda k: zuyu_idx[k][1])
+
+    def trim_to_magic(words):
+        # Align at SFCI magic for requests, SFCO for replies. This drops
+        # leftover cmd_buf bytes from prior IPCs and noisy descriptor diffs.
+        magic = "49434653" if use_request else "4f434653"
+        for i, w in enumerate(words):
+            if w.lower() == magic:
+                return words[i:]
+        return words
+
+    trim_to_sfco = trim_to_magic
+
+    diffs = 0
+    for key in shared:
+        r_payload, r_seq = ruzu_idx[key]
+        z_payload, z_seq = zuyu_idx[key]
+        r_trim = trim_to_sfco(r_payload)
+        z_trim = trim_to_sfco(z_payload)
+        if r_trim == z_trim:
+            continue
+        diffs += 1
+        service, cmd, ioctl, rank = key
+        ioctl_s = f" ioctl=0x{ioctl:08X}" if ioctl else ""
+        print(
+            f"DIFF service={service} cmd={cmd}{ioctl_s} rank={rank} "
+            f"ruzu_seq={r_seq} zuyu_seq={z_seq}"
+        )
+        print(f"  ruzu(sfco+): {' '.join(r_trim)}")
+        print(f"  zuyu(sfco+): {' '.join(z_trim)}")
+        # Per-word diff summary (indices from SFCO)
+        diff_words = []
+        for i, (rw, zw) in enumerate(zip(r_trim, z_trim)):
+            if rw != zw:
+                diff_words.append(f"[{i}] {rw} != {zw}")
+        if len(r_trim) != len(z_trim):
+            diff_words.append(f"len ruzu={len(r_trim)} zuyu={len(z_trim)}")
+        print(f"  words_differ: {', '.join(diff_words)}")
+        if diffs >= 30:
+            print("... (stopping after 30 diffs)")
+            break
+
+    # Also report keys present only on one side
+    only_ruzu = sorted(set(ruzu_idx) - set(zuyu_idx))
+    only_zuyu = sorted(set(zuyu_idx) - set(ruzu_idx))
+    print(f"\n=== summary ===")
+    print(f"shared_keys={len(shared)} diffs={diffs}")
+    print(f"only_in_ruzu={len(only_ruzu)}, only_in_zuyu={len(only_zuyu)}")
+    for k in only_ruzu[:10]:
+        print(f"  only_ruzu: {k}")
+    for k in only_zuyu[:10]:
+        print(f"  only_zuyu: {k}")
+
+
+if __name__ == "__main__":
+    main()

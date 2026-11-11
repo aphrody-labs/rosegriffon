@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "profile": "ie",
+  "project": "iecode",
+  "postgresService": "postgres",
+  "postgresDatabase": "iecode",
+  "postgresUser": "iecode",
+  "profileLabel": "io.aphrody.profile",
+  "postgresImage": "postgres@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873",
+  "bunImage": "docker.io/oven/bun@sha256:1d22548f177f4ff38e0c15baa3c2c46c6c2060ba2d1bc573bb4720b407548f1d",
+  "runtimeConfig": "runtime/storage.json",
+  "mirror": "var/mirror.sqlite",
+  "cfgbinCache": "var/cfgbin.sqlite",
+  "bunContainerVersion": "1.4.4",
+  "bunContainerRevision": "38afee6c84fcf48c0edb2466aa4b27d287a59c30"
+}

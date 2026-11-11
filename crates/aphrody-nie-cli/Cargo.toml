@@ -1,0 +1,92 @@
+[package]
+name = "aphrody-nie-cli"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Native host CLI for Inazuma Eleven reverse engineering and game data"
+autobins = false
+
+[[bin]]
+name = "nie"
+path = "src/bin.rs"
+required-features = ["host"]
+
+[lib]
+path = "src/main.rs"
+
+[package.metadata.aphrody-package]
+binary = "nie"
+install-package = "aphrody-nie-cli"
+supported-os = ["linux", "macos", "windows"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["host"]
+host = [
+  "dep:aphrody-nie-index", "dep:aphrody-nie-seed", "dep:aphrody-nie-queue",
+  "dep:aphrody-re", "dep:bun-steam", "dep:aphrody-nie-trace",
+  "dep:aphrody-nie-computer-use", "dep:aphrody-nie-data", "dep:aphrody-nie-formats",
+  "dep:aphrody-nie-explore", "dep:aphrody-nie-viola", "dep:aphrody-nie-launcher",
+  "dep:aphrody-nie-net", "dep:tokio", "dep:futures-util", "dep:tokio-tungstenite",
+  "dep:reqwest", "dep:aphrody-nie-lua", "aphrody-nie-lua/host", "dep:aphrody-nie-save", "dep:aphrody-nie-wiki",
+  "dep:aphrody-nie-zukan", "dep:aphrody-nie-app", "dep:aphrody-nie-core",
+  "dep:aphrody-nie-runtime", "dep:aphrody-nie-render3d", "dep:aphrody-nie-ocgen",
+  "dep:clap", "dep:anyhow", "dep:tracing", "dep:tracing-subscriber", "dep:sha2",
+  "dep:hex", "dep:base64", "dep:redis", "dep:serde", "dep:serde_json", "dep:schemars",
+  "dep:rmcp", "dep:rayon", "dep:goblin", "dep:iced-x86", "dep:image_dds", "dep:image",
+  "dep:png", "dep:ignore", "dep:globset", "dep:grep-searcher", "dep:grep-regex"
+]
+
+[dependencies]
+aphrody-nie-index = { path = "../aphrody-nie-index", version = "1.4.8", features = ["host"], optional = true }
+aphrody-nie-seed = { path = "../aphrody-nie-seed", version = "1.4.8", features = ["host"], optional = true }
+aphrody-nie-queue = { path = "../aphrody-nie-queue", version = "1.4.8", features = ["host"], optional = true }
+aphrody-re = { package = "yolo-re-core", path = "../yolo-re-core", version = "1.4.8", default-features = false, features = ["nie"], optional = true }
+bun-steam = { path = "../bun-steam", version = "1.4.8", features = ["depot"], optional = true }
+aphrody-nie-trace = { path = "../aphrody-nie-trace", version = "1.4.8", features = ["host"], optional = true }
+aphrody-nie-computer-use = { path = "../aphrody-nie-computer-use", version = "1.4.8", features = ["host"], optional = true }
+aphrody-nie-data = { path = "../aphrody-nie-data", version = "1.4.8", features = ["serde", "std"], optional = true }
+aphrody-nie-formats = { path = "../aphrody-nie-formats", version = "1.4.8", features = ["serde", "textures", "audio-decode", "images", "textures-encode", "lua"], optional = true }
+aphrody-nie-explore = { path = "../aphrody-nie-explore", version = "1.4.8", features = ["host"], optional = true }
+aphrody-nie-viola = { path = "../aphrody-nie-viola", version = "1.4.8", optional = true }
+aphrody-nie-launcher = { path = "../aphrody-nie-launcher", version = "1.4.8", optional = true }
+aphrody-nie-net = { path = "../aphrody-nie-net", version = "1.4.8", features = ["transport"], optional = true }
+tokio = { version = "1.53.2", features = ["rt", "rt-multi-thread", "sync", "macros", "time", "net"], optional = true }
+futures-util = { version = "0.3", optional = true }
+tokio-tungstenite = { version = "0.29", optional = true }
+reqwest = { version = "0.13.5", default-features = false, features = ["http2", "rustls", "stream"], optional = true }
+aphrody-nie-lua = { path = "../aphrody-nie-lua", version = "1.4.8", optional = true }
+aphrody-nie-save = { path = "../aphrody-nie-save", version = "1.4.8", optional = true }
+aphrody-nie-wiki = { path = "../aphrody-nie-wiki", version = "1.4.8", optional = true }
+aphrody-nie-zukan = { path = "../aphrody-nie-zukan", version = "1.4.8", optional = true }
+aphrody-nie-app = { path = "../aphrody-nie-app", version = "1.4.8", optional = true }
+aphrody-nie-core = { path = "../aphrody-nie-core", version = "1.4.8", optional = true }
+aphrody-nie-runtime = { path = "../aphrody-nie-runtime", version = "1.4.8", default-features = false, optional = true }
+aphrody-nie-render3d = { path = "../aphrody-nie-render3d", version = "1.4.8", default-features = false, optional = true }
+aphrody-nie-ocgen = { path = "../aphrody-nie-ocgen", version = "1.4.8", features = ["cli"], optional = true }
+clap = { version = "4.6.7", features = ["derive", "color", "env"], optional = true }
+anyhow = { version = "1.0.104", optional = true }
+tracing = { version = "0.1.44", optional = true }
+tracing-subscriber = { version = "0.3.20", default-features = false, features = ["fmt", "env-filter", "ansi", "tracing-log"], optional = true }
+sha2 = { version = "0.11.1", optional = true }
+hex = { version = "0.4", optional = true }
+base64 = { version = "0.23.1", optional = true }
+redis = { version = "0.27.6", features = ["r2d2"], optional = true }
+serde = { version = "1.0.228", features = ["std", "derive"], optional = true }
+serde_json = { version = "1.0.154", optional = true }
+schemars = { version = "1", optional = true }
+rmcp = { version = "3.4.1", features = ["server", "transport-io", "macros", "schemars"], optional = true }
+rayon = { version = "1.12.0", optional = true }
+goblin = { version = "0.10", optional = true }
+iced-x86 = { version = "1.21", optional = true }
+image_dds = { version = "0.7", default-features = false, features = ["ddsfile", "image"], optional = true }
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "webp", "gif", "bmp", "tiff"], optional = true }
+png = { version = "0.18.1", optional = true }
+ignore = { version = "0.4", optional = true }
+globset = { version = "0.4", optional = true }
+grep-searcher = { version = "0.1", optional = true }
+grep-regex = { version = "0.1", optional = true }

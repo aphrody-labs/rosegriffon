@@ -13,11 +13,11 @@
     "victory-road",
     "wiki"
   ],
-  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/azalee#readme",
+  "homepage": "https://github.com/aphrody-dev/rosegriffon/tree/main/packages/azalee#readme",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "url": "https://github.com/aphrody-dev/rosegriffon.git",
     "directory": "packages/azalee"
   },
   "bin": {
@@ -101,6 +101,6 @@
     "bun": ">=1.4.4"
   },
   "bugs": {
-    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
+    "url": "https://github.com/aphrody-dev/rosegriffon/issues"
   }
 }

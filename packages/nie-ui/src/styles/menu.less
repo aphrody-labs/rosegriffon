@@ -1,0 +1,322 @@
+// Pause menu. Roles: surface-container (menu), surface-container-high (rows), on-surface (text),
+// on-surface-variant (labels), outline (boundaries). Interaction colour comes from M3 state layers only.
+
+@normal-bg-opacity: 80%;
+@blurred-bg-opacity: 60%;
+
+@easing: var(--md-sys-motion-easing-emphasized-decelerate);
+@effects: var(--md-sys-motion-duration-short4);
+
+// An on-role state layer composited over its container (hover 0.08, focus/pressed 0.10).
+.state-layer(@on; @container; @opacity) {
+  background-color: color-mix(in srgb, var(@on) calc(var(@opacity) * 100%), var(@container));
+}
+
+.row() {
+  transition: background-color @effects @easing;
+  background-color: var(--md-sys-color-surface-container-high);
+}
+
+.row-hover() {
+  .state-layer(--md-sys-color-on-surface; --md-sys-color-surface-container-high; --md-sys-state-hover-state-layer-opacity);
+}
+
+.row-pressed() {
+  .state-layer(--md-sys-color-on-surface; --md-sys-color-surface-container-high; --md-sys-state-pressed-state-layer-opacity);
+}
+
+.row-disabled() {
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+}
+
+.elevated() {
+  & when (@box-shadows = true) {
+    box-shadow: var(--md-sys-elevation-level1);
+  }
+}
+
+// Keeps a native input reachable by keyboard while its label draws the control.
+.visually-hidden() {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+#menu-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    visibility var(--md-sys-motion-duration-medium4) @easing,
+    opacity var(--md-sys-motion-duration-medium4) @easing;
+
+  body.paused & {
+    visibility: visible;
+    pointer-events: initial;
+    opacity: 1;
+  }
+
+  & when (@blur = true) {
+    background-color: color-mix(in oklab, var(--md-sys-color-surface-container) @blurred-bg-opacity, transparent);
+  }
+
+  & when (@blur = false) {
+    background-color: color-mix(in oklab, var(--md-sys-color-surface-container) @normal-bg-opacity, transparent);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    background-color: var(--md-sys-color-surface-container);
+  }
+
+  @media (forced-colors: active) {
+    background-color: Canvas;
+    color: CanvasText;
+  }
+}
+
+#menu {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  font-size: 1.9em;
+  color: var(--md-sys-color-on-surface);
+
+  input[type="file"] {
+    .visually-hidden();
+  }
+}
+
+#settings {
+  flex: 1 1 auto;
+  overflow: auto;
+
+  .group {
+    .elevated();
+    display: grid;
+    grid-template-columns: auto 1fr;
+    overflow: hidden;
+    margin: 0.4em;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-sys-shape-corner-medium);
+  }
+
+  .group-label,
+  .entry-label {
+    .row();
+  }
+
+  .group-label {
+    grid-column-end: span 2;
+    margin: 0;
+    padding: 0.25em 0.75em;
+    font-size: 0.8em;
+    font-weight: normal;
+    color: var(--md-sys-color-on-surface-variant);
+
+    .arrow {
+      position: relative;
+      top: -0.06em;
+      transition: transform var(--md-sys-motion-duration-medium4) @easing;
+      margin-right: 0.67em;
+      font-size: 0.8em;
+    }
+
+    &.collapsed .arrow {
+      transform: rotate(-90deg);
+    }
+  }
+
+  .entry-label,
+  .entry-contents {
+    display: flex;
+    align-items: center;
+    padding: 0.4em 0.5em;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .entry-label {
+    justify-content: flex-end;
+    margin-top: 1px;
+  }
+
+  .entry-contents {
+    .row();
+    justify-content: center;
+    margin-top: 1px;
+    margin-left: 1px;
+    color: var(--md-sys-color-on-surface);
+
+    .load-indicator {
+      vertical-align: middle;
+      width: 1em;
+      height: 1em;
+      fill: currentColor;
+    }
+
+    .file-name:not(:empty) {
+      font-size: 0.75em;
+      margin-left: 0.5em;
+    }
+  }
+
+  .entry-contents.button:enabled,
+  button:enabled + .entry-contents.label,
+  input:enabled + .entry-contents.label {
+    &:hover {
+      .row-hover();
+    }
+
+    &:active {
+      .row-pressed();
+    }
+  }
+
+  input:enabled:focus-visible + .entry-contents.label {
+    .row-pressed();
+    outline: 2px solid var(--md-sys-color-secondary);
+    outline-offset: -2px;
+  }
+
+  .entry-contents.button:not(:enabled),
+  button:not(:enabled) + .entry-contents.label,
+  input:not(:enabled) + .entry-contents.label {
+    .row-disabled();
+  }
+
+  .save {
+    display: flex;
+    flex-wrap: wrap;
+
+    .entry-contents {
+      flex: auto;
+    }
+  }
+}
+
+// M3 switch roles: off track surface-container-highest with outline handle; on track primary with
+// on-primary handle; disabled track on-surface 12 %, disabled handle on-surface 38 %.
+.toggle {
+  input[type="checkbox"] {
+    .visually-hidden();
+  }
+
+  label {
+    position: relative;
+    display: inline-block;
+    box-sizing: border-box;
+    cursor: pointer;
+    border: 1px solid var(--md-sys-color-outline);
+    background-color: var(--md-sys-color-surface-container-highest);
+    transition:
+      background-color @effects @easing,
+      border-color @effects @easing;
+    width: 2em;
+    height: 1em;
+    border-radius: var(--md-sys-shape-corner-full);
+
+    &::after {
+      content: "";
+      display: block;
+      position: absolute;
+      left: 0.05em;
+      bottom: 0.05em;
+      background-color: var(--md-sys-color-outline);
+      transition:
+        background-color @effects @easing,
+        left var(--md-sys-motion-duration-medium2) @easing;
+      width: 0.8em;
+      height: 0.8em;
+      border-radius: var(--md-sys-shape-corner-full);
+    }
+  }
+
+  input[type="checkbox"]:enabled:checked + label {
+    border-color: var(--md-sys-color-primary);
+    background-color: var(--md-sys-color-primary);
+
+    &::after {
+      background-color: var(--md-sys-color-on-primary);
+      left: 1.05em;
+    }
+
+    &:hover {
+      .state-layer(--md-sys-color-on-primary; --md-sys-color-primary; --md-sys-state-hover-state-layer-opacity);
+    }
+
+    &:active {
+      .state-layer(--md-sys-color-on-primary; --md-sys-color-primary; --md-sys-state-pressed-state-layer-opacity);
+    }
+  }
+
+  input[type="checkbox"]:enabled:not(:checked) + label {
+    &:hover {
+      .state-layer(--md-sys-color-on-surface; --md-sys-color-surface-container-highest; --md-sys-state-hover-state-layer-opacity);
+    }
+
+    &:active {
+      .state-layer(--md-sys-color-on-surface; --md-sys-color-surface-container-highest; --md-sys-state-pressed-state-layer-opacity);
+    }
+  }
+
+  input[type="checkbox"]:focus-visible + label {
+    outline: 2px solid var(--md-sys-color-secondary);
+    outline-offset: 2px;
+  }
+
+  input[type="checkbox"]:not(:enabled) + label {
+    cursor: default;
+    border-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+    background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+
+    &::after {
+      background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+    }
+  }
+}
+
+#game-controls {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0.2em;
+
+  button {
+    .row();
+    .elevated();
+    flex: 1 0 auto;
+    margin: 0.1em;
+    border-radius: var(--md-sys-shape-corner-small);
+    height: 3em;
+    max-height: 33vh;
+    padding: 0.25em 0.5em;
+    font-size: 2em;
+    color: var(--md-sys-color-on-surface);
+
+    &:enabled {
+      &:hover {
+        .row-hover();
+      }
+
+      &:focus-visible,
+      &:active {
+        .row-pressed();
+      }
+    }
+
+    &:not(:enabled) {
+      .row-disabled();
+    }
+  }
+}

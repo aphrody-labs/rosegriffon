@@ -1,0 +1,16 @@
+{
+  "name": "@aphrody/rosegriffon-mod",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Build tooling for the Rose Griffon IEVR mod: theme, kit, menu theme and title art from published Rose Griffon packages and the real game packs",
+  "scripts": {
+    "theme": "bun scripts/theme.ts",
+    "build": "bash scripts/build.sh"
+  },
+  "dependencies": {
+    "@material/material-color-utilities": "latest",
+    "@rosegriffon/assets": "^1.4.4",
+    "@rosegriffon/ui": "latest"
+  }
+}

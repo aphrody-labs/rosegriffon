@@ -1,0 +1,370 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-03",
+  "sourceRepository": "https://github.com/rust3ds/citro3d-rs.git",
+  "sourceCommit": "c86c611c50ff47d845901fc4cec9517cdf4fbb34",
+  "dirty": false,
+  "sourcePath": "crates/citro3d-rs",
+  "retainedBackup": "/home/aphro/.local/share/aphrody/source-backups/iecode-citro3d-rs-20261003",
+  "activeWorkspaceConsumers": [],
+  "action": "Removed unused upstream Git submodule from active workspace; preserved full source and Git history externally. Read reference upstream live; if integration becomes necessary, use registry or pinned Cargo Git dependency.",
+  "licenses": {
+    "citro3d": "MIT OR Apache-2.0",
+    "citro3d-macros": "MIT OR Apache-2.0",
+    "citro3d-sys": "Zlib"
+  },
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "a10300cc3477d551abcd4aa3cf5350353ddc3ec285af13db909e37d852d00a58",
+      "bytes": 2171
+    },
+    {
+      "path": ".github/workflows/docs.yml",
+      "sha256": "2077449591a98d1b4c1c0e4800dd63aa0cb6f78d4f783d5fbc22e7eb52421d6e",
+      "bytes": 1745
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "a6589a1a4c970d1cd9aa987197e82baa561f5cfa87ce2439513414961c0f27d1",
+      "bytes": 599
+    },
+    {
+      "path": "Cargo.toml",
+      "sha256": "6c2f6357740c9f0f46175e4127ff8644ffdd7ae6aa96e90c59f569373dd9527b",
+      "bytes": 343
+    },
+    {
+      "path": "README.md",
+      "sha256": "31cccadfc3fb63e5c1f59e0eb90b8302766ba53779a68a283c8058947dfb7014",
+      "bytes": 667
+    },
+    {
+      "path": "_config.yml",
+      "sha256": "81d04eacecbdad93b21607e05eea36bd9835fa17987fbf24368dea1d31c4c17c",
+      "bytes": 71
+    },
+    {
+      "path": "assets/css/style.scss",
+      "sha256": "0a8ef97496466778e357a038488ce1644ce00efdf12052437f29eccfaa52011e",
+      "bytes": 269
+    },
+    {
+      "path": "citro3d-macros/Cargo.toml",
+      "sha256": "f6bf6d6736435595c036fc6256647aa22b334bef8b3a17fd87564f60e2c149bf",
+      "bytes": 239
+    },
+    {
+      "path": "citro3d-macros/LICENSE-APACHE",
+      "sha256": "95bd3988beee069fa2848f648dab43cc6e0b2add2ad6bcb17360caf749802bcc",
+      "bytes": 9722
+    },
+    {
+      "path": "citro3d-macros/LICENSE-MIT",
+      "sha256": "30fefc3a7d6a0041541858293bcbea2dde4caa4c0a5802f996a7f7e8c0085652",
+      "bytes": 1022
+    },
+    {
+      "path": "citro3d-macros/README.md",
+      "sha256": "86ca1f9ee0472d5f00619dea8ff1c218d42a159f800982afc23b3133f02db2fc",
+      "bytes": 194
+    },
+    {
+      "path": "citro3d-macros/build.rs",
+      "sha256": "3d1fa620a5899aebb9153d4e66a720c17dfb5dd3968da3b67ead33cd3846ad4b",
+      "bytes": 276
+    },
+    {
+      "path": "citro3d-macros/src/lib.rs",
+      "sha256": "03df61fdeb5a0106f14fbfc02708c11e06d10badfe8c8bc67102a477185c2884",
+      "bytes": 5883
+    },
+    {
+      "path": "citro3d-macros/tests/bad-shader.pica",
+      "sha256": "43837583cf14da51d78728ac2e0174b0396842d2ff64a9e6e351005767928bdf",
+      "bytes": 137
+    },
+    {
+      "path": "citro3d-macros/tests/integration.pica",
+      "sha256": "dca3b3a8a744fab79cb18969c221e1e602532bf3700e547abe040800fd481522",
+      "bytes": 167
+    },
+    {
+      "path": "citro3d-macros/tests/integration.rs",
+      "sha256": "95598850a65e4bce21b766fd792999691ce406adf80b9b40272eedec08e9b98d",
+      "bytes": 344
+    },
+    {
+      "path": "citro3d-sys/Cargo.toml",
+      "sha256": "df1ecc87d2588a8671040af654cd466096376437ce7796e043ecb52b0b68e26d",
+      "bytes": 456
+    },
+    {
+      "path": "citro3d-sys/LICENSE",
+      "sha256": "5cb6733297b2058bc0d0329dadbecc946474f22f797b487edb849d05bdda83cf",
+      "bytes": 945
+    },
+    {
+      "path": "citro3d-sys/README.md",
+      "sha256": "f2c418545e5e6639295010d83418fed16f2d133a4a1632ab84b2160a71e8e834",
+      "bytes": 546
+    },
+    {
+      "path": "citro3d-sys/build.rs",
+      "sha256": "d3fb824b34fbc4dcf45c787d7972aa7011c73f974b12380f2029ea233d510e81",
+      "bytes": 5693
+    },
+    {
+      "path": "citro3d-sys/src/gx.rs",
+      "sha256": "5bcea9131398cc05b470f9fdb65d26abda26180750bf6959cb30e8492792100a",
+      "bytes": 814
+    },
+    {
+      "path": "citro3d-sys/src/lib.rs",
+      "sha256": "49483539c498dd250d18312ae5c144e108e9c2fbe90b8d5116aaf13dd1388554",
+      "bytes": 704
+    },
+    {
+      "path": "citro3d/Cargo.toml",
+      "sha256": "5f9194b29d3c70eef3808c8f792995a130bafdbadd2e495e4de277ccb5516017",
+      "bytes": 1333
+    },
+    {
+      "path": "citro3d/LICENSE-APACHE",
+      "sha256": "95bd3988beee069fa2848f648dab43cc6e0b2add2ad6bcb17360caf749802bcc",
+      "bytes": 9722
+    },
+    {
+      "path": "citro3d/LICENSE-MIT",
+      "sha256": "30fefc3a7d6a0041541858293bcbea2dde4caa4c0a5802f996a7f7e8c0085652",
+      "bytes": 1022
+    },
+    {
+      "path": "citro3d/README.md",
+      "sha256": "15f27d8831b7680347ef3ef151175c0d674703f4324e1b4889fd5f8e882486f0",
+      "bytes": 172
+    },
+    {
+      "path": "citro3d/examples/assets/create_texture.sh",
+      "sha256": "b3162bbc91b92ac7bc91a87835ff5d83ed001b142bf569c68569ca09e1e80b4d",
+      "bytes": 284
+    },
+    {
+      "path": "citro3d/examples/assets/frag-shader.pica",
+      "sha256": "c3ac43f88e12ca8b7af9e73b002520db981d4a4b474f182259547d3f79ef6bff",
+      "bytes": 1630
+    },
+    {
+      "path": "citro3d/examples/assets/gshader_geo.pica",
+      "sha256": "572ecab862dd3cfdc6789893f3ba7defd1666ec29b451c299e26b9e935f4920d",
+      "bytes": 1628
+    },
+    {
+      "path": "citro3d/examples/assets/kitten.png",
+      "sha256": "c9e8f82019617b3ea738e4265d97a23f34ffd0a3a71a7ca3b13e9a458d588b43",
+      "bytes": 15647
+    },
+    {
+      "path": "citro3d/examples/assets/kitten.t3d",
+      "sha256": "06f50f0b2e1aa4ca3fc2ca1d1c9599680b6610a7daac6af5ea3b14afd8e1e345",
+      "bytes": 2421
+    },
+    {
+      "path": "citro3d/examples/assets/skybox.png",
+      "sha256": "5182ac979ea38e0c1661981861fc96cfd147303e935fa9b1cf3b8991a70303ae",
+      "bytes": 613244
+    },
+    {
+      "path": "citro3d/examples/assets/skybox.t3d",
+      "sha256": "5268fe14df8c529d937b414bb25764865b4af3b91e892d669b5f39e1585930f2",
+      "bytes": 139373
+    },
+    {
+      "path": "citro3d/examples/assets/vshader.pica",
+      "sha256": "c67878594a60427fd82698208d403eecec19ef91c146f0214c8605f8c7b8c2d8",
+      "bytes": 567
+    },
+    {
+      "path": "citro3d/examples/assets/vshader_geo.pica",
+      "sha256": "3c86dc3783badf6f4a45c1ecd45007aa0a7f51f72926eea01fa8849d9bdf9ad4",
+      "bytes": 573
+    },
+    {
+      "path": "citro3d/examples/assets/vshader_skybox.pica",
+      "sha256": "7bbc74d314164d77e176a83a869367acfb32bee8c1c4a3fbe09e41d812c64ec8",
+      "bytes": 843
+    },
+    {
+      "path": "citro3d/examples/assets/vshader_textured.pica",
+      "sha256": "d81e619e0aa4403c0b7ea743073aed94ae1aec8f49405709059c7e40767f2e08",
+      "bytes": 643
+    },
+    {
+      "path": "citro3d/examples/cube.rs",
+      "sha256": "dae1444e6c45c6b6793c3bdc0715a938290e037edaa198371d42c846d54a53db",
+      "bytes": 7723
+    },
+    {
+      "path": "citro3d/examples/dynamic-shader.rs",
+      "sha256": "7addd2ab6647c9dbd68bcb44f1d65dd29069b3566b0fd1257cdc228cc84c7ff7",
+      "bytes": 6339
+    },
+    {
+      "path": "citro3d/examples/fragment-light.rs",
+      "sha256": "f05a54166ce63c27d6ca6b5d382e1ef190fc0b671a2f4f0b84a0dc0d234f5665",
+      "bytes": 13021
+    },
+    {
+      "path": "citro3d/examples/geometry.rs",
+      "sha256": "185fddb50ee3d68d9d6bfb35d1cc7a807d8a42070d5006cbade205e26b67c1e8",
+      "bytes": 4922
+    },
+    {
+      "path": "citro3d/examples/multiple-buffers.rs",
+      "sha256": "6be1faed6b1f7364bcde7ce951e942ef376885f3163fbe4225ad7e1de4bbb92a",
+      "bytes": 6518
+    },
+    {
+      "path": "citro3d/examples/render-to-texture.rs",
+      "sha256": "2ede43131be7f45b2d5d17f97b7b176403a3499ca18d327ba770277a76eecba2",
+      "bytes": 8642
+    },
+    {
+      "path": "citro3d/examples/shared-library.rs",
+      "sha256": "efa8257a94e2f3a32efd0f4b682c79fed1499c14569e949046e7e8e6c2c40f6f",
+      "bytes": 4742
+    },
+    {
+      "path": "citro3d/examples/skybox.rs",
+      "sha256": "28b152ca222f4f782fed4df3ed063f8e0c79cb649db9ce50e094ee3449bbda45",
+      "bytes": 9132
+    },
+    {
+      "path": "citro3d/examples/textured.rs",
+      "sha256": "5cfbefd6fa9f40686570b03ecab017a63b530d7be9df59370fdac054ac1cea15",
+      "bytes": 7177
+    },
+    {
+      "path": "citro3d/examples/triangle.rs",
+      "sha256": "b50dc205ff84ef864dd6e1896851c86bbcd709d390be8eb272867013b913cdf0",
+      "bytes": 6225
+    },
+    {
+      "path": "citro3d/src/attrib.rs",
+      "sha256": "27103a709d03112b2c5c5a622e4314dcdcb3de47eb5d7e7e0707321f80def45c",
+      "bytes": 6626
+    },
+    {
+      "path": "citro3d/src/buffer.rs",
+      "sha256": "954165341f2a641655130db257c607ddfb14db03399865068468fe2a0337d64f",
+      "bytes": 9403
+    },
+    {
+      "path": "citro3d/src/color.rs",
+      "sha256": "c6eac20e56958e30180ab076d7b5d044455521e2caac1b2323fb0c525e50570a",
+      "bytes": 542
+    },
+    {
+      "path": "citro3d/src/error.rs",
+      "sha256": "d77968ece0f505181a9ffde62ddbaf7991bee799cfbf401eef0c3529019448ea",
+      "bytes": 2188
+    },
+    {
+      "path": "citro3d/src/fog.rs",
+      "sha256": "e7b040d9f1a800ecfc2c121a2b53aa881829c3c213f8fa59f04597e1100800d4",
+      "bytes": 3403
+    },
+    {
+      "path": "citro3d/src/lib.rs",
+      "sha256": "cf4c0742aa1866e063a619cb7e5b50cfdaca174392f0022ca2b0e9d9a9332eee",
+      "bytes": 5205
+    },
+    {
+      "path": "citro3d/src/light.rs",
+      "sha256": "68cd5ae8abf933910fcbc395ec2bb13742f57b2c3a0b8269f1213299393815b2",
+      "bytes": 28361
+    },
+    {
+      "path": "citro3d/src/math.rs",
+      "sha256": "21dadc56b788a64ce73c189f67a1010c8403edbad284f26bd4e578c472f129db",
+      "bytes": 1577
+    },
+    {
+      "path": "citro3d/src/math/fvec.rs",
+      "sha256": "a8e47e9034eee795d465d5a30f31b3ef335910be68f4dc532f980cece02f56d4",
+      "bytes": 9175
+    },
+    {
+      "path": "citro3d/src/math/matrix.rs",
+      "sha256": "2781381528ae1dec1902dfacc9ad6d3ba1c4e3fe025e6dad9e731fca18a2d590",
+      "bytes": 6453
+    },
+    {
+      "path": "citro3d/src/math/ops.rs",
+      "sha256": "f6d8f71de4fc4698e1562098e174166440608897fbfd4aa03cd44a368f14054e",
+      "bytes": 6373
+    },
+    {
+      "path": "citro3d/src/math/projection.rs",
+      "sha256": "fdcf97995391bd44cffa8e17b165e10c4762da467c0d06d8f6d9d896ac8df82a",
+      "bytes": 13827
+    },
+    {
+      "path": "citro3d/src/render.rs",
+      "sha256": "ea5663d31e6be631131171b86df10ece399feeb8518ce873b519e743662de4ab",
+      "bytes": 22191
+    },
+    {
+      "path": "citro3d/src/render/effect.rs",
+      "sha256": "d8befcdd2a88734d07803995c9612cb66575d8e0d70cae6862048e354943eafa",
+      "bytes": 16380
+    },
+    {
+      "path": "citro3d/src/render/transfer.rs",
+      "sha256": "fc4ec2c82d597351d479e553569f6b47eb8c1d1b1531975588c35ab5860a0c7d",
+      "bytes": 1912
+    },
+    {
+      "path": "citro3d/src/shader.rs",
+      "sha256": "3afbeaf3aa12c3b8428812253cf180bb68e39847bc714e1619af733a0b4da137",
+      "bytes": 8147
+    },
+    {
+      "path": "citro3d/src/texenv.rs",
+      "sha256": "0b1934feaeaca71a7de3ea6ccbc7916f16b3eeced36c823ecad3ca42606d7902",
+      "bytes": 9250
+    },
+    {
+      "path": "citro3d/src/texture.rs",
+      "sha256": "9cc9f9032334a844ac9e1e82fbcdc1b3e426d2f916221881a161f00e4cbc180f",
+      "bytes": 11466
+    },
+    {
+      "path": "citro3d/src/texture/enums.rs",
+      "sha256": "aa06cd2e03f8ba330ce7cfc9fe251ff6c961fb7df0033a2742c2e3d6ba58e33f",
+      "bytes": 21657
+    },
+    {
+      "path": "citro3d/src/uniform.rs",
+      "sha256": "287e507074fafdd50f7385045274d823e7d83cfe92a556326ef9ea601206387e",
+      "bytes": 8765
+    },
+    {
+      "path": "rustfmt.toml",
+      "sha256": "79ae035ffe917316bfa7d420ff262f11f357ddf1ca579493339151e8229cd3fc",
+      "bytes": 95
+    }
+  ],
+  "unchangedDependencyOwners": {
+    "bun": "Root npm catalog and Bun lockfile",
+    "python": "Root uv workspace; registry dependencies",
+    "rust": "Root Cargo catalog, Cargo.lock and sibling Aphrody owners; required upstream forks already use locked Git resolution."
+  },
+  "validation": {
+    "workspace": "passed: 74 Rust, 6 Bun members; 0 layout violation",
+    "documentation": "passed: 885 classified files and 188 local links",
+    "licenses": "passed: native C/C++ and Rust emulator notice audits",
+    "diffCheck": "passed",
+    "submodulesAfter": 0
+  }
+}

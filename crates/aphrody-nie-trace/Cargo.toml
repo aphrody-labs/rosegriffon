@@ -1,0 +1,40 @@
+[package]
+name = "aphrody-nie-trace"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license = "Apache-2.0"
+publish = false
+description = "Live memory read/write and bounded reverse-engineering probes for Inazuma Eleven runtime processes"
+
+[lints]
+workspace = true
+
+[features]
+default = ["host"]
+host = ["dep:libc", "dep:windows-sys"]
+
+[dependencies]
+thiserror = { workspace = true, features = ["std"] }
+bun-steam = { workspace = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = { version = "0.2", optional = true }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", optional = true, features = ["Win32_Foundation", "Win32_System_Threading", "Win32_System_Memory", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Diagnostics_Debug"] }
+
+[[bin]]
+name = "nie-mem"
+path = "src/bin/nie-mem.rs"
+required-features = ["host"]
+
+[[bin]]
+name = "nie-edit"
+path = "src/bin/nie-edit.rs"
+required-features = ["host"]
+
+[[test]]
+name = "self_mem"
+path = "tests/self_mem.rs"
+required-features = ["host"]

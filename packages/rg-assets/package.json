@@ -27,11 +27,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "url": "https://github.com/aphrody-dev/rosegriffon.git",
     "directory": "packages/rg-assets"
   },
-  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-assets#readme",
+  "homepage": "https://github.com/aphrody-dev/rosegriffon/tree/main/packages/rg-assets#readme",
   "bugs": {
-    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
+    "url": "https://github.com/aphrody-dev/rosegriffon/issues"
   }
 }

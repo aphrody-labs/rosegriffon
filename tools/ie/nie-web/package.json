@@ -1,0 +1,27 @@
+{
+  "name": "@aphrody/nie-web-host-tools",
+  "version": "1.4.7",
+  "private": false,
+  "description": "Host-side IE data staging, archive precompression, and desktop tooling retained from the former NIE web package.",
+  "license": "UNLICENSED",
+  "files": [
+    "docs",
+    "release",
+    "src",
+    "tools"
+  ],
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "typecheck": "bun check -p tsconfig.json --noEmit"
+  },
+  "engines": {
+    "bun": "1.4.4-canary.20261028.1"
+  }
+}

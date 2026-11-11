@@ -8,9 +8,8 @@ last at commit `efc5b0d`) so Bun UI carries no Rose Griffon brand material.
   selectors, fonts and notes) in the Bun UI `brands.csv` schema.
 - `rg-ui-stack.csv`: the `rg-ui` stack guidelines (Bun UI stack CSV schema: Category,
   Guideline, Do/Don't, code samples, severity, docs URL, applicability, status).
-- This file: the Rose Griffon part of the former `references/bun-os.md`. Paths are relative
-  to the repository that owned them at the time (Bun OS); `packages/rg-ui` and
-  `apps/rg-website` now live here.
+- This file: the Rose Griffon design specification. `packages/rg-ui` and
+  `apps/rg-website` live in this monorepo.
 
 rg-ui is itself built on the M3 tokens (`@aphrody/m3-tokens` dependency): its themes declare
 `--md-sys-color-*` roles and map shadcn variables onto them, so both vocabularies work inside it.

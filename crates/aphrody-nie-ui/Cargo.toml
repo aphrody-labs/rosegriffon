@@ -1,0 +1,23 @@
+[package]
+name = "aphrody-nie-ui"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Typed design tokens and native UI constants for Inazuma Eleven: Victory Road"
+
+[lints]
+workspace = true
+
+[dependencies]
+aphrody-nie-formats = { path = "../aphrody-nie-formats", version = "1.4.8" }
+serde_json = "1.0.154"
+
+[[bin]]
+name = "game_screens_css"
+path = "src/bin/game_screens_css.rs"
+
+[dev-dependencies]
+# Cross-checks the transposed game colours against the measured palette (published on crates.io).
+aphrody-identity = "1.4.7"

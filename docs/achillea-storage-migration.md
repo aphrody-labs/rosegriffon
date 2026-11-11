@@ -190,7 +190,7 @@ mémoire séparés :
 
 ```bash
 bun test scripts/achillea/migrate-storage-objects.test.ts
-bunx oxlint scripts/achillea/migrate-storage-objects.ts \
+bun run oxlint scripts/achillea/migrate-storage-objects.ts \
   scripts/achillea/migrate-storage-objects.test.ts
 ```
 

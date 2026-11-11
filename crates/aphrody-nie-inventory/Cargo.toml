@@ -1,0 +1,32 @@
+[package]
+name = "aphrody-nie-inventory"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "IEVR binary inventory and CRIWARE container metadata analysis tools."
+
+[lints]
+workspace = true
+
+[lib]
+name = "ievr_tools"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ievr-tools"
+path = "src/main.rs"
+
+[features]
+default = []
+
+[dependencies]
+anyhow = { workspace = true }
+aphrody-nie-pe-inspect = { path = "../aphrody-nie-pe-inspect" }
+aphrody-nie-formats = { workspace = true, features = ["std", "serde"] }
+serde = { workspace = true, features = ["std", "derive"] }
+serde_json = { workspace = true }
+byteorder = "1.5"
+hex = "0.4"
+clap = { version = "4.5", features = ["derive", "color", "env"] }

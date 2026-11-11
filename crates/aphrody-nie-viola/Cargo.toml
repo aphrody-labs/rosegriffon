@@ -1,0 +1,18 @@
+[package]
+name = "aphrody-nie-viola"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Inazuma Eleven modding and CRIWARE CPK dump, pack, merge and verification tools"
+
+[lints]
+workspace = true
+
+[dependencies]
+aphrody-nie-formats = { workspace = true, features = ["std", "serde"] }
+rayon = "1.12"
+memmap2 = "0.9.12"
+serde_json = { workspace = true }
+serde = { workspace = true, features = ["std", "derive"] }

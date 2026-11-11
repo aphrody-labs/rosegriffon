@@ -1,0 +1,23 @@
+[package]
+name = "aphrody-nie-save"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Read, decrypt, inspect, and edit Inazuma Eleven: Victory Road save data"
+
+[lints]
+workspace = true
+
+[features]
+default = []
+serde = ["dep:serde", "aphrody-nie-formats/serde"]
+
+[dependencies]
+aphrody-nie-formats = { workspace = true, default-features = true }
+thiserror = { workspace = true }
+serde = { workspace = true, features = ["std", "derive"], optional = true }
+
+[dev-dependencies]
+tempfile = "3.27"

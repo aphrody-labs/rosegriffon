@@ -1,0 +1,18 @@
+[package]
+name = "yre-worker"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97"
+license = "Apache-2.0"
+publish = false
+description = "Rust lane of the yolo-re job queue (Redis Streams): x86-64 disassembly jobs over PE function ranges"
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true, features = ["std"] }
+goblin = { version = "0.10", default-features = false, features = ["std", "endian_fd", "pe32", "pe64"] }
+iced-x86 = "1.21"
+redis = { version = "0.27.6", features = ["streams"] }
+serde_json = { workspace = true }

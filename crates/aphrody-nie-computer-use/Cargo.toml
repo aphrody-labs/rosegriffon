@@ -1,0 +1,28 @@
+[package]
+name = "aphrody-nie-computer-use"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Bounded offline image, Ghidra availability, and NIE reverse-engineering probes"
+
+[lints]
+workspace = true
+
+[features]
+default = ["host"]
+host = ["dep:rusqlite", "dep:yolo-re-core", "yolo-re-core/nie", "dep:aphrody-nie-trace", "aphrody-nie-trace/host"]
+
+[dependencies]
+anyhow = { workspace = true }
+hex = "0.4"
+rusqlite = { workspace = true, optional = true }
+sha2 = "0.10"
+serde = { workspace = true, features = ["std", "derive"] }
+serde_json = { workspace = true }
+yolo-re-core = { path = "../yolo-re-core", version = "1.4.8", optional = true, default-features = false }
+aphrody-nie-trace = { path = "../aphrody-nie-trace", version = "1.4.8", optional = true, default-features = false }
+
+[dev-dependencies]
+aphrody-nie-index = { workspace = true, features = ["host"] }

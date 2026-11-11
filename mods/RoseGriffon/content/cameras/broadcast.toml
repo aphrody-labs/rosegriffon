@@ -1,0 +1,15 @@
+schema = "VRFW.match_camera/1"
+# Rose Griffon broadcast camera, applied in memory by the VR-Framework match camera service (no game file
+# is modified). The framework applies a preset only while a mod requests it; Rose Griffon's request comes
+# from the option row RoseGriffon.broadcast_camera (options.toml). Offline matches only.
+# Values carry over the earlier cfg.bin experiment (distance 32, yaw 90, pitch 18). Not tested in game.
+
+[[preset]]
+name = "broadcast"
+kind = "chase_rows"
+yaw = 90.0          # touchline
+pitch = 18.0        # degrees above the horizontal
+distance = 32.0     # metres from the look point
+fov = 40.0          # vertical field of view (retail 45)
+fixed_pitch = true  # hold the pitch instead of following the ball's depth
+option = "horizontal"

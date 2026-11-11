@@ -119,7 +119,7 @@ Constats mesurés :
 - `aphrody-nie-game --play` (réimplémentation Rust) tourne sous Xvfb mais n'affiche qu'un écran titre générique.
 - `nie.exe` sous Wine 10 : `E-01000100 Failed to connect to Steam`. Sous Proton Experimental : assertion
   `steam.exe` (pas de client Steam Linux connecté). Il faut un client Steam Linux **connecté** (auto-login en cours
-  de configuration par la session `bun-os-ac` à partir du cache `steamcmd` de `darksasuke971`).
+  de configuration par la session `vps-steam-ac` à partir du cache `steamcmd` de `darksasuke971`).
 - Le VPS n'a pas de GPU (`llvmpipe`, rendu processeur) : « full WebGPU » ne peut pas se calculer côté VPS.
   Voie réaliste : rendre dans le navigateur avec le moteur compilé en wasm (`iecode/packages/nie-ui/rust/nie-wasm`,
   `nie-render3d`), les assets étant servis par `aphrody-nie-model-serve` (127.0.0.1:8792, `/menu-render/` inactif
@@ -132,7 +132,7 @@ Décisions à prendre : paquets Wayland à installer ; examiner `nie-wasm` d'abo
 
 ## Sessions parallèles à connaître
 
-- `bun-os-ac` monte la pile Steam/Proton/gamescope/Heroic du VPS, un volume de jeux ext4 sur le disque rapide
+- `vps-steam-ac` monte la pile Steam/Proton/gamescope/Heroic du VPS, un volume de jeux ext4 sur le disque rapide
   `/games` (ne pas installer de jeux sur `/home`, 15 Mo/s contre 2,1 Go/s) et configure l'auto-login Steam.
   Elle ne tue ni le client Steam ni Xvfb `:99` sans prévenir ; un faux `zenity` existe dans
   `/home/ubuntu/build/fakebin` (à retirer une fois Steam installé). Un Proton Experimental téléchargé par

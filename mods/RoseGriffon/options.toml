@@ -1,0 +1,15 @@
+# Rose Griffon rows of Options > Mod options. Values are stored by the framework (mod_options\RoseGriffon.json).
+
+# Broadcast camera: Original / Broadcast. When on, the match requests the preset RoseGriffon.broadcast
+# (content/cameras/broadcast.toml) at kick-off; when off, the game's own camera.
+[[option]]
+id = "broadcast_camera"
+visual = true          # only what this player sees; not compared in online rooms
+type = "toggle"
+label = "broadcast_camera"
+help = "broadcast_camera_help"
+parent = "mod_options.game_settings"
+off = { key = "rg_broadcast_camera_off", text = "Original" }
+on = { key = "rg_broadcast_camera_on", text = "Broadcast" }
+default = 0
+order = 110

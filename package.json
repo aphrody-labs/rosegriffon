@@ -5,7 +5,7 @@
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aphrody-labs/rosegriffon.git"
+    "url": "https://github.com/aphrody-dev/rosegriffon.git"
   },
   "packageManager": "bun@1.4.4",
   "engines": {
@@ -32,7 +32,6 @@
     "@better-auth/oauth-provider": "1.7.14",
     "@better-auth/passkey": "1.7.14",
     "@casl/ability": "^7.0.1",
-    "@changesets/cli": "3.0.3",
     "@colyseus/bun-websockets": "^0.18.3",
     "@colyseus/core": "^0.18.17",
     "@colyseus/schema": "^5.0.34",
@@ -192,7 +191,6 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "0.187.0",
     "ts-morph": "^28.0.0",
-    "turbo": "2.11.8",
     "tw-animate-css": "^1.4.0",
     "typescript": "7.0.2",
     "use-image": "^1.1.4",
@@ -218,19 +216,15 @@
     "@next/third-parties": "catalog:"
   },
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "typecheck": "turbo run typecheck",
-    "lint": "turbo run lint",
-    "test": "turbo run test",
+    "build": "bun run --filter '*' build",
+    "dev": "bun run --filter '*' dev",
+    "typecheck": "bun run --filter '*' typecheck",
+    "lint": "bun run --filter '*' lint",
+    "test": "bun run --filter '*' test",
     "compile": "bun scripts/compile.ts",
-    "changeset": "changeset",
-    "version-packages": "changeset version && bun install",
     "release": "bun scripts/publish.ts"
   },
   "devDependencies": {
-    "@changesets/cli": "catalog:",
-    "turbo": "catalog:",
     "@types/bun": "catalog:"
   }
 }

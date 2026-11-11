@@ -1,0 +1,88 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "yolo-re-core"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license = "Apache-2.0"
+publish = false
+repository = "https://github.com/aphrody-labs/yolo-re"
+description = "Consolidated reverse engineering core: PE/ELF/Mach-O triage, strings, x86-64 disassembly, ASAR/Electron/Go/Adobe/Android/SteamStub/minidump inspection, AOB scanning, live memory recovery."
+
+[lib]
+name = "bun_re"
+crate-type = ["rlib", "cdylib"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["pipeline", "game-formats"]
+assets = ["game-formats", "dep:rusqlite", "dep:lz4_flex", "dep:cridecoder", "aphrody-nie-formats/textures", "aphrody-nie-formats/images"]
+dbxv2 = ["game-formats", "dep:rusqlite"]
+nie = ["dep:aphrody-nie-index", "aphrody-nie-index/host", "dep:anyhow", "dep:tracing"]
+decompile = ["dep:ghidra-decompiler"]
+game-formats = ["dep:aphrody-nie-formats", "aphrody-nie-formats/std", "aphrody-nie-formats/serde", "aphrody-nie-formats/audio-decode", "aphrody-nie-formats/lua"]
+wasm = ["game-formats", "dep:wasm-bindgen", "dep:serde-wasm-bindgen", "dep:js-sys", "aphrody-nie-formats/textures", "aphrody-nie-formats/images"]
+pipeline = ["dep:tempfile", "dep:process-wrap"]
+magika = ["dep:magika"]
+leveldb = ["dep:rusty-leveldb", "dep:tempfile"]
+yara = ["dep:yara-x"]
+
+[dependencies]
+yolo-re-bin-format = { path = "../yolo-re-bin-format", version = "1.4.8" }
+bun-steam = { workspace = true }
+aphrody-nie-index = { workspace = true, optional = true }
+ghidra-decompiler = { version = "2.1.0", optional = true }
+aphrody-nie-formats = { workspace = true, optional = true }
+rusqlite = { workspace = true, optional = true }
+lz4_flex = { workspace = true, optional = true }
+cridecoder = { workspace = true, optional = true }
+goblin     = { version = "0.10", default-features = false, features = ["std", "endian_fd", "pe32", "pe64", "elf32", "elf64", "mach32", "mach64"] }
+sha2       = "0.11.0"
+md5        = { package = "md-5", version = "0.11.0" }
+sha1       = "0.11.0"
+aes        = "0.9.3"
+flate2     = "1.1.10"
+lzma-rs    = "0.3"
+crc32fast  = { version = "1.5", default-features = false }
+hex        = "0.4"
+serde      = { version = "1.0.228", default-features = false, features = ["derive", "std"] }
+serde_json = "1.0.150"
+thiserror  = "2.0.20"
+iced-x86   = "1.21"
+memchr     = "2"
+regex      = "1.11"
+zerocopy   = { version = "0.8", features = ["derive"] }
+magika     = { version = "1.1.0", optional = true }
+rusty-leveldb = { version = "4", optional = true, default-features = false, features = ["fs"] }
+tempfile   = { version = "3.27.0", optional = true }
+walkdir    = "2.5.0"
+hashbrown  = { version = "0.17", default-features = false, features = ["default-hasher", "inline-more"] }
+yara-x     = { version = "1.7.0", optional = true, default-features = false }
+anyhow     = { workspace = true, optional = true }
+tracing    = { workspace = true, optional = true }
+process-wrap = { version = "10.0.1", optional = true, default-features = false, features = ["std", "process-group", "job-object"] }
+wasm-bindgen = { version = "=0.2.129", optional = true }
+serde-wasm-bindgen = { version = "0.6.5", optional = true }
+js-sys = { version = "=0.3.106", optional = true }
+
+[dev-dependencies]
+serde_json = "1.0.150"
+tempfile   = "3.27.0"
+googletest = "0.14"
+criterion  = { version = "0.8.2", features = ["html_reports"] }
+
+[[bin]]
+name = "bunre"
+path = "src/bin/bunre/main.rs"
+
+[[example]]
+name = "dump_census"
+
+[[example]]
+name = "dump_scan"
+
+[[bench]]
+name    = "triage"
+harness = false

@@ -5,7 +5,7 @@
  *
  * `bun pm pack` resolves `workspace:` and `catalog:` specifiers into the tarball manifest;
  * `npm publish <tarball> --provenance` then signs it with the GitHub Actions OIDC identity.
- * Packages owned by bun-os (`@rosegriffon/inagle*`) are never published from here.
+ * External Inagle packages (`@rosegriffon/inagle*`) are never published from here.
  *
  *   bun scripts/publish.ts            publish (CI, needs NPM_TOKEN or ~/.npmrc)
  *   bun scripts/publish.ts --dry-run  list what would be published
@@ -58,7 +58,7 @@ for (const { dir, manifest } of pending) {
   const tag = manifest.version.includes("-") ? ["--tag", "next"] : [];
   run(["npm", "publish", tarball, "--access", "public", ...(PROVENANCE ? ["--provenance"] : []), ...tag], dir);
   console.log(`published ${id}`);
-  // Changesets pushes the tags it reads from these lines; it does not create them.
+  // Create release git tag if not already present.
   if (!run(["git", "tag", "--list", id], ROOT).trim()) run(["git", "tag", id], ROOT);
   console.log(`New tag: ${id}`);
 }

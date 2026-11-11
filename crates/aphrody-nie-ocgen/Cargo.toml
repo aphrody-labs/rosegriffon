@@ -1,0 +1,30 @@
+[package]
+name = "aphrody-nie-ocgen"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Static mod-authoring pipeline for IEVR avatar parameters and portrait assets"
+
+[lints]
+workspace = true
+
+[dependencies]
+aphrody-nie-data = { workspace = true, features = ["serde", "std"] }
+aphrody-nie-formats = { workspace = true, default-features = false, features = ["std", "textures"] }
+serde = { workspace = true, features = ["std", "derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "webp"] }
+clap = { version = "4.5", features = ["derive"], optional = true }
+
+[features]
+default = []
+cli = ["dep:clap"]
+bc7 = ["aphrody-nie-formats/textures-encode"]
+
+[[bin]]
+name = "aphrody-nie-ocgen"
+path = "src/main.rs"
+required-features = ["cli"]

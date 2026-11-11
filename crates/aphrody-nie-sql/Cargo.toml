@@ -1,0 +1,26 @@
+[package]
+name = "aphrody-nie-sql"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE.upstream"
+publish = false
+description = "Shared bounded read-only SQLite and PostgreSQL boundary for NIE hosts"
+
+[lints]
+workspace = true
+
+[dependencies]
+bytes = "1.12.1"
+rusqlite = { workspace = true, features = ["bundled", "column_decltype"] }
+serde = { workspace = true, features = ["std", "derive"] }
+serde_json = { workspace = true }
+sha2 = "0.10"
+thiserror = { workspace = true }
+tokio = { version = "1.49", default-features = false, features = ["rt"] }
+tokio-postgres = { version = "0.7", default-features = false, features = ["runtime", "with-serde_json-1"] }
+tokio-postgres-rustls = { version = "0.14", default-features = false, features = ["ring", "native-certs"] }
+rustls = { version = "0.23.45", default-features = false, features = ["ring"] }
+
+[dev-dependencies]
+tempfile = { version = "3.27.0", default-features = false, features = ["getrandom"] }

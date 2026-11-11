@@ -1,0 +1,28 @@
+[package]
+name = "aphrody-nie-app"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Headless IE application-state machine, game-data views, and CPU presentation"
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+aphrody-nie-formats = { workspace = true, features = ["serde"] }
+aphrody-nie-render3d = { path = "../aphrody-nie-render3d", version = "1.4.8", default-features = false }
+aphrody-nie-core = { workspace = true, features = ["data"] }
+aphrody-nie-data = { workspace = true, features = ["serde", "std"] }
+aphrody-nie-runtime = { path = "../aphrody-nie-runtime", version = "1.4.8", default-features = false }
+aphrody-nie-geom = { workspace = true }
+aphrody-nie-explore = { path = "../aphrody-nie-explore", version = "1.4.8", default-features = true }
+specta = { version = "2.0.0-rc.25", features = ["derive", "serde_json"] }
+bcdec_rs = "0.2.0"
+
+[dev-dependencies]
+png = { version = "0.18.1", default-features = false }

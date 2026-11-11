@@ -1,0 +1,217 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+    echo "This script only supports macOS." >&2
+    exit 1
+fi
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+build_dir="$repo_root/target/release"
+binary="$build_dir/ruzu"
+app="$build_dir/ruzu.app"
+plist="$repo_root/crates/emu/ruzu/ruzu/Info.plist"
+icon_source="$repo_root/crates/emu/ruzu/ruzu/assets/ruzu-rusty-lemon.png"
+
+if command -v brew >/dev/null 2>&1; then
+    brew_prefix="$(brew --prefix)"
+    export PATH="$brew_prefix/bin:$PATH"
+
+    pkg_config_paths=(
+        "$brew_prefix/lib/pkgconfig"
+        "$brew_prefix/share/pkgconfig"
+    )
+    for formula in opus ffmpeg openssl@3; do
+        formula_prefix="$(brew --prefix "$formula" 2>/dev/null || true)"
+        if [[ -n "$formula_prefix" ]]; then
+            pkg_config_paths+=("$formula_prefix/lib/pkgconfig")
+        fi
+    done
+    joined_pkg_config_path="$(IFS=:; echo "${pkg_config_paths[*]}")"
+    export PKG_CONFIG_PATH="$joined_pkg_config_path${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+fi
+
+# The build pipeline has already compiled the workspace; standalone runs still
+# need cargo, so this is opt-out rather than removed.
+skip_build=false
+package=false
+for arg in "$@"; do
+    case "$arg" in
+        --no-build) skip_build=true ;;
+        --package) package=true ;;
+        *) echo "Unknown option: $arg" >&2; exit 1 ;;
+    esac
+done
+
+cd "$repo_root"
+if [[ "$package" == true ]]; then
+    package_revision="$(sh "$repo_root/scripts/ruzu/package-revision.sh" "$repo_root")"
+    release_commit="$(git rev-parse HEAD)"
+fi
+# Cargo supplies numeric bundle metadata only, never the archive name.
+package_id="$(cargo pkgid --offline -p ruzu)"
+version="${package_id##*#}"
+version="${version##*@}"
+if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "macOS release packaging requires a numeric major.minor.patch version: $version" >&2
+    exit 1
+fi
+if [[ "$skip_build" != true ]]; then
+    cargo build --locked --release --bin ruzu
+fi
+
+if [[ ! -x "$binary" ]]; then
+    echo "Cargo did not produce $binary." >&2
+    exit 1
+fi
+
+if [[ "$package" == true ]]; then
+    case "$(lipo -archs "$binary")" in
+        arm64) package_arch=arm64 ;;
+        x86_64) package_arch=x64 ;;
+        "x86_64 arm64"|"arm64 x86_64") package_arch=universal ;;
+        *) echo "Unsupported macOS binary architecture." >&2; exit 1 ;;
+    esac
+    package_name="Ruzu-macOS-$package_revision-$package_arch-clang"
+    printf 'Package directory: %s\nStandalone archive: %s.zip\n' "$package_name" "$package_name"
+    printf 'Generate this package? [y/N]: '
+    confirmation=
+    IFS= read -r confirmation || true
+    case "$confirmation" in
+        y|Y|yes|YES|Yes|o|O|oui|OUI|Oui) ;;
+        *) echo "Packaging cancelled; no package files were changed."; exit 1 ;;
+    esac
+fi
+
+staging_root="$(mktemp -d "$build_dir/.ruzu-app.XXXXXX")"
+staging="$staging_root/ruzu.app"
+trap 'rm -rf "$staging_root"' EXIT
+
+contents="$staging/Contents"
+macos="$contents/MacOS"
+frameworks="$contents/Frameworks"
+resources="$contents/Resources"
+iconset="$staging/ruzu.iconset"
+
+mkdir -p "$macos" "$frameworks" "$resources" "$iconset"
+install -m 755 "$binary" "$macos/ruzu"
+install -m 644 "$plist" "$contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $version" "$contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $version" "$contents/Info.plist"
+
+make_icon() {
+    sips -z "$1" "$1" "$icon_source" --out "$iconset/$2" >/dev/null
+}
+
+make_icon 16 icon_16x16.png
+make_icon 32 icon_16x16@2x.png
+make_icon 32 icon_32x32.png
+make_icon 64 icon_32x32@2x.png
+make_icon 128 icon_128x128.png
+make_icon 256 icon_128x128@2x.png
+make_icon 256 icon_256x256.png
+make_icon 512 icon_256x256@2x.png
+make_icon 512 icon_512x512.png
+make_icon 1024 icon_512x512@2x.png
+iconutil -c icns "$iconset" -o "$resources/ruzu.icns"
+rm -rf "$iconset"
+
+moltenvk="${MOLTENVK_LIBRARY:-}"
+if [[ -n "$moltenvk" ]]; then
+    if [[ ! -f "$moltenvk" ]]; then
+        echo "MOLTENVK_LIBRARY does not name a file: $moltenvk" >&2
+        exit 1
+    fi
+    echo "Using explicit MoltenVK override: $moltenvk"
+    install -m 755 "$moltenvk" "$frameworks/libMoltenVK.dylib"
+else
+    python3 "$repo_root/scripts/ruzu/fetch-moltenvk.py" "$frameworks/libMoltenVK.dylib"
+fi
+
+# GTK is not a macOS system framework. Bundle the runtime data that cannot be
+# discovered through Mach-O dependency traversal before collecting all dylibs.
+if command -v brew >/dev/null 2>&1; then
+    # Homebrew links libraries through opt/<formula>, but formula post-install
+    # hooks merge GTK's shared schemas and loader registry into the global
+    # prefix. Looking in the formula kegs silently produces an incomplete app.
+    schema_source="$brew_prefix/share/glib-2.0/schemas"
+    schema_dir="$resources/share/glib-2.0/schemas"
+    if [[ ! -f "$schema_source/gschemas.compiled" ]]; then
+        echo "Missing compiled GTK schemas: $schema_source/gschemas.compiled" >&2
+        exit 1
+    fi
+    mkdir -p "$schema_dir"
+    find -L "$schema_source" -maxdepth 1 -type f \
+        \( -name '*.xml' -o -name '*.override' \) -exec install -m 644 {} "$schema_dir" \;
+    if find "$schema_dir" -maxdepth 1 -name '*.xml' -type f | grep -q .; then
+        glib-compile-schemas "$schema_dir"
+    else
+        install -m 644 "$schema_source/gschemas.compiled" "$schema_dir"
+    fi
+
+    loader_cache="$(find -L "$brew_prefix/lib/gdk-pixbuf-2.0" -name loaders.cache -type f -print -quit)"
+    if [[ -z "$loader_cache" ]]; then
+        echo "Missing Homebrew GDK-Pixbuf loader cache." >&2
+        exit 1
+    fi
+    bundled_loader_cache="$resources/gdk-pixbuf-2.0/loaders.cache"
+    mkdir -p "$(dirname "$bundled_loader_cache")"
+    loader_modules=()
+
+    while IFS= read -r loader; do
+        [[ -f "$loader" ]] || {
+            echo "GDK-Pixbuf loader listed in the cache is missing: $loader" >&2
+            exit 1
+        }
+        loader_modules+=("$loader")
+    done < <(sed -n 's#^"\(/[^" ]*\)"$#\1#p' "$loader_cache")
+
+    if [[ ${#loader_modules[@]} -eq 0 ]]; then
+        echo "The GDK-Pixbuf loader cache contains no modules: $loader_cache" >&2
+        exit 1
+    fi
+
+    # dyld expands @rpath when GModule loads these paths, making the cache
+    # relocatable with the application bundle.
+    sed -E 's#^"[^"]*/([^/"]+)"$#"@rpath/\1"#' \
+        "$loader_cache" > "$bundled_loader_cache"
+fi
+
+"$repo_root/scripts/ruzu/macos-bundle-dependencies.sh" "$staging" "${loader_modules[@]}"
+
+plutil -lint "$contents/Info.plist" >/dev/null
+while IFS= read -r nested_code; do
+    codesign --force --sign - "$nested_code" >/dev/null
+done < <(find "$frameworks" -type f -print | sort)
+codesign --force --sign - "$macos/ruzu" >/dev/null
+codesign --force --sign - "$staging" >/dev/null
+codesign --verify --deep --strict "$staging"
+
+if [[ "$package" == true ]]; then
+    # Reject changes to the package identity during compilation or bundling.
+    checked_revision="$(sh "$repo_root/scripts/ruzu/package-revision.sh" "$repo_root")"
+    if [[ "$checked_revision" != "$package_revision" || "$(git rev-parse HEAD)" != "$release_commit" ]]; then
+        echo "Git package identity changed while packaging; rebuild the package." >&2
+        exit 1
+    fi
+    archive="$build_dir/$package_name.zip"
+    package_root="$staging_root/$package_name"
+    mkdir "$package_root"
+    mv "$staging" "$package_root/ruzu.app"
+    # Keep the previous archive intact until the new signed bundle is compressed.
+    ditto -c -k --sequesterRsrc --keepParent "$package_root" "$staging_root/package.zip"
+    mv "$package_root/ruzu.app" "$staging"
+    rmdir "$package_root"
+    mv -f "$staging_root/package.zip" "$archive"
+    echo "Packaged $archive"
+fi
+
+if [[ -e "$app" ]]; then
+    rm -rf "$app"
+fi
+mv "$staging" "$app"
+rmdir "$staging_root"
+trap - EXIT
+
+echo "Built $app"
+echo "Launch it with: open '$app'"

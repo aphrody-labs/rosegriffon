@@ -1,0 +1,37 @@
+[package]
+name = "aphrody-nie-forge"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Static PE reconstruction, function lifting, registry, and binary coverage tools for Inazuma Eleven RE"
+
+[lib]
+name = "aphrody_nie_forge"
+path = "src/lib.rs"
+
+[[bin]]
+name = "aphrody-nie-forge"
+path = "src/main.rs"
+required-features = ["redb"]
+
+[features]
+default = ["redb"]
+redb = ["dep:clap", "dep:rusqlite"]
+
+[dependencies]
+aphrody-nie-pe = { path = "../aphrody-nie-pe", default-features = true }
+aphrody-nie-asm = { path = "../aphrody-nie-asm", default-features = true }
+iced-x86 = "1.21"
+anyhow = { workspace = true }
+clap = { version = "4.5", optional = true, features = ["derive", "color", "env"] }
+serde = { workspace = true, features = ["std", "derive"] }
+serde_json = { workspace = true }
+rusqlite = { workspace = true, optional = true, features = ["bundled"] }
+
+[dev-dependencies]
+tempfile = { version = "3.27", default-features = false, features = ["getrandom"] }
+
+[lints]
+workspace = true

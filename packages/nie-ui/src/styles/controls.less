@@ -1,0 +1,238 @@
+// On-screen touch controls drawn over the game: surface-container-highest buttons with outline
+// boundaries and on-surface labels; pressed is the 0.10 on-surface state layer, the interaction ring is primary.
+@controls-text-color: var(--md-sys-color-on-surface);
+@controls-border-color: var(--md-sys-color-outline);
+@controls-bg-color: var(--md-sys-color-surface-container-highest);
+@controls-pressed-bg-color: color-mix(
+  in srgb,
+  var(--md-sys-color-on-surface) calc(var(--md-sys-state-pressed-state-layer-opacity) * 100%),
+  var(--md-sys-color-surface-container-highest)
+);
+@controls-easing: var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-emphasized-decelerate);
+
+#controls {
+  font-size: 1.5em;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  color: @controls-text-color;
+
+  & > * {
+    position: absolute;
+  }
+
+  &:not(.touch) .touch {
+    display: none;
+  }
+}
+
+.button-control {
+  transition: background-color @controls-easing;
+  box-sizing: border-box;
+  border: 1px solid @controls-border-color;
+  background-color: @controls-bg-color;
+
+  &.pressed {
+    background-color: @controls-pressed-bg-color;
+  }
+
+  button {
+    pointer-events: none;
+    border-radius: inherit;
+    width: 100%;
+    height: 100%;
+
+    & when (@box-shadows) {
+      box-shadow: var(--md-sys-elevation-level1);
+    }
+  }
+}
+
+.interaction {
+  opacity: 0;
+  border-radius: inherit;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 5px solid var(--md-sys-color-primary);
+}
+
+#btn-a,
+#btn-b,
+#btn-x,
+#btn-y {
+  width: 2em;
+  height: 2em;
+  border-radius: 100%;
+  background-color: @controls-bg-color;
+
+  &.pressed {
+    background-color: @controls-pressed-bg-color;
+  }
+}
+
+#btn-l,
+#btn-r {
+  width: 6.5em;
+  height: 2em;
+  line-height: 2em;
+  text-align: center;
+  border-radius: var(--md-sys-shape-corner-extra-small);
+}
+
+#btn-l {
+  border-top-left-radius: 1em;
+}
+
+#btn-r {
+  border-top-right-radius: 1em;
+}
+
+#btn-start,
+#btn-select {
+  width: 5.5em;
+  height: 2em;
+  border-radius: 1em;
+}
+
+#btn-pause {
+  width: 2em;
+  height: 2em;
+  border-radius: 100%;
+
+  button {
+    pointer-events: all;
+  }
+}
+
+#controls:not(.touch) #btn-pause {
+  // The touch control layout overrides these in the style attribute, so !important is needed;
+  // maybe that class should handle cleaning its own styles up, though.
+  left: unset !important;
+  top: 0.5em !important;
+  right: 0.5em !important;
+  transform: none !important;
+}
+
+@dir-length: 2.125em;
+@dir-width: 1.75em;
+@line-length: 1em;
+@line-margin: 0.5em;
+@dpad-radius: var(--md-sys-shape-corner-extra-small);
+
+#dpad {
+  width: 2 * @dir-length + @dir-width;
+  height: 2 * @dir-length + @dir-width;
+
+  & > * {
+    position: absolute;
+  }
+
+  .line {
+    border: 1px solid @controls-border-color;
+    margin: @line-margin;
+  }
+
+  .interaction {
+    border-radius: 100%;
+  }
+}
+
+#dpad-up,
+#dpad-down,
+#dpad-left,
+#dpad-right,
+#dpad-center {
+  box-sizing: border-box;
+  background-color: @controls-bg-color;
+}
+
+#dpad-center {
+  top: @dir-length;
+  left: @dir-length;
+  width: @dir-width;
+  height: @dir-width;
+}
+
+#dpad-up,
+#dpad-down,
+#dpad-left,
+#dpad-right {
+  transition: background-color @controls-easing;
+  display: flex;
+  justify-content: center;
+  border: 1px solid @controls-border-color;
+
+  & when (@box-shadows) {
+    box-shadow: var(--md-sys-elevation-level1);
+  }
+
+  &.pressed {
+    background-color: @controls-pressed-bg-color;
+  }
+}
+
+#dpad-up,
+#dpad-down {
+  width: @dir-width;
+  height: @dir-length;
+
+  .line {
+    width: 0;
+    height: @line-length;
+  }
+}
+
+#dpad-left,
+#dpad-right {
+  flex-direction: column;
+  width: @dir-length;
+  height: @dir-width;
+
+  .line {
+    width: @line-length;
+    height: 0;
+  }
+}
+
+#dpad-up {
+  align-items: flex-start;
+  border-bottom: none;
+  top: 0;
+  left: @dir-length;
+  border-top-left-radius: @dpad-radius;
+  border-top-right-radius: @dpad-radius;
+}
+
+#dpad-down {
+  align-items: flex-end;
+  border-top: none;
+  bottom: 0;
+  left: @dir-length;
+  border-bottom-left-radius: @dpad-radius;
+  border-bottom-right-radius: @dpad-radius;
+}
+
+#dpad-left {
+  align-items: flex-start;
+  border-right: none;
+  left: 0;
+  top: @dir-length;
+  border-top-left-radius: @dpad-radius;
+  border-bottom-left-radius: @dpad-radius;
+}
+
+#dpad-right {
+  align-items: flex-end;
+  border-left: none;
+  right: 0;
+  top: @dir-length;
+  border-top-right-radius: @dpad-radius;
+  border-bottom-right-radius: @dpad-radius;
+}

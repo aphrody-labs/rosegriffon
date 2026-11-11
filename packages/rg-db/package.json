@@ -58,11 +58,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "url": "https://github.com/aphrody-dev/rosegriffon.git",
     "directory": "packages/rg-db"
   },
-  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-db#readme",
+  "homepage": "https://github.com/aphrody-dev/rosegriffon/tree/main/packages/rg-db#readme",
   "bugs": {
-    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
+    "url": "https://github.com/aphrody-dev/rosegriffon/issues"
   }
 }

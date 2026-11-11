@@ -1,0 +1,29 @@
+[package]
+name = "aphrody-nie-net"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "IEVR online lobby, room and deterministic multiplayer session state"
+
+[lints]
+workspace = true
+
+[features]
+default = ["transport"]
+transport = ["dep:tokio", "dep:futures-util", "dep:tokio-tungstenite", "dep:uuid", "dep:anyhow"]
+
+[dependencies]
+aphrody-nie-runtime = { path = "../aphrody-nie-runtime", version = "1.4.8", default-features = false }
+aphrody-nie-core = { workspace = true }
+aphrody-nie-geom = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+anyhow = { workspace = true, optional = true }
+tokio = { version = "1.53.2", features = ["rt-multi-thread", "macros", "sync", "time", "net"], optional = true }
+futures-util = { version = "0.3", optional = true }
+tokio-tungstenite = { version = "0.29", optional = true }
+uuid = { version = "1.28.0", features = ["v4"], optional = true }

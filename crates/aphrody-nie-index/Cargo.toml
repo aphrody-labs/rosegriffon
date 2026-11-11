@@ -1,0 +1,29 @@
+[package]
+name = "aphrody-nie-index"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license = "Apache-2.0"
+publish = false
+description = "Bounded in-memory and SQLite-backed knowledge index for reverse engineering"
+
+[lints]
+workspace = true
+
+[features]
+default = ["host"]
+host = ["dep:ignore", "dep:r2d2", "dep:redis", "dep:rusqlite", "dep:serde_json", "dep:sha2", "dep:tracing"]
+
+[dependencies]
+ignore = { version = "0.4", optional = true }
+rusqlite = { version = "0.40", optional = true, features = ["bundled"] }
+sha2 = { version = "0.10", optional = true }
+serde = { workspace = true }
+serde_json = { workspace = true, optional = true }
+thiserror = { workspace = true }
+tracing = { workspace = true, optional = true }
+r2d2 = { version = "0.8", optional = true }
+redis = { version = "0.27", optional = true, features = ["r2d2"] }
+
+[dev-dependencies]
+serde_json = { workspace = true }

@@ -263,7 +263,7 @@ Commit : `feat(tests): migrer vitest → bun:test (P3)`
 		"lint": "oxlint src/ examples/",
 		"lint:fix": "oxlint --fix src/ examples/",
 		"type-check": "tsc --noEmit",
-		// drop: prestart (bunx tsc && node), build:openapi (bunx tsc && node)
+		// drop: prestart (npx tsc && node), build:openapi (npx tsc && node)
 	},
 	"engines": {
 		"bun": ">=1.1.0", // drop node
@@ -330,7 +330,7 @@ Commit : `chore(pkg): rename @rose-griffon/patreon-bun, ESM-only, bun engines (P
 n2b /home/ubuntu/rg/packages/patreon-bun/.github/workflows/ --fix
 ```
 
-47 findings couverts : `setup-node` → `oven-sh/setup-bun@v2`, `node-version` → `bun-version: latest`, `bun install` → `bun install`, `npm run` → `bun run`, `npm ci` → `bun install --frozen-lockfile`, `npm publish` → `bun publish`, `npx` → `bunx`.
+47 findings couverts : `setup-node` → `oven-sh/setup-bun@v2`, `node-version` → `bun-version: latest`, `bun install` → `bun install`, `npm run` → `bun run`, `npm ci` → `bun install --frozen-lockfile`, `npm publish` → `bun publish`, `npx` → `bun run`.
 
 ### 5.2. Workflows à désactiver / supprimer
 

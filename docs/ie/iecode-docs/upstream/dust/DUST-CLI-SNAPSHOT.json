@@ -1,0 +1,2069 @@
+{
+  "baseline_commit": "37e321b3f063de1688927265586b667d12539449",
+  "inventory_date": "2026-10-01",
+  "file_count": 257,
+  "bytes": 3745361,
+  "comparison_counts": {
+    "historical-workspace-control": 6,
+    "retained-counterpart-differs": 165,
+    "byte-identical": 86
+  },
+  "files": [
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/.gitignore",
+      "git_blob": "ea8c4bf7f35f6f77f75d92ad8ce8349f6e81ddba",
+      "sha256": "44c92e3a70ad3307b7056871c2bdb096d8bfa9373f5bf06a79bb6324a20ff2fb",
+      "bytes": 8,
+      "current_owner": ".gitignore",
+      "comparison": "historical-workspace-control"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/Cargo.lock",
+      "git_blob": "22676e996d1ae05de3d8c2d9843495145f6b2cdc",
+      "sha256": "b137f671ad19acdbab66c896981484fb15ba3ef513f0bd52d490f5737a9db844",
+      "bytes": 115976,
+      "current_owner": "Cargo.lock",
+      "comparison": "historical-workspace-control"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/Cargo.toml",
+      "git_blob": "a07cf3107f4c1a38445937ee04ee7fed7b230e20",
+      "sha256": "f6c2977ba6598385fe5da8e0ab6fd72c05473a1e451bba42bafb5b99e70ac2b3",
+      "bytes": 361,
+      "current_owner": "Cargo.toml",
+      "comparison": "historical-workspace-control"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/Cargo.toml",
+      "git_blob": "5755aa436c614d3e1fad7035872fc92b4e478aaa",
+      "sha256": "0fa0d0f80964bed5b21977781069126d56e68542d368cd80271866cfebeef131",
+      "bytes": 1000,
+      "current_owner": "crates/emu/core/Cargo.toml",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/build.rs",
+      "git_blob": "df7f31a29bcec3f692f9855b43c8f2c15a79bf54",
+      "sha256": "4232f074349c66718fac0165f3e0387436992690735cf9222679f1d26440c674",
+      "bytes": 47033,
+      "current_owner": "crates/emu/core/build.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/audio.rs",
+      "git_blob": "198c541aea57b52318592f8731357e0a4abe4dae",
+      "sha256": "d0c4c64a7ab0aa3041ce012a37a9fc3d322c52d73374cc327b5cdd4a03e2581a",
+      "bytes": 20857,
+      "current_owner": "crates/emu/core/src/audio.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/audio/capture.rs",
+      "git_blob": "cf326d936aacff9c5095d5554353b07bb3c7d52a",
+      "sha256": "266559224bfdf2cc43c01ed43b15c0e7b94db3337f5bb63bbfccf1025d51e21b",
+      "bytes": 6176,
+      "current_owner": "crates/emu/core/src/audio/capture.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/audio/channel.rs",
+      "git_blob": "9f954a47c5e4407718ffd5cc27f7e1b869798f8f",
+      "sha256": "8bca52daade4c0330b011169da67e178b5f3fed8a8c3459810ff7a4077b3ca4a",
+      "bytes": 26590,
+      "current_owner": "crates/emu/core/src/audio/channel.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/audio/io.rs",
+      "git_blob": "a31341968d96fdc12c0b97499ea443f4c974517b",
+      "sha256": "18997922fc2c93febc1a3f8b1c185edeaa21dcb2b7bcb30797822cc76c026458",
+      "bytes": 15800,
+      "current_owner": "crates/emu/core/src/audio/io.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu.rs",
+      "git_blob": "1aff2555f98b8654128e047e8829a16b51835918",
+      "sha256": "893d3b587edac4206d1961a37cf3bafb6a53d4f266966da4e119b3a725e24c28",
+      "bytes": 4522,
+      "current_owner": "crates/emu/core/src/cpu.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm7.rs",
+      "git_blob": "f7474b7d5ac2f791f7211abe2b76ec743fba8074",
+      "sha256": "e00d4a5ca0f10c368671094a2b8f1c85b7fab1788f851a0afd4063b17fe336bb",
+      "bytes": 14964,
+      "current_owner": "crates/emu/core/src/cpu/arm7.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm7/bus.rs",
+      "git_blob": "3d3c11018777e638817a9a39ff65bb677deb0120",
+      "sha256": "354f5427f01491c12ccba91ede3d321c41d743d9ae8d42d6e017c074206822c7",
+      "bytes": 90,
+      "current_owner": "crates/emu/core/src/cpu/arm7/bus.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm7/bus/access.rs",
+      "git_blob": "d685b437e79ebe09d36e907f8e03dcc6c5e6a1ad",
+      "sha256": "f0ca3d6cf49f5f06d539f5ace49ae2db30186aadab27090edeefd5c158bede1f",
+      "bytes": 2015,
+      "current_owner": "crates/emu/core/src/cpu/arm7/bus/access.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm7/bus/fallback.rs",
+      "git_blob": "64e344028b4493648ae8a58126a975ee93e8069d",
+      "sha256": "68622e92c8dd7984b0eb9acb22ab3bab61094788c54ec3ed6b20fa3539b70401",
+      "bytes": 60467,
+      "current_owner": "crates/emu/core/src/cpu/arm7/bus/fallback.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm7/bus/ptrs.rs",
+      "git_blob": "5dad8104433abc482932d2a6f12e02efc4345ce3",
+      "sha256": "61c24b052bd7055ffd64c344138ca0fda03fc1c73fc3a08137424623ac1ba52c",
+      "bytes": 7340,
+      "current_owner": "crates/emu/core/src/cpu/arm7/bus/ptrs.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm7/bus/timings.rs",
+      "git_blob": "43e7c303e8388dfe3a18e05d1f1a4687791b67d0",
+      "sha256": "de1b8f8ccacd94f873178f5ec9507e16a6da7ab68437cb6fa54ffd1a2e3d6730",
+      "bytes": 2222,
+      "current_owner": "crates/emu/core/src/cpu/arm7/bus/timings.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm7/dma.rs",
+      "git_blob": "583200060eb7b0deffc6d69503c557c6a6dbe7d8",
+      "sha256": "d85360b45e26f27a08d077b4503836d9100582896fc5b418dd518b1e161c0e16",
+      "bytes": 9901,
+      "current_owner": "crates/emu/core/src/cpu/arm7/dma.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm7/irqs.rs",
+      "git_blob": "533435b78e4091bbe3da2c515f2305619d7d64d6",
+      "sha256": "2289f369e2900f4bd80040395faa25bbc9b6710a6ce011d7b9ba385ed9b0da64",
+      "bytes": 5011,
+      "current_owner": "crates/emu/core/src/cpu/arm7/irqs.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm7/schedule.rs",
+      "git_blob": "2cd38f477fa725ff1ad91d77846aceeef157ebd0",
+      "sha256": "37d6bb779b8717ba13bf87898f7a76c77b1a16966fc8631845876cc7a0345fe0",
+      "bytes": 4309,
+      "current_owner": "crates/emu/core/src/cpu/arm7/schedule.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9.rs",
+      "git_blob": "9044af9a9047c6d9c0820221b2f39c7ef9541f93",
+      "sha256": "6f85a725add3f5c5edab2c7bc23d7ab62520ca77ab6ac45605f7d4cddfa13bd6",
+      "bytes": 18121,
+      "current_owner": "crates/emu/core/src/cpu/arm9.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/bus.rs",
+      "git_blob": "8aed09a075e9235361b96c97fd63eba82063555f",
+      "sha256": "0e6c4dc558a54d2dda9d4bed27538b6d4fc62d7777459bfdedb6fabbc7530e2b",
+      "bytes": 101,
+      "current_owner": "crates/emu/core/src/cpu/arm9/bus.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/bus/access.rs",
+      "git_blob": "bf4812d665c14bad6626f3380d6cc03a2f0a9361",
+      "sha256": "f3521e7f03794bdb8fb61d1f69b9558ebf46f7c9c7678528a5e61d8de38031d6",
+      "bytes": 7200,
+      "current_owner": "crates/emu/core/src/cpu/arm9/bus/access.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/bus/fallback.rs",
+      "git_blob": "1676075eb033d74f7092cb19a37acd34b29969b2",
+      "sha256": "92d81086e53ec2e34ca37ab730d660dfc9fea18783a803f7688917acaeb80fae",
+      "bytes": 62966,
+      "current_owner": "crates/emu/core/src/cpu/arm9/bus/fallback.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/bus/ptrs.rs",
+      "git_blob": "954c5581cf0ce6d0990005519c74ed480481b319",
+      "sha256": "4cb201a4a4b94c3b68ff6469d8cd720a80f4aaada57e5d3dc5376fc67943ac20",
+      "bytes": 12812,
+      "current_owner": "crates/emu/core/src/cpu/arm9/bus/ptrs.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/bus/timings.rs",
+      "git_blob": "e0759757135beed56c48d17967a6395e62a92918",
+      "sha256": "27d43f0fbc247e80375d960ae4bde9eac7e996453cf7a93b2ed64d798db9dd96",
+      "bytes": 2419,
+      "current_owner": "crates/emu/core/src/cpu/arm9/bus/timings.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/cp15.rs",
+      "git_blob": "355d9514a02c4932c4d27b42f81b65ca99959525",
+      "sha256": "fdad6aebfab3fe952fe95d2c0e6c38e00e465163a537b6777163cfe2f8bb45c3",
+      "bytes": 56652,
+      "current_owner": "crates/emu/core/src/cpu/arm9/cp15.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/cp15/perms.rs",
+      "git_blob": "2f4a58af65ee96f011957eda57ba3b2d1afd9c7a",
+      "sha256": "b897de076a8a3512f301f96c1e0663faf2f6d7be042a1e27bebe9c0b5b0bd0d3",
+      "bytes": 2753,
+      "current_owner": "crates/emu/core/src/cpu/arm9/cp15/perms.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/cp15/ptrs.rs",
+      "git_blob": "a24b2160635c4c56c2b2a10684e818c5359f4b0f",
+      "sha256": "b241803f06522728237c9bab5efd15b4a81c742e3a480fd244f7e16883311d0b",
+      "bytes": 22959,
+      "current_owner": "crates/emu/core/src/cpu/arm9/cp15/ptrs.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/cp15/timings.rs",
+      "git_blob": "f7fedf201cf9f9bc4dc440ec77f1bf705da5dff3",
+      "sha256": "f731d900154a035b15a2394ce2668b9307504b635d8e25974c331081e536a9b7",
+      "bytes": 6269,
+      "current_owner": "crates/emu/core/src/cpu/arm9/cp15/timings.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/div_engine.rs",
+      "git_blob": "98cb3c649d2166aabdc44955adc66d4272bfbdeb",
+      "sha256": "265122ae981325f58f5f0aa7f30527c5e5cd45b2628c6ff7c1ca42f8b2cff7a4",
+      "bytes": 3996,
+      "current_owner": "crates/emu/core/src/cpu/arm9/div_engine.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/dma.rs",
+      "git_blob": "5451bc178be7f187ddec522800395a9b3d1b28aa",
+      "sha256": "d91a0689bd1683052e69e14626ba384d46f027090aec85680559d28a6ae00de5",
+      "bytes": 11620,
+      "current_owner": "crates/emu/core/src/cpu/arm9/dma.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/irqs.rs",
+      "git_blob": "a87b2cc653c4df29cf3f2541054314532a15001a",
+      "sha256": "506f54e3d002da96b3dd06f49411e954cecf547358404dc137d6b5186511b3a2",
+      "bytes": 4759,
+      "current_owner": "crates/emu/core/src/cpu/arm9/irqs.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/schedule.rs",
+      "git_blob": "4611cb4c51e4835e0938aa1aec801a4d27cd47ec",
+      "sha256": "39f3d4f38781ef76b6321f63d0b8687eeae2896f9cab80dcb3438c0a9dbbf2fe",
+      "bytes": 3342,
+      "current_owner": "crates/emu/core/src/cpu/arm9/schedule.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/arm9/sqrt_engine.rs",
+      "git_blob": "0121cb61b53f956086de3732c65ab61841710678",
+      "sha256": "86de2a82b9c1841778a2209b840d156bacb8d9bb14b6f19f5707b4806398734d",
+      "bytes": 2221,
+      "current_owner": "crates/emu/core/src/cpu/arm9/sqrt_engine.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/bus.rs",
+      "git_blob": "052df452ff55299fbff87bb4d83145ece9fd9f37",
+      "sha256": "89a50c0a46dcade1750499476351da558972c2132f6ae9b890dcf0e95c0c8096",
+      "bytes": 1232,
+      "current_owner": "crates/emu/core/src/cpu/bus.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/debug.rs",
+      "git_blob": "8d11702fc0a1355dba1c175d280d340873b31c12",
+      "sha256": "3fbc88f12a87cfbcb2d2cb810a896e989ef9947f48f63a0002d1a2e6a96db78b",
+      "bytes": 9612,
+      "current_owner": "crates/emu/core/src/cpu/debug.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm.rs",
+      "git_blob": "8173c8a86f9a50e3db802d4e011e7cae7f4fcb6a",
+      "sha256": "ff7b2a1f6ba3912e6198ac6b225e39b8b1583b53bb303e9fcfa4b0d50c9d516a",
+      "bytes": 3665,
+      "current_owner": "crates/emu/core/src/cpu/disasm.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm/arm.rs",
+      "git_blob": "4ff272d077f9fb3e1ab8cf2cc80ab0233f79aee3",
+      "sha256": "aba068d17cd2f4b758236891823ae6a3d9aefa2e0a0bc827f494f6c1cf43c9f8",
+      "bytes": 1132,
+      "current_owner": "crates/emu/core/src/cpu/disasm/arm.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm/arm/branch.rs",
+      "git_blob": "fcf72bffe4557df71a2123213425eeca097d7a9a",
+      "sha256": "f66c96d3a2d141e3cbdc22f6373e5dbf775241c9ac8e7e12918d4730d4b46914",
+      "bytes": 791,
+      "current_owner": "crates/emu/core/src/cpu/disasm/arm/branch.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm/arm/data.rs",
+      "git_blob": "06c0241ffaef0c85c4b3596bb2b990b3562b15c7",
+      "sha256": "8394b37c799e4a1cc45ad7e686120aa5774cb80940cbfed4aa580abfe26c1e19",
+      "bytes": 8080,
+      "current_owner": "crates/emu/core/src/cpu/disasm/arm/data.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm/arm/mem.rs",
+      "git_blob": "d2d4c260850f62a8e5b9b6a7ec75c66e189d8996",
+      "sha256": "056daed46aa7fac444148b0f0adca864ce593b6d357b12b5b2ed88bda24d8a42",
+      "bytes": 6416,
+      "current_owner": "crates/emu/core/src/cpu/disasm/arm/mem.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm/arm/other.rs",
+      "git_blob": "5868a4111fe060eae0fbad88a48973c1b56c5bca",
+      "sha256": "a94360372dc2d025bac949c231c0dfce32447c55e67b108b2ebc623a60f9a058",
+      "bytes": 5868,
+      "current_owner": "crates/emu/core/src/cpu/disasm/arm/other.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm/common.rs",
+      "git_blob": "83a52aa7e00be2d3b923bd4249906a640c14bf22",
+      "sha256": "9f8eff31540d70b7f1233556a4fe993d143c1234d0ee3a9743bfff9211381f46",
+      "bytes": 643,
+      "current_owner": "crates/emu/core/src/cpu/disasm/common.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm/thumb.rs",
+      "git_blob": "bc6b48182e246215ef16be643d843e14e9091ca0",
+      "sha256": "06c2343679d8b3a15368f1ec8480f8d0f47b5b35037ec971067afad26f714f9c",
+      "bytes": 698,
+      "current_owner": "crates/emu/core/src/cpu/disasm/thumb.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm/thumb/branch.rs",
+      "git_blob": "1e3107edce18c4f21d78168c5f19ae658443538d",
+      "sha256": "ebb3ff317ae79eabfd8ddf1688403f22a3f9e03837c7ac8de5e1cbdfebd045d6",
+      "bytes": 1662,
+      "current_owner": "crates/emu/core/src/cpu/disasm/thumb/branch.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm/thumb/data.rs",
+      "git_blob": "1bdbd365f1c423adf6ad969ece9a63abfac3ee50",
+      "sha256": "b6c1e5033925964dae42017043f96592a19c278b87e3dbf2cb74689b02f3c662",
+      "bytes": 3647,
+      "current_owner": "crates/emu/core/src/cpu/disasm/thumb/data.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm/thumb/mem.rs",
+      "git_blob": "9a215e5bc9624ca1f064ff72cf28e2e956d93665",
+      "sha256": "65deb5d2e3fa5fd12a26c585f46dc8b8d96defc1e35ad8f57300d19e40121047",
+      "bytes": 3844,
+      "current_owner": "crates/emu/core/src/cpu/disasm/thumb/mem.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/disasm/thumb/other.rs",
+      "git_blob": "780f66b251f1a676b0f6beb90e178baa719d63fb",
+      "sha256": "f0c6a31bcadf2c36e2021f8f9b613fcd52482600a9863bf20bc0a033a43df4e0",
+      "bytes": 532,
+      "current_owner": "crates/emu/core/src/cpu/disasm/thumb/other.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/dma.rs",
+      "git_blob": "0f8af2d12abd24e0d2b4695c6e436db5c661b872",
+      "sha256": "a24f3490a9305c8586a85ac4118e268cf6a7eb785582977568f70e6a948788f6",
+      "bytes": 4606,
+      "current_owner": "crates/emu/core/src/cpu/dma.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/engines_common.rs",
+      "git_blob": "15e449a92766535277c05a520a5acc3814d414ad",
+      "sha256": "6ef80a6f8f44e70b7ccf4fcc14c4b72e598155a29e41808e4e2b73143e1fc0e3",
+      "bytes": 2734,
+      "current_owner": "crates/emu/core/src/cpu/engines_common.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/hle_bios.rs",
+      "git_blob": "922eba3187630ab46882177457104d0c7458f5d1",
+      "sha256": "b577dc498ad05fd2670e483173271c2b1d47e4051729f36c7774af7faa0c81e9",
+      "bytes": 40,
+      "current_owner": "crates/emu/core/src/cpu/hle_bios.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/hle_bios/arm7.rs",
+      "git_blob": "37d480158e49aaf1c529d9646a1e51c09c98a33c",
+      "sha256": "3b9b00a4fd3f1b204169fd6430bbe77b3a1d9048ffb10e51875bad1d4626a50f",
+      "bytes": 23060,
+      "current_owner": "crates/emu/core/src/cpu/hle_bios/arm7.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/hle_bios/arm9.rs",
+      "git_blob": "dd285bacacb2ffbf476694e833be06ef99f47288",
+      "sha256": "5e06bb582a6c5054ee7602abb46bcfb7856b62c2e61194778d5c3e3709f83f17",
+      "bytes": 10292,
+      "current_owner": "crates/emu/core/src/cpu/hle_bios/arm9.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/hle_bios/common.rs",
+      "git_blob": "24035e757e7cc354f8305e023206c10fb20ddf65",
+      "sha256": "83035935d6841b0afab770ff8e895a8ebf1a32673ce6b68e1da47e86dc16051c",
+      "bytes": 1635,
+      "current_owner": "crates/emu/core/src/cpu/hle_bios/common.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter.rs",
+      "git_blob": "12239506b373a38b34e019290f9397e624e09d7c",
+      "sha256": "1da8baf87527dab92de5319897a5f6c4d31a9e4e2fbb778b9a0513f90ed91459",
+      "bytes": 1857,
+      "current_owner": "crates/emu/core/src/cpu/interpreter.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils.rs",
+      "git_blob": "cc19c6db6aefbe1e49b1ca77463939a246d88228",
+      "sha256": "8b3efccc739244529784900fa670d9ef0a5e5c0fdf0de0a6591a162ee38d8235",
+      "bytes": 461,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/aarch64.rs",
+      "git_blob": "fc3ba40b43bbc1bfb236adfa1821c00e425f825f",
+      "sha256": "03779f8b831a5f2e8b548b995f881abe8897ab6fb2b0933bd6e60759a1abc43e",
+      "bytes": 53,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/aarch64.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/aarch64/arithmetic.rs",
+      "git_blob": "1fbf7b35d30bf17c86db5f7c163e4af366e4fe07",
+      "sha256": "e59e15aa0abda50592dc2d32cb06e50558c122939a2e95a0056326265a42c5c4",
+      "bytes": 2812,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/aarch64/arithmetic.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/aarch64/bit_ops.rs",
+      "git_blob": "8312018c4fb3b796f188199ce768fab6e8e54077",
+      "sha256": "f966bdfd512d55804310ad6813cfb3786395e6c2c5fc3dda745f2c16242cc410",
+      "bytes": 3171,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/aarch64/bit_ops.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/aarch64/shifts.rs",
+      "git_blob": "3ac753e85ae767c03737fef38b2278cadd1c9189",
+      "sha256": "4a96a6e34b1943b5107707616d082398531f3625cd8f994f3bba04c3f0e0266c",
+      "bytes": 8368,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/aarch64/shifts.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/all.rs",
+      "git_blob": "fc3ba40b43bbc1bfb236adfa1821c00e425f825f",
+      "sha256": "03779f8b831a5f2e8b548b995f881abe8897ab6fb2b0933bd6e60759a1abc43e",
+      "bytes": 53,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/all.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/all/arithmetic.rs",
+      "git_blob": "4e7ffaa025379328a2609f24352c3cdef7400852",
+      "sha256": "652670b0c96222943b2c544133aa959e171625401aeece443a9bddf8b1ee750d",
+      "bytes": 1319,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/all/arithmetic.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/all/bit_ops.rs",
+      "git_blob": "06879e054f82f8f63578272dee105c82a6287357",
+      "sha256": "a1bff0341773e3d246c40a3ccb83d5e414b232286306b3dc33afe486c0c4d1f3",
+      "bytes": 967,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/all/bit_ops.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/all/shifts.rs",
+      "git_blob": "ae89605c7d3c486fdd089419eb646fd7be85f17d",
+      "sha256": "3ddc7acd9d1fe3894c42aba2dc5272f43eee5cfa163c7df3c84c58d0a77c73fe",
+      "bytes": 2925,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/all/shifts.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/shifts_common.rs",
+      "git_blob": "c2d96dd8c69ce6f19c5e088bf916a57e77bcf4fd",
+      "sha256": "ff40cee063368ff9d07312b45ec03b7d1a95ff60928ebc0849ce3e440a96c7e6",
+      "bytes": 690,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/shifts_common.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/x86.rs",
+      "git_blob": "fc3ba40b43bbc1bfb236adfa1821c00e425f825f",
+      "sha256": "03779f8b831a5f2e8b548b995f881abe8897ab6fb2b0933bd6e60759a1abc43e",
+      "bytes": 53,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/x86.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/x86/arithmetic.rs",
+      "git_blob": "7ea88c4e7ec6ea8d402e8b49dc5ef969197d75a1",
+      "sha256": "d763288d906d37fb5274eaf5e4a892a0241d5ddbe41e9a93db155cb4ede0b173",
+      "bytes": 2828,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/x86/arithmetic.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/x86/bit_ops.rs",
+      "git_blob": "d51596558ee14f48effea30c79a1f76ebb82a5ee",
+      "sha256": "082d59efef48b53a4a40fc83ac0a973c4552a4b40d65d0914a9fc02e455ee8d5",
+      "bytes": 3502,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/x86/bit_ops.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/alu_utils/x86/shifts.rs",
+      "git_blob": "e388cd64784b46aa46e173d9868cbe730b9a3283",
+      "sha256": "9f32b378b5394ce5c6e20fd2e3574fe4e1f8325508b678012f9b63308f5c3821",
+      "bytes": 8655,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/alu_utils/x86/shifts.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm7.rs",
+      "git_blob": "4c04a1415c90104f176dd9ad7c8370d21291e530",
+      "sha256": "ed603bd7515766ea39daf8102836e3e63d7a3ec7946d3f8a69a1fa7442e9cb17",
+      "bytes": 26978,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm7.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm7/arm.rs",
+      "git_blob": "ababe34215dc2994742d07cf51fdf90e96e41f44",
+      "sha256": "720d27d0d16b5a49e894db19277a94c7027e3ef4e14789f218ae0b03bc5f5fb8",
+      "bytes": 709,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm7/arm.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm7/arm/branch.rs",
+      "git_blob": "aebb5458f4c4c4bb543cfe2c3587c5b47d702a81",
+      "sha256": "1a6cf0b303bad832a36f083bd79e54fff80875cd4b5f52e30efbe8d6b151ee9e",
+      "bytes": 590,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm7/arm/branch.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm7/arm/data.rs",
+      "git_blob": "cb79ec644e3e08491b1b504cd870c470ffcd3d64",
+      "sha256": "692865b1397f2875b10c036bcb0440816764be98cf05c7f2ace50dd63fb20e53",
+      "bytes": 11161,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm7/arm/data.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm7/arm/mem.rs",
+      "git_blob": "4aefde0c7c1fce1bbb9197045d49b442b6b02a0a",
+      "sha256": "f2881c9a66777f5a6f40fd9c079774ee156939e8ebc9d7303ecdf67fa315e639",
+      "bytes": 17435,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm7/arm/mem.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm7/arm/other.rs",
+      "git_blob": "8a8158ee80091112477c902f5952c978039a6ae1",
+      "sha256": "e8cfc7a9a479c36fc5b78b149fd2dd938213c677c5c796d7fbb5e7f957e47bf6",
+      "bytes": 4884,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm7/arm/other.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm7/thumb.rs",
+      "git_blob": "ea0276dbc50cd28c3a7251b3fc2cfa2fcf7145fa",
+      "sha256": "806daf32bd2b00755d174ef96981d9b7c47d204d5bcf37aee711b402589462e9",
+      "bytes": 462,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm7/thumb.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm7/thumb/branch.rs",
+      "git_blob": "3c89adf85e8cd9babe891e6add6ee6eb6d96efd8",
+      "sha256": "a0db403e6064562e64af143307071342ec663c9eb2cec83312d8b8106e73107c",
+      "bytes": 1297,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm7/thumb/branch.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm7/thumb/data.rs",
+      "git_blob": "55e3a8c444ea7855d30f767201a4522b7a794052",
+      "sha256": "23253db3694857965e7d430697f8c029ae2d7aff7ed0591a997bffe033686d53",
+      "bytes": 7969,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm7/thumb/data.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm7/thumb/mem.rs",
+      "git_blob": "21956d29314d83b9cdac245acb4730fc2e4408a5",
+      "sha256": "535dd64579f89b40849b2b076510691e6fcd35c389668815e4977c183ca422fb",
+      "bytes": 12224,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm7/thumb/mem.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm7/thumb/other.rs",
+      "git_blob": "233bb3079f82a2ba0f66750639b79cab46dde47f",
+      "sha256": "7e57a6ee89d4d66bfba370c16ab77410c7247b7eebad7f982993ad26ea36efe6",
+      "bytes": 358,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm7/thumb/other.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm9.rs",
+      "git_blob": "4bb70e386e87ff26bf85972a218300c36f3b30ac",
+      "sha256": "91ca593304ebdb1921257c404c065b43ae7ca5c365b769c5813daccb751521f1",
+      "bytes": 51350,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm9.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm9/arm.rs",
+      "git_blob": "e429a415c8166f55e76714cd293640d9530966b3",
+      "sha256": "82e65a3bb58dc864fdb47599aa3ac6b82c77cc57235e3ffbae627b423d4a556e",
+      "bytes": 1045,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm9/arm.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm9/arm/branch.rs",
+      "git_blob": "7bc3fd4071f8b6c7f8cee118ad8fc750ce397e4c",
+      "sha256": "7e0485b822f861da54fedfd31f19d30a2157c098169c46c9bdc7583a121825c9",
+      "bytes": 1765,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm9/arm/branch.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm9/arm/data.rs",
+      "git_blob": "54c24adf59c358f8b21002f7386e3255b6c9b1cc",
+      "sha256": "633e3645af54ee52b841e8ccbca554fbc34cb82bae7fcbfbcc1c2a4ab5d3a9d0",
+      "bytes": 18304,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm9/arm/data.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm9/arm/mem.rs",
+      "git_blob": "a2119ea15b576d1fb5f1849d4d87734446f15f87",
+      "sha256": "78268773a18fc831f5b074a55262b8657cb707562a05140dd8fdbc834cf84580",
+      "bytes": 33272,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm9/arm/mem.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm9/arm/other.rs",
+      "git_blob": "d926376fbbca45a477ef1c317b7231f3e8ca67c5",
+      "sha256": "f92e066fecf6a6d8ac5a16455dbca1b11b4a301bb2d9c00616c44663a5de571b",
+      "bytes": 6142,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm9/arm/other.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm9/thumb.rs",
+      "git_blob": "a1bddbe014d9fb305181609b59563e8ceb2032d0",
+      "sha256": "b239ab5fdee319ef34d7a3f75eb888c5bd44af7481bcd1e6ceef17dc68839183",
+      "bytes": 462,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm9/thumb.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm9/thumb/branch.rs",
+      "git_blob": "2dc1b1d3c917ebc3bbdce52aab889e7df6699afc",
+      "sha256": "71294566e71a248d7b5904c37b5efef6550862b9c68714440da4faadd7dcf7ea",
+      "bytes": 2441,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm9/thumb/branch.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm9/thumb/data.rs",
+      "git_blob": "dc282543eb54fbfa604cf4d459e10e2a4e3e2c42",
+      "sha256": "21136331867f7a243e5711976aa9c3c981e5b8b7746559913312d706ad18dbf9",
+      "bytes": 10756,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm9/thumb/data.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm9/thumb/mem.rs",
+      "git_blob": "cf5486829ab49a66737a13e72611b4c7c6d778b1",
+      "sha256": "efc912de2fd45c56028f82ea1d957b01994a732a49015b6c1c5483ae61ee8378",
+      "bytes": 23611,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm9/thumb/mem.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/arm9/thumb/other.rs",
+      "git_blob": "66fcb70b217bca4414e49ad20e06b154962539d4",
+      "sha256": "fe0b12891d0aad7ae4ef0b379091751d4de983cf5f020095c2d29aa87c3d77d2",
+      "bytes": 421,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/arm9/thumb/other.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/common.rs",
+      "git_blob": "5515b12e6ab9eb26ed1742b9892868d8ade0173f",
+      "sha256": "aebf289dc01b62d1a53089c1df2d1e1f54cbcb4c50ee5250cf2381d08c981cf2",
+      "bytes": 1638,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/common.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/interpreter/regs.rs",
+      "git_blob": "c4e513ffd099fc5ec528f099759fe71952ae571b",
+      "sha256": "e8c2e596c2dd41aa521f607de13100fa9b2f91cca24292a2b1ca0f58032d3b12",
+      "bytes": 7911,
+      "current_owner": "crates/emu/core/src/cpu/interpreter/regs.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/irqs.rs",
+      "git_blob": "93426f51aa79a456499714975dab1b4ae4d9b3c5",
+      "sha256": "92259b3a7214c5d2818fd45b7ab341211071abb1970519748dbda68db584aea3",
+      "bytes": 213,
+      "current_owner": "crates/emu/core/src/cpu/irqs.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/jit.rs",
+      "git_blob": "70b786d12ed055a08b57f5cf47f717bf6a266301",
+      "sha256": "d86a603e47ff3551a7bc3efc1c88f9d93054ba56d714e5c95dab9d54d0a10161",
+      "bytes": 8,
+      "current_owner": "crates/emu/core/src/cpu/jit.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/psr.rs",
+      "git_blob": "7592ddfaf49e43609bad742a6696bf5dcfb06066",
+      "sha256": "8d9f5b41831aebe3a3984c02ade3f1f3e61b71e3368d5e864815f2cf57e31e37",
+      "bytes": 2862,
+      "current_owner": "crates/emu/core/src/cpu/psr.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/schedule.rs",
+      "git_blob": "0427b2b20564c0ca31ede08a48aa471339112474",
+      "sha256": "a7110267836c8fd8642f96a1520b2d633e1939ab9abd8e277c78a7aa151f8297",
+      "bytes": 1258,
+      "current_owner": "crates/emu/core/src/cpu/schedule.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/cpu/timers.rs",
+      "git_blob": "14f2e6a5a7cb6257e77ad717a654a94e69e3dc91",
+      "sha256": "3fe561225fe1d82fbdf5bdbe9679858004e7a0fc69eb5e915bab8ac34d088b9f",
+      "bytes": 12173,
+      "current_owner": "crates/emu/core/src/cpu/timers.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/dldi.rs",
+      "git_blob": "723ee24a0b3b150600b130b68cbec1795dd7e1e9",
+      "sha256": "4745eed5e4d6d9c91bb72f56215b97a83ffb282c8c9805dc5e21f8af631caf40",
+      "bytes": 8085,
+      "current_owner": "crates/emu/core/src/dldi.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot.rs",
+      "git_blob": "f7e60f4af555be4f3365b2ab4a2aa334bc889e36",
+      "sha256": "860fbb619b82fecd6a210f3eba32d034317c2cc4321e574fc27515477a501915",
+      "bytes": 13983,
+      "current_owner": "crates/emu/core/src/ds_slot.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot/rom.rs",
+      "git_blob": "a51dc456f6acdfc6692887ddba1f82ec0205db0f",
+      "sha256": "37905540803bfef0bc1602c86f9b249c76988b310684c1213d3bf4b46a90c5b6",
+      "bytes": 3920,
+      "current_owner": "crates/emu/core/src/ds_slot/rom.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot/rom/empty.rs",
+      "git_blob": "ad850b103d50b097b013b4a24b11bd11accdedb7",
+      "sha256": "fa29e5dd51d5ed6012e1e7664d245a6d8db62143eb582153d911496e9a9daf0e",
+      "bytes": 1181,
+      "current_owner": "crates/emu/core/src/ds_slot/rom/empty.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot/rom/header.rs",
+      "git_blob": "2b319932e94944950d0b81aba4af485e7ab1a4d7",
+      "sha256": "5d5bec6629f9cd8a1c3af1c44e5458df322222144911a0ebf8ad81175db5339d",
+      "bytes": 4850,
+      "current_owner": "crates/emu/core/src/ds_slot/rom/header.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot/rom/icon_title.rs",
+      "git_blob": "39dcd4c4d87cf7ede56451919ae299b1cc359fb5",
+      "sha256": "ed3b54cd399738152945c69807f6381b20b377d951511f01e79733db541a5933",
+      "bytes": 8254,
+      "current_owner": "crates/emu/core/src/ds_slot/rom/icon_title.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot/rom/key1.rs",
+      "git_blob": "022253be93de2b087900b969dd6487425eb678cd",
+      "sha256": "502730dae1781bffc6d48d574a91770b11f81a1f35bfed764e517f85dd0721fe",
+      "bytes": 2841,
+      "current_owner": "crates/emu/core/src/ds_slot/rom/key1.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot/rom/normal.rs",
+      "git_blob": "01b1bfa1c3dd56d253ae818384060b76a183c30d",
+      "sha256": "12b77ccff3d021d2bc3b9470ab4ebe62029e515f0e522aa374f3c8ce45ff5366",
+      "bytes": 12539,
+      "current_owner": "crates/emu/core/src/ds_slot/rom/normal.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot/spi.rs",
+      "git_blob": "8a7cf9efd4429739950ded451bfe5f00c67a595b",
+      "sha256": "e8234a5573119b0774e2913bec294b146ad25e4dc3ad7d053a6e3fbdfe591c76",
+      "bytes": 2614,
+      "current_owner": "crates/emu/core/src/ds_slot/spi.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot/spi/eeprom_4k.rs",
+      "git_blob": "5c5a56be28109b80a43396fd87dcb5b028c7f56f",
+      "sha256": "a15301b96ce403ff1cf3c1e9516b8799bc74945dcbf4297c03c8af4eecf16c4a",
+      "bytes": 7327,
+      "current_owner": "crates/emu/core/src/ds_slot/spi/eeprom_4k.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot/spi/eeprom_fram.rs",
+      "git_blob": "914bb0952dc80b9b9c60c2011b6a2f9b51708feb",
+      "sha256": "6fd5884ae32018d92a27de296584a21ba597a7f048bcd7149b162c409c6fa368",
+      "bytes": 8660,
+      "current_owner": "crates/emu/core/src/ds_slot/spi/eeprom_fram.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot/spi/empty.rs",
+      "git_blob": "a072df0ec6b606e3a3438facd08235554c875ef2",
+      "sha256": "d89addf64e89dd3ffd613ed8e9e3af8233dc9a7d867240b61d343f33351e23c1",
+      "bytes": 1336,
+      "current_owner": "crates/emu/core/src/ds_slot/spi/empty.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ds_slot/spi/flash.rs",
+      "git_blob": "390d016b68e0590e2c3dfe5968feab6852f84bba",
+      "sha256": "7c72d05b77022e213e16b96a344bd005b656a87ae8622086aaf39aef44437980",
+      "bytes": 4617,
+      "current_owner": "crates/emu/core/src/ds_slot/spi/flash.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/emu.rs",
+      "git_blob": "449ba69a7baa28b10fccd240b50135d8a89c4e45",
+      "sha256": "a31c137614354f0b1107c99f26d01f2a953893a5acd107ccf2378cfc2e0acd2e",
+      "bytes": 26252,
+      "current_owner": "crates/emu/core/src/emu.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/emu/input.rs",
+      "git_blob": "03dfaa58a5f949981856917196a1261ed9cf8491",
+      "sha256": "93618f198945398b12044c3e81aa659149ef65d80123430258fa20792567af99",
+      "bytes": 4432,
+      "current_owner": "crates/emu/core/src/emu/input.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/emu/schedule.rs",
+      "git_blob": "3c49ea69d2ac05ef6c13e58c7aac4302c698d2f6",
+      "sha256": "ef2d1e75415491869244958be085db7f51983fdcaec0fbd9352608c737de8a22",
+      "bytes": 2054,
+      "current_owner": "crates/emu/core/src/emu/schedule.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/emu/swram.rs",
+      "git_blob": "5da087d78f8b4c981274bebb97478a32f9d5f37e",
+      "sha256": "4f7997ec5757429d1adcf276d77d139bcb3506657a760bb81e8bfed62d90b603",
+      "bytes": 5267,
+      "current_owner": "crates/emu/core/src/emu/swram.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/flash.rs",
+      "git_blob": "6295b2f66a15cc56df1462cd3b219d955f2004ec",
+      "sha256": "c15fc5260eeb0cb8b8b13325cfa5f2887c5157b7c37942f2f84106ed804fd246",
+      "bytes": 16664,
+      "current_owner": "crates/emu/core/src/flash.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu.rs",
+      "git_blob": "28cc34f0861a551386dd661495618511ef49c7b7",
+      "sha256": "fa6a6ccbc4d000f11cc98f22ce02831bc069492902b9d22007986a251ea4ac0f",
+      "bytes": 13876,
+      "current_owner": "crates/emu/core/src/gpu.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/engine_2d.rs",
+      "git_blob": "6e52202624cc2a0e03528d9f8661590b4c3bd7fe",
+      "sha256": "c051737f7f3f2c4ae311ddc5c0a21c8daf7e3a5e6d8d3343bf32c52fbcb99289",
+      "bytes": 15300,
+      "current_owner": "crates/emu/core/src/gpu/engine_2d.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/engine_2d/io.rs",
+      "git_blob": "ac36b92f86381e5881112fbe3d055ca14be059ee",
+      "sha256": "2f873d1ce543ab3d9f3caa53b080ad207e32afcbf1dbb975ca16cd1eeafb547f",
+      "bytes": 21257,
+      "current_owner": "crates/emu/core/src/gpu/engine_2d/io.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/engine_2d/renderer.rs",
+      "git_blob": "e794efd96b1afbe0f06b6b68c389c404008451db",
+      "sha256": "470872c9d9e3f519a6a5187570dfc49d07563b6d5be9788c06f2252dad559de6",
+      "bytes": 760,
+      "current_owner": "crates/emu/core/src/gpu/engine_2d/renderer.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/engine_3d.rs",
+      "git_blob": "08084cb56d88a3abf1e228c166bf9aa60c296194",
+      "sha256": "d5e14c14e72fa47ab9238262014612e85d74b19ea2ab6a4afbbe7d63f6eadddc",
+      "bytes": 79778,
+      "current_owner": "crates/emu/core/src/gpu/engine_3d.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/engine_3d/io.rs",
+      "git_blob": "6106223788ff6ddf411ed3b4a64567df8fc6a96e",
+      "sha256": "8c2d02fb3990717f4e38bcc21999432f674ed3ddf7a203b76aaab8eda6deeb86",
+      "bytes": 19848,
+      "current_owner": "crates/emu/core/src/gpu/engine_3d/io.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/engine_3d/matrix.rs",
+      "git_blob": "9705102e56d41698e616cbf30b2f17cbaccd05e9",
+      "sha256": "58d75976ace7f5196c2104e89d52af815c4c71b02dedd4a963dd0af4a509c0cb",
+      "bytes": 5525,
+      "current_owner": "crates/emu/core/src/gpu/engine_3d/matrix.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/engine_3d/renderer.rs",
+      "git_blob": "d3fe5cfeafd56e5de9c96cb629c10f3a34c00488",
+      "sha256": "4f281603e44994a9072895abaf62d51764c29534e965264528b08978b60bbf47",
+      "bytes": 871,
+      "current_owner": "crates/emu/core/src/gpu/engine_3d/renderer.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/engine_3d/vertex.rs",
+      "git_blob": "ac848fbe28802860f180a1eaf6cc686177f47c77",
+      "sha256": "671078496bcb20ce8d3f44c53bad0786de6dfc8fdc12484afe9da2570e10ba76",
+      "bytes": 3831,
+      "current_owner": "crates/emu/core/src/gpu/engine_3d/vertex.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/vram.md",
+      "git_blob": "268ce4713a71716fbec2da8661609c7605d04cfe",
+      "sha256": "c66611d8f2019a46e03936c326c0dfdaf9ababb8f64505127fc627e5f8812feb",
+      "bytes": 4477,
+      "current_owner": "crates/emu/core/src/gpu/vram.md",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/vram.rs",
+      "git_blob": "851c255c45888a431d25bcf03f9e66e97dcac0f8",
+      "sha256": "9be08907d193f49a520d631fdfaebf6ab88c57941b391cfc883698d04fd1bf69",
+      "bytes": 8570,
+      "current_owner": "crates/emu/core/src/gpu/vram.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/vram/access.rs",
+      "git_blob": "31f28aa13f6ca65480a70c73a53c4d95b3383903",
+      "sha256": "28712a66dc9a746b87dc408ce53784a4340c9314d2b39962b2dc53a690a50512",
+      "bytes": 23177,
+      "current_owner": "crates/emu/core/src/gpu/vram/access.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/gpu/vram/bank_cnt.rs",
+      "git_blob": "93febbcf28bc95cac1870316b998be8b1de78c96",
+      "sha256": "3af1b1caaf8cf2ab84d571a2165e8fbd1f832824b14a48373b6b53a6c50f870b",
+      "bytes": 71706,
+      "current_owner": "crates/emu/core/src/gpu/vram/bank_cnt.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/ipc.rs",
+      "git_blob": "a3e3fe8c1343b9215d20c88a7db8a3e858243621",
+      "sha256": "18ab897eddf04418b4818ee8ff54afdb6dbf9b66fd11c267b2a6ad7c5e2ba7b7",
+      "bytes": 10105,
+      "current_owner": "crates/emu/core/src/ipc.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/lib.rs",
+      "git_blob": "3e8085ad73f968807bf3d515ee1e7b180bce514a",
+      "sha256": "cce3334151dd586613cde3bd079f90fa9b1b9ad6c27ee6ee50dfcbaf486c5fcc",
+      "bytes": 2145,
+      "current_owner": "crates/emu/core/src/lib.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/rtc.rs",
+      "git_blob": "9ecc742c0824a9b4099354035331acf379a8570b",
+      "sha256": "48d0100949dfdb410c4843e7cfd75a914c0269fff1eeb1f36b6169e189da36a1",
+      "bytes": 16541,
+      "current_owner": "crates/emu/core/src/rtc.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/spi.rs",
+      "git_blob": "781f6ff556e7d5ece09261b980829f80e33326b0",
+      "sha256": "d23863029068f1fc2c787154606b47fef10750f51ac0c45a9120f8f3bfce39ea",
+      "bytes": 4961,
+      "current_owner": "crates/emu/core/src/spi.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/spi/firmware.rs",
+      "git_blob": "2190b333ad280cd9520f1cfaf0effe79499d529b",
+      "sha256": "8fd345217f561f0efdb126932a92681a3de63bf5476292b3de1867f3ca65b8ef",
+      "bytes": 5788,
+      "current_owner": "crates/emu/core/src/spi/firmware.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/spi/firmware/default.rs",
+      "git_blob": "6a6ecc7689b2fcf61eab16241bcde390cf9abce0",
+      "sha256": "250b6752c0edbe03faace8db9d918fda1ebdf22c05a865ad786b4606d921f23b",
+      "bytes": 3431,
+      "current_owner": "crates/emu/core/src/spi/firmware/default.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/spi/power.rs",
+      "git_blob": "4afa9c4f1bf08e5595564b0b688f91710bf4ce97",
+      "sha256": "98370807a9e0d2f461f44425be912adb463f20d5b08ab1d3b33505396493030a",
+      "bytes": 11816,
+      "current_owner": "crates/emu/core/src/spi/power.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/spi/tsc.rs",
+      "git_blob": "932180311e603e249c2930335bffb701d6972f26",
+      "sha256": "f2257b5d208261e5b949c7599762c118e5ac7b2e8021b0ea9d91f20aebd8efc7",
+      "bytes": 8381,
+      "current_owner": "crates/emu/core/src/spi/tsc.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/wifi.rs",
+      "git_blob": "a55fc647500e4dd5c1a2e5fd9e30477b4457173c",
+      "sha256": "105e3c6547e09fc61c62779b32c98d61882bfb1743468c12394621064e598b91",
+      "bytes": 599,
+      "current_owner": "crates/emu/core/src/wifi.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/core/src/wifi/io.rs",
+      "git_blob": "78d333eded9ae5fb649420d20394ae247326202b",
+      "sha256": "769d0ffd12b9efc4651ea55b13be49a0e332f1cf7a29aa2bf35aa1a018129127",
+      "bytes": 3435,
+      "current_owner": "crates/emu/core/src/wifi/io.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/Cargo.toml",
+      "git_blob": "6702f63e3be814c4d30cb3fb9ddd3af57f1c286e",
+      "sha256": "83bb94d860a946ad08b41b475aec10216c610f21cafbd444212b4b1a1da3a391",
+      "bytes": 3127,
+      "current_owner": "vendor/dust-imgui-frontend-archive/Cargo.toml",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/fonts/FiraMono-Regular.ttf",
+      "git_blob": "59e1e1a1d3b8894fcd446cdc031b6caef0fc4716",
+      "sha256": "8c86f2963208a353c3435e28ecb38a99ab68f14d7433ba00c1822cef9a9c1b44",
+      "bytes": 174632,
+      "current_owner": "vendor/dust-imgui-frontend-archive/fonts/FiraMono-Regular.ttf",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/fonts/FontAwesome-Brands.ttf",
+      "git_blob": "502f3621e7f97d1d94ce05794e47a6c6a56e94e7",
+      "sha256": "c7ae37d35b8edd322f5c85b8f54f8cb76f5e8446581ae20da5e7e3a9bdee900b",
+      "bytes": 186112,
+      "current_owner": "vendor/dust-imgui-frontend-archive/fonts/FontAwesome-Brands.ttf",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/fonts/FontAwesome-Solid.ttf",
+      "git_blob": "13c9489771fd4e60ed0ea9303e882f94f640ec6d",
+      "sha256": "6d53c706f3b7178ccfc82c94d3fc7968828dacd351717f27c757a65cfd853147",
+      "bytes": 397728,
+      "current_owner": "vendor/dust-imgui-frontend-archive/fonts/FontAwesome-Solid.ttf",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/fonts/OpenSans-Regular.ttf",
+      "git_blob": "db433349b7047f72f40072630c1bc110620bf09e",
+      "sha256": "e64e508b2aa2880f907e470c4550980ec4c0694d103a43f36150ac3f93189bee",
+      "bytes": 217360,
+      "current_owner": "vendor/dust-imgui-frontend-archive/fonts/OpenSans-Regular.ttf",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/platform/macos/Dust.icns",
+      "git_blob": "e5649b7e05f17081f08f3c64aa0c5298886ed720",
+      "sha256": "2862d20498ebe2a8e15b4d67f583dfff3bf439be4638dfedea44c5d2f9382e0c",
+      "bytes": 76667,
+      "current_owner": "vendor/dust-imgui-frontend-archive/platform/macos/Dust.icns",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/platform/macos/Info.plist",
+      "git_blob": "06254e57030fe72f6e42d51672ee17c3c5e7d325",
+      "sha256": "e3be9d0224f0bc6f615e5729cbe526fd9e887cc36bcb52a42ab25ed616501c2e",
+      "bytes": 1058,
+      "current_owner": "vendor/dust-imgui-frontend-archive/platform/macos/Info.plist",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/audio.rs",
+      "git_blob": "66470a416acfb512dc65bf0ba6dcd88f21b61c2b",
+      "sha256": "08626b10e92b2bdcabf2fd81a7b6e6d67fb6fb862a5540dcdb9ed036ef5008cd",
+      "bytes": 267,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/audio.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/audio/input.rs",
+      "git_blob": "cbefbce1999523abea34e07625ba0922e368ce77",
+      "sha256": "87db53a9a0c1a244b7aedf2f52bbbed063bec1f95cd8bb345244be6179d45568",
+      "bytes": 2440,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/audio/input.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/audio/input/cpal.rs",
+      "git_blob": "32b940fcc686b2b16ad895c24c3c4f551fd224ae",
+      "sha256": "0c57a806e0adc6fde02268f135dfd006248bfc03b9cf58543a9d21df7f5bd335",
+      "bytes": 4649,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/audio/input/cpal.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/audio/interp.rs",
+      "git_blob": "2a6553d429e3b1d3a62a8a5d0f27541da35ee464",
+      "sha256": "46f1e6cffe25196289ab3c83cd947a96b832dbe01eac631e7271cbdc45c99db5",
+      "bytes": 2083,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/audio/interp.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/audio/output.rs",
+      "git_blob": "fad000c6fc05a7a2ba92429da412259520aa07f6",
+      "sha256": "873ebb5e71f6ccbe881c4631abada6db5e0b3da3cf2a5e87fb1a756e246f7bc3",
+      "bytes": 8665,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/audio/output.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/audio/output/cpal.rs",
+      "git_blob": "ac9322f5811fa316f1d875d44294b35c42727373",
+      "sha256": "11c77c3da7895ef4149870fbae59c5bf7ec48f85dbc8fd88c26230c1dcd6b1c1",
+      "bytes": 7405,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/audio/output/cpal.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/config.rs",
+      "git_blob": "71a3f29248cc9f814677bacd9f3bf0941bea1d1f",
+      "sha256": "537dc68df6cc1ce903c869de3eaa91c5c6d3f8796f041e302cefb25ed5e636cf",
+      "bytes": 29685,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/config.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/config/saves.rs",
+      "git_blob": "d410433b1358bf17ed206df522566757119a8085",
+      "sha256": "318cd7b047776f1fda1c6abf5d61aaef6800700d65db25a2254a1fc6f74180c7",
+      "bytes": 8295,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/config/saves.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/config/setting.rs",
+      "git_blob": "617e16a66113bb5c481930a30ed4aec0aef3622b",
+      "sha256": "6d83ac506982dbb84a8d64ffbae69aeb32727484f908fc6bc25cb3831437d5a4",
+      "bytes": 5687,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/config/setting.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views.rs",
+      "git_blob": "551c20643d6a7b2c5664d5456569ad80b5380856",
+      "sha256": "1484b4e87d55fac100e51a4394fc76937bda846c5a365f7956295a5a85972b1c",
+      "bytes": 42432,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/audio_channels.rs",
+      "git_blob": "2a207ce34145af22ef6afa360bce9c499ac5d526",
+      "sha256": "741296957ff02d346f82d3aa29d6a7a4a6761add414c0f0484411c6ab0e09257",
+      "bytes": 12892,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/audio_channels.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/bg_maps_2d.rs",
+      "git_blob": "b6fdff62ee370e9c6521a5ecaff9f804afa9b17c",
+      "sha256": "a1d544724b7e6008c4ea05d57d5b38e44ec19ce8d5227e44174faac1ad62f5b4",
+      "bytes": 55421,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/bg_maps_2d.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/common.rs",
+      "git_blob": "1228abe95fe15ba658ff05c30e6f57580654dcb6",
+      "sha256": "ffe4b57d26f74b4b375177f70c6f0201fbe4a601f7476dafaa411002aa27715d",
+      "bytes": 4727,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/common.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/common/disasm.rs",
+      "git_blob": "8b95bd79d50c3a1ab6548df553d391ed6aa73c73",
+      "sha256": "86e4a23e87217058af0dcffadbd2a34d10ebf846aa59ce0a6571b6dc0034ae0b",
+      "bytes": 19252,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/common/disasm.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/common/range_inclusive.rs",
+      "git_blob": "85d17e46040d8b2a4e05c77cf1fca4caf833e74d",
+      "sha256": "f144095a3aef82b38d7f027f4d106578e6d3cd92d531b1986b60ba09c02d0b31",
+      "bytes": 1089,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/common/range_inclusive.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/common/regs.rs",
+      "git_blob": "3c832373cc204a9d5462f457536295174358a13e",
+      "sha256": "e4c630be7ce4d102c735d0784bab748afb61229aa7884751fb344dce87d74d3e",
+      "bytes": 6724,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/common/regs.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/common/scrollbar.rs",
+      "git_blob": "d57536f51d6a5e6c3307f08125dd5443ebaf0345",
+      "sha256": "aef70301f0fc8136deea68b0da0f8b5716090b44edd1aa7a7db4aaa8e458d54c",
+      "bytes": 2986,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/common/scrollbar.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/common/y_pos.rs",
+      "git_blob": "3673e8b020560ac96c4d6e81acf877cd51abf41b",
+      "sha256": "01d7250c49c943fb08bcde9898a5b6d1f2c37ec4cd44c774933957e6870f043e",
+      "bytes": 4918,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/common/y_pos.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/cpu_disasm.rs",
+      "git_blob": "4ff910a35de9580a41b0c6c1884fa65e1e33175a",
+      "sha256": "f32c2d47ffcab629eececbe4731a15810d58b36a6684a51c43f43f20d499fa56",
+      "bytes": 6792,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/cpu_disasm.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/cpu_memory.rs",
+      "git_blob": "2fa8bd1f0b0a00613628432bf315229404b08113",
+      "sha256": "fa900d48d9d7d6eef931cdea5aea78e5e5e5731aacdebdb5b8b41b1607600ffa",
+      "bytes": 5662,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/cpu_memory.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/cpu_state.rs",
+      "git_blob": "255359650def3a89fdc8fab8edceb4f35f65acff",
+      "sha256": "1c9b2eb1ded51bc722a9d2c72231574fb30e761316d6c922e47d541d47b8733a",
+      "bytes": 16266,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/cpu_state.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/ds_rom_info.rs",
+      "git_blob": "f331c0279a4ee196baba5ecac59b80835dbc3a25",
+      "sha256": "a7312636a6f42ae1928bfb627ba327b5c31a8a1c47a8fe38c8961ac244debd8f",
+      "bytes": 13778,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/ds_rom_info.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/fs.rs",
+      "git_blob": "edb5531a2f3d1194a2a45e819cc7d40a479a74c5",
+      "sha256": "fa9f56eb783f1eb1f6d2b84fdb9e09431bb87cc41ad6f2d34d64a8fdf5c3c1a7",
+      "bytes": 32940,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/fs.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/debug_views/palettes_2d.rs",
+      "git_blob": "30be7272848578a9b46827b8bf90e852064a5b97",
+      "sha256": "611cea794cabeed3ae77e66e1266e8050d59c43d8cf8efd1899a86792cb1fd5e",
+      "bytes": 10492,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/debug_views/palettes_2d.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu.rs",
+      "git_blob": "c9f6a9983263f6f0cca04b1e5bb0263f6fd3197b",
+      "sha256": "7b08e2d3fb8d117985801bbd18561f3ddd3d6f90331bc19477e9e7bab33f2c33",
+      "bytes": 34478,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/cli_server.rs",
+      "git_blob": "1a0c99ba919c01772342b86bcafb062f1736246d",
+      "sha256": "77ec6a106adf488eb971bd5835dfc563497cabac17a3d363f81661bc8401c53c",
+      "bytes": 35888,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/cli_server.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/cli_server/protocol.rs",
+      "git_blob": "e324922163b0c131bceff7606f7cc8ff7b37b2c9",
+      "sha256": "5119c4c9d463048d62ac254781fd2688d51c9fb5dec4ce4db97fc28f0abea267",
+      "bytes": 8087,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/cli_server/protocol.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/cli_server/touch.rs",
+      "git_blob": "4ba3c2ecf02c40ff9edaa00acea29221e648bbbc",
+      "sha256": "1d2b48914454f89ddfef7d53bf00928a21250cce7051a67e80aee934738185c9",
+      "bytes": 10359,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/cli_server/touch.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/dldi.rs",
+      "git_blob": "f5b97eee5e9e16e7cd43eb428e50b799b8e93121",
+      "sha256": "b1cf30c40f534c73fe6e85eba987671c59c8086df41355d613c52ad1cc2bb0e5",
+      "bytes": 10251,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/dldi.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/ds_slot_rom.rs",
+      "git_blob": "e3077333539d712fb24f5a806a7aec1aa9fa8a4e",
+      "sha256": "1e4f0310a6d614da68e8cb7acc242b22ca909df29ede0dfdd837d1a78baae712",
+      "bytes": 7422,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/ds_slot_rom.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/gdb_server.rs",
+      "git_blob": "09369dbedf43208eadd59d06318353456eec596a",
+      "sha256": "2518ea788ab4a51168fad01d56df7a7d3a20dbcac8822f36d52dd53971b83c74",
+      "bytes": 23871,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/gdb_server.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/gdb_server/packets.rs",
+      "git_blob": "b726bfc3ceea10df9a99fd41a39c9f435bacb431",
+      "sha256": "4195f70fd6d569c2c051ac602d6a338bb3cb36bf945f3689b8c2353fe4777f85",
+      "bytes": 44735,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/gdb_server/packets.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/gdb_server/server.rs",
+      "git_blob": "e62abc3397ca6ffcdeb86153af32faf314547725",
+      "sha256": "65b6d94dae189fa4fc9d6004aeb6734f88b2b1f020b4411faef2533ddfefda51",
+      "bytes": 8305,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/gdb_server/server.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/gdb_server/specs/target.xml",
+      "git_blob": "6bfcf9c169b2612481d630147022b509333e0b29",
+      "sha256": "32e2381a455100c78dc57f920c8ba36d6e9c503abb9e0591da58e6a91f0ef747",
+      "bytes": 1854,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/gdb_server/specs/target.xml",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/gdb_server/specs/threads.xml",
+      "git_blob": "3c7c693fbc2a3616d60a73ca36e77e63422539d6",
+      "sha256": "b5654302b5d484dba80f5a6a593a8c974fa5610f7a0602a24cb058fa3f612d77",
+      "bytes": 143,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/gdb_server/specs/threads.xml",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/rtc.rs",
+      "git_blob": "3b71b79ba32b5c2e0b46a497c01f398ab8359036",
+      "sha256": "ecf1d8f89a1845a0c5b8a990369cc279570222b58f48f1a4cc4391de972e8f4e",
+      "bytes": 4424,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/rtc.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/emu/soft_renderer_3d.rs",
+      "git_blob": "3f47195216643b90ff231cdbbe1c38b0a7ebbcbe",
+      "sha256": "74bfd17a7b69b725e321e5549b4ac74a4892892dce0a3bd5a6b08682a41d30e8",
+      "bytes": 5962,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/emu/soft_renderer_3d.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/frame_data.rs",
+      "git_blob": "754be88d7b77eb7974493c1cbaf0f45534ed73b5",
+      "sha256": "f0aee0ea8942d2da81819edc01984860bc38bf4aad16a29e208c3199aa1e5059",
+      "bytes": 517,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/frame_data.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/game_db.rs",
+      "git_blob": "6672b64b8ebfae3f62dbb13765416625e46a7adf",
+      "sha256": "53e26c80cab97fb1471ae3dc49952f5e956e90016855f895d874624ed750f0ba",
+      "bytes": 2728,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/game_db.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/headless.rs",
+      "git_blob": "9c5fb97a09097918fec3ae1af12d8fbbb89a27b8",
+      "sha256": "2936497f1ff908552a5a92a2a7d459e3392b81b66dfe242345646490c5c0f0c9",
+      "bytes": 8208,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/headless.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/input.rs",
+      "git_blob": "02802b76dbb5d2945ec164b43a5b831b11d1e708",
+      "sha256": "d6f21e16cdd81f85559788caf06de24386b08bc0a363a58ecd4c4cf00552ecd0",
+      "bytes": 986,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/input.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/input/key_codes.rs",
+      "git_blob": "12d53d8228172ee3a19480dd146512d052eb73e5",
+      "sha256": "50a835b3e88dda35742d50df8dda04ba16af37be5f68660fb3562d140c993d26",
+      "bytes": 9432,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/input/key_codes.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/input/map.rs",
+      "git_blob": "5a4605453bbd39c4d6751fc69c5fecb75610df6f",
+      "sha256": "c12a95fd60747352eb5d07f57129b561e8ec6c5c3c4d4954c8a2958120a41193",
+      "bytes": 8536,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/input/map.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/input/state.rs",
+      "git_blob": "cd03b1983eb16a9f91faa08fefbbd69437b58263",
+      "sha256": "da793392fd717898a76cf3acf5d96f5072aff16b5adb3a4b97e31060b1595874",
+      "bytes": 7381,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/input/state.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/input/trigger.rs",
+      "git_blob": "f77c98d7f77c8bc17fc2f37526678f1cc03fabbb",
+      "sha256": "3f3a456c1ad947a5f6042b4366d44f456f9068a6c54a99e6e1de0304ec7a9238",
+      "bytes": 10774,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/input/trigger.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/main.rs",
+      "git_blob": "2e5142595a427d44a12cbea65688efca8adc4a69",
+      "sha256": "5ca832de9c087649e905d11f73b4bc91675076f5776341d472dcdb7c5ef76bb6",
+      "bytes": 912,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/main.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/ui.rs",
+      "git_blob": "846fa0267fb24c506e42eaafa0a2e9410e5b585d",
+      "sha256": "b3945f2a372b37db9d4d04bc17cf0c6fdf5e5462124a2b450a4ca9d062fd3ce8",
+      "bytes": 67985,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/ui.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/ui/config_editor.rs",
+      "git_blob": "53b9669cab11974b20962659d5716b12c4c4b1c0",
+      "sha256": "c4fc5eff69cdc82fa977423364b50dcd399779d96b59ab807c55281cf3e11792",
+      "bytes": 81301,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/ui/config_editor.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/ui/config_editor/input_map.rs",
+      "git_blob": "720071d7438216bec4d2eab3cf61f8dc2f38b7c4",
+      "sha256": "6a9a28953f57f19947ebcf4e1fa0c7702206e6fe6718f8c908e09770841d001e",
+      "bytes": 16661,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/ui/config_editor/input_map.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/ui/config_editor/setting.rs",
+      "git_blob": "2169ab9f2e3d7c15483df7c958163f8fcca0c245",
+      "sha256": "a4f65ca47c580b89bc0106a156af98724e714f70c6b07e8bdf6773cc4fda506e",
+      "bytes": 24376,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/ui/config_editor/setting.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/ui/log.rs",
+      "git_blob": "86a985b0141468227646418a1ae5184a2c30ddf5",
+      "sha256": "05f01bf32255b76af0d83176bbdaf101f763d162c47318c389224d7fe0b9ca1c",
+      "bytes": 3251,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/ui/log.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/ui/save_slot_editor.rs",
+      "git_blob": "0d5c76acaf3a7a5d76c3f8c0f9e6dd16ddc8aa6e",
+      "sha256": "b56a9dc9f7a3464ab1aab2dd8b1aa9afff8ee8f434cdf3c77a3f560bc8c95c7c",
+      "bytes": 6581,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/ui/save_slot_editor.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/ui/savestate_editor.rs",
+      "git_blob": "8da723bc21edef72cb33c0a534fe48ef1e48d9f5",
+      "sha256": "4d502bff03db6deaeda16201ff51dd12cf5a989f7ae3f66eb37cecd9e881f845",
+      "bytes": 28350,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/ui/savestate_editor.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/ui/title_menu_bar.rs",
+      "git_blob": "b5c7c7577c927b8404d4acef4381ffcfc79e6fa4",
+      "sha256": "27c017e177638662316996e0d83622a14774889fdbf24f325acc6d0d56a1ed1a",
+      "bytes": 14474,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/ui/title_menu_bar.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/ui/utils.rs",
+      "git_blob": "1ac4b48196881180fff7d09b139b6d5be727fb0d",
+      "sha256": "511a4777b0a56cce63b641bf4a0e65be9e4fafff45906aa3e6f033bacafeb8f0",
+      "bytes": 7998,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/ui/utils.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/ui/window.rs",
+      "git_blob": "95602cfb9af651f5c5b42d60140f286f498c499e",
+      "sha256": "b1d8512050d9eeced8b7b13375de93421e98407c13823b5fdb4b72aea9a41c4b",
+      "bytes": 27046,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/ui/window.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/frontend/desktop/src/utils.rs",
+      "git_blob": "7f5908e9670e4bbec3acc28e5605c35f1fd411b5",
+      "sha256": "ed74b65b1df246ea49786635a24fcdecc8c1fa39f53042fce26fb6ab3e7dbc8f",
+      "bytes": 6771,
+      "current_owner": "vendor/dust-imgui-frontend-archive/src/utils.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/Cargo.toml",
+      "git_blob": "d9265a8cf8f6b9cafc6b1baeabd3512cc501bdb5",
+      "sha256": "3a12cdc0004e5f349202f5760d210fa830036784f24e44261f232c7ec70f19c0",
+      "bytes": 299,
+      "current_owner": "crates/emu/render/soft-2d/Cargo.toml",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/Cargo.toml",
+      "git_blob": "802e894689671eb27ad8bba4649f415d70aceae2",
+      "sha256": "c08c877b45be371bc6e3de13ea252dfdca9a50b66312d285b273f62973cbca1b",
+      "bytes": 231,
+      "current_owner": "crates/emu/render/soft-2d/base/Cargo.toml",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/capture.rs",
+      "git_blob": "8e8589d0d6e031ce753569b7546741ef37ef0206",
+      "sha256": "75b4d4b3df4197281495f7d94b3c6aadab0902dafe33dea6e5081c89bd764228",
+      "bytes": 6272,
+      "current_owner": "crates/emu/render/soft-2d/base/src/capture.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/impls.rs",
+      "git_blob": "ea74afab1c34bcbf4ae1cc5e0b941c3bb1f99c57",
+      "sha256": "3d8160a52777942afcb3a9edd16b8f66098d2d130f6155d5574f5d9b834a3909",
+      "bytes": 3531,
+      "current_owner": "crates/emu/render/soft-2d/base/src/impls.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/lib.rs",
+      "git_blob": "8dac5353cc8a3f83270b5511f27cf30dfb8582c0",
+      "sha256": "335fb3b413a98b3e90fa4ad23c0f73a0f3ce76edee4d0c02ccae3127fe8bebbd",
+      "bytes": 3423,
+      "current_owner": "crates/emu/render/soft-2d/base/src/lib.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/render.rs",
+      "git_blob": "39287b7fbf719b8dc6e2b5c406a053e752210a1a",
+      "sha256": "72415e5f2b29b0dfd8ce05bac4b03e3aa62a86b71995693da0c1a6d958706676",
+      "bytes": 1465,
+      "current_owner": "crates/emu/render/soft-2d/base/src/render.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/render/bgs.rs",
+      "git_blob": "f174f93d8cee06bf78bb6770eb8dfe65456eca77",
+      "sha256": "18e4891a9a99075ed57297bd8f95d1771f3ba3dcb3aaf3be0fdd7f1b90d41a0c",
+      "bytes": 70,
+      "current_owner": "crates/emu/render/soft-2d/base/src/render/bgs.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/render/bgs/all.rs",
+      "git_blob": "82ce51ecd8a6e5cdd2c0704f518aa98d77548f21",
+      "sha256": "897c08e22885bbad8ec02dd7d3a18baa4d025a32c1111909070c4cccb7857e23",
+      "bytes": 22333,
+      "current_owner": "crates/emu/render/soft-2d/base/src/render/bgs/all.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/render/bgs/avx2.rs",
+      "git_blob": "273089e15a3b59c77023b4005f8b4e534920e5d5",
+      "sha256": "52c7675687eb6bf4449e6c62415385ee221a03d45a1ada73ecfa0bcc160adb2b",
+      "bytes": 37383,
+      "current_owner": "crates/emu/render/soft-2d/base/src/render/bgs/avx2.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/render/bgs/common.rs",
+      "git_blob": "7dd6017f755af6955ce96c2c2243fb8719604993",
+      "sha256": "659a9dec84ebc197c38464327c68dd66d3ccc131f325ebf641a8a1f2dc60d993",
+      "bytes": 2024,
+      "current_owner": "crates/emu/render/soft-2d/base/src/render/bgs/common.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/render/effects.rs",
+      "git_blob": "3b69494f47f5d2791deda534244f8c9396affb12",
+      "sha256": "f0307eea6d7c34ac5105289aca5164e0c11b50d1ec60e645d1b28fa689d21518",
+      "bytes": 58,
+      "current_owner": "crates/emu/render/soft-2d/base/src/render/effects.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/render/effects/all.rs",
+      "git_blob": "c3027d8a4f9a9c1de577ac60358453a764b56e18",
+      "sha256": "b6cf6782775922ecde690d5a460d90f9f29a4a2fa7aa4ab3f48542692baf92dc",
+      "bytes": 5298,
+      "current_owner": "crates/emu/render/soft-2d/base/src/render/effects/all.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/render/effects/avx2.rs",
+      "git_blob": "b00c1d9bb4643bf652ff5296d8e3a4f2475568f2",
+      "sha256": "de4389acba7c8ff7018b6b1f85d89f5a3ddc3b34c6bc17d609ac32e956b2460c",
+      "bytes": 12207,
+      "current_owner": "crates/emu/render/soft-2d/base/src/render/effects/avx2.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/base/src/render/objs.rs",
+      "git_blob": "f33fa78652fc8121e2bbfcebdf22798d5388dd24",
+      "sha256": "c2969fceb5eb99fbf9650781e97377795ceb180b7b779b86982b72b76a288de1",
+      "bytes": 21629,
+      "current_owner": "crates/emu/render/soft-2d/base/src/render/objs.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/src/common.rs",
+      "git_blob": "74da93c34eb06c04af9e231fa0103b9b752d3a60",
+      "sha256": "0b5f1351b0f54e5f0095ade3d6df8b7e57603a8516731f661b20010b662a0118",
+      "bytes": 2708,
+      "current_owner": "crates/emu/render/soft-2d/src/common.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/src/lib.rs",
+      "git_blob": "e025b9bab60bb0ddb4c88424ea3e778ead7f73d0",
+      "sha256": "1f6c8387bb0571000ff42b47f764193f66a3db56fb96ea1461623b2821c6fc0c",
+      "bytes": 99,
+      "current_owner": "crates/emu/render/soft-2d/src/lib.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/src/sync.rs",
+      "git_blob": "d33f7fd6577e7d76ffb0bc3bd58cf406326450e5",
+      "sha256": "2de0c2e264c06f7265bc4ef26c4a7ad550f69fcb2e5d7fdfb61cf82d00177fc9",
+      "bytes": 9163,
+      "current_owner": "crates/emu/render/soft-2d/src/sync.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/src/sync/impls.rs",
+      "git_blob": "4dcfcd0581e1cf99a2a496f623d18c2bc36133bd",
+      "sha256": "3e1afb838035cf5a9f54ca3e6159bac392b58fc25c700a7b6017c6fe01331ea2",
+      "bytes": 642,
+      "current_owner": "crates/emu/render/soft-2d/src/sync/impls.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/src/threaded.rs",
+      "git_blob": "b43245660febd0dc6e9b329a41d217c0370571bb",
+      "sha256": "20e7e24e789e3107b933f63c974592ce2fb18657235bd81fd7cd1d84ef9095aa",
+      "bytes": 28,
+      "current_owner": "crates/emu/render/soft-2d/src/threaded.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/src/threaded/lockstep_scanlines.rs",
+      "git_blob": "719dfd28511da90a549b02e8e733565e1ede54f6",
+      "sha256": "db73ceb12887f50007f188d3512a3dc804a60a4ad71a589c84c9fb476f77d911",
+      "bytes": 25260,
+      "current_owner": "crates/emu/render/soft-2d/src/threaded/lockstep_scanlines.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-2d/src/threaded/lockstep_scanlines/impls.rs",
+      "git_blob": "4e3f80afef06bc68b47aae346f67283f2360bd10",
+      "sha256": "0a36ccb573cec662020ae689ba6aad1ec44bf9e3dd397abb3ef0e9affa4fa792",
+      "bytes": 3187,
+      "current_owner": "crates/emu/render/soft-2d/src/threaded/lockstep_scanlines/impls.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-3d/Cargo.toml",
+      "git_blob": "9780f5ab75ec1be4df75e66fac254ea63ffa444e",
+      "sha256": "fe7ab4c99b84b866dfeea340adf58463f1f61d46a897df642d908ad510309314",
+      "bytes": 211,
+      "current_owner": "crates/emu/render/soft-3d/Cargo.toml",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-3d/src/data.rs",
+      "git_blob": "7ae2084d686c7a441d7292564531f3ece71b0137",
+      "sha256": "0d0acabcd2da70ba81be4c9fe6a3b3e947b701711a484a47a11dd2c2457e1cad",
+      "bytes": 2982,
+      "current_owner": "crates/emu/render/soft-3d/src/data.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-3d/src/lib.rs",
+      "git_blob": "2c7beae8de6af4afc25cce1c6ef576a9015c1d85",
+      "sha256": "6e4dd9f02368901bead4288ad011ac13961e9584b6771dc7c179abf26e3a4c1d",
+      "bytes": 37563,
+      "current_owner": "crates/emu/render/soft-3d/src/lib.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/soft-3d/src/utils.rs",
+      "git_blob": "eb92526495223cb6548c4b2d8cc8fe2c931c9ffd",
+      "sha256": "eca908f5af235788136b6886f6775d8ae14be8c283f4d7e45b2c305328a07862",
+      "bytes": 12135,
+      "current_owner": "crates/emu/render/soft-3d/src/utils.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/Cargo.toml",
+      "git_blob": "07695245e32da24cc26e461b0efd44cf415cdd17",
+      "sha256": "07e8dbbc2078b43a1743bfd48ae9921904788b5f75e6f880c0117fccef414665",
+      "bytes": 439,
+      "current_owner": "crates/emu/render/wgpu/Cargo.toml",
+      "comparison": "historical-workspace-control"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/common.rs",
+      "git_blob": "a55d1c4b70c0068c14338ea2c9e2a11dc040d4dd",
+      "sha256": "a6ae254f5d11ba95a1a261dcb1cd85b1970152b786a538b740d3cf0f819bb212",
+      "bytes": 3744,
+      "current_owner": "crates/emu/render/wgpu/2d/src/common.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/common/gfx.rs",
+      "git_blob": "dba446e1b2beeb049f21d3c8fb330beff63ead4c",
+      "sha256": "2aa0ebb7e4cb2848a02ebc4a5ed5832e31fad5e6dda01ebe3d7019e47a22a7f6",
+      "bytes": 29762,
+      "current_owner": "crates/emu/render/wgpu/2d/src/common/gfx.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/common/render.rs",
+      "git_blob": "cb0152c6d00162543ecb7f582fd0925c07f04fa5",
+      "sha256": "b195009ec456ba5d22a1e706cf02555d391b959ba810c5c7a8111663b5099d63",
+      "bytes": 1194,
+      "current_owner": "crates/emu/render/wgpu/2d/src/common/render.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/common/render/bgs.rs",
+      "git_blob": "2757765a7bc81356d0fc251eed73188ab410a77e",
+      "sha256": "5b4e35750e55cb9e5b61df836af8598c962a52594f3f38f234f192575688e7f7",
+      "bytes": 749,
+      "current_owner": "crates/emu/render/wgpu/2d/src/common/render/bgs.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/common/render/bgs/all.rs",
+      "git_blob": "b0ef67127b2d317e66137542c1eaec3c7b39ecc6",
+      "sha256": "1c45733e8af381f98e27c17be09d0155b496ee9bb4bc1b2b01699f7195943128",
+      "bytes": 5944,
+      "current_owner": "crates/emu/render/wgpu/2d/src/common/render/bgs/all.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/common/render/bgs/avx2.rs",
+      "git_blob": "a7ed472526a1da200aa0d4108a955e49b04a22fb",
+      "sha256": "3dfc4c61c1f89ac0049fa7728835e6a38de88912d6e36c8d888f38c2ad0c54da",
+      "bytes": 6643,
+      "current_owner": "crates/emu/render/wgpu/2d/src/common/render/bgs/avx2.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/common/shaders/wgpu-2d-accel.wgsl",
+      "git_blob": "1e8f20c0b02df5148c5a7147e0643728365d493c",
+      "sha256": "5e441b4cd1e3049b24b43b3b2f4ea2daaa4ac459d766225f725b6971428f7ca7",
+      "bytes": 4904,
+      "current_owner": "crates/emu/render/wgpu/2d/src/common/shaders/wgpu-2d-accel.wgsl",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/common/shaders/wgpu-2d-soft.wgsl",
+      "git_blob": "7c50d904f207cbdcfc9ef09ab362536f1269e5cd",
+      "sha256": "1a96bcf1ce0e31d2dae47c1093397cd3a0b3a0915bc142d06864b297026b27b0",
+      "bytes": 5022,
+      "current_owner": "crates/emu/render/wgpu/2d/src/common/shaders/wgpu-2d-soft.wgsl",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/lib.rs",
+      "git_blob": "73a92898b688634b68cde3079ce511a579c63eb7",
+      "sha256": "a50cd641b33b814910c21ee006ffd4008de633e45f3ca597370d4bdb01896abe",
+      "bytes": 126,
+      "current_owner": "crates/emu/render/wgpu/2d/src/lib.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/threaded.rs",
+      "git_blob": "b43245660febd0dc6e9b329a41d217c0370571bb",
+      "sha256": "20e7e24e789e3107b933f63c974592ce2fb18657235bd81fd7cd1d84ef9095aa",
+      "bytes": 28,
+      "current_owner": "crates/emu/render/wgpu/2d/src/threaded.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/threaded/lockstep_scanlines.rs",
+      "git_blob": "6fc8e54804bdb5851e3ee067702b73c1539ca047",
+      "sha256": "e590c0d64da7d6e1322b61a6bfe1f3445b5007d94f1b2d7f7d417a0ba7da15cb",
+      "bytes": 29555,
+      "current_owner": "crates/emu/render/wgpu/2d/src/threaded/lockstep_scanlines.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-2d/src/threaded/lockstep_scanlines/impls.rs",
+      "git_blob": "4e3f80afef06bc68b47aae346f67283f2360bd10",
+      "sha256": "0a36ccb573cec662020ae689ba6aad1ec44bf9e3dd397abb3ef0e9affa4fa792",
+      "bytes": 3187,
+      "current_owner": "crates/emu/render/wgpu/2d/src/threaded/lockstep_scanlines/impls.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/Cargo.toml",
+      "git_blob": "90a2c3fdd1344ae7e1e532e5a3c6fa1c47531cef",
+      "sha256": "96ecde8ebdb0ca80212045e4b8fe22e847a580e926d13dfa2caad782e2a89229",
+      "bytes": 628,
+      "current_owner": "crates/emu/render/wgpu/Cargo.toml",
+      "comparison": "historical-workspace-control"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/data.rs",
+      "git_blob": "0c89328d756b28ae9202a9b34ed6591af940215b",
+      "sha256": "cedd4901e246b8922c051d54d9b7309e407422b3961b6affe29b1baec46fb088",
+      "bytes": 3619,
+      "current_owner": "crates/emu/render/wgpu/3d/src/data.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/lib.rs",
+      "git_blob": "f91b2e78a7ac1a7a822d50b2cebb2a7325c88db0",
+      "sha256": "91c478c932831379e676369b183b1113db6c7308413d72bec60780a4ef808638",
+      "bytes": 77950,
+      "current_owner": "crates/emu/render/wgpu/3d/src/lib.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/render.rs",
+      "git_blob": "bc090bcbdccbc8673bd15ce56370a9065f591fa4",
+      "sha256": "2c53c2d77561b5deba0e7e225a0ca1c35eb96ad0fde7440351d2bbdd07fad5c8",
+      "bytes": 2354,
+      "current_owner": "crates/emu/render/wgpu/3d/src/render.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/render/attrs.rs",
+      "git_blob": "166a1e52f76df307f7906701ef0326d780061d5f",
+      "sha256": "839426a4a55417e40e1fcbe8bdf229b9fc1657e57e055e849060e99b8f728fb4",
+      "bytes": 357,
+      "current_owner": "crates/emu/render/wgpu/3d/src/render/attrs.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/render/common.rs",
+      "git_blob": "5dc73250bcae022eb292ee5de498fc0315c7caf4",
+      "sha256": "c5d15abcf42a19a738d5ba72d69dc34447268a2000e36a76ea29cbb4236b8428",
+      "bytes": 1959,
+      "current_owner": "crates/emu/render/wgpu/3d/src/render/common.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/render/edge_marking.rs",
+      "git_blob": "4df4526acd1e49245ac3a4923c6cff57b41c4b41",
+      "sha256": "e51f0db1f0dd3d80fd8b9e7571ca3b12fafc1748c0f31aad02ed5ffa69ecd654",
+      "bytes": 5165,
+      "current_owner": "crates/emu/render/wgpu/3d/src/render/edge_marking.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/render/fog.rs",
+      "git_blob": "f133ad96e08e6ba37d624e491fdbafa96103a0c0",
+      "sha256": "b84e73328fcec2c2d86a9811694adc8c9b12a1618d783c6dbb1063b062e16604",
+      "bytes": 4538,
+      "current_owner": "crates/emu/render/wgpu/3d/src/render/fog.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/render/opaque.rs",
+      "git_blob": "a6d0e1173144ee7e070b779ee8f4a71fc48a4f6c",
+      "sha256": "3ffd6222c6b27d062a172a735cbc363c9127718ab23f00019a1f7b0caa0ff8f7",
+      "bytes": 6729,
+      "current_owner": "crates/emu/render/wgpu/3d/src/render/opaque.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/render/texture.rs",
+      "git_blob": "356aa8f935ebece8b23b7c00c7e5e344759bd02a",
+      "sha256": "66b6043a3bfefdfdfbd8de55046d2551149700dc35c08b83f1e710764bfa1225",
+      "bytes": 1318,
+      "current_owner": "crates/emu/render/wgpu/3d/src/render/texture.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/render/toon.rs",
+      "git_blob": "d0612a106ac41e6e14cfe2187b35e111c2974c12",
+      "sha256": "69f13838084feade8773d9969d8dfb6a2385c7d0a76ddfcec76cf84004759fe9",
+      "bytes": 503,
+      "current_owner": "crates/emu/render/wgpu/3d/src/render/toon.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/render/trans.rs",
+      "git_blob": "343d40af865cbbfee2119055722558c22ffd7030",
+      "sha256": "0f6042d6ea4a149962f086f2e40c0e642ac5c1f26f606d83e778e8ee685826ce",
+      "bytes": 10772,
+      "current_owner": "crates/emu/render/wgpu/3d/src/render/trans.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/render/w_buffer.rs",
+      "git_blob": "f95d841d92f9d526095274df62c376e902983628",
+      "sha256": "5d715c96453fa0fc2689f757723d1a0edc1dcac3895f7570301b8659afba491f",
+      "bytes": 715,
+      "current_owner": "crates/emu/render/wgpu/3d/src/render/w_buffer.rs",
+      "comparison": "byte-identical"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/threaded.rs",
+      "git_blob": "34cba7295b6e4513798c53ce67b3e06b17a00e38",
+      "sha256": "751d850cd70b8d315a46a4524ad1fb4ffbb20ba1b458a6edd3f5219a0eabd2de",
+      "bytes": 12336,
+      "current_owner": "crates/emu/render/wgpu/3d/src/threaded.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/render/wgpu-3d/src/utils.rs",
+      "git_blob": "902fe272db038f290225b9cf05a4b0013f7c9b23",
+      "sha256": "6853513aa31d49b95588ebab9c34a8c35d702402754350c45aa453e007828b4a",
+      "bytes": 1111,
+      "current_owner": "crates/emu/render/wgpu/3d/src/utils.rs",
+      "comparison": "retained-counterpart-differs"
+    },
+    {
+      "snapshot_path": ".agents/skills/dust-cli/src/rust-toolchain.toml",
+      "git_blob": "9dbbbabe870a7d74f46ed7db0ecf8fea819f5d05",
+      "sha256": "8d09456a5fb6243bfb349fa4168f3307ca3bcf32469eafc50e8d743ea064c0d1",
+      "bytes": 43,
+      "current_owner": "rust-toolchain.toml",
+      "comparison": "historical-workspace-control"
+    }
+  ]
+}

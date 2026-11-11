@@ -1,0 +1,29 @@
+[package]
+name = "aphrody-nie-headless"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE.upstream"
+publish = false
+description = "Host-side CLI for inspecting IE/IEVR formats and deterministic game data"
+
+[lints]
+workspace = true
+
+[features]
+default = ["host"]
+host = ["dep:clap", "dep:aphrody-nie-core", "dep:aphrody-nie-data"]
+
+[dependencies]
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["std", "derive"] }
+serde_json = { workspace = true }
+aphrody-nie-formats = { workspace = true, default-features = true }
+aphrody-nie-data = { workspace = true, optional = true }
+aphrody-nie-core = { workspace = true, optional = true }
+clap = { workspace = true, optional = true, features = ["derive", "color", "env"] }
+
+[[bin]]
+name = "aphrody-nie-headless"
+path = "src/main.rs"
+required-features = ["host"]

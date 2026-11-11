@@ -1,0 +1,6195 @@
+{
+  "schema": "iecode.code-audit/v1",
+  "date": "2026-10-03",
+  "source_revision": "50a73fd27249a6834ba364205de3f3e083452804",
+  "scope": {
+    "tracked_source_files": 5330,
+    "physical_lines": 2048698,
+    "source_bytes": 85913396,
+    "method": "Tracked-file inventory/hashes, Python AST parse, manifest and MSBuild ownership evaluation, automated gates/static analysis, focused parser/FFI review and synthetic reproductions.",
+    "line_metric": "Physical lines, including comments, generated arrays and retained sources; not executable code line count.",
+    "limitations": [
+      "Not a manual review of every source line.",
+      "No complete Rust/native/.NET solution build passed.",
+      "No actual NativeAOT library or hardware/browser GPU acceptance run.",
+      "Directories outside build graphs are retained sources, not proven unused code.",
+      "No domain source was changed or removed."
+    ]
+  },
+  "toolchain": {
+    "rust": "1.98.1",
+    "python": "3.12.3",
+    "uv": "0.12.22",
+    "ruff_probe": "0.15.18",
+    "pytest_probe": "8.4.2",
+    "dotnet_sdk": "10.0.112",
+    "cmake": "3.28.3",
+    "cppcheck": "2.13.0",
+    "cpp_parity_compiler": "g++-13; C++20; ASan/UBSan"
+  },
+  "local_sibling": {
+    "observed_revision": "14a14958ae0df7c1d0fadcaa7a5e9556bd0cfa2a",
+    "declared_operations_revision": "ec2212914457af395e857b3bb029f6187ffab748",
+    "observations_during_audit": [
+      "f6a6b6310ed25ddaaed4de4ee4cd21fcc2ed9abd",
+      "14a14958ae0df7c1d0fadcaa7a5e9556bd0cfa2a"
+    ],
+    "qualification": "The sibling HEAD moved during this audit. These observations do not identify a frozen dependency snapshot; no pinned clean-sibling build was performed."
+  },
+  "inventory": {
+    "rust": {
+      "files": 3511,
+      "lines": 1579375,
+      "bytes": 63615924,
+      "roots": {
+        "apps/web": {
+          "files": 7,
+          "lines": 2012
+        },
+        "crates/aphrody-aarch64": {
+          "files": 6,
+          "lines": 955
+        },
+        "crates/aphrody-ctr": {
+          "files": 7,
+          "lines": 932
+        },
+        "crates/aphrody-emulator-host": {
+          "files": 3,
+          "lines": 353
+        },
+        "crates/aphrody-gpu-backend": {
+          "files": 1,
+          "lines": 145
+        },
+        "crates/aphrody-homebrew": {
+          "files": 2,
+          "lines": 148
+        },
+        "crates/aphrody-model-view": {
+          "files": 2,
+          "lines": 139
+        },
+        "crates/aphrody-render": {
+          "files": 18,
+          "lines": 8953
+        },
+        "crates/aphrody-render3d": {
+          "files": 2,
+          "lines": 530
+        },
+        "crates/aphrody-softraster": {
+          "files": 1,
+          "lines": 281
+        },
+        "crates/aphrody-switch": {
+          "files": 3,
+          "lines": 296
+        },
+        "crates/aphrody-tauri-3d": {
+          "files": 4,
+          "lines": 678
+        },
+        "crates/aphrody-wii": {
+          "files": 4,
+          "lines": 449
+        },
+        "crates/emu/cli": {
+          "files": 65,
+          "lines": 11441
+        },
+        "crates/emu/core": {
+          "files": 205,
+          "lines": 57775
+        },
+        "crates/emu/render": {
+          "files": 48,
+          "lines": 12059
+        },
+        "crates/emu/ruzu": {
+          "files": 2089,
+          "lines": 1076790
+        },
+        "crates/emu/utils": {
+          "files": 16,
+          "lines": 4124
+        },
+        "crates/emu/wii": {
+          "files": 178,
+          "lines": 58823
+        },
+        "crates/nie/aphrody-nie-app": {
+          "files": 14,
+          "lines": 5776
+        },
+        "crates/nie/aphrody-nie-asm": {
+          "files": 2,
+          "lines": 4365
+        },
+        "crates/nie/aphrody-nie-bench": {
+          "files": 2,
+          "lines": 322
+        },
+        "crates/nie/aphrody-nie-bevy": {
+          "files": 8,
+          "lines": 1270
+        },
+        "crates/nie/aphrody-nie-camera": {
+          "files": 11,
+          "lines": 5446
+        },
+        "crates/nie/aphrody-nie-cli": {
+          "files": 37,
+          "lines": 23229
+        },
+        "crates/nie/aphrody-nie-computer-use": {
+          "files": 3,
+          "lines": 953
+        },
+        "crates/nie/aphrody-nie-core": {
+          "files": 62,
+          "lines": 17811
+        },
+        "crates/nie/aphrody-nie-data": {
+          "files": 253,
+          "lines": 71801
+        },
+        "crates/nie/aphrody-nie-dump": {
+          "files": 1,
+          "lines": 59
+        },
+        "crates/nie/aphrody-nie-editor": {
+          "files": 2,
+          "lines": 924
+        },
+        "crates/nie/aphrody-nie-emu": {
+          "files": 3,
+          "lines": 1033
+        },
+        "crates/nie/aphrody-nie-explore": {
+          "files": 31,
+          "lines": 8978
+        },
+        "crates/nie/aphrody-nie-ffi": {
+          "files": 1,
+          "lines": 3158
+        },
+        "crates/nie/aphrody-nie-forge": {
+          "files": 13,
+          "lines": 4808
+        },
+        "crates/nie/aphrody-nie-formats": {
+          "files": 110,
+          "lines": 49290
+        },
+        "crates/nie/aphrody-nie-game": {
+          "files": 41,
+          "lines": 10433
+        },
+        "crates/nie/aphrody-nie-geom": {
+          "files": 1,
+          "lines": 338
+        },
+        "crates/nie/aphrody-nie-headless": {
+          "files": 3,
+          "lines": 969
+        },
+        "crates/nie/aphrody-nie-identity-source": {
+          "files": 4,
+          "lines": 1055
+        },
+        "crates/nie/aphrody-nie-index": {
+          "files": 3,
+          "lines": 3514
+        },
+        "crates/nie/aphrody-nie-inventory": {
+          "files": 5,
+          "lines": 1392
+        },
+        "crates/nie/aphrody-nie-launcher": {
+          "files": 10,
+          "lines": 10293
+        },
+        "crates/nie/aphrody-nie-lua-web": {
+          "files": 1,
+          "lines": 418
+        },
+        "crates/nie/aphrody-nie-lua": {
+          "files": 18,
+          "lines": 13764
+        },
+        "crates/nie/aphrody-nie-mcp": {
+          "files": 3,
+          "lines": 599
+        },
+        "crates/nie/aphrody-nie-model-serve": {
+          "files": 6,
+          "lines": 9373
+        },
+        "crates/nie/aphrody-nie-net": {
+          "files": 18,
+          "lines": 6879
+        },
+        "crates/nie/aphrody-nie-ocgen": {
+          "files": 13,
+          "lines": 3748
+        },
+        "crates/nie/aphrody-nie-pe-inspect": {
+          "files": 3,
+          "lines": 2007
+        },
+        "crates/nie/aphrody-nie-pe": {
+          "files": 8,
+          "lines": 2540
+        },
+        "crates/nie/aphrody-nie-pg": {
+          "files": 5,
+          "lines": 858
+        },
+        "crates/nie/aphrody-nie-play": {
+          "files": 1,
+          "lines": 241
+        },
+        "crates/nie/aphrody-nie-queue": {
+          "files": 1,
+          "lines": 451
+        },
+        "crates/nie/aphrody-nie-re": {
+          "files": 18,
+          "lines": 7261
+        },
+        "crates/nie/aphrody-nie-render": {
+          "files": 1,
+          "lines": 161
+        },
+        "crates/nie/aphrody-nie-render3d": {
+          "files": 13,
+          "lines": 9379
+        },
+        "crates/nie/aphrody-nie-runtime": {
+          "files": 5,
+          "lines": 2130
+        },
+        "crates/nie/aphrody-nie-save": {
+          "files": 9,
+          "lines": 4102
+        },
+        "crates/nie/aphrody-nie-seed": {
+          "files": 8,
+          "lines": 2484
+        },
+        "crates/nie/aphrody-nie-sql": {
+          "files": 3,
+          "lines": 1007
+        },
+        "crates/nie/aphrody-nie-steam": {
+          "files": 9,
+          "lines": 3504
+        },
+        "crates/nie/aphrody-nie-tasks": {
+          "files": 1,
+          "lines": 715
+        },
+        "crates/nie/aphrody-nie-trace": {
+          "files": 11,
+          "lines": 6603
+        },
+        "crates/nie/aphrody-nie-ui": {
+          "files": 10,
+          "lines": 4053
+        },
+        "crates/nie/aphrody-nie-video": {
+          "files": 2,
+          "lines": 478
+        },
+        "crates/nie/aphrody-nie-viewer-web": {
+          "files": 1,
+          "lines": 253
+        },
+        "crates/nie/aphrody-nie-viola": {
+          "files": 14,
+          "lines": 4240
+        },
+        "crates/nie/aphrody-nie-wasm": {
+          "files": 9,
+          "lines": 6313
+        },
+        "crates/nie/aphrody-nie-wiki": {
+          "files": 25,
+          "lines": 14201
+        },
+        "crates/nie/aphrody-nie-zukan": {
+          "files": 10,
+          "lines": 3896
+        },
+        "tools/capture_harness": {
+          "files": 4,
+          "lines": 3617
+        }
+      },
+      "largest": [
+        {
+          "path": "crates/emu/ruzu/core/src/file_sys/system_archive/data/time_zone_binary.rs",
+          "lines": 25771
+        },
+        {
+          "path": "crates/emu/ruzu/core/src/file_sys/system_archive/data/font_extended_chinese_simplified.rs",
+          "lines": 18352
+        },
+        {
+          "path": "crates/emu/ruzu/core/src/file_sys/system_archive/data/font_chinese_traditional.rs",
+          "lines": 13897
+        },
+        {
+          "path": "crates/emu/ruzu/core/src/file_sys/system_archive/data/font_chinese_simplified.rs",
+          "lines": 13587
+        },
+        {
+          "path": "crates/emu/ruzu/core/src/file_sys/system_archive/data/font_korean.rs",
+          "lines": 13587
+        },
+        {
+          "path": "crates/emu/ruzu/core/src/file_sys/system_archive/data/font_standard.rs",
+          "lines": 13587
+        },
+        {
+          "path": "crates/emu/ruzu/rdynarmic/src/jit.rs",
+          "lines": 9602
+        },
+        {
+          "path": "crates/emu/ruzu/core/src/hle/kernel/k_page_table_base.rs",
+          "lines": 9571
+        },
+        {
+          "path": "crates/emu/ruzu/ruzu/src/main_window.rs",
+          "lines": 8969
+        },
+        {
+          "path": "crates/emu/ruzu/video_core/src/texture_cache/texture_cache.rs",
+          "lines": 8618
+        },
+        {
+          "path": "crates/emu/ruzu/video_core/src/renderer_vulkan/texture_cache.rs",
+          "lines": 8537
+        },
+        {
+          "path": "crates/nie/aphrody-nie-model-serve/src/main.rs",
+          "lines": 7622
+        }
+      ]
+    },
+    "python": {
+      "files": 174,
+      "lines": 48335,
+      "bytes": 1958459,
+      "roots": {
+        ".agents/skills": {
+          "files": 7,
+          "lines": 858
+        },
+        "crates/emu/ruzu": {
+          "files": 1,
+          "lines": 154
+        },
+        "scripts/audit": {
+          "files": 55,
+          "lines": 6821
+        },
+        "scripts/donnees": {
+          "files": 7,
+          "lines": 1615
+        },
+        "scripts/forge": {
+          "files": 6,
+          "lines": 503
+        },
+        "scripts/re": {
+          "files": 5,
+          "lines": 731
+        },
+        "scripts/ruzu": {
+          "files": 22,
+          "lines": 3349
+        },
+        "scripts/tools": {
+          "files": 6,
+          "lines": 929
+        },
+        "scripts/upstream": {
+          "files": 4,
+          "lines": 566
+        },
+        "scripts/validation": {
+          "files": 6,
+          "lines": 1214
+        },
+        "src/nie-blender": {
+          "files": 24,
+          "lines": 22735
+        },
+        "src/niepy": {
+          "files": 28,
+          "lines": 8362
+        },
+        "tools/capture_harness": {
+          "files": 3,
+          "lines": 498
+        }
+      },
+      "largest": [
+        {
+          "path": "src/nie-blender/g4_model_probe.py",
+          "lines": 5445
+        },
+        {
+          "path": "src/nie-blender/__init__.py",
+          "lines": 4667
+        },
+        {
+          "path": "src/nie-blender/g4_animation_addon.py",
+          "lines": 3643
+        },
+        {
+          "path": "src/nie-blender/g4_port_addon.py",
+          "lines": 3198
+        },
+        {
+          "path": "src/nie-blender/g4_port.py",
+          "lines": 2432
+        },
+        {
+          "path": "src/niepy/niepy/__main__.py",
+          "lines": 968
+        },
+        {
+          "path": "src/nie-blender/nie_bridge.py",
+          "lines": 697
+        },
+        {
+          "path": "scripts/validation/ui-text-map.py",
+          "lines": 688
+        },
+        {
+          "path": "src/niepy/niepy/formats.py",
+          "lines": 688
+        },
+        {
+          "path": "src/niepy/niepy/vfs.py",
+          "lines": 563
+        },
+        {
+          "path": "src/nie-blender/g4mt_motion.py",
+          "lines": 533
+        },
+        {
+          "path": "src/niepy/niepy/native_bridge.py",
+          "lines": 514
+        }
+      ]
+    },
+    "cpp": {
+      "files": 691,
+      "lines": 197752,
+      "bytes": 7657601,
+      "roots": {
+        "crates/emu/externals": {
+          "files": 8,
+          "lines": 58360
+        },
+        "crates/emu/ruzu": {
+          "files": 4,
+          "lines": 4434
+        },
+        "docs/nie": {
+          "files": 4,
+          "lines": 2230
+        },
+        "scripts/ruzu": {
+          "files": 1,
+          "lines": 20
+        },
+        "src/iecode-cpp": {
+          "files": 671,
+          "lines": 132236
+        },
+        "tools/a32_oracle.cpp": {
+          "files": 1,
+          "lines": 304
+        },
+        "tools/capture_harness": {
+          "files": 2,
+          "lines": 168
+        }
+      },
+      "largest": [
+        {
+          "path": "crates/emu/externals/zbic/vendor/src/zstd.c",
+          "lines": 52650
+        },
+        {
+          "path": "src/iecode-cpp/third_party/tinygltf/tiny_gltf.h",
+          "lines": 8733
+        },
+        {
+          "path": "src/iecode-cpp/third_party/stb/stb_image.h",
+          "lines": 7988
+        },
+        {
+          "path": "crates/emu/externals/zbic/vendor/src/zstd.h",
+          "lines": 3209
+        },
+        {
+          "path": "src/iecode-cpp/src/gamedata/loader.cpp",
+          "lines": 2892
+        },
+        {
+          "path": "crates/emu/ruzu/video_core/src/host_shaders/ffx_a.h",
+          "lines": 2656
+        },
+        {
+          "path": "src/iecode-cpp/third_party/mio/mio.hpp",
+          "lines": 1763
+        },
+        {
+          "path": "src/iecode-cpp/third_party/stb/stb_image_write.h",
+          "lines": 1724
+        },
+        {
+          "path": "src/iecode-cpp/src/formats/level5/cfgbin.cpp",
+          "lines": 1671
+        },
+        {
+          "path": "src/iecode-cpp/third_party/lua-5.2.4/lparser.c",
+          "lines": 1638
+        },
+        {
+          "path": "src/iecode-cpp/src/cli/commands/serve_cmd.cpp",
+          "lines": 1590
+        },
+        {
+          "path": "crates/emu/externals/bc_decoder/bc_decoder.cpp",
+          "lines": 1522
+        }
+      ]
+    },
+    "dotnet": {
+      "files": 954,
+      "lines": 223236,
+      "bytes": 12681412,
+      "roots": {
+        "src/IECODE/Cli": {
+          "files": 40,
+          "lines": 7943
+        },
+        "src/IECODE/Core.Tests": {
+          "files": 28,
+          "lines": 4193
+        },
+        "src/IECODE/Core": {
+          "files": 364,
+          "lines": 44995
+        },
+        "src/IECODE/Ffi": {
+          "files": 2,
+          "lines": 293
+        },
+        "src/IECODE/Gui": {
+          "files": 519,
+          "lines": 165693
+        },
+        "src/IECODE/Tests": {
+          "files": 1,
+          "lines": 119
+        }
+      },
+      "largest": [
+        {
+          "path": "src/IECODE/Gui/Toolbox/Logic/Player.cs",
+          "lines": 12985
+        },
+        {
+          "path": "src/IECODE/Gui/SaveEditor/InazumaEleven/Common/GO/Items/Items.cs",
+          "lines": 8392
+        },
+        {
+          "path": "src/IECODE/Gui/IESEViewModel/InazumaEleven/Common/GO/Galaxy.cs",
+          "lines": 7232
+        },
+        {
+          "path": "src/IECODE/Gui/IESEViewModel/InazumaEleven/Common/GO/Cs.cs",
+          "lines": 5363
+        },
+        {
+          "path": "src/IECODE/Gui/SaveEditor/InazumaEleven/Common/GO/Players/Players.cs",
+          "lines": 4630
+        },
+        {
+          "path": "src/IECODE/Gui/GalaxyRandomizer/RandomizerWindow.Designer.cs",
+          "lines": 3863
+        },
+        {
+          "path": "src/IECODE/Gui/Lynx/Forms/Soccers/SoccersWindow.Designer.cs",
+          "lines": 3376
+        },
+        {
+          "path": "src/IECODE/Gui/IESEViewModel/InazumaEleven/Common/GO/Go.cs",
+          "lines": 3091
+        },
+        {
+          "path": "src/IECODE/Gui/IevrManager/MainWindow.xaml.cs",
+          "lines": 2949
+        },
+        {
+          "path": "src/IECODE/Gui/SaveEditor/Welcome.Designer.cs",
+          "lines": 2875
+        },
+        {
+          "path": "src/IECODE/Gui/Toolbox/Dictionaries/ENG/Players.cs",
+          "lines": 2743
+        },
+        {
+          "path": "src/IECODE/Gui/Lynx/Forms/Characters/CharaParamWindow.Designer.cs",
+          "lines": 2184
+        }
+      ]
+    }
+  },
+  "active_rust_packages": [
+    {
+      "name": "aphrody-ctr",
+      "manifest": "crates/aphrody-ctr/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_ctr",
+          "kind": ["lib"]
+        },
+        {
+          "name": "libctru_commands",
+          "kind": ["test"]
+        },
+        {
+          "name": "libctru_shaders",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-aarch64",
+      "manifest": "crates/aphrody-aarch64/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_aarch64",
+          "kind": ["lib"]
+        },
+        {
+          "name": "a64_decoder_parser",
+          "kind": ["test"]
+        },
+        {
+          "name": "build-script-build",
+          "kind": ["custom-build"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-wii",
+      "manifest": "crates/aphrody-wii/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_wii",
+          "kind": ["lib"]
+        },
+        {
+          "name": "archive_adapter",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-wii-runtime",
+      "manifest": "crates/emu/wii/core/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_wii_runtime",
+          "kind": ["lib"]
+        },
+        {
+          "name": "wii_dol",
+          "kind": ["test"]
+        },
+        {
+          "name": "build-script-build",
+          "kind": ["custom-build"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-wii-dff",
+      "manifest": "crates/emu/wii/dff/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "dff",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-wii-disasm",
+      "manifest": "crates/emu/wii/disasm/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "disasm",
+          "kind": ["lib"]
+        },
+        {
+          "name": "build-script-build",
+          "kind": ["custom-build"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-wii-image",
+      "manifest": "crates/emu/wii/image/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "image",
+          "kind": ["lib"]
+        },
+        {
+          "name": "build-script-build",
+          "kind": ["custom-build"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-wii-render",
+      "manifest": "crates/emu/wii/render/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "backend_wgpu",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-wii-debug",
+      "manifest": "crates/emu/wii/debug/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "dbglib",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-wii-web",
+      "manifest": "apps/web/wii/crate/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "gecko_web",
+          "kind": ["cdylib", "rlib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-switch",
+      "manifest": "crates/aphrody-switch/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_switch",
+          "kind": ["lib"]
+        },
+        {
+          "name": "native_texture_adapter",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-emulator-host",
+      "manifest": "crates/aphrody-emulator-host/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_emulator_host",
+          "kind": ["lib"]
+        },
+        {
+          "name": "ds_execution",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-dust-core",
+      "manifest": "crates/emu/core/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_dust_core",
+          "kind": ["lib"]
+        },
+        {
+          "name": "common",
+          "kind": ["test"]
+        },
+        {
+          "name": "test_dsprot",
+          "kind": ["test"]
+        },
+        {
+          "name": "test_extract_build",
+          "kind": ["test"]
+        },
+        {
+          "name": "build-script-build",
+          "kind": ["custom-build"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-emu-utils",
+      "manifest": "crates/emu/utils/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_emu_utils",
+          "kind": ["lib"]
+        },
+        {
+          "name": "simd_savestate",
+          "kind": ["test"]
+        },
+        {
+          "name": "build-script-build",
+          "kind": ["custom-build"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-emu-utils-macros",
+      "manifest": "crates/emu/utils/macros/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_emu_utils_macros",
+          "kind": ["proc-macro"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-dust-soft-2d",
+      "manifest": "crates/emu/render/soft-2d/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_dust_soft_2d",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-dust-soft-2d-base",
+      "manifest": "crates/emu/render/soft-2d/base/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_dust_soft_2d_base",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-dust-soft-3d",
+      "manifest": "crates/emu/render/soft-3d/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_dust_soft_3d",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-homebrew",
+      "manifest": "crates/aphrody-homebrew/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_homebrew",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-homebrew",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-gpu-backend",
+      "manifest": "crates/aphrody-gpu-backend/Cargo.toml",
+      "license_file": "../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_gpu_backend",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-dust-cli",
+      "manifest": "crates/emu/cli/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "dust",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-dust-web",
+      "manifest": "apps/web/crate/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_dust_web",
+          "kind": ["cdylib", "rlib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-dust-wgpu",
+      "manifest": "crates/emu/render/wgpu/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_dust_wgpu",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-geom",
+      "manifest": "crates/nie/aphrody-nie-geom/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": ["std"],
+      "targets": [
+        {
+          "name": "aphrody_nie_geom",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-video",
+      "manifest": "crates/nie/aphrody-nie-video/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_video",
+          "kind": ["lib"]
+        },
+        {
+          "name": "bout_en_bout",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-sql",
+      "manifest": "crates/nie/aphrody-nie-sql/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_sql",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-tasks",
+      "manifest": "crates/nie/aphrody-nie-tasks/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_tasks",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-emu",
+      "manifest": "crates/nie/aphrody-nie-emu/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_emu",
+          "kind": ["lib"]
+        },
+        {
+          "name": "platform_contracts",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-pe-inspect",
+      "manifest": "crates/nie/aphrody-nie-pe-inspect/Cargo.toml",
+      "license_file": null,
+      "license_exists": null,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_pe_inspect",
+          "kind": ["rlib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-identity-source",
+      "manifest": "crates/nie/aphrody-nie-identity-source/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_identity_source",
+          "kind": ["lib"]
+        },
+        {
+          "name": "export_aphrody",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-data",
+      "manifest": "crates/nie/aphrody-nie-data/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_data",
+          "kind": ["lib"]
+        },
+        {
+          "name": "export_formations",
+          "kind": ["bin"]
+        },
+        {
+          "name": "export_passives",
+          "kind": ["bin"]
+        },
+        {
+          "name": "export_skills",
+          "kind": ["bin"]
+        },
+        {
+          "name": "ability_learning_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "academic_year_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "activity_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "add_content_equip_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "add_model_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "advent_calendar_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "ai_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "ai_strategy_resolve_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "ai_type_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "aura_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "aura_name_resolve_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "avatar_resolve_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "banner_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "basara_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "belong_team_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "boost_grp_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "capsule_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "change_aura_skill_config_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chara_bank_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chara_base_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chara_base_resolve_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chara_costume_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chara_description_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chara_details_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chara_edit_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chara_menu_resource_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chara_param_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chara_series_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chara_text_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chat_emote_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "chronicle_top_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "command_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "cond_corpus_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "craft_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "ctrl_chara_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "delivery_config_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "delivery_list_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "dictionary_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "dungeon_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "emblems_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "enjoy_mode_team_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "enjoy_mode_team_vars_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "event_bustup_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "event_map_tag_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "event_subtitle_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "exp_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "extend_story_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "fast_travel_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "flag_config_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "font_color_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "formation_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "friendmap_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "gallery_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "game_quest_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "growth_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "happen_event_npc_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "help_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "inacode_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "input_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "item_emission_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "item_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "item_text_resolve_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "light_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "menu_setting_focus_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "menu_setting_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "menu_setting_prefix_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "mission_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "mission_text_resolve_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "movie_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "music_app_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "nfc_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "notice_maj_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "opponent_team_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "override_skill_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "party_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "passive_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "passives_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "password_list_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "phase_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "phase_set_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "photo_mode_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "players_universe_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "playstyle_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "post_notice_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "quest_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "quest_title_resolve_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "real_skill_config_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "record_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "rpg_battle_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "scene_archive_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "search_word_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "setting_menu_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "shop_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "shop_text_resolve_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "skill_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "skill_technic_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "skill_view_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_chara_unique_rarity_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_dispatch_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_drop_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_fixed_reward_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_map_env_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_opponent_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_performance_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_placement_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_player_record_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_rank_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "soccer_suggest_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "special_tactics_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "stadium_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "super_tactics_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "system_unlock_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "talk_select_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "team_build_config_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "team_name_resolve_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "telop_waza_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "trial_take_over_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "trick_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "trigger_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "trophy_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "trophy_text_resolve_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "typed_corpus_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "uniform_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "unlock_condition_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "unlock_condition_resolve_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "user_name_plate_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "video_waza_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "vsroute_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "weather_golden",
+          "kind": ["test"]
+        },
+        {
+          "name": "win_treasure_golden",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-inventory",
+      "manifest": "crates/nie/aphrody-nie-inventory/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "ievr_tools",
+          "kind": ["lib"]
+        },
+        {
+          "name": "ievr-tools",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-app",
+      "manifest": "crates/nie/aphrody-nie-app/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_app",
+          "kind": ["lib"]
+        },
+        {
+          "name": "effectif_reel",
+          "kind": ["example"]
+        },
+        {
+          "name": "match_3d",
+          "kind": ["example"]
+        },
+        {
+          "name": "parcours_jouable",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-core",
+      "manifest": "crates/nie/aphrody-nie-core/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["data"],
+      "targets": [
+        {
+          "name": "aphrody_nie_core",
+          "kind": ["lib"]
+        },
+        {
+          "name": "chara_param_growth",
+          "kind": ["test"]
+        },
+        {
+          "name": "simulation_formation",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-formats",
+      "manifest": "crates/nie/aphrody-nie-formats/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["std", "lua"],
+      "targets": [
+        {
+          "name": "aphrody_nie_formats",
+          "kind": ["lib"]
+        },
+        {
+          "name": "anim_mesh",
+          "kind": ["example"]
+        },
+        {
+          "name": "anim_skeleton",
+          "kind": ["example"]
+        },
+        {
+          "name": "attach_locator_probe",
+          "kind": ["example"]
+        },
+        {
+          "name": "census_position_limit",
+          "kind": ["example"]
+        },
+        {
+          "name": "cfgbin_pied",
+          "kind": ["example"]
+        },
+        {
+          "name": "corpus_cfgbin",
+          "kind": ["example"]
+        },
+        {
+          "name": "dialogue_scene",
+          "kind": ["example"]
+        },
+        {
+          "name": "dump_bones",
+          "kind": ["example"]
+        },
+        {
+          "name": "dump_couverture",
+          "kind": ["example"]
+        },
+        {
+          "name": "dump_g4pkm_poses",
+          "kind": ["example"]
+        },
+        {
+          "name": "dump_local_world",
+          "kind": ["example"]
+        },
+        {
+          "name": "dump_map",
+          "kind": ["example"]
+        },
+        {
+          "name": "font_accents",
+          "kind": ["example"]
+        },
+        {
+          "name": "font_catalog",
+          "kind": ["example"]
+        },
+        {
+          "name": "font_render",
+          "kind": ["example"]
+        },
+        {
+          "name": "g4cm_scale_census",
+          "kind": ["example"]
+        },
+        {
+          "name": "g4tx_info",
+          "kind": ["example"]
+        },
+        {
+          "name": "g4tx_patch_region",
+          "kind": ["example"]
+        },
+        {
+          "name": "inspect_g4pk",
+          "kind": ["example"]
+        },
+        {
+          "name": "inspect_g4tx",
+          "kind": ["example"]
+        },
+        {
+          "name": "list_motion_clips",
+          "kind": ["example"]
+        },
+        {
+          "name": "menu_presentation_export",
+          "kind": ["example"]
+        },
+        {
+          "name": "model_glb_preview",
+          "kind": ["example"]
+        },
+        {
+          "name": "motion_additive_census",
+          "kind": ["example"]
+        },
+        {
+          "name": "probe_acb",
+          "kind": ["example"]
+        },
+        {
+          "name": "probe_cpk_list",
+          "kind": ["example"]
+        },
+        {
+          "name": "probe_g4pkm_g4md",
+          "kind": ["example"]
+        },
+        {
+          "name": "probe_g4tg",
+          "kind": ["example"]
+        },
+        {
+          "name": "probe_g4tg_swizzle",
+          "kind": ["example"]
+        },
+        {
+          "name": "probe_waza_glb",
+          "kind": ["example"]
+        },
+        {
+          "name": "rdbn_dump",
+          "kind": ["example"]
+        },
+        {
+          "name": "rdbn_max",
+          "kind": ["example"]
+        },
+        {
+          "name": "render_text",
+          "kind": ["example"]
+        },
+        {
+          "name": "sample_menu_states",
+          "kind": ["example"]
+        },
+        {
+          "name": "skin_palette_census",
+          "kind": ["example"]
+        },
+        {
+          "name": "skin_probe",
+          "kind": ["example"]
+        },
+        {
+          "name": "t2b_roundtrip",
+          "kind": ["example"]
+        },
+        {
+          "name": "validate_g4mt",
+          "kind": ["example"]
+        },
+        {
+          "name": "validate_g4sk",
+          "kind": ["example"]
+        },
+        {
+          "name": "validate_skin",
+          "kind": ["example"]
+        },
+        {
+          "name": "assemble_astro_lor",
+          "kind": ["test"]
+        },
+        {
+          "name": "dds_bc7_encode",
+          "kind": ["test"]
+        },
+        {
+          "name": "decode_dispatch",
+          "kind": ["test"]
+        },
+        {
+          "name": "dump_vs_packs",
+          "kind": ["test"]
+        },
+        {
+          "name": "g4cm_reel",
+          "kind": ["test"]
+        },
+        {
+          "name": "iecode_t2b_aller_retour",
+          "kind": ["test"]
+        },
+        {
+          "name": "level5_hash",
+          "kind": ["test"]
+        },
+        {
+          "name": "luabin_reel",
+          "kind": ["test"]
+        },
+        {
+          "name": "navm_reel",
+          "kind": ["test"]
+        },
+        {
+          "name": "rdbn_patch_reel",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-lua",
+      "manifest": "crates/nie/aphrody-nie-lua/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["vm", "analysis"],
+      "targets": [
+        {
+          "name": "aphrody_nie_lua",
+          "kind": ["lib"]
+        },
+        {
+          "name": "couverture_funclua",
+          "kind": ["example"]
+        },
+        {
+          "name": "hunt_sprite_hash",
+          "kind": ["example"]
+        },
+        {
+          "name": "probe_menu_script",
+          "kind": ["example"]
+        },
+        {
+          "name": "global_definitions",
+          "kind": ["test"]
+        },
+        {
+          "name": "main_menu_inc",
+          "kind": ["test"]
+        },
+        {
+          "name": "menu_host_gap",
+          "kind": ["test"]
+        },
+        {
+          "name": "opcode_survey",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-render3d",
+      "manifest": "crates/nie/aphrody-nie-render3d/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["cli"],
+      "targets": [
+        {
+          "name": "aphrody_nie_render3d",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-render3d",
+          "kind": ["bin"]
+        },
+        {
+          "name": "anim_char",
+          "kind": ["example"]
+        },
+        {
+          "name": "story_scene",
+          "kind": ["example"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-runtime",
+      "manifest": "crates/nie/aphrody-nie-runtime/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_runtime",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-runtime",
+          "kind": ["bin"]
+        },
+        {
+          "name": "nie-match3d",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-explore",
+      "manifest": "crates/nie/aphrody-nie-explore/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_explore",
+          "kind": ["lib"]
+        },
+        {
+          "name": "probe_banque",
+          "kind": ["example"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-asm",
+      "manifest": "crates/nie/aphrody-nie-asm/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["serde"],
+      "targets": [
+        {
+          "name": "aphrody_nie_asm",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-bench",
+      "manifest": "crates/nie/aphrody-nie-bench/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_bench",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-bench",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-bevy",
+      "manifest": "crates/nie/aphrody-nie-bevy/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_bevy",
+          "kind": ["lib"]
+        },
+        {
+          "name": "load_model",
+          "kind": ["example"]
+        },
+        {
+          "name": "loader",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-camera",
+      "manifest": "crates/nie/aphrody-nie-camera/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_camera",
+          "kind": ["lib"]
+        },
+        {
+          "name": "nie-cam",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-index",
+      "manifest": "crates/nie/aphrody-nie-index/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_index",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-trace",
+      "manifest": "crates/nie/aphrody-nie-trace/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_trace",
+          "kind": ["lib"]
+        },
+        {
+          "name": "nie-edit",
+          "kind": ["bin"]
+        },
+        {
+          "name": "nie-mem",
+          "kind": ["bin"]
+        },
+        {
+          "name": "self_mem",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-cli",
+      "manifest": "crates/nie/aphrody-nie-cli/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_cli",
+          "kind": ["lib"]
+        },
+        {
+          "name": "nie",
+          "kind": ["bin"]
+        },
+        {
+          "name": "carte_monde",
+          "kind": ["example"]
+        },
+        {
+          "name": "hash_ou",
+          "kind": ["example"]
+        },
+        {
+          "name": "mod_aura_poste",
+          "kind": ["example"]
+        },
+        {
+          "name": "mod_postgame",
+          "kind": ["example"]
+        },
+        {
+          "name": "mod_teleport",
+          "kind": ["example"]
+        },
+        {
+          "name": "postgame_extract",
+          "kind": ["example"]
+        },
+        {
+          "name": "postgame_scan",
+          "kind": ["example"]
+        },
+        {
+          "name": "rdbn_champs",
+          "kind": ["example"]
+        },
+        {
+          "name": "texte_grep",
+          "kind": ["example"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-computer-use",
+      "manifest": "crates/nie/aphrody-nie-computer-use/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_computer_use",
+          "kind": ["lib"]
+        },
+        {
+          "name": "verify_session",
+          "kind": ["example"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-re",
+      "manifest": "crates/nie/aphrody-nie-re/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_re",
+          "kind": ["lib"]
+        },
+        {
+          "name": "dump_census",
+          "kind": ["example"]
+        },
+        {
+          "name": "dump_scan",
+          "kind": ["example"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-dump",
+      "manifest": "crates/nie/aphrody-nie-dump/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_dump",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-launcher",
+      "manifest": "crates/nie/aphrody-nie-launcher/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_launcher",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-launcher",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-save",
+      "manifest": "crates/nie/aphrody-nie-save/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_save",
+          "kind": ["lib"]
+        },
+        {
+          "name": "apply_astro_lor",
+          "kind": ["test"]
+        },
+        {
+          "name": "dump_headersave",
+          "kind": ["test"]
+        },
+        {
+          "name": "parse_headersave",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-net",
+      "manifest": "crates/nie/aphrody-nie-net/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["transport"],
+      "targets": [
+        {
+          "name": "aphrody_nie_net",
+          "kind": ["lib"]
+        },
+        {
+          "name": "e2e_network",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-ocgen",
+      "manifest": "crates/nie/aphrody-nie-ocgen/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_ocgen",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-ocgen",
+          "kind": ["bin"]
+        },
+        {
+          "name": "format_roundtrip",
+          "kind": ["test"]
+        },
+        {
+          "name": "pipeline",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-queue",
+      "manifest": "crates/nie/aphrody-nie-queue/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_queue",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-seed",
+      "manifest": "crates/nie/aphrody-nie-seed/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_seed",
+          "kind": ["lib"]
+        },
+        {
+          "name": "integration",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-steam",
+      "manifest": "crates/nie/aphrody-nie-steam/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_steam",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-steam",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-viola",
+      "manifest": "crates/nie/aphrody-nie-viola/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_viola",
+          "kind": ["lib"]
+        },
+        {
+          "name": "cfgbin_envelope",
+          "kind": ["example"]
+        },
+        {
+          "name": "cpk_list_patch_check",
+          "kind": ["example"]
+        },
+        {
+          "name": "cpk_list_roundtrip",
+          "kind": ["example"]
+        },
+        {
+          "name": "valider_reel",
+          "kind": ["example"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-wiki",
+      "manifest": "crates/nie/aphrody-nie-wiki/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_wiki",
+          "kind": ["lib"]
+        },
+        {
+          "name": "import_cross",
+          "kind": ["example"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-zukan",
+      "manifest": "crates/nie/aphrody-nie-zukan/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_zukan",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-zukan",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-editor",
+      "manifest": "crates/nie/aphrody-nie-editor/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_editor",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-editor",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-ffi",
+      "manifest": "crates/nie/aphrody-nie-ffi/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "iecode",
+          "kind": ["cdylib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-forge",
+      "manifest": "crates/nie/aphrody-nie-forge/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["redb"],
+      "targets": [
+        {
+          "name": "aphrody_nie_forge",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-forge",
+          "kind": ["bin"]
+        },
+        {
+          "name": "chaine_rapport",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-pe",
+      "manifest": "crates/nie/aphrody-nie-pe/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["serde"],
+      "targets": [
+        {
+          "name": "aphrody_nie_pe",
+          "kind": ["lib"]
+        },
+        {
+          "name": "nie_exe_reel",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-game",
+      "manifest": "crates/nie/aphrody-nie-game/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody-nie-game",
+          "kind": ["bin"]
+        },
+        {
+          "name": "dump_g4tx",
+          "kind": ["example"]
+        },
+        {
+          "name": "dump_packs",
+          "kind": ["example"]
+        },
+        {
+          "name": "export_auras",
+          "kind": ["example"]
+        },
+        {
+          "name": "export_characters",
+          "kind": ["example"]
+        },
+        {
+          "name": "export_items",
+          "kind": ["example"]
+        },
+        {
+          "name": "export_manifest",
+          "kind": ["example"]
+        },
+        {
+          "name": "export_quests",
+          "kind": ["example"]
+        },
+        {
+          "name": "export_shops",
+          "kind": ["example"]
+        },
+        {
+          "name": "export_teams",
+          "kind": ["example"]
+        },
+        {
+          "name": "export_trophies",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_ai_strategy_names",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_aura_names",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_chara_base",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_chara_description",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_chara_details",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_chara_full",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_chara_series",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_chara_text",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_ctrl_chara",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_event_subtitle",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_item_text",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_mission_text",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_playstyle",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_quest_titles",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_shop_text",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_team_names",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_trophy_text",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_unlock_conditions",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_video_waza",
+          "kind": ["example"]
+        },
+        {
+          "name": "extract_win_treasure",
+          "kind": ["example"]
+        },
+        {
+          "name": "probe_rdbn",
+          "kind": ["example"]
+        },
+        {
+          "name": "probe_t2b",
+          "kind": ["example"]
+        },
+        {
+          "name": "verify_dump",
+          "kind": ["example"]
+        },
+        {
+          "name": "vfs_grep",
+          "kind": ["example"]
+        },
+        {
+          "name": "vfs_hist",
+          "kind": ["example"]
+        },
+        {
+          "name": "format_corpus",
+          "kind": ["test"]
+        },
+        {
+          "name": "menu_native_state",
+          "kind": ["test"]
+        },
+        {
+          "name": "menu_render_gate",
+          "kind": ["test"]
+        },
+        {
+          "name": "placement_guard",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-headless",
+      "manifest": "crates/nie/aphrody-nie-headless/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_headless",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-headless",
+          "kind": ["bin"]
+        },
+        {
+          "name": "cli",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-lua-web",
+      "manifest": "crates/nie/aphrody-nie-lua-web/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_lua_web",
+          "kind": ["cdylib", "rlib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-mcp",
+      "manifest": "crates/nie/aphrody-nie-mcp/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody-nie-mcp",
+          "kind": ["bin"]
+        },
+        {
+          "name": "re_real",
+          "kind": ["test"]
+        },
+        {
+          "name": "stdio_smoke",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-model-serve",
+      "manifest": "crates/nie/aphrody-nie-model-serve/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": ["host"],
+      "targets": [
+        {
+          "name": "aphrody_nie_model_serve",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-model-serve",
+          "kind": ["bin"]
+        },
+        {
+          "name": "diag_g4pkm_transforms",
+          "kind": ["example"]
+        },
+        {
+          "name": "probe_g4tx_dds",
+          "kind": ["example"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-pg",
+      "manifest": "crates/nie/aphrody-nie-pg/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_pg",
+          "kind": ["lib"]
+        },
+        {
+          "name": "aphrody-nie-pg",
+          "kind": ["bin"]
+        },
+        {
+          "name": "postgres",
+          "kind": ["test"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-play",
+      "manifest": "crates/nie/aphrody-nie-play/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody-nie-play",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-render",
+      "manifest": "crates/nie/aphrody-nie-render/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_render",
+          "kind": ["lib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-ui",
+      "manifest": "crates/nie/aphrody-nie-ui/Cargo.toml",
+      "license_file": "../../../docs/reference/iecode/NIE-LICENSE",
+      "license_exists": false,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_ui",
+          "kind": ["lib"]
+        },
+        {
+          "name": "game_screens_css",
+          "kind": ["bin"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-viewer-web",
+      "manifest": "crates/nie/aphrody-nie-viewer-web/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_viewer_web",
+          "kind": ["cdylib", "rlib"]
+        }
+      ]
+    },
+    {
+      "name": "aphrody-nie-wasm",
+      "manifest": "crates/nie/aphrody-nie-wasm/Cargo.toml",
+      "license_file": "../../../docs/nie/LICENSE",
+      "license_exists": true,
+      "default_features": [],
+      "targets": [
+        {
+          "name": "aphrody_nie_wasm",
+          "kind": ["cdylib", "rlib"]
+        },
+        {
+          "name": "model_render",
+          "kind": ["test"]
+        }
+      ]
+    }
+  ],
+  "rust_ownership": {
+    "active_member_directory_files": 1391,
+    "active_member_directory_lines": 488387,
+    "outside_active_member_directory_files": 2120,
+    "outside_active_member_directory_lines": 1090988,
+    "qualification": "Directory attribution, not proof that every file is reachable from module declarations or enabled features."
+  },
+  "dotnet_project_evaluation": [
+    {
+      "path": "src/IECODE/Cli/IECODE.Cli.csproj",
+      "frameworks": ["net10.0"],
+      "project_references": [
+        {
+          "Include": "../Core/IECODE.Core.csproj"
+        }
+      ],
+      "package_references": [
+        {
+          "Include": "System.CommandLine"
+        }
+      ],
+      "compile_remove": [
+        {
+          "Remove": "NdsExample/**/*.cs"
+        }
+      ],
+      "evaluated_compile_items": 39
+    },
+    {
+      "path": "src/IECODE/Core.Tests/IECODE.Core.Tests.csproj",
+      "frameworks": ["net10.0"],
+      "project_references": [
+        {
+          "Include": "../Core/IECODE.Core.csproj"
+        }
+      ],
+      "package_references": [
+        {
+          "Include": "Microsoft.NET.Test.Sdk"
+        },
+        {
+          "Include": "xunit"
+        },
+        {
+          "Include": "xunit.runner.visualstudio"
+        }
+      ],
+      "compile_remove": [],
+      "evaluated_compile_items": 28
+    },
+    {
+      "path": "src/IECODE/Core/IECODE.Core.csproj",
+      "frameworks": ["net10.0"],
+      "project_references": [],
+      "package_references": [
+        {
+          "Include": "MoonSharp"
+        },
+        {
+          "Include": "SharpGLTF.Toolkit"
+        },
+        {
+          "Include": "SixLabors.ImageSharp"
+        },
+        {
+          "Include": "System.IO.Hashing"
+        },
+        {
+          "Include": "CommunityToolkit.HighPerformance"
+        },
+        {
+          "Include": "BCnEncoder.Net"
+        },
+        {
+          "Include": "K4os.Compression.LZ4"
+        },
+        {
+          "Include": "SteamKit2"
+        },
+        {
+          "Include": "AuroraLib.Compression"
+        },
+        {
+          "Include": "Newtonsoft.Json"
+        },
+        {
+          "Include": "Serilog"
+        },
+        {
+          "Include": "Serilog.Sinks.Console"
+        }
+      ],
+      "compile_remove": [],
+      "evaluated_compile_items": 364
+    },
+    {
+      "path": "src/IECODE/Ffi/IECODE.Ffi.csproj",
+      "frameworks": ["net10.0"],
+      "project_references": [
+        {
+          "Include": "../Core/IECODE.Core.csproj"
+        }
+      ],
+      "package_references": [
+        {
+          "Include": "Microsoft.JavaScript.NodeApi"
+        },
+        {
+          "Include": "Microsoft.JavaScript.NodeApi.DotNetHost"
+        }
+      ],
+      "compile_remove": [],
+      "evaluated_compile_items": 2
+    },
+    {
+      "path": "src/IECODE/Gui/IECODE.Gui.csproj",
+      "frameworks": ["net10.0"],
+      "project_references": [
+        {
+          "Include": "../Core/IECODE.Core.csproj"
+        }
+      ],
+      "package_references": [
+        {
+          "Include": "Avalonia"
+        },
+        {
+          "Include": "Avalonia.Desktop"
+        },
+        {
+          "Include": "Avalonia.Themes.Fluent"
+        },
+        {
+          "Include": "Avalonia.Fonts.Inter"
+        },
+        {
+          "Include": "Avalonia.Diagnostics",
+          "Condition": "'$(Configuration)' == 'Debug'"
+        },
+        {
+          "Include": "CommunityToolkit.Mvvm"
+        },
+        {
+          "Include": "DynamicData"
+        },
+        {
+          "Include": "FluentAvaloniaUI"
+        },
+        {
+          "Include": "FluentAvalonia.ProgressRing"
+        },
+        {
+          "Include": "Material.Icons"
+        },
+        {
+          "Include": "Material.Icons.Avalonia"
+        },
+        {
+          "Include": "NAudio"
+        },
+        {
+          "Include": "OpenTK"
+        },
+        {
+          "Include": "ReactiveUI"
+        }
+      ],
+      "compile_remove": [],
+      "evaluated_compile_items": 191
+    }
+  ],
+  "dotnet_sources_outside_evaluated_compile": [
+    "src/IECODE/Cli/NdsExample/Program.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Avatar/Avatar.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Avatar/FightingSpirit.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Avatar/Totem.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Common/Elements.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Common/Evolutions.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Common/ExperienceBar.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Common/Identity.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Common/Invokes.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Common/MoveType.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Common/Positions.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Common/Stats.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Common/Styles.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Equipment/Equipment.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Move/Effect.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Move/Move.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Move/MoveUltimate.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Player/Base.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Player/Param.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Player/Player.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Player/SkillTable.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Soccer/SoccerAvatar.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Soccer/SoccerCharaConfig.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Soccer/SoccerMove.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Soccer/SoccerPlayer.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Team/Team.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Logic/Team/TeamParam.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Properties/AssemblyInfo.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Properties/Resources.Designer.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Properties/Settings.Designer.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Randomizer/Galaxy.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Randomizer/Randomizer.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Randomizer/Utility/Option.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Randomizer/Utility/Probability.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/RandomizerWindow.Designer.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/RandomizerWindow.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Resources/Avatars.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Resources/Equipments.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Resources/Items.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Resources/Moves.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Resources/Players.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Resources/ScriptSoccers.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Resources/Teams.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Tools/DataReader.cs",
+    "src/IECODE/Gui/GalaxyRandomizer/Tools/DataWriter.cs",
+    "src/IECODE/Gui/IevrManager/Helpers/LocalizationHelper.cs",
+    "src/IECODE/Gui/IevrManager/IEVRModManager.Tests/ConfigManagerAdditionalTests.cs",
+    "src/IECODE/Gui/IevrManager/IEVRModManager.Tests/ConfigManagerTests.cs",
+    "src/IECODE/Gui/IevrManager/IEVRModManager.Tests/ConfigMigrationTests.cs",
+    "src/IECODE/Gui/IevrManager/IEVRModManager.Tests/ErrorHandlingTests.cs",
+    "src/IECODE/Gui/IevrManager/IEVRModManager.Tests/IntegrationTests.cs",
+    "src/IECODE/Gui/IevrManager/IEVRModManager.Tests/ModEntryTests.cs",
+    "src/IECODE/Gui/IevrManager/IEVRModManager.Tests/ModManagerAdditionalTests.cs",
+    "src/IECODE/Gui/IevrManager/IEVRModManager.Tests/ModManagerTests.cs",
+    "src/IECODE/Gui/IevrManager/IEVRModManager.Tests/ProfileManagerAdditionalTests.cs",
+    "src/IECODE/Gui/IevrManager/IEVRModManager.Tests/ProfileManagerTests.cs",
+    "src/IECODE/Gui/IevrManager/IEVRModManager.Tests/ValidationTests.cs",
+    "src/IECODE/Gui/IevrManager/MainWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Managers/AppUpdateManager.cs",
+    "src/IECODE/Gui/IevrManager/Windows/AppUpdateWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/BackupConfirmationWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/ConfigPathsWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/ConflictWarningWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/DownloadsWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/GameBananaBrowserWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/MessageWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/PacksWarningWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/PendingChangesWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/ProfileManagerWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/ProgressWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/SuccessMessageWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/ThemeChangeWindow.xaml.cs",
+    "src/IECODE/Gui/IevrManager/Windows/UpdateDetectedWindow.xaml.cs",
+    "src/IECODE/Gui/Lynx/Forms/ChallengeRoute/AddCellWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/ChallengeRoute/AddCellWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/ChallengeRoute/ChallengeRouteWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/ChallengeRoute/ChallengeRouteWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/CharaParamWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/CharaParamWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/CharabaseWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/CharabaseWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/GenerateStatsWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/GenerateStatsWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/GrowthCurveWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/GrowthCurveWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/GrowthProfileWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/GrowthProfileWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/NewCharabaseWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/NewCharabaseWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/NewCharaparamWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Characters/NewCharaparamWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Coaches/CoachWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Coaches/CoachWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/FightingSpirits/FightingSpiritWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/FightingSpirits/FightingSpiritWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/FontEditor/FontWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/FontEditor/FontWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Home/Home.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Home/Home.cs",
+    "src/IECODE/Gui/Lynx/Forms/Home/LanguageWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Home/LanguageWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Maps/MapEditor.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Maps/MapEditor.cs",
+    "src/IECODE/Gui/Lynx/Forms/Maps/MapPreview.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Maps/MapPreview.cs",
+    "src/IECODE/Gui/Lynx/Forms/Maps/MapSelect.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Maps/MapSelect.cs",
+    "src/IECODE/Gui/Lynx/Forms/Maps/NewNPCWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Maps/NewNPCWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Nyanko/Nyanko.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Nyanko/Nyanko.cs",
+    "src/IECODE/Gui/Lynx/Forms/Nyanko/SearchWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Nyanko/SearchWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/PalpackCards/NewPalpackCardWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/PalpackCards/NewPalpackCardWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/PalpackCards/PalpackCardsWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/PalpackCards/PalpackCardsWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/SaveEditor/SaveEditorWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/SaveEditor/SaveEditorWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Scipts/NewScriptWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Scipts/NewScriptWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Scipts/ScriptEditor.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Scipts/ScriptEditor.cs",
+    "src/IECODE/Gui/Lynx/Forms/Scipts/ScriptSelect.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Scipts/ScriptSelect.cs",
+    "src/IECODE/Gui/Lynx/Forms/Shops/ShopWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Shops/ShopWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Skills/NewSkillWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Skills/NewSkillWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Skills/SkillWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Skills/SkillWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Soccers/NewSoccerWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Soccers/NewSoccerWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/Soccers/SoccersWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/Soccers/SoccersWindow.cs",
+    "src/IECODE/Gui/Lynx/Forms/TranslationHelper/TranslationHelperWindow.Designer.cs",
+    "src/IECODE/Gui/Lynx/Forms/TranslationHelper/TranslationHelperWindow.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Base64/Condition.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/AvatarGrowthStats.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/Bodies.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/CharaTypes.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/Elements.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/ExperienceCurve.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/Genders.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/GrowStats.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/GrowingTimes.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/ItemTypes.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/MatchRestrictions.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/MovePositions.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/PalpackConditionTypes.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/PlayerPositions.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/PlayerStats.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/Skins.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Common/Years.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Games/GO/GO.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Games/GO/GOStatCalculator.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Games/GO/GOSupport.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Games/Game.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Games/GameSupports.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/AvatarGrowthStat.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ChallengeRoute.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/CoachText.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/IAvatar.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ICharabase.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ICharaparam.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ICommunityInfo.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/IItemConfig.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/INPCAppear.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/INPCBase.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/INPCPreset.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/IRouteConfig.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/IShopConfig.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ISkillConfig.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ISkillTable.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ISoccerInfo.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/IStatCalculator.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ITalkConfig.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ITalkInfo.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ITeamConfigInfo.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ITeamParamInfo.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ITraining.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/ITrainingUD.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/Player.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/StatProfileMatch.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/Team.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Logic/UseTimeGrowth.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Games/IEGO/IEGO.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Games/IEGO/IEGOHelper.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Games/IEGOCS/IEGOCS.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Games/IEGOCS/IEGOCSHelper.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Games/IEGOGalaxy/IEGOGalaxy.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Games/IEGOGalaxy/IEGOGalaxyHelper.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Games/IGame.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Logic/Competition Route/Cell.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Logic/Competition Route/Route.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Logic/Equipment.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Logic/MixiMax.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Logic/Move.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Logic/Player.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Logic/Save.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Logic/Team.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Saves/IE/IE.cs",
+    "src/IECODE/Gui/Lynx/InazumaEleven/Save/Saves/ISave.cs",
+    "src/IECODE/Gui/Lynx/Properties/AssemblyInfo.cs",
+    "src/IECODE/Gui/Lynx/Properties/Resources.Designer.cs",
+    "src/IECODE/Gui/Lynx/Properties/Settings.Designer.cs",
+    "src/IECODE/Gui/Lynx/Tools/Draw.cs",
+    "src/IECODE/Gui/Lynx/Tools/ResourceReader.cs",
+    "src/IECODE/Gui/Lynx/UI/FlatCheckBox.cs",
+    "src/IECODE/Gui/Lynx/UI/FlatComboBox.cs",
+    "src/IECODE/Gui/Lynx/UI/FlatNumericUpDown.cs",
+    "src/IECODE/Gui/Lynx/UI/LineNumberRTB.Designer.cs",
+    "src/IECODE/Gui/Lynx/UI/LineNumberRTB.cs",
+    "src/IECODE/Gui/Lynx/UI/VSTabControl.cs",
+    "src/IECODE/Gui/MapEditor/InazumaElevenGo/Common/NPCHeads.cs",
+    "src/IECODE/Gui/MapEditor/InazumaElevenGo/Common/NPCHeadsOther.cs",
+    "src/IECODE/Gui/MapEditor/InazumaElevenGo/Common/PlayablePhase.cs",
+    "src/IECODE/Gui/MapEditor/InazumaElevenGo/Common/PlayerHeads.cs",
+    "src/IECODE/Gui/MapEditor/InazumaElevenGo/Games/IEGO/IEGO.cs",
+    "src/IECODE/Gui/MapEditor/InazumaElevenGo/Games/IGame.cs",
+    "src/IECODE/Gui/MapEditor/InazumaElevenGo/Map/NPCSupport.cs",
+    "src/IECODE/Gui/MapEditor/InazumaElevenGo/Map/TalkSupport.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Binary/Binary.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Binary/BinarySupport.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Binary/CfgBin.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Binary/CfgBinSupport.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Compression/Compressor.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Compression/ETC1/ETC1.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Compression/ETC1/ETC1Decoder.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Compression/ETC1/RGB.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Compression/Huffman/Huffman.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Compression/Huffman/HuffmanDecoder.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Compression/ICompression.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Compression/LZ10/LZ10.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Compression/NoCompression/NoCompression.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Compression/RLE/RLE.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Image/Color Formats/ColorFormats.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Image/Color Formats/IColorFormat.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Image/IMGC.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Image/IMGCSupport.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Image/IMGCSwizzle.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Logic/Entry.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Logic/OffsetStringPair.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Logic/Type.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Logic/Variable.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Mapenv/FloatTree.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Mapenv/Mapenv.cs",
+    "src/IECODE/Gui/MapEditor/Level5/Mapenv/MapenvSupport.cs",
+    "src/IECODE/Gui/MapEditor/MapEditor.cs",
+    "src/IECODE/Gui/MapEditor/MapEditor.designer.cs",
+    "src/IECODE/Gui/MapEditor/Properties/AssemblyInfo.cs",
+    "src/IECODE/Gui/MapEditor/Properties/Resources.Designer.cs",
+    "src/IECODE/Gui/MapEditor/Properties/Settings.Designer.cs",
+    "src/IECODE/Gui/MapEditor/Tools/BinaryDataReader.cs",
+    "src/IECODE/Gui/MapEditor/Tools/BinaryDataWriter.cs",
+    "src/IECODE/Gui/MapEditor/Tools/Draw.cs",
+    "src/IECODE/Gui/PlaylistMaker/BeBinaryReader.cs",
+    "src/IECODE/Gui/PlaylistMaker/BeBinaryWriter.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Common/GO/Avatars/Avatars.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Common/GO/Best Matches/BestMatches.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Common/GO/Equipments/Equipments.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Common/GO/Items/Items.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Common/GO/Moves/Moves.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Common/GO/Play Records/PlayRecords.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Common/GO/Players/Auras.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Common/GO/Players/Players.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Common/GO/Routes/Routes.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Games/IEGO/IEGO.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Games/IEGO/IEGOHelper.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Games/IEGOCS/IEGOCS.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Games/IEGOCS/IEGOCSHelper.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Games/IEGOGalaxy/IEGOGalaxy.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Games/IEGOGalaxy/IEGOGalaxyHelper.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Games/IGame.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/INZ/INZ4.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/INZ/INZ5.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/INZ/INZ6.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/INZ/INZContainer.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Saves/IE/IE.cs",
+    "src/IECODE/Gui/SaveEditor/InazumaEleven/Saves/ISave.cs",
+    "src/IECODE/Gui/SaveEditor/InventoryWindow.Designer.cs",
+    "src/IECODE/Gui/SaveEditor/InventoryWindow.cs",
+    "src/IECODE/Gui/SaveEditor/MessageComboBox.Designer.cs",
+    "src/IECODE/Gui/SaveEditor/MessageComboBox.cs",
+    "src/IECODE/Gui/SaveEditor/PlayRecordsWindow.Designer.cs",
+    "src/IECODE/Gui/SaveEditor/PlayRecordsWindow.cs",
+    "src/IECODE/Gui/SaveEditor/Properties/AssemblyInfo.cs",
+    "src/IECODE/Gui/SaveEditor/Properties/Resources.Designer.cs",
+    "src/IECODE/Gui/SaveEditor/SaveInfoWindow.Designer.cs",
+    "src/IECODE/Gui/SaveEditor/SaveInfoWindow.cs",
+    "src/IECODE/Gui/SaveEditor/TeamWindow.Designer.cs",
+    "src/IECODE/Gui/SaveEditor/TeamWindow.cs",
+    "src/IECODE/Gui/SaveEditor/Tools/Collections.cs",
+    "src/IECODE/Gui/SaveEditor/Tools/Draw.cs",
+    "src/IECODE/Gui/SaveEditor/Welcome.Designer.cs",
+    "src/IECODE/Gui/SaveEditor/Welcome.cs",
+    "src/IECODE/Gui/StrikersTools/FileFormats/ArchiveFile.cs",
+    "src/IECODE/Gui/StrikersTools/FileFormats/BLN.cs",
+    "src/IECODE/Gui/StrikersTools/FileFormats/Font.cs",
+    "src/IECODE/Gui/StrikersTools/FileFormats/Patcher.cs",
+    "src/IECODE/Gui/StrikersTools/FileFormats/SHTX.cs",
+    "src/IECODE/Gui/StrikersTools/MainForm.Designer.cs",
+    "src/IECODE/Gui/StrikersTools/MainForm.cs",
+    "src/IECODE/Gui/StrikersTools/Properties/AssemblyInfo.cs",
+    "src/IECODE/Gui/StrikersTools/Properties/Resources.Designer.cs",
+    "src/IECODE/Gui/StrikersTools/Properties/Settings.Designer.cs",
+    "src/IECODE/Gui/StrikersTools/TextRendering/FileExplorer.cs",
+    "src/IECODE/Gui/StrikersTools/TextRendering/Form1.Designer.cs",
+    "src/IECODE/Gui/StrikersTools/TextRendering/Form1.cs",
+    "src/IECODE/Gui/StrikersTools/TextRendering/GameBackground.cs",
+    "src/IECODE/Gui/StrikersTools/TextRendering/TextRenderer.cs",
+    "src/IECODE/Gui/Toolbox/Forms/MoveForm.Designer.cs",
+    "src/IECODE/Gui/Toolbox/Forms/MoveForm.cs",
+    "src/IECODE/Gui/Toolbox/Forms/Save-Editor.Designer.cs",
+    "src/IECODE/Gui/Toolbox/Forms/Save-Editor.cs",
+    "src/IECODE/Gui/Toolbox/Forms/Save-Editor/Config/Config.cs",
+    "src/IECODE/Gui/Toolbox/Forms/StatsForm.Designer.cs",
+    "src/IECODE/Gui/Toolbox/Forms/StatsForm.cs",
+    "src/IECODE/Gui/Toolbox/Forms/SubTitleForm.Designer.cs",
+    "src/IECODE/Gui/Toolbox/Forms/SubTitleForm.cs",
+    "src/IECODE/Gui/Toolbox/MainForm.Designer.cs",
+    "src/IECODE/Gui/Toolbox/MainForm.cs",
+    "src/IECODE/Gui/Toolbox/Properties/AssemblyInfo.cs",
+    "src/IECODE/Gui/Toolbox/Properties/Resources.Designer.cs",
+    "src/IECODE/Gui/Toolbox/Properties/Settings.Designer.cs",
+    "src/IECODE/Gui/Toolbox/Utils/FileIO.cs",
+    "src/IECODE/Gui/Toolbox/Utils/NFFM3_Plugin.cs",
+    "src/IECODE/Tests/Bench/Program.cs"
+  ],
+  "cpp_default_tests": {
+    "source_files": 62,
+    "excluded_files": 26,
+    "exclusion_basis": "Three permanently excluded tests plus engine/game tests gated by disabled default options."
+  },
+  "exact_source_duplicate_groups_above_500_bytes": [
+    {
+      "language": "rust",
+      "files": [
+        {
+          "path": "crates/aphrody-aarch64/src/decoder.rs",
+          "bytes": 7220,
+          "lines": 271
+        },
+        {
+          "path": "crates/emu/ruzu/rdynarmic/src/frontend/a64/decoder.rs",
+          "bytes": 7220,
+          "lines": 271
+        }
+      ],
+      "redundant_bytes": 7220
+    },
+    {
+      "language": "rust",
+      "files": [
+        {
+          "path": "crates/aphrody-aarch64/a64_decoder_parser.rs",
+          "bytes": 2724,
+          "lines": 109
+        },
+        {
+          "path": "crates/emu/ruzu/rdynarmic/a64_decoder_parser.rs",
+          "bytes": 2724,
+          "lines": 109
+        }
+      ],
+      "redundant_bytes": 2724
+    },
+    {
+      "language": "rust",
+      "files": [
+        {
+          "path": "crates/aphrody-aarch64/tests/a64_decoder_parser.rs",
+          "bytes": 717,
+          "lines": 19
+        },
+        {
+          "path": "crates/emu/ruzu/rdynarmic/tests/a64_decoder_parser.rs",
+          "bytes": 717,
+          "lines": 19
+        }
+      ],
+      "redundant_bytes": 717
+    }
+  ],
+  "additional_duplicate_opcode_table": {
+    "paths": ["crates/aphrody-aarch64/src/a64.inc", "crates/emu/ruzu/rdynarmic/src/frontend/a64/a64.inc"],
+    "redundant_bytes": 101402
+  },
+  "checks": [
+    {
+      "language": "rust",
+      "command": "cargo metadata --no-deps --format-version 1 --locked",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "74 workspace packages; dependency resolution/build is not exercised.",
+      "scope": null
+    },
+    {
+      "language": "rust",
+      "command": "cargo fmt --all --check",
+      "status": "failed",
+      "exit_code": 1,
+      "summary": "Includes formatting diagnostics from sibling path dependencies. Local packages checked separately.",
+      "scope": null
+    },
+    {
+      "language": "rust",
+      "command": "cargo fmt --check -p <each of the 74 workspace packages>",
+      "status": "failed",
+      "exit_code": 1,
+      "summary": "723 distinct normalized IECODE source paths have formatting differences.",
+      "scope": null
+    },
+    {
+      "language": "rust",
+      "command": "cargo check --workspace --all-targets --locked --offline -j 2",
+      "status": "blocked",
+      "exit_code": 101,
+      "summary": "Initially lacked the arm-decoder Git checkout; not a compiler diagnostic.",
+      "scope": null
+    },
+    {
+      "language": "rust",
+      "command": "cargo clippy --workspace --all-targets --locked --offline -j 2 -- -D warnings",
+      "status": "blocked",
+      "exit_code": 101,
+      "summary": "Stopped during dependency acquisition, before linting any workspace package.",
+      "scope": null
+    },
+    {
+      "language": "rust",
+      "command": "timeout 180 cargo check --workspace --all-targets --locked -j 2",
+      "status": "blocked",
+      "exit_code": 101,
+      "summary": "Fetched required Git sources, then refused to update Cargo.lock. No compiler success claimed.",
+      "scope": "Current local sibling; not a clean checkout of the pinned operations revision."
+    },
+    {
+      "language": "rust",
+      "command": "cargo test --manifest-path <temporary exact-source wii projection> --all-targets --offline -j 2",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "10 tests passed.",
+      "scope": "Original aphrody-wii library source; independent manifest outside the repository."
+    },
+    {
+      "language": "rust",
+      "command": "cargo test --manifest-path <temporary exact-source ctr projection> --all-targets --offline -j 2",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "17 tests passed.",
+      "scope": "Original aphrody-ctr library source; independent manifest outside the repository."
+    },
+    {
+      "language": "rust",
+      "command": "cargo run --release --manifest-path <temporary format projection> --offline -j 2",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "Caught CPK offset/range panics; Rust rejects the exhausted CRILAYLA stream.",
+      "scope": "Original cpk.rs/crilayla.rs, AES 0.8.4, minimal surrounding error/detection types; not the full formats crate."
+    },
+    {
+      "language": "python",
+      "command": "ast.parse for every tracked .py file",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "174 files parse under Python 3.12; imports and execution are not proven.",
+      "scope": null
+    },
+    {
+      "language": "python",
+      "command": "bun run lint:python",
+      "status": "blocked",
+      "exit_code": 2,
+      "summary": "Required uv ==0.12.17; installed uv is 0.12.22.",
+      "scope": null
+    },
+    {
+      "language": "python",
+      "command": "uv tool run --from ruff==0.15.18 ruff check . --output-format json",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "No diagnostics under the root configuration; only the 28 niepy files are selected.",
+      "scope": null
+    },
+    {
+      "language": "python",
+      "command": "uv tool run --from ruff==0.15.18 ruff format --check .",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "28 files already formatted.",
+      "scope": null
+    },
+    {
+      "language": "python",
+      "command": "uv tool run --from ruff==0.15.18 ruff check --isolated --select E4,E7,E9,F --ignore E401,E402,F401,F403,F405,F541,F841 scripts src/niepy src/nie-blender .agents/skills tools --output-format json",
+      "status": "failed",
+      "exit_code": 1,
+      "summary": "84 diagnostics: 82 style violations and two Ghidra host-global references. The latter are not confirmed NameError defects.",
+      "scope": null
+    },
+    {
+      "language": "python",
+      "command": "uv tool run --from pytest==8.4.2 pytest src/niepy -q",
+      "status": "blocked",
+      "exit_code": 2,
+      "summary": "Initial standalone harness could not import niepy; corrected with an explicit PYTHONPATH.",
+      "scope": null
+    },
+    {
+      "language": "python",
+      "command": "PYTHONPATH=src/niepy uv tool run --from pytest==8.4.2 pytest src/niepy -q",
+      "status": "failed",
+      "exit_code": 1,
+      "summary": "99 passed, 17 skipped, 10 failed. Eight failures require unavailable native artifacts; two metadata assertions fail without native artifacts.",
+      "scope": null
+    },
+    {
+      "language": "cpp",
+      "command": "cmake --preset iecode-cpp-debug",
+      "status": "bounded_incomplete",
+      "exit_code": 143,
+      "summary": "vcpkg planned 84 packages. Stopped the owned process tree during package 13/84 (assimp) to bound the dependency bootstrap.",
+      "scope": "No configured/compiled full CMake native graph claimed."
+    },
+    {
+      "language": "cpp",
+      "command": "cppcheck --enable=warning,performance,portability --std=c++20 --inline-suppr --suppress=missingIncludeSystem --xml --xml-version=2 -j 2 -Isrc/iecode-cpp/src/include src/iecode-cpp/src",
+      "status": "completed_with_diagnostics",
+      "exit_code": 0,
+      "summary": "343 translation units checked, 27 raw diagnostics. No --error-exitcode was set; exit 0 does not mean no findings.",
+      "scope": null
+    },
+    {
+      "language": "cpp",
+      "command": "g++-13 -std=c++20 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer <crand/nie_re/vfs_formats sources and tests> -lgtest -lgtest_main -lpthread; run produced binary",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "16 tests passed; no AddressSanitizer/UndefinedBehaviorSanitizer diagnostic.",
+      "scope": "The three narrow C++ suites used by CI, not all native tests."
+    },
+    {
+      "language": "cpp",
+      "command": "sanitized build/run of original compression/crilayla.cpp with exhausted-stream fixture",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "A 273-byte fixture with one compressed byte claims 32 decoded bytes; function returns 288 bytes instead of an error.",
+      "scope": null
+    },
+    {
+      "language": "cpp",
+      "command": "bun run format:cpp:check",
+      "status": "failed",
+      "exit_code": 1,
+      "summary": "The documented types.h formatting gate reports clang-format violations.",
+      "scope": null
+    },
+    {
+      "language": "dotnet",
+      "command": "dotnet restore IECODE.sln --locked-mode --disable-parallel",
+      "status": "failed",
+      "exit_code": 1,
+      "summary": "NU1004: Debug GUI reference Avalonia.Diagnostics is absent from the package lock.",
+      "scope": null
+    },
+    {
+      "language": "dotnet",
+      "command": "dotnet build IECODE.sln --configuration Release --no-restore -m:1",
+      "status": "failed",
+      "exit_code": 1,
+      "summary": "113 unique compiler warnings; one GUI NuGet lock error.",
+      "scope": "This follows the failed default-configuration restore; no clean Release-only restore was tested."
+    },
+    {
+      "language": "dotnet",
+      "command": "dotnet test src/IECODE/Core.Tests/IECODE.Core.Tests.csproj --configuration Release --no-restore -m:1",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "290 passed, zero failed/skipped.",
+      "scope": "Managed core tests; not NativeAOT export qualification or GUI execution."
+    },
+    {
+      "language": "dotnet",
+      "command": "dotnet msbuild <each solution project> -getItem:Compile",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "Evaluated source inclusion for all five projects; 328 tracked .cs files are outside these Compile items.",
+      "scope": "Default configuration evaluation; does not include all later generated compiler inputs."
+    },
+    {
+      "language": "dotnet",
+      "command": "managed Release harness calling UnmanagedCallersOnly exports through unmanaged function pointers",
+      "status": "passed",
+      "exit_code": 0,
+      "summary": "GC compaction changes the returned version pointer. CRILAYLA declared input length 16 is accepted and reads the marker stored at input offset 16.",
+      "scope": "Compiled managed FFI assembly; NativeAOT publish/load not tested. Extra backing memory makes the length-boundary probe safe."
+    }
+  ],
+  "findings": [
+    {
+      "id": "NET-01",
+      "priority": "P1",
+      "status": "reproduced",
+      "title": "Native CRILAYLA export reads beyond declared input length",
+      "locations": [
+        {
+          "path": "src/IECODE/Ffi/Native/IecodeNative.cs",
+          "line": 61
+        },
+        {
+          "path": "src/IECODE/Core/Formats/Criware/CriFs/Compression/CriLayla.cs",
+          "line": 122
+        },
+        {
+          "path": "src/IECODE/Ffi/NodeApiBridge.cs",
+          "line": 41
+        }
+      ],
+      "evidence": "Only inputLen >=16 is required; header offset and raw-block/bitstream bounds are not checked. A safe 272-byte backing allocation passed with declared length 16 returns status 0, 256 output bytes and the marker at offset 16. The Node API path shares the unbounded pointer decoder; that path was reviewed but not independently executed.",
+      "recommended_action": "Use a bounded decoder; validate header sizes/offsets, signed arithmetic and every bitstream/back-reference read before allocation/copy. Initialize output slots on every failure."
+    },
+    {
+      "id": "NET-02",
+      "priority": "P1",
+      "status": "reproduced",
+      "title": "Exported version pointer refers to a movable managed array",
+      "locations": [
+        {
+          "path": "src/IECODE/Ffi/Native/IecodeNative.cs",
+          "line": 18
+        },
+        {
+          "path": "src/IECODE/Ffi/Native/IecodeNative.cs",
+          "line": 22
+        },
+        {
+          "path": "src/IECODE/Ffi/Native/IecodeNative.cs",
+          "line": 28
+        }
+      ],
+      "evidence": "The pointer escapes a fixed block. After GC.Collect(2, Forced, true, true), CoreVersion returns a different address. Schema uses the same allocation/return pattern. The old pointer was not dereferenced after relocation.",
+      "recommended_action": "Keep exported strings in memory with stable lifetime (pinned/native storage), or expose a caller-owned copy API; validate the actual published NativeAOT artifact separately."
+    },
+    {
+      "id": "RUST-01",
+      "priority": "P1",
+      "status": "validation_blocker",
+      "title": "Current workspace dependency graph is incompatible with locked resolution",
+      "locations": [
+        {
+          "path": "Cargo.lock",
+          "line": 1
+        },
+        {
+          "path": "workspace.manifest.json",
+          "line": 1
+        }
+      ],
+      "evidence": "Online cargo check fetches missing Git dependencies, then exits 101 because Cargo.lock would require changes. Local sibling revision differs from the pinned operations revision. This does not prove that a clean checkout with the exact pinned sibling has the same failure.",
+      "recommended_action": "Reproduce with the declared sibling revision, then regenerate the root lock only from the intended exact graph and rerun check/clippy/test."
+    },
+    {
+      "id": "NET-03",
+      "priority": "P1",
+      "status": "reproduced",
+      "title": "Default locked solution restore fails for Debug GUI dependencies",
+      "locations": [
+        {
+          "path": "src/IECODE/Gui/IECODE.Gui.csproj",
+          "line": 21
+        },
+        {
+          "path": "src/IECODE/Gui/packages.lock.json",
+          "line": 1
+        }
+      ],
+      "evidence": "NU1004 identifies Avalonia.Diagnostics in the Debug project references but absent from the lock file. The default restore fails; the subsequent no-restore solution build also fails. Core test restore/build remains usable.",
+      "recommended_action": "Qualify Debug/Release dependency conditions with the owning restore/lock procedure and update the lock coherently."
+    },
+    {
+      "id": "RUST-02",
+      "priority": "P2",
+      "status": "reproduced",
+      "title": "CPK invalid offsets and sizes panic instead of returning FormatError",
+      "locations": [
+        {
+          "path": "crates/nie/aphrody-nie-formats/src/cpk.rs",
+          "line": 827
+        },
+        {
+          "path": "crates/nie/aphrody-nie-formats/src/cpk.rs",
+          "line": 911
+        },
+        {
+          "path": "crates/nie/aphrody-nie-formats/src/cpk.rs",
+          "line": 976
+        }
+      ],
+      "evidence": "Original source in an isolated Release harness: parse_table_container([0;32], usize::MAX-8) panics at slice access; CpkReader::extract with offset=1,size=u64::MAX panics on range 1..0. Debug also panics on arithmetic overflow.",
+      "recommended_action": "Use checked arithmetic and checked slices; validate conversions and signed archive fields before producing entries, with malformed-input regressions."
+    },
+    {
+      "id": "CPP-01",
+      "priority": "P2",
+      "status": "reproduced",
+      "title": "Exhausted CRILAYLA bitstream is accepted with fabricated zero bytes",
+      "locations": [
+        {
+          "path": "src/iecode-cpp/src/compression/crilayla.cpp",
+          "line": 47
+        },
+        {
+          "path": "src/iecode-cpp/src/compression/crilayla.cpp",
+          "line": 122
+        }
+      ],
+      "evidence": "One compressed byte cannot encode the claimed 32 literal bytes. read_bits returns zero when exhausted; the decoder returns 288 output bytes. The same fixture is rejected by the original Rust CRILAYLA decoder.",
+      "recommended_action": "Propagate bitstream exhaustion as failure instead of synthesizing zero bits, and add the cross-language malformed-stream fixture."
+    },
+    {
+      "id": "CPP-02",
+      "priority": "P2",
+      "status": "source_verified",
+      "title": "G4MD importer serializes a layout incompatible with the retained parser",
+      "locations": [
+        {
+          "path": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": 32
+        },
+        {
+          "path": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": 129
+        },
+        {
+          "path": "src/iecode-cpp/src/formats/level5/g4md.cpp",
+          "line": 14
+        },
+        {
+          "path": "src/iecode-cpp/src/formats/level5/g4md.cpp",
+          "line": 17
+        }
+      ],
+      "evidence": "Importer uses header 0x44 and submesh stride 0x10; parser requires header 0xA0 and stride 0x50 with fields at different offsets. The importer is included behind IECODE_HAS_TINYGLTF, which the default core target enables. No real GLB round trip was run.",
+      "recommended_action": "Choose the supported format/version explicitly and qualify importer output with the owning parser and model round-trip fixtures."
+    },
+    {
+      "id": "PY-01",
+      "priority": "P2",
+      "status": "reproduced",
+      "title": "Python fallback format metadata differs from native contracts",
+      "locations": [
+        {
+          "path": "src/niepy/niepy/formats.py",
+          "line": 98
+        },
+        {
+          "path": "src/niepy/niepy/formats.py",
+          "line": 206
+        },
+        {
+          "path": "src/niepy/tests/test_vfs_formats.py",
+          "line": 38
+        },
+        {
+          "path": "src/niepy/tests/test_vfs_formats.py",
+          "line": 82
+        },
+        {
+          "path": "crates/nie/aphrody-nie-ffi/src/lib.rs",
+          "line": 534
+        }
+      ],
+      "evidence": "Fallback G4TX MIME is image/x-g4tx, whereas Rust scalar/descriptor MIME is image/x-level5-g4tx. The cfg.bin detection test expects the scalar/native name cfg.bin, but fallback reports RDBN; the Rust full descriptor also uses RDBN. Two assertions fail, exposing inconsistent display-name conventions as well as MIME drift.",
+      "recommended_action": "Derive fallback metadata from the owning catalog and define scalar/descriptor name compatibility explicitly; qualify both native and fallback paths."
+    },
+    {
+      "id": "PY-02",
+      "priority": "P2",
+      "status": "validation_blocker",
+      "title": "Official Python gate is blocked by the uv version pin",
+      "locations": [
+        {
+          "path": "pyproject.toml",
+          "line": 15
+        }
+      ],
+      "evidence": "required-version ==0.12.17 rejects the installed uv 0.12.22 before Ruff starts. Independently pinned Ruff/Pytest probes were run through uv tool run without changing the project pin.",
+      "recommended_action": "Requalify and align the workspace uv contract, or run the declared version in the owning workflow."
+    },
+    {
+      "id": "PY-03",
+      "priority": "P2",
+      "status": "reproduced",
+      "title": "Python native-dependent tests do not qualify a source-only checkout",
+      "locations": [
+        {
+          "path": "src/niepy/tests/test_native_bridge.py",
+          "line": 1
+        },
+        {
+          "path": "src/niepy/tests/test_crypto_parsers.py",
+          "line": 183
+        },
+        {
+          "path": "src/niepy/tests/test_cli_nie_exe.py",
+          "line": 12
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "line": 76
+        },
+        {
+          "path": "src/niepy/niepy/_ffi.py",
+          "line": 139
+        }
+      ],
+      "evidence": "With PYTHONPATH set, 99 pass/17 skip/10 fail. Eight failures depend on absent Rust/.NET native libraries; no NativeAOT .so was published. Missing-artifact failures are not counted as eight independent parser defects. The recovery message requests cargo build -p nie-ffi, but the active package is aphrody-nie-ffi.",
+      "recommended_action": "Separate native acceptance prerequisites from pure-Python checks, then run native integration against real built artifacts rather than a mocked success. Correct the package selector in the recovery message."
+    },
+    {
+      "id": "PY-04",
+      "priority": "P2",
+      "status": "source_verified",
+      "title": "Root Python lint excludes most retained Python code",
+      "locations": [
+        {
+          "path": "ruff.toml",
+          "line": 3
+        }
+      ],
+      "evidence": "Root Ruff selects 28 niepy files out of 174 tracked Python files; four other include roots no longer exist. Scripts, Blender, tools and skills are outside that baseline. Expanded scan has 82 style findings and two Ghidra-injected currentProgram references; those host globals are not confirmed execution bugs.",
+      "recommended_action": "Replace obsolete include roots with an explicit current owner/scope policy and preserve host-specific Ghidra/Blender assumptions."
+    },
+    {
+      "id": "RUST-03",
+      "priority": "P2",
+      "status": "source_verified",
+      "title": "CRILAYLA allocation has no decoded-size budget",
+      "locations": [
+        {
+          "path": "crates/nie/aphrody-nie-formats/src/crilayla.rs",
+          "line": 95
+        },
+        {
+          "path": "crates/nie/aphrody-nie-formats/src/crilayla.rs",
+          "line": 110
+        }
+      ],
+      "evidence": "The untrusted u32 decoded size is used for a zeroed allocation before proving the bitstream can produce it. On a 64-bit target the requested output can reach 4,294,967,551 bytes. No large allocation/OOM reproduction was attempted; C++ already applies a 256 MiB cap.",
+      "recommended_action": "Expose/enforce an owner-approved decoded-size budget and return an allocation/size error before materializing oversized output."
+    },
+    {
+      "id": "RUST-04",
+      "priority": "P2",
+      "status": "source_verified",
+      "title": "Active UI package license-file path is missing",
+      "locations": [
+        {
+          "path": "crates/nie/aphrody-nie-ui/Cargo.toml",
+          "line": 6
+        }
+      ],
+      "evidence": "../../../docs/reference/iecode/NIE-LICENSE does not exist. The other declared active license files resolve correctly when interpreted relative to their manifests. This path was already missing outside the compacted historical/research trees.",
+      "recommended_action": "Point metadata at the actual retained license owner and verify packaging; preserve license text and ownership."
+    },
+    {
+      "id": "RUST-05",
+      "priority": "P3",
+      "status": "reproduced",
+      "title": "Local Rust formatting gate fails broadly",
+      "locations": [
+        {
+          "path": "Cargo.toml",
+          "line": 1
+        }
+      ],
+      "evidence": "Explicitly selecting all 74 local workspace packages produces differences in 723 normalized local source paths. The separate --all command also traverses sibling path dependencies. No formatter was applied.",
+      "recommended_action": "Format coherent owner batches after preserving unrelated changes; do not infer correctness from a style-only change."
+    },
+    {
+      "id": "CPP-03",
+      "priority": "P3",
+      "status": "reproduced",
+      "title": "Documented C++ formatting gate fails",
+      "locations": [
+        {
+          "path": "src/iecode-cpp/src/include/iecode/types.h",
+          "line": 30
+        }
+      ],
+      "evidence": "clang-format --dry-run --Werror reports violations in types.h. No broad native formatting sweep was applied.",
+      "recommended_action": "Normalize the relevant native owner batch and repeat the documented formatting gate."
+    },
+    {
+      "id": "NET-04",
+      "priority": "P3",
+      "status": "source_verified",
+      "title": "Managed build retains a large warning baseline",
+      "locations": [
+        {
+          "path": "src/IECODE/Core/IECODE.Core.csproj",
+          "line": 1
+        }
+      ],
+      "evidence": "113 distinct warnings: 90 CS8618, 4 CS0108, 2 CS8602, 8 CS8509, 3 CS8600, 3 CS8524, 1 CS8601, 1 CS8604, 1 CS0659. The passing 290 core tests do not demonstrate every nullable/enum path.",
+      "recommended_action": "Triage warnings by runtime impact and source owner, especially dereferences and non-exhaustive switches, without fabricating unavailable game inputs."
+    },
+    {
+      "id": "RUST-06",
+      "priority": "P3",
+      "status": "source_verified",
+      "title": "Portable A64 decoder source and opcode table have exact retained copies",
+      "locations": [
+        {
+          "path": "crates/aphrody-aarch64/src/decoder.rs",
+          "line": 1
+        },
+        {
+          "path": "crates/emu/ruzu/rdynarmic/src/frontend/a64/decoder.rs",
+          "line": 1
+        }
+      ],
+      "evidence": "Three Rust-file duplicate groups above 500 bytes plus the identical 101,402-byte a64.inc table; total redundant bytes 112,063. Retained rdynarmic is outside the active root graph, so equality does not establish safe deletion.",
+      "recommended_action": "Converge through the established portable owner when the retained runtime is integrated; preserve provenance and required runtime interfaces."
+    }
+  ],
+  "reproductions": [
+    {
+      "language": "dotnet",
+      "source": "using System.Runtime.InteropServices;\nusing IECODE.Ffi.Native;\nunsafe {\n    delegate* unmanaged<byte*> version = &IecodeNative.CoreVersion;\n    nuint original = (nuint)version();\n    GC.Collect(2, GCCollectionMode.Forced, true, true);\n    bool versionPointerMoved = (nuint)version() != original;\n    byte* input = (byte*)NativeMemory.AllocZeroed(272);\n    new ReadOnlySpan<byte>(\"CRILAYLA\"u8.ToArray()).CopyTo(new Span<byte>(input, 8));\n    input[16] = 0xA5;\n    byte* output = null;\n    int length = 0;\n    delegate* unmanaged<byte*, int, byte**, int*, int> decompress = &IecodeNative.CrilaylaDecompress;\n    int status = decompress(input, 16, &output, &length);\n    bool readPastDeclaredLength = output != null && output[0] == 0xA5;\n    Console.WriteLine($\"version_pointer_moved={versionPointerMoved}; truncated_status={status}; output_length={length}; read_past_declared_length={readPastDeclaredLength}\");\n    NativeMemory.Free(output);\n    NativeMemory.Free(input);\n}\n",
+      "placement": "Temporary harness outside the repository; source paths are placeholders.",
+      "scope": "Synthetic malformed data; no private game bytes."
+    },
+    {
+      "language": "cpp",
+      "source": "#include \"iecode/compression/crilayla.h\"\n#include <vector>\n#include <cstring>\n#include <iostream>\nint main() {\n    std::vector<uint8_t> bytes(273, 0);\n    std::memcpy(bytes.data(), \"CRILAYLA\", 8);\n    bytes[8] = 32;\n    bytes[12] = 1;\n    auto output = iecode::compression::crilayla_decompress(bytes);\n    std::cout << \"exhausted_stream_accepted=\" << (!output.empty()) << \"; output_size=\" << output.size() << '\\n';\n}\n",
+      "placement": "Temporary harness outside the repository; source paths are placeholders.",
+      "scope": "Synthetic malformed data; no private game bytes."
+    },
+    {
+      "language": "rust",
+      "source": "extern crate alloc;\n#[derive(Debug)]\npub enum FormatError { TooShort { got: usize, need: usize }, BadMagic { format: &'static str }, Corrupt(&'static str) }\n#[derive(PartialEq)]\npub enum FileFormat { CriLayla, Unknown }\npub fn detect(data: &[u8]) -> FileFormat { if crilayla::has_magic(data) { FileFormat::CriLayla } else { FileFormat::Unknown } }\n#[path=\"<REPOSITORY>/crates/nie/aphrody-nie-formats/src/crilayla.rs\"] pub mod crilayla;\n#[path=\"<REPOSITORY>/crates/nie/aphrody-nie-formats/src/cpk.rs\"] pub mod cpk;\nfn main() {\n    let overflow_panics = std::panic::catch_unwind(|| cpk::parse_table_container(&[0u8;32], usize::MAX - 8)).is_err();\n    let reader = cpk::CpkReader { entries: Vec::new(), file_key: None, is_encrypted: false };\n    let entry = cpk::CpkEntry { filename: String::new(), directory: String::new(), offset: 1, size: u64::MAX, extract_size: 0, is_compressed: false };\n    let extract_panics = std::panic::catch_unwind(|| reader.extract(&[0u8;32], &entry)).is_err();\n    println!(\"cpk_entry_range_panics={extract_panics}\");\n    let mut bytes = vec![0u8;273];\n    bytes[..8].copy_from_slice(b\"CRILAYLA\");\n    bytes[8..12].copy_from_slice(&32u32.to_le_bytes());\n    bytes[12..16].copy_from_slice(&1u32.to_le_bytes());\n    println!(\"cpk_extreme_offset_panics={overflow_panics}; crilayla_exhausted_stream_rejected={}\",crilayla::decompress(&bytes).is_err());\n}\n",
+      "placement": "Temporary harness outside the repository; source paths are placeholders.",
+      "scope": "Synthetic malformed data; no private game bytes."
+    }
+  ],
+  "cppcheck_raw_diagnostics": [
+    {
+      "id": "uselessCallsSubstr",
+      "severity": "performance",
+      "message": "Ineffective call of function 'substr' because a prefix of the string is assigned to itself. Use resize() or pop_back() instead.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/cli/commands/analyze_cmd.cpp",
+          "line": "119",
+          "column": "24"
+        }
+      ]
+    },
+    {
+      "id": "invalidLifetime",
+      "severity": "error",
+      "message": "Using object that points to local variable 'tmp' that is out of scope.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "179",
+          "column": "56"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "184",
+          "column": "21",
+          "info": "Variable created here."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "216",
+          "column": "30",
+          "info": "Assuming container is not empty"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "188",
+          "column": "29",
+          "info": "Added to container 'vertex_buffer'."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "189",
+          "column": "64",
+          "info": "Array decayed to pointer here."
+        }
+      ]
+    },
+    {
+      "id": "invalidLifetime",
+      "severity": "error",
+      "message": "Using object that points to local variable 'tmp' that is out of scope.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "208",
+          "column": "16"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "184",
+          "column": "21",
+          "info": "Variable created here."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "188",
+          "column": "29",
+          "info": "Added to container 'vertex_buffer'."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "189",
+          "column": "64",
+          "info": "Array decayed to pointer here."
+        }
+      ]
+    },
+    {
+      "id": "invalidLifetime",
+      "severity": "error",
+      "message": "Using object that points to local variable 'tmp' that is out of scope.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "212",
+          "column": "14"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "184",
+          "column": "21",
+          "info": "Variable created here."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "188",
+          "column": "29",
+          "info": "Added to container 'vertex_buffer'."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "189",
+          "column": "64",
+          "info": "Array decayed to pointer here."
+        }
+      ]
+    },
+    {
+      "id": "invalidLifetime",
+      "severity": "error",
+      "message": "Using object that points to local variable 'tmp' that is out of scope.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "232",
+          "column": "50"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "184",
+          "column": "21",
+          "info": "Variable created here."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "216",
+          "column": "30",
+          "info": "Assuming container is not empty"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "188",
+          "column": "29",
+          "info": "Added to container 'vertex_buffer'."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "189",
+          "column": "64",
+          "info": "Array decayed to pointer here."
+        }
+      ]
+    },
+    {
+      "id": "invalidLifetime",
+      "severity": "error",
+      "message": "Using object that points to local variable 'tmp' that is out of scope.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "235",
+          "column": "52"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "184",
+          "column": "21",
+          "info": "Variable created here."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "216",
+          "column": "30",
+          "info": "Assuming container is not empty"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "188",
+          "column": "29",
+          "info": "Added to container 'vertex_buffer'."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "189",
+          "column": "64",
+          "info": "Array decayed to pointer here."
+        }
+      ]
+    },
+    {
+      "id": "invalidLifetime",
+      "severity": "error",
+      "message": "Using object that points to local variable 'tmp' that is out of scope.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "274",
+          "column": "41"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "184",
+          "column": "21",
+          "info": "Variable created here."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "216",
+          "column": "30",
+          "info": "Assuming container is not empty"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "188",
+          "column": "29",
+          "info": "Added to container 'vertex_buffer'."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "189",
+          "column": "64",
+          "info": "Array decayed to pointer here."
+        }
+      ]
+    },
+    {
+      "id": "invalidLifetime",
+      "severity": "error",
+      "message": "Using object that points to local variable 'tmp' that is out of scope.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "275",
+          "column": "42"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "184",
+          "column": "21",
+          "info": "Variable created here."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "216",
+          "column": "30",
+          "info": "Assuming container is not empty"
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "188",
+          "column": "29",
+          "info": "Added to container 'vertex_buffer'."
+        },
+        {
+          "file": "src/iecode-cpp/src/converters/model_import.cpp",
+          "line": "189",
+          "column": "64",
+          "info": "Array decayed to pointer here."
+        }
+      ]
+    },
+    {
+      "id": "integerOverflow",
+      "severity": "error",
+      "message": "Signed integer overflow for expression '-static_cast<int32_t>(crc&1u)'.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/engine/sound/cri_sound_controller.cpp",
+          "line": "40",
+          "column": "47",
+          "info": "Integer overflow"
+        }
+      ]
+    },
+    {
+      "id": "duplInheritedMember",
+      "severity": "warning",
+      "message": "The struct 'MenuSimplePrimitiveComponent' defines member variable with name 'type_' also defined in its parent struct 'CComponent'.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/include/iecode/game/ui/menu_components.h",
+          "line": "560",
+          "column": "14",
+          "info": "Derived variable 'MenuSimplePrimitiveComponent::type_'"
+        },
+        {
+          "file": "src/iecode-cpp/src/include/iecode/engine/core/object.h",
+          "line": "47",
+          "column": "20",
+          "info": "Parent variable 'CComponent::type_'"
+        }
+      ]
+    },
+    {
+      "id": "duplInheritedMember",
+      "severity": "warning",
+      "message": "The struct 'CMenuSoundCmdProperty' defines member variable with name 'enabled_' also defined in its parent struct 'CComponent'.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/include/iecode/game/ui/menu_properties.h",
+          "line": "125",
+          "column": "10",
+          "info": "Derived variable 'CMenuSoundCmdProperty::enabled_'"
+        },
+        {
+          "file": "src/iecode-cpp/src/include/iecode/engine/core/object.h",
+          "line": "48",
+          "column": "20",
+          "info": "Parent variable 'CComponent::enabled_'"
+        }
+      ]
+    },
+    {
+      "id": "stlFindInsert",
+      "severity": "performance",
+      "message": "Searching before insertion is not necessary. Instead of 'db.skill_by_id[skill.skill_id]=db.skills.size()' consider using 'db.skill_by_id.try_emplace(skill.skill_id, db.skills.size());'.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/gamedata/loader.cpp",
+          "line": "367",
+          "column": "76"
+        }
+      ]
+    },
+    {
+      "id": "stlFindInsert",
+      "severity": "performance",
+      "message": "Searching before insertion is not necessary. Instead of 'db.aura_by_id[aura.aura_id]=db.aura_skills.size()' consider using 'db.aura_by_id.try_emplace(aura.aura_id, db.aura_skills.size());'.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/gamedata/loader.cpp",
+          "line": "1446",
+          "column": "70"
+        }
+      ]
+    },
+    {
+      "id": "uselessCallsSubstr",
+      "severity": "performance",
+      "message": "Ineffective call of function 'substr' because a prefix of the string is assigned to itself. Use replace() instead.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/iecode_export_app_optimized.cpp",
+          "line": "343",
+          "column": "23"
+        }
+      ]
+    },
+    {
+      "id": "uselessCallsSubstr",
+      "severity": "performance",
+      "message": "Ineffective call of function 'substr' because a prefix of the string is assigned to itself. Use resize() or pop_back() instead.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/modding/update_checker.cpp",
+          "line": "75",
+          "column": "13"
+        }
+      ]
+    },
+    {
+      "id": "uselessCallsSubstr",
+      "severity": "performance",
+      "message": "Ineffective call of function 'substr' because a prefix of the string is assigned to itself. Use resize() or pop_back() instead.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/modding/update_checker.cpp",
+          "line": "80",
+          "column": "13"
+        }
+      ]
+    },
+    {
+      "id": "syntaxError",
+      "severity": "error",
+      "message": "syntax error",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/tests/test_cfgbin_decrypt.cpp",
+          "line": "30",
+          "column": "1"
+        }
+      ]
+    },
+    {
+      "id": "syntaxError",
+      "severity": "error",
+      "message": "syntax error",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/tests/test_composite_renderer.cpp",
+          "line": "66",
+          "column": "1"
+        }
+      ]
+    },
+    {
+      "id": "syntaxError",
+      "severity": "error",
+      "message": "syntax error",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/tests/test_ecs.cpp",
+          "line": "53",
+          "column": "1"
+        }
+      ]
+    },
+    {
+      "id": "syntaxError",
+      "severity": "error",
+      "message": "syntax error",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/tests/test_ecs_scene.cpp",
+          "line": "49",
+          "column": "1"
+        }
+      ]
+    },
+    {
+      "id": "syntaxError",
+      "severity": "error",
+      "message": "syntax error",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/tests/test_gmd_obj_model.cpp",
+          "line": "20",
+          "column": "1"
+        }
+      ]
+    },
+    {
+      "id": "syntaxError",
+      "severity": "error",
+      "message": "syntax error",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/tests/test_menu_paths.cpp",
+          "line": "19",
+          "column": "1"
+        }
+      ]
+    },
+    {
+      "id": "syntaxError",
+      "severity": "error",
+      "message": "syntax error",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/tests/test_menu_system.cpp",
+          "line": "36",
+          "column": "1"
+        }
+      ]
+    },
+    {
+      "id": "useInitializationList",
+      "severity": "performance",
+      "message": "Variable 'path_' is assigned in constructor body. Consider performing initialization in initialization list.",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/tests/test_modding.cpp",
+          "line": "29",
+          "column": "9"
+        }
+      ]
+    },
+    {
+      "id": "syntaxError",
+      "severity": "error",
+      "message": "syntax error",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/tests/test_render_2d.cpp",
+          "line": "36",
+          "column": "1"
+        }
+      ]
+    },
+    {
+      "id": "syntaxError",
+      "severity": "error",
+      "message": "syntax error",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/tests/test_render_pipeline.cpp",
+          "line": "23",
+          "column": "1"
+        }
+      ]
+    },
+    {
+      "id": "syntaxError",
+      "severity": "error",
+      "message": "syntax error",
+      "locations": [
+        {
+          "file": "src/iecode-cpp/src/tests/test_resource_manager.cpp",
+          "line": "44",
+          "column": "1"
+        }
+      ]
+    }
+  ],
+  "cppcheck_triage": {
+    "raw_count": 27,
+    "translation_units": 343,
+    "invalidLifetime_7": "Source-reviewed false positives: vector<uint8_t>::insert copies the local arrays; the vectors do not retain pointers to tmp.",
+    "integerOverflow_1": "Source-reviewed false positive: crc & 1u is 0 or 1, so negating the signed cast cannot overflow.",
+    "syntaxError_10": "Unqualified parser/macro diagnostics in GoogleTest sources; not established compiler errors.",
+    "remaining": "Seven performance suggestions and two member-shadow warnings; no full native graph was compiled."
+  },
+  "expanded_python_diagnostics": [
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 13,
+        "row": 8
+      },
+      "filename": "scripts/audit/uemu/validate_bezier.py",
+      "fix": null,
+      "location": {
+        "column": 12,
+        "row": 8
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 8,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 33,
+        "row": 8
+      },
+      "filename": "scripts/audit/uemu/validate_bezier.py",
+      "fix": null,
+      "location": {
+        "column": 32,
+        "row": 8
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 8,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 53,
+        "row": 8
+      },
+      "filename": "scripts/audit/uemu/validate_bezier.py",
+      "fix": null,
+      "location": {
+        "column": 52,
+        "row": 8
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 8,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 20,
+        "row": 32
+      },
+      "filename": "scripts/audit/uemu/validate_bezier.py",
+      "fix": null,
+      "location": {
+        "column": 19,
+        "row": 32
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 32,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 36,
+        "row": 32
+      },
+      "filename": "scripts/audit/uemu/validate_bezier.py",
+      "fix": null,
+      "location": {
+        "column": 35,
+        "row": 32
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 32,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 12,
+        "row": 42
+      },
+      "filename": "scripts/audit/uemu/validate_bezier.py",
+      "fix": null,
+      "location": {
+        "column": 11,
+        "row": 42
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 42,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 28,
+        "row": 46
+      },
+      "filename": "scripts/audit/uemu/validate_bezier.py",
+      "fix": null,
+      "location": {
+        "column": 27,
+        "row": 46
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 46,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 59,
+        "row": 46
+      },
+      "filename": "scripts/audit/uemu/validate_bezier.py",
+      "fix": null,
+      "location": {
+        "column": 58,
+        "row": 46
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 46,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 39,
+        "row": 32
+      },
+      "filename": "scripts/audit/uemu/validate_dribble_vel.py",
+      "fix": null,
+      "location": {
+        "column": 38,
+        "row": 32
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 32,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 12,
+        "row": 33
+      },
+      "filename": "scripts/audit/uemu/validate_dribble_vel.py",
+      "fix": null,
+      "location": {
+        "column": 11,
+        "row": 33
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 33,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 19,
+        "row": 39
+      },
+      "filename": "scripts/audit/uemu/validate_dribble_vel.py",
+      "fix": null,
+      "location": {
+        "column": 18,
+        "row": 39
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 39,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 43,
+        "row": 280
+      },
+      "filename": "scripts/audit/uemu/validate_imm_batcher.py",
+      "fix": null,
+      "location": {
+        "column": 42,
+        "row": 280
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 280,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 17,
+        "row": 19
+      },
+      "filename": "scripts/audit/uemu/validate_keeper_reach.py",
+      "fix": null,
+      "location": {
+        "column": 16,
+        "row": 19
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 19,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 17,
+        "row": 20
+      },
+      "filename": "scripts/audit/uemu/validate_keeper_reach.py",
+      "fix": null,
+      "location": {
+        "column": 16,
+        "row": 20
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 20,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 35,
+        "row": 25
+      },
+      "filename": "scripts/audit/uemu/validate_keeper_reach.py",
+      "fix": null,
+      "location": {
+        "column": 34,
+        "row": 25
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 25,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 12,
+        "row": 26
+      },
+      "filename": "scripts/audit/uemu/validate_keeper_reach.py",
+      "fix": null,
+      "location": {
+        "column": 11,
+        "row": 26
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 26,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 56,
+        "row": 27
+      },
+      "filename": "scripts/audit/uemu/validate_keeper_reach.py",
+      "fix": null,
+      "location": {
+        "column": 55,
+        "row": 27
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 27,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 34,
+        "row": 29
+      },
+      "filename": "scripts/audit/uemu/validate_keeper_reach.py",
+      "fix": null,
+      "location": {
+        "column": 33,
+        "row": 29
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 29,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 66,
+        "row": 29
+      },
+      "filename": "scripts/audit/uemu/validate_keeper_reach.py",
+      "fix": null,
+      "location": {
+        "column": 65,
+        "row": 29
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 29,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E731",
+      "end_location": {
+        "column": 76,
+        "row": 41
+      },
+      "filename": "scripts/audit/uemu/validate_menu_setting.py",
+      "fix": {
+        "applicability": "unsafe",
+        "edits": [
+          {
+            "content": "def s(x):\n        return struct.unpack(\"<i\", struct.pack(\"<I\", x & 0xFFFFFFFF))[0]",
+            "end_location": {
+              "column": 76,
+              "row": 41
+            },
+            "location": {
+              "column": 5,
+              "row": 41
+            }
+          }
+        ],
+        "message": "Rewrite `s` as a `def`"
+      },
+      "location": {
+        "column": 5,
+        "row": 41
+      },
+      "message": "Do not assign a `lambda` expression, use a `def`",
+      "name": "lambda-assignment",
+      "noqa_row": 41,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+    },
+    {
+      "cell": null,
+      "code": "E731",
+      "end_location": {
+        "column": 65,
+        "row": 60
+      },
+      "filename": "scripts/audit/uemu/validate_menu_setting.py",
+      "fix": {
+        "applicability": "unsafe",
+        "edits": [
+          {
+            "content": "def g(o, f=\"<i\"):\n        return struct.unpack_from(f, b, o - 0x590)[0]",
+            "end_location": {
+              "column": 65,
+              "row": 60
+            },
+            "location": {
+              "column": 5,
+              "row": 60
+            }
+          }
+        ],
+        "message": "Rewrite `g` as a `def`"
+      },
+      "location": {
+        "column": 5,
+        "row": 60
+      },
+      "message": "Do not assign a `lambda` expression, use a `def`",
+      "name": "lambda-assignment",
+      "noqa_row": 60,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 13,
+        "row": 13
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 12,
+        "row": 13
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 13,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 33,
+        "row": 13
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 32,
+        "row": 13
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 13,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 17,
+        "row": 22
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 16,
+        "row": 22
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 22,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 30,
+        "row": 22
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 29,
+        "row": 22
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 22,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 40,
+        "row": 24
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 39,
+        "row": 24
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 24,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 49,
+        "row": 30
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 48,
+        "row": 30
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 30,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 45,
+        "row": 46
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 44,
+        "row": 46
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 46,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 12,
+        "row": 47
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 11,
+        "row": 47
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 47,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 51,
+        "row": 48
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 50,
+        "row": 48
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 48,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 61,
+        "row": 50
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 60,
+        "row": 50
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 50,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 48,
+        "row": 52
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 47,
+        "row": 52
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 52,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 83,
+        "row": 52
+      },
+      "filename": "scripts/audit/uemu/validate_normal_vel.py",
+      "fix": null,
+      "location": {
+        "column": 82,
+        "row": 52
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 52,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 27,
+        "row": 31
+      },
+      "filename": "scripts/audit/uemu/validate_normalize.py",
+      "fix": null,
+      "location": {
+        "column": 26,
+        "row": 31
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 31,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 24,
+        "row": 40
+      },
+      "filename": "scripts/audit/uemu/validate_normalize.py",
+      "fix": null,
+      "location": {
+        "column": 23,
+        "row": 40
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 40,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 13,
+        "row": 14
+      },
+      "filename": "scripts/audit/uemu/validate_path_eval.py",
+      "fix": null,
+      "location": {
+        "column": 12,
+        "row": 14
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 14,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 33,
+        "row": 14
+      },
+      "filename": "scripts/audit/uemu/validate_path_eval.py",
+      "fix": null,
+      "location": {
+        "column": 32,
+        "row": 14
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 14,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 52,
+        "row": 14
+      },
+      "filename": "scripts/audit/uemu/validate_path_eval.py",
+      "fix": null,
+      "location": {
+        "column": 51,
+        "row": 14
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 14,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 26,
+        "row": 31
+      },
+      "filename": "scripts/audit/uemu/validate_path_eval.py",
+      "fix": null,
+      "location": {
+        "column": 25,
+        "row": 31
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 31,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 52,
+        "row": 31
+      },
+      "filename": "scripts/audit/uemu/validate_path_eval.py",
+      "fix": null,
+      "location": {
+        "column": 51,
+        "row": 31
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 31,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 10,
+        "row": 32
+      },
+      "filename": "scripts/audit/uemu/validate_path_eval.py",
+      "fix": null,
+      "location": {
+        "column": 9,
+        "row": 32
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 32,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 38,
+        "row": 40
+      },
+      "filename": "scripts/audit/uemu/validate_path_eval.py",
+      "fix": null,
+      "location": {
+        "column": 37,
+        "row": 40
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 40,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 12,
+        "row": 41
+      },
+      "filename": "scripts/audit/uemu/validate_path_eval.py",
+      "fix": null,
+      "location": {
+        "column": 11,
+        "row": 41
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 41,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 31,
+        "row": 45
+      },
+      "filename": "scripts/audit/uemu/validate_path_eval.py",
+      "fix": null,
+      "location": {
+        "column": 30,
+        "row": 45
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 45,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 62,
+        "row": 45
+      },
+      "filename": "scripts/audit/uemu/validate_path_eval.py",
+      "fix": null,
+      "location": {
+        "column": 61,
+        "row": 45
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 45,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 13,
+        "row": 14
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 12,
+        "row": 14
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 14,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 33,
+        "row": 14
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 32,
+        "row": 14
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 14,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 45,
+        "row": 20
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 44,
+        "row": 20
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 20,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 17,
+        "row": 23
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 16,
+        "row": 23
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 23,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 30,
+        "row": 23
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 29,
+        "row": 23
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 23,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 41,
+        "row": 24
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 40,
+        "row": 24
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 24,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 14,
+        "row": 31
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 13,
+        "row": 31
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 31,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 21,
+        "row": 35
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 20,
+        "row": 35
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 35,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 40,
+        "row": 42
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 39,
+        "row": 42
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 42,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 51,
+        "row": 43
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 50,
+        "row": 43
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 43,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 51,
+        "row": 44
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 50,
+        "row": 44
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 44,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 38,
+        "row": 46
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 37,
+        "row": 46
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 46,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 69,
+        "row": 46
+      },
+      "filename": "scripts/audit/uemu/validate_rate_progress.py",
+      "fix": null,
+      "location": {
+        "column": 68,
+        "row": 46
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 46,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 28,
+        "row": 21
+      },
+      "filename": "scripts/audit/uemu/validate_reflect.py",
+      "fix": null,
+      "location": {
+        "column": 27,
+        "row": 21
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 21,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 12,
+        "row": 22
+      },
+      "filename": "scripts/audit/uemu/validate_reflect.py",
+      "fix": null,
+      "location": {
+        "column": 11,
+        "row": 22
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 22,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 29,
+        "row": 26
+      },
+      "filename": "scripts/audit/uemu/validate_reflect.py",
+      "fix": null,
+      "location": {
+        "column": 28,
+        "row": 26
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 26,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 61,
+        "row": 26
+      },
+      "filename": "scripts/audit/uemu/validate_reflect.py",
+      "fix": null,
+      "location": {
+        "column": 60,
+        "row": 26
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 26,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 59,
+        "row": 61
+      },
+      "filename": "scripts/audit/uemu/validate_trajectory.py",
+      "fix": null,
+      "location": {
+        "column": 58,
+        "row": 61
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 61,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 29,
+        "row": 65
+      },
+      "filename": "scripts/audit/uemu/validate_trajectory.py",
+      "fix": null,
+      "location": {
+        "column": 28,
+        "row": 65
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 65,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 55,
+        "row": 97
+      },
+      "filename": "scripts/audit/uemu/validate_trajectory.py",
+      "fix": null,
+      "location": {
+        "column": 54,
+        "row": 97
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 97,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 29,
+        "row": 109
+      },
+      "filename": "scripts/audit/uemu/validate_trajectory.py",
+      "fix": null,
+      "location": {
+        "column": 28,
+        "row": 109
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 109,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 63,
+        "row": 140
+      },
+      "filename": "scripts/audit/uemu/validate_trajectory.py",
+      "fix": null,
+      "location": {
+        "column": 62,
+        "row": 140
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 140,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 29,
+        "row": 147
+      },
+      "filename": "scripts/audit/uemu/validate_trajectory.py",
+      "fix": null,
+      "location": {
+        "column": 28,
+        "row": 147
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 147,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 19,
+        "row": 27
+      },
+      "filename": "scripts/audit/uemu/validate_uemu_xmm.py",
+      "fix": null,
+      "location": {
+        "column": 18,
+        "row": 27
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 27,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 17,
+        "row": 35
+      },
+      "filename": "scripts/re/extract_save_editor_hooks.py",
+      "fix": null,
+      "location": {
+        "column": 16,
+        "row": 35
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 35,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 10,
+        "row": 40
+      },
+      "filename": "scripts/re/extract_save_editor_hooks.py",
+      "fix": null,
+      "location": {
+        "column": 9,
+        "row": 40
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 40,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 15,
+        "row": 56
+      },
+      "filename": "scripts/re/extract_save_editor_hooks.py",
+      "fix": null,
+      "location": {
+        "column": 14,
+        "row": 56
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 56,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "E701",
+      "end_location": {
+        "column": 30,
+        "row": 89
+      },
+      "filename": "scripts/re/extract_save_editor_hooks.py",
+      "fix": null,
+      "location": {
+        "column": 29,
+        "row": 89
+      },
+      "message": "Multiple statements on one line (colon)",
+      "name": "multiple-statements-on-one-line-colon",
+      "noqa_row": 89,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-colon"
+    },
+    {
+      "cell": null,
+      "code": "F821",
+      "end_location": {
+        "column": 20,
+        "row": 24
+      },
+      "filename": "scripts/tools/ghidra_export_functions.py",
+      "fix": null,
+      "location": {
+        "column": 6,
+        "row": 24
+      },
+      "message": "Undefined name `currentProgram`",
+      "name": "undefined-name",
+      "noqa_row": 24,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+    },
+    {
+      "cell": null,
+      "code": "F821",
+      "end_location": {
+        "column": 25,
+        "row": 25
+      },
+      "filename": "scripts/tools/ghidra_export_functions.py",
+      "fix": null,
+      "location": {
+        "column": 11,
+        "row": 25
+      },
+      "message": "Undefined name `currentProgram`",
+      "name": "undefined-name",
+      "noqa_row": 25,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 34,
+        "row": 148
+      },
+      "filename": "scripts/tools/triage_funclua_handlers.py",
+      "fix": null,
+      "location": {
+        "column": 33,
+        "row": 148
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 148,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 31,
+        "row": 152
+      },
+      "filename": "scripts/tools/triage_funclua_handlers.py",
+      "fix": null,
+      "location": {
+        "column": 30,
+        "row": 152
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 152,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 47,
+        "row": 154
+      },
+      "filename": "scripts/tools/triage_funclua_handlers.py",
+      "fix": null,
+      "location": {
+        "column": 46,
+        "row": 154
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 154,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 34,
+        "row": 155
+      },
+      "filename": "scripts/tools/triage_funclua_handlers.py",
+      "fix": null,
+      "location": {
+        "column": 33,
+        "row": 155
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 155,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    },
+    {
+      "cell": null,
+      "code": "E731",
+      "end_location": {
+        "column": 74,
+        "row": 331
+      },
+      "filename": "scripts/validation/ui-text-map.py",
+      "fix": {
+        "applicability": "unsafe",
+        "edits": [
+          {
+            "content": "def keep(rows):\n        return [record for record in rows if record[\"verified\"]]",
+            "end_location": {
+              "column": 74,
+              "row": 331
+            },
+            "location": {
+              "column": 5,
+              "row": 331
+            }
+          }
+        ],
+        "message": "Rewrite `keep` as a `def`"
+      },
+      "location": {
+        "column": 5,
+        "row": 331
+      },
+      "message": "Do not assign a `lambda` expression, use a `def`",
+      "name": "lambda-assignment",
+      "noqa_row": 331,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+    },
+    {
+      "cell": null,
+      "code": "E731",
+      "end_location": {
+        "column": 61,
+        "row": 395
+      },
+      "filename": "scripts/validation/ui-text-map.py",
+      "fix": {
+        "applicability": "unsafe",
+        "edits": [
+          {
+            "content": "def js(value):\n        return json.dumps(value, ensure_ascii=False)",
+            "end_location": {
+              "column": 61,
+              "row": 395
+            },
+            "location": {
+              "column": 5,
+              "row": 395
+            }
+          }
+        ],
+        "message": "Rewrite `js` as a `def`"
+      },
+      "location": {
+        "column": 5,
+        "row": 395
+      },
+      "message": "Do not assign a `lambda` expression, use a `def`",
+      "name": "lambda-assignment",
+      "noqa_row": 395,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+    },
+    {
+      "cell": null,
+      "code": "E731",
+      "end_location": {
+        "column": 72,
+        "row": 409
+      },
+      "filename": "scripts/validation/ui-text-map.py",
+      "fix": {
+        "applicability": "unsafe",
+        "edits": [
+          {
+            "content": "def order(record):\n        return (-len(record[\"locations\"]), record[\"label\"])",
+            "end_location": {
+              "column": 72,
+              "row": 409
+            },
+            "location": {
+              "column": 5,
+              "row": 409
+            }
+          }
+        ],
+        "message": "Rewrite `order` as a `def`"
+      },
+      "location": {
+        "column": 5,
+        "row": 409
+      },
+      "message": "Do not assign a `lambda` expression, use a `def`",
+      "name": "lambda-assignment",
+      "noqa_row": 409,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+    },
+    {
+      "cell": null,
+      "code": "E731",
+      "end_location": {
+        "column": 6,
+        "row": 440
+      },
+      "filename": "scripts/validation/ui-text-map.py",
+      "fix": {
+        "applicability": "unsafe",
+        "edits": [
+          {
+            "content": "def families(rows):\n        return \", \".join(\n            f\"{f} ({c})\" for f, c in collections.Counter(r[\"family\"] for r in rows).most_common()\n        )",
+            "end_location": {
+              "column": 6,
+              "row": 440
+            },
+            "location": {
+              "column": 5,
+              "row": 438
+            }
+          }
+        ],
+        "message": "Rewrite `families` as a `def`"
+      },
+      "location": {
+        "column": 5,
+        "row": 438
+      },
+      "message": "Do not assign a `lambda` expression, use a `def`",
+      "name": "lambda-assignment",
+      "noqa_row": 438,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/lambda-assignment"
+    },
+    {
+      "cell": null,
+      "code": "E702",
+      "end_location": {
+        "column": 49,
+        "row": 793
+      },
+      "filename": "src/nie-blender/g4_port.py",
+      "fix": null,
+      "location": {
+        "column": 48,
+        "row": 793
+      },
+      "message": "Multiple statements on one line (semicolon)",
+      "name": "multiple-statements-on-one-line-semicolon",
+      "noqa_row": 793,
+      "severity": "error",
+      "url": "https://docs.astral.sh/ruff/rules/multiple-statements-on-one-line-semicolon"
+    }
+  ],
+  "delivery": "Audit evidence and ledger only; generated local build outputs removed after validation."
+}

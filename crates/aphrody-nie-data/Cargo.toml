@@ -1,0 +1,162 @@
+[package]
+name = "aphrody-nie-data"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE.upstream"
+publish = false
+description = "Static Inazuma Eleven Victory Road game-data schemas and reverse-engineering decoders"
+
+[lints]
+workspace = true
+
+[features]
+default = []
+serde = ["dep:serde"]
+std = ["serde_json/std"]
+
+[dependencies]
+serde_json = { version = "1.0.154", default-features = false, features = ["alloc"] }
+serde = { version = "1.0.228", default-features = false, features = ["alloc", "derive"], optional = true }
+
+[[bin]]
+name = "export_passives"
+path = "src/bin/export_passives.rs"
+required-features = ["serde", "std"]
+
+[[bin]]
+name = "export_formations"
+path = "src/bin/export_formations.rs"
+required-features = ["serde", "std"]
+
+[[bin]]
+name = "export_skills"
+path = "src/bin/export_skills.rs"
+required-features = ["serde", "std"]
+
+# `typed` sits behind the `serde` feature; these goldens declare it so a default-feature run
+# skips them with an explicit reason instead of failing to compile.
+[[test]]
+name = "avatar_resolve_golden"
+path = "tests/avatar_resolve_golden.rs"
+required-features = ["serde"]
+
+[[test]]
+name = "ai_type_golden"
+path = "tests/ai_type_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "enjoy_mode_team_golden"
+path = "tests/enjoy_mode_team_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "event_bustup_golden"
+path = "tests/event_bustup_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "event_map_tag_golden"
+path = "tests/event_map_tag_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "event_subtitle_golden"
+path = "tests/event_subtitle_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "flag_config_golden"
+path = "tests/flag_config_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "game_quest_golden"
+path = "tests/game_quest_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "happen_event_npc_golden"
+path = "tests/happen_event_npc_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "menu_setting_prefix_golden"
+path = "tests/menu_setting_prefix_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "phase_set_golden"
+path = "tests/phase_set_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "soccer_dispatch_golden"
+path = "tests/soccer_dispatch_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "soccer_drop_golden"
+path = "tests/soccer_drop_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "soccer_fixed_reward_golden"
+path = "tests/soccer_fixed_reward_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "soccer_map_env_golden"
+path = "tests/soccer_map_env_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "soccer_opponent_golden"
+path = "tests/soccer_opponent_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "soccer_placement_golden"
+path = "tests/soccer_placement_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "soccer_player_record_golden"
+path = "tests/soccer_player_record_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "soccer_rank_golden"
+path = "tests/soccer_rank_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "soccer_suggest_golden"
+path = "tests/soccer_suggest_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "system_unlock_golden"
+path = "tests/system_unlock_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "talk_select_golden"
+path = "tests/talk_select_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "trial_take_over_golden"
+path = "tests/trial_take_over_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "trigger_golden"
+path = "tests/trigger_golden.rs"
+required-features = ["serde", "std"]
+
+[[test]]
+name = "typed_corpus_golden"
+path = "tests/typed_corpus_golden.rs"
+required-features = ["serde", "std"]

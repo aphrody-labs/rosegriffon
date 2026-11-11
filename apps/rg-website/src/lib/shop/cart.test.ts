@@ -30,7 +30,25 @@ mock.module("@rosegriffon/db/redis", () => ({ cache: redisCache }));
 // Mock @/lib/auth-helpers (le module réel charge @/lib/auth → betterAuth/Pool ;
 // on le mocke entièrement pour ne jamais évaluer ces effets de bord).
 const getServerUser = mock();
-mock.module("@/lib/auth-helpers", () => ({ getServerUser }));
+const getServerSession = mock();
+const requireAuth = mock();
+const requireAdmin = mock();
+const requirePatreonCreator = mock();
+const requireAuthOrFail = mock();
+const requireAdminOrFail = mock();
+const hasMedailleAzaleeRole = mock();
+const requireEditorOrFail = mock();
+mock.module("@/lib/auth-helpers", () => ({
+  getServerUser,
+  getServerSession,
+  requireAuth,
+  requireAdmin,
+  requirePatreonCreator,
+  requireAuthOrFail,
+  requireAdminOrFail,
+  hasMedailleAzaleeRole,
+  requireEditorOrFail,
+}));
 
 // Catalogue SYNTHÉTIQUE : les produits réels viennent de `merch_products`.
 const PRODUITS_TEST: Record<string, object> = {

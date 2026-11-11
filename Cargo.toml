@@ -1,0 +1,878 @@
+[workspace]
+resolver = "2"
+exclude = ["vendor/magika/rust/pyo3"]
+members = [
+    "crates/aphrody-nie-app",
+    "crates/aphrody-nie-asm",
+    "crates/aphrody-nie-bench",
+    "crates/aphrody-nie-bevy",
+    "crates/aphrody-nie-camera",
+    "crates/aphrody-nie-cli",
+    "crates/aphrody-nie-computer-use",
+    "crates/aphrody-nie-core",
+    "crates/aphrody-nie-data",
+    "crates/aphrody-nie-editor",
+    "crates/aphrody-nie-explore",
+    "crates/aphrody-nie-ffi",
+    "crates/aphrody-nie-forge",
+    "crates/aphrody-nie-formats",
+    "crates/aphrody-nie-game",
+    "crates/aphrody-nie-geom",
+    "crates/aphrody-nie-headless",
+    "crates/aphrody-nie-identity-source",
+    "crates/aphrody-nie-index",
+    "crates/aphrody-nie-inventory",
+    "crates/aphrody-nie-launcher",
+    "crates/aphrody-nie-lua",
+    "crates/aphrody-nie-lua-web",
+    "crates/aphrody-nie-mcp",
+    "crates/aphrody-nie-model-core",
+    "crates/aphrody-nie-model-serve",
+    "crates/aphrody-nie-net",
+    "crates/aphrody-nie-ocgen",
+    "crates/aphrody-nie-pe",
+    "crates/aphrody-nie-pe-inspect",
+    "crates/aphrody-nie-pg",
+    "crates/aphrody-nie-play",
+    "crates/aphrody-nie-queue",
+    "crates/aphrody-nie-render",
+    "crates/aphrody-nie-render3d",
+    "crates/aphrody-nie-runtime",
+    "crates/aphrody-nie-save",
+    "crates/aphrody-nie-seed",
+    "crates/aphrody-nie-sql",
+    "crates/aphrody-nie-tasks",
+    "crates/aphrody-nie-trace",
+    "crates/aphrody-nie-ui",
+    "crates/aphrody-nie-video",
+    "crates/aphrody-nie-viola",
+    "crates/aphrody-nie-wasm",
+    "crates/aphrody-nie-wiki",
+    "crates/aphrody-nie-zukan",
+    "crates/aphrody-softraster",
+    "crates/bun-steam",
+    "crates/criware",
+    "crates/re",
+    "crates/shenron-gpu",
+    "crates/yolo-re-bin-format",
+    "crates/yolo-re-core",
+    "crates/yre-worker",
+]
+
+[workspace.package]
+version = "1.4.7"
+edition = "2024"
+rust-version = "1.95"
+license = "Apache-2.0"
+repository = "https://github.com/yolo-rs/yolo-re"
+homepage = "https://aphrody.com"
+authors = ["aphrody-dev <contact@aphrody.com>"]
+
+
+
+[workspace.lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+unused_must_use = "deny"
+non_ascii_idents = "deny"
+
+[workspace.lints.clippy]
+todo = "deny"
+unimplemented = "deny"
+dbg_macro = "deny"
+correctness = { level = "warn", priority = -1 }
+perf = { level = "warn", priority = -1 }
+
+[workspace.dependencies]
+serde-wasm-bindgen = "0.6"
+
+vello = "0.11.0"
+
+bun_git = { path = "crates/bun-os-git", version = "1.4.7" }
+bun_native = { path = "crates/bun-os-native", version = "1.4.7" }
+bun_pkg = { path = "crates/bun-os-pkg", version = "1.4.7" }
+gix = { version = "0.88", default-features = false, features = ["sha1", "basic", "extras", "comfort", "max-performance-safe", "revision", "index", "worktree-mutation"] }
+octocrab = { version = "0.54", default-features = false, features = ["default-client", "follow-redirect", "retry", "rustls", "rustls-ring", "timeout"] }
+serde_yaml = { package = "yaml_serde", version = "0.10" }
+slog = { version = "2.7" }
+arm-decoder = { git = "https://github.com/kelpsyberry/arm-decoder" }
+cocoa = { version = "0.25" }
+objc = { version = "0.2" }
+magika = { version = "1.1.0" }
+rusty-leveldb = { version = "4", default-features = false }
+yara-x = { version = "1.7.0", default-features = false }
+cairo-rs = { version = "0.22" }
+core-graphics = { version = "0.23" }
+core-foundation = { version = "0.9" }
+gdk4-x11 = { version = "0.11" }
+gdk4-wayland = { version = "0.11" }
+wayland-client = { version = "0.31" }
+wayland-egl = { version = "0.32" }
+x11 = { version = "2" }
+junction = { version = "2.0" }
+embed-resource = { version = "3.0.6" }
+pkg-config = { version = "0.3" }
+winapi = { version = "0.3" }
+env_filter = { version = "1.0" }
+rusty_enet = { version = "0.4" }
+jsonwebtoken = { version = "9.3.1" }
+rxbyak = { git = "https://github.com/vricosti/rxbyak", rev = "3aac8e24bfe559e7b076d6fa6783ed4b1bb160f3" }
+rhazel = { git = "https://github.com/vricosti/rhazel", rev = "5d2e49e0ac5f24da800b7ca54b4bd7d520816118" }
+tracing-subscriber ={ version = "0.3.22", features = ["env-filter","fmt","json","regex","registry"] }
+aphrody-command = { path = "crates/aphrody-command", version = "1.4.7", features = [] }
+aphrody-agent-home = { path = "crates/aphrody-agent-home", version = "1.4.7", features = [] }
+aphrody-bun = { path = "crates/aphrody-bun", version = "1.4.7" }
+aphrody-n2b-core = { version = "0.7.0", features = [] }
+memchr = { version = "2" }
+aphrody-oxc-bridge = { version = "0.2.0" }
+aphrody-llama-server = { path = "crates/aphrody-llama-server", version = "1.4.7", features = [] }
+aphrody-model-client = { path = "crates/aphrody-model-client", version = "1.4.7", features = [] }
+aphrody-models = { path = "crates/aphrody-models", version = "1.4.7", features = [] }
+aphrody-rag-core = { path = "crates/aphrody-rag-core", version = "1.4.7", features = [] }
+rookie-cookies = { version = "0.6.0" }
+yolo-runtime = { path = "crates/yolo-runtime", version = "1.4.7" }
+bun-python-host = { version = "0.1.0" }
+# PyO3 resolves to the aphrody-labs fork pinned in [patch.crates-io] below.
+pyo3 = { version = "0.29.3" }
+mimalloc = { version = "0.1", default-features = false, features = [] }
+aphrody-backend = { path = "crates/aphrody-backend", version = "1.4.7", features = [] }
+libm = { version = "0.2.16" }
+filmcraft-engine = { path = "crates/filmcraft-engine", version = "0.9.0" }
+filmcraft-ui-egui = { path = "crates/filmcraft-ui-egui", version = "0.9.0" }
+filmcraft-media = { path = "crates/filmcraft-media", version = "0.9.0" }
+filmcraft-codecs = { path = "crates/filmcraft-codecs", version = "0.9.0" }
+filmcraft-frame = { path = "crates/filmcraft-frame", version = "0.9.0" }
+filmcraft-color = { path = "crates/filmcraft-color", version = "0.9.0" }
+filmcraft-isobmff = { path = "crates/filmcraft-isobmff", version = "0.9.0" }
+filmcraft-format = { path = "crates/filmcraft-format", version = "0.9.0" }
+filmcraft-time = { path = "crates/filmcraft-time", version = "0.9.0" }
+soundcraft-engine = { path = "crates/soundcraft-engine", version = "0.6.1" }
+soundcraft-ui-egui = { path = "crates/soundcraft-ui-egui", version = "0.6.1" }
+soundcraft-playback = { path = "crates/soundcraft-playback", version = "0.6.1" }
+soundcraft-model = { path = "crates/soundcraft-model", version = "0.6.1" }
+aphrody-web-extract = { package = "bun_browser_extract", version = "1.4.7" }
+aphrody-web-index = { package = "bun_browser_index", version = "1.4.7" }
+obscura-crawl = { package = "bun_browser_crawl", version = "1.4.7" }
+aphrody-gemini-web = { path = "crates/aphrody-gemini-web", version = "1.4.7" }
+aphrody-site = { path = "crates/aphrody-site", version = "1.4.7" }
+aphrody-inventory = { path = "crates/aphrody-inventory", version = "1.4.7" }
+aphrody-webos-wasm = { path = "crates/aphrody-webos-wasm", version = "1.4.7" }
+aphrody-shell-session = { path = "crates/aphrody-shell-session", version = "1.4.7" }
+aphrody-shell-vfs = { path = "crates/aphrody-shell-vfs", version = "1.4.7" }
+aphrody-terminal-core = { path = "crates/aphrody-terminal-core", version = "1.4.7" }
+aphrody-shell-web = { path = "crates/aphrody-shell-web", version = "1.4.7" }
+aphrody-google = { path = "crates/aphrody-google", version = "1.4.7" }
+rio-vt = { version = "0.5.28", default-features = false }
+tower = { version = "0.5.3", features = ["util"] }
+tower-http = { version = "0.7.1", features = ["cors"] }
+aphrody-gemini-runtime = { path = "crates/aphrody-gemini-runtime", version = "1.4.7" }
+aphrody-antigravity = { path = "crates/aphrody-antigravity", version = "1.4.7" }
+aphrody-model-antigravity = { path = "crates/aphrody-model-antigravity", version = "1.4.7" }
+aphrody-boq = { path = "crates/aphrody-boq", version = "1.4.7" }
+data-encoding = { version = "2.11.1" }
+prost = { version = "0.14.4" }
+tonic = { version = "0.14.6" }
+tonic-prost = { version = "0.14.6" }
+tonic-prost-build = { version = "0.14.6" }
+protoc-bin-vendored = { version = "3.2.0" }
+aphrody-mcp-client = { path = "crates/aphrody-mcp-client", version = "1.4.7" }
+aphrody-x = { package = "bun_x", version = "1.4.7" }
+obscura-dom = { package = "bun_browser_dom", version = "1.4.7" }
+obscura-net = { package = "bun_browser_net", version = "1.4.7" }
+craft-fonts = { path = "crates/craft-fonts", version = "1.4.7" }
+craft-atomic = { path = "crates/craft-atomic", version = "1.4.7" }
+craft-settings = { path = "crates/craft-settings", version = "1.4.7" }
+craft-cms = { path = "crates/craft-cms", version = "1.4.7" }
+craft-print = { path = "crates/craft-print", version = "1.4.7" }
+craft-quit = { path = "crates/craft-quit", version = "1.4.7" }
+craft-ui = { path = "crates/craft-ui", version = "1.4.7" }
+cadcraft-color = { path = "crates/cadcraft-color", version = "1.4.7" }
+cadcraft-geom = { path = "crates/cadcraft-geom", version = "1.4.7" }
+cadcraft-doc = { path = "crates/cadcraft-doc", version = "1.4.7" }
+cadcraft-engine = { path = "crates/cadcraft-engine", version = "1.4.7" }
+cadcraft-constraints = { path = "crates/cadcraft-constraints", version = "1.4.7" }
+cadcraft-dxf = { path = "crates/cadcraft-dxf", version = "1.4.7" }
+cadcraft-dwg = { path = "crates/cadcraft-dwg", version = "1.4.7" }
+cadcraft-fonts = { path = "crates/cadcraft-fonts", version = "1.4.7" }
+cadcraft-io = { path = "crates/cadcraft-io", version = "1.4.7" }
+cadcraft-mcp = { path = "crates/cadcraft-mcp", version = "1.4.7" }
+cadcraft-render = { path = "crates/cadcraft-render", version = "1.4.7" }
+cadcraft-ui-egui = { path = "crates/cadcraft-ui-egui", version = "1.4.7" }
+cadcraft = { path = "crates/cadcraft", version = "1.4.7" }
+aphrody-a2a = { path = "crates/aphrody-a2a", version = "1.4.7" }
+aphrody-agent-proto = { path = "crates/aphrody-agent-proto", version = "1.4.7" }
+aphrody-app-protocol = { path = "crates/aphrody-app-protocol", version = "1.4.7" }
+aphrody-toolcall = { path = "crates/aphrody-toolcall", version = "1.4.7" }
+aphrody-patch = { path = "crates/aphrody-patch", version = "1.4.7" }
+aphrody-toolcall-repair = { path = "crates/aphrody-toolcall-repair", version = "1.4.7" }
+aphrody-translate-core = { path = "crates/aphrody-translate-core", version = "1.4.7" }
+aphrody-http-error = { path = "crates/aphrody-http-error", version = "1.4.7" }
+aphrody-guard = { path = "crates/aphrody-guard", version = "1.4.7" }
+aphrody-subsystem = { path = "crates/aphrody-subsystem", version = "1.4.7" }
+aphrody-proc = { path = "crates/aphrody-proc", version = "1.4.7" }
+aphrody-config = { path = "crates/aphrody-config", version = "1.4.7" }
+aphrody-jev = { path = "crates/aphrody-jev", version = "1.4.7", default-features = false }
+acadrust = "0.6.3"
+anyhow = { version = "1.0.104", default-features = false }
+async-trait = { version = "0.1.92", default-features = false }
+axum = { version = "0.8.9", default-features = false }
+base64 = { version = "0.23.1", default-features = false }
+chrono = { version = "0.4.45", default-features = false }
+dirs = { version = "7.0.0", default-features = false }
+dispatch2 = { version = "0.3.1", default-features = false }
+egui = { version = "0.36.2", default-features = false }
+eframe = { version = "0.36.2", default-features = false }
+egui_extras = { version = "0.36.2", default-features = false }
+egui_kittest = { version = "0.36.2", default-features = false }
+egui-wgpu = "0.36.2"
+encoding_rs = "0.8.35"
+getrandom = { version = "0.4.3", default-features = false }
+hidapi = { version = "2.6.7", default-features = false }
+futures = { version = "0.3.34", default-features = false, features = ["std", "async-await"] }
+harfrust = "0.12.0"
+image = { version = "0.25.10", default-features = false }
+libc = { version = "0.2.190", default-features = false }
+log = { version = "0.4.34", default-features = false }
+lyon_tessellation = "1.0.22"
+miniz_oxide = { version = "0.9.1", default-features = false, features = ["with-alloc"] }
+moxcms = "0.9.1"
+naga = { version = "30.0.1", default-features = false }
+objc2 = { version = "0.6.5", default-features = false }
+objc2-app-kit = { version = "0.3.2", default-features = false }
+png = { version = "0.18.1", default-features = false }
+pretty_assertions = { version = "1.4.1", default-features = false }
+proptest = { version = "1.12.0", default-features = false }
+quick-xml = "0.41.0"
+rayon = { version = "1.12.0", default-features = false }
+regex = { version = "1.13.1", default-features = false }
+reqwest = { version = "0.13.5", default-features = false }
+rfd = "0.17.2"
+rstar = { version = "0.12.2", default-features = false }
+roxmltree = { version = "0.21.1", default-features = false, features = ["positions", "std"] }
+rustls = { version = "0.23.45", default-features = false }
+rustix = { version = "1.1.5", default-features = false }
+serde = { version = "1.0.228", default-features = false, features = ["derive", "std"] }
+serde_json = { version = "1.0.154", default-features = false, features = ["std"] }
+sys-locale = "0.3.2"
+skrifa = { version = "0.48.0", default-features = false, features = ["std"] }
+sha2 = { version = "0.11.1", default-features = false }
+similar = { version = "3.2.0", default-features = false }
+taffy = { version = "0.9.2" }
+tempfile = { version = "3.27.0", default-features = false, features = ["getrandom"] }
+open = { version = "5.4.3" }
+dunce = "1.0.5"
+thiserror = { version = "2.0.21", default-features = false }
+tiny-skia = { version = "0.11.4", default-features = false, features = ["std", "simd", "png-format"] }
+toml = { version = "1.1.8+spec-1.1.0", default-features = false }
+toml_edit = { version = "0.25.17", default-features = false, features = ["display", "parse"] }
+tokio = { version = "1.53.2", default-features = false }
+tracing = { version = "0.1.44", default-features = false }
+url = { version = "2.5.8", default-features = false }
+uuid = { version = "1.28.0", default-features = false }
+unicode-bidi = "0.3.18"
+windows = { version = "0.62.2", default-features = false }
+winsafe = { version = "0.0.29", default-features = false }
+winresource = "0.1.31"
+winprint = { git = "https://github.com/storytold/winprint.rs", rev = "5f80b9baf6b58937c401656634e42d33f00ddf49", version = "0.2.1", default-features = false }
+muda = { version = "0.21.2", default-features = false }
+winit = { version = "0.30.13", default-features = false }
+zbus = { version = "5.19.0", default-features = false }
+
+# Vendored crates carried by PdfCraft (patch notes in apps/pdfcraft/vendor/README.md).
+# DesignCraft's former winit git patch (skylartaylor/winit 3d51077) is superseded by this vendored copy.
+# Dependencies absorbed from iecode.
+bevy = { version = "0.20.1", default-features = false, features = ["std"] }
+bevy_app = { version = "0.20.1", default-features = false, features = ["std"] }
+iecode-bevy-app = { package = "bevy_app", version = "0.20.1", default-features = false, features = ["std"] }
+bevy_asset = { version = "0.20.1", default-features = false }
+bevy_ecs = { version = "0.20.1", default-features = false, features = ["std"] }
+iecode-bevy-ecs = { package = "bevy_ecs", version = "0.20.1", default-features = false, features = ["std"] }
+bevy_image = { version = "0.20.1", default-features = false, features = ["bevy_reflect"] }
+bevy_math = { version = "0.20.1", default-features = false }
+bevy_mesh = { version = "0.20.1", default-features = false }
+bevy_reflect = { version = "0.20.1", default-features = false }
+bevy_input = { version = "0.20.1", default-features = false, features = ["std", "keyboard"] }
+bevy_time = { version = "0.20.1", default-features = false, features = ["std"] }
+bevy-wgpu-types = { package = "wgpu-types", version = "30.0.1", default-features = false }
+wgpu = { version = "30.0.1", default-features = false, features = ["std", "wgsl", "vulkan", "gles", "dx12", "metal", "web", "webgpu"] }
+wgpu-types = { version = "30.0.1", default-features = false, features = ["std"] }
+egui-winit = { package = "aphrody-egui-winit", version = "0.36.2", default-features = false }
+objc2-ui-kit = { version = "0.3.2", default-features = false }
+wayland-cursor = { version = "0.31.14", default-features = false }
+smithay-clipboard = { version = "0.7.2" }
+webbrowser = { version = "1.2" }
+accesskit = { version = "0.24.1", default-features = false }
+accesskit_winit = { version = "0.32.0" }
+type-map = "0.5.1"
+epaint = { version = "0.36.2", default-features = false }
+chipi-build = "0.9.1"
+wesl = "0.3.2"
+renderdoc = "0.12.1"
+hotpath = "0.16.1"
+egui-phosphor = "0.14.0"
+chapa = "0.1.2"
+multiversion = "0.8.0"
+twox-hash = { version = "2.1.2", default-features = false, features = ["std", "xxhash3_64"] }
+zstd = "0.13.3"
+ahash = "0.8"
+crossbeam-channel = "0.5"
+aphrody-emu-utils = {  path = "crates/aphrody-emu-utils", version = "0.0.1", features = ["triple-buffer", "app"] }
+aphrody-dust-core = {  path = "crates/aphrody-dust-core", version = "0.0.1" }
+bun-steam = { path = "crates/bun-steam", version = "1.4.7", default-features = false }
+bun-engine = { path = "crates/bun-engine-core", version = "0.1.0", default-features = false }
+aphrody-gpu-backend = { package = "shenron-gpu", path = "crates/shenron-gpu" }
+aphrody-wii = { path = "crates/aphrody-wii", version = "0.1.1" }
+aphrody-wii-image = { path = "crates/aphrody-wii-image", version = "0.1.1" }
+aphrody-switch = { path = "crates/aphrody-switch", version = "0.1.1" }
+ghidra-decompiler = "2.1.0"
+parking_lot = "0.12.3"
+proc-bitfield = { version = "0.5" }
+bitfield-struct = "0.12"
+bitreader = "0.3"
+cpp_demangle = "0.5"
+crossterm = "0.29"
+crc = "3.4"
+derive_more = { version = "2.1", features = ["display"] }
+fxhash = "0.2"
+objdiff-core = { version = "3.8.2", default-features = true, features = [
+  "config",
+  "serde",
+] }
+path-clean = "1.0"
+path-slash = "0.2"
+pathdiff = "0.2"
+ratatui = "0.30"
+rust-bitwriter = "0.0"
+serde-saphyr = "0.0"
+sha1 = "0.10"
+snafu = { version = "0.8", features = ["backtrace"] }
+strum_macros = "0.28"
+tinytemplate = "1.2"
+typed-path = "0.12"
+unarm = { version = "2.2", default-features = false, features = ["arm", "thumb", "v5te"] }
+addr2line = { version = "0.26.0", default-features = false }
+android_system_properties = "0.1.1"
+anyhow-for-testing = { package = "anyhow", version = "1.0.100", default-features = false }
+approx = "0.5"
+arbitrary = "1.4.2"
+arboard = { version = "3.6", default-features = false }
+arbtest = "0.3.2"
+argh = "0.1.13"
+arrayvec = { version = "0.7.1", default-features = false }
+ash = "0.38"
+backtrace = "0.3.76"
+bincode = { version = "2", default-features = false, features = ["std", "serde"] }
+bit-set = { version = "0.11", default-features = false }
+bit-vec = { version = "0.10", default-features = false }
+bitflags = "2.9.4"
+block2 = "0.6.2"
+bumpalo = "3.20.2"
+bytemuck = { version = "1.0", features = ["derive", "extern_crate_alloc", "min_const_generics"] }
+bytes = { version = "1.12.1" }
+cap-fs-ext = "4.0.2"
+cap-std = "4.0.2"
+capstone = { version = "0.14.0", default-features = false, features = [
+  "full",
+  "arch_x86",
+  "arch_riscv",
+  "arch_arm64",
+  "arch_sysz",
+] }
+cargo-hot = { version = "0.1", package = "cargo-hot-protocol" }
+cargo_metadata = "0.23"
+cc = "1.2.41"
+cfg-if = "1.0"
+cfg_aliases = "0.2.2"
+clap = { version = "4", features = ["derive", "env"] }
+clap_complete = "4.5.58"
+codespan-reporting = { version = "0.13", default-features = false }
+console_error_panic_hook = "0.1.5"
+console_log = "1"
+cosmic-text = "0.19"
+criterion = { version = "0.8.2", default-features = false, features = ["html_reports", "rayon"] }
+cryoglyph = { git = "https://github.com/iced-rs/cryoglyph.git", rev = "53ba3e879539d19ed8162942126a977ec896cc3b" }
+deno_console = "0.214.0"
+deno_core = "0.355.0"
+deno_error = "0.7.0"
+deno_features = "0.11.0"
+deno_unsync = "0.4.4"
+deno_url = "0.214.0"
+deno_web = "0.245.0"
+deno_webidl = "0.214.0"
+diff = "0.1"
+document-features = "0.2.10"
+encase = "0.13"
+env_logger = { version = "0.11.5", default-features = false, features = [
+  "auto-color",
+  "humantime",
+  "regex",
+] }
+exhaust = "0.2"
+fern = "0.7"
+file-per-thread-logger = "0.2.0"
+filecheck = "0.5.0"
+flate2 = "1.1.4"
+flume = "0.12"
+futures-lite = "2"
+gdbstub = "0.7.10"
+gdbstub_arch = "0.3.3"
+gimli = { version = "0.33.0", default-features = false, features = ["read"] }
+glam = { version = "0.33.9", default-features = false, features = ["std"] }
+glob = "0.3.3"
+glow = "0.18"
+glutin = { version = "0.32", default-features = false }
+glutin-winit = { version = "0.5", default-features = false }
+glutin_wgl_sys = "0.6"
+goblin = { version = "0.10" }
+googletest = { version = "0.14" }
+gpu-allocator = { version = "0.28", default-features = false, features = ["hashbrown"] }
+guillotiere = "0.6"
+half = "2.2"
+hashbrown = { version = "0.17", default-features = false, features = [
+  "default-hasher",
+  "inline-more",
+] }
+heck = "0.5"
+hex = { version = "0.4" }
+http = "1.3.1"
+http-body = "1.0.1"
+http-body-util = "0.1.3"
+hyper = "1.9.0"
+iced-x86 = { version = "1.21" }
+indexmap = { version = "2.14.0", default-features = false }
+indicatif = "0.18"
+io-lifetimes = { version = "3.0.1", default-features = false }
+itertools = "0.14.0"
+ittapi = "0.4.0"
+jobserver = "0.1"
+js-sys = { version = "0.3.106", default-features = false }
+json-from-wast = "0.251.0"
+kamadak-exif = "0.6"
+khronos-egl = "6"
+ktx2 = "0.5"
+kurbo = "0.10"
+libfuzzer-sys = "0.4.10"
+libloading = "0.8"
+libtest-mimic = "0.8.1"
+lilt = "0.8"
+lock_api = { version = "0.4.6", default-features = false }
+lyon = "1.0"
+lyon_path = "1.0"
+mach-dxcompiler-rs = { version = ">=0.1.0,<=0.1.4", default-features = false }
+mach2 = "0.6"
+macro_rules_attribute = "0.2"
+memfd = "0.6.5"
+mint = "0.5.6"
+mundy = { version = "0.2", default-features = false }
+mutatis = { version = "0.4.0", features = ["alloc", "derive", "check"] }
+nanorand = { version = "0.8", default-features = false, features = ["wyrand"] }
+nanoserde = "0.2"
+native-tls = "0.2.11"
+ndk-sys = "0.6"
+noise = "0.9"
+nom = "8"
+num-traits = "0.2"
+num_cpus = "1"
+nv-flip = "0.1"
+obj = "0.10"
+objc2-core-foundation = { version = "0.3.2", default-features = false, features = [
+  "std",
+  "CFCGTypes",
+] }
+objc2-core-graphics = { version = "0.3.2", default-features = false, features = [
+  "std",
+  "CGColorSpace",
+] }
+objc2-foundation = { version = "0.3.2", default-features = false, features = [
+  "std",
+  "NSError",
+  "NSProcessInfo",
+  "NSRange",
+  "NSString",
+] }
+objc2-metal = { version = "0.3.2", default-features = false, features = [
+  "std",
+  "block2",
+  "MTLAllocation",
+  "MTLBlitCommandEncoder",
+  "MTLBlitPass",
+  "MTLBuffer",
+  "MTLCaptureManager",
+  "MTLCaptureScope",
+  "MTLCommandBuffer",
+  "MTLCommandEncoder",
+  "MTLCommandQueue",
+  "MTLComputeCommandEncoder",
+  "MTLComputePass",
+  "MTLComputePipeline",
+  "MTLCounters",
+  "MTLDepthStencil",
+  "MTLDevice",
+  "MTLDrawable",
+  "MTLEvent",
+  "MTLLibrary",
+  "MTLPipeline",
+  "MTLPixelFormat",
+  "MTLRenderCommandEncoder",
+  "MTLRenderPass",
+  "MTLRenderPipeline",
+  "MTLResource",
+  "MTLSampler",
+  "MTLStageInputOutputDescriptor",
+  "MTLTexture",
+  "MTLTypes",
+  "MTLVertexDescriptor",
+  "MTLAccelerationStructure",
+  "MTLAccelerationStructureTypes",
+  "MTLAccelerationStructureCommandEncoder",
+  "MTLResidencySet",
+  "MTLLogState",
+] }
+objc2-quartz-core = { version = "0.3.2", default-features = false, features = [
+  "std",
+  "objc2-core-foundation",
+  "objc2-core-graphics",
+  "CALayer",
+  "CAMetalLayer",
+  "objc2-metal",
+] }
+object = { version = "0.39.0", default-features = false, features = ["read_core", "elf"] }
+dsd-object = { package = "object", git = "https://github.com/AetiasHax/object.git", branch = "dev", default-features = false, features = [
+  "elf",
+  "build",
+] }
+once_cell = { version = "1.21", default-features = false }
+openssl = "0.10.80"
+openssl-sys = "0.9.116"
+ordered-float = { version = ">=3, <6.0", default-features = false }
+ouroboros = "0.18"
+paste = "1.0.15"
+petgraph = { version = "0.8", default-features = false }
+pico-args = { version = "0.5", features = ["eq-separator", "short-space-opt", "combined-flags"] }
+pin-project-lite = "0.2.14"
+pollster = "1.0"
+portable-atomic = "1.10"
+portable-atomic-util = "0.2.4"
+postcard = { version = "1.1.3", default-features = false, features = ["alloc"] }
+pp-rs = "0.2.1"
+proc-macro2 = "1.0.101"
+profiling = { version = "1.0.1", default-features = false }
+psm = "0.1.11"
+pulldown-cmark = "0.12"
+qrcode = { version = "0.13", default-features = false }
+quote = "1.0.41"
+rand = { version = "0.10.1", default-features = false }
+range-alloc = "0.1"
+raw-window-handle = "0.6"
+raw-window-metal = "1.0"
+regalloc2 = "0.15.1"
+regex-lite = "0.1"
+renderdoc-sys = "1"
+resvg = "0.45"
+ron = "0.12"
+rspirv = "0.13"
+rusqlite = { version = "0.40" }
+rustc-hash = { version = "2.1.1", default-features = false }
+scopeguard = { version = "1.2", default-features = false }
+semver = { version = "1.0.27", default-features = false }
+serde_derive = "1.0.228"
+shell-words = "1"
+sipper = "0.1"
+smallvec = { version = "1.15.1", features = ["union"] }
+smol = "2"
+smol_str = "0.2"
+softbuffer = { version = "0.4", default-features = false }
+spirv = "0.4"
+static_assertions = "1.1"
+strum = { version = "0.28", default-features = false, features = ["derive"] }
+syn = "2.0.106"
+sysinfo = "0.33"
+target-lexicon = "0.13.5"
+termcolor = "1.4.1"
+test-log = { version = "0.2.18", default-features = false, features = ["trace"] }
+tokio-native-tls = "0.3.1"
+tokio-openssl = "0.6.5"
+tokio-postgres = { version = "0.7", default-features = false, features = [
+  "runtime",
+  "with-serde_json-1",
+] }
+tokio-postgres-rustls = { version = "0.14", default-features = false, features = [
+  "ring",
+  "native-certs",
+] }
+tokio-rustls = { version = "0.26.4", default-features = false, features = [
+  "ring",
+  "tls12",
+  "logging",
+] }
+tokio-util = "0.7.16"
+tracy-client = "0.19"
+trybuild = "1"
+two-face = { version = "0.4", default-features = false, features = ["syntect-default-fancy"] }
+unicode-ident = "1.0.5"
+unicode-segmentation = "1.0"
+ureq = { version = "3.2.0", default-features = false }
+walkdir = "2.5.0"
+wasip1 = { version = "1.0.0", default-features = false }
+wasip2 = "1.0"
+wasm-bindgen = { version = "0.2.129", default-features = false }
+wasm-bindgen-futures = "0.4"
+wasm-compose = { version = "0.251.0", default-features = false }
+wasm-encoder = "0.251.0"
+wasm-mutate = "0.251.0"
+wasm-smith = "0.251.0"
+wasm-wave = "0.251.0"
+wasmparser = { version = "0.251.0", default-features = false, features = ["simd"] }
+wasmprinter = "0.251.0"
+wasmtimer = "0.4.2"
+wast = "251.0.0"
+wat = "1.251.0"
+web-sys = { version = "0.3.104", default-features = false }
+web-time = "1.1"
+webpki-roots = "0.26.0"
+which = "8"
+windows-core = { version = "0.62", default-features = false }
+windows-result = { version = "0.4", default-features = false }
+windows-sys = "0.61.2"
+wit-bindgen = { version = "0.57.0", default-features = false }
+wit-bindgen-rust-macro = { version = "0.57.0", default-features = false }
+wit-component = "0.251.0"
+wit-parser = "0.251.0"
+wstd = "0.6.5"
+xshell = "0.2.6"
+zerocopy = { version = "0.8" }
+aes = { version = "0.8", default-features = false }
+aes-gcm = { version = "0.10" }
+assert_cmd = { version = "2" }
+bcdec_rs = { version = "0.2.0" }
+byteorder = { version = "1" }
+crc32fast = { version = "1.5", default-features = false }
+cridecoder = { version = "0.2.3", default-features = false }
+dirs-next = { version = "2" }
+futures-util = { version = "0.3" }
+globset = { version = "0.4" }
+grep-regex = { version = "0.1" }
+grep-searcher = { version = "0.1" }
+hmac = { version = "0.12" }
+aphrody-re = { package = "bun-re", path = "crates/re", version = "1.4.7" }
+aphrody-web-crawl = "1.0.0"
+aphrody-os-re = { package = "bun-re", path = "crates/re", version = "1.4.7" }
+aphrody-identity = { path = "crates/aphrody-identity", version = "1.4.7" }
+aphrody-softraster = { path = "crates/aphrody-softraster", version = "1.4.7" }
+aphrody-sprite-sheet = { path = "../yolo-ai/crates/aphrody-sprite-sheet", version = "1.4.8" }
+aphrody-nie-geom = { path = "crates/aphrody-nie-geom", version = "1.4.7" }
+aphrody-nie-video = { path = "crates/aphrody-nie-video", version = "1.4.7" }
+aphrody-nie-sql = { path = "crates/aphrody-nie-sql", version = "1.4.7" }
+aphrody-nie-tasks = { default-features = false, path = "crates/aphrody-nie-tasks", version = "1.4.7" }
+aphrody-nie-pe-inspect = { path = "crates/aphrody-nie-pe-inspect", version = "1.4.7" }
+ignore = { version = "0.4" }
+image_dds = { version = "0.7", default-features = false }
+memmap2 = { version = "0.9" }
+mlua = { version = "0.11" }
+aphrody-nie-identity-source = { path = "crates/aphrody-nie-identity-source", version = "1.4.7" }
+aphrody-nie-app = { default-features = false, path = "crates/aphrody-nie-app", version = "1.4.7" }
+aphrody-nie-asm = { default-features = false, path = "crates/aphrody-nie-asm", version = "1.4.7" }
+aphrody-nie-bench = { default-features = false, path = "crates/aphrody-nie-bench", version = "1.4.7" }
+aphrody-nie-bevy = { path = "crates/aphrody-nie-bevy", version = "1.4.7" }
+aphrody-nie-camera = { default-features = false, path = "crates/aphrody-nie-camera", version = "1.4.7" }
+aphrody-nie-cli = { path = "crates/aphrody-nie-cli", version = "1.4.7" }
+aphrody-nie-computer-use = { default-features = false, path = "crates/aphrody-nie-computer-use", version = "1.4.7" }
+aphrody-nie-core = { default-features = false, path = "crates/aphrody-nie-core", version = "1.4.7" }
+aphrody-nie-data = { path = "crates/aphrody-nie-data", version = "1.4.7" }
+aphrody-nie-editor = { default-features = false, path = "crates/aphrody-nie-editor", version = "1.4.7" }
+aphrody-nie-explore = { default-features = false, path = "crates/aphrody-nie-explore", version = "1.4.7" }
+aphrody-nie-ffi = { default-features = false, path = "crates/aphrody-nie-ffi", version = "1.4.7" }
+aphrody-nie-forge = { default-features = false, path = "crates/aphrody-nie-forge", version = "1.4.7" }
+aphrody-nie-formats = { default-features = false, path = "crates/aphrody-nie-formats", version = "1.4.7" }
+nie-formats = { package = "aphrody-nie-formats", path = "crates/aphrody-nie-formats", version = "1.4.7" }
+aphrody-nie-game = { path = "crates/aphrody-nie-game", version = "1.4.7" }
+aphrody-nie-headless = { default-features = false, path = "crates/aphrody-nie-headless", version = "1.4.7" }
+aphrody-nie-index = { default-features = false, path = "crates/aphrody-nie-index", version = "1.4.7" }
+aphrody-nie-launcher = { path = "crates/aphrody-nie-launcher", version = "1.4.7" }
+aphrody-nie-lua = { default-features = false, path = "crates/aphrody-nie-lua", version = "1.4.7" }
+aphrody-nie-lua-web = { path = "crates/aphrody-nie-lua-web", version = "1.4.7" }
+aphrody-nie-mcp = { path = "crates/aphrody-nie-mcp", version = "1.4.7" }
+aphrody-nie-model-serve = { default-features = false, path = "crates/aphrody-nie-model-serve", version = "1.4.7" }
+aphrody-nie-net = { default-features = false, path = "crates/aphrody-nie-net", version = "1.4.7" }
+aphrody-nie-ocgen = { path = "crates/aphrody-nie-ocgen", version = "1.4.7" }
+aphrody-nie-pe = { default-features = false, path = "crates/aphrody-nie-pe", version = "1.4.7" }
+aphrody-nie-pg = { path = "crates/aphrody-nie-pg", version = "1.4.7" }
+aphrody-nie-play = { path = "crates/aphrody-nie-play", version = "1.4.7" }
+aphrody-nie-queue = { default-features = false, path = "crates/aphrody-nie-queue", version = "1.4.7" }
+aphrody-nie-render = { path = "crates/aphrody-nie-render", version = "1.4.7" }
+aphrody-nie-render3d = { default-features = false, path = "crates/aphrody-nie-render3d", version = "1.4.7" }
+aphrody-nie-ui = { path = "crates/aphrody-nie-ui", version = "1.0.1" }
+aphrody-nie-runtime = { default-features = false, path = "crates/aphrody-nie-runtime", version = "1.4.7" }
+aphrody-nie-save = { default-features = false, path = "crates/aphrody-nie-save", version = "1.4.7" }
+aphrody-nie-seed = { default-features = false, path = "crates/aphrody-nie-seed", version = "1.4.7" }
+aphrody-nie-trace = { default-features = false, path = "crates/aphrody-nie-trace", version = "1.4.7" }
+aphrody-nie-viola = { path = "crates/aphrody-nie-viola", version = "1.4.7" }
+aphrody-nie-wasm = { path = "crates/aphrody-nie-wasm", version = "1.4.7" }
+aphrody-nie-wiki = { path = "crates/aphrody-nie-wiki", version = "1.4.7" }
+aphrody-nie-zukan = { default-features = false, path = "crates/aphrody-nie-zukan", version = "1.4.7" }
+pbkdf2 = { version = "0.12" }
+percent-encoding = { version = "2" }
+r2d2 = { version = "0.8" }
+redis = { version = "0.27" }
+aphrody-ssh = "0.1.0"
+russh = { version = "0.63", default-features = false, features = ["ring"] }
+russh-sftp = "3.0"
+rmcp = { version = "3.4.1" }
+schemars = { version = "1" }
+scraper = { version = "0.22" }
+specta = { version = "2.0.0-rc.25" }
+steamroom = { version = "0.2" }
+steamroom-client = { version = "0.2" }
+tokio-tungstenite = { version = "0.29" }
+tree-sitter = { version = "0.27" }
+tree-sitter-lua = { version = "0.5" }
+candle-core = { version = "0.11", default-features = false }
+candle-nn = { version = "0.11", default-features = false }
+candle-transformers = { version = "0.11", default-features = false }
+zip = { version = "8.6.0", default-features = false, features = ["deflate"] }
+aphrody-tauri-3d = { path = "crates/aphrody-tauri-3d", version = "1.0.0-canary" }
+rdynarmic = { path = "crates/rdynarmic", version = "0.1.0" }
+common = { path = "crates/ruzu-common", version = "1.4.7" }
+network = { path = "crates/ruzu-network", version = "1.4.7" }
+web_service = { path = "crates/ruzu-web-service", version = "1.4.7" }
+input_common = { path = "crates/ruzu-input-common", version = "1.4.7" }
+video_core = { path = "crates/ruzu-video-core", version = "1.4.7" }
+frontend_common = { path = "crates/ruzu-frontend-common", version = "1.4.7" }
+shader_recompiler = { path = "crates/ruzu-shader-recompiler", version = "1.4.7" }
+# bunos-wsl (GPL-3.0, derived from octasoft-ltd/wsl-ui; docs/wsl/PROVENANCE.md)
+tar = "0.4"
+ruzstd = "0.9"
+jsonc-parser = "0.34"
+configparser = "3"
+lazy_static = "1.5"
+shell-escape = "0.1"
+winreg = "0.56"
+wiremock = "0.6"
+# One Tauri line for the whole monorepo: upstream tauri-apps/tauri v3 alpha from crates.io (the aphrody-labs/tauri fork carries no patch).
+# Members consume these with `workspace = true` and only add features; bump here and nowhere else.
+tauri = { version = "=3.0.0-alpha.5", default-features = false }
+tauri-build = { version = "=3.0.0-alpha.4" }
+tauri-plugin = { version = "=3.0.0-alpha.4" }
+tauri-utils = { version = "=3.0.0-alpha.4" }
+tauri-runtime = { version = "=3.0.0-alpha.4" }
+tauri-runtime-wry = { version = "=3.0.0-alpha.5" }
+tauri-runtime-cef = { version = "=3.0.0-alpha.6" }
+tauri-cli = { version = "=3.0.0-alpha.5" }
+create-tauri-app = { version = "=4.8.0" }
+wry = { version = "0.57.1" }
+tao = { version = "0.37.2" }
+tray-icon = { version = "0.26.1" }
+webview2-com = { version = "0.39.1" }
+tauri-plugin-autostart = { version = "=3.0.0-alpha.3" }
+tauri-plugin-clipboard-manager = { version = "=3.0.0-alpha.3" }
+tauri-plugin-deep-link = { version = "=3.0.0-alpha.3" }
+tauri-plugin-dialog = { version = "=3.0.0-alpha.4" }
+tauri-plugin-fs = { version = "=3.0.0-alpha.3" }
+tauri-plugin-global-shortcut = { version = "=3.0.0-alpha.3" }
+tauri-plugin-http = { version = "=3.0.0-alpha.3" }
+tauri-plugin-log = { version = "=3.0.0-alpha.3" }
+tauri-plugin-notification = { version = "=3.0.0-alpha.3" }
+tauri-plugin-opener = { version = "=3.0.0-alpha.3" }
+tauri-plugin-os = { version = "=3.0.0-alpha.3" }
+tauri-plugin-process = { version = "=3.0.0-alpha.3" }
+tauri-plugin-shell = { version = "=3.0.0-alpha.3" }
+tauri-plugin-single-instance = { version = "=3.0.0-alpha.3" }
+tauri-plugin-store = { version = "=3.0.0-alpha.3" }
+tauri-plugin-updater = { version = "=3.0.0-alpha.3" }
+tauri-plugin-upload = { version = "=3.0.0-alpha.2" }
+tauri-plugin-window-state = { version = "=3.0.0-alpha.2" }
+tauri-plugin-mcp-bridge = { path = "crates/tauri-plugin-mcp-bridge", version = "1.4.7" }
+tauri-plugin-aphrody = { path = "crates/tauri-plugin-aphrody", version = "1.4.7", default-features = false }
+aphrody-render = { path = "crates/aphrody-render", version = "1.4.7" }
+aphrody-m3-tokens = { path = "crates/aphrody-m3-tokens", version = "1.4.7" }
+cubeb = "0.34"
+cubeb-sys = "0.34"
+sdl3 = "0.20"
+sdl3-sys = "0.7"
+lz4_flex = "0.14"
+context = "3"
+fastrand = "2"
+cipher = "0.4"
+ctr = "0.9"
+md-5 = "0.11"
+gl = "0.14"
+vk-mem = "0.5"
+spirv-cross2 = "0.7"
+
+[patch.crates-io]
+# Obscura headless browser crates (aphrody-labs/bun-obscura, snapshot of the fork src/browser merged with h4ckf0r0day/obscura 3285fbc2357a); replaces the crates.io 1.4.7 releases.
+bun_browser = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_browser = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_cdp = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_crawl = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_detect = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_dom = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_engine = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_extract = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_frames = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_index = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_js = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_layout = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_mcp = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_net = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_process = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_render = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_service = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+bun_browser_ssrf = { git = "https://github.com/aphrody-labs/bun-obscura", rev = "3ed4a767cae9f93816a78b43e02995a79cd481a4" }
+# PyO3: aphrody-labs fork, pinned.
+pyo3 = { git = "https://github.com/aphrody-labs/pyo3", rev = "451d99fdcdcddf159e8e0a1186960b332cdb5d7c" }
+pyo3-build-config = { git = "https://github.com/aphrody-labs/pyo3", rev = "451d99fdcdcddf159e8e0a1186960b332cdb5d7c" }
+pyo3-ffi = { git = "https://github.com/aphrody-labs/pyo3", rev = "451d99fdcdcddf159e8e0a1186960b332cdb5d7c" }
+pyo3-macros = { git = "https://github.com/aphrody-labs/pyo3", rev = "451d99fdcdcddf159e8e0a1186960b332cdb5d7c" }
+pyo3-macros-backend = { git = "https://github.com/aphrody-labs/pyo3", rev = "451d99fdcdcddf159e8e0a1186960b332cdb5d7c" }
+zip2 = { package = "zip", git = "https://github.com/zip-rs/zip2", tag = "v2.6.1" }
+zip = { git = "https://github.com/zip-rs/zip2", tag = "v8.6.0" }
+bun-re = { path = "crates/re" }
+# Rust base (docs/RUST-BASE.md, factory/rustbase/forks.json): one aphrody-labs fork per shared crate, same rev as the
+# vendor/ submodule. rustls is the TLS stack of first-party code (ring provider); zlib-rs is flate2's zlib backend.
+rustls = { git = "https://github.com/aphrody-labs/rustls", rev = "f04804fa13341a9b1dc02b5d1dd8a746f2c4b7fb" }
+zlib-rs = { git = "https://github.com/aphrody-labs/zlib-rs", rev = "0254e07204884bfc902d6ebb68c8b703d0ea49cf" }
+
+# Workspace development profile: line tables for backtraces without heavy DWARF debuginfo bloat.
+# Accelerates compilation and linking by ~2x and reduces target directory volume by ~60%.
+[profile.dev]
+debug = 1
+opt-level = 0
+
+[profile.test]
+debug = 1
+opt-level = 0
+
+# Zakuro's hot crates are unusable without optimisation, as in its own workspace.
+[profile.dev.package.zakuro-cpu]
+opt-level = 3
+[profile.dev.package.zakuro-gpu]
+opt-level = 3
+[profile.dev.package.zakuro-core]
+opt-level = 2
+
+# Browser emulation builds (packages/bun-engine/web-emulation): whole-program optimisation for
+# wasm32-unknown-unknown; wasm-bindgen and wasm-opt -O3 run afterwards.
+[profile.wasm-release]
+inherits = "release"
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = false
+strip = true
+incremental = false
+
+# Craft browser apps (apps/webos/build-craft.ts): smallest download; wasm-bindgen and wasm-opt -Oz run afterwards.
+[profile.web-craft]
+inherits = "release"
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = false
+strip = true
+incremental = false
+
+
+
+

@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "policy": "AGENTS.md",
+  "ledger": "PLAN.md",
+  "entrypoints": [
+    "README.md",
+    "CONTRIBUTING.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".agents/README.md",
+    ".agents/skills/dust-cli/SKILL.md",
+    ".agents/skills/decompilation/SKILL.md",
+    "docs/README.md",
+    "docs/nie/README.md",
+    "docs/nie/IECODE-MIGRATION.md",
+    "LICENSES.md",
+    "THIRD_PARTY.md",
+    "TODO.md"
+  ],
+  "currentPrefixes": [
+    "docs/architecture/",
+    "docs/development/",
+    "docs/emulation/",
+    "docs/formats/",
+    "docs/migrations/",
+    "docs/apis/"
+  ],
+  "currentFiles": ["docs/REMAINING-WORK.md"],
+  "referencePrefixes": [
+    "docs/gecko/",
+    "docs/licenses/",
+    "docs/lua-src/",
+    "docs/nie/",
+    "docs/reference/",
+    "docs/research/",
+    "docs/rg/",
+    "docs/ruzu/",
+    "docs/third-party/",
+    "docs/upstream/"
+  ],
+  "historicalPrefixes": ["docs/history/", "docs/ruzu/history/"],
+  "historicalFiles": ["docs/cli-ie.md"],
+  "sourceOwners": [
+    "Cargo.toml",
+    "package.json",
+    "pyproject.toml",
+    "IECODE.sln",
+    "CMakeLists.txt",
+    "crates/emu/core",
+    "crates/emu/cli/dust-cli",
+    "crates/aphrody-emulator-host",
+    "crates/emu/wii/core",
+    "crates/nie/aphrody-nie-ffi",
+    "apps/web",
+    "src/IECODE",
+    "src/iecode-cpp"
+  ],
+  "referencePolicy": "Retained domain specifications, upstream snapshots and dated reports are evidence, not current build instructions or agent policy. Their original relative links may refer to the original repository."
+}

@@ -47,11 +47,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "url": "https://github.com/aphrody-dev/rosegriffon.git",
     "directory": "packages/rg-app-shell"
   },
-  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-app-shell#readme",
+  "homepage": "https://github.com/aphrody-dev/rosegriffon/tree/main/packages/rg-app-shell#readme",
   "bugs": {
-    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
+    "url": "https://github.com/aphrody-dev/rosegriffon/issues"
   }
 }

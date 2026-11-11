@@ -27,7 +27,17 @@ mock.module("next/headers", () => ({
   }),
   headers: async () => new Headers(),
 }));
-mock.module("@/lib/auth-helpers", () => ({ getServerSession: async () => rgSession }));
+mock.module("@/lib/auth-helpers", () => ({
+  getServerSession: async () => rgSession,
+  getServerUser: async () => rgSession?.user ?? null,
+  requireAuth: async () => rgSession?.user,
+  requireAdmin: async () => {},
+  requirePatreonCreator: async () => {},
+  requireAuthOrFail: async () => rgSession?.user,
+  requireAdminOrFail: async () => {},
+  hasMedailleAzaleeRole: async () => false,
+  requireEditorOrFail: async () => {},
+}));
 
 const ADMIN_TOKEN = randomBytes(24).toString("hex");
 const previous: Record<string, string | undefined> = {};

@@ -8,8 +8,8 @@
 	"type": "module",
 	"scripts": {
 		"deploy": "wrangler deploy -j -c ./config/wrangler.json",
-		"config-schema": "bunx typescript-json-schema ./tsconfig.json Vars --id Config --out ./config/schema.json --include ./src/types.d.ts --noExtraProps --required --ignoreErrors",
-		"config-merge": "cd config && bunx json-merger --pretty --output combined.json wrangler.json options.json",
+		"config-schema": "bun run typescript-json-schema ./tsconfig.json Vars --id Config --out ./config/schema.json --include ./src/types.d.ts --noExtraProps --required --ignoreErrors",
+		"config-merge": "cd config && bun run json-merger --pretty --output combined.json wrangler.json options.json",
 		"secrets": "wrangler secret bulk secrets.json",
 		"login": "wrangler login"
 	},

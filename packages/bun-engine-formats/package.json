@@ -1,0 +1,22 @@
+{
+  "name": "@aphrody/bun-engine",
+  "version": "1.4.7",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "yolo-console-formats": "src/main.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./formats": "./src/index.ts",
+    "./usr": "./src/usr.ts"
+  },
+  "scripts": {
+    "cli": "bun src/main.ts",
+    "build": "bun src/cli.ts compile",
+    "build:tinke": "bun ../../tools/nds-tinke/build.ts"
+  },
+  "engines": {
+    "bun": ">=1.4.4"
+  }
+}

@@ -51,11 +51,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "url": "https://github.com/aphrody-dev/rosegriffon.git",
     "directory": "packages/rg-auth"
   },
-  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/packages/rg-auth#readme",
+  "homepage": "https://github.com/aphrody-dev/rosegriffon/tree/main/packages/rg-auth#readme",
   "bugs": {
-    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
+    "url": "https://github.com/aphrody-dev/rosegriffon/issues"
   }
 }

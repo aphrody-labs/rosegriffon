@@ -1,0 +1,32 @@
+[package]
+name = "aphrody-nie-camera"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Reverse-engineering model, G4CM codec, configuration and memory tools for Inazuma Eleven: Victory Road"
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "nie-cam"
+path = "src/bin/nie-cam.rs"
+required-features = ["host"]
+
+[features]
+default = ["host"]
+host = ["dep:anyhow", "dep:clap", "dep:aphrody-nie-index", "aphrody-nie-index/host", "dep:aphrody-nie-trace", "dep:sha2"]
+
+[dependencies]
+aphrody-nie-formats = { path = "../aphrody-nie-formats", version = "1.4.8", default-features = true }
+aphrody-nie-data = { path = "../aphrody-nie-data", version = "1.4.8", features = ["std"] }
+aphrody-nie-trace = { path = "../aphrody-nie-trace", version = "1.4.8", optional = true, default-features = true }
+aphrody-nie-index = { path = "../aphrody-nie-index", version = "1.4.8", optional = true, default-features = true }
+sha2 = { version = "0.10", optional = true }
+thiserror = { version = "2.0.20" }
+anyhow = { version = "1.0", optional = true }
+serde = { version = "1.0.228", features = ["std", "derive"] }
+serde_json = { version = "1.0.150" }
+clap = { version = "4.5", optional = true, features = ["derive", "color", "env"] }

@@ -1,0 +1,22 @@
+schema = "VRFW.text_key/1"
+# Texts of Rose Griffon (mod RoseGriffon). The ui_theme_rg_* keys label the menu theme accents of
+# content/themes/rose_griffon.toml (generated). A language missing here falls back to English.
+default_lang = "en"
+
+[en.new]
+mod_name = "Rose Griffon"
+mod_description = "Rose Griffon club pack for offline play: a menu theme computed from an official Rose Griffon theme (Roy by default), the Rose Griffon title logo, a Rose Griffon kit with the club crest, and an optional side-on broadcast camera. No rules, data or saves changed."
+ui_theme_rg_primary = "Rose Griffon (main)"
+ui_theme_rg_secondary = "Rose Griffon (secondary)"
+ui_theme_rg_tertiary = "Rose Griffon (tertiary)"
+broadcast_camera = "Broadcast camera"
+broadcast_camera_help = "Wide side-on view of the pitch during offline matches."
+
+[fr.new]
+mod_name = "Rose Griffon"
+mod_description = "Pack club Rose Griffon pour le jeu hors ligne : un thème de menus calculé à partir d'un thème officiel Rose Griffon (Roy par défaut), le logo Rose Griffon à l'écran titre, un maillot Rose Griffon avec l'écusson du club et une caméra télé latérale en option. Aucune règle, donnée ni sauvegarde modifiée."
+ui_theme_rg_primary = "Rose Griffon (principale)"
+ui_theme_rg_secondary = "Rose Griffon (secondaire)"
+ui_theme_rg_tertiary = "Rose Griffon (tertiaire)"
+broadcast_camera = "Caméra télé"
+broadcast_camera_help = "Vue latérale large du terrain pendant les matchs hors ligne."

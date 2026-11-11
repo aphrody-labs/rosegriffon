@@ -1,0 +1,14 @@
+[package]
+name = "aphrody-nie-video"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Streaming RGBA-to-video encoding for headless NIE output"
+
+[lints]
+workspace = true
+
+[dependencies]
+thiserror = { workspace = true }

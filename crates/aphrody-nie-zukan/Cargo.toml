@@ -1,0 +1,38 @@
+[package]
+name = "aphrody-nie-zukan"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "Inagle encyclopedia HTML parsing, query coding, fuzzy matching, SQLite correlation and optional live pull for IE research"
+
+[lints]
+workspace = true
+
+[features]
+default = ["sqlite"]
+sqlite = ["dep:rusqlite"]
+# Live, rate-limited pull of zukan.inazuma.jp through the shared Aphrody Web crawler, plus the
+# `aphrody-nie-zukan` CLI. Off by default: the offline parsers and matchers need no network.
+pull = ["sqlite", "dep:aphrody-web-crawl", "dep:clap", "dep:tracing-subscriber"]
+
+[dependencies]
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true, features = ["std", "derive"] }
+serde_json = { workspace = true }
+base64 = "0.22.1"
+percent-encoding = "2.3.2"
+scraper = "0.24"
+rusqlite = { workspace = true, optional = true }
+tracing = { workspace = true }
+# Shared HTTP transport, retries and host pacing (crates.io).
+aphrody-web-crawl = { version = "1.0.0", optional = true }
+clap = { version = "4.5.58", optional = true, features = ["derive", "color", "env"] }
+tracing-subscriber = { version = "0.3.20", default-features = false, features = ["fmt", "env-filter", "ansi", "tracing-log"], optional = true }
+
+[[bin]]
+name = "aphrody-nie-zukan"
+path = "src/bin/nie_zukan.rs"
+required-features = ["pull"]

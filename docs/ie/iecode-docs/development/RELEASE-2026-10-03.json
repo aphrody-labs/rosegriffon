@@ -1,0 +1,599 @@
+{
+  "schema": "iecode.release.v1",
+  "date": "2026-10-03",
+  "status": "published-qualified-prerelease",
+  "install_directory": "~/.local/bin",
+  "release_order": [
+    {
+      "package": "aphrody-nie-lua",
+      "version": "1.0.1",
+      "direct_consumers": 6,
+      "transitive_consumers": 26
+    },
+    {
+      "package": "aphrody-nie-formats",
+      "version": "1.0.1",
+      "direct_consumers": 22,
+      "transitive_consumers": 25
+    },
+    {
+      "package": "aphrody-nie-data",
+      "version": "1.0.1",
+      "direct_consumers": 13,
+      "transitive_consumers": 22
+    },
+    {
+      "package": "aphrody-gpu-backend",
+      "version": "1.0.1",
+      "direct_consumers": 3,
+      "transitive_consumers": 16
+    },
+    {
+      "package": "aphrody-nie-geom",
+      "version": "1.0.1",
+      "direct_consumers": 4,
+      "transitive_consumers": 16
+    },
+    {
+      "package": "aphrody-nie-core",
+      "version": "1.0.1",
+      "direct_consumers": 10,
+      "transitive_consumers": 15
+    },
+    {
+      "package": "aphrody-nie-video",
+      "version": "1.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 14
+    },
+    {
+      "package": "aphrody-nie-render3d",
+      "version": "1.0.1",
+      "direct_consumers": 8,
+      "transitive_consumers": 13
+    },
+    {
+      "package": "aphrody-nie-runtime",
+      "version": "1.0.1",
+      "direct_consumers": 8,
+      "transitive_consumers": 10
+    },
+    {
+      "package": "aphrody-emu-utils-macros",
+      "version": "0.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 9
+    },
+    {
+      "package": "aphrody-emu-utils",
+      "version": "0.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 8
+    },
+    {
+      "package": "aphrody-nie-sql",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 8
+    },
+    {
+      "package": "aphrody-dust-core",
+      "version": "0.0.1",
+      "direct_consumers": 7,
+      "transitive_consumers": 7
+    },
+    {
+      "package": "aphrody-nie-explore",
+      "version": "1.0.1",
+      "direct_consumers": 4,
+      "transitive_consumers": 7
+    },
+    {
+      "package": "aphrody-nie-index",
+      "version": "1.0.1",
+      "direct_consumers": 5,
+      "transitive_consumers": 7
+    },
+    {
+      "package": "aphrody-nie-app",
+      "version": "1.0.1",
+      "direct_consumers": 4,
+      "transitive_consumers": 5
+    },
+    {
+      "package": "aphrody-nie-dump",
+      "version": "1.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 5
+    },
+    {
+      "package": "aphrody-nie-save",
+      "version": "1.0.1",
+      "direct_consumers": 4,
+      "transitive_consumers": 5
+    },
+    {
+      "package": "aphrody-nie-trace",
+      "version": "1.0.1",
+      "direct_consumers": 4,
+      "transitive_consumers": 5
+    },
+    {
+      "package": "aphrody-nie-net",
+      "version": "1.0.1",
+      "direct_consumers": 3,
+      "transitive_consumers": 4
+    },
+    {
+      "package": "aphrody-nie-re",
+      "version": "1.0.1",
+      "direct_consumers": 3,
+      "transitive_consumers": 4
+    },
+    {
+      "package": "aphrody-wii",
+      "version": "0.1.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 4
+    },
+    {
+      "package": "aphrody-wii-dff",
+      "version": "0.1.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 4
+    },
+    {
+      "package": "aphrody-wii-disasm",
+      "version": "0.1.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 4
+    },
+    {
+      "package": "aphrody-wii-image",
+      "version": "0.1.1",
+      "direct_consumers": 3,
+      "transitive_consumers": 4
+    },
+    {
+      "package": "aphrody-dust-soft-2d-base",
+      "version": "0.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 3
+    },
+    {
+      "package": "aphrody-nie-computer-use",
+      "version": "1.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 3
+    },
+    {
+      "package": "aphrody-nie-queue",
+      "version": "1.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 3
+    },
+    {
+      "package": "aphrody-nie-seed",
+      "version": "1.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 3
+    },
+    {
+      "package": "aphrody-nie-steam",
+      "version": "1.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 3
+    },
+    {
+      "package": "aphrody-nie-wiki",
+      "version": "1.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 3
+    },
+    {
+      "package": "aphrody-nie-zukan",
+      "version": "1.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 3
+    },
+    {
+      "package": "aphrody-wii-runtime",
+      "version": "0.1.1",
+      "direct_consumers": 3,
+      "transitive_consumers": 3
+    },
+    {
+      "package": "aphrody-dust-soft-3d",
+      "version": "0.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 2
+    },
+    {
+      "package": "aphrody-nie-asm",
+      "version": "1.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 2
+    },
+    {
+      "package": "aphrody-nie-launcher",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 2
+    },
+    {
+      "package": "aphrody-nie-ocgen",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 2
+    },
+    {
+      "package": "aphrody-nie-pe",
+      "version": "1.0.1",
+      "direct_consumers": 2,
+      "transitive_consumers": 2
+    },
+    {
+      "package": "aphrody-nie-viola",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 2
+    },
+    {
+      "package": "aphrody-dust-soft-2d",
+      "version": "0.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-dust-wgpu",
+      "version": "0.1.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-emulator-host",
+      "version": "0.1.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-nie-bench",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-nie-camera",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-nie-cli",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-nie-editor",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-nie-emu",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-nie-forge",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-nie-headless",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-nie-model-serve",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-nie-pe-inspect",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-nie-tasks",
+      "version": "1.0.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-wii-debug",
+      "version": "0.1.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-wii-render",
+      "version": "0.1.1",
+      "direct_consumers": 1,
+      "transitive_consumers": 1
+    },
+    {
+      "package": "aphrody-aarch64",
+      "version": "0.1.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-ctr",
+      "version": "0.1.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-dust-cli",
+      "version": "0.1.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-dust-web",
+      "version": "0.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-homebrew",
+      "version": "0.1.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-bevy",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-ffi",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-game",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-identity-source",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-inventory",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-lua-web",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-mcp",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-pg",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-play",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-render",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-ui",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-viewer-web",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-nie-wasm",
+      "version": "1.0.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-switch",
+      "version": "0.1.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    },
+    {
+      "package": "aphrody-wii-web",
+      "version": "0.1.1",
+      "direct_consumers": 0,
+      "transitive_consumers": 0
+    }
+  ],
+  "npm_order": [
+    "ieverse",
+    "@rosegriffon/inagle-cross",
+    "@rosegriffon/inagle",
+    "@rosegriffon/azalee",
+    "iecode-homebrew"
+  ],
+  "validation": {
+    "rust_tests_passed": 662,
+    "rust_tests_ignored": 3,
+    "rust_scope": "formats, FFI, launcher, NIE WASM fixtures, Switch adapter, Dust CLI assets, Wii and AArch64; not all 74 members",
+    "dotnet_tests_passed": 304,
+    "python_tests_passed": 130,
+    "python_tests_skipped": 16,
+    "cpp_sanitized_tests_passed": 10,
+    "bun_inagle_tests_passed": 141,
+    "bun_inagle_tests_skipped": 6,
+    "bun_azalee_tests_passed": 246,
+    "bun_azalee_tests_skipped": 41,
+    "bun_ieverse_tests_passed": 7,
+    "bun_homebrew_tests_passed": 2,
+    "rust_workspace_check": "RUSTC_BOOTSTRAP=1 cargo check --workspace --all-targets --locked: pass, 74 members",
+    "rust_wasm_check": "aphrody-dust-web: wasm32-unknown-unknown check passes",
+    "cpp_debug_tests_passed": 489,
+    "cpp_debug_tests_disabled": 6,
+    "published_npm_native_smoke": "Automatic PATH discovery, .NET 3.0.0, CRC32, 700-byte roundtrip and cross-native Rust decoding pass.",
+    "cpp_release_tests_passed": 489,
+    "cpp_release_tests_disabled": 6,
+    "rust_global_clippy": {
+      "status": "failed",
+      "diagnostics": 653,
+      "owner": "aphrody-dust-core",
+      "examples": ["unreadable_literal", "pedantic casts"],
+      "scope": "Retained emulator core; warnings were not globally suppressed."
+    },
+    "rust_final_portable_tests": {
+      "passed": 574,
+      "ignored": 3,
+      "scope": "formats, FFI, RE, Wii and AArch64; overlaps the previous 662-test run and is not additive."
+    },
+    "aggregate_gate": {
+      "command": "RUSTC_BOOTSTRAP=1 bun run check:all",
+      "exit_code": 1,
+      "stopped_at": "format:check: Cargo path-dependency formatting in the active Aphrody sibling",
+      "scope": "No sibling source was modified. Later sequential gates were not executed by this command; scoped gates are reported separately."
+    }
+  },
+  "publication": {
+    "npm": {
+      "status": "published-and-consumed",
+      "packages": {
+        "ieverse": "1.0.1",
+        "@rosegriffon/inagle-cross": "1.0.4",
+        "@rosegriffon/inagle": "2.0.5",
+        "@rosegriffon/azalee": "1.0.6",
+        "iecode-homebrew": "0.1.1"
+      },
+      "verification": "Registry versions and isolated five-package installation; public imports, native Rust loading and all three CLI entrypoints pass.",
+      "naming": "The @iecode/homebrew scope rejected publication; the public producer uses iecode-homebrew.",
+      "source_commits": ["0ef75475", "415ea607"]
+    },
+    "github": {
+      "status": "published-prerelease",
+      "tag": "v2026.10.3-rc.1",
+      "url": "https://github.com/aphrody-labs/iecode/releases/tag/v2026.10.3-rc.1",
+      "visibility": "private",
+      "source_commit": "ae4e59c2a1a14aad65e395df54eeae4b7925689e",
+      "verification": "The original twelve-asset release was verified against local SHA-256 digests and sizes. Crate archives and receipts are refreshed from the successfully published registry packages and checked after upload.",
+      "initial_assets": 10
+    },
+    "pypi": {
+      "status": "published-and-consumed",
+      "package": "niepy",
+      "version": "0.2.1",
+      "wheel_sha256": "57207a1c5cae51b3263cfb387613ebb312af9f90af2a7ff984bdc78a6befbaa4",
+      "verification": "Public wheel installed outside the checkout; metadata version, imports, CRC and CRILAYLA roundtrip pass.",
+      "trusted_publishing": "OIDC publisher registration remains unverified. Automatic publication is operational using the encrypted pypi environment token; removing that secret selects OIDC.",
+      "automation": {
+        "status": "validated",
+        "authentication": "GitHub pypi environment secret PYPI_API_TOKEN",
+        "workflow": ".github/workflows/workflow.yml",
+        "run": "https://github.com/aphrody-labs/iecode/actions/runs/37104130734",
+        "commit": "80f51b3ffa2bab5513dbc691209f8c227bb4570f",
+        "evidence": "Build, portable source/tests, independently installed wheel and idempotent token-authenticated upload pass. Existing niepy 0.2.1 files are skipped; no new version was published by this configuration check."
+      }
+    },
+    "crates_io": {
+      "status": "published-and-consumed",
+      "packages": {
+        "aphrody-wii": "0.1.1",
+        "aphrody-aarch64": "0.1.1"
+      },
+      "source_commit": "fd26533412af6aeb015586bdc0c2974caa7c8fbb",
+      "verification": "Both registry versions are available. An isolated crates.io-only consumer compiles and executes Wii branching and AArch64 decoding; archive checksums match the registry.",
+      "artifacts": [
+        {
+          "name": "aphrody-wii",
+          "version": "0.1.1",
+          "license": "GPL-3.0-only",
+          "sha256": "2a1ee63545b9cf2ee738059f024d5f2c12560853dc100e6faf74c1ed051c47c6",
+          "bytes": 18501,
+          "registry": "https://crates.io/crates/aphrody-wii/0.1.1"
+        },
+        {
+          "name": "aphrody-aarch64",
+          "version": "0.1.1",
+          "license": "GPL-3.0-or-later",
+          "sha256": "3c4ccb9207969cb79ed681c2096feb90e9f23996f89421098707a50687d14a80",
+          "bytes": 34244,
+          "registry": "https://crates.io/crates/aphrody-aarch64/0.1.1"
+        }
+      ],
+      "scope": "Two dependency-independent portable crates. Other members remain publish=false pending dependency/license qualification.",
+      "owner_adapter": {
+        "path": "Aphrody scripts/iecode/publish-rust-crates.sh",
+        "commit": "29751a831",
+        "validation": "Scoped serialized check, 22 unit tests plus two integration tests, strict Clippy and both package verification builds pass in --dry-run mode. No upload.",
+        "authentication": "Normal Cargo credential-provider chain; no env-only token requirement.",
+        "scope": "Clean source required, allowlisted Wii/AArch64, locked sequential publication."
+      }
+    }
+  },
+  "limits": [
+    "Portable C++ Release CTest passes 489 tests with six existing network tests disabled; optional engine and emulator frontends are not qualified.",
+    "Strict workspace Clippy fails on 653 retained DustCore diagnostics; the aggregate production gate and all-member tests are not qualified.",
+    "PostgreSQL/private-fixture integration tests are skipped when prerequisites are absent.",
+    "Rust crate publication beyond portable leaves requires unpublished local dependencies first.",
+    "No complete emulator or production service deployment is qualified.",
+    "Aggregate check:all stops at formatting differences in external Cargo path dependencies; the independently run strict global Clippy also fails on retained DustCore diagnostics."
+  ],
+  "installation": {
+    "directory": "~/.local/bin",
+    "cpp_version": "2026.10.3",
+    "managed_version": "3.0.0",
+    "bun_cli": "Minified bundles use existing Bun; 2.5 MiB total instead of three embedded ~78 MiB runtimes.",
+    "static_libraries": "Rust rlib requires the matching Rust compiler; C++ archives require matching headers and dependencies. Neither is a new portable shared ABI."
+  },
+  "source_commit": "ae4e59c2a1a14aad65e395df54eeae4b7925689e",
+  "artifacts": {
+    "linux_archive": "iecode-linux-x86_64-2026.10.3-rc.1.tar.zst",
+    "native_files": 14,
+    "archive_entries": 19,
+    "source_commit": "ae4e59c2a1a14aad65e395df54eeae4b7925689e",
+    "verification": "All 19 allowlisted file digests pass; archive integrity and exact entry list pass. No private inputs or caches included.",
+    "linux_archive_bytes": 49150296,
+    "linux_archive_sha256": "f35fd3a032158158cf5cb040483add735c1f23f39c825b7ce3d5fc64b2f7e6f2"
+  }
+}

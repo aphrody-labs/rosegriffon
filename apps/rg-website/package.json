@@ -180,11 +180,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aphrody-labs/rosegriffon.git",
+    "url": "https://github.com/aphrody-dev/rosegriffon.git",
     "directory": "apps/rg-website"
   },
-  "homepage": "https://github.com/aphrody-labs/rosegriffon/tree/main/apps/rg-website#readme",
+  "homepage": "https://github.com/aphrody-dev/rosegriffon/tree/main/apps/rg-website#readme",
   "bugs": {
-    "url": "https://github.com/aphrody-labs/rosegriffon/issues"
+    "url": "https://github.com/aphrody-dev/rosegriffon/issues"
   }
 }

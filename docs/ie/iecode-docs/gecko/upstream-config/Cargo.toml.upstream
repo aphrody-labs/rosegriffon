@@ -1,0 +1,72 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/multitool",
+    "crates/disasm",
+    "crates/gecko",
+    "crates/image",
+    "crates/tinyapp",
+    "crates/app",
+    "crates/backend-wgpu",
+    "crates/scripting",
+    "crates/dbglib",
+    "crates/debugger",
+    "crates/dff",
+    "crates/fifoplayer",
+    "crates/mcp",
+    "crates/hostinput",
+
+    # Stuff we rarely use
+    "crates/dsptestrunner",
+    "crates/screenshotter",
+    "crates/dspemu",
+    "crates/tinytracer",
+    "crates/tinybench",
+]
+default-members = [
+    "crates/multitool",
+    "crates/disasm",
+    "crates/gecko",
+    "crates/image",
+    "crates/tinyapp",
+    "crates/app",
+    "crates/backend-wgpu",
+    "crates/scripting",
+    "crates/mcp",
+    "crates/hostinput",
+    "crates/debugger",
+]
+
+exclude = [
+    # Built separately with wasm-pack for wasm32-unknown-unknown.
+    "crates/web",
+]
+
+[patch.crates-io]
+cranelift-codegen = { git = "https://github.com/ioncodes/wasmtime", branch = "gecko" }
+cranelift-frontend = { git = "https://github.com/ioncodes/wasmtime", branch = "gecko" }
+cranelift-jit = { git = "https://github.com/ioncodes/wasmtime", branch = "gecko" }
+cranelift-module = { git = "https://github.com/ioncodes/wasmtime", branch = "gecko" }
+cranelift-native = { git = "https://github.com/ioncodes/wasmtime", branch = "gecko" }
+
+iced_core = { git = "https://github.com/iced-rs/iced.git", rev = "0d12e964da8c3f0f7a02d3d731e3187eecfe5779" }
+iced_widget = { git = "https://github.com/iced-rs/iced.git", rev = "0d12e964da8c3f0f7a02d3d731e3187eecfe5779" }
+iced_runtime = { git = "https://github.com/iced-rs/iced.git", rev = "0d12e964da8c3f0f7a02d3d731e3187eecfe5779" }
+iced_graphics = { git = "https://github.com/iced-rs/iced.git", rev = "0d12e964da8c3f0f7a02d3d731e3187eecfe5779" }
+iced_renderer = { git = "https://github.com/iced-rs/iced.git", rev = "0d12e964da8c3f0f7a02d3d731e3187eecfe5779" }
+iced_winit = { git = "https://github.com/iced-rs/iced.git", rev = "0d12e964da8c3f0f7a02d3d731e3187eecfe5779" }
+iced_wgpu = { git = "https://github.com/iced-rs/iced.git", rev = "0d12e964da8c3f0f7a02d3d731e3187eecfe5779" }
+iced_tiny_skia = { git = "https://github.com/iced-rs/iced.git", rev = "0d12e964da8c3f0f7a02d3d731e3187eecfe5779" }
+iced_futures = { git = "https://github.com/iced-rs/iced.git", rev = "0d12e964da8c3f0f7a02d3d731e3187eecfe5779" }
+iced_program = { git = "https://github.com/iced-rs/iced.git", rev = "0d12e964da8c3f0f7a02d3d731e3187eecfe5779" }
+iced_debug = { git = "https://github.com/iced-rs/iced.git", rev = "0d12e964da8c3f0f7a02d3d731e3187eecfe5779" }
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+#debug = true
+#panic = "abort"
+
+[profile.dev]
+opt-level = 3
+#codegen-units = 1

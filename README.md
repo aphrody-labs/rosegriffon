@@ -1,7 +1,7 @@
 # Rose Griffon
 
 Monorepo of [Rose Griffon](https://rosegriffon.fr): the website, the Discord bots, the
-unified API, the Achillea ranked platform, and Azalee. Bun workspaces, Turborepo, Changesets.
+unified API, the Achillea ranked platform, and Azalee. Pure Bun v1.4.4 workspaces.
 
 History is preserved from `aphrody-labs/rg`, then `aphrody-labs/iecode` and
 `aphrody-labs/bun-distribution` (Bun OS), rewritten to the flat layout below.
@@ -26,21 +26,20 @@ Bun OS (`aphrody-labs/bun-distribution`, with nie and iecode) and consumed here 
 
 ## Toolchain
 
-- [Aphrody Bun](https://github.com/aphrody-labs/bun) 1.4.4 or newer (`packageManager: bun@1.4.4`).
-  Type checking, lint and format use its native `bun check`, `bun lint` and `bun fmt`;
-  upstream Bun does not ship them. CI installs the fork with `.github/actions/setup-bun`.
+- [Aphrody Bun](https://github.com/aphrody-dev/bun) 1.4.4 or newer (`packageManager: bun@1.4.4`).
+  Type checking, lint and format use its native `bun check`, `bun lint` and `bun fmt`.
 
 ```sh
 bun install
-bun run typecheck          # turbo run typecheck
-bun run lint               # turbo run lint
-bun run build              # turbo run build (Next builds, bundles)
-bun run turbo run typecheck --filter=@rosegriffon/cron...
+bun run typecheck          # bun run --filter '*' typecheck
+bun run lint               # bun run --filter '*' lint
+bun run build              # bun run --filter '*' build
+bun run --filter '@rosegriffon/cron' typecheck
 ```
 
 ### just
 
-The root `justfile` drives the same turbo tasks (`just` lists them):
+The root `justfile` drives the same workspace tasks (`just` lists them):
 `just install` (`bun install --ignore-scripts`), `just check`, `just lint`, `just test`,
 `just build`, `just ci` (check, lint, test, build), `just compile [args]`, `just tokens`
 (rg-ui themes and tokens). `deploy-preflight`, `deploy-build`, `deploy-status`, `deploy-site`
@@ -89,10 +88,9 @@ and GitHub secrets, never in the repository.
 
 ## Releases
 
-- **npm**: add a changeset (`bun run changeset`). On `main`, `Release packages` opens a
-  "Version packages" pull request after a green CI; merging it publishes every public `@rosegriffon/*` package
-  whose version is not on npm (`bun pm pack`, then `npm publish --provenance`). The
-  `@rosegriffon/inagle*` packages are skipped: Bun OS publishes them.
+- **npm**: bump the package `version` and run `bun run release` (`scripts/publish.ts`), which
+  publishes every public `@rosegriffon/*` package whose version is not on npm (`bun pm pack`,
+  then `npm publish --provenance`). The `@rosegriffon/inagle*` packages are skipped.
 - **Executables**: push a `v*` tag (or run `rosegriffon binaries` manually) to build and
   attach `rosegriffon-linux-x64` and `rosegriffon-windows-x64.exe` with `SHA256SUMS`.
 

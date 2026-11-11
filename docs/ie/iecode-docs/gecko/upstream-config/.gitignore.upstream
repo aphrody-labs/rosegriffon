@@ -1,0 +1,17 @@
+target/
+.idea/
+.vscode/
+perf.*
+profile.json.gz
+out*.txt
+private/
+*.log
+out/
+__pycache__/
+/fs/
+screenshots/
+textures/
+screenshotdb/
+dump.wav
+profile-dumps/
+/cache/

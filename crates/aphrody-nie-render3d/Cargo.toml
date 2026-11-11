@@ -1,0 +1,51 @@
+[package]
+name = "aphrody-nie-render3d"
+version = "1.4.8"
+edition = "2024"
+rust-version = "1.97"
+license-file = "LICENSE"
+publish = false
+description = "3D renderer for IEVR GLB models: deterministic CPU z-buffer rasterizer, optional wgpu viewport (feature `gpu`) and canvas presentation (features `webgpu`/`webgl`)"
+
+[lints]
+workspace = true
+
+[features]
+default = ["cli"]
+# Command-line executable. Kept separate so WebAssembly consumers embed the CPU rasterizer
+# without `clap`.
+cli = ["dep:clap", "dep:aphrody-nie-video"]
+# wgpu viewport. Optional: headless consumers (CPU golden tests, CLI turntable) do not pull wgpu.
+gpu = ["dep:aphrody-gpu-backend", "dep:pollster", "dep:bytemuck"]
+# Optional canvas presentation; no GPU backend is added to CPU consumers by default.
+webgpu = ["gpu", "aphrody-gpu-backend/webgpu", "dep:web-sys"]
+# WebGL 2 backend running the same renderer where WebGPU is missing (+2.24 MiB of wasm,
+# measured 2026-09-12 in bun-os, hence opt-in).
+webgl = ["webgpu", "aphrody-gpu-backend/webgl"]
+
+[dependencies]
+aphrody-nie-core = { workspace = true }
+aphrody-softraster = { path = "../aphrody-softraster", version = "1.4.8" }
+glam = { version = "0.33.9", default-features = false, features = ["std"] }
+anyhow = { workspace = true }
+clap = { version = "4.5.58", features = ["derive", "color", "env"], optional = true }
+serde_json = { workspace = true }
+serde = { workspace = true }
+png = { version = "0.18.1", default-features = false }
+bcdec_rs = "0.2.0"
+aphrody-nie-video = { path = "../aphrody-nie-video", version = "1.4.8", optional = true }
+# Shared wgpu instance/adapter/device boundary (crates.io, Apache-2.0, wgpu 30).
+aphrody-gpu-backend = { version = "1.4.7", optional = true }
+pollster = { version = "1.0.1", optional = true }
+bytemuck = { version = "1.0", features = ["derive"], optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { version = "0.3.104", default-features = false, optional = true, features = ["HtmlCanvasElement"] }
+
+[dev-dependencies]
+aphrody-nie-formats = { path = "../aphrody-nie-formats", version = "1.4.8" }
+
+[[bin]]
+name = "aphrody-nie-render3d"
+path = "src/main.rs"
+required-features = ["cli"]

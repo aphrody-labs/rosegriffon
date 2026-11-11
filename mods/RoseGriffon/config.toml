@@ -1,0 +1,6 @@
+# Rose Griffon settings (mod RoseGriffon). Can also go in <game>\evt_loader\config.toml under [mods.RoseGriffon].
+
+# The press-start and mode-menu logo come from this mod (content/images/menu/50_title/rg_title_art.toml,
+# generated from theme.toml's `title` slot); the framework's own title art is off.
+[VRFW.TitleArt]
+own = true

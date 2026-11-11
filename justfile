@@ -1,5 +1,5 @@
-# Rose Griffon infra over the Bun workspace (turbo stays the task runner).
-# `just` lists the recipes. Bun only: no node, npm, npx, pnpm or yarn.
+# Rose Griffon infra over the Bun v1.4.4 workspace (bun run --filter '*' is the task runner).
+# `just` lists the recipes. Bun only: no node, npm, npx, pnpm, yarn, or bunx.
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
@@ -14,7 +14,7 @@ default:
 install:
     bun install --ignore-scripts
 
-# Type-check every workspace (turbo run typecheck).
+# Type-check every workspace (bun run --filter '*' typecheck).
 check:
     bun run typecheck
 
@@ -24,7 +24,7 @@ lint:
 test:
     bun run test
 
-# Production build of every workspace (turbo run build).
+# Production build of every workspace (bun run --filter '*' build).
 build:
     bun run build
 

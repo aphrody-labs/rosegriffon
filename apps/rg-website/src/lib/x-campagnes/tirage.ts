@@ -30,7 +30,7 @@
  *    depuis son disque n'aurait PAS `crypto.subtle`. `exigerSubtle()` lève alors
  *    un message qui dit quoi faire, au lieu d'un « Cannot read properties of
  *    undefined » illisible. La parade côté vérificateur est de servir la page
- *    (`bunx serve`) ou d'utiliser le script Bun d'export.
+ *    (`bun run serve`) ou d'utiliser le script Bun d'export.
  *
  * ── CE QUE CE MODULE NE FAIT PAS ───────────────────────────────────────────
  * Il ne lit RIEN et n'écrit RIEN : pas de base, pas de réseau, pas d'horloge
@@ -275,7 +275,7 @@ function exigerSubtle(): SubtleCrypto {
   if (!sous) {
     throw new Error(
       "crypto.subtle indisponible : la Web Crypto API n'existe qu'en contexte sécurisé (HTTPS ou localhost). " +
-        "Pour vérifier un tirage hors ligne, servez la page (par exemple `bunx serve`) au lieu de l'ouvrir en file://.",
+        "Pour vérifier un tirage hors ligne, servez la page (par exemple `bun run serve`) au lieu de l'ouvrir en file://.",
     );
   }
   return sous;

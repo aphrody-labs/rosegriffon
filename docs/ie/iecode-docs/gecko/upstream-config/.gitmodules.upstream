@@ -1,0 +1,9 @@
+[submodule "submodules/chipi-spec"]
+	path = submodules/chipi-spec
+	url = https://github.com/ioncodes/chipi-spec
+[submodule "submodules/solstice"]
+	path = submodules/solstice
+	url = https://codeberg.org/hazelwiss/solstice
+[submodule "submodules/beanwii"]
+	path = submodules/beanwii
+	url = https://github.com/zaydlang/beanwii

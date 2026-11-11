@@ -1,0 +1,11 @@
+build/
+out/
+*.user
+*.suo
+
+# Folded into yolo-re: build artefacts
+bin/
+obj/
+target/
+node_modules/
+__pycache__/
