@@ -16,9 +16,7 @@
   "dependencies": {
     "@rosegriffon/inagle": "workspace:*",
     "@rosegriffon/azalee": "workspace:*",
-    "@rosegriffon/achillea-contract": "workspace:*",
-    "@aphrody/bun-engine": "workspace:*",
-    "@aphrody/shenron-pipeline": "workspace:*"
+    "@rosegriffon/achillea-contract": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest"

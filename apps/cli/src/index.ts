@@ -29,7 +29,6 @@ Available Commands:
   azalee        Azalee game DB, sync, audit, rules, and contracts
   formats       Console formats inspection, disasm, and identification
   homebrew      Homebrew DS / 3DS toolchain runner
-  pipeline      Shenron ML / OCR / RAG / Ingest pipeline
   contract      Achillea cross-language contract generator
   achillea      Achilléa headless API client runner
   server        Rose Griffon self-hosted server supervisor
@@ -80,15 +79,8 @@ async function main() {
 
     case "formats":
     case "console": {
-      const { runFormats } = await import("@aphrody/bun-engine");
-      const exitCode = await runFormats(subArgs);
-      process.exit(exitCode);
-      break;
-    }
-
-    case "homebrew": {
-      const homebrewEntry = resolve(import.meta.dir, "../../../packages/iecode-homebrew/src/cli.ts");
-      const proc = Bun.spawn([process.execPath, homebrewEntry, ...subArgs], {
+      const formatsEntry = resolve(import.meta.dir, "../../../packages/bun-engine-formats/src/cli.ts");
+      const proc = Bun.spawn([process.execPath, formatsEntry, ...subArgs], {
         stdin: "inherit",
         stdout: "inherit",
         stderr: "inherit",
@@ -97,10 +89,9 @@ async function main() {
       break;
     }
 
-    case "pipeline":
-    case "shenron": {
-      const pipelineEntry = resolve(import.meta.dir, "../../../packages/shenron-pipeline/src/cli.ts");
-      const proc = Bun.spawn([process.execPath, pipelineEntry, ...subArgs], {
+    case "homebrew": {
+      const homebrewEntry = resolve(import.meta.dir, "../../../packages/iecode-homebrew/src/cli.ts");
+      const proc = Bun.spawn([process.execPath, homebrewEntry, ...subArgs], {
         stdin: "inherit",
         stdout: "inherit",
         stderr: "inherit",
