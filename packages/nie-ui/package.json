@@ -11,7 +11,12 @@
   "type": "module",
   "exports": {
     "./ui": "./src/ui/ui.ts",
+    "./studio": "./src/studio/index.ts",
     "./styles/main.less": "./src/styles/main.less"
+  },
+  "dependencies": {
+    "@aphrody/filmcraft": "workspace:*",
+    "@aphrody/hyperframes": "workspace:*"
   },
   "scripts": {
     "lint": "oxlint src packages",
