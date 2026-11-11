@@ -83,9 +83,21 @@ const fakeDb = new Kysely<Database>({
     createQueryCompiler: () => new PostgresQueryCompiler(),
   },
 });
+import { db as originalDb, setTestDb } from "../../plugins/db";
+
+const dbModuleUrl = import.meta.resolve("../../plugins/db");
+const dbModuleResolved = require.resolve("../../plugins/db");
+mock.module(dbModuleUrl, () => {
+  const { Elysia } = require("elysia") as typeof import("elysia");
+  return { db: fakeDb, inagleDb: fakeDb, setTestDb: () => {}, dbPlugin: new Elysia({ name: "db" }).derive(() => ({ db: fakeDb, inagleDb: fakeDb })) };
+});
+mock.module(dbModuleResolved, () => {
+  const { Elysia } = require("elysia") as typeof import("elysia");
+  return { db: fakeDb, inagleDb: fakeDb, setTestDb: () => {}, dbPlugin: new Elysia({ name: "db" }).derive(() => ({ db: fakeDb, inagleDb: fakeDb })) };
+});
 mock.module("../../plugins/db", () => {
   const { Elysia } = require("elysia") as typeof import("elysia");
-  return { db: fakeDb, inagleDb: fakeDb, dbPlugin: new Elysia({ name: "db" }).decorate("db", fakeDb) };
+  return { db: fakeDb, inagleDb: fakeDb, setTestDb: () => {}, dbPlugin: new Elysia({ name: "db" }).derive(() => ({ db: fakeDb, inagleDb: fakeDb })) };
 });
 
 const JWT_SECRET = process.env.JWT_SECRET_KEY!;
@@ -101,6 +113,7 @@ const providerCalls: { url: string; body?: string }[] = [];
 let app: { handle: (request: Request) => Promise<Response> };
 
 beforeAll(async () => {
+  setTestDb(fakeDb);
   for (const [key, value] of Object.entries(ENV)) {
     previous[key] = process.env[key];
     process.env[key] = value;
@@ -115,6 +128,7 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
+  setTestDb(originalDb);
   globalThis.fetch = realFetch;
   for (const [key, value] of Object.entries(previous)) {
     if (value === undefined) delete process.env[key];

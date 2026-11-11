@@ -4,10 +4,6 @@ import { safeReturnUrl } from "@rosegriffon/auth/redirect";
 
 const pages = [
   { page: new URL("./page.tsx", import.meta.url), fallback: "/dashboard" },
-  {
-    page: new URL("../../../../azalee-web/app/2fa/page.tsx", import.meta.url),
-    fallback: "/",
-  },
 ];
 
 for (const { page, fallback } of pages) {
