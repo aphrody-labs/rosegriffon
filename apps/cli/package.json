@@ -1,0 +1,25 @@
+{
+  "name": "@rosegriffon/cli",
+  "version": "1.4.8",
+  "private": true,
+  "description": "Rose Griffon unified CLI — unified entryway for all monorepo tools",
+  "type": "module",
+  "bin": {
+    "rg": "./src/index.ts",
+    "rosegriffon": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "bun build ./src/index.ts --target=bun --outdir=./dist",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@rosegriffon/inagle": "workspace:*",
+    "@rosegriffon/azalee": "workspace:*",
+    "@rosegriffon/achillea-contract": "workspace:*",
+    "@aphrody/bun-engine": "workspace:*",
+    "@aphrody/shenron-pipeline": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

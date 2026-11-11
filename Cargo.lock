@@ -626,6 +626,7 @@ version = "1.4.8"
 dependencies = [
  "aes 0.8.4",
  "aphrody-nie-lua",
+ "base64 0.22.1",
  "crc32fast",
  "cridecoder",
  "glam",
@@ -643,6 +644,7 @@ name = "aphrody-nie-game"
 version = "1.4.7"
 dependencies = [
  "anyhow",
+ "aphrody-gpu-backend",
  "aphrody-nie-app",
  "aphrody-nie-core",
  "aphrody-nie-data",
@@ -661,7 +663,6 @@ dependencies = [
  "rayon",
  "serde",
  "serde_json",
- "shenron-gpu",
  "tracing",
  "tracing-subscriber",
 ]
@@ -1067,7 +1068,6 @@ dependencies = [
  "aphrody-nie-tasks",
  "aphrody-nie-trace",
  "aphrody-nie-zukan",
- "bun-re",
  "bun-steam",
  "console_error_panic_hook",
  "getrandom 0.3.4",
@@ -1078,6 +1078,7 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
  "web-time",
+ "yolo-re-core",
 ]
 
 [[package]]
@@ -3613,24 +3614,6 @@ name = "critical-section"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "790eea4361631c5e7d22598ecd5723ff611904e3344ce8720784c93e3d83d40b"
-
-[[package]]
-name = "criware"
-version = "1.4.8"
-dependencies = [
- "aes 0.8.4",
- "aphrody-nie-lua",
- "crc32fast",
- "cridecoder",
- "glam",
- "image",
- "image_dds",
- "png 0.18.1",
- "serde",
- "serde_json",
- "sha2 0.11.1",
- "tempfile",
-]
 
 [[package]]
 name = "crossbeam-channel"

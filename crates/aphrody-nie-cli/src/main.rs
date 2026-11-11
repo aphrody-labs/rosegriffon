@@ -5760,7 +5760,7 @@ fn convert_sprites(
         "svg" => {
             let image = aphrody_nie_formats::image_out::g4tx_vers(&data, &tronc, ImageOut::Png)
                 .map_err(|e| anyhow::anyhow!("encodage de l'atlas : {e}"))?;
-            feuille.vers_svg(&sprite_sheet::data_uri(&image, "image/png"))
+            feuille.vers_svg(&sprite_sheet::data_uri("image/png", &image))
         }
         _ => unreachable!("format filtré par l'appelant"),
     };

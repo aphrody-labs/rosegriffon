@@ -1,0 +1,23 @@
+{
+  "name": "@rosegriffon/mcp",
+  "version": "1.4.8",
+  "private": true,
+  "description": "Rose Griffon unified MCP server (Model Context Protocol) powered by Bun",
+  "type": "module",
+  "bin": {
+    "rg-mcp": "./src/index.ts",
+    "rosegriffon-mcp": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "bun run ./src/index.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@rosegriffon/inagle": "workspace:*",
+    "@rosegriffon/azalee": "workspace:*",
+    "@aphrody/bun-engine": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

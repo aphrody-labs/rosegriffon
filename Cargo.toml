@@ -51,7 +51,6 @@ members = [
     "crates/aphrody-nie-zukan",
     "crates/aphrody-softraster",
     "crates/bun-steam",
-    "crates/criware",
     "crates/re",
     "crates/shenron-gpu",
     "crates/yolo-re-bin-format",
@@ -215,7 +214,7 @@ acadrust = "0.6.3"
 anyhow = { version = "1.0.104", default-features = false }
 async-trait = { version = "0.1.92", default-features = false }
 axum = { version = "0.8.9", default-features = false }
-base64 = { version = "0.23.1", default-features = false }
+base64 = { version = "0.22.1", default-features = false, features = ["alloc"] }
 chrono = { version = "0.4.45", default-features = false }
 dirs = { version = "7.0.0", default-features = false }
 dispatch2 = { version = "0.3.1", default-features = false }
@@ -653,7 +652,7 @@ globset = { version = "0.4" }
 grep-regex = { version = "0.1" }
 grep-searcher = { version = "0.1" }
 hmac = { version = "0.12" }
-aphrody-re = { package = "bun-re", path = "crates/re", version = "1.4.7" }
+aphrody-re = { package = "yolo-re-core", path = "crates/yolo-re-core", version = "1.4.8" }
 aphrody-web-crawl = "1.0.0"
 aphrody-os-re = { package = "bun-re", path = "crates/re", version = "1.4.7" }
 aphrody-identity = { path = "crates/aphrody-identity", version = "1.4.7" }

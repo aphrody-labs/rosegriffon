@@ -13,7 +13,7 @@ workspace = true
 
 [features]
 default = ["std", "serde", "lua"]
-std = ["dep:crc32fast", "crc32fast/std", "dep:tempfile"]
+std = ["dep:crc32fast", "crc32fast/std", "dep:tempfile", "dep:base64"]
 serde = ["dep:serde"]
 lua = ["dep:aphrody-nie-lua"]
 textures = ["std", "dep:image_dds", "dep:png"]
@@ -28,6 +28,7 @@ crc32fast = { version = "1.5", default-features = false, optional = true }
 serde = { version = "1.0.228", default-features = false, features = ["derive", "std"], optional = true }
 serde_json = { version = "1.0.154", default-features = false, features = ["std"] }
 aes = { version = "0.8", default-features = false }
+base64 = { workspace = true, optional = true }
 sha2 = { version = "0.11.1", default-features = false }
 image_dds = { version = "0.7", default-features = false, optional = true }
 png = { version = "0.18.1", default-features = false, optional = true }

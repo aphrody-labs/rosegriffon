@@ -18,6 +18,7 @@ pub enum ModeCss {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Sprite {
     pub nom: String,
     pub classe: String,
@@ -28,23 +29,12 @@ pub struct Sprite {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SpriteSheet {
     pub nom: String,
     pub largeur: u32,
     pub hauteur: u32,
     pub sprites: Vec<Sprite>,
-}
-
-impl SpriteSheet {
-    #[must_use]
-    pub fn len(&self) -> usize {
-        self.sprites.len()
-    }
-
-    #[must_use]
-    pub fn is_empty(&self) -> bool {
-        self.sprites.is_empty()
-    }
 }
 
 #[must_use]
@@ -56,9 +46,17 @@ pub fn assainir_nom(nom: &str) -> String {
 
 #[must_use]
 pub fn data_uri(mime: &str, bytes: &[u8]) -> String {
-    use base64::prelude::*;
-    let encoded = BASE64_STANDARD.encode(bytes);
-    alloc::format!("data:{mime};base64,{encoded}")
+    #[cfg(feature = "std")]
+    {
+        use base64::Engine as _;
+        let encoded = base64::engine::general_purpose::STANDARD.encode(bytes);
+        alloc::format!("data:{mime};base64,{encoded}")
+    }
+    #[cfg(not(feature = "std"))]
+    {
+        let _ = bytes;
+        alloc::format!("data:{mime};base64,")
+    }
 }
 
 /// Extrait la feuille de sprites d'un atlas déjà parsé.
@@ -79,10 +77,103 @@ pub fn depuis_g4tx(g4tx: &G4tx, index_texture: usize) -> Option<SpriteSheet> {
         .collect();
     Some(SpriteSheet {
         nom: t.name.clone(),
-        largeur: t.width,
-        hauteur: t.height,
+        largeur: t.width as u32,
+        hauteur: t.height as u32,
         sprites,
     })
+}
+
+impl SpriteSheet {
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.sprites.len()
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.sprites.is_empty()
+    }
+
+    #[must_use]
+    pub fn vers_json(&self) -> String {
+        #[cfg(feature = "serde")]
+        {
+            serde_json::to_string_pretty(self).unwrap_or_else(|_| "{}".to_string())
+        }
+        #[cfg(not(feature = "serde"))]
+        {
+            let mut s = alloc::format!("{{\"nom\":\"{}\",\"largeur\":{},\"hauteur\":{},\"sprites\":[", self.nom, self.largeur, self.hauteur);
+            for (i, sp) in self.sprites.iter().enumerate() {
+                if i > 0 { s.push(','); }
+                s.push_str(&alloc::format!("{{\"nom\":\"{}\",\"classe\":\"{}\",\"x\":{},\"y\":{},\"largeur\":{},\"hauteur\":{}}}", sp.nom, sp.classe, sp.x, sp.y, sp.largeur, sp.hauteur));
+            }
+            s.push_str("]}");
+            s
+        }
+    }
+
+    #[must_use]
+    pub fn vers_css(&self, image_url: &str) -> String {
+        self.vers_css_mode(image_url, ModeCss::Image)
+    }
+
+    #[must_use]
+    pub fn vers_css_mode(&self, image_url: &str, mode: ModeCss) -> String {
+        let mut css = alloc::format!(
+            "/* {} — {} régions, atlas {}x{}. */\n",
+            self.nom,
+            self.sprites.len(),
+            self.largeur,
+            self.hauteur
+        );
+        match mode {
+            ModeCss::Image => {
+                css.push_str(&alloc::format!(
+                    ".{PREFIXE}-sprite {{ display: inline-block; background-image: url(\"{image_url}\"); background-repeat: no-repeat; background-size: {}px {}px; image-rendering: pixelated; }}\n",
+                    self.largeur, self.hauteur
+                ));
+            }
+            ModeCss::Masque => {
+                css.push_str(&alloc::format!(
+                    ".{PREFIXE}-sprite {{ display: inline-block; background-color: currentColor; -webkit-mask-image: url(\"{image_url}\"); mask-image: url(\"{image_url}\"); -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-size: {}px {}px; mask-size: {}px {}px; }}\n",
+                    self.largeur, self.hauteur, self.largeur, self.hauteur
+                ));
+            }
+        }
+        for sprite in &self.sprites {
+            match mode {
+                ModeCss::Image => {
+                    css.push_str(&alloc::format!(
+                        ".{PREFIXE}-{} {{ width: {}px; height: {}px; background-position: {}px {}px; }}\n",
+                        sprite.classe, sprite.largeur, sprite.hauteur, -sprite.x, -sprite.y
+                    ));
+                }
+                ModeCss::Masque => {
+                    css.push_str(&alloc::format!(
+                        ".{PREFIXE}-{} {{ width: {}px; height: {}px; -webkit-mask-position: {}px {}px; mask-position: {}px {}px; }}\n",
+                        sprite.classe, sprite.largeur, sprite.hauteur, -sprite.x, -sprite.y, -sprite.x, -sprite.y
+                    ));
+                }
+            }
+        }
+        css
+    }
+
+    #[must_use]
+    pub fn vers_svg(&self, data_uri: &str) -> String {
+        let mut svg = alloc::format!(
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {} {}\">\n  <image href=\"{}\" width=\"{}\" height=\"{}\"/>\n",
+            self.largeur, self.hauteur, data_uri, self.largeur, self.hauteur
+        );
+        for s in &self.sprites {
+            svg.push_str(&alloc::format!(
+                "  <g id=\"{}\" data-name=\"{}\"><rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" fill=\"none\"/></g>\n",
+                s.classe, s.nom, s.x, s.y, s.largeur, s.hauteur
+            ));
+        }
+        svg.push_str("</svg>\n");
+        svg
+    }
 }
 
 #[cfg(test)]
