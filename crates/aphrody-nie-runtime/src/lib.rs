@@ -15,6 +15,7 @@
 #![forbid(unsafe_code)]
 
 pub mod g4mt;
+pub mod open_world;
 pub mod render;
 
 pub use aphrody_nie_core::animation::{

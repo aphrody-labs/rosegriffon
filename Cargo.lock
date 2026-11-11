@@ -416,6 +416,7 @@ dependencies = [
  "aphrody-nie-geom",
  "aphrody-nie-render3d",
  "aphrody-nie-runtime",
+ "aphrody-nie-ui",
  "bcdec_rs",
  "png 0.18.1",
  "serde",
@@ -948,6 +949,7 @@ dependencies = [
  "aphrody-nie-video",
  "clap",
  "png 0.18.1",
+ "serde",
 ]
 
 [[package]]
@@ -12641,8 +12643,3 @@ checksum = "27bc9d5b815bc103f142aa054f561d9187d191692ec7c2d1e2b4737f8dbd7296"
 dependencies = [
  "zune-core",
 ]
-
-[[patch.unused]]
-name = "zip"
-version = "2.6.1"
-source = "git+https://github.com/zip-rs/zip2?tag=v2.6.1#1d42731efcad72e9f653a5ca46ed8306f4a3ca72"

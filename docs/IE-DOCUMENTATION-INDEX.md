@@ -30,10 +30,10 @@ Cet index structure et référence l'ensemble de la documentation technique, d'a
 ---
 
 ## 4. Composants IECODE (C++, .NET C#, Rust & Bun)
-- [IECODE C++](file:///C:/src/apps/rosegriffon/packages/iecode-cpp) : Implémentations natives des parseurs et bindings haute performance.
+- [IECODE C++](file:///C:/src/apps/rosegriffon/tools/iecode-cpp) : Implémentations natives des parseurs et bindings haute performance.
 - [IECODE .NET C#](file:///C:/src/apps/rosegriffon/apps/iecode-dotnet) : Solution `IECODE.sln` (.NET 9 / C# 13), CLI, Core, GUI et pont FFI.
 - [IECODE Homebrew](file:///C:/src/apps/rosegriffon/packages/iecode-homebrew) : Toolchain homebrew DS/3DS et compilateurs de formats consoles.
-- [IECODE Scripts](file:///C:/src/apps/rosegriffon/packages/iecode-scripts) : Automatisation et ingestion de dumps.
+- [IECODE Scripts](file:///C:/src/apps/rosegriffon/tools/iecode-scripts) : Automatisation et ingestion de dumps.
 - [CLI unifié IECODE](file:///C:/src/apps/rosegriffon/docs/ie/iecode-docs/cli-ie.md) : Guide de commande exhaustif.
 
 ---

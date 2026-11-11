@@ -3,13 +3,13 @@ set -Eeuo pipefail
 
 # Build exactly one immutable RG artifact. Activation is owned by aphrody-infra
 # (scripts/atomic-deploy-rg.sh). The systemd units and nginx route table packaged
-# here live in yolo (`$YOLO_ROOT/config/host`, default `$HOME/yolo`): rg only
+# here live in yolo (`$RG_INFRA_ROOT/config/host`, default `$HOME/yolo`): rg only
 # contributes application code.
 commit_arg="${1:?usage: assemble-vps-release.sh FULL_GIT_SHA}"
 source_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 infra_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-yolo_root="${YOLO_ROOT:-$HOME/yolo}"
-host_root="$yolo_root/config/host"
+infra_cfg_root="${RG_INFRA_ROOT:-$source_root/infra}"
+host_root="$infra_cfg_root/config/host"
 releases_root="${RG_RELEASES_ROOT:-/srv/rg/releases}"
 catalog="${RG_CATALOG_PATH:-$host_root/rg/service-catalog.json}"
 website_env="${RG_WEBSITE_ENV_PATH:-/etc/rose-griffon/website.env}"
@@ -24,13 +24,13 @@ trap 'rm -f -- "$catalog_snapshot"' EXIT
 cp -- "$catalog" "$catalog_snapshot"
 catalog="$catalog_snapshot"
 [[ -d "$host_root/systemd/rg" && -f "$host_root/rg/nginx-routes.json" && -f "$infra_root/scripts/nginx-gen.ts" ]] || {
-  echo "$host_root/{systemd/rg,rg/nginx-routes.json} (set YOLO_ROOT) and scripts/nginx-gen.ts required" >&2; exit 2;
+  echo "$host_root/{systemd/rg,rg/nginx-routes.json} (set RG_INFRA_ROOT) and scripts/nginx-gen.ts required" >&2; exit 2;
 }
 # Units and routes are release content: they must be committed in aphrody-infra
 # so the artifact records exactly which yolo revision it carries.
-infra_commit="$(git -C "$yolo_root" rev-parse --verify 'HEAD^{commit}')"
-git -C "$yolo_root" diff --quiet HEAD -- config/host packages/core/src/host &&
-  [[ -z "$(git -C "$yolo_root" ls-files --others --exclude-standard -- config/host packages/core/src/host)" ]] || {
+infra_commit="$(git -C "$infra_cfg_root" rev-parse --verify 'HEAD^{commit}')"
+git -C "$infra_cfg_root" diff --quiet HEAD -- config/host packages/core/src/host &&
+  [[ -z "$(git -C "$infra_cfg_root" ls-files --others --exclude-standard -- config/host packages/core/src/host)" ]] || {
   echo 'yolo config/host has uncommitted changes' >&2; exit 2;
 }
 git -C "$infra_root" diff --quiet HEAD -- scripts/nginx-gen.ts || {
@@ -204,7 +204,7 @@ mkdir -p "$stage/apps/rg-bot/logs" "$stage/apps/rg-bot/storage"
 mkdir -p "$stage/systemd" "$stage/nginx"
 bun "$infra_root/scripts/nginx-gen.ts" --out "$stage/nginx/rg.conf"
 chmod 0644 "$stage/nginx/rg.conf"
-python3 - "$stage" "$catalog" "$commit" "$yolo_root" "$infra_commit" <<'PY'
+python3 - "$stage" "$catalog" "$commit" "$infra_cfg_root" "$infra_commit" <<'PY'
 import datetime
 import hashlib
 import json
@@ -234,7 +234,7 @@ for service in services:
     if unit != f'{name}.service':
         raise SystemExit(f'catalog unit for {name} must be {name}.service')
     text = subprocess.run(['bun', str(host_cli), 'compose-unit', unit], check=True, text=True, capture_output=True,
-                          env={**os.environ, 'YOLO_ROOT': yolo_root}).stdout
+                          env={**os.environ, 'RG_INFRA_ROOT': yolo_root}).stdout
     for old, new in [('apps/achillea-bot', 'apps/rg-bot'), ('apps/website', 'apps/rg-website'), ('apps/bot', 'apps/rg-bot'), ('packages/cron', 'packages/rg-cron')]:
         text = text.replace('/srv/rg/current/' + old, '/srv/rg/current/' + new)
     # Same invariants as the activation adapter, checked before the build is sealed.

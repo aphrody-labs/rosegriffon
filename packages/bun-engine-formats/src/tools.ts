@@ -21,12 +21,12 @@ function walkUp(from: string): string | undefined {
 
 let cachedRoot: string | null | undefined;
 
-/** yolo-re checkout root: YOLO_RE_ROOT, the source tree, then cwd and executable ancestors. */
+/** yolo-re checkout root: RG_RE_ROOT, the source tree, then cwd and executable ancestors. */
 export function workspaceRoot(): string | undefined {
   if (cachedRoot !== undefined) return cachedRoot ?? undefined;
   const fromSource = resolve(import.meta.dir, "..", "..", "..");
   const found =
-    [Bun.env.YOLO_RE_ROOT].find(path => path && isRoot(path)) ??
+    [Bun.env.RG_RE_ROOT].find(path => path && isRoot(path)) ??
     (isRoot(fromSource) ? fromSource : undefined) ??
     walkUp(process.cwd()) ??
     walkUp(dirname(process.execPath));

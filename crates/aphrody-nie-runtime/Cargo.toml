@@ -15,11 +15,12 @@ default = ["cli"]
 cli = ["dep:clap", "dep:anyhow", "dep:png", "dep:aphrody-nie-video"]
 
 [dependencies]
-aphrody-nie-core = { workspace = true }
-aphrody-nie-formats = { workspace = true, features = ["std"] }
+aphrody-nie-core = { workspace = true, features = ["serde"] }
+aphrody-nie-formats = { workspace = true, features = ["std", "serde"] }
 aphrody-nie-render3d = { path = "../aphrody-nie-render3d", version = "1.4.8", default-features = false }
 aphrody-nie-video = { path = "../aphrody-nie-video", version = "1.4.8", optional = true }
-aphrody-nie-geom = { workspace = true }
+aphrody-nie-geom = { workspace = true, features = ["serde"] }
+serde = { workspace = true, features = ["derive"] }
 clap = { version = "4.5.58", features = ["derive", "color", "env"], optional = true }
 anyhow = { workspace = true, optional = true }
 png = { version = "0.18.1", default-features = false, optional = true }

@@ -1,5 +1,0 @@
-{
-  "$comment": "The root manifest is the only dependency owner.",
-  "overlay-ports": ["cmake/overlay-ports"],
-  "overlay-triplets": ["cmake/overlay-triplets"]
-}

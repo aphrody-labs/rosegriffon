@@ -1,0 +1,42 @@
+{
+  "internalGateway": "127.0.0.1:8088",
+  "routes": [
+    {
+      "host": "rosegriffon.fr",
+      "aliases": ["www.rosegriffon.fr"],
+      "service": "rg-website",
+      "upstream": "127.0.0.1:3004",
+      "status": "active"
+    },
+    {
+      "host": "api.rosegriffon.fr",
+      "service": "rg-api",
+      "upstream": "127.0.0.1:4002",
+      "status": "active"
+    },
+    {
+      "host": "cdn.rosegriffon.fr",
+      "service": "rg-cdn",
+      "upstream": "127.0.0.1:4002",
+      "status": "active"
+    },
+    {
+      "host": "achillea.rosegriffon.fr",
+      "service": "rg-achillea",
+      "upstream": "127.0.0.1:5011",
+      "status": "active"
+    },
+    {
+      "host": "ranked.rosegriffon.fr",
+      "service": "rg-ranked",
+      "upstream": "127.0.0.1:5012",
+      "status": "active"
+    },
+    {
+      "host": "azalee.rosegriffon.fr",
+      "service": "rg-azalee",
+      "upstream": "127.0.0.1:3004",
+      "status": "active"
+    }
+  ]
+}

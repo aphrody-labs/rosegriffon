@@ -1,7 +1,7 @@
-# RoseGriffon theme packs (Yolo UI `theme.toml`, schema v1.1)
+# RoseGriffon theme packs (Aphrody Design `theme.toml`, schema v1.1)
 
 One pack per entry of `THEME_PACKS` in `packages/rg-ui/src/lib/themes.ts`: `roy`, `gaelle`,
-`azalee-light`, `azalee-dark`, `achillea`. Schema: `yolo-ui/crates/yolo-theme-pack/src/manifest.rs`
+`azalee-light`, `azalee-dark`, `achillea`. Schema: `crates/design-system/src/manifest.rs`
 (`deny_unknown_fields`). Colours are produced by `packages/rg-ui/src/lib/color-engine.ts`.
 
 Assets are RoseGriffon originals already in the repo. Paths are repo-relative (from the repository

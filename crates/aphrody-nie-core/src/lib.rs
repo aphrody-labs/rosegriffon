@@ -111,6 +111,7 @@ pub mod stats;
 pub mod tactics;
 pub mod typed_list_iter;
 pub mod typed_value_reader;
+pub mod world_move;
 
 /// Identifiant invalide pour joueur/cible (0xFFFF0000 en binaire IEVR).
 ///

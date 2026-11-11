@@ -1,9 +1,9 @@
 {
-  "name": "ieverse",
+  "name": "@rosegriffon/ieverse",
   "version": "1.4.7",
-  "private": false,
+  "private": true,
   "description": "Canonical Inazuma Eleven media catalogue, source URLs, navigation and player contracts.",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "files": [
     "src",
     "tsconfig.json"
@@ -19,10 +19,6 @@
     "./manga": "./src/manga.ts",
     "./runtime": "./src/runtime.ts"
   },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org"
-  },
   "scripts": {
     "typecheck": "bun check --noEmit",
     "test": "bun test"
@@ -31,6 +27,6 @@
     "@types/bun": "catalog:"
   },
   "engines": {
-    "bun": "1.4.4-canary.20261028.1"
+    "bun": ">=1.4.4"
   }
 }

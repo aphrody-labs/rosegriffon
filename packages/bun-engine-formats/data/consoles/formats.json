@@ -11,7 +11,7 @@
   "builtOn": [
     "docs/ie/iecode-docs/nie/CONSOLE-PIPELINE.md (external container tools)",
     "docs/ie/iecode-docs/nie/FORMATS.md, docs/ie/iecode-docs/formats/VFS-FORMAT-SPECIFICATIONS.md (Level-5/CRI)",
-    "packages/yolo-bun-engine-formats/data/consoles/formats.json"
+    "packages/bun-engine-formats/data/consoles/formats.json"
   ],
   "formats": [
     {
@@ -29,7 +29,7 @@
       "header": "16-byte header: PRG 16K units @4, CHR 8K units @5, flags6 (mirroring, battery, trainer, mapper low), flags7 (mapper high, NES 2.0 when (b7 & 0x0C) == 0x08); 512-byte trainer if flags6 bit 2",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -90,7 +90,7 @@
       "header": "65500-byte sides of blocks 1 (disk info), 2 (file count), 3 (file header), 4 (file data); .qd keeps CRCs and 65536-byte sides",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/parsers/handheld.ts",
+          "path": "packages/bun-engine-formats/src/parsers/handheld.ts",
           "scope": "identify"
         }
       ],
@@ -176,7 +176,7 @@
       "header": "Entry 0x100, title 0x134, CGB flag 0x143 (0x80/0xC0), SGB flag 0x146, cartridge type 0x147, ROM size 0x148 (32 KiB << n), RAM size 0x149, header checksum 0x14D, global checksum 0x14E",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -232,7 +232,7 @@
       "header": "ARM branch @0, logo 0x04..0x9F, title 0xA0 (12), game code 0xAC (4), maker 0xB0 (2), unit 0xB3, version 0xBC, complement check 0xBD; multiboot images (.mb) load at 0x02000000",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -270,7 +270,7 @@
       "header": "0x200 header (0x1000 on DSi): title 0x00, game code 0x0C, maker 0x10, unit code 0x12, ARM9 rom offset/entry/load/size 0x20..0x2F, ARM7 0x30..0x3F, FNT 0x40/0x44, FAT 0x48/0x4C, ARM9/ARM7 overlay tables 0x50/0x58, banner offset 0x68, secure-area CRC 0x6C",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -286,7 +286,7 @@
           "scope": "parse"
         },
         {
-          "path": "packages/yolo-bun-engine-formats/src/tinke.ts",
+          "path": "packages/bun-engine-formats/src/tinke.ts",
           "scope": "decode"
         },
         {
@@ -316,7 +316,7 @@
       "header": "Extended header 0x180..0xFFF: region flags, ARM9i/ARM7i offsets 0x1C0/0x1D0, modcrypt areas 0x220..0x22F, SHA-1 HMACs, RSA signature at 0xF80",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -456,7 +456,7 @@
       "header": "RSA-2048 signature 0x000, media size 0x104 (0x200-byte media units), media ID 0x108, partition FS types 0x110, crypt types 0x118, partition table 0x120 (8 x offset/length), card info 0x200",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -630,7 +630,7 @@
       "header": "PI config 0x00, clock 0x04, entry point 0x08, libultra version 0x0C, CRC1/CRC2 0x10/0x14, title 0x20 (20 bytes), game code 0x3B (category, ID, region), version 0x3F, IPL3 boot code 0x40..0xFFF (CIC-specific)",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -676,7 +676,7 @@
       "header": "Game ID 0x00 (6), disc number 0x06, version 0x07, name 0x20, DOL offset 0x420, FST offset/size 0x424/0x428; bi2.bin at 0x440, apploader at 0x2440",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -710,7 +710,7 @@
       "header": "Partition info table at 0x40000, region settings 0x4E000; partitions hold ticket, TMD (size 0x2A4, offset>>2 0x2A8), H3, AES-128-CBC data in 0x8000 clusters (0x400 hashes + 0x7C00 data)",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -767,7 +767,7 @@
       "header": "Sector counts, hd/wbfs sector shift, disc table; per-disc wlba table",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/parsers/home.ts",
+          "path": "packages/bun-engine-formats/src/parsers/home.ts",
           "scope": "identify"
         }
       ],
@@ -875,7 +875,7 @@
           "scope": "execute"
         },
         {
-          "path": "packages/yolo-bun-engine-formats/src/parsers/home.ts",
+          "path": "packages/bun-engine-formats/src/parsers/home.ts",
           "scope": "identify"
         }
       ],
@@ -906,7 +906,7 @@
       "header": "Machine 0x12: PowerPC (20) for GC/Wii/Wii U, MIPS (8) for PS1/PS2/PSP (PSP Allegrex flags 0x00A2xxxx), ARM (40) for DS/3DS",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -1130,7 +1130,7 @@
           "scope": "parse"
         },
         {
-          "path": "packages/yolo-bun-engine-formats/src/parsers/ctr-switch.ts",
+          "path": "packages/bun-engine-formats/src/parsers/ctr-switch.ts",
           "scope": "identify"
         }
       ],
@@ -1160,7 +1160,7 @@
           "scope": "parse"
         },
         {
-          "path": "packages/yolo-bun-engine-formats/src/parsers/ctr-switch.ts",
+          "path": "packages/bun-engine-formats/src/parsers/ctr-switch.ts",
           "scope": "identify"
         }
       ],
@@ -1249,7 +1249,7 @@
           "scope": "parse"
         },
         {
-          "path": "packages/yolo-bun-engine-formats/src/parsers/ctr-switch.ts",
+          "path": "packages/bun-engine-formats/src/parsers/ctr-switch.ts",
           "scope": "identify"
         }
       ],
@@ -1448,7 +1448,7 @@
       "header": "CUE: FILE/TRACK MODE1|MODE2/2352|AUDIO/INDEX lines; PS1/PS2 boot from SYSTEM.CNF (BOOT=cdrom:\\SLUS_xxx.xx;1 or BOOT2=cdrom0:...)",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -1464,7 +1464,7 @@
           "scope": "parse"
         },
         {
-          "path": "packages/yolo-bun-engine-formats/src/parsers/playstation.ts",
+          "path": "packages/bun-engine-formats/src/parsers/playstation.ts",
           "scope": "identify"
         }
       ],
@@ -1506,7 +1506,7 @@
           "scope": "parse"
         },
         {
-          "path": "packages/yolo-bun-engine-formats/src/parsers/playstation.ts",
+          "path": "packages/bun-engine-formats/src/parsers/playstation.ts",
           "scope": "identify"
         }
       ],
@@ -1636,7 +1636,7 @@
       "header": "DVD ISO 9660 (+UDF bridge); dual-layer second layer start in PVD",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -1721,7 +1721,7 @@
       "header": "Version 0x4 then 8 offsets: PARAM.SFO, ICON0.PNG, ICON1.PMF, PIC0.PNG, PIC1.PNG, SND0.AT3, DATA.PSP, DATA.PSAR (PS1 classics: PSISOIMG/PSTITLEIMG)",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/parsers/playstation.ts",
+          "path": "packages/bun-engine-formats/src/parsers/playstation.ts",
           "scope": "identify"
         }
       ],
@@ -1755,7 +1755,7 @@
       "header": "PSP_GAME/SYSDIR/EBOOT.BIN, PSP_GAME/PARAM.SFO, UMD_DATA.BIN",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -1897,7 +1897,7 @@
           "scope": "identify"
         },
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         }
       ],
@@ -2023,7 +2023,7 @@
       "header": "Domestic title 0x120, overseas title 0x150, serial 0x180, checksum 0x18E, I/O 0x190, ROM range 0x1A0, RAM range 0x1A8, SRAM 0x1B0, region 0x1F0; 32X security program at ROM 0x400..0x7FF",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {
@@ -2209,7 +2209,7 @@
       "header": "No-Intro/Redump distribution containers",
       "parsers": [
         {
-          "path": "packages/yolo-bun-engine-formats/src/image.ts",
+          "path": "packages/bun-engine-formats/src/image.ts",
           "scope": "identify"
         },
         {

@@ -1,12 +1,12 @@
 {
   "name": "@rosegriffon/inagle-cross",
   "version": "1.4.7",
-  "private": false,
-  "description": "API de données et de rétro-conception pour Inazuma Eleven Cross — types, schémas, et analyseurs d'assets",
-  "license": "UNLICENSED",
+  "private": true,
+  "description": "Inazuma Eleven Cross masterdata schemas, enums, and extraction catalogs",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aphrody-labs/bun-os.git",
+    "url": "https://github.com/aphrody-dev/rosegriffon.git",
     "directory": "packages/inagle-cross"
   },
   "files": [
@@ -20,13 +20,8 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org"
-  },
   "scripts": {
     "type-check": "bun check --noEmit",
-    "lint": "oxlint src",
     "typecheck": "bun check --noEmit"
   },
   "dependencies": {
@@ -36,6 +31,6 @@
     "@types/node": "catalog:"
   },
   "engines": {
-    "bun": "1.4.4-canary.20261028.1"
+    "bun": ">=1.4.4"
   }
 }

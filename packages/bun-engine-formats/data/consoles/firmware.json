@@ -35,15 +35,15 @@
     }
   ],
   "builtOn": [
-    "packages/yolo-bun-engine-formats/README.md (payload policy, selected owners)",
-    "packages/yolo-bun-engine-formats/README.md (firmwarePolicy values)",
+    "packages/bun-engine-formats/README.md (payload policy, selected owners)",
+    "packages/bun-engine-formats/README.md (firmwarePolicy values)",
     "docs/ie/iecode-docs/emulation/MULTICONSOLE-RUST-MIGRATION.md (pinned Rust owners)",
-    "packages/yolo-bun-engine-formats/README.md (read-only firmware and tool provenance)",
+    "packages/bun-engine-formats/README.md (read-only firmware and tool provenance)",
     "docs/ie/iecode-docs/emulation/MULTICONSOLE-RUST-MIGRATION.md (3DS user-supplied inputs, IECODE_GC_IPL_HLE)",
     "docs/ie/iecode-docs/architecture/EMULATION-PLATFORM-DECISION.md",
     "docs/ie/iecode-docs/.agents/skills/dust-cli/SKILL.md (Dust direct boot without BIOS)",
     "docs/ie/iecode-docs/ruzu/quickstart.md (Switch keys/firmware)",
-    "packages/yolo-bun-engine-formats/src/parsers/firmware.ts, packages/yolo-bun-engine-formats/src/parsers/handheld.ts"
+    "packages/bun-engine-formats/src/parsers/firmware.ts, packages/bun-engine-formats/src/parsers/handheld.ts"
   ],
   "consoles": [
     {
@@ -609,7 +609,7 @@
           "firmware": "FreeBIOS + generated firmware for DS mode; real dumps for firmware boot"
         },
         {
-          "id": "packages/yolo-bun-engine-formats/src/parsers/handheld.ts",
+          "id": "packages/bun-engine-formats/src/parsers/handheld.ts",
           "firmware": "validates owner-supplied BIOS/firmware sizes and hashes (local firmware format inspection)"
         }
       ],

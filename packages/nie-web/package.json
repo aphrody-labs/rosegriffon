@@ -1,17 +1,13 @@
 {
   "name": "@aphrody/nie-web",
   "version": "1.4.7",
-  "private": false,
-  "description": "NIE web/site: wasm bindings (nie-wasm-web), engine/game loaders, build/audit/release/tools scripts of the former nie-web app, viewer assets.",
-  "license": "UNLICENSED",
+  "private": true,
+  "description": "NIE web/site: wasm bindings (nie-wasm-web), engine/game loaders, and viewer assets.",
+  "license": "Apache-2.0",
   "files": [
     "assets",
-    "audit",
     "build",
-    "docs",
-    "release",
-    "src",
-    "tools"
+    "src"
   ],
   "type": "module",
   "exports": {
@@ -21,14 +17,10 @@
     "./wasm/nie_wasm_bg.wasm": "./src/nie-wasm-web/nie_wasm_bg.wasm",
     "./package.json": "./package.json"
   },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org"
-  },
   "scripts": {
     "typecheck": "bun check -p tsconfig.json --noEmit"
   },
   "engines": {
-    "bun": "1.4.4-canary.20261028.1"
+    "bun": ">=1.4.4"
   }
 }

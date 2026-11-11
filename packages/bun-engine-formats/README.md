@@ -13,20 +13,20 @@ games.
 Run it from the workspace root:
 
 ```powershell
-bun run packages/yolo-bun-engine-formats/src/main.ts identify .\sample.nds --json
-bun run packages/yolo-bun-engine-formats/src/main.ts sections .\sample.nds --json
-bun run packages/yolo-bun-engine-formats/src/main.ts files .\sample.nds --json
-bun run packages/yolo-bun-engine-formats/src/main.ts disasm .\sample.nds --arch arm --count 32
-bun run packages/yolo-bun-engine-formats/src/main.ts tinke-pac-count .\sample.pac
+bun run packages/bun-engine-formats/src/main.ts identify .\sample.nds --json
+bun run packages/bun-engine-formats/src/main.ts sections .\sample.nds --json
+bun run packages/bun-engine-formats/src/main.ts files .\sample.nds --json
+bun run packages/bun-engine-formats/src/main.ts disasm .\sample.nds --arch arm --count 32
+bun run packages/bun-engine-formats/src/main.ts tinke-pac-count .\sample.pac
 bun tools/nds-tinke/build.ts
-bun run packages/yolo-bun-engine-formats/src/main.ts tinke-decrypt .\encrypted.bin .\decrypted.bin --block-size 0x1000
+bun run packages/bun-engine-formats/src/main.ts tinke-decrypt .\encrypted.bin .\decrypted.bin --block-size 0x1000
 ```
 
 Disassembly uses installed tools discovered on `PATH`; MAME tools may also be placed under
 `usr/lib/mame` at the workspace root or a directory selected with `YOLO_RE_USR`. `tinke-*` commands
 use the GPL-licensed .NET NativeAOT library in `tools/nds-tinke`; build it before use with .NET 10
 and a NativeAOT toolchain. The `./usr` API reads installed-tool provenance from the optional
-`YOLO_RE_USR/var/lib/yolo-re-tools/local.db` database without modifying it. The format and firmware
+`RG_RE_USR/var/lib/re-tools/local.db` database without modifying it. The format and firmware
 metadata used by the detector are in `data/consoles/` and remain available when the CLI is built as
 a single-file executable while run from this checkout.
 
