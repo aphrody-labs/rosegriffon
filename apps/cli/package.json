@@ -2,9 +2,10 @@
   "name": "@rosegriffon/cli",
   "version": "1.4.8",
   "private": true,
-  "description": "Rose Griffon unified CLI — unified entryway for all monorepo tools",
+  "description": "Unified Bun CLI for Rose Griffon & Inazuma Eleven monorepo",
   "type": "module",
   "bin": {
+    "ie": "./src/index.ts",
     "rg": "./src/index.ts",
     "rosegriffon": "./src/index.ts"
   },

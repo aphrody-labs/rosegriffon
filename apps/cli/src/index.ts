@@ -1,26 +1,26 @@
 #!/usr/bin/env bun
 /**
- * Unified CLI for Rose Griffon Monorepo
- * Subcommands:
- *  - inagle: Universal Game Data CLI (IEVR)
- *  - azalee: Azalee game database & contract toolkit
- *  - formats / console: yolo-console-formats ROM/binary inspection
- *  - homebrew: DS/3DS homebrew build runner
- *  - pipeline / shenron: Shenron OCR, RAG, Translation & Ingest pipeline
- *  - contract: Achillea contract generator
+ * `ie` / `rg` / `rosegriffon` — Unified Bun CLI for Inazuma Eleven & Rose Griffon.
+ * Consolidates every pure Bun CLI across the entire monorepo:
+ *  - inagle: Universal Game Data CLI (IEVR) & Zukan query
+ *  - azalee: Azalee game DB, sync, audit, rules, and contracts
+ *  - formats / console: yolo-console-formats ROM/binary inspection & disasm
+ *  - homebrew: DS/3DS homebrew toolchain runner
+ *  - pipeline / shenron: Shenron ML / OCR / RAG / Ingest pipeline
+ *  - contract: Achillea cross-language contract generator
+ *  - achillea / server: Rose Griffon self-hosted server & AchilleaClient runner
  */
 
-import { parseArgs } from "node:util";
-import { resolve, join } from "node:path";
-import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 
 const VERSION = "1.4.8";
 
 function showHelp() {
   console.log(`
-Rose Griffon Unified CLI (v${VERSION})
+Inazuma Eleven & Rose Griffon Unified Bun CLI (v${VERSION})
 
 Usage:
+  ie <command> [options...]
   rg <command> [options...]
   rosegriffon <command> [options...]
 
@@ -31,6 +31,8 @@ Available Commands:
   homebrew      Homebrew DS / 3DS toolchain runner
   pipeline      Shenron ML / OCR / RAG / Ingest pipeline
   contract      Achillea cross-language contract generator
+  achillea      Achilléa headless API client runner
+  server        Rose Griffon self-hosted server supervisor
 
 Global Options:
   --help, -h     Show this help message
@@ -47,7 +49,7 @@ async function main() {
   }
 
   if (argv[0] === "-v" || argv[0] === "--version" || argv[0] === "version") {
-    console.log(`@rosegriffon/cli v${VERSION}`);
+    console.log(`ie (Rose Griffon Unified Bun CLI) v${VERSION}`);
     process.exit(0);
   }
 
@@ -55,7 +57,6 @@ async function main() {
 
   switch (command) {
     case "inagle": {
-      // Delegate to inagle CLI entry
       const inagleEntry = resolve(import.meta.dir, "../../../packages/inagle/src/cli.ts");
       const proc = Bun.spawn([process.execPath, inagleEntry, ...subArgs], {
         stdin: "inherit",
@@ -67,7 +68,6 @@ async function main() {
     }
 
     case "azalee": {
-      // Delegate to azalee CLI entry
       const azaleeEntry = resolve(import.meta.dir, "../../../packages/azalee/src/cli.ts");
       const proc = Bun.spawn([process.execPath, azaleeEntry, ...subArgs], {
         stdin: "inherit",
@@ -120,7 +120,17 @@ async function main() {
       break;
     }
 
-    case "achillea":
+    case "achillea": {
+      const serverEntry = resolve(import.meta.dir, "../../../apps/rosegriffon/src/main.ts");
+      const proc = Bun.spawn([process.execPath, serverEntry, "achillea", ...subArgs], {
+        stdin: "inherit",
+        stdout: "inherit",
+        stderr: "inherit",
+      });
+      process.exit(await proc.exited);
+      break;
+    }
+
     case "server": {
       const serverEntry = resolve(import.meta.dir, "../../../apps/rosegriffon/src/main.ts");
       const proc = Bun.spawn([process.execPath, serverEntry, ...subArgs], {
@@ -133,7 +143,7 @@ async function main() {
     }
 
     default:
-      console.error(`Unknown command: "${command}". Run "rg --help" for available commands.`);
+      console.error(`Unknown command: "${command}". Run "ie --help" for available commands.`);
       process.exit(1);
   }
 }
