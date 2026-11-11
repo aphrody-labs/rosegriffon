@@ -14,6 +14,11 @@ History is preserved from `aphrody-labs/rg`, then `aphrody-labs/iecode` and
 | `apps/rg-bot` | `@rosegriffon/bot` | Discord gateways (profiles `rg`, `azalee`), unified Elysia API, Achillea ranked Colyseus server, `rg-core` VPS service |
 | `packages/achillea-*` | `@rosegriffon/achillea-{client,contract,core,types}` | Achillea esport domain, API contract and client |
 | `packages/azalee` | `@rosegriffon/azalee` | Azalee library and CLI |
+| `packages/nie-ui` | `@aphrody/nie-ui` | Unified NIE Studio, Save Editor, Mod Manager, 3D Chara & Emulator UI |
+| `packages/filmcraft` | `@aphrody/filmcraft` | FilmCraft NLE timeline engine, multi-track cuts and video export |
+| `packages/hyperframes` | `@aphrody/hyperframes` | Zero-download HTTP byte-range ISOBMFF parser and frame decoder |
+| `packages/remotion` | `@aphrody/remotion` | Zero-dependency React/Bun remotion timeline composition |
+| `crates/aphrody-nie-headless` | `aphrody-nie-headless` | Headless IEVR simulation, save editor, menu capture & core memory dump |
 | `packages/rg-*` | `@rosegriffon/{app-shell,assets,auth,config,cron,db,discord-sync,i18n,identity,preferences,search,types}`, `@rosegriffon/ui` (private) | shared site, data and service packages |
 | `supabase/` | — | Supabase CLI config and migrations of the `rg` project |
 | `scripts/` | — | build, deploy, operations and campaign scripts |
@@ -69,6 +74,27 @@ variable. `aphrody-nie-model-serve` is a Bun OS product and is never embedded: s
 
 A VPS install is the executable, an env file and a systemd unit; `infra/systemd` and
 `infra/nginx` hold the production units and the nginx site for `rosegriffon.fr`.
+
+## NIE Studio & Headless Simulation Engine
+
+Inazuma Eleven: Victory Road (`nie.exe` Level-5 "Lives" engine) reverse-engineering and studio capabilities are exposed via:
+
+1. **Headless Engine (`crates/aphrody-nie-headless`)**:
+   - `detect`: Identifies Level-5 / Criware binary structures (`CPK`, `@UTF`, `CRILAYLA`, `G4TX`, `G4MD`, `RDBN`).
+   - `match`: Deterministic 90-minute football match simulation.
+   - `save-edit`: Encrypted XOR stream cipher manipulation with CRC32 recalculation.
+   - `capture-menus`: Captures all game menu screens (boot, title, main menu, save editor, match UI, formation) as PNG sequences + `timeline.json`.
+   - `memory-dump`: Full structured JSON memory map and binary core image matching `nie.exe` PE sections.
+   - `pipeline`: Automated end-to-end run combining save editing, core dumping, and menu capture.
+
+2. **Unified Studio Package (`@aphrody/nie-ui/studio`)**:
+   - Save Editor, Mod Manager with VFS path overlays, CPK Explorer, and 3D Character Editor with morphological tuning.
+   - NLE Timeline and video processing through `@aphrody/filmcraft`, `@aphrody/hyperframes`, and `@aphrody/remotion`.
+   - Multimodal RAG dataset ingestion with SigLIP vision embeddings on RTX 4070 (`sm_89`).
+
+3. **Technical Specs & Roadmap**:
+   - [Roadmap 2026-2027](file:///C:/src/apps/rosegriffon/docs/ROADMAP-2026-2027.md)
+   - [Architecture Studio NIE](file:///C:/src/apps/rosegriffon/docs/ARCHITECTURE-NIE-STUDIO.md)
 
 ## Cloud topology
 

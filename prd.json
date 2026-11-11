@@ -1,0 +1,38 @@
+[
+  {
+    "id": "PHASE-1-HEADLESS-SAVE-MEMORY",
+    "title": "Headless Simulation, Stream XOR Save Editor & Core Memory Dump",
+    "acceptanceCommand": "cargo test -p aphrody-nie-headless",
+    "completed": true
+  },
+  {
+    "id": "PHASE-2-WEBGPU-WASM-BEVY",
+    "title": "Tri-Tier WebGPU & WASM Shaders and Native G4TX/G4MD Asset Loaders",
+    "acceptanceCommand": "cargo check -p aphrody-nie-bevy --features bevy && cargo check -p aphrody-nie-render3d",
+    "completed": true
+  },
+  {
+    "id": "PHASE-3-PRO-DESKTOP-SHELL",
+    "title": "Desktop Shell, Live Memory Hooks and Egui/WGPU 3D Viewport",
+    "acceptanceCommand": "cargo check -p aphrody-nie-editor",
+    "completed": true
+  },
+  {
+    "id": "PHASE-4-FILMCRAFT-STUDIO",
+    "title": "FilmCraft & Remotion Multi-Track NLE Timeline and 3D Chara Editor",
+    "acceptanceCommand": "bun test packages/nie-ui/test && bun test packages/filmcraft/test",
+    "completed": true
+  },
+  {
+    "id": "PHASE-5-HYPERFRAMES-RAG",
+    "title": "HyperFrames Zero-Download Range Streaming & Multimodal RAG Ingestion",
+    "acceptanceCommand": "bun test packages/hyperframes/test",
+    "completed": true
+  },
+  {
+    "id": "PHASE-6-MCP-INTEGRATION",
+    "title": "Unified MCP Stdio Server Tools Integration",
+    "acceptanceCommand": "bun test apps/mcp/src/index.test.ts",
+    "completed": true
+  }
+]
