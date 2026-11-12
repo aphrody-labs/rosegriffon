@@ -2,7 +2,7 @@
 
 import { ArrowLeft, CircleUser, Home, LayoutDashboard, Menu, Settings, User } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@rosegriffon/ui/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSidebar } from "@rosegriffon/ui";

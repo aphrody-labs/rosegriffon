@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "./link";
 import * as React from "react";
 import { cn } from "../lib/utils";
 

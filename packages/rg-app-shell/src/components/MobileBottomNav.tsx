@@ -1,7 +1,7 @@
 "use client";
 
 import type { MouseEvent } from "react";
-import Link from "next/link";
+import Link from "@rosegriffon/ui/link";
 import { usePathname } from "next/navigation";
 import { construireMobileNavUnifiee, estRouteActive, type NavItem } from "../config/navigation";
 import { iconMap } from "../lib/icons";

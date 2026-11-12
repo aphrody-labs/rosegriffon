@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import Link from "./link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, Shield, Home } from "lucide-react";
 import type { LucideIcon } from "lucide-react";

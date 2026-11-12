@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, KeyRound, Link2, Truck, UserCircle } from "lucide-react";
-import Link from "next/link";
+import Link from "../link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useState } from "react";

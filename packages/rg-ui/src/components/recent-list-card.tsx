@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowRight, type LucideIcon } from "lucide-react";
-import Link from "next/link";
+import Link from "./link";
 import { cn } from "../lib/utils";
 
 interface RecentItem {

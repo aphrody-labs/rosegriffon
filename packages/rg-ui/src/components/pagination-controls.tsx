@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import Link from "./link";
 import { useSearchParams } from "next/navigation";
 import type * as React from "react";
 

@@ -1,6 +1,6 @@
 import type * as React from "react";
 import { isValidElement } from "react";
-import Link from "next/link";
+import Link from "./link";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "../lib/utils";
 

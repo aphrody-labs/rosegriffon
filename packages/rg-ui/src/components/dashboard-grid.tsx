@@ -1,6 +1,6 @@
 import { Card, CardContent } from "./card";
 import type { LucideIcon } from "lucide-react";
-import Link from "next/link";
+import Link from "./link";
 import { cn } from "../lib/utils";
 
 interface QuickActionProps {

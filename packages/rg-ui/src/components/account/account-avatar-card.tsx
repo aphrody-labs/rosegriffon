@@ -1,7 +1,7 @@
 "use client";
 
 import { Camera, ExternalLink, Loader2, Upload } from "lucide-react";
-import Link from "next/link";
+import Link from "../link";
 import { useId, useRef, useState } from "react";
 import { toast } from "sonner";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, X } from "lucide-react";
-import Link from "next/link";
+import Link from "@rosegriffon/ui/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
