@@ -22,7 +22,7 @@ import {
 const PROTOCOL = "2025-06-18";
 const SUPPORTED_PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
 const API = "https://api.steampowered.com";
-const UA = "steam-plugin-mcp/0.1 (+https://github.com/aphrody-dev)";
+const UA = "steam-plugin-mcp/0.1 (+https://github.com/aphrody-labs/rosegriffon)";
 
 type Json = Record<string, unknown>;
 type Tool = {
