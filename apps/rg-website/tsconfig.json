@@ -3,7 +3,7 @@
   "compilerOptions": {
     "noImplicitOverride": false,
     "noUncheckedIndexedAccess": false,
-    "types": ["google.maps", "bun", "@webgpu/types"],
+    "types": ["bun", "@webgpu/types"],
     "tsBuildInfoFile": ".next/.tsbuildinfo",
     "paths": {
       "@/*": ["./src/*", "./*"],

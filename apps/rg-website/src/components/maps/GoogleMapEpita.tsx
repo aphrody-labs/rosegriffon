@@ -1,74 +1,60 @@
 "use client";
 
+import "leaflet/dist/leaflet.css";
+
 import { useEffect, useRef } from "react";
 
-import { useGoogleMaps } from "@/hooks/useGoogleMaps";
-import { EPITA_COORDS, EPITA_PLACE_ID, GOOGLE_MAPS_ID } from "@/lib/maps";
+import { EPITA_COORDS, EPITA_PLACE_ID } from "@/lib/maps";
 
+/** Carte de l'EPITA sur tuiles OpenStreetMap (Leaflet), sans clé ni facturation. */
 export default function GoogleMapEpita() {
   const mapRef = useRef<HTMLDivElement>(null);
-  const { isLoaded, error, importLibrary } = useGoogleMaps();
 
   useEffect(() => {
-    if (!isLoaded || !importLibrary || !mapRef.current) {
+    const el = mapRef.current;
+    if (!el) {
       return;
     }
+    let disposed = false;
+    let map: import("leaflet").Map | undefined;
 
-    const initMap = async () => {
-      try {
-        const { Map } = await importLibrary("maps");
-        const { AdvancedMarkerElement, PinElement } = (await importLibrary("marker")) as google.maps.MarkerLibrary;
-
-        const map = new Map(mapRef.current as HTMLElement, {
-          center: EPITA_COORDS,
-          disableDefaultUI: false,
-          gestureHandling: "cooperative", // Meilleure UX sur mobile
-          mapId: GOOGLE_MAPS_ID,
-          zoom: 18, // Zoom élevé pour voir les bâtiments
-        });
-
-        // Personnalisation du pin pour correspondre à l'identité visuelle (optionnel)
-        const pin = new PinElement({
-          background: "#1d4ed8", // Blue-700
-          borderColor: "#1e3a8a", // Blue-900
-          glyphColor: "white",
-        });
-
-        // Création du marqueur avancé
-        const marker = new AdvancedMarkerElement({
-          content: pin,
-          gmpClickable: true,
-          map,
-          position: EPITA_COORDS,
-          title: "EPITA Kremlin-Bicêtre",
-        });
-
-        // Ajout d'un événement au clic pour ouvrir Google Maps avec le Place ID spécifique
-        marker.addEventListener("gmp-click", () => {
-          const url = `https://www.google.com/maps/search/?api=1&query=EPITA&query_place_id=${EPITA_PLACE_ID}`;
-          window.open(url, "_blank");
-        });
-      } catch (error) {
-        console.error("Erreur lors du chargement de Google Maps:", error);
+    void import("leaflet").then(L => {
+      if (disposed) {
+        return;
       }
+      const at: [number, number] = [EPITA_COORDS.lat, EPITA_COORDS.lng];
+      map = L.map(el, { scrollWheelZoom: false }).setView(at, 18);
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map);
+      const icon = L.divIcon({
+        className: "",
+        html: '<div style="background:#1d4ed8;width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #1e3a8a"></div>',
+        iconAnchor: [14, 28],
+        iconSize: [28, 28],
+      });
+      L.marker(at, { icon, title: "EPITA Kremlin-Bicêtre" })
+        .addTo(map)
+        .on("click", () => {
+          window.open(
+            `https://www.google.com/maps/search/?api=1&query=EPITA&query_place_id=${EPITA_PLACE_ID}`,
+            "_blank",
+            "noopener",
+          );
+        });
+    });
+
+    return () => {
+      disposed = true;
+      map?.remove();
     };
-
-    initMap();
-  }, [isLoaded, importLibrary]);
-
-  if (error) {
-    return (
-      <div className="w-full h-96 flex items-center justify-center bg-gray-50 rounded-xl border border-red-200">
-        <p className="text-red-600 font-medium px-4 text-center">
-          Impossible de charger la carte. Vérifiez votre connexion ou la clé API.
-        </p>
-      </div>
-    );
-  }
+  }, []);
 
   return (
     <div
       ref={mapRef}
+      role="region"
       className="w-full h-[500px] rounded-xl shadow-lg border border-gray-200 overflow-hidden"
       aria-label="Carte de localisation de l'EPITA"
     />
