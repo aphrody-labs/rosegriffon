@@ -143,6 +143,9 @@ const nextConfig: NextConfig = {
     turbopackFileSystemCacheForBuild: true,
     turbopackFileSystemCacheForDev: true,
     cssChunking: true,
+    // CSS servi en <style> dans le HTML : supprime la requête bloquante (~1,1 s de LCP
+    // mesurés par Lighthouse sur l'accueil). Tailwind reste compact une fois compressé.
+    inlineCss: true,
   },
 
   compiler: {
