@@ -23,7 +23,13 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import {
   REPO_ROOT,
+  candidates,
   composeEnv,
+  type HostProbe,
+  parseProbe,
+  probeScript,
+  rankHosts,
+  roles,
   type Host,
   hostByKey,
   loadInfra,
@@ -101,7 +107,7 @@ function parse(argv: string[]): Args {
     else if (
       next !== undefined &&
       !next.startsWith("--") &&
-      !["apply", "check", "json", "dry-run"].includes(k)
+      !["apply", "check", "json", "dry-run", "auto"].includes(k)
     ) {
       flags[k] = next;
       i++;
@@ -131,6 +137,54 @@ async function remote(
     },
   );
   return proc.exited;
+}
+
+/** Probes one host over ssh (mesh alias, then `<alias>-public`); null when neither answers. */
+async function probe(host: Host): Promise<string | null> {
+  for (const alias of [host.ssh, `${host.ssh}-public`]) {
+    const proc = Bun.spawn(
+      [
+        "ssh",
+        "-n",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=5",
+        alias,
+        probeScript(host),
+      ],
+      { stdout: "pipe", stderr: "ignore" },
+    );
+    const out = await new Response(proc.stdout).text();
+    if ((await proc.exited) === 0 && out.trim()) return out;
+  }
+  return null;
+}
+
+/** Live ranking of a role's candidates (least loaded first). */
+async function place(
+  role: string,
+): Promise<{ ranked: string[]; probes: HostProbe[] }> {
+  const keys = candidates(infra, role);
+  const probes = await Promise.all(
+    keys.map(async (k) => parseProbe(k, await probe(hostByKey(infra, k, env)))),
+  );
+  return { ranked: rankHosts(infra, role, probes), probes };
+}
+
+/** `--auto` / RG_PLACE=auto: pin every multi-candidate role to its least loaded live host. */
+async function autoPlace(): Promise<void> {
+  for (const role of roles(infra)) {
+    if (
+      candidates(infra, role).length < 2 ||
+      env[`RG_HOST_${role.toUpperCase()}`]
+    )
+      continue;
+    const { ranked } = await place(role);
+    if (!ranked[0]) throw new Error(`no live host for role "${role}"`);
+    env[`RG_HOST_${role.toUpperCase()}`] = ranked[0];
+    console.error(`place ${role} -> ${ranked[0]}`);
+  }
 }
 
 function roleFor(name: string, flags: Args["flags"]): string {
@@ -165,8 +219,23 @@ async function main(argv: string[]): Promise<number> {
   const { pos, flags, rest } = parse(tail);
   const dry = flags["dry-run"] === true;
   const ref = str(flags.ref, "origin/main");
+  if (flags.auto === true || env.RG_PLACE === "auto") await autoPlace();
 
   switch (verb) {
+    case "place": {
+      for (const role of pos.length ? pos : roles(infra)) {
+        const { ranked, probes } = await place(role);
+        const detail = probes
+          .map((p) =>
+            p.ok
+              ? `${p.key}(load=${p.load1} mem=${p.mem} disk=${p.disk})`
+              : `${p.key}(down)`,
+          )
+          .join(" ");
+        console.log(`${role.padEnd(8)} -> ${ranked[0] ?? "NONE"}  ${detail}`);
+      }
+      return 0;
+    }
     case "host": {
       const h = resolveHost(infra, pos[0] ?? "prod", env);
       const field = pos[1] as keyof Host | undefined;

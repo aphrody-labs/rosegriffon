@@ -47,7 +47,8 @@ export interface Service {
 }
 
 export interface HostsManifest {
-  roles: Record<string, string>;
+  /** A role names one host, or an ordered list of interchangeable candidates (see {@link rankHosts}). */
+  roles: Record<string, string | string[]>;
   hosts: Record<string, Omit<Host, "key">>;
 }
 
@@ -139,7 +140,7 @@ export function resolveHost(
 ): Host {
   const override = set(env, `RG_HOST_${envKey(roleOrHost)}`);
   if (override) return hostByKey(infra, override, env);
-  const mapped = infra.hosts.roles[roleOrHost];
+  const mapped = candidates(infra, roleOrHost)[0];
   if (mapped) return hostByKey(infra, mapped, env);
   const known =
     infra.hosts.hosts[roleOrHost] ??
@@ -148,6 +149,70 @@ export function resolveHost(
   throw new Error(
     `unknown role or host "${roleOrHost}" (roles: ${roles(infra).join(", ")})`,
   );
+}
+
+/** Candidate host keys of a role, in preference order (empty for an unknown role). */
+export function candidates(infra: Infra, role: string): string[] {
+  const v = infra.hosts.roles[role];
+  return v === undefined ? [] : Array.isArray(v) ? v : [v];
+}
+
+/** Live measurement of one host; `ok: false` when it did not answer. */
+export interface HostProbe {
+  key: string;
+  ok: boolean;
+  /** 1-minute load average. */
+  load1?: number;
+  /** Fraction of memory in use, 0..1. */
+  mem?: number;
+  /** Fraction of the srv_root filesystem in use, 0..1. */
+  disk?: number;
+}
+
+/**
+ * Orders the reachable candidates of a role from least to most loaded. Score: load per core plus
+ * memory pressure; hosts above 90% disk or missing a required capability are dropped. Ties keep the
+ * manifest order, so a quiet cluster behaves like the static mapping.
+ */
+export function rankHosts(
+  infra: Infra,
+  role: string,
+  probes: readonly HostProbe[],
+  require: readonly string[] = [],
+): string[] {
+  const order = candidates(infra, role);
+  const byKey = new Map(probes.map((p) => [p.key, p]));
+  const score = (k: string): number => {
+    const p = byKey.get(k);
+    const cores = infra.hosts.hosts[k]?.cores || 1;
+    return (p?.load1 ?? 0) / cores + (p?.mem ?? 0);
+  };
+  return order
+    .filter((k) => {
+      const p = byKey.get(k);
+      const caps = infra.hosts.hosts[k]?.capabilities ?? [];
+      return (
+        p?.ok === true &&
+        (p.disk ?? 0) < 0.9 &&
+        require.every((c) => caps.includes(c))
+      );
+    })
+    .map((k, i) => ({ k, i, s: score(k) }))
+    .sort((a, b) => a.s - b.s || a.i - b.i)
+    .map((x) => x.k);
+}
+
+/** Shell run on a host to produce one {@link HostProbe} line: `load1 mem disk`. */
+export function probeScript(host: Host): string {
+  const root = host.srv_root || "/";
+  return `read l _ < /proc/loadavg; m=$(awk '/MemTotal/{t=$2}/MemAvailable/{a=$2}END{printf "%.3f",(t-a)/t}' /proc/meminfo); d=$(df -P ${root} 2>/dev/null | awk 'NR==2{gsub("%","",$5); printf "%.3f",$5/100}'); echo "$l $m $d"`;
+}
+
+/** Parses the output of {@link probeScript}. */
+export function parseProbe(key: string, out: string | null): HostProbe {
+  const [l, m, d] = (out ?? "").trim().split(/\s+/).map(Number);
+  if (out === null || !Number.isFinite(l)) return { key, ok: false };
+  return { key, ok: true, load1: l, mem: m, disk: d };
 }
 
 /** Repository cloned into a host stack_dir (`RG_REPO_URL` overrides). */

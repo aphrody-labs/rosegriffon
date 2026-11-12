@@ -142,3 +142,42 @@ test("deploy ships images from the build role instead of building on prod", () =
   );
   expect(local).toContain("compose build --pull");
 });
+
+import {
+  candidates,
+  parseProbe,
+  rankHosts,
+} from "../../packages/rg-config/infra.ts";
+
+test("multi-candidate roles resolve statically to the first candidate", () => {
+  expect(candidates(infra, "build")).toEqual(["vps", "cdn"]);
+  expect(resolveHost(infra, "build").key).toBe("vps");
+});
+
+test("rankHosts prefers the least loaded live candidate and drops dead or full hosts", () => {
+  const busy = [
+    parseProbe("vps", "24.0 0.9 0.5"),
+    parseProbe("cdn", "0.5 0.2 0.4"),
+  ];
+  expect(rankHosts(infra, "build", busy)).toEqual(["cdn", "vps"]);
+  expect(
+    rankHosts(infra, "build", [
+      parseProbe("vps", null),
+      parseProbe("cdn", "0.1 0.1 0.1"),
+    ]),
+  ).toEqual(["cdn"]);
+  expect(
+    rankHosts(infra, "build", [
+      parseProbe("vps", "0 0 0.95"),
+      parseProbe("cdn", "1 0.5 0.2"),
+    ]),
+  ).toEqual(["cdn"]);
+  expect(
+    rankHosts(
+      infra,
+      "build",
+      [parseProbe("vps", "1 0.1 0.1"), parseProbe("cdn", "1 0.1 0.1")],
+      ["sccache"],
+    ),
+  ).toEqual(["vps"]);
+});

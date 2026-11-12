@@ -11,12 +11,14 @@
 #   RG_HOST_<KEY>_<FIELD>=<value>            e.g. RG_HOST_PRD_SRV_ROOT=/data/rosegriffon
 # Adding a host: add a [hosts.<key>] table, then point a role at it. See docs/ARCHITECTURE.md.
 
-# Role -> host key. Roles are open: add one here and use it from services.toml.
+# Role -> host key, or an ordered list of interchangeable candidates. `ops place` ranks the live
+# candidates by load and availability; `--auto` (or RG_PLACE=auto) pins each verb to the best one.
+# Stateful roles (prod, storage) list a second host only once its state is replicated (ops migrate).
 [roles]
-build = "vps"   # image and Rust/WASM builds (12 cores, sccache)
-storage = "vps" # game install, Steam home, archives, backups
-cdn = "cdn"     # static/derived assets, R2 sync origin
-prod = "prd"    # the compose stack (website, core, cron, model-serve, nginx)
+build = ["vps", "cdn"]   # image and Rust/WASM builds (sccache on vps, 6 cores on cdn)
+storage = "vps"          # game install, Steam home, archives, backups
+cdn = ["cdn", "vps"]     # static/derived assets, R2 sync origin (stateless: R2 is the source)
+prod = "prd"             # the compose stack (website, core, cron, model-serve, nginx)
 
 [hosts.vps]
 ssh = "vps"
