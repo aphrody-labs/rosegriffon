@@ -86,6 +86,8 @@ services:
       RG_MEDIA_ROOT: /var/lib/rg-core/media
       CDN_STATIC_ROOT: /data/cdn
       ACHILLEA_BACKUP_DIR: /var/lib/rg-core/backups/achillea
+      RANKED_STORAGE_DIR: /var/lib/rg-core/ranked
+      RG_CRON_SHARED_ROOT: /var/lib/rg-core/shared
     volumes:
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/state:/var/lib/rg-core
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/cdn/static:/data/cdn
@@ -109,6 +111,8 @@ services:
       RG_MEDIA_ROOT: /var/lib/rg-core/media
       CDN_STATIC_ROOT: /data/cdn
       ACHILLEA_BACKUP_DIR: /var/lib/rg-core/backups/achillea
+      RANKED_STORAGE_DIR: /var/lib/rg-core/ranked
+      RG_CRON_SHARED_ROOT: /var/lib/rg-core/shared
       NIE_MODEL_SERVE_URL: http://model-serve:8792
     volumes:
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/state:/var/lib/rg-core

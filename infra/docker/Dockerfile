@@ -95,7 +95,12 @@ COPY --chown=bun:bun packages ./packages
 ARG CHROMIUM_VERSION=156.0.8078.79-r0
 ARG FONT_NOTO_VERSION=2026.11.01-r0
 RUN apk add --no-cache chromium=${CHROMIUM_VERSION} font-noto=${FONT_NOTO_VERSION} \
-    && mkdir -p /var/lib/rg-core /data/cdn && chown bun:bun /var/lib/rg-core /data/cdn
+    && mkdir -p /var/lib/rg-core /data/cdn && chown bun:bun /var/lib/rg-core /data/cdn \
+    && ln -sfn ../../packages/rg-config node_modules/@rosegriffon/config
+# Bun takes the tsconfig of the working directory, not of the entry file: without this, the
+# Colyseus @type field decorators get TC39 semantics and crash. BUN_OPTIONS reaches the bot
+# child processes too. The link restores @rosegriffon/config (a devDependency) for `extends`.
+ENV BUN_OPTIONS=--tsconfig-override=/app/apps/rg-bot/tsconfig.json
 ENV BUN_CHROME_PATH=/usr/bin/chromium
 
 FROM server-base AS core
@@ -157,4 +162,4 @@ EXPOSE 8792
 HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=5 \
     CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8792/health"]
 # Shell form so the env defaults above (overridable per service) reach the CLI flags.
-CMD ["sh", "-c", "exec aphrody-nie-model-serve --game-dir \"$NIE_GAME_DIR\" --port \"$NIE_MODEL_SERVE_PORT\" --cache-dir \"$NIE_MODEL_CACHE_DIR\" --threads \"$NIE_MODEL_SERVE_THREADS\" $NIE_MODEL_SERVE_ARGS"]
+CMD ["sh", "-c", "exec aphrody-nie-model-serve --game-dir \"${NIE_GAME_DIR:-/data/game}\" --port \"${NIE_MODEL_SERVE_PORT:-8792}\" --cache-dir \"${NIE_MODEL_CACHE_DIR:-/var/cache/nie-model-serve}\" --threads \"${NIE_MODEL_SERVE_THREADS:-8}\" $NIE_MODEL_SERVE_ARGS"]
