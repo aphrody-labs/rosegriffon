@@ -35,7 +35,10 @@ mod noop {
 
     #[test]
     fn the_device_gets_the_limits_the_policy_resolves() {
-        let adapter = Limits { max_texture_dimension_2d: 4096, ..Limits::default() };
+        let adapter = Limits {
+            max_texture_dimension_2d: 4096,
+            ..Limits::default()
+        };
         let context = noop_context(noop_with(adapter, Features::all()));
         assert_eq!(context.device().limits().max_texture_dimension_2d, 4096);
         assert_eq!(context.report().backend, "noop");
@@ -51,7 +54,7 @@ mod noop {
         match GpuContext::new_blocking(&options) {
             Err(GpuError::MissingFeatures { missing, .. }) => {
                 assert!(missing.contains("CLEAR_TEXTURE"), "{missing}")
-            },
+            }
             other => panic!("expected MissingFeatures, got {:?}", other.map(|_| ())),
         }
     }
@@ -61,8 +64,18 @@ mod noop {
         let mut options = noop_options(noop_with(Limits::default(), Features::CLEAR_TEXTURE));
         options.optional_features = Features::CLEAR_TEXTURE | Features::PIPELINE_CACHE;
         let context = GpuContext::new_blocking(&options).expect("noop opens");
-        assert!(context.device().features().contains(Features::CLEAR_TEXTURE));
-        assert!(!context.device().features().contains(Features::PIPELINE_CACHE));
+        assert!(
+            context
+                .device()
+                .features()
+                .contains(Features::CLEAR_TEXTURE)
+        );
+        assert!(
+            !context
+                .device()
+                .features()
+                .contains(Features::PIPELINE_CACHE)
+        );
     }
 
     #[test]
@@ -84,7 +97,10 @@ mod noop {
         let _ = context.device().poll(wgpu::PollType::Poll);
         assert_eq!(context.error_count(), 1);
         let errors = context.take_errors();
-        assert!(matches!(errors.as_slice(), [GpuError::Validation(_)]), "{errors:?}");
+        assert!(
+            matches!(errors.as_slice(), [GpuError::Validation(_)]),
+            "{errors:?}"
+        );
         assert!(context.take_errors().is_empty(), "taking drains the log");
     }
 
@@ -93,7 +109,11 @@ mod noop {
         let context = noop_context(NoopOptions::default());
         let result = context.validated_blocking(|| invalid_buffer(&context));
         assert!(matches!(result, Err(GpuError::Validation(_))), "{result:?}");
-        assert_eq!(context.error_count(), 0, "a captured error does not reach the handler");
+        assert_eq!(
+            context.error_count(),
+            0,
+            "a captured error does not reach the handler"
+        );
         assert!(context.validated_blocking(|| ()).is_ok());
     }
 
@@ -111,17 +131,27 @@ mod noop {
         }
         let loss = context.lost().expect("the device-lost callback ran");
         assert_eq!(loss.reason, "Destroyed");
-        assert!(matches!(context.ensure_alive(), Err(GpuError::DeviceLost { .. })));
+        assert!(matches!(
+            context.ensure_alive(),
+            Err(GpuError::DeviceLost { .. })
+        ));
     }
 
     #[test]
     fn render_targets_refuse_what_the_device_cannot_hold() {
-        let adapter = Limits { max_texture_dimension_2d: 1024, ..Limits::default() };
+        let adapter = Limits {
+            max_texture_dimension_2d: 1024,
+            ..Limits::default()
+        };
         let context = noop_context(noop_with(adapter, Features::all()));
         match RenderTarget::new(context.device(), "too wide", 1025, 10) {
             Err(error) => assert_eq!(
                 error,
-                GpuError::SurfaceTooLarge { width: 1025, height: 10, limit: 1024 }
+                GpuError::SurfaceTooLarge {
+                    width: 1025,
+                    height: 10,
+                    limit: 1024
+                }
             ),
             Ok(_) => panic!("a texture wider than the limit must be refused"),
         }
@@ -134,7 +164,10 @@ mod noop {
 
     #[test]
     fn the_readback_buffer_must_fit_the_buffer_limit() {
-        let adapter = Limits { max_buffer_size: 1 << 20, ..Limits::default() };
+        let adapter = Limits {
+            max_buffer_size: 1 << 20,
+            ..Limits::default()
+        };
         let mut options = noop_options(noop_with(adapter, Features::all()));
         options.limits = LimitsPolicy::Default;
         let context = GpuContext::new_blocking(&options).expect("noop opens");
@@ -149,14 +182,18 @@ mod noop {
     fn the_pool_reuses_a_target_of_the_same_size_and_bounds_idle_ones() {
         let context = noop_context(NoopOptions::default());
         let mut pool = TargetPool::new(2);
-        let first = pool.take(context.device(), "page", 64, 64).expect("allocates");
+        let first = pool
+            .take(context.device(), "page", 64, 64)
+            .expect("allocates");
         pool.put(first);
         assert_eq!(pool.len(), 1);
         let again = pool.take(context.device(), "page", 64, 64).expect("reuses");
         assert_eq!(pool.len(), 0, "taking removes it from the pool");
         pool.put(again);
         for width in [32, 48, 96] {
-            let target = pool.take(context.device(), "page", width, 8).expect("allocates");
+            let target = pool
+                .take(context.device(), "page", width, 8)
+                .expect("allocates");
             pool.put(target);
         }
         assert_eq!(pool.len(), 2, "idle targets are bounded by the capacity");
@@ -170,7 +207,9 @@ mod noop {
         let json = serde_json::to_value(context.report()).expect("serialises");
         assert_eq!(json["backend"], "noop");
         assert!(
-            json["features"].as_array().is_some_and(|f| f.iter().any(|n| n == "CLEAR_TEXTURE")),
+            json["features"]
+                .as_array()
+                .is_some_and(|f| f.iter().any(|n| n == "CLEAR_TEXTURE")),
             "{json}"
         );
     }
@@ -211,9 +250,11 @@ mod software {
             )
             .expect("renders");
         let mut encoder =
-            context.device().create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("test readback"),
-            });
+            context
+                .device()
+                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                    label: Some("test readback"),
+                });
         target.copy_to_readback(&mut encoder);
         let submission = context.queue().submit([encoder.finish()]);
         let pixels = target
@@ -236,10 +277,13 @@ mod software {
 
     #[test]
     fn a_software_adapter_clears_and_reads_padded_rows_without_vello() {
-        let Some(context) = software_context() else { return };
+        let Some(context) = software_context() else {
+            return;
+        };
         let target = RenderTarget::new(context.device(), "clear readback", 17, 3).unwrap();
-        let mut encoder =
-            context.device().create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
+        let mut encoder = context
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
         {
             let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("clear readback"),
@@ -260,7 +304,9 @@ mod software {
         }
         target.copy_to_readback(&mut encoder);
         let submission = context.queue().submit([encoder.finish()]);
-        let pixels = target.read_blocking(&context, submission, Duration::from_secs(60)).unwrap();
+        let pixels = target
+            .read_blocking(&context, submission, Duration::from_secs(60))
+            .unwrap();
         assert_eq!(pixels, [255, 0, 0, 255].repeat(17 * 3));
         assert_eq!(context.error_count(), 0, "{:?}", context.take_errors());
         assert!(context.lost().is_none());
@@ -268,10 +314,16 @@ mod software {
 
     #[test]
     fn a_software_adapter_renders_and_reads_back_a_scene() {
-        let Some(context) = software_context() else { return };
+        let Some(context) = software_context() else {
+            return;
+        };
         let (pixels, target) = render_square(&context, 64, 64);
         assert_eq!(pixels.len(), 64 * 64 * 4);
-        assert_eq!(pixel(&pixels, 64, 32, 32), [255, 0, 0, 255], "inside the square");
+        assert_eq!(
+            pixel(&pixels, 64, 32, 32),
+            [255, 0, 0, 255],
+            "inside the square"
+        );
         assert_eq!(pixel(&pixels, 64, 2, 2), [0, 0, 0, 0], "outside the square");
         assert_eq!(target.size(), (64, 64));
         assert_eq!(context.error_count(), 0, "{:?}", context.take_errors());
@@ -279,22 +331,32 @@ mod software {
 
     #[test]
     fn rows_that_need_padding_come_back_intact() {
-        let Some(context) = software_context() else { return };
+        let Some(context) = software_context() else {
+            return;
+        };
         // 50 px = 200 bytes per row, padded to 256 in the readback buffer.
         let (pixels, target) = render_square(&context, 50, 37);
         assert_eq!(target.layout().padded_bytes_per_row, 256);
         assert_eq!(pixels.len(), 50 * 37 * 4);
         assert_eq!(pixel(&pixels, 50, 25, 18), [255, 0, 0, 255]);
-        assert_eq!(pixel(&pixels, 50, 49, 36), [0, 0, 0, 0], "the last pixel of the last row");
+        assert_eq!(
+            pixel(&pixels, 50, 49, 36),
+            [0, 0, 0, 0],
+            "the last pixel of the last row"
+        );
     }
 
     #[test]
     fn a_target_can_be_reused_for_the_next_page() {
-        let Some(context) = software_context() else { return };
+        let Some(context) = software_context() else {
+            return;
+        };
         let mut pool = TargetPool::new(1);
         let (first, target) = render_square(&context, 32, 32);
         pool.put(target);
-        let target = pool.take(context.device(), "again", 32, 32).expect("reuses");
+        let target = pool
+            .take(context.device(), "again", 32, 32)
+            .expect("reuses");
         assert_eq!(target.size(), (32, 32));
         assert_eq!(first.len(), 32 * 32 * 4);
     }
@@ -305,13 +367,17 @@ mod software {
             std::env::temp_dir().join(format!("shenron-gpu-cache-{}", std::process::id()));
         let mut options = crate::testing::software_options().for_vello();
         options.pipeline_cache_dir = Some(directory.clone());
-        let Ok(context) = GpuContext::new_blocking(&options) else { return };
+        let Ok(context) = GpuContext::new_blocking(&options) else {
+            return;
+        };
         if !context.report().is_software || context.pipeline_cache().is_none() {
             return; // the adapter has no pipeline cache: nothing to persist
         }
         VelloBackend::new(&context, AaSupport::area_only()).expect("Vello builds a renderer");
         context.save_pipeline_cache().expect("saves");
-        let saved = std::fs::read_dir(&directory).map(|entries| entries.count()).unwrap_or(0);
+        let saved = std::fs::read_dir(&directory)
+            .map(|entries| entries.count())
+            .unwrap_or(0);
         assert_eq!(saved, 1, "one cache file per adapter");
         // A second context loads it without error.
         let again = GpuContext::new_blocking(&options).expect("reopens");

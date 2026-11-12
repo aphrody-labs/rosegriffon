@@ -36,12 +36,17 @@ pub struct EmmMaterial {
 
 impl EmmMaterial {
     pub fn parameter(&self, name: &str) -> Option<f32> {
-        self.parameters.iter().find(|p| p.name == name).map(|p| p.value)
+        self.parameters
+            .iter()
+            .find(|p| p.name == name)
+            .map(|p| p.value)
     }
 
     /// The `.dyt.emb` ramp line colouring this material (`MatScale1X`).
     pub fn dye_line(&self) -> Option<u32> {
-        self.parameter("MatScale1X").filter(|v| v.is_finite() && *v >= 0.0).map(|v| v as u32)
+        self.parameter("MatScale1X")
+            .filter(|v| v.is_finite() && *v >= 0.0)
+            .map(|v| v as u32)
     }
 }
 
@@ -52,9 +57,10 @@ pub struct EmmFile {
 }
 
 fn fixed_string(buffer: &[u8], at: usize) -> Result<String> {
-    let raw = buffer
-        .get(at..at + 32)
-        .ok_or(ReError::BufferTooSmall { required: at + 32, available: buffer.len() })?;
+    let raw = buffer.get(at..at + 32).ok_or(ReError::BufferTooSmall {
+        required: at + 32,
+        available: buffer.len(),
+    })?;
     let end = raw.iter().position(|&b| b == 0).unwrap_or(32);
     Ok(String::from_utf8_lossy(&raw[..end]).into_owned())
 }
@@ -76,7 +82,10 @@ impl EmmFile {
 
     pub fn parse(buffer: &[u8]) -> Result<Self> {
         if buffer.len() < 0x10 {
-            return Err(ReError::BufferTooSmall { required: 0x10, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 0x10,
+                available: buffer.len(),
+            });
         }
         if &buffer[0..4] != EMM_MAGIC {
             return Err(ReError::InvalidMagic {
@@ -105,7 +114,11 @@ impl EmmFile {
                     } else {
                         u32_at(buffer, p + 36)? as f32
                     };
-                    Ok(EmmParameter { name: fixed_string(buffer, p)?, kind, value })
+                    Ok(EmmParameter {
+                        name: fixed_string(buffer, p)?,
+                        kind,
+                        value,
+                    })
                 })
                 .collect::<Result<_>>()?;
             materials.push(EmmMaterial {
@@ -157,7 +170,11 @@ mod tests {
     #[test]
     fn parses_materials_and_dye_line() {
         let bytes = encode_emm(&[
-            ("skin_bust", "TOON_UNIF_STAIN3d2_XVM_DFD", &[("MatScale1X", 3.0), ("MatCol2G", 0.25)]),
+            (
+                "skin_bust",
+                "TOON_UNIF_STAIN3d2_XVM_DFD",
+                &[("MatScale1X", 3.0), ("MatCol2G", 0.25)],
+            ),
             ("armor_A", "TOON_UNIF_STAIN2_DFD", &[]),
         ]);
         let emm = EmmFile::parse(&bytes).unwrap();
@@ -179,9 +196,15 @@ mod tests {
     /// `SHENRON_REAL_EMM=<path to a game .emm>` checks a real material file.
     #[test]
     fn parses_real_materials_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_EMM") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_EMM") else {
+            return;
+        };
         let emm = EmmFile::parse(&std::fs::read(path).unwrap()).expect("parse real EMM");
         assert!(!emm.is_empty());
-        assert!(emm.materials.iter().all(|m| !m.name.is_empty() && !m.shader_program.is_empty()));
+        assert!(
+            emm.materials
+                .iter()
+                .all(|m| !m.name.is_empty() && !m.shader_program.is_empty())
+        );
     }
 }

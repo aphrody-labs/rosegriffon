@@ -74,7 +74,10 @@ fn i32_at(buffer: &[u8], offset: usize) -> Result<i32> {
 impl PupFile {
     pub fn parse(buffer: &[u8]) -> Result<Self> {
         if buffer.len() < 16 {
-            return Err(ReError::BufferTooSmall { required: 16, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 16,
+                available: buffer.len(),
+            });
         }
         if &buffer[0..4] != PUP_MAGIC {
             return Err(ReError::InvalidMagic {
@@ -196,7 +199,9 @@ mod tests {
     /// `SHENRON_REAL_PUP=<path to powerup_parameter.pup>` checks the real 77-entry file.
     #[test]
     fn parses_real_powerups_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_PUP") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_PUP") else {
+            return;
+        };
         let pup = PupFile::parse(&std::fs::read(path).unwrap()).expect("parse real PUP");
         assert_eq!(pup.entries.len(), 77);
         assert!(pup.entries.iter().all(|e| e.duration.is_finite()));

@@ -14,6 +14,7 @@
     "target": "ES6",
     "lib": ["ES6", "DOM"],
     "moduleResolution": "bundler",
+    "jsx": "react-jsx",
     "paths": {
       "@iecode-web/*": ["../*"]
     }

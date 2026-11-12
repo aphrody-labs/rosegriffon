@@ -34,6 +34,8 @@ aphrody-nie-pe-inspect = { path = "../aphrody-nie-pe-inspect", optional = true }
 aphrody-nie-video = { path = "../aphrody-nie-video", optional = true }
 png = { workspace = true, optional = true }
 clap = { workspace = true, optional = true, features = ["derive", "color", "env"] }
+aphrody-nie-app = { path = "../aphrody-nie-app", version = "1.4.8" }
+aphrody-nie-runtime = { path = "../aphrody-nie-runtime", version = "1.4.8" }
 
 [[bin]]
 name = "aphrody-nie-headless"

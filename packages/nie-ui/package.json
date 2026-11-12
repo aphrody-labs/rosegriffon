@@ -12,7 +12,8 @@
   "exports": {
     "./ui": "./src/ui/ui.ts",
     "./studio": "./src/studio/index.ts",
-    "./styles/main.less": "./src/styles/main.less"
+    "./styles/main.less": "./src/styles/main.less",
+    "./design-system": "./src/ui/game-design-system.tsx"
   },
   "dependencies": {
     "@aphrody/filmcraft": "workspace:*",

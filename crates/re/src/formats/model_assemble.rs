@@ -70,7 +70,12 @@ impl AssembledCharacterModel {
 
         let primitives = Self::assemble_primitives(emd, textures.len());
 
-        Self { name: character_name.to_string(), primitives, textures, skeleton: esk.cloned() }
+        Self {
+            name: character_name.to_string(),
+            primitives,
+            textures,
+            skeleton: esk.cloned(),
+        }
     }
 
     /// Assemble geometry using an existing decoded texture bank, without cloning its pixels.
@@ -345,8 +350,9 @@ impl AssembledCharacterModel {
         }
 
         // Build nodes referencing each mesh
-        let nodes: Vec<_> =
-            (0..meshes.len()).map(|i| json!({ "name": format!("Node_{i}"), "mesh": i })).collect();
+        let nodes: Vec<_> = (0..meshes.len())
+            .map(|i| json!({ "name": format!("Node_{i}"), "mesh": i }))
+            .collect();
         let scene_nodes: Vec<_> = (0..meshes.len()).collect();
 
         // Build glTF JSON object
@@ -409,16 +415,26 @@ impl AssembledCharacterModel {
 }
 
 fn stage_transform_error(details: &str) -> ReError {
-    ReError::ParseError { context: "nsk rigid placement", details: details.into() }
+    ReError::ParseError {
+        context: "nsk rigid placement",
+        details: details.into(),
+    }
 }
 
 fn rotate_stage_vector(vector: [f32; 3], quaternion: [f32; 4]) -> [f32; 3] {
-    let length = quaternion.iter().map(|value| value * value).sum::<f32>().sqrt();
+    let length = quaternion
+        .iter()
+        .map(|value| value * value)
+        .sum::<f32>()
+        .sqrt();
     let [x, y, z, w] = quaternion.map(|value| value / length);
     let [vx, vy, vz] = vector;
     let cross = [y * vz - z * vy, z * vx - x * vz, x * vy - y * vx];
-    let second =
-        [y * cross[2] - z * cross[1], z * cross[0] - x * cross[2], x * cross[1] - y * cross[0]];
+    let second = [
+        y * cross[2] - z * cross[1],
+        z * cross[0] - x * cross[2],
+        x * cross[1] - y * cross[0],
+    ];
     std::array::from_fn(|axis| vector[axis] + 2.0 * (w * cross[axis] + second[axis]))
 }
 
@@ -486,7 +502,9 @@ mod tests {
             assert!((actual - expected).abs() < 1e-5);
         }
         let mut weighted = emd.clone();
-        weighted.parts[0].meshes[0].submeshes[0].bone_names.push("rigid".into());
+        weighted.parts[0].meshes[0].submeshes[0]
+            .bone_names
+            .push("rigid".into());
         assert_eq!(
             AssembledCharacterModel::assemble_nsk_primitives(&weighted, &esk, 0).unwrap()[0]
                 .positions[0],
@@ -503,7 +521,9 @@ mod tests {
     /// A private real BFtok01_01.nsk proves rigid models were previously stacked at origin.
     #[test]
     fn rigid_bftok_fixture_uses_original_crystal_placement_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_BFTOK_NSK") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_BFTOK_NSK") else {
+            return;
+        };
         let nsk = crate::formats::nsk::NskFile::parse(&std::fs::read(path).unwrap()).unwrap();
         assert!(nsk.model.submeshes().all(|sub| sub.bone_names.is_empty()));
         let part = nsk
@@ -551,7 +571,10 @@ mod tests {
         assert_eq!(geometry.len(), assembled.primitives.len());
         assert_eq!(geometry[0].positions, assembled.primitives[0].positions);
         assert_eq!(geometry[0].uv, assembled.primitives[0].uv);
-        assert_eq!(geometry[0].texture_index, assembled.primitives[0].texture_index);
+        assert_eq!(
+            geometry[0].texture_index,
+            assembled.primitives[0].texture_index
+        );
 
         let glb = assembled.to_glb().expect("export GLB");
         assert!(glb.len() > 64);

@@ -17,9 +17,13 @@ pub mod save_runner;
 #[cfg(feature = "host")]
 pub use memory_dump::{MemoryDumpOptions, ProcessMemoryMap, execute_memory_dump};
 #[cfg(feature = "host")]
-pub use menu_capture::{CaptureSequenceManifest, GameScreen, MenuCaptureOptions, capture_all_menus};
+pub use menu_capture::{
+    CaptureSequenceManifest, GameScreen, MenuCaptureOptions, capture_all_menus,
+};
 #[cfg(feature = "host")]
-pub use save_runner::{SaveEditOptions, SaveEditReport, create_mock_save_container, execute_save_edit};
+pub use save_runner::{
+    SaveEditOptions, SaveEditReport, create_mock_save_container, execute_save_edit,
+};
 
 /// Largest byte buffer accepted by the interactive detailed detector.
 pub const MAX_INSPECTION_BYTES: usize = 128 * 1024 * 1024;
@@ -191,7 +195,8 @@ mod tests {
     #[cfg(feature = "host")]
     #[test]
     fn test_menu_capture_execution() {
-        let temp_dir = std::env::temp_dir().join(format!("nie_test_capture_{}", std::process::id()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("nie_test_capture_{}", std::process::id()));
         let _ = std::fs::create_dir_all(&temp_dir);
         let out_dir = temp_dir.join("frames");
 

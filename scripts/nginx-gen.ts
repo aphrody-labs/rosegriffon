@@ -190,18 +190,57 @@ ${proxy(api)}
         default_type text/plain;
         return 200 "User-agent: *\\nDisallow: /upload\\nAllow: /\\n";
     }
-${gone("# NIE and the IECode game asset origin were retired on 2026-09-25.", "^~ /dx11/")}
-${gone("# NIE decoded texture/container API is unavailable until the service is redeployed.", "^~ /g4tx/")}
-    # Raw/source game bytes are never public; NIE is retired and these stay closed.
+    # VFS & Game Asset Reverse Proxy to nie-model-serve (Next.js & CDN optimized)
+    location ^~ /dx11/ {
+        proxy_pass http://127.0.0.1:8810;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        expires 365d;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Cross-Origin-Resource-Policy "cross-origin" always;
+        etag on;
+    }
+    location ^~ /vfs/ {
+        proxy_pass http://127.0.0.1:8810;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        expires 1h;
+        add_header Cache-Control "public, max-age=3600, stale-while-revalidate=86400" always;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Cross-Origin-Resource-Policy "cross-origin" always;
+    }
+    location ^~ /export/ {
+        proxy_pass http://127.0.0.1:8810;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000" always;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Cross-Origin-Resource-Policy "cross-origin" always;
+    }
+    location ~* ^/(model|model-full)/ {
+        proxy_pass http://127.0.0.1:8810;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        expires 365d;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Cross-Origin-Resource-Policy "cross-origin" always;
+        etag on;
+    }
+    location ~* ^/(${nieTexture})/ {
+        proxy_pass http://127.0.0.1:8810;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000" always;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Cross-Origin-Resource-Policy "cross-origin" always;
+    }
+    # Raw proprietary game depot stays non-public
     location ~ ^/(raw|depot)(/|$) {
         return 404;
-    }
-${gone("# VFS tree API is unavailable until NIE is redeployed.", "~ ^/vfs(/|$)")}
-${gone("# Converted game exports are unavailable until NIE is redeployed.", "~ ^/export/")}
-${gone("# Decoded game data, models and menu renders are unavailable until NIE returns.", `~ ^/(${nieTexture})/`)}
-${gone("# Assembled 3D models and previews are unavailable until NIE returns.", "~ ^/model/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+\\.(glb|png)$")}
-    location ~ ^/(menu-tree|story-scene)(/|\\.json$|$) {
-        return 410;
     }
     location / {
 ${proxy(api)}

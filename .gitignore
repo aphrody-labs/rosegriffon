@@ -37,7 +37,8 @@ __pycache__/
 .fleet-tick
 
 # Sorties locales des exécutions
-/var/
+var/
+**/var/
 
 # Save editor binaries and upstream checkouts
 tools/ie/save-editor/*.exe
@@ -46,4 +47,10 @@ tools/ie/save-editor/extracted/
 tools/ie/save-editor/upstream-src/
 tools/ie/save-editor/alsobeta-src/
 tools/ie/save-editor/rsrc-dump/
+
+# Temporary memory dumps and test save artifacts
+*-USERDATALIVE
+*.dmp
+*.dump
+nie_memory_dump_*.bin
 

@@ -40,7 +40,10 @@ impl CpkArchive {
     /// Parses a CPK archive from an in-memory buffer.
     pub fn parse(buffer: &[u8]) -> Result<Self> {
         if buffer.len() < 16 {
-            return Err(ReError::BufferTooSmall { required: 16, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 16,
+                available: buffer.len(),
+            });
         }
 
         if &buffer[0..4] != CPK_MAGIC {
@@ -158,10 +161,10 @@ impl CpkArchive {
                             }
                         }
                     }
-                },
+                }
                 Err(e) => {
                     println!("hdr_table parse error: {:?}", e);
-                },
+                }
             }
         }
 
@@ -180,22 +183,32 @@ impl CpkArchive {
             entries.push(entry);
         }
 
-        Ok(Self { entries, has_utf_table, file_map })
+        Ok(Self {
+            entries,
+            has_utf_table,
+            file_map,
+        })
     }
 
     /// Extract a file slice zero-copy (if uncompressed) by its internal filename.
     pub fn extract_slice<'a>(&self, buffer: &'a [u8], file_name: &str) -> Result<&'a [u8]> {
-        let &idx = self.file_map.get(file_name).ok_or_else(|| ReError::ParseError {
-            context: "cpk_extract_slice",
-            details: format!("File `{file_name}` not found in archive"),
-        })?;
+        let &idx = self
+            .file_map
+            .get(file_name)
+            .ok_or_else(|| ReError::ParseError {
+                context: "cpk_extract_slice",
+                details: format!("File `{file_name}` not found in archive"),
+            })?;
 
         let entry = &self.entries[idx];
         let start = entry.file_offset as usize;
         let end = start + (entry.file_size as usize);
 
         if end > buffer.len() {
-            return Err(ReError::BufferTooSmall { required: end, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: end,
+                available: buffer.len(),
+            });
         }
 
         let slice = &buffer[start..end];
@@ -213,17 +226,23 @@ impl CpkArchive {
 
     /// Extract a file by its internal path/name, decompressing CRILAYLA if required.
     pub fn extract(&self, buffer: &[u8], file_name: &str) -> Result<Vec<u8>> {
-        let &idx = self.file_map.get(file_name).ok_or_else(|| ReError::ParseError {
-            context: "cpk_extract",
-            details: format!("File `{file_name}` not found in archive"),
-        })?;
+        let &idx = self
+            .file_map
+            .get(file_name)
+            .ok_or_else(|| ReError::ParseError {
+                context: "cpk_extract",
+                details: format!("File `{file_name}` not found in archive"),
+            })?;
 
         let entry = &self.entries[idx];
         let start = entry.file_offset as usize;
         let end = start + (entry.file_size as usize);
 
         if end > buffer.len() {
-            return Err(ReError::BufferTooSmall { required: end, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: end,
+                available: buffer.len(),
+            });
         }
 
         let slice = &buffer[start..end];
@@ -345,7 +364,11 @@ fn parse_utf_table(data: &[u8]) -> Result<UtfParsedTable> {
     let row_length = u16::from_be_bytes(data[24..26].try_into().unwrap()) as usize;
     let num_rows = u32::from_be_bytes(data[26..30].try_into().unwrap()) as usize;
 
-    let strings_pool = if strings_offset < data.len() { &data[strings_offset..] } else { &[] };
+    let strings_pool = if strings_offset < data.len() {
+        &data[strings_offset..]
+    } else {
+        &[]
+    };
 
     let mut cursor = 30;
     let mut columns = Vec::with_capacity(num_columns);
@@ -422,27 +445,36 @@ fn read_utf_value(slice: &[u8], type_id: u8, strings_pool: &[u8]) -> (String, us
         2 => {
             // u16
             if slice.len() >= 2 {
-                (u16::from_be_bytes(slice[0..2].try_into().unwrap()).to_string(), 2)
+                (
+                    u16::from_be_bytes(slice[0..2].try_into().unwrap()).to_string(),
+                    2,
+                )
             } else {
                 ("0".into(), slice.len())
             }
-        },
+        }
         4 => {
             // u32
             if slice.len() >= 4 {
-                (u32::from_be_bytes(slice[0..4].try_into().unwrap()).to_string(), 4)
+                (
+                    u32::from_be_bytes(slice[0..4].try_into().unwrap()).to_string(),
+                    4,
+                )
             } else {
                 ("0".into(), slice.len())
             }
-        },
+        }
         6 => {
             // u64
             if slice.len() >= 8 {
-                (u64::from_be_bytes(slice[0..8].try_into().unwrap()).to_string(), 8)
+                (
+                    u64::from_be_bytes(slice[0..8].try_into().unwrap()).to_string(),
+                    8,
+                )
             } else {
                 ("0".into(), slice.len())
             }
-        },
+        }
         0x0A => {
             // String (u32 offset into string pool)
             if slice.len() >= 4 {
@@ -451,15 +483,15 @@ fn read_utf_value(slice: &[u8], type_id: u8, strings_pool: &[u8]) -> (String, us
             } else {
                 (String::new(), slice.len())
             }
-        },
+        }
         0x0B => {
             // Data blob (u32 offset + u32 size)
             (String::new(), 8.min(slice.len()))
-        },
+        }
         _ => {
             // Fallback 4 bytes
             ("0".into(), 4.min(slice.len()))
-        },
+        }
     }
 }
 
@@ -467,7 +499,9 @@ fn find_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> {
     if needle.is_empty() || haystack.len() < needle.len() {
         return None;
     }
-    haystack.windows(needle.len()).position(|window| window == needle)
+    haystack
+        .windows(needle.len())
+        .position(|window| window == needle)
 }
 
 fn build_mock_utf_table(table_name: &str, rows: &[HashMap<String, String>]) -> Vec<u8> {
@@ -558,13 +592,19 @@ mod tests {
         assert!(archive.has_utf_table());
         assert_eq!(archive.entries.len(), 2);
 
-        let extracted1 = archive.extract(&mock_cpk, "skill_goku.cus").expect("Extract file1");
+        let extracted1 = archive
+            .extract(&mock_cpk, "skill_goku.cus")
+            .expect("Extract file1");
         assert_eq!(extracted1, file1_data);
 
-        let extracted2 = archive.extract(&mock_cpk, "skill_vegeta.bac").expect("Extract file2");
+        let extracted2 = archive
+            .extract(&mock_cpk, "skill_vegeta.bac")
+            .expect("Extract file2");
         assert_eq!(extracted2, file2_data);
 
-        let slice1 = archive.extract_slice(&mock_cpk, "skill_goku.cus").expect("Zero copy slice");
+        let slice1 = archive
+            .extract_slice(&mock_cpk, "skill_goku.cus")
+            .expect("Zero copy slice");
         assert_eq!(slice1, file1_data);
     }
 }

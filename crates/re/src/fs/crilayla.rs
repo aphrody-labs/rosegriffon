@@ -11,7 +11,10 @@ pub const CRILAYLA_MAGIC: &[u8; 8] = b"CRILAYLA";
 /// Decompresses a CRILAYLA-compressed buffer with standard 16-byte header into raw uncompressed bytes.
 pub fn decompress_crilayla(input: &[u8]) -> Result<Vec<u8>> {
     if input.len() < 16 {
-        return Err(ReError::BufferTooSmall { required: 16, available: input.len() });
+        return Err(ReError::BufferTooSmall {
+            required: 16,
+            available: input.len(),
+        });
     }
 
     if &input[0..8] != CRILAYLA_MAGIC {
@@ -45,7 +48,9 @@ pub fn decompress_crilayla(input: &[u8]) -> Result<Vec<u8>> {
      -> Result<u32> {
         while *bits_left < bits_needed {
             if *src_idx == 0 {
-                return Err(ReError::CrilaylaDecompress("Unexpected end of input stream".into()));
+                return Err(ReError::CrilaylaDecompress(
+                    "Unexpected end of input stream".into(),
+                ));
             }
             *src_idx -= 1;
             *bit_pool = (*bit_pool << 8) | (input[*src_idx] as u32);
@@ -99,7 +104,9 @@ pub fn decompress_crilayla(input: &[u8]) -> Result<Vec<u8>> {
 /// Decompresses a headerless CRILAYLA raw LZSS stream into a buffer of `expected_size` bytes.
 pub fn decompress_crilayla_raw(input: &[u8], expected_size: usize) -> Result<Vec<u8>> {
     if expected_size == 0 {
-        return Err(ReError::CrilaylaDecompress("Expected uncompressed size cannot be 0".into()));
+        return Err(ReError::CrilaylaDecompress(
+            "Expected uncompressed size cannot be 0".into(),
+        ));
     }
 
     let mut output = vec![0u8; expected_size];
@@ -115,7 +122,9 @@ pub fn decompress_crilayla_raw(input: &[u8], expected_size: usize) -> Result<Vec
      -> Result<u32> {
         while *bits_left < bits_needed {
             if *src_idx == 0 {
-                return Err(ReError::CrilaylaDecompress("Unexpected end of input stream".into()));
+                return Err(ReError::CrilaylaDecompress(
+                    "Unexpected end of input stream".into(),
+                ));
             }
             *src_idx -= 1;
             *bit_pool = (*bit_pool << 8) | (input[*src_idx] as u32);
@@ -167,15 +176,22 @@ pub fn decompress_crilayla_raw(input: &[u8], expected_size: usize) -> Result<Vec
 /// Helper compressor that emits a valid CRILAYLA compressed stream (using literal backwards LZSS).
 /// Useful for creating synthetic CRILAYLA payloads for unit tests and WASM verification.
 pub fn compress_crilayla_mock(uncompressed: &[u8]) -> Vec<u8> {
-    let uncompressed_size =
-        if uncompressed.len() >= 0x100 { uncompressed.len() - 0x100 } else { 0 };
+    let uncompressed_size = if uncompressed.len() >= 0x100 {
+        uncompressed.len() - 0x100
+    } else {
+        0
+    };
 
     let mut bitstream = Vec::new();
     let mut bit_pool = 0u64;
     let mut bits_in_pool = 0usize;
 
     // We write from uncompressed.len() down to 0x100
-    let payload = if uncompressed.len() > 0x100 { &uncompressed[0x100..] } else { &[] };
+    let payload = if uncompressed.len() > 0x100 {
+        &uncompressed[0x100..]
+    } else {
+        &[]
+    };
 
     // Pack bits backwards: each symbol is flag=1 (1 bit) + byte (8 bits) = 9 bits
     for &byte in payload.iter().rev() {

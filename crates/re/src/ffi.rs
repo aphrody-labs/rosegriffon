@@ -3,7 +3,10 @@
 //!
 //! Exposes the pure Rust reverse engineering engine to Bun (`bun:ffi`), C, and foreign runtimes.
 
-#![allow(clippy::missing_safety_doc, reason = "C ABI FFI boundary with explicit safety contracts")]
+#![allow(
+    clippy::missing_safety_doc,
+    reason = "C ABI FFI boundary with explicit safety contracts"
+)]
 
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
@@ -29,14 +32,18 @@ fn to_c_string<T: serde::Serialize>(val: &T) -> *mut c_char {
         },
         Err(e) => {
             let err_json = format!(r#"{{"error":"{}"}}"#, e);
-            CString::new(err_json).map(|c| c.into_raw()).unwrap_or(ptr::null_mut())
-        },
+            CString::new(err_json)
+                .map(|c| c.into_raw())
+                .unwrap_or(ptr::null_mut())
+        }
     }
 }
 
 fn err_to_c_string(msg: &str) -> *mut c_char {
     let err_json = format!(r#"{{"error":"{}"}}"#, msg.replace('"', "\\\""));
-    CString::new(err_json).map(|c| c.into_raw()).unwrap_or(ptr::null_mut())
+    CString::new(err_json)
+        .map(|c| c.into_raw())
+        .unwrap_or(ptr::null_mut())
 }
 
 /// Returns the C ABI version of the shenron-re library.
@@ -95,7 +102,12 @@ pub unsafe extern "C" fn shenron_re_triage_json(data: *const u8, len: usize) -> 
         is_sav: bool,
     }
 
-    to_c_string(&TriageReport { size_bytes: len, is_pe, is_cpk, is_sav })
+    to_c_string(&TriageReport {
+        size_bytes: len,
+        is_pe,
+        is_cpk,
+        is_sav,
+    })
 }
 
 /// Lists all files in a CPK archive as a JSON array of entries.
@@ -144,7 +156,7 @@ pub unsafe extern "C" fn shenron_re_cpk_extract(
                 *out_len = len;
             }
             raw_ptr
-        },
+        }
         Err(_) => ptr::null_mut(),
     }
 }

@@ -8,8 +8,14 @@ use wgpu::{Adapter, DeviceType, Features};
 use crate::options::GpuOptions;
 
 /// Name fragments of the software adapters (CPU rasterisers).
-const SOFTWARE_NAMES: [&str; 6] =
-    ["llvmpipe", "lavapipe", "swiftshader", "warp", "software", "basic render"];
+const SOFTWARE_NAMES: [&str; 6] = [
+    "llvmpipe",
+    "lavapipe",
+    "swiftshader",
+    "warp",
+    "software",
+    "basic render",
+];
 
 /// The limits that decide whether a page can be rendered and read back.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -50,7 +56,9 @@ pub fn is_software_adapter(name: &str, device_type: DeviceType) -> bool {
         return true;
     }
     let name = name.to_ascii_lowercase();
-    SOFTWARE_NAMES.iter().any(|fragment| name.contains(fragment))
+    SOFTWARE_NAMES
+        .iter()
+        .any(|fragment| name.contains(fragment))
 }
 
 fn device_type_name(device_type: DeviceType) -> &'static str {
@@ -64,7 +72,10 @@ fn device_type_name(device_type: DeviceType) -> &'static str {
 }
 
 fn feature_names(features: Features) -> Vec<String> {
-    features.iter_names().map(|(name, _)| name.to_owned()).collect()
+    features
+        .iter_names()
+        .map(|(name, _)| name.to_owned())
+        .collect()
 }
 
 impl AdapterReport {
@@ -108,7 +119,10 @@ impl AdapterReport {
         } else {
             format!(", driver {}", self.driver)
         };
-        format!("{} ({}, {}{driver})", self.name, self.backend, self.device_type)
+        format!(
+            "{} ({}, {}{driver})",
+            self.name, self.backend, self.device_type
+        )
     }
 }
 
@@ -151,10 +165,19 @@ mod tests {
     #[test]
     fn software_adapters_are_recognised_by_type_or_name() {
         assert!(is_software_adapter("anything", DeviceType::Cpu));
-        assert!(is_software_adapter("llvmpipe (LLVM 19.1.1, 256 bits)", DeviceType::Other));
-        assert!(is_software_adapter("Microsoft Basic Render Driver", DeviceType::Other));
+        assert!(is_software_adapter(
+            "llvmpipe (LLVM 19.1.1, 256 bits)",
+            DeviceType::Other
+        ));
+        assert!(is_software_adapter(
+            "Microsoft Basic Render Driver",
+            DeviceType::Other
+        ));
         assert!(is_software_adapter("lavapipe", DeviceType::Other));
-        assert!(!is_software_adapter("NVIDIA GeForce RTX 4070", DeviceType::DiscreteGpu));
+        assert!(!is_software_adapter(
+            "NVIDIA GeForce RTX 4070",
+            DeviceType::DiscreteGpu
+        ));
     }
 
     #[test]
@@ -187,7 +210,10 @@ mod tests {
             features: vec![],
             downlevel: vec![],
         };
-        assert_eq!(report.summary(), "NVIDIA GeForce RTX 4070 (vulkan, discrete, driver NVIDIA)");
+        assert_eq!(
+            report.summary(),
+            "NVIDIA GeForce RTX 4070 (vulkan, discrete, driver NVIDIA)"
+        );
         let json = serde_json::to_value(&report).expect("serialises");
         assert_eq!(json["limits"]["max_texture_dimension_2d"], 32768);
         assert_eq!(json["is_software"], false);

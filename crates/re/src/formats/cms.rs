@@ -40,7 +40,10 @@ pub struct CmsFile {
 impl CmsFile {
     pub fn parse(buffer: &[u8]) -> Result<Self> {
         if buffer.len() < 16 {
-            return Err(ReError::BufferTooSmall { required: 16, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 16,
+                available: buffer.len(),
+            });
         }
         if &buffer[0..4] != CMS_MAGIC {
             return Err(ReError::InvalidMagic {
@@ -67,7 +70,10 @@ impl CmsFile {
             }
             let name = c_string_at(buffer, at + NAME_OFFSET)?;
             let name = name.chars().take(NAME_SLOT - 1).collect();
-            entries.push(CmsEntry { id: u32_at(buffer, at)?, short_name: name });
+            entries.push(CmsEntry {
+                id: u32_at(buffer, at)?,
+                short_name: name,
+            });
         }
         Ok(Self { entries })
     }
@@ -124,15 +130,24 @@ mod tests {
     /// Goku present at id 0, and every code non-empty uppercase ASCII.
     #[test]
     fn parses_real_roster_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_CMS") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_CMS") else {
+            return;
+        };
         let cms = CmsFile::parse(&std::fs::read(path).unwrap()).expect("parse real CMS");
         assert_eq!(cms.entries.len(), 184);
         assert_eq!(cms.find("GOK").unwrap().id, 0);
         assert!(cms.find("VGT").is_some());
         for entry in &cms.entries {
-            assert!(!entry.short_name.is_empty(), "entry {} has an empty code", entry.id);
             assert!(
-                entry.short_name.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit()),
+                !entry.short_name.is_empty(),
+                "entry {} has an empty code",
+                entry.id
+            );
+            assert!(
+                entry
+                    .short_name
+                    .chars()
+                    .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit()),
                 "{:?} is not an uppercase code",
                 entry.short_name
             );

@@ -136,13 +136,9 @@ pub enum ProximityAction {
         label: String,
     },
     /// Launch a playable 11v11 / 5v5 match (`[E] / [Entree] Defi Football`).
-    StartBattle {
-        opponent_name: String,
-    },
+    StartBattle { opponent_name: String },
     /// Place or cycle a Kizuna Town monument (`[E] / [Entree] Amenager Kizuna`).
-    KizunaCustomize {
-        socket_id: u32,
-    },
+    KizunaCustomize { socket_id: u32 },
 }
 
 /// Result of executing [`OpenWorldState::interact`] on the active proximity prompt.
@@ -161,13 +157,9 @@ pub enum InteractionOutcome {
     /// Closed dialogue.
     DialogueEnded,
     /// Transitioned to another zone.
-    ZoneChanged {
-        zone: WorldZoneId,
-    },
+    ZoneChanged { zone: WorldZoneId },
     /// Triggered a playable soccer match against `opponent_name`.
-    LaunchMatch {
-        opponent_name: String,
-    },
+    LaunchMatch { opponent_name: String },
     /// Placed or upgraded a Kizuna Town prop.
     KizunaPropUpdated {
         socket_id: u32,
@@ -370,7 +362,8 @@ impl OpenWorldState {
                         element: ElementBadge::Fire,
                         ctrl: CharaMoveCtrl::at(Vec3::new(8.0, 0.0, 14.0)),
                         dialogue: vec![
-                            "Unmei ! La brise marine de Nagumohara est parfaite pour s'entrainer.".to_string(),
+                            "Unmei ! La brise marine de Nagumohara est parfaite pour s'entrainer."
+                                .to_string(),
                             "Montre-moi la tactique de ton club sur un match complet !".to_string(),
                         ],
                         triggers_battle: true,
@@ -384,7 +377,8 @@ impl OpenWorldState {
                         ctrl: CharaMoveCtrl::at(Vec3::new(-9.0, 0.0, 6.0)),
                         dialogue: vec![
                             "Le terrain cotier est libre. Mes frappes sont pretes.".to_string(),
-                            "Direction la gare si tu veux rejoindre la Ville Kizuna ou Raimon.".to_string(),
+                            "Direction la gare si tu veux rejoindre la Ville Kizuna ou Raimon."
+                                .to_string(),
                         ],
                         triggers_battle: false,
                         battle_team: None,
@@ -395,9 +389,7 @@ impl OpenWorldState {
                         role: "Milieu Nagumohara".to_string(),
                         element: ElementBadge::Forest,
                         ctrl: CharaMoveCtrl::at(Vec3::new(11.0, 0.0, -3.0)),
-                        dialogue: vec![
-                            "J'ai mis a jour nos formations sur Inacord.".to_string(),
-                        ],
+                        dialogue: vec!["J'ai mis a jour nos formations sur Inacord.".to_string()],
                         triggers_battle: false,
                         battle_team: None,
                     },
@@ -454,7 +446,8 @@ impl OpenWorldState {
                         element: ElementBadge::Mountain,
                         ctrl: CharaMoveCtrl::at(Vec3::new(0.0, 0.0, 15.0)),
                         dialogue: vec![
-                            "Bienvenue sur le terrain de la riviere ! Jouons au football !".to_string(),
+                            "Bienvenue sur le terrain de la riviere ! Jouons au football !"
+                                .to_string(),
                         ],
                         triggers_battle: true,
                         battle_team: Some("Raimon Legendes".to_string()),
@@ -495,21 +488,20 @@ impl OpenWorldState {
                 }];
             }
             WorldZoneId::KizunaTown => {
-                self.npcs = vec![
-                    WorldNpc {
-                        chara_id: 301,
-                        name: "Terumi Afuro (Aphrody)".to_string(),
-                        role: "Architecte Celeste".to_string(),
-                        element: ElementBadge::Wind,
-                        ctrl: CharaMoveCtrl::at(Vec3::new(0.0, 0.0, 8.0)),
-                        dialogue: vec![
-                            "La Ville Kizuna reflete l'harmonie de ton equipe.".to_string(),
-                            "Place des monuments sur les socles lumineux ou affronte Zeus !".to_string(),
-                        ],
-                        triggers_battle: true,
-                        battle_team: Some("College Zeus".to_string()),
-                    },
-                ];
+                self.npcs = vec![WorldNpc {
+                    chara_id: 301,
+                    name: "Terumi Afuro (Aphrody)".to_string(),
+                    role: "Architecte Celeste".to_string(),
+                    element: ElementBadge::Wind,
+                    ctrl: CharaMoveCtrl::at(Vec3::new(0.0, 0.0, 8.0)),
+                    dialogue: vec![
+                        "La Ville Kizuna reflete l'harmonie de ton equipe.".to_string(),
+                        "Place des monuments sur les socles lumineux ou affronte Zeus !"
+                            .to_string(),
+                    ],
+                    triggers_battle: true,
+                    battle_team: Some("College Zeus".to_string()),
+                }];
                 self.func_points = vec![
                     MapFuncPointConfig {
                         map_id,
@@ -548,7 +540,8 @@ impl OpenWorldState {
                     ctrl: CharaMoveCtrl::at(Vec3::new(0.0, 0.0, 16.0)),
                     dialogue: vec![
                         "Bienvenue au Stade National Football Frontier.".to_string(),
-                        "Voyons si la vision tactique de Nagumohara surpasse la Royal Academy !".to_string(),
+                        "Voyons si la vision tactique de Nagumohara surpasse la Royal Academy !"
+                            .to_string(),
                     ],
                     triggers_battle: true,
                     battle_team: Some("Royal Academy".to_string()),
@@ -616,13 +609,15 @@ impl OpenWorldState {
         let world_dx = move_x * cos_y + move_z * sin_y;
         let world_dz = -move_x * sin_y + move_z * cos_y;
 
-        self.player.apply_input(world_dx, world_dz, sprinting, TICK_DT);
+        self.player
+            .apply_input(world_dx, world_dz, sprinting, TICK_DT);
 
         // Clamp to zone bounds & navmesh height
         let (half_w, half_d) = self.zone.half_extents();
         self.player.position.x = self.player.position.x.clamp(-half_w, half_w);
         self.player.position.z = self.player.position.z.clamp(-half_d, half_d);
-        let ground_y = Self::sample_navmesh_height(navm, self.player.position.x, self.player.position.z);
+        let ground_y =
+            Self::sample_navmesh_height(navm, self.player.position.x, self.player.position.z);
         if self.player.position.y < ground_y {
             self.player.position.y = ground_y;
         }
@@ -685,13 +680,17 @@ impl OpenWorldState {
                             label: next.title_fr().to_string(),
                         })
                     }
-                    x if x == MapFuncKind::FastTravel as u32 => Some(ProximityAction::ZoneTransition {
-                        target_zone: WorldZoneId::Raimon,
-                        label: WorldZoneId::Raimon.title_fr().to_string(),
-                    }),
-                    x if x == MapFuncKind::SoccerBattle as u32 => Some(ProximityAction::StartBattle {
-                        opponent_name: "Selection Kyushu".to_string(),
-                    }),
+                    x if x == MapFuncKind::FastTravel as u32 => {
+                        Some(ProximityAction::ZoneTransition {
+                            target_zone: WorldZoneId::Raimon,
+                            label: WorldZoneId::Raimon.title_fr().to_string(),
+                        })
+                    }
+                    x if x == MapFuncKind::SoccerBattle as u32 => {
+                        Some(ProximityAction::StartBattle {
+                            opponent_name: "Selection Kyushu".to_string(),
+                        })
+                    }
                     x if x == MapFuncKind::KizunaSocket as u32 => {
                         Some(ProximityAction::KizunaCustomize {
                             socket_id: fp.point_id,
@@ -838,9 +837,15 @@ mod tests {
         ));
 
         let first = world.interact();
-        assert!(matches!(first, InteractionOutcome::Dialogue { line_index: 0, .. }));
+        assert!(matches!(
+            first,
+            InteractionOutcome::Dialogue { line_index: 0, .. }
+        ));
         let second = world.interact();
-        assert!(matches!(second, InteractionOutcome::Dialogue { line_index: 1, .. }));
+        assert!(matches!(
+            second,
+            InteractionOutcome::Dialogue { line_index: 1, .. }
+        ));
         let third = world.interact();
         assert!(matches!(third, InteractionOutcome::LaunchMatch { .. }));
     }

@@ -66,7 +66,7 @@ impl LimitsPolicy {
                 };
                 // Never ask for less than the WebGPU defaults, nor for more than the adapter has.
                 limits.or_better_values_from(&Limits::default())
-            },
+            }
             Self::Exact(limits) => (**limits).clone(),
         };
         requested.or_worse_values_from(adapter)
@@ -159,14 +159,22 @@ impl GpuOptions {
     /// The browser WebGPU viewport: WebGPU only, the portable default limits.
     #[must_use]
     pub fn browser() -> Self {
-        Self::base("shenron browser WebGPU device", Backends::BROWSER_WEBGPU, LimitsPolicy::Default)
+        Self::base(
+            "shenron browser WebGPU device",
+            Backends::BROWSER_WEBGPU,
+            LimitsPolicy::Default,
+        )
     }
 
     /// Native rendering and exports: the primary backends (Vulkan, Metal, DX12), limits raised so
     /// a supersampled page fits.
     #[must_use]
     pub fn native() -> Self {
-        Self::base("shenron native device", Backends::PRIMARY, LimitsPolicy::RaisedForRendering)
+        Self::base(
+            "shenron native device",
+            Backends::PRIMARY,
+            LimitsPolicy::RaisedForRendering,
+        )
     }
 
     /// Adds what Vello can use when present: `CLEAR_TEXTURE` and `PIPELINE_CACHE`.
@@ -190,7 +198,9 @@ impl GpuOptions {
     #[must_use]
     pub fn with_lookup(mut self, lookup: impl Fn(&str) -> Option<String>) -> Self {
         let get = |name: &str| {
-            lookup(name).map(|value| value.trim().to_owned()).filter(|v| !v.is_empty())
+            lookup(name)
+                .map(|value| value.trim().to_owned())
+                .filter(|v| !v.is_empty())
         };
         if let Some(text) = get(ENV_BACKEND) {
             match parse_backends(&text) {
@@ -284,13 +294,21 @@ mod tests {
     use super::*;
 
     fn env<'a>(pairs: &'a [(&'a str, &'a str)]) -> impl Fn(&str) -> Option<String> + 'a {
-        move |name| pairs.iter().find(|(k, _)| *k == name).map(|(_, v)| (*v).to_owned())
+        move |name| {
+            pairs
+                .iter()
+                .find(|(k, _)| *k == name)
+                .map(|(_, v)| (*v).to_owned())
+        }
     }
 
     #[test]
     fn backends_accept_wgpu_names_and_groups() {
         assert_eq!(parse_backends("vulkan"), Some(Backends::VULKAN));
-        assert_eq!(parse_backends(" vk , DX12 "), Some(Backends::VULKAN | Backends::DX12));
+        assert_eq!(
+            parse_backends(" vk , DX12 "),
+            Some(Backends::VULKAN | Backends::DX12)
+        );
         assert_eq!(parse_backends("primary"), Some(Backends::PRIMARY));
         assert_eq!(
             parse_backends("secondary, vulkan"),
@@ -326,7 +344,10 @@ mod tests {
         assert_eq!(options.power_preference, PowerPreference::LowPower);
         assert_eq!(options.adapter_name.as_deref(), Some("lavapipe"));
         assert!(options.force_fallback_adapter);
-        assert_eq!(options.pipeline_cache_dir, Some(PathBuf::from("/var/cache/shenron/gpu")));
+        assert_eq!(
+            options.pipeline_cache_dir,
+            Some(PathBuf::from("/var/cache/shenron/gpu"))
+        );
     }
 
     #[test]
@@ -347,7 +368,10 @@ mod tests {
 
     #[test]
     fn the_default_policy_never_exceeds_the_adapter() {
-        let weak = Limits { max_texture_dimension_2d: 4096, ..Limits::default() };
+        let weak = Limits {
+            max_texture_dimension_2d: 4096,
+            ..Limits::default()
+        };
         let limits = LimitsPolicy::Default.resolve(&weak);
         assert_eq!(limits.max_texture_dimension_2d, 4096);
     }
@@ -360,9 +384,15 @@ mod tests {
             ..Limits::default()
         };
         let limits = LimitsPolicy::RaisedForRendering.resolve(&big);
-        assert_eq!(limits.max_texture_dimension_2d, RENDER_MAX_TEXTURE_DIMENSION);
+        assert_eq!(
+            limits.max_texture_dimension_2d,
+            RENDER_MAX_TEXTURE_DIMENSION
+        );
         assert_eq!(limits.max_buffer_size, RENDER_MAX_BUFFER_SIZE);
-        let modest = Limits { max_texture_dimension_2d: 8192, ..Limits::default() };
+        let modest = Limits {
+            max_texture_dimension_2d: 8192,
+            ..Limits::default()
+        };
         let limits = LimitsPolicy::RaisedForRendering.resolve(&modest);
         assert_eq!(limits.max_texture_dimension_2d, 8192);
     }

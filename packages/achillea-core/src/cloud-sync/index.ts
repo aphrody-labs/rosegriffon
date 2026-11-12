@@ -120,8 +120,7 @@ export function validateRankedRosterLegal(
 
   const seenCharIds = new Set<number>();
 
-  for (let i = 0; i < roster.length; i++) {
-    const member = roster[i];
+  for (const member of roster) {
     if (seenCharIds.has(member.characterId)) {
       violations.push(`Duplicate character ID ${member.characterId} detected in team roster.`);
     }

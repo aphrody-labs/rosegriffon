@@ -223,6 +223,7 @@
     "typecheck": "bun run --filter '*' typecheck",
     "lint": "bun run --filter '*' lint",
     "test": "bun run --filter '*' test",
+    "bench:infra": "bun scripts/bench/infra-benchmark.ts",
     "compile": "bun scripts/compile.ts",
     "release": "bun scripts/publish.ts",
     "skills:sync": "bun .agents/skills/sync.ts",

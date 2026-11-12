@@ -90,13 +90,21 @@ fn parse_component(
         Some(1) => EanChannel::Rotation,
         Some(2) => EanChannel::Scale,
         Some(k) => EanChannel::Other(k),
-        None => return Err(ReError::BufferTooSmall { required: at + 1, available: buffer.len() }),
+        None => {
+            return Err(ReError::BufferTooSmall {
+                required: at + 1,
+                available: buffer.len(),
+            });
+        }
     };
     let count = u32_at(buffer, at + 4)? as usize;
     let frames_at = at + u32_at(buffer, at + 8)? as usize;
     let values_at = at + u32_at(buffer, at + 12)? as usize;
     if count > u16::MAX as usize + 1 {
-        return Err(ReError::ParseError { context: "ean", details: format!("{count} keys") });
+        return Err(ReError::ParseError {
+            context: "ean",
+            details: format!("{count} keys"),
+        });
     }
     let mut frames = Vec::with_capacity(count);
     let mut values = Vec::with_capacity(count);
@@ -119,12 +127,16 @@ fn parse_component(
                         context: "ean",
                         details: format!("float size {other}"),
                     });
-                },
+                }
             };
         }
         values.push(value);
     }
-    Ok(EanComponent { channel, frames, values })
+    Ok(EanComponent {
+        channel,
+        frames,
+        values,
+    })
 }
 
 fn parse_animation(buffer: &[u8], at: usize, index: usize, name: String) -> Result<EanAnimation> {
@@ -145,15 +157,26 @@ fn parse_animation(buffer: &[u8], at: usize, index: usize, name: String) -> Resu
                 parse_component(buffer, node + offset, wide_index, float_size)
             })
             .collect::<Result<_>>()?;
-        nodes.push(EanNode { bone_index, components });
+        nodes.push(EanNode {
+            bone_index,
+            components,
+        });
     }
-    Ok(EanAnimation { index, name, frame_count, nodes })
+    Ok(EanAnimation {
+        index,
+        name,
+        frame_count,
+        nodes,
+    })
 }
 
 impl EanFile {
     pub fn parse(buffer: &[u8]) -> Result<Self> {
         if buffer.len() < 0x20 {
-            return Err(ReError::BufferTooSmall { required: 0x20, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 0x20,
+                available: buffer.len(),
+            });
         }
         if &buffer[0..4] != EAN_MAGIC {
             return Err(ReError::InvalidMagic {
@@ -166,8 +189,11 @@ impl EanFile {
         let skeleton_at = u32_at(buffer, 0x14)? as usize;
         let table = u32_at(buffer, 0x18)? as usize;
         let names = u32_at(buffer, 0x1C)? as usize;
-        let skeleton =
-            if skeleton_at == 0 { Vec::new() } else { parse_skeleton(buffer, skeleton_at)? };
+        let skeleton = if skeleton_at == 0 {
+            Vec::new()
+        } else {
+            parse_skeleton(buffer, skeleton_at)?
+        };
         let mut animations = Vec::with_capacity(count);
         for index in 0..count {
             let at = u32_at(buffer, table + index * 4)? as usize;
@@ -180,7 +206,10 @@ impl EanFile {
                 c_string_at(buffer, u32_at(buffer, names + index * 4)? as usize)?
             };
             let animation = parse_animation(buffer, at, index, name)?;
-            if let Some(node) = animation.nodes.iter().find(|n| n.bone_index >= skeleton.len())
+            if let Some(node) = animation
+                .nodes
+                .iter()
+                .find(|n| n.bone_index >= skeleton.len())
                 && !skeleton.is_empty()
             {
                 return Err(ReError::ParseError {
@@ -190,7 +219,11 @@ impl EanFile {
             }
             animations.push(animation);
         }
-        Ok(Self { is_camera, skeleton, animations })
+        Ok(Self {
+            is_camera,
+            skeleton,
+            animations,
+        })
     }
 
     pub fn find(&self, name: &str) -> Option<&EanAnimation> {
@@ -208,7 +241,11 @@ fn nlerp(a: [f32; 4], mut b: [f32; 4], t: f32) -> [f32; 4] {
     }
     let q = lerp4(a, b, t);
     let len = q.iter().map(|v| v * v).sum::<f32>().sqrt();
-    if len > f32::EPSILON { q.map(|v| v / len) } else { [0.0, 0.0, 0.0, 1.0] }
+    if len > f32::EPSILON {
+        q.map(|v| v / len)
+    } else {
+        [0.0, 0.0, 0.0, 1.0]
+    }
 }
 
 impl EanComponent {
@@ -223,9 +260,17 @@ impl EanComponent {
             return self.values.last().copied();
         }
         let (f0, f1) = (self.frames[next - 1] as f32, self.frames[next] as f32);
-        let t = if f1 > f0 { (frame - f0) / (f1 - f0) } else { 0.0 };
+        let t = if f1 > f0 {
+            (frame - f0) / (f1 - f0)
+        } else {
+            0.0
+        };
         let (a, b) = (self.values[next - 1], self.values[next]);
-        Some(if self.channel == EanChannel::Rotation { nlerp(a, b, t) } else { lerp4(a, b, t) })
+        Some(if self.channel == EanChannel::Rotation {
+            nlerp(a, b, t)
+        } else {
+            lerp4(a, b, t)
+        })
     }
 }
 
@@ -234,17 +279,25 @@ impl EanAnimation {
     pub fn sample(&self, skeleton: &[EskBone], frame: f32) -> Vec<LocalPose> {
         let mut pose: Vec<LocalPose> = skeleton
             .iter()
-            .map(|b| LocalPose { translation: b.translation, rotation: b.rotation, scale: b.scale })
+            .map(|b| LocalPose {
+                translation: b.translation,
+                rotation: b.rotation,
+                scale: b.scale,
+            })
             .collect();
         for node in &self.nodes {
-            let Some(local) = pose.get_mut(node.bone_index) else { continue };
+            let Some(local) = pose.get_mut(node.bone_index) else {
+                continue;
+            };
             for component in &node.components {
-                let Some(v) = component.sample(frame) else { continue };
+                let Some(v) = component.sample(frame) else {
+                    continue;
+                };
                 match component.channel {
                     EanChannel::Translation => local.translation = [v[0], v[1], v[2]],
                     EanChannel::Rotation => local.rotation = v,
                     EanChannel::Scale => local.scale = [v[0], v[1], v[2]],
-                    EanChannel::Other(_) => {},
+                    EanChannel::Other(_) => {}
                 }
             }
         }
@@ -274,7 +327,10 @@ mod tests {
     fn sample_file() -> Vec<u8> {
         let skeleton = encode_skeleton(
             &[
-                EskBone { name: "b_C_Base".into(), ..Default::default() },
+                EskBone {
+                    name: "b_C_Base".into(),
+                    ..Default::default()
+                },
                 EskBone {
                     index: 1,
                     name: "b_C_Pelvis".into(),
@@ -290,7 +346,12 @@ mod tests {
             &[0, 10],
             &[
                 [0.0, 0.0, 0.0, 1.0],
-                [0.0, 0.0, std::f32::consts::FRAC_1_SQRT_2, std::f32::consts::FRAC_1_SQRT_2],
+                [
+                    0.0,
+                    0.0,
+                    std::f32::consts::FRAC_1_SQRT_2,
+                    std::f32::consts::FRAC_1_SQRT_2,
+                ],
             ],
         );
         // Animation: header(16) + node table(4) + node(8) + component table(8) + components.
@@ -344,7 +405,10 @@ mod tests {
         let half = (std::f32::consts::FRAC_PI_8).sin();
         assert!((pose[1].rotation[2] - half).abs() < 1e-5);
         assert_eq!(pose[0].rotation, [0.0, 0.0, 0.0, 1.0]);
-        assert_eq!(walk.sample(&ean.skeleton, 99.0)[1].translation, [0.0, 1.0, 0.0]);
+        assert_eq!(
+            walk.sample(&ean.skeleton, 99.0)[1].translation,
+            [0.0, 1.0, 0.0]
+        );
     }
 
     #[test]
@@ -358,14 +422,20 @@ mod tests {
     /// `SHENRON_REAL_EAN=<path to a game .ean>` checks a real animation set.
     #[test]
     fn parses_real_animations_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_EAN") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_EAN") else {
+            return;
+        };
         let ean = EanFile::parse(&std::fs::read(path).unwrap()).expect("parse real EAN");
         assert!(!ean.animations.is_empty());
         let first = &ean.animations[0];
         let pose = first.sample(&ean.skeleton, first.frame_count as f32 / 2.0);
         for p in pose {
             let len = p.rotation.iter().map(|v| v * v).sum::<f32>().sqrt();
-            assert!((len - 1.0).abs() < 0.02, "rotation not unit: {:?}", p.rotation);
+            assert!(
+                (len - 1.0).abs() < 0.02,
+                "rotation not unit: {:?}",
+                p.rotation
+            );
         }
     }
 }

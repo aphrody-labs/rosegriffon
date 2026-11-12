@@ -112,7 +112,10 @@ impl WineProcessMemory {
         for line in content.lines() {
             if let Some(region) = parse_maps_line(line) {
                 if base_address == 0
-                    && region.pathname.to_lowercase().contains(&process_name.to_lowercase())
+                    && region
+                        .pathname
+                        .to_lowercase()
+                        .contains(&process_name.to_lowercase())
                     && region.is_executable
                 {
                     base_address = region.start;
@@ -126,7 +129,12 @@ impl WineProcessMemory {
             base_address = regions[0].start;
         }
 
-        Ok(Self { pid, process_name: process_name.to_string(), base_address, regions })
+        Ok(Self {
+            pid,
+            process_name: process_name.to_string(),
+            base_address,
+            regions,
+        })
     }
 
     /// Reads `len` bytes from virtual memory at `address`.
@@ -137,16 +145,18 @@ impl WineProcessMemory {
             details: format!("Cannot open {mem_path}: {e}"),
         })?;
 
-        file.seek(SeekFrom::Start(address)).map_err(|e| ReError::ParseError {
-            context: "seek_memory",
-            details: format!("Cannot seek to 0x{address:x}: {e}"),
-        })?;
+        file.seek(SeekFrom::Start(address))
+            .map_err(|e| ReError::ParseError {
+                context: "seek_memory",
+                details: format!("Cannot seek to 0x{address:x}: {e}"),
+            })?;
 
         let mut buffer = vec![0u8; len];
-        file.read_exact(&mut buffer).map_err(|e| ReError::ParseError {
-            context: "read_exact_memory",
-            details: format!("Cannot read {len} bytes at 0x{address:x}: {e}"),
-        })?;
+        file.read_exact(&mut buffer)
+            .map_err(|e| ReError::ParseError {
+                context: "read_exact_memory",
+                details: format!("Cannot read {len} bytes at 0x{address:x}: {e}"),
+            })?;
 
         Ok(buffer)
     }
@@ -231,7 +241,15 @@ fn parse_maps_line(line: &str) -> Option<MemoryRegion> {
     let is_writable = perms.contains('w');
     let is_executable = perms.contains('x');
 
-    Some(MemoryRegion { start, end, is_readable, is_writable, is_executable, offset, pathname })
+    Some(MemoryRegion {
+        start,
+        end,
+        is_readable,
+        is_writable,
+        is_executable,
+        offset,
+        pathname,
+    })
 }
 
 #[cfg(test)]

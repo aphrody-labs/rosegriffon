@@ -69,14 +69,24 @@ mod tests {
 
     #[test]
     fn errors_are_plain_data() {
-        let error = GpuError::SurfaceTooLarge { width: 9000, height: 12000, limit: 8192 };
+        let error = GpuError::SurfaceTooLarge {
+            width: 9000,
+            height: 12000,
+            limit: 8192,
+        };
         assert_eq!(error.clone(), error);
-        assert_eq!(error.to_string(), "render surface 9000x12000 exceeds the device limit 8192");
+        assert_eq!(
+            error.to_string(),
+            "render surface 9000x12000 exceeds the device limit 8192"
+        );
     }
 
     #[test]
     fn a_device_loss_names_its_reason() {
-        let error = GpuError::DeviceLost { reason: "Unknown".into(), message: "TDR".into() };
+        let error = GpuError::DeviceLost {
+            reason: "Unknown".into(),
+            message: "TDR".into(),
+        };
         assert_eq!(error.to_string(), "the GPU device was lost (Unknown): TDR");
     }
 }

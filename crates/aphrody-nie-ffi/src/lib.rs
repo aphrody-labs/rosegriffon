@@ -3415,7 +3415,10 @@ mod tests {
         }
         let byte = 7u8;
         let too_large = unsafe {
-            nie_crilayla_compress(&byte, aphrody_nie_formats::crilayla::MAX_DECOMPRESSED_SIZE + 1)
+            nie_crilayla_compress(
+                &byte,
+                aphrody_nie_formats::crilayla::MAX_DECOMPRESSED_SIZE + 1,
+            )
         };
         assert!(too_large.ptr.is_null());
         for len in [256, 257, 512] {
@@ -3424,7 +3427,10 @@ mod tests {
             unsafe { nie_crilayla_compress_out(sample.as_ptr(), sample.len(), &mut encoded) };
             assert!(!encoded.ptr.is_null());
             let bytes = unsafe { core::slice::from_raw_parts(encoded.ptr, encoded.len) };
-            assert_eq!(aphrody_nie_formats::crilayla::decompress(bytes).unwrap(), sample);
+            assert_eq!(
+                aphrody_nie_formats::crilayla::decompress(bytes).unwrap(),
+                sample
+            );
             unsafe { nie_bytes_free(encoded) };
         }
     }
@@ -3474,4 +3480,3 @@ mod tests {
         nie_clear_error();
     }
 }
-

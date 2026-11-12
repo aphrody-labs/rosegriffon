@@ -5,9 +5,9 @@
 //! Coordinate convention in `aphrody-nie-core`: `y` is vertical height, `(x, z)` is
 //! the horizontal ground plane — matching `game::CCharaMoveCtrl` in `nie.exe`.
 
+use crate::Vec3;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
-use crate::Vec3;
 
 /// Animation state driven by horizontal character velocity (`game::MoveAnimState`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
@@ -227,9 +227,14 @@ impl CharaMoveCtrl {
             let dist = (dx * dx + dz * dz).sqrt();
             if dist < wp.radius {
                 self.current_waypoint += 1;
-                if self.current_waypoint >= self.waypoints.len() {
+                if self.current_waypoint < self.waypoints.len() {
+                    self.target_position = self.waypoints[self.current_waypoint].position;
+                } else {
                     self.has_target = false;
                     self.is_moving = false;
+                    self.speed = 0.0;
+                    self.velocity.x = 0.0;
+                    self.velocity.z = 0.0;
                 }
             }
         }
@@ -650,8 +655,14 @@ impl MapBlockList {
                         let crc_name = after_quote[..crc_end].to_string();
                         let tail = after_quote[crc_end + 2..].trim().trim_start_matches(',');
                         let mut parts = tail.split(',').map(str::trim);
-                        let unk0 = parts.next().and_then(|s| s.parse::<i32>().ok()).unwrap_or(0);
-                        let unk1 = parts.next().and_then(|s| s.parse::<i32>().ok()).unwrap_or(0);
+                        let unk0 = parts
+                            .next()
+                            .and_then(|s| s.parse::<i32>().ok())
+                            .unwrap_or(0);
+                        let unk1 = parts
+                            .next()
+                            .and_then(|s| s.parse::<i32>().ok())
+                            .unwrap_or(0);
                         blocks.push(MapBlock {
                             crc_name,
                             unk0,
@@ -681,7 +692,7 @@ mod tests {
             Waypoint::new(3.0, 0.0, 3.0),
         ]);
 
-        for _ in 0..120 {
+        for _ in 0..180 {
             ctrl.update(1.0 / 60.0);
         }
 

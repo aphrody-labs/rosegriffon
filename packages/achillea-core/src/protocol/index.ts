@@ -29,17 +29,17 @@ export const SessionType = {
 };
 
 /** Match mode categories. */
-export type MatchMode = "Casual" | "Ranked" | "PrivateRoom" | "Mode2v2";
+export type ProtocolMatchMode = "Casual" | "Ranked" | "PrivateRoom" | "Mode2v2";
 
-export const MatchMode = {
+export const ProtocolMatchMode = {
   /** Casual exhibition match (flag_enjoy_match). */
-  Casual: "Casual" as MatchMode,
+  Casual: "Casual" as ProtocolMatchMode,
   /** Competitive ranked ladder match (flag_rank_match). */
-  Ranked: "Ranked" as MatchMode,
+  Ranked: "Ranked" as ProtocolMatchMode,
   /** Private custom room (flag_room_match). */
-  PrivateRoom: "PrivateRoom" as MatchMode,
+  PrivateRoom: "PrivateRoom" as ProtocolMatchMode,
   /** 2 vs 2 co-op team match (MODE_2V2). */
-  Mode2v2: "Mode2v2" as MatchMode,
+  Mode2v2: "Mode2v2" as ProtocolMatchMode,
 };
 
 /** Assigned player slot in an active match or room. */

@@ -31,9 +31,9 @@ pub fn acquire(surface: &Surface<'_>) -> Result<Acquired> {
         CurrentSurfaceTexture::Suboptimal(texture) => Ok(Acquired::Suboptimal(texture)),
         CurrentSurfaceTexture::Timeout | CurrentSurfaceTexture::Occluded => Ok(Acquired::Retry),
         CurrentSurfaceTexture::Lost | CurrentSurfaceTexture::Outdated => Ok(Acquired::Reconfigure),
-        CurrentSurfaceTexture::Validation => {
-            Err(GpuError::Surface("acquiring the next surface image failed validation".into()))
-        },
+        CurrentSurfaceTexture::Validation => Err(GpuError::Surface(
+            "acquiring the next surface image failed validation".into(),
+        )),
     }
 }
 
@@ -55,7 +55,12 @@ pub fn surface_configuration(
     let preferred = formats
         .iter()
         .copied()
-        .find(|format| matches!(format, TextureFormat::Rgba8Unorm | TextureFormat::Bgra8Unorm))
+        .find(|format| {
+            matches!(
+                format,
+                TextureFormat::Rgba8Unorm | TextureFormat::Bgra8Unorm
+            )
+        })
         .or_else(|| formats.iter().copied().find(|format| !format.is_srgb()));
     if let Some(format) = preferred {
         config.format = format;
@@ -164,7 +169,11 @@ impl SurfaceBlitter {
             multiview_mask: None,
             cache: None,
         });
-        Self { pipeline, bind_group_layout, sampler }
+        Self {
+            pipeline,
+            bind_group_layout,
+            sampler,
+        }
     }
 
     /// Records a pass that clears `target` and, when there is a `source`, draws it over the whole

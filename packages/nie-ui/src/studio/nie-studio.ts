@@ -12,16 +12,13 @@
  */
 
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { FilmCraftEngine, createFilmProject, type FilmClip, type FilmProject } from "@aphrody/filmcraft";
 import {
-  fetchByteSlice,
   findAtom,
   parseAtoms,
-  HyperFramesDecoder,
   type AtomHeader,
-  type DecodedVideoFrame,
 } from "@aphrody/hyperframes";
 
 export interface SavePlayerStats {

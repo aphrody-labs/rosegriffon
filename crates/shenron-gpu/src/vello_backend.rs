@@ -57,7 +57,12 @@ impl VelloBackend {
                 context.queue(),
                 scene,
                 view,
-                &RenderParams { base_color, width, height, antialiasing_method: antialiasing },
+                &RenderParams {
+                    base_color,
+                    width,
+                    height,
+                    antialiasing_method: antialiasing,
+                },
             )
             .map_err(|error| GpuError::Vello(format!("rendering failed: {error:?}")))
     }

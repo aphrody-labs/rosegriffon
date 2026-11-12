@@ -42,7 +42,9 @@ impl RowLayout {
             .checked_next_multiple_of(wgpu::COPY_BYTES_PER_ROW_ALIGNMENT)
             .ok_or_else(invalid)?;
         // The whole buffer must be addressable.
-        u64::from(padded).checked_mul(u64::from(height)).ok_or_else(invalid)?;
+        u64::from(padded)
+            .checked_mul(u64::from(height))
+            .ok_or_else(invalid)?;
         Ok(Self {
             width,
             height,
@@ -97,7 +99,11 @@ impl RenderTarget {
         let limits = device.limits();
         let side_limit = limits.max_texture_dimension_2d;
         if width > side_limit || height > side_limit {
-            return Err(GpuError::SurfaceTooLarge { width, height, limit: side_limit });
+            return Err(GpuError::SurfaceTooLarge {
+                width,
+                height,
+                limit: side_limit,
+            });
         }
         if layout.buffer_size() > limits.max_buffer_size {
             return Err(GpuError::Readback(format!(
@@ -108,7 +114,11 @@ impl RenderTarget {
         }
         let texture = device.create_texture(&TextureDescriptor {
             label: Some(label),
-            size: Extent3d { width, height, depth_or_array_layers: 1 },
+            size: Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: TextureDimension::D2,
@@ -126,7 +136,12 @@ impl RenderTarget {
             usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
-        Ok(Self { layout, texture, view, readback })
+        Ok(Self {
+            layout,
+            texture,
+            view,
+            readback,
+        })
     }
 
     /// `(width, height)` in pixels.
@@ -220,7 +235,10 @@ impl TargetPool {
     /// A pool that keeps at most `capacity` idle targets.
     #[must_use]
     pub fn new(capacity: usize) -> Self {
-        Self { targets: Vec::new(), capacity }
+        Self {
+            targets: Vec::new(),
+            capacity,
+        }
     }
 
     /// A target of exactly this size: an idle one, else a new one.
@@ -231,7 +249,11 @@ impl TargetPool {
         width: u32,
         height: u32,
     ) -> Result<RenderTarget> {
-        match self.targets.iter().position(|target| target.size() == (width, height)) {
+        match self
+            .targets
+            .iter()
+            .position(|target| target.size() == (width, height))
+        {
             Some(position) => Ok(self.targets.swap_remove(position)),
             None => RenderTarget::new(device, label, width, height),
         }
@@ -289,8 +311,20 @@ mod tests {
 
     #[test]
     fn a_degenerate_size_is_rejected() {
-        assert_eq!(RowLayout::rgba8(0, 10), Err(GpuError::InvalidSurface { width: 0, height: 10 }));
-        assert_eq!(RowLayout::rgba8(10, 0), Err(GpuError::InvalidSurface { width: 10, height: 0 }));
+        assert_eq!(
+            RowLayout::rgba8(0, 10),
+            Err(GpuError::InvalidSurface {
+                width: 0,
+                height: 10
+            })
+        );
+        assert_eq!(
+            RowLayout::rgba8(10, 0),
+            Err(GpuError::InvalidSurface {
+                width: 10,
+                height: 0
+            })
+        );
         assert!(RowLayout::rgba8(u32::MAX, 1).is_err());
     }
 }

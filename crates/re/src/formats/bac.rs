@@ -23,8 +23,9 @@ use serde::{Deserialize, Serialize};
 pub const BAC_MAGIC: &[u8; 4] = b"#BAC";
 
 /// Record sizes per block type; types beyond the table are not decoded.
-pub const RECORD_SIZES: [usize; 20] =
-    [36, 64, 36, 12, 12, 16, 16, 12, 48, 64, 76, 16, 12, 12, 12, 32, 32, 32, 32, 16];
+pub const RECORD_SIZES: [usize; 20] = [
+    36, 64, 36, 12, 12, 16, 16, 12, 48, 64, 76, 16, 12, 12, 12, 32, 32, 32, 32, 16,
+];
 
 /// A hitbox record (block type 1).
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -92,13 +93,20 @@ fn record_end(buffer: &[u8], at: usize) -> Result<u16> {
 }
 
 fn vec3(buffer: &[u8], at: usize) -> Result<[f32; 3]> {
-    Ok([f32_at(buffer, at)?, f32_at(buffer, at + 4)?, f32_at(buffer, at + 8)?])
+    Ok([
+        f32_at(buffer, at)?,
+        f32_at(buffer, at + 4)?,
+        f32_at(buffer, at + 8)?,
+    ])
 }
 
 impl BacFile {
     pub fn parse(buffer: &[u8]) -> Result<Self> {
         if buffer.len() < 0x14 {
-            return Err(ReError::BufferTooSmall { required: 0x14, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 0x14,
+                available: buffer.len(),
+            });
         }
         if &buffer[0..4] != BAC_MAGIC {
             return Err(ReError::InvalidMagic {
@@ -138,7 +146,9 @@ impl BacFile {
                 let records = u16_at(buffer, block + 2)?;
                 let records_at = u32_at(buffer, block + 8)? as usize;
                 action.blocks.push(BacBlock { kind, records });
-                let Some(&size) = RECORD_SIZES.get(kind as usize) else { continue };
+                let Some(&size) = RECORD_SIZES.get(kind as usize) else {
+                    continue;
+                };
                 if records_at == 0 {
                     continue;
                 }
@@ -181,7 +191,7 @@ impl BacFile {
                             min_bounds: vec3(buffer, at + 40)?,
                             max_bounds: vec3(buffer, at + 52)?,
                         }),
-                        _ => {},
+                        _ => {}
                     }
                 }
             }
@@ -257,7 +267,10 @@ mod tests {
         assert_eq!(action.animations[0].ean_index, 4);
         assert_eq!(action.animations[0].frame_end, u16::MAX);
         let hit = &action.hitboxes[0];
-        assert_eq!((hit.start_frame, hit.end_frame, hit.damage, hit.bdm_entry_id), (8, 12, 250, 7));
+        assert_eq!(
+            (hit.start_frame, hit.end_frame, hit.damage, hit.bdm_entry_id),
+            (8, 12, 250, 7)
+        );
         assert_eq!(hit.size, 0.3);
         assert_eq!(action.total_frames, 30);
         assert_eq!((action.startup_frames, action.recovery_frames), (8, 18));
@@ -283,7 +296,9 @@ mod tests {
     /// asserted.
     #[test]
     fn parses_real_actions_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_BAC") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_BAC") else {
+            return;
+        };
         let bac = BacFile::parse(&std::fs::read(path).unwrap()).expect("parse real BAC");
         assert!(!bac.moves.is_empty());
         assert!(bac.moves.iter().any(|m| !m.animations.is_empty()));

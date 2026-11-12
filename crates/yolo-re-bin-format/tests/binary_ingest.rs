@@ -254,4 +254,3 @@ fn truncated_or_ambiguous_inputs_remain_unknown() {
         assert_eq!(inspect_binary(bytes).format, BinaryFormat::Unknown);
     }
 }
-

@@ -2,9 +2,9 @@
 
 #![forbid(unsafe_code)]
 
-use std::path::PathBuf;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 use aphrody_nie_save::{
     BLOB_MAGIC, BLOB_SUBTYPE_AUTOSAVE, DATA_START, LIVES_CONST2, LIVES_MAGIC,
@@ -61,7 +61,7 @@ pub fn create_mock_save_container(slot_name: &str) -> Vec<u8> {
     // Directory entry #0 at 0x50: AUTOSAVE_data.bin
     let blob_offset_rel: u32 = 0; // Relative to DATA_START (0x800)
     let blob_size: u32 = 0x1800;
-    
+
     // Directory entry layout:
     // [0..4] crc32_blob
     // [4..8] blob_size
@@ -84,11 +84,12 @@ pub fn create_mock_save_container(slot_name: &str) -> Vec<u8> {
     // Body start at blob_start + 12
     let body_start = blob_start + 12;
     data[body_start..body_start + 4].copy_from_slice(&BODY_VERSION.to_be_bytes());
-    
+
     // Add scalar stream marker and separator
     let sep_pos = body_start + SCALAR_STREAM_END;
     if sep_pos + 8 <= data.len() {
-        data[sep_pos..sep_pos + 8].copy_from_slice(&[0x1E, 0x00, 0x00, 0x03, 0xD0, 0x66, 0x1F, 0x54]);
+        data[sep_pos..sep_pos + 8]
+            .copy_from_slice(&[0x1E, 0x00, 0x00, 0x03, 0xD0, 0x66, 0x1F, 0x54]);
     }
 
     // Compute Blob CRC32
@@ -113,8 +114,15 @@ pub fn execute_save_edit(options: &SaveEditOptions) -> Result<SaveEditReport> {
     let target_out = options.output_path.as_ref().unwrap_or(&options.input_path);
 
     let (mut container, was_mocked) = if input_exists {
-        let cont = read_save(&options.input_path)
-            .map_err(|e| anyhow::anyhow!("Reading save file {}: {e}", options.input_path.display()))?;
+        let raw = std::fs::read(&options.input_path)?;
+        let cont = aphrody_nie_save::parse(&raw, &options.slot)
+            .or_else(|_| {
+                read_save(&options.input_path)
+                    .map_err(|_| aphrody_nie_save::SaveError::Corrupt("echec de lecture save"))
+            })
+            .map_err(|e| {
+                anyhow::anyhow!("Reading save file {}: {e}", options.input_path.display())
+            })?;
         (cont, false)
     } else if options.mock_if_missing {
         let plain_bytes = create_mock_save_container(&options.slot);
@@ -122,13 +130,20 @@ pub fn execute_save_edit(options: &SaveEditOptions) -> Result<SaveEditReport> {
             .map_err(|e| anyhow::anyhow!("Failed parsing generated mock save: {e}"))?;
         (cont, true)
     } else {
-        anyhow::bail!("Input save file '{}' not found", options.input_path.display());
+        anyhow::bail!(
+            "Input save file '{}' not found",
+            options.input_path.display()
+        );
     };
 
     // Apply player level and coins edits if requested
     let mut blob_names = Vec::new();
     for (i, blob) in container.blobs.iter_mut().enumerate() {
-        let name = container.entries.get(i).map(|e| e.filename.clone()).unwrap_or_default();
+        let name = container
+            .entries
+            .get(i)
+            .map(|e| e.filename.clone())
+            .unwrap_or_default();
         blob_names.push(name.clone());
 
         if name == "AUTOSAVE_data.bin" {

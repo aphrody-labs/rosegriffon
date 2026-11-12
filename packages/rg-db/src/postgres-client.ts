@@ -182,6 +182,9 @@ export class PostgresQueryBuilder implements PromiseLike<Result> {
   }
 
   private mutationSql(): string {
+    if (this.mutation === "delete") {
+      return `DELETE FROM ${identifier(this.table)}${this.whereSql()} RETURNING ${this.projectionSql}`;
+    }
     const values = Array.isArray(this.payload) ? this.payload : [this.payload];
     if (!values.length || !values.every(value => value && typeof value === "object"))
       throw new Error("SQL mutation payload must contain objects");

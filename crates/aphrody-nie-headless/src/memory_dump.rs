@@ -5,11 +5,11 @@
 
 #![forbid(unsafe_code)]
 
+use anyhow::{Context, Result};
+use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
-use anyhow::{Context, Result};
-use serde::{Deserialize, Serialize};
 
 /// Memory region descriptor.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -89,8 +89,10 @@ pub fn execute_memory_dump(options: &MemoryDumpOptions) -> Result<ProcessMemoryM
                             name: sec.name.clone(),
                             start_address: BASE_ADDR + sec.vaddr as u64,
                             size_bytes: sec.size as usize,
-                            permissions: if sec.name == ".text" { "R-X" } else { "RW-" }.to_string(),
-                            description: "Real PE/COFF section probed via aphrody-nie-pe-inspect".to_string(),
+                            permissions: if sec.name == ".text" { "R-X" } else { "RW-" }
+                                .to_string(),
+                            description: "Real PE/COFF section probed via aphrody-nie-pe-inspect"
+                                .to_string(),
                             sample_hex: format!("entropy={:.2}", sec.entropy.unwrap_or(0.0)),
                         });
                     }
@@ -164,7 +166,8 @@ pub fn execute_memory_dump(options: &MemoryDumpOptions) -> Result<ProcessMemoryM
         start_address: SAVE_MGR_ADDR,
         size_bytes: 0x2000,
         permissions: "RW-".to_string(),
-        description: "In-memory SaveManager instance and decrypted save buffer pointers".to_string(),
+        description: "In-memory SaveManager instance and decrypted save buffer pointers"
+            .to_string(),
         sample_hex: "8042010030303241423846342D".to_string(),
     });
     raw_dump.extend_from_slice(&save_mgr_sample);
@@ -181,7 +184,8 @@ pub fn execute_memory_dump(options: &MemoryDumpOptions) -> Result<ProcessMemoryM
         start_address: HEAP_ADDR,
         size_bytes: 0x2000,
         permissions: "RW-".to_string(),
-        description: "Dynamic allocation heap containing 60Hz match simulation and Kizuna state".to_string(),
+        description: "Dynamic allocation heap containing 60Hz match simulation and Kizuna state"
+            .to_string(),
         sample_hex: "03000000010000000000AF42".to_string(),
     });
     raw_dump.extend_from_slice(&heap_sample);

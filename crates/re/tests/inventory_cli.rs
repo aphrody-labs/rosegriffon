@@ -46,8 +46,11 @@ fn text_cli_extracts_msg_strings_without_overwriting_existing_files() {
     bytes.extend("日文".encode_utf16().flat_map(u16::to_le_bytes));
     fs::write(&input, bytes).unwrap();
 
-    let printed =
-        Command::new(env!("CARGO_BIN_EXE_shenron-re")).arg("text").arg(&input).output().unwrap();
+    let printed = Command::new(env!("CARGO_BIN_EXE_shenron-re"))
+        .arg("text")
+        .arg(&input)
+        .output()
+        .unwrap();
     assert!(printed.status.success());
     let report: serde_json::Value = serde_json::from_slice(&printed.stdout).unwrap();
     assert_eq!(report["file"], "quest.msg");
@@ -103,7 +106,11 @@ fn text_cli_converts_a_tree_to_a_new_destination_and_rejects_existing_destinatio
         .arg(&output)
         .output()
         .unwrap();
-    assert!(result.status.success(), "{}", String::from_utf8_lossy(&result.stderr));
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
     let manifest: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
     assert_eq!(manifest["msgFiles"], 2);
     assert_eq!(manifest["converted"], 2);
@@ -152,7 +159,11 @@ fn emb_cli_extracts_entries_to_a_new_directory_without_overwriting() {
         .arg(&output)
         .output()
         .unwrap();
-    assert!(extracted.status.success(), "{}", String::from_utf8_lossy(&extracted.stderr));
+    assert!(
+        extracted.status.success(),
+        "{}",
+        String::from_utf8_lossy(&extracted.stderr)
+    );
     let report: serde_json::Value = serde_json::from_slice(&extracted.stdout).unwrap();
     assert_eq!(report["entryCount"], 1);
     assert_eq!(report["totalBytes"], 4);
@@ -184,7 +195,11 @@ fn cpk_cli_extracts_to_a_new_directory_and_rejects_traversal() {
         .arg(&output)
         .output()
         .unwrap();
-    assert!(extracted.status.success(), "{}", String::from_utf8_lossy(&extracted.stderr));
+    assert!(
+        extracted.status.success(),
+        "{}",
+        String::from_utf8_lossy(&extracted.stderr)
+    );
     let report: serde_json::Value = serde_json::from_slice(&extracted.stdout).unwrap();
     assert_eq!(report["entryCount"], 1);
     assert_eq!(report["totalBytes"], 4);
@@ -201,7 +216,11 @@ fn cpk_cli_extracts_to_a_new_directory_and_rejects_traversal() {
     assert_eq!(fs::read(output.join("texture.dds")).unwrap(), b"DDS!");
 
     let traversal = temp.path().join("traversal.cpk");
-    fs::write(&traversal, CpkArchive::create_mock(&[("../escape.bin", b"unsafe")])).unwrap();
+    fs::write(
+        &traversal,
+        CpkArchive::create_mock(&[("../escape.bin", b"unsafe")]),
+    )
+    .unwrap();
     let refused = Command::new(env!("CARGO_BIN_EXE_shenron-re"))
         .arg("cpk")
         .arg(&traversal)

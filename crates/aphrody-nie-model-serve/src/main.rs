@@ -5130,7 +5130,8 @@ fn handle_connection(mut stream: TcpStream, state: Arc<State>) {
                 // (`nie convert --to css`), mais sans ré-encoder l'atlas : le CSS pointe sur
                 // la route `/tex/<rel>.png` déjà servie, pas d'image dupliquée à générer/cacher.
                 if param(query, "css").as_deref() == Some("1") {
-                    let Some(feuille) = aphrody_nie_model_serve::sprite_sheet::depuis_g4tx(&g4tx, 0)
+                    let Some(feuille) =
+                        aphrody_nie_model_serve::sprite_sheet::depuis_g4tx(&g4tx, 0)
                     else {
                         respond_text(&mut stream, 404, "Not Found", "aucune région d'atlas");
                         return;

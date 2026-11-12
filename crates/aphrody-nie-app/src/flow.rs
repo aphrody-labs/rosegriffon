@@ -27,6 +27,14 @@ pub enum Screen {
     Menu { sel: usize },
     /// Sélecteur de mode : les 5 modes réels ([`MODES`]), atteint via « Adversaires ».
     ModeSelect { sel: usize },
+    /// Open World exploration simulation (`w10` Nagumohara, `w20` Raimon, `w40` Odaiba).
+    OpenWorld {
+        state: aphrody_nie_runtime::open_world::OpenWorldState,
+    },
+    /// Kizuna Town customization and community hub (`w30` Kizuna Station).
+    KizunaTown {
+        state: aphrody_nie_runtime::open_world::OpenWorldState,
+    },
     /// Local `aphrody-nie-runtime` match simulation (physics, 22 players, ball, goals).
     Match { world: aphrody_nie_runtime::World },
     /// Scène de dialogue (mode histoire).
@@ -101,20 +109,73 @@ impl Screen {
                 if nav != 0 {
                     *sel = wrap(*sel, MODES.len());
                 } else if enter {
-                    // Mode 0 waits for sourced story data; modes 1-4 start the local simulation.
-                    if *sel == 0 {
-                        *self = Screen::Story {
-                            idx: 0,
-                            titre: String::new(),
-                            repliques: Vec::new(),
-                        };
-                    } else {
-                        *self = Screen::Match {
-                            world: aphrody_nie_runtime::World::kickoff(),
-                        };
+                    match *sel {
+                        0 => {
+                            *self = Screen::OpenWorld {
+                                state: aphrody_nie_runtime::open_world::OpenWorldState::new(
+                                    aphrody_nie_runtime::open_world::WorldZoneId::Nagumohara,
+                                ),
+                            };
+                        }
+                        3 => {
+                            *self = Screen::OpenWorld {
+                                state: aphrody_nie_runtime::open_world::OpenWorldState::new(
+                                    aphrody_nie_runtime::open_world::WorldZoneId::OdaibaStadium,
+                                ),
+                            };
+                        }
+                        4 => {
+                            *self = Screen::KizunaTown {
+                                state: aphrody_nie_runtime::open_world::OpenWorldState::new(
+                                    aphrody_nie_runtime::open_world::WorldZoneId::KizunaTown,
+                                ),
+                            };
+                        }
+                        _ => {
+                            *self = Screen::Match {
+                                world: aphrody_nie_runtime::World::kickoff(),
+                            };
+                        }
                     }
                 } else if back {
                     *self = Screen::Menu { sel: 5 };
+                }
+            }
+            Screen::OpenWorld { state } | Screen::KizunaTown { state } => {
+                if enter {
+                    match state.interact() {
+                        aphrody_nie_runtime::open_world::InteractionOutcome::LaunchMatch {
+                            ..
+                        } => {
+                            *self = Screen::Match {
+                                world: aphrody_nie_runtime::World::kickoff(),
+                            };
+                        }
+                        aphrody_nie_runtime::open_world::InteractionOutcome::ZoneChanged {
+                            zone,
+                        } => {
+                            let s = std::mem::take(state);
+                            if zone == aphrody_nie_runtime::open_world::WorldZoneId::KizunaTown {
+                                *self = Screen::KizunaTown { state: s };
+                            } else {
+                                *self = Screen::OpenWorld { state: s };
+                            }
+                        }
+                        _ => {}
+                    }
+                } else if back {
+                    *self = Screen::ModeSelect { sel: 0 };
+                } else {
+                    let (dx, dz) = match cmd {
+                        "CMD_FCS_MTX_UP" => (0.0, 1.0),
+                        "CMD_FCS_MTX_DOWN" => (0.0, -1.0),
+                        "CMD_FCS_MTX_LEFT" => (-1.0, 0.0),
+                        "CMD_FCS_MTX_RIGHT" => (1.0, 0.0),
+                        _ => (0.0, 0.0),
+                    };
+                    if dx != 0.0 || dz != 0.0 {
+                        state.step(dx, dz, false);
+                    }
                 }
             }
             Screen::Match { .. } => {
@@ -151,8 +212,14 @@ impl Screen {
 
     /// Advances the local simulation by `dt` seconds while its match screen is active.
     pub fn update(&mut self, dt: f32) {
-        if let Screen::Match { world } = self {
-            world.step(dt);
+        match self {
+            Screen::Match { world } => {
+                world.step(dt);
+            }
+            Screen::OpenWorld { state } | Screen::KizunaTown { state } => {
+                state.step(0.0, 0.0, false);
+            }
+            _ => {}
         }
     }
 
@@ -162,11 +229,17 @@ impl Screen {
     /// maintenu — une direction dure tant que la touche est tenue. Hors match, l'appel est sans
     /// effet, ce qui évite au front de savoir sur quel écran il se trouve.
     pub fn set_game_input(&mut self, dx: f32, dy: f32, shoot: bool) {
-        if let Screen::Match { world } = self {
-            world.input = aphrody_nie_runtime::Input {
-                dir: aphrody_nie_geom::Vec2::new(dx, dy),
-                shoot,
-            };
+        match self {
+            Screen::Match { world } => {
+                world.input = aphrody_nie_runtime::Input {
+                    dir: aphrody_nie_geom::Vec2::new(dx, dy),
+                    shoot,
+                };
+            }
+            Screen::OpenWorld { state } | Screen::KizunaTown { state } => {
+                state.step(dx, dy, shoot);
+            }
+            _ => {}
         }
     }
 
@@ -257,6 +330,15 @@ impl Screen {
         matches!(self, Screen::Match { .. })
     }
 
+    /// Exposes the active open-world or Kizuna Town simulation state.
+    #[must_use]
+    pub fn open_world(&self) -> Option<&aphrody_nie_runtime::open_world::OpenWorldState> {
+        match self {
+            Screen::OpenWorld { state } | Screen::KizunaTown { state } => Some(state),
+            _ => None,
+        }
+    }
+
     /// Returns `true` when verified pixels must be supplied by the front end.
     ///
     /// `aphrody-nie-app` deliberately does not synthesize the native main menu. Browser/native hosts can
@@ -273,6 +355,9 @@ impl Screen {
             Screen::Title => render_state(&GameState::Title, font, None).buf,
             Screen::Menu { sel } => crate::render::render_main_menu(*sel, font).buf,
             Screen::ModeSelect { sel } => render_list("MODE DE JEU", &MODES, *sel, font).buf,
+            Screen::OpenWorld { state } | Screen::KizunaTown { state } => {
+                crate::render::render_open_world(state, font).buf
+            }
             Screen::Story {
                 idx,
                 titre,
@@ -371,5 +456,62 @@ mod tests {
         let pixels = host_owned_surface();
         assert_eq!(pixels.len(), W * H * 4);
         assert!(pixels.iter().all(|channel| *channel == 0));
+    }
+
+    #[test]
+    fn mode_select_transitions_to_open_world_and_kizuna_town() {
+        let mut screen_nagumo = Screen::ModeSelect { sel: 0 };
+        screen_nagumo.input("CMD_ENTER");
+        assert!(matches!(
+            screen_nagumo,
+            Screen::OpenWorld {
+                state: aphrody_nie_runtime::open_world::OpenWorldState {
+                    zone: aphrody_nie_runtime::open_world::WorldZoneId::Nagumohara,
+                    ..
+                }
+            }
+        ));
+        assert!(screen_nagumo.open_world().is_some());
+
+        let mut screen_odaiba = Screen::ModeSelect { sel: 3 };
+        screen_odaiba.input("CMD_ENTER");
+        assert!(matches!(
+            screen_odaiba,
+            Screen::OpenWorld {
+                state: aphrody_nie_runtime::open_world::OpenWorldState {
+                    zone: aphrody_nie_runtime::open_world::WorldZoneId::OdaibaStadium,
+                    ..
+                }
+            }
+        ));
+
+        let mut screen_kizuna = Screen::ModeSelect { sel: 4 };
+        screen_kizuna.input("CMD_ENTER");
+        assert!(matches!(
+            screen_kizuna,
+            Screen::KizunaTown {
+                state: aphrody_nie_runtime::open_world::OpenWorldState {
+                    zone: aphrody_nie_runtime::open_world::WorldZoneId::KizunaTown,
+                    ..
+                }
+            }
+        ));
+    }
+
+    #[test]
+    fn open_world_navigation_and_cancel_flow() {
+        let mut screen = Screen::OpenWorld {
+            state: aphrody_nie_runtime::open_world::OpenWorldState::new(
+                aphrody_nie_runtime::open_world::WorldZoneId::Nagumohara,
+            ),
+        };
+
+        let initial_z = screen.open_world().unwrap().player.position.z;
+        screen.input("CMD_FCS_MTX_UP");
+        let next_z = screen.open_world().unwrap().player.position.z;
+        assert_ne!(initial_z, next_z);
+
+        screen.input("CMD_BACK");
+        assert!(matches!(screen, Screen::ModeSelect { sel: 0 }));
     }
 }

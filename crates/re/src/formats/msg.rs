@@ -25,13 +25,22 @@ pub struct MsgFile {
 }
 
 fn corrupt(details: impl Into<String>) -> ReError {
-    ReError::ParseError { context: "msg", details: details.into() }
+    ReError::ParseError {
+        context: "msg",
+        details: details.into(),
+    }
 }
 
 fn range(buffer: &[u8], offset: usize, count: usize, stride: usize) -> Result<&[u8]> {
-    let length = count.checked_mul(stride).ok_or_else(|| corrupt("table size overflow"))?;
-    let end = offset.checked_add(length).ok_or_else(|| corrupt("table offset overflow"))?;
-    buffer.get(offset..end).ok_or_else(|| corrupt("table or string is outside the file"))
+    let length = count
+        .checked_mul(stride)
+        .ok_or_else(|| corrupt("table size overflow"))?;
+    let end = offset
+        .checked_add(length)
+        .ok_or_else(|| corrupt("table offset overflow"))?;
+    buffer
+        .get(offset..end)
+        .ok_or_else(|| corrupt("table or string is outside the file"))
 }
 
 fn u32_at(buffer: &[u8], offset: usize) -> Result<u32> {
@@ -47,7 +56,9 @@ fn string_at(buffer: &[u8], slot: usize, unicode: bool) -> Result<String> {
     let width = if unicode { 2 } else { 1 };
     let expected = chars.checked_add(1).and_then(|n| n.checked_mul(width));
     if expected != Some(bytes) {
-        return Err(corrupt("string byte length disagrees with its encoding and character count"));
+        return Err(corrupt(
+            "string byte length disagrees with its encoding and character count",
+        ));
     }
     let raw = range(buffer, offset, bytes, 1)?;
     if raw[bytes - width..].iter().any(|b| *b != 0) {
@@ -69,7 +80,10 @@ fn string_at(buffer: &[u8], slot: usize, unicode: bool) -> Result<String> {
 impl MsgFile {
     pub fn parse(buffer: &[u8]) -> Result<Self> {
         if buffer.len() < 32 {
-            return Err(ReError::BufferTooSmall { required: 32, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 32,
+                available: buffer.len(),
+            });
         }
 
         if &buffer[0..4] != MSG_MAGIC {
@@ -104,8 +118,9 @@ impl MsgFile {
         for i in 0..entry_count {
             let count = u32_at(buffer, lists + i * 8)? as usize;
             let start = u32_at(buffer, lists + i * 8 + 4)? as usize;
-            consumed_lines =
-                consumed_lines.checked_add(count).ok_or_else(|| corrupt("line count overflow"))?;
+            consumed_lines = consumed_lines
+                .checked_add(count)
+                .ok_or_else(|| corrupt("line count overflow"))?;
             if consumed_lines > line_count {
                 return Err(corrupt("entry line counts exceed the header count"));
             }
@@ -144,7 +159,10 @@ impl MsgFile {
         let mut buffer = vec![0; slots + count * 16];
         buffer[..4].copy_from_slice(MSG_MAGIC);
         buffer[4..8].copy_from_slice(&[0, 1, 1, 0]);
-        for (index, value) in [count, keys, ids, lists, count, slots].into_iter().enumerate() {
+        for (index, value) in [count, keys, ids, lists, count, slots]
+            .into_iter()
+            .enumerate()
+        {
             buffer[8 + index * 4..12 + index * 4].copy_from_slice(&(value as u32).to_le_bytes());
         }
         for (i, line) in lines.iter().enumerate() {
@@ -152,18 +170,24 @@ impl MsgFile {
             buffer[lists + i * 8..lists + i * 8 + 4].copy_from_slice(&1u32.to_le_bytes());
             buffer[lists + i * 8 + 4..lists + i * 8 + 8]
                 .copy_from_slice(&((slots + i * 16) as u32).to_le_bytes());
-            for (slot, text) in
-                [(keys + i * 16, format!("MSG_{i}")), (slots + i * 16, (*line).into())]
-            {
+            for (slot, text) in [
+                (keys + i * 16, format!("MSG_{i}")),
+                (slots + i * 16, (*line).into()),
+            ] {
                 let units = text.encode_utf16().collect::<Vec<_>>();
-                for (field, value) in
-                    [buffer.len(), units.len(), (units.len() + 1) * 2].into_iter().enumerate()
+                for (field, value) in [buffer.len(), units.len(), (units.len() + 1) * 2]
+                    .into_iter()
+                    .enumerate()
                 {
                     buffer[slot + field * 4..slot + field * 4 + 4]
                         .copy_from_slice(&(value as u32).to_le_bytes());
                 }
-                buffer
-                    .extend(units.into_iter().chain(std::iter::once(0)).flat_map(u16::to_le_bytes));
+                buffer.extend(
+                    units
+                        .into_iter()
+                        .chain(std::iter::once(0))
+                        .flat_map(u16::to_le_bytes),
+                );
             }
         }
         buffer
@@ -262,7 +286,11 @@ mod tests {
         assert!(expected_entries > 0);
         assert_eq!(parsed.entries.len(), expected_entries);
         assert_eq!(
-            parsed.entries.iter().map(|entry| entry.lines.len()).sum::<usize>(),
+            parsed
+                .entries
+                .iter()
+                .map(|entry| entry.lines.len())
+                .sum::<usize>(),
             expected_lines
         );
         assert!(parsed.entries.iter().all(|entry| !entry.name_id.is_empty()));

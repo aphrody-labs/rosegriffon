@@ -114,7 +114,10 @@ const MAX_VERTICES: usize = 1 << 20;
 const MAX_INDICES: usize = 3 << 20;
 
 fn err(details: String) -> ReError {
-    ReError::ParseError { context: "emd", details }
+    ReError::ParseError {
+        context: "emd",
+        details,
+    }
 }
 
 fn aabb(buffer: &[u8], at: usize) -> Result<([f32; 3], [f32; 3])> {
@@ -161,7 +164,11 @@ fn read_vertex(buffer: &[u8], at: usize, flags: u32) -> Result<EmdVertex> {
                 f32_at(buffer, cursor + k * 4)?
             };
         }
-        cursor += if half { n.next_multiple_of(2).max(2) * 2 } else { n * 4 };
+        cursor += if half {
+            n.next_multiple_of(2).max(2) * 2
+        } else {
+            n * 4
+        };
         Ok(out)
     };
     let mut vertex = EmdVertex::default();
@@ -187,7 +194,10 @@ fn read_vertex(buffer: &[u8], at: usize, flags: u32) -> Result<EmdVertex> {
         buffer
             .get(at..at + 4)
             .map(|b| [b[0], b[1], b[2], b[3]])
-            .ok_or(ReError::BufferTooSmall { required: at + 4, available: buffer.len() })
+            .ok_or(ReError::BufferTooSmall {
+                required: at + 4,
+                available: buffer.len(),
+            })
     };
     if flags & FLAG_COLOR != 0 {
         vertex.color = Some(bytes4(cursor)?.map(|c| c as f32 / 255.0));
@@ -203,7 +213,11 @@ fn read_vertex(buffer: &[u8], at: usize, flags: u32) -> Result<EmdVertex> {
             }
             w
         } else {
-            [f32_at(buffer, cursor)?, f32_at(buffer, cursor + 4)?, f32_at(buffer, cursor + 8)?]
+            [
+                f32_at(buffer, cursor)?,
+                f32_at(buffer, cursor + 4)?,
+                f32_at(buffer, cursor + 8)?,
+            ]
         };
         vertex.bone_weights = Some([w[0], w[1], w[2], (1.0 - w[0] - w[1] - w[2]).max(0.0)]);
     }
@@ -222,7 +236,9 @@ fn parse_submesh(buffer: &[u8], at: usize) -> Result<EmdSubmesh> {
     let samplers_at = at + u32_at(buffer, at + 0x48)? as usize;
     let lists_at = at + u32_at(buffer, at + 0x4C)? as usize;
     if size != vertex_size(flags) {
-        return Err(err(format!("{name}: vertex size {size} for flags {flags:#x}")));
+        return Err(err(format!(
+            "{name}: vertex size {size} for flags {flags:#x}"
+        )));
     }
     if count > MAX_VERTICES {
         return Err(err(format!("{name}: {count} vertices")));
@@ -265,7 +281,7 @@ fn parse_submesh(buffer: &[u8], at: usize) -> Result<EmdSubmesh> {
                     None => {
                         bone_names.push(bone);
                         (bone_names.len() - 1) as u16
-                    },
+                    }
                 })
             })
             .collect::<Result<Vec<u16>>>()?;
@@ -310,7 +326,12 @@ fn parse_mesh(buffer: &[u8], at: usize) -> Result<EmdMesh> {
     let submeshes = (0..count)
         .map(|s| parse_submesh(buffer, at + u32_at(buffer, table + s * 4)? as usize))
         .collect::<Result<_>>()?;
-    Ok(EmdMesh { name, submeshes, aabb_min, aabb_max })
+    Ok(EmdMesh {
+        name,
+        submeshes,
+        aabb_min,
+        aabb_max,
+    })
 }
 
 impl EmdFile {
@@ -325,13 +346,19 @@ impl EmdFile {
     }
 
     pub fn submeshes(&self) -> impl Iterator<Item = &EmdSubmesh> {
-        self.parts.iter().flat_map(|p| &p.meshes).flat_map(|m| &m.submeshes)
+        self.parts
+            .iter()
+            .flat_map(|p| &p.meshes)
+            .flat_map(|m| &m.submeshes)
     }
 
     /// Parses an EMD model file from binary data.
     pub fn parse(buffer: &[u8]) -> Result<Self> {
         if buffer.len() < 0x1C {
-            return Err(ReError::BufferTooSmall { required: 0x1C, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 0x1C,
+                available: buffer.len(),
+            });
         }
         if &buffer[0..4] != EMD_MAGIC {
             return Err(ReError::InvalidMagic {
@@ -360,7 +387,10 @@ impl EmdFile {
                 .collect::<Result<_>>()?;
             parts.push(EmdModelPart { name, meshes });
         }
-        Ok(Self { name: "DBXV2_Model".into(), parts })
+        Ok(Self {
+            name: "DBXV2_Model".into(),
+            parts,
+        })
     }
 }
 
@@ -453,7 +483,10 @@ mod tests {
     #[test]
     fn vertex_sizes_match_game_layouts() {
         assert_eq!(vertex_size(0x8207), 36);
-        assert_eq!(vertex_size(FLAG_POSITION | FLAG_NORMAL | FLAG_UV | FLAG_BLEND), 48);
+        assert_eq!(
+            vertex_size(FLAG_POSITION | FLAG_NORMAL | FLAG_UV | FLAG_BLEND),
+            48
+        );
     }
 
     #[test]
@@ -470,8 +503,9 @@ mod tests {
             compressed.extend(value.to_le_bytes());
         }
         // Actual EMD order; 0xfc00 padding occurs in the real failing Conton vertices.
-        for value in [0x3c00u16, 0, 0, 0xfc00, 0x3800, 0xb400, 0x3400, 0x3800, 0, 0x3c00, 0, 0xfc00]
-        {
+        for value in [
+            0x3c00u16, 0, 0, 0xfc00, 0x3800, 0xb400, 0x3400, 0x3800, 0, 0x3c00, 0, 0xfc00,
+        ] {
             compressed.extend(value.to_le_bytes());
         }
         compressed.extend([12, 34, 56, 255, 1, 2, 3, 4]);
@@ -487,7 +521,9 @@ mod tests {
         assert_eq!(vertex.bone_indices, Some([1, 2, 3, 4]));
         assert_eq!(vertex.bone_weights, Some([0.5, 0.25, 0.125, 0.125]));
         let mut plain = Vec::new();
-        for value in [1.0f32, 2.0, 3.0, 0.0, 1.0, 0.0, 0.5, -0.25, 0.25, 0.5, 1.0, 0.0, 0.0] {
+        for value in [
+            1.0f32, 2.0, 3.0, 0.0, 1.0, 0.0, 0.5, -0.25, 0.25, 0.5, 1.0, 0.0, 0.0,
+        ] {
             plain.extend(value.to_le_bytes());
         }
         plain.extend([12, 34, 56, 255, 1, 2, 3, 4]);
@@ -505,9 +541,10 @@ mod tests {
     /// Original LOD0 NSK dependencies, geometry only; no GPU or DDS decode is needed.
     #[test]
     fn real_conton_lod0_geometry_has_finite_attributes_when_provided() {
-        let (Ok(root), Ok(map)) =
-            (std::env::var("SHENRON_REAL_STAGE_NSK_ROOT"), std::env::var("SHENRON_REAL_BFLBN_FMP"))
-        else {
+        let (Ok(root), Ok(map)) = (
+            std::env::var("SHENRON_REAL_STAGE_NSK_ROOT"),
+            std::env::var("SHENRON_REAL_BFLBN_FMP"),
+        ) else {
             return;
         };
         let layout = crate::formats::fmp::FmpFile::parse(&std::fs::read(map).unwrap()).unwrap();
@@ -584,7 +621,9 @@ mod tests {
     /// `SHENRON_REAL_EMD=<path to a game .emd>` checks a real model.
     #[test]
     fn parses_real_model_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_EMD") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_EMD") else {
+            return;
+        };
         let emd = EmdFile::parse(&std::fs::read(path).unwrap()).expect("parse real EMD");
         assert!(emd.total_triangles() > 0);
         for sub in emd.submeshes() {
@@ -594,7 +633,10 @@ mod tests {
                 let w = v.bone_weights.unwrap();
                 assert!((w.iter().sum::<f32>() - 1.0).abs() < 0.01, "{w:?}");
                 assert!(
-                    v.bone_indices.unwrap().iter().all(|&b| (b as usize) < sub.bone_names.len())
+                    v.bone_indices
+                        .unwrap()
+                        .iter()
+                        .all(|&b| (b as usize) < sub.bone_names.len())
                 );
             }
         }

@@ -29,20 +29,23 @@ fn main() -> ExitCode {
                 None => print_json(&result),
                 _ => usage(),
             }
-        },
+        }
         Some(arg) if arg == "catalog" => {
             if args.next().is_some() {
                 return usage();
             }
             let catalog = bun_re::get_dragon_ball_catalog();
             print_json(&catalog)
-        },
+        }
         Some(arg) if arg == "emb" => {
             let Some(input) = args.next() else {
                 return usage();
             };
             let input = PathBuf::from(input);
-            if !input.extension().is_some_and(|extension| extension.eq_ignore_ascii_case("emb")) {
+            if !input
+                .extension()
+                .is_some_and(|extension| extension.eq_ignore_ascii_case("emb"))
+            {
                 eprintln!("shenron-re: emb input must have a .emb extension");
                 return ExitCode::FAILURE;
             }
@@ -60,22 +63,28 @@ fn main() -> ExitCode {
                 Err(error) => {
                     eprintln!("shenron-re: could not read {}: {error}", input.display());
                     return ExitCode::FAILURE;
-                },
+                }
             };
             let archive = match EmbArchive::parse(&archive_bytes) {
                 Ok(archive) => archive,
                 Err(error) => {
                     eprintln!("shenron-re: invalid EMB {}: {error}", input.display());
                     return ExitCode::FAILURE;
-                },
+                }
             };
             let destination = PathBuf::from(destination);
             if destination.exists() {
-                eprintln!("shenron-re: output directory already exists: {}", destination.display());
+                eprintln!(
+                    "shenron-re: output directory already exists: {}",
+                    destination.display()
+                );
                 return ExitCode::FAILURE;
             }
             if let Err(error) = fs::create_dir(&destination) {
-                eprintln!("shenron-re: could not create {}: {error}", destination.display());
+                eprintln!(
+                    "shenron-re: could not create {}: {error}",
+                    destination.display()
+                );
                 return ExitCode::FAILURE;
             }
             let mut outputs = Vec::with_capacity(archive.entries.len());
@@ -86,7 +95,7 @@ fn main() -> ExitCode {
                     Err(error) => {
                         eprintln!("shenron-re: invalid EMB entry {}: {error}", entry.name);
                         return ExitCode::FAILURE;
-                    },
+                    }
                 };
                 let output = destination.join(&entry.name);
                 let result = OpenOptions::new()
@@ -108,13 +117,16 @@ fn main() -> ExitCode {
                 "files": outputs,
             });
             print_json(&summary)
-        },
+        }
         Some(arg) if arg == "cpk" => {
             let Some(input) = args.next() else {
                 return usage();
             };
             let input = PathBuf::from(input);
-            if !input.extension().is_some_and(|extension| extension.eq_ignore_ascii_case("cpk")) {
+            if !input
+                .extension()
+                .is_some_and(|extension| extension.eq_ignore_ascii_case("cpk"))
+            {
                 eprintln!("shenron-re: cpk input must have a .cpk extension");
                 return ExitCode::FAILURE;
             }
@@ -132,14 +144,14 @@ fn main() -> ExitCode {
                 Err(error) => {
                     eprintln!("shenron-re: could not read {}: {error}", input.display());
                     return ExitCode::FAILURE;
-                },
+                }
             };
             let archive = match CpkArchive::parse(&archive_bytes) {
                 Ok(archive) => archive,
                 Err(error) => {
                     eprintln!("shenron-re: invalid CPK {}: {error}", input.display());
                     return ExitCode::FAILURE;
-                },
+                }
             };
             let mut paths = Vec::with_capacity(archive.entries.len());
             let mut unique_paths = HashSet::with_capacity(archive.entries.len());
@@ -151,7 +163,10 @@ fn main() -> ExitCode {
                     );
                     return ExitCode::FAILURE;
                 };
-                let key = path.to_string_lossy().replace('\\', "/").to_ascii_lowercase();
+                let key = path
+                    .to_string_lossy()
+                    .replace('\\', "/")
+                    .to_ascii_lowercase();
                 if key == "cpk_manifest.json" {
                     eprintln!("shenron-re: CPK entry reserves cpk_manifest.json");
                     return ExitCode::FAILURE;
@@ -164,11 +179,17 @@ fn main() -> ExitCode {
             }
             let destination = PathBuf::from(destination);
             if destination.exists() {
-                eprintln!("shenron-re: output directory already exists: {}", destination.display());
+                eprintln!(
+                    "shenron-re: output directory already exists: {}",
+                    destination.display()
+                );
                 return ExitCode::FAILURE;
             }
             if let Err(error) = fs::create_dir(&destination) {
-                eprintln!("shenron-re: could not create {}: {error}", destination.display());
+                eprintln!(
+                    "shenron-re: could not create {}: {error}",
+                    destination.display()
+                );
                 return ExitCode::FAILURE;
             }
             let mut outputs = Vec::with_capacity(archive.entries.len());
@@ -179,7 +200,7 @@ fn main() -> ExitCode {
                     Err(error) => {
                         eprintln!("shenron-re: could not extract {}: {error}", entry.name);
                         return ExitCode::FAILURE;
-                    },
+                    }
                 };
                 let output = destination.join(&relative);
                 if let Some(parent) = output.parent()
@@ -211,20 +232,24 @@ fn main() -> ExitCode {
                 "files": outputs,
             });
             let manifest_path = destination.join("cpk_manifest.json");
-            if let Err(error) =
-                OpenOptions::new().write(true).create_new(true).open(&manifest_path).and_then(
-                    |mut file| {
-                        let json =
-                            serde_json::to_vec_pretty(&manifest).map_err(std::io::Error::other)?;
-                        file.write_all(&json)
-                    },
-                )
+            if let Err(error) = OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&manifest_path)
+                .and_then(|mut file| {
+                    let json =
+                        serde_json::to_vec_pretty(&manifest).map_err(std::io::Error::other)?;
+                    file.write_all(&json)
+                })
             {
-                eprintln!("shenron-re: could not write {}: {error}", manifest_path.display());
+                eprintln!(
+                    "shenron-re: could not write {}: {error}",
+                    manifest_path.display()
+                );
                 return ExitCode::FAILURE;
             }
             print_json(&manifest)
-        },
+        }
         Some(arg) if arg == "inventory" => {
             let Some(root) = args.next() else {
                 return usage();
@@ -234,19 +259,19 @@ fn main() -> ExitCode {
                 Err(error) => {
                     eprintln!("shenron-re: inventory failed: {error}");
                     return ExitCode::FAILURE;
-                },
+                }
             };
             match args.next() {
                 Some(option) if option == "--output" => match args.next() {
                     Some(path) if args.next().is_none() => {
                         write_json(PathBuf::from(path), &inventory)
-                    },
+                    }
                     _ => usage(),
                 },
                 None => print_json(&inventory),
                 _ => usage(),
             }
-        },
+        }
         Some(arg) if arg == "text" => {
             let Some(input) = args.next() else {
                 return usage();
@@ -267,11 +292,14 @@ fn main() -> ExitCode {
                     Err(error) => {
                         eprintln!("shenron-re: text batch failed: {error}");
                         return ExitCode::FAILURE;
-                    },
+                    }
                 };
                 return print_json(&manifest);
             }
-            if !input.extension().is_some_and(|extension| extension.eq_ignore_ascii_case("msg")) {
+            if !input
+                .extension()
+                .is_some_and(|extension| extension.eq_ignore_ascii_case("msg"))
+            {
                 eprintln!("shenron-re: text input must have a .msg extension");
                 return ExitCode::FAILURE;
             }
@@ -280,20 +308,20 @@ fn main() -> ExitCode {
                 Err(error) => {
                     eprintln!("shenron-re: could not read {}: {error}", input.display());
                     return ExitCode::FAILURE;
-                },
+                }
             };
             let text = extract_msg_text(&input, &bytes);
             match args.next() {
                 Some(option) if option == "--output" => match args.next() {
                     Some(path) if args.next().is_none() => {
                         write_json_new(PathBuf::from(path), &text)
-                    },
+                    }
                     _ => usage(),
                 },
                 None => print_json(&text),
                 _ => usage(),
             }
-        },
+        }
         _ => usage(),
     }
 }
@@ -303,11 +331,11 @@ fn print_json(value: &impl serde::Serialize) -> ExitCode {
         Ok(json) => {
             println!("{json}");
             ExitCode::SUCCESS
-        },
+        }
         Err(error) => {
             eprintln!("shenron-re: could not encode JSON: {error}");
             ExitCode::FAILURE
-        },
+        }
     }
 }
 
@@ -317,14 +345,14 @@ fn write_json(path: PathBuf, value: &impl serde::Serialize) -> ExitCode {
         Err(error) => {
             eprintln!("shenron-re: could not encode JSON: {error}");
             return ExitCode::FAILURE;
-        },
+        }
     };
     match fs::write(&path, json) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             eprintln!("shenron-re: could not write {}: {error}", path.display());
             ExitCode::FAILURE
-        },
+        }
     }
 }
 
@@ -334,7 +362,7 @@ fn write_json_new(path: PathBuf, value: &impl serde::Serialize) -> ExitCode {
         Err(error) => {
             eprintln!("shenron-re: could not encode JSON: {error}");
             return ExitCode::FAILURE;
-        },
+        }
     };
     let result = OpenOptions::new()
         .write(true)
@@ -346,7 +374,7 @@ fn write_json_new(path: PathBuf, value: &impl serde::Serialize) -> ExitCode {
         Err(error) => {
             eprintln!("shenron-re: could not create {}: {error}", path.display());
             ExitCode::FAILURE
-        },
+        }
     }
 }
 

@@ -142,7 +142,10 @@ impl BdmFile {
     /// Parses a BDM binary file.
     pub fn parse(buffer: &[u8]) -> Result<Self> {
         if buffer.len() < 16 {
-            return Err(ReError::BufferTooSmall { required: 16, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 16,
+                available: buffer.len(),
+            });
         }
         if &buffer[0..4] != BDM_MAGIC {
             return Err(ReError::InvalidMagic {
@@ -153,7 +156,9 @@ impl BdmFile {
         let count = u32_at(buffer, 8)? as usize;
         let table = u32_at(buffer, 12)? as usize;
         if count == 0 {
-            return Ok(Self { entries: Vec::new() });
+            return Ok(Self {
+                entries: Vec::new(),
+            });
         }
         let size = buffer.len().saturating_sub(table) / count;
         if size != ENTRY_SIZE {
@@ -249,7 +254,9 @@ mod tests {
     /// `SHENRON_REAL_BDM=<path to a game .bdm>` checks a real damage file.
     #[test]
     fn parses_real_damage_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_BDM") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_BDM") else {
+            return;
+        };
         let bdm = BdmFile::parse(&std::fs::read(path).unwrap()).expect("parse real BDM");
         assert!(!bdm.entries.is_empty());
         for e in &bdm.entries {

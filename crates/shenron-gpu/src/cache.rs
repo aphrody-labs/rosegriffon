@@ -22,7 +22,13 @@ pub(crate) struct PipelineCacheStore {
 fn file_name(key: &str) -> String {
     let safe: String = key
         .chars()
-        .map(|c| if c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-') { c } else { '_' })
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-') {
+                c
+            } else {
+                '_'
+            }
+        })
         .collect();
     format!("{safe}.bin")
 }

@@ -1,7 +1,9 @@
 {
-  "extends": "../config/tsconfig/bun.json",
+  "extends": "../rg-config/tsconfig-bun.json",
   "compilerOptions": {
-    "lib": ["ESNext", "DOM"]
+    "lib": ["ESNext", "DOM"],
+    "types": ["bun", "node"],
+    "noUncheckedIndexedAccess": false
   },
   "include": ["src/**/*", "test/**/*"]
 }

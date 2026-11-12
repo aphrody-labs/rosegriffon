@@ -22,7 +22,10 @@ impl NskFile {
     /// Parses the bounded ESK and EMD sections using their existing owners.
     pub fn parse(buffer: &[u8]) -> Result<Self> {
         if buffer.len() < 0x20 {
-            return Err(ReError::BufferTooSmall { required: 0x20, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 0x20,
+                available: buffer.len(),
+            });
         }
         if &buffer[..4] != ESK_MAGIC {
             return Err(ReError::InvalidMagic {
@@ -31,11 +34,15 @@ impl NskFile {
             });
         }
         if buffer[4..6] != [0xFE, 0xFF] {
-            return Err(ReError::CorruptHeader("NSK requires little-endian data".into()));
+            return Err(ReError::CorruptHeader(
+                "NSK requires little-endian data".into(),
+            ));
         }
         let model_offset = u32_at(buffer, 0x14)? as usize;
         if model_offset < 0x20 || model_offset > buffer.len().saturating_sub(4) {
-            return Err(ReError::CorruptHeader("NSK EMD offset outside container".into()));
+            return Err(ReError::CorruptHeader(
+                "NSK EMD offset outside container".into(),
+            ));
         }
         let (skeleton_bytes, model_bytes) = buffer.split_at(model_offset);
         if &model_bytes[..4] != EMD_MAGIC {
@@ -44,7 +51,10 @@ impl NskFile {
                 found: model_bytes[..4].to_vec(),
             });
         }
-        Ok(Self { skeleton: EskFile::parse(skeleton_bytes)?, model: EmdFile::parse(model_bytes)? })
+        Ok(Self {
+            skeleton: EskFile::parse(skeleton_bytes)?,
+            model: EmdFile::parse(model_bytes)?,
+        })
     }
 }
 
@@ -104,7 +114,15 @@ mod tests {
         for length in [0, 3, 20, 31, 320, 323, 324] {
             assert!(parse_nsk(&original[..length]).is_err());
         }
-        for offset in [0, 16, 31, 319, original.len() - 3, original.len(), u32::MAX as usize] {
+        for offset in [
+            0,
+            16,
+            31,
+            319,
+            original.len() - 3,
+            original.len(),
+            u32::MAX as usize,
+        ] {
             let mut bytes = original.clone();
             bytes[0x14..0x18].copy_from_slice(&(offset as u32).to_le_bytes());
             assert!(parse_nsk(&bytes).is_err());
@@ -126,7 +144,9 @@ mod tests {
     /// Set to a private real CPK entry; absent fixtures do not qualify game data.
     #[test]
     fn parses_real_stage_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_NSK") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_NSK") else {
+            return;
+        };
         let bytes = std::fs::read(path).expect("read private real NSK");
         let nsk = parse_nsk(&bytes).expect("parse real stage NSK");
         assert!(!nsk.skeleton.bones.is_empty());

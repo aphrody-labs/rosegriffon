@@ -18,14 +18,19 @@ pub fn extract_entry(buffer: &[u8], entry: &CpkEntry) -> Result<Vec<u8>> {
         details: format!("File `{}` range overflows", entry.name),
     })?;
     if end > buffer.len() {
-        return Err(ReError::BufferTooSmall { required: end, available: buffer.len() });
+        return Err(ReError::BufferTooSmall {
+            required: end,
+            available: buffer.len(),
+        });
     }
 
     let bytes = &buffer[start..end];
     if entry.is_compressed || bytes.starts_with(b"CRILAYLA") {
         let decoded = crate::fs::crilayla::decompress_crilayla(bytes)?;
         if entry.is_compressed
-            && usize::try_from(entry.extract_size).ok().is_some_and(|size| size != decoded.len())
+            && usize::try_from(entry.extract_size)
+                .ok()
+                .is_some_and(|size| size != decoded.len())
         {
             return Err(ReError::ParseError {
                 context: "cpk_extract",

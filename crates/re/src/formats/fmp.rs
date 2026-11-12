@@ -66,14 +66,19 @@ pub fn fmp_matrix_column_major(matrix: &[f32; 12]) -> [f32; 16] {
 }
 
 fn error(message: impl Into<String>) -> ReError {
-    ReError::ParseError { context: "fmp", details: message.into() }
+    ReError::ParseError {
+        context: "fmp",
+        details: message.into(),
+    }
 }
 
 struct Reader<'a>(&'a [u8]);
 
 impl Reader<'_> {
     fn range(&self, at: usize, count: usize, stride: usize) -> Result<()> {
-        let end = count.checked_mul(stride).and_then(|size| at.checked_add(size));
+        let end = count
+            .checked_mul(stride)
+            .and_then(|size| at.checked_add(size));
         if count > MAX_COUNT || end.is_none_or(|end| end > self.0.len()) {
             return Err(error("table exceeds FMP bounds"));
         }
@@ -84,9 +89,16 @@ impl Reader<'_> {
     }
 
     fn u32(&self, at: usize) -> Result<u32> {
-        let end = at.checked_add(4).ok_or_else(|| error("u32 offset overflow"))?;
-        let bytes = self.0.get(at..end).ok_or_else(|| error("u32 outside FMP"))?;
-        Ok(u32::from_le_bytes(bytes.try_into().map_err(|_| error("u32"))?))
+        let end = at
+            .checked_add(4)
+            .ok_or_else(|| error("u32 offset overflow"))?;
+        let bytes = self
+            .0
+            .get(at..end)
+            .ok_or_else(|| error("u32 outside FMP"))?;
+        Ok(u32::from_le_bytes(
+            bytes.try_into().map_err(|_| error("u32"))?,
+        ))
     }
 
     fn float(&self, at: usize) -> Result<f32> {
@@ -115,8 +127,9 @@ impl Reader<'_> {
             .take(4097)
             .position(|byte| *byte == 0)
             .ok_or_else(|| error("unterminated or oversized FMP name"))?;
-        *text_budget =
-            text_budget.checked_add(length).ok_or_else(|| error("name budget overflow"))?;
+        *text_budget = text_budget
+            .checked_add(length)
+            .ok_or_else(|| error("name budget overflow"))?;
         if *text_budget > MAX_TEXT_BYTES {
             return Err(error("FMP total name limit exceeded"));
         }
@@ -173,7 +186,9 @@ impl Reader<'_> {
         entity.emb = self.index(self.u32(visual + 0x10)?, resources.emb.len())?;
         entity.ema = self.index(self.u32(visual + 0x20)?, resources.ema.len())?;
         let count = self.u32(visual + 8)? as usize;
-        *lod_budget = lod_budget.checked_add(count).ok_or_else(|| error("LOD count overflow"))?;
+        *lod_budget = lod_budget
+            .checked_add(count)
+            .ok_or_else(|| error("LOD count overflow"))?;
         if *lod_budget > MAX_COUNT {
             return Err(error("too many FMP LODs"));
         }
@@ -266,7 +281,11 @@ impl FmpFile {
                 spatial_hierarchy_offset: (hierarchy != 0).then_some(hierarchy),
             });
         }
-        Ok(Self { version, resources, objects })
+        Ok(Self {
+            version,
+            resources,
+            objects,
+        })
     }
 
     /// Exact original named transform, including EVE spawn markers; no camera inferred.
@@ -316,9 +335,11 @@ mod tests {
             put(&mut bytes, at, value);
         }
         for at in [0x94, 0xD8] {
-            for (index, value) in [1.0f32, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, -10.0]
-                .into_iter()
-                .enumerate()
+            for (index, value) in [
+                1.0f32, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, -10.0,
+            ]
+            .into_iter()
+            .enumerate()
             {
                 put(&mut bytes, at + index * 4, value.to_bits());
             }
@@ -399,7 +420,10 @@ mod tests {
         ] {
             let mut bytes = original.clone();
             put(&mut bytes, at, value);
-            assert!(FmpFile::parse(&bytes).is_err(), "field {at:x} accepted {value:x}");
+            assert!(
+                FmpFile::parse(&bytes).is_err(),
+                "field {at:x} accepted {value:x}"
+            );
         }
         let mut bytes = original.clone();
         bytes[0] = b'?';
@@ -425,14 +449,20 @@ mod tests {
             fmp_matrix_column_major(&[0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 3.0, 4.0, 5.0]);
         // A local +X basis vector rotates toward -Z, then receives the source translation.
         assert_eq!(
-            [matrix[0] + matrix[12], matrix[1] + matrix[13], matrix[2] + matrix[14]],
+            [
+                matrix[0] + matrix[12],
+                matrix[1] + matrix[13],
+                matrix[2] + matrix[14]
+            ],
             [3.0, 4.0, 4.0]
         );
     }
 
     #[test]
     fn parses_real_bftok_manifest_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_BFTOK_FMP") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_BFTOK_FMP") else {
+            return;
+        };
         let file = FmpFile::parse(&std::fs::read(path).unwrap()).unwrap();
         assert_eq!(file.objects.len(), 7);
         assert_eq!(file.resources.nsk.len(), 4);
@@ -449,12 +479,23 @@ mod tests {
 
     #[test]
     fn parses_real_bflbn_instances_and_cross_directory_dependencies_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_BFLBN_FMP") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_BFLBN_FMP") else {
+            return;
+        };
         let file = FmpFile::parse(&std::fs::read(path).unwrap()).unwrap();
         assert_eq!(file.objects.len(), 173);
         assert_eq!(file.resources.nsk.len(), 60);
-        assert!(file.resources.nsk.iter().any(|name| name == "LBY\\NLBYa40.nsk"));
-        let palm = file.objects.iter().find(|object| object.name == "ACT40_palm01").unwrap();
+        assert!(
+            file.resources
+                .nsk
+                .iter()
+                .any(|name| name == "LBY\\NLBYa40.nsk")
+        );
+        let palm = file
+            .objects
+            .iter()
+            .find(|object| object.name == "ACT40_palm01")
+            .unwrap();
         assert!((palm.matrix[9] - 77.12407).abs() < 0.001);
         assert_eq!(palm.entities[0].lods[0].nsk, Some(0));
         assert!(
@@ -467,7 +508,9 @@ mod tests {
 
     #[test]
     fn parses_real_eve_spawns_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_BFLBN_EVE") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_BFLBN_EVE") else {
+            return;
+        };
         let file = FmpFile::parse(&std::fs::read(path).unwrap()).unwrap();
         assert_eq!(file.objects.len(), 46);
         assert_eq!(file.named_point("VS_INIT_POS_A_0"), Some([0.0, 0.0, -10.0]));

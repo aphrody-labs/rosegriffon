@@ -60,7 +60,11 @@ pub struct SteamPlanningLimits {
 
 impl Default for SteamPlanningLimits {
     fn default() -> Self {
-        Self { max_depots: 1024, max_manifest_entries: 250_000, max_collisions: 2048 }
+        Self {
+            max_depots: 1024,
+            max_manifest_entries: 250_000,
+            max_collisions: 2048,
+        }
     }
 }
 
@@ -164,7 +168,9 @@ fn parse_app_manifest(content: &str) -> Option<(u32, String, String)> {
     let install_dir = vdf_value(content, "installdir")?;
     let install_dir = Path::new(&install_dir);
     if install_dir.components().count() != 1
-        || install_dir.components().any(|part| !matches!(part, std::path::Component::Normal(_)))
+        || install_dir
+            .components()
+            .any(|part| !matches!(part, std::path::Component::Normal(_)))
     {
         return None;
     }
@@ -174,7 +180,9 @@ fn parse_app_manifest(content: &str) -> Option<(u32, String, String)> {
 fn vdf_value(content: &str, key: &str) -> Option<String> {
     content.lines().find_map(|line| {
         let mut fields = line.split('"').filter(|field| !field.trim().is_empty());
-        (fields.next()? == key).then(|| fields.next().map(str::to_owned)).flatten()
+        (fields.next()? == key)
+            .then(|| fields.next().map(str::to_owned))
+            .flatten()
     })
 }
 

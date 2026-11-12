@@ -5,11 +5,11 @@
 
 #![forbid(unsafe_code)]
 
+use anyhow::{Context, Result};
+use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufWriter;
 use std::path::{Path, PathBuf};
-use anyhow::{Context, Result};
-use serde::{Deserialize, Serialize};
 
 /// Supported game menu screens for headless capture.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -291,7 +291,10 @@ pub fn capture_all_menus(options: &MenuCaptureOptions) -> Result<CaptureSequence
         let mut first_file = String::new();
 
         for local_frame in 0..options.frames_per_menu {
-            let file_name = format!("frame_{:05}_{}_{:02}.png", global_frame_index, s_name, local_frame);
+            let file_name = format!(
+                "frame_{:05}_{}_{:02}.png",
+                global_frame_index, s_name, local_frame
+            );
             let file_path = options.output_dir.join(&file_name);
 
             if first_file.is_empty() {

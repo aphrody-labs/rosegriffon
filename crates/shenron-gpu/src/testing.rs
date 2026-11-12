@@ -52,10 +52,10 @@ pub fn software_context() -> Option<GpuContext> {
                 context.report().summary()
             );
             None
-        },
+        }
         Err(error) => {
             log::warn!("no software adapter ({error}): software tests skipped");
             None
-        },
+        }
     }
 }

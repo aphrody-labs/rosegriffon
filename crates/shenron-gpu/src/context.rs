@@ -79,16 +79,28 @@ async fn select_adapter(
     if let Some(wanted) = options.adapter_name.as_deref() {
         let needle = wanted.to_ascii_lowercase();
         let adapters = instance.enumerate_adapters(options.backends).await;
-        let available: Vec<String> =
-            adapters.iter().map(|adapter| adapter.get_info().name).collect();
+        let available: Vec<String> = adapters
+            .iter()
+            .map(|adapter| adapter.get_info().name)
+            .collect();
         return adapters
             .into_iter()
             .filter(|adapter| surface.is_none_or(|surface| adapter.is_surface_supported(surface)))
-            .find(|adapter| adapter.get_info().name.to_ascii_lowercase().contains(&needle))
+            .find(|adapter| {
+                adapter
+                    .get_info()
+                    .name
+                    .to_ascii_lowercase()
+                    .contains(&needle)
+            })
             .ok_or_else(|| {
                 GpuError::NoAdapter(format!(
                     "no adapter name contains {wanted:?}; available: {}",
-                    if available.is_empty() { "none".to_owned() } else { available.join(", ") }
+                    if available.is_empty() {
+                        "none".to_owned()
+                    } else {
+                        available.join(", ")
+                    }
                 ))
             });
     }
@@ -105,7 +117,11 @@ async fn select_adapter(
                 "{error}; backends {:?}, power {:?}, software adapter {}",
                 options.backends,
                 options.power_preference,
-                if options.force_fallback_adapter { "required" } else { "not required" },
+                if options.force_fallback_adapter {
+                    "required"
+                } else {
+                    "not required"
+                },
             ))
         })
 }
@@ -186,7 +202,11 @@ impl GpuContext {
             "GPU device `{}` on {}{}",
             options.label,
             report.summary(),
-            if report.is_software { " (software adapter)" } else { "" },
+            if report.is_software {
+                " (software adapter)"
+            } else {
+                ""
+            },
         );
         Ok(Self {
             instance,
@@ -232,16 +252,18 @@ impl GpuContext {
     /// The persistent pipeline cache, when enabled and supported.
     #[must_use]
     pub fn pipeline_cache(&self) -> Option<&wgpu::PipelineCache> {
-        self.pipeline_cache.as_ref().map(crate::cache::PipelineCacheStore::cache)
+        self.pipeline_cache
+            .as_ref()
+            .map(crate::cache::PipelineCacheStore::cache)
     }
 
     /// Writes the pipeline cache next to the previous ones (native; a no-op elsewhere or when
     /// the cache is disabled). Call it once the pipelines of a session are built.
     pub fn save_pipeline_cache(&self) -> Result<()> {
         match &self.pipeline_cache {
-            Some(store) => {
-                store.save().map_err(|error| GpuError::Internal(format!("pipeline cache: {error}")))
-            },
+            Some(store) => store
+                .save()
+                .map_err(|error| GpuError::Internal(format!("pipeline cache: {error}"))),
             None => Ok(()),
         }
     }

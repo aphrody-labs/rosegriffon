@@ -98,7 +98,12 @@ struct CpkLruCache {
 
 impl CpkLruCache {
     fn new(budget_bytes: usize) -> Self {
-        Self { map: HashMap::new(), order: VecDeque::new(), bytes_used: 0, budget_bytes }
+        Self {
+            map: HashMap::new(),
+            order: VecDeque::new(),
+            bytes_used: 0,
+            budget_bytes,
+        }
     }
 
     fn get(&mut self, key: &str) -> Option<Arc<LoadedCpk>> {
@@ -357,7 +362,11 @@ impl XenoverseVfs {
             (archive, bytes)
         };
 
-        let loaded = Arc::new(LoadedCpk { name: archive_name.clone(), archive, storage });
+        let loaded = Arc::new(LoadedCpk {
+            name: archive_name.clone(),
+            archive,
+            storage,
+        });
 
         // Add to mounted paths
         self.mounted_cpks.push(cpk_path);
@@ -402,7 +411,11 @@ impl XenoverseVfs {
         #[cfg(target_arch = "wasm32")]
         let storage = bytes;
 
-        let loaded = Arc::new(LoadedCpk { name: name.to_string(), archive, storage });
+        let loaded = Arc::new(LoadedCpk {
+            name: name.to_string(),
+            archive,
+            storage,
+        });
 
         let mut added = 0;
         for entry in &loaded.archive.entries {
@@ -485,10 +498,11 @@ impl XenoverseVfs {
         }
 
         // Cache miss: reload from mounted_cpks
-        let found_path = self
-            .mounted_cpks
-            .iter()
-            .find(|p| p.file_name().map(|n| n.to_string_lossy() == archive_name).unwrap_or(false));
+        let found_path = self.mounted_cpks.iter().find(|p| {
+            p.file_name()
+                .map(|n| n.to_string_lossy() == archive_name)
+                .unwrap_or(false)
+        });
 
         if let Some(path) = found_path {
             #[cfg(not(target_arch = "wasm32"))]
@@ -506,9 +520,16 @@ impl XenoverseVfs {
                 (archive, bytes)
             };
 
-            let loaded = Arc::new(LoadedCpk { name: archive_name.to_string(), archive, storage });
+            let loaded = Arc::new(LoadedCpk {
+                name: archive_name.to_string(),
+                archive,
+                storage,
+            });
 
-            self.cache.lock().unwrap().insert(archive_name.to_string(), loaded.clone());
+            self.cache
+                .lock()
+                .unwrap()
+                .insert(archive_name.to_string(), loaded.clone());
             return Ok(loaded);
         }
 
@@ -554,7 +575,10 @@ impl XenoverseVfs {
     /// Finds files by path prefix (e.g. `"chara/GOK/"`).
     pub fn find_by_prefix(&self, prefix: &str) -> Vec<&XenoverseVfsEntry> {
         let norm_prefix = normalize_virtual_path(prefix);
-        self.index.values().filter(|e| e.virtual_path.starts_with(&norm_prefix)).collect()
+        self.index
+            .values()
+            .filter(|e| e.virtual_path.starts_with(&norm_prefix))
+            .collect()
     }
 
     /// Returns a list of distinct 3-letter character folder codes (e.g. `GOK`, `VEG`, `PIC`).
@@ -624,13 +648,22 @@ mod tests {
 
     #[test]
     fn test_normalize_virtual_path() {
-        assert_eq!(normalize_virtual_path("data\\chara\\GOK\\GOK.emd"), "chara/GOK/GOK.emd");
-        assert_eq!(normalize_virtual_path("./data/chara/VEG/VEG.emb"), "chara/VEG/VEG.emb");
+        assert_eq!(
+            normalize_virtual_path("data\\chara\\GOK\\GOK.emd"),
+            "chara/GOK/GOK.emd"
+        );
+        assert_eq!(
+            normalize_virtual_path("./data/chara/VEG/VEG.emb"),
+            "chara/VEG/VEG.emb"
+        );
         assert_eq!(
             normalize_virtual_path("/data/system/custom_skill.cus"),
             "system/custom_skill.cus"
         );
-        assert_eq!(normalize_virtual_path("chara/PIC/PIC.esk"), "chara/PIC/PIC.esk");
+        assert_eq!(
+            normalize_virtual_path("chara/PIC/PIC.esk"),
+            "chara/PIC/PIC.esk"
+        );
     }
 
     #[test]
@@ -642,7 +675,8 @@ mod tests {
             ("chara/GOK/GOK.emd", b"EMD_GOKU_V1"),
             ("system/custom_skill.cus", b"CUS_SKILLS_V1"),
         ]);
-        vfs.mount_cpk_memory("data.cpk", cpk_data).expect("mount data.cpk");
+        vfs.mount_cpk_memory("data.cpk", cpk_data)
+            .expect("mount data.cpk");
 
         assert_eq!(vfs.len(), 2);
         assert!(vfs.exists("chara/GOK/GOK.emd"));
@@ -656,20 +690,32 @@ mod tests {
         // Notice: in DBXV2, data2 is mounted before data so it takes precedence.
         // If we reset and mount data2 then data:
         let mut vfs_prioritized = XenoverseVfs::new();
-        vfs_prioritized.mount_cpk_memory("data2.cpk", cpk_data2).unwrap();
+        vfs_prioritized
+            .mount_cpk_memory("data2.cpk", cpk_data2)
+            .unwrap();
         let cpk_data_base = CpkArchive::create_mock(&[
             ("chara/GOK/GOK.emd", b"EMD_GOKU_V1_OLD"),
             ("system/custom_skill.cus", b"CUS_SKILLS_V1"),
         ]);
-        vfs_prioritized.mount_cpk_memory("data.cpk", cpk_data_base).unwrap();
+        vfs_prioritized
+            .mount_cpk_memory("data.cpk", cpk_data_base)
+            .unwrap();
 
         assert_eq!(vfs_prioritized.len(), 3);
         assert_eq!(
             vfs_prioritized.read_file("chara/GOK/GOK.emd").unwrap(),
             b"EMD_GOKU_V2_OVERRIDE"
         );
-        assert_eq!(vfs_prioritized.read_file("chara/VEG/VEG.emd").unwrap(), b"EMD_VEGETA_V2");
-        assert_eq!(vfs_prioritized.read_file("system/custom_skill.cus").unwrap(), b"CUS_SKILLS_V1");
+        assert_eq!(
+            vfs_prioritized.read_file("chara/VEG/VEG.emd").unwrap(),
+            b"EMD_VEGETA_V2"
+        );
+        assert_eq!(
+            vfs_prioritized
+                .read_file("system/custom_skill.cus")
+                .unwrap(),
+            b"CUS_SKILLS_V1"
+        );
 
         let char_codes = vfs_prioritized.list_character_codes();
         assert!(char_codes.contains(&"GOK".to_string()));

@@ -67,7 +67,10 @@ impl Dxbv2Save {
     /// Parse a decrypted DBXV2 savegame body (beginning with `#SAV`).
     pub fn parse_decrypted(data: &[u8]) -> Result<Self> {
         if data.len() < 0x20000 {
-            return Err(ReError::BufferTooSmall { required: 0x20000, available: data.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 0x20000,
+                available: data.len(),
+            });
         }
 
         if data[0..4] != DECRYPTED_SAV_MAGIC {
@@ -123,7 +126,9 @@ fn parse_cac_slot(slot: usize, buf: &[u8]) -> Option<Dxbv2Cac> {
     // Name is 64 bytes UTF-8 null-terminated at offset 0x44
     let name_bytes = &buf[0x44..0x44 + 64];
     let null_pos = name_bytes.iter().position(|&b| b == 0).unwrap_or(64);
-    let name = String::from_utf8_lossy(&name_bytes[..null_pos]).trim().to_string();
+    let name = String::from_utf8_lossy(&name_bytes[..null_pos])
+        .trim()
+        .to_string();
 
     if name.is_empty() {
         return None;
@@ -170,9 +175,17 @@ fn parse_cac_slot(slot: usize, buf: &[u8]) -> Option<Dxbv2Cac> {
 
 fn read_u32_le(data: &[u8], offset: usize) -> Result<u32> {
     if offset + 4 > data.len() {
-        return Err(ReError::BufferTooSmall { required: offset + 4, available: data.len() });
+        return Err(ReError::BufferTooSmall {
+            required: offset + 4,
+            available: data.len(),
+        });
     }
-    Ok(u32::from_le_bytes([data[offset], data[offset + 1], data[offset + 2], data[offset + 3]]))
+    Ok(u32::from_le_bytes([
+        data[offset],
+        data[offset + 1],
+        data[offset + 2],
+        data[offset + 3],
+    ]))
 }
 
 #[cfg(test)]

@@ -13,7 +13,7 @@
     "compile": "bun ../../scripts/compile.ts",
     "typecheck": "bun check --noEmit",
     "test": "bun test src",
-    "lint": "bun lint src"
+    "lint": "oxlint src"
   },
   "dependencies": {
     "@aphrody/next-bun": "catalog:",

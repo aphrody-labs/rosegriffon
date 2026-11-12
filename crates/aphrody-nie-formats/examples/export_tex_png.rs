@@ -38,7 +38,9 @@ fn decode(vfs: &vfs::Vfs, rel: &str) -> Result<Vec<u8>, String> {
         Some((c, n)) => (format!("data/{c}.g4tx"), Some(n.trim_end_matches(".png"))),
         None => (format!("data/{}.g4tx", rel.trim_end_matches(".png")), None),
     };
-    let data = vfs.read(&container).map_err(|e| format!("read {container}: {e}"))?;
+    let data = vfs
+        .read(&container)
+        .map_err(|e| format!("read {container}: {e}"))?;
     match name {
         Some(n) => g4tx_decode::decode_named_to_png(&data, n),
         None => g4tx_decode::decode_best_to_png(&data, g4tx_decode::basename_of(&container)),
@@ -48,21 +50,41 @@ fn decode(vfs: &vfs::Vfs, rel: &str) -> Result<Vec<u8>, String> {
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let flag = |n: &str| args.iter().position(|a| a == n).and_then(|i| args.get(i + 1)).cloned();
-    let out = PathBuf::from(args.first().expect("usage: export_tex_png <out-dir> (--prefix P | --list F) [--threads N]"));
+    let flag = |n: &str| {
+        args.iter()
+            .position(|a| a == n)
+            .and_then(|i| args.get(i + 1))
+            .cloned()
+    };
+    let out = PathBuf::from(
+        args.first()
+            .expect("usage: export_tex_png <out-dir> (--prefix P | --list F) [--threads N]"),
+    );
     let threads: usize = flag("--threads").and_then(|t| t.parse().ok()).unwrap_or(8);
 
     let probe = vfs::open_game().expect("open game VFS (NIE_GAME_DIR)");
     let mut wanted: Vec<String> = if let Some(list) = flag("--list") {
-        std::fs::read_to_string(&list).expect("read --list").lines().filter_map(normalize).collect()
+        std::fs::read_to_string(&list)
+            .expect("read --list")
+            .lines()
+            .filter_map(normalize)
+            .collect()
     } else {
         let prefix = flag("--prefix").unwrap_or_else(|| "dx11/".into());
-        let prefix = format!("data/{}", prefix.trim_start_matches('/').trim_start_matches("data/"));
+        let prefix = format!(
+            "data/{}",
+            prefix.trim_start_matches('/').trim_start_matches("data/")
+        );
         probe
             .iter()
             .map(|(p, _)| p)
             .filter(|p| p.starts_with(&prefix) && p.ends_with(".g4tx"))
-            .map(|p| format!("{}.png", p.trim_start_matches("data/").trim_end_matches(".g4tx")))
+            .map(|p| {
+                format!(
+                    "{}.png",
+                    p.trim_start_matches("data/").trim_end_matches(".g4tx")
+                )
+            })
             .collect()
     };
     drop(probe);
@@ -72,14 +94,19 @@ fn main() {
 
     std::fs::create_dir_all(&out).expect("create out dir");
     let manifest = Arc::new(Mutex::new(
-        std::fs::OpenOptions::new().create(true).append(true).open(out.join("manifest.jsonl")).expect("manifest"),
+        std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(out.join("manifest.jsonl"))
+            .expect("manifest"),
     ));
     let wanted = Arc::new(wanted);
     let next = Arc::new(AtomicUsize::new(0));
     let (ok, failed) = (Arc::new(AtomicUsize::new(0)), Arc::new(AtomicUsize::new(0)));
     let workers: Vec<_> = (0..threads)
         .map(|_| {
-            let (wanted, next, manifest, out) = (wanted.clone(), next.clone(), manifest.clone(), out.clone());
+            let (wanted, next, manifest, out) =
+                (wanted.clone(), next.clone(), manifest.clone(), out.clone());
             let (ok, failed) = (ok.clone(), failed.clone());
             std::thread::spawn(move || {
                 let vfs = vfs::open_game().expect("open game VFS");
@@ -97,7 +124,9 @@ fn main() {
                                 let _ = std::fs::create_dir_all(dir);
                             }
                             let tmp = dest.with_extension("png.tmp");
-                            std::fs::write(&tmp, &png).and_then(|()| std::fs::rename(&tmp, &dest)).expect("write png");
+                            std::fs::write(&tmp, &png)
+                                .and_then(|()| std::fs::rename(&tmp, &dest))
+                                .expect("write png");
                             ok.fetch_add(1, Ordering::Relaxed);
                             let sha = hex(&Sha256::digest(&png));
                             serde_json::json!({ "path": rel, "bytes": png.len(), "sha256": sha })
@@ -120,7 +149,11 @@ fn main() {
     for w in workers {
         w.join().expect("worker");
     }
-    eprintln!("done: {} ok, {} failed", ok.load(Ordering::Relaxed), failed.load(Ordering::Relaxed));
+    eprintln!(
+        "done: {} ok, {} failed",
+        ok.load(Ordering::Relaxed),
+        failed.load(Ordering::Relaxed)
+    );
 }
 
 fn hex(bytes: &[u8]) -> String {

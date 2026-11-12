@@ -113,7 +113,11 @@ fn parse_skillset(buffer: &[u8], at: usize) -> Result<Skillset> {
     for (k, slot) in values.iter_mut().enumerate() {
         *slot = u16_at(buffer, at + 8 + k * 2)?;
     }
-    Ok(Skillset { id: u32_at(buffer, at)? as i32, flags: u32_at(buffer, at + 4)? as i32, values })
+    Ok(Skillset {
+        id: u32_at(buffer, at)? as i32,
+        flags: u32_at(buffer, at + 4)? as i32,
+        values,
+    })
 }
 
 fn parse_skill(buffer: &[u8], at: usize, category: SkillCategory) -> Result<CusSkill> {
@@ -124,9 +128,10 @@ fn parse_skill(buffer: &[u8], at: usize, category: SkillCategory) -> Result<CusS
         short_name: c_string_at(buffer, at)?.chars().take(4).collect(),
         id1: u16(8)?,
         id2: u16(10)?,
-        race_lock: *buffer
-            .get(at + 12)
-            .ok_or(ReError::BufferTooSmall { required: at + 13, available: buffer.len() })?,
+        race_lock: *buffer.get(at + 12).ok_or(ReError::BufferTooSmall {
+            required: at + 13,
+            available: buffer.len(),
+        })?,
         files_loaded: u16(14)?,
         ean_path: optional_path(buffer, at + 20)?,
         cam_ean_path: optional_path(buffer, at + 24)?,
@@ -153,7 +158,10 @@ fn parse_skill(buffer: &[u8], at: usize, category: SkillCategory) -> Result<CusS
 impl CusFile {
     pub fn parse(buffer: &[u8]) -> Result<Self> {
         if buffer.len() < 64 {
-            return Err(ReError::BufferTooSmall { required: 64, available: buffer.len() });
+            return Err(ReError::BufferTooSmall {
+                required: 64,
+                available: buffer.len(),
+            });
         }
         if &buffer[0..4] != CUS_MAGIC {
             return Err(ReError::InvalidMagic {
@@ -210,7 +218,9 @@ impl CusFile {
     }
 
     pub fn find(&self, category: SkillCategory, id1: u16) -> Option<&CusSkill> {
-        self.skills.iter().find(|s| s.category == category && s.id1 == id1)
+        self.skills
+            .iter()
+            .find(|s| s.category == category && s.id1 == id1)
     }
 }
 
@@ -238,8 +248,11 @@ pub fn encode_cus(skillset_id: i32, skills: &[(SkillCategory, &str, u16)]) -> Ve
     let offsets = [40usize, 44, 48, 52, 56, 60];
     let counts = [16usize, 20, 24, 28, 32, 36];
     let mut cursor = skillset_end;
-    for (category, offset_field, count_field) in
-        order.into_iter().zip(offsets).zip(counts).map(|((c, o), n)| (c, o, n))
+    for (category, offset_field, count_field) in order
+        .into_iter()
+        .zip(offsets)
+        .zip(counts)
+        .map(|((c, o), n)| (c, o, n))
     {
         let entries: Vec<_> = skills.iter().filter(|(cat, ..)| *cat == category).collect();
         out[count_field..count_field + 4].copy_from_slice(&(entries.len() as u32).to_le_bytes());
@@ -264,7 +277,10 @@ mod tests {
     fn parses_skillsets_and_skills_across_categories() {
         let bytes = encode_cus(
             7,
-            &[(SkillCategory::Super, "KMHM", 12), (SkillCategory::Awoken, "SSJ3", 99)],
+            &[
+                (SkillCategory::Super, "KMHM", 12),
+                (SkillCategory::Awoken, "SSJ3", 99),
+            ],
         );
         let cus = CusFile::parse(&bytes).unwrap();
         assert_eq!(cus.skillsets.len(), 1);
@@ -274,7 +290,10 @@ mod tests {
         assert_eq!(kame.short_name, "KMHM");
         assert_eq!(kame.part_set, -1);
         assert!(cus.find(SkillCategory::Ultimate, 12).is_none());
-        assert_eq!(cus.find(SkillCategory::Awoken, 99).unwrap().short_name, "SSJ3");
+        assert_eq!(
+            cus.find(SkillCategory::Awoken, 99).unwrap().short_name,
+            "SSJ3"
+        );
     }
 
     #[test]
@@ -295,15 +314,28 @@ mod tests {
     /// 434 skillsets and every category offset landing exactly where declared.
     #[test]
     fn parses_real_skills_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_CUS") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_CUS") else {
+            return;
+        };
         let cus = CusFile::parse(&std::fs::read(path).unwrap()).expect("parse real CUS");
         assert_eq!(cus.skillsets.len(), 434);
         assert!(cus.skills.len() > 500, "only {} skills", cus.skills.len());
-        assert!(cus.skills.iter().any(|s| s.category == SkillCategory::Super));
-        assert!(cus.skills.iter().any(|s| s.category == SkillCategory::Awoken));
+        assert!(
+            cus.skills
+                .iter()
+                .any(|s| s.category == SkillCategory::Super)
+        );
+        assert!(
+            cus.skills
+                .iter()
+                .any(|s| s.category == SkillCategory::Awoken)
+        );
         for skill in &cus.skills {
             assert!(
-                skill.short_name.chars().all(|c| c.is_ascii_graphic() || c == ' '),
+                skill
+                    .short_name
+                    .chars()
+                    .all(|c| c.is_ascii_graphic() || c == ' '),
                 "{:?} has a non-ASCII short name",
                 skill.short_name
             );
@@ -318,6 +350,11 @@ mod tests {
             .collect();
         goku_supers.sort_by_key(|s| s.id2);
         let names: Vec<_> = goku_supers.iter().map(|s| s.short_name.as_str()).collect();
-        assert_eq!(names, ["KMH", "KMC", "CSG", "CRG", "GKD", "SKI", "GTW", "AST", "4KM", "KMQ"]);
+        assert_eq!(
+            names,
+            [
+                "KMH", "KMC", "CSG", "CRG", "GKD", "SKI", "GTW", "AST", "4KM", "KMQ"
+            ]
+        );
     }
 }

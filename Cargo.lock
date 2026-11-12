@@ -680,10 +680,12 @@ name = "aphrody-nie-headless"
 version = "1.4.8"
 dependencies = [
  "anyhow",
+ "aphrody-nie-app",
  "aphrody-nie-core",
  "aphrody-nie-data",
  "aphrody-nie-formats",
  "aphrody-nie-pe-inspect",
+ "aphrody-nie-runtime",
  "aphrody-nie-save",
  "aphrody-nie-video",
  "clap",

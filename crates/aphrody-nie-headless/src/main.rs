@@ -166,6 +166,18 @@ enum Commande {
         #[arg(long, default_value = "002AB8F4-USERDATALIVE")]
         slot: String,
     },
+    /// Starts the cross-platform open world simulation with pixel-perfect design system rendering.
+    OpenWorld {
+        /// Initial zone (nagumohara, raimon, kizuna-town, odaiba-stadium).
+        #[arg(long, default_value = "nagumohara")]
+        zone: String,
+        /// Number of simulation ticks to run (at 60 Hz).
+        #[arg(long, default_value = "120")]
+        ticks: u32,
+        /// Output directory for rendered frames and session state.
+        #[arg(long, default_value = "target/open_world_sim")]
+        out_dir: PathBuf,
+    },
 }
 
 // ---------------------------------------------------------------------------
@@ -205,6 +217,11 @@ fn main() -> Result<()> {
             slot,
         } => cmd_memory_dump(out_bin, out_json, slot),
         Commande::Pipeline { out_dir, slot } => cmd_pipeline(out_dir, slot),
+        Commande::OpenWorld {
+            zone,
+            ticks,
+            out_dir,
+        } => cmd_open_world(zone, ticks, out_dir),
     }
 }
 
@@ -493,36 +510,39 @@ fn cmd_pipeline(out_dir: PathBuf, slot: String) -> Result<()> {
 
     // 1. Save edit
     let save_path = out_dir.join(format!("{slot}.bin"));
-    let save_report = aphrody_nie_headless::execute_save_edit(&aphrody_nie_headless::SaveEditOptions {
-        input_path: save_path.clone(),
-        output_path: Some(save_path.clone()),
-        slot: slot.clone(),
-        player_level: Some(99),
-        coins: Some(999_999),
-        mock_if_missing: true,
-    })?;
+    let save_report =
+        aphrody_nie_headless::execute_save_edit(&aphrody_nie_headless::SaveEditOptions {
+            input_path: save_path.clone(),
+            output_path: Some(save_path.clone()),
+            slot: slot.clone(),
+            player_level: Some(99),
+            coins: Some(999_999),
+            mock_if_missing: true,
+        })?;
 
     // 2. Memory dump
     let mem_bin = out_dir.join("nie_memory_dump.bin");
     let mem_json = out_dir.join("nie_memory_map.json");
-    let mem_map = aphrody_nie_headless::execute_memory_dump(&aphrody_nie_headless::MemoryDumpOptions {
-        output_bin: mem_bin,
-        output_json: Some(mem_json),
-        live_pid: None,
-        target_pe: None,
-        slot_name: slot.clone(),
-    })?;
+    let mem_map =
+        aphrody_nie_headless::execute_memory_dump(&aphrody_nie_headless::MemoryDumpOptions {
+            output_bin: mem_bin,
+            output_json: Some(mem_json),
+            live_pid: None,
+            target_pe: None,
+            slot_name: slot.clone(),
+        })?;
 
     // 3. Menu capture
     let frames_dir = out_dir.join("frames");
-    let menu_manifest = aphrody_nie_headless::capture_all_menus(&aphrody_nie_headless::MenuCaptureOptions {
-        output_dir: frames_dir,
-        width: 1280,
-        height: 720,
-        frames_per_menu: 5,
-        fps: 30,
-        screens: aphrody_nie_headless::GameScreen::all().to_vec(),
-    })?;
+    let menu_manifest =
+        aphrody_nie_headless::capture_all_menus(&aphrody_nie_headless::MenuCaptureOptions {
+            output_dir: frames_dir,
+            width: 1280,
+            height: 720,
+            frames_per_menu: 5,
+            fps: 30,
+            screens: aphrody_nie_headless::GameScreen::all().to_vec(),
+        })?;
 
     let summary = serde_json::json!({
         "status": "success",
@@ -542,6 +562,100 @@ fn cmd_pipeline(out_dir: PathBuf, slot: String) -> Result<()> {
             "clips_count": menu_manifest.filmcraft_clips.len(),
         }
     });
+
+    println!("{}", serde_json::to_string_pretty(&summary)?);
+    Ok(())
+}
+
+fn cmd_open_world(zone_str: String, ticks: u32, out_dir: PathBuf) -> Result<()> {
+    use aphrody_nie_app::render::{Font, H, W, render_open_world};
+    use aphrody_nie_runtime::open_world::{OpenWorldState, WorldZoneId};
+
+    let zone = match zone_str.to_lowercase().as_str() {
+        "raimon" | "w20" => WorldZoneId::Raimon,
+        "kizuna" | "kizuna-town" | "kizuna_town" | "w30" => WorldZoneId::KizunaTown,
+        "odaiba" | "odaiba-stadium" | "odaiba_stadium" | "w40" => WorldZoneId::OdaibaStadium,
+        _ => WorldZoneId::Nagumohara,
+    };
+
+    std::fs::create_dir_all(&out_dir)?;
+
+    let mut state = OpenWorldState::new(zone);
+    let font = Font::default();
+
+    // Run simulation ticks with active player movement and NPC interaction check
+    let mut interactions = Vec::new();
+    for i in 0..ticks {
+        state.step(0.0, 1.0, false);
+        if i == ticks / 3 || i == (2 * ticks) / 3 {
+            let outcome = state.interact();
+            if outcome != aphrody_nie_runtime::open_world::InteractionOutcome::None {
+                interactions.push(format!("tick {i}: {outcome:?}"));
+            }
+        }
+    }
+
+    // Render frame with authentic pixel-perfect design system
+    let frame = render_open_world(&state, &font);
+
+    // Save PNG frame
+    let frame_png_path = out_dir.join("open_world_frame.png");
+    {
+        let file = std::fs::File::create(&frame_png_path)?;
+        let w = std::io::BufWriter::new(file);
+        let mut encoder = png::Encoder::new(w, W as u32, H as u32);
+        encoder.set_color(png::ColorType::Rgba);
+        encoder.set_depth(png::BitDepth::Eight);
+        let mut writer = encoder.write_header()?;
+        writer.write_image_data(&frame.buf)?;
+    }
+
+    let summary = serde_json::json!({
+        "status": "success",
+        "action": "open_world_started",
+        "zone": format!("{:?}", state.zone),
+        "zone_title": state.zone.title_fr(),
+        "map_code": state.zone.map_code(),
+        "player": {
+            "leader": state.leader_name,
+            "party_level": state.party_level,
+            "position": {
+                "x": state.player.position.x,
+                "y": state.player.position.y,
+                "z": state.player.position.z,
+            },
+            "speed": state.player.speed,
+            "anim_state": format!("{:?}", state.player.anim_state),
+        },
+        "camera": {
+            "eye": {
+                "x": state.camera.eye.x,
+                "y": state.camera.eye.y,
+                "z": state.camera.eye.z,
+            },
+            "yaw": state.camera.yaw,
+            "pitch": state.camera.pitch,
+            "fov": state.camera.fov_deg,
+        },
+        "simulation": {
+            "ticks_run": ticks,
+            "total_ticks": state.tick_count,
+            "matches_won": state.matches_won,
+            "npcs_in_zone": state.npcs.len(),
+            "func_points_in_zone": state.func_points.len(),
+            "kizuna_power": state.kizuna.kizuna_power,
+            "interactions_recorded": interactions,
+        },
+        "frame_output": {
+            "png_path": frame_png_path.display().to_string(),
+            "width": W,
+            "height": H,
+            "bytes": frame.buf.len(),
+        }
+    });
+
+    let json_path = out_dir.join("open_world_session.json");
+    std::fs::write(&json_path, serde_json::to_string_pretty(&summary)?)?;
 
     println!("{}", serde_json::to_string_pretty(&summary)?);
     Ok(())

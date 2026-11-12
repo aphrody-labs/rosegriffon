@@ -5,9 +5,9 @@
 //! adresse au runtime par `SetIconSprite(obj, CRC32(chemin), CRC32(région))`. `gaiji_game.g4tx`
 //! en compte 117.
 
+use crate::g4tx::G4tx;
 use alloc::string::String;
 use alloc::vec::Vec;
-use crate::g4tx::G4tx;
 
 pub const PREFIXE: &str = "ievr";
 
@@ -40,7 +40,13 @@ pub struct SpriteSheet {
 #[must_use]
 pub fn assainir_nom(nom: &str) -> String {
     nom.chars()
-        .map(|c| if c.is_alphanumeric() || c == '-' || c == '_' { c } else { '_' })
+        .map(|c| {
+            if c.is_alphanumeric() || c == '-' || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
         .collect()
 }
 
@@ -102,9 +108,16 @@ impl SpriteSheet {
         }
         #[cfg(not(feature = "serde"))]
         {
-            let mut s = alloc::format!("{{\"nom\":\"{}\",\"largeur\":{},\"hauteur\":{},\"sprites\":[", self.nom, self.largeur, self.hauteur);
+            let mut s = alloc::format!(
+                "{{\"nom\":\"{}\",\"largeur\":{},\"hauteur\":{},\"sprites\":[",
+                self.nom,
+                self.largeur,
+                self.hauteur
+            );
             for (i, sp) in self.sprites.iter().enumerate() {
-                if i > 0 { s.push(','); }
+                if i > 0 {
+                    s.push(',');
+                }
                 s.push_str(&alloc::format!("{{\"nom\":\"{}\",\"classe\":\"{}\",\"x\":{},\"y\":{},\"largeur\":{},\"hauteur\":{}}}", sp.nom, sp.classe, sp.x, sp.y, sp.largeur, sp.hauteur));
             }
             s.push_str("]}");
@@ -163,7 +176,11 @@ impl SpriteSheet {
     pub fn vers_svg(&self, data_uri: &str) -> String {
         let mut svg = alloc::format!(
             "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {} {}\">\n  <image href=\"{}\" width=\"{}\" height=\"{}\"/>\n",
-            self.largeur, self.hauteur, data_uri, self.largeur, self.hauteur
+            self.largeur,
+            self.hauteur,
+            data_uri,
+            self.largeur,
+            self.hauteur
         );
         for s in &self.sprites {
             svg.push_str(&alloc::format!(

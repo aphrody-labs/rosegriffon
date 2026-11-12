@@ -62,7 +62,10 @@ pub struct EmbFile {
 const MAX_DIMENSION: u32 = 8192;
 
 fn err(details: String) -> ReError {
-    ReError::ParseError { context: "dds", details }
+    ReError::ParseError {
+        context: "dds",
+        details,
+    }
 }
 
 /// Reads a DDS header: `(width, height, mip_count, format, payload_offset)`.
@@ -101,12 +104,16 @@ pub fn inspect_dds(data: &[u8]) -> Result<(u32, u32, u32, TexturePixelFormat, us
                     87 | 91 => TexturePixelFormat::Bgra8,
                     _ => TexturePixelFormat::Unknown,
                 }
-            },
+            }
             _ => TexturePixelFormat::Unknown,
         }
     } else if flags & 0x40 != 0 && u32_at(88) == 32 {
         // Uncompressed 32-bit: the red mask tells RGBA from BGRA.
-        if u32_at(92) == 0xFF { TexturePixelFormat::Rgba8 } else { TexturePixelFormat::Bgra8 }
+        if u32_at(92) == 0xFF {
+            TexturePixelFormat::Rgba8
+        } else {
+            TexturePixelFormat::Bgra8
+        }
     } else {
         TexturePixelFormat::Unknown
     };
@@ -117,7 +124,11 @@ fn rgb565(c: u16) -> [u8; 3] {
     let r = ((c >> 11) & 0x1F) as u32;
     let g = ((c >> 5) & 0x3F) as u32;
     let b = (c & 0x1F) as u32;
-    [((r * 527 + 23) >> 6) as u8, ((g * 259 + 33) >> 6) as u8, ((b * 527 + 23) >> 6) as u8]
+    [
+        ((r * 527 + 23) >> 6) as u8,
+        ((g * 259 + 33) >> 6) as u8,
+        ((b * 527 + 23) >> 6) as u8,
+    ]
 }
 
 /// Decodes a BC1 color block into 16 RGBA pixels. `opaque` forces four-color mode (BC2/BC3).
@@ -130,9 +141,19 @@ fn bc1_block(block: &[u8], opaque: bool, out: &mut [[u8; 4]; 16]) {
         [m(0), m(1), m(2), 255]
     };
     let palette = if c0 > c1 || opaque {
-        [[a[0], a[1], a[2], 255], [b[0], b[1], b[2], 255], mix(2, 1, 3), mix(1, 2, 3)]
+        [
+            [a[0], a[1], a[2], 255],
+            [b[0], b[1], b[2], 255],
+            mix(2, 1, 3),
+            mix(1, 2, 3),
+        ]
     } else {
-        [[a[0], a[1], a[2], 255], [b[0], b[1], b[2], 255], mix(1, 1, 2), [0, 0, 0, 0]]
+        [
+            [a[0], a[1], a[2], 255],
+            [b[0], b[1], b[2], 255],
+            mix(1, 1, 2),
+            [0, 0, 0, 0],
+        ]
     };
     let bits = u32::from_le_bytes([block[4], block[5], block[6], block[7]]);
     for (i, px) in out.iter_mut().enumerate() {
@@ -192,7 +213,9 @@ fn dds_mip_range(
         let w = (width >> current).max(1);
         let h = (height >> current).max(1);
         let size = if block_bytes == 0 {
-            (w as usize).checked_mul(h as usize).and_then(|pixels| pixels.checked_mul(4))
+            (w as usize)
+                .checked_mul(h as usize)
+                .and_then(|pixels| pixels.checked_mul(4))
         } else {
             (w as usize)
                 .div_ceil(4)
@@ -200,8 +223,11 @@ fn dds_mip_range(
                 .and_then(|blocks| blocks.checked_mul(block_bytes))
         }
         .ok_or_else(|| err("DDS mip size overflow".into()))?;
-        let end = offset.checked_add(size).ok_or_else(|| err("DDS mip offset overflow".into()))?;
-        data.get(offset..end).ok_or_else(|| err(format!("truncated DDS mip {current}")))?;
+        let end = offset
+            .checked_add(size)
+            .ok_or_else(|| err("DDS mip offset overflow".into()))?;
+        data.get(offset..end)
+            .ok_or_else(|| err(format!("truncated DDS mip {current}")))?;
         if current == level {
             selected = Some((w, h, format, offset..end));
         }
@@ -226,10 +252,18 @@ pub fn decode_dds_mip(data: &[u8], level: usize) -> Result<EmbRgbaTexture> {
                 .ok_or_else(|| err("truncated 32-bit surface".into()))?;
             rgba.copy_from_slice(src);
             if format == TexturePixelFormat::Bgra8 {
-                rgba.as_chunks_mut::<4>().0.iter_mut().for_each(|p| p.swap(0, 2));
+                rgba.as_chunks_mut::<4>()
+                    .0
+                    .iter_mut()
+                    .for_each(|p| p.swap(0, 2));
             }
-            return Ok(EmbRgbaTexture { width, height, format, rgba });
-        },
+            return Ok(EmbRgbaTexture {
+                width,
+                height,
+                format,
+                rgba,
+            });
+        }
         other => return Err(err(format!("unsupported format {other:?}"))),
     };
     let (bw, bh) = (w.div_ceil(4), h.div_ceil(4));
@@ -247,24 +281,24 @@ pub fn decode_dds_mip(data: &[u8], level: usize) -> Result<EmbRgbaTexture> {
                     for (i, px) in pixels.iter_mut().enumerate() {
                         px[3] = ((block[i / 2] >> ((i % 2) * 4)) & 0xF) * 17;
                     }
-                },
+                }
                 TexturePixelFormat::Dxt5 => {
                     bc1_block(&block[8..], true, &mut pixels);
                     for (px, a) in pixels.iter_mut().zip(bc4_block(&block[..8])) {
                         px[3] = a;
                     }
-                },
+                }
                 TexturePixelFormat::Bc4 => {
                     for (px, r) in pixels.iter_mut().zip(bc4_block(block)) {
                         *px = [r, r, r, 255];
                     }
-                },
+                }
                 TexturePixelFormat::Bc5 => {
                     let (r, g) = (bc4_block(&block[..8]), bc4_block(&block[8..]));
                     for (i, px) in pixels.iter_mut().enumerate() {
                         *px = [r[i], g[i], 0, 255];
                     }
-                },
+                }
                 _ => unreachable!(),
             }
             for (i, px) in pixels.iter().enumerate() {
@@ -275,7 +309,12 @@ pub fn decode_dds_mip(data: &[u8], level: usize) -> Result<EmbRgbaTexture> {
             }
         }
     }
-    Ok(EmbRgbaTexture { width, height, format, rgba })
+    Ok(EmbRgbaTexture {
+        width,
+        height,
+        format,
+        rgba,
+    })
 }
 
 impl EmbFile {
@@ -301,30 +340,43 @@ impl EmbFile {
                 data,
             });
         }
-        Ok(Self { count: textures.len(), textures })
+        Ok(Self {
+            count: textures.len(),
+            textures,
+        })
     }
 
     /// Checks the full original DDS mip chain and returns the requested stored dimensions.
     pub fn mip_dimensions(&self, index: usize, level: usize) -> Result<(u32, u32)> {
-        let entry =
-            self.textures.get(index).ok_or_else(|| err("texture index outside EMB".into()))?;
+        let entry = self
+            .textures
+            .get(index)
+            .ok_or_else(|| err("texture index outside EMB".into()))?;
         let (width, height, _, _) = dds_mip_range(&entry.data, level)?;
         Ok((width, height))
     }
 
     /// Decodes an original DDS mip with validated bounds and no resampling.
     pub fn decode_rgba_mip(&self, index: usize, level: usize) -> Result<EmbRgbaTexture> {
-        let entry =
-            self.textures.get(index).ok_or_else(|| err("texture index outside EMB".into()))?;
+        let entry = self
+            .textures
+            .get(index)
+            .ok_or_else(|| err("texture index outside EMB".into()))?;
         decode_dds_mip(&entry.data, level)
     }
 
     /// Extracts and decodes the texture at the specified index into RGBA8 raster pixels.
     pub fn decode_rgba(&self, index: usize) -> Result<EmbRgbaTexture> {
-        let entry = self.textures.get(index).ok_or_else(|| ReError::ParseError {
-            context: "emb_decode_rgba",
-            details: format!("Texture index {index} out of bounds (count {})", self.textures.len()),
-        })?;
+        let entry = self
+            .textures
+            .get(index)
+            .ok_or_else(|| ReError::ParseError {
+                context: "emb_decode_rgba",
+                details: format!(
+                    "Texture index {index} out of bounds (count {})",
+                    self.textures.len()
+                ),
+            })?;
         decode_dds_mip(&entry.data, 0)
     }
 }
@@ -397,7 +449,10 @@ mod tests {
         assert_eq!(px[0], [255, 0, 0, 255]);
         assert_eq!(px[15], [0, 0, 255, 255]);
         // BC4 alpha: a0 = 255, a1 = 0, all indices 1 → 0.
-        assert_eq!(bc4_block(&[255, 0, 0x49, 0x92, 0x24, 0x49, 0x92, 0x24]), [0; 16]);
+        assert_eq!(
+            bc4_block(&[255, 0, 0x49, 0x92, 0x24, 0x49, 0x92, 0x24]),
+            [0; 16]
+        );
     }
 
     #[test]
@@ -419,9 +474,11 @@ mod tests {
         dds[28..32].copy_from_slice(&3u32.to_le_bytes());
         dds[80..84].copy_from_slice(&4u32.to_le_bytes());
         dds[84..88].copy_from_slice(b"DXT1");
-        for block in
-            [[0, 248, 0, 0, 0, 0, 0, 0], [224, 7, 0, 0, 0, 0, 0, 0], [31, 0, 0, 0, 0, 0, 0, 0]]
-        {
+        for block in [
+            [0, 248, 0, 0, 0, 0, 0, 0],
+            [224, 7, 0, 0, 0, 0, 0, 0],
+            [31, 0, 0, 0, 0, 0, 0, 0],
+        ] {
             dds.extend_from_slice(&block);
         }
         let emb = EmbFile::parse(&encode_emb(&[dds.clone()])).unwrap();
@@ -445,25 +502,37 @@ mod tests {
     /// `SHENRON_REAL_EMB=<path to a game .emb>` decodes every texture of a real package.
     #[test]
     fn decodes_real_package_when_provided() {
-        let Ok(path) = std::env::var("SHENRON_REAL_EMB") else { return };
+        let Ok(path) = std::env::var("SHENRON_REAL_EMB") else {
+            return;
+        };
         let emb = EmbFile::parse(&std::fs::read(path).unwrap()).expect("parse real EMB");
         assert!(emb.count > 0);
         for i in 0..emb.count {
             let count = emb.textures[i].mipmap_count as usize;
             assert!((1..=32).contains(&count));
             for level in 0..count {
-                let (width, height) =
-                    emb.mip_dimensions(i, level).expect("real original mip bounds");
+                let (width, height) = emb
+                    .mip_dimensions(i, level)
+                    .expect("real original mip bounds");
                 assert_eq!(width, (emb.textures[i].width >> level).max(1));
                 assert_eq!(height, (emb.textures[i].height >> level).max(1));
             }
-            let smallest =
-                emb.decode_rgba_mip(i, count - 1).expect("decode real final original mip");
-            assert_eq!(smallest.rgba.len(), (smallest.width * smallest.height * 4) as usize);
+            let smallest = emb
+                .decode_rgba_mip(i, count - 1)
+                .expect("decode real final original mip");
+            assert_eq!(
+                smallest.rgba.len(),
+                (smallest.width * smallest.height * 4) as usize
+            );
             let tex = emb.decode_rgba(i).expect("decode real texture");
             assert_eq!(tex.rgba.len(), (tex.width * tex.height * 4) as usize);
             assert!(
-                tex.rgba.as_chunks::<4>().0.iter().any(|p| p[0] != p[1] || p[1] != p[2]) || i > 0
+                tex.rgba
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .any(|p| p[0] != p[1] || p[1] != p[2])
+                    || i > 0
             );
         }
     }

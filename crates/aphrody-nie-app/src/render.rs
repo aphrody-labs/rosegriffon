@@ -8,6 +8,8 @@ use std::path::Path;
 use anyhow::{Context, Result};
 use aphrody_nie_formats::font::{self, LatinAtlas};
 use aphrody_nie_formats::{cfgbin, g4tx};
+use aphrody_nie_runtime::open_world::{ElementBadge, OpenWorldState, ProximityAction, WorldZoneId};
+use aphrody_nie_ui::{color, surfaces};
 
 use crate::GameState;
 #[cfg(not(target_arch = "wasm32"))]
@@ -588,6 +590,392 @@ pub fn render_list<'a>(title: &str, items: &[&str], sel: usize, f: &'a Font) -> 
     s
 }
 
+fn screen_color_rgba(c: &surfaces::ScreenColor, alpha: u8) -> [u8; 4] {
+    let hex = c.hex.strip_prefix('#').unwrap_or(c.hex);
+    if hex.len() >= 6 {
+        let r = u8::from_str_radix(&hex[0..2], 16).unwrap_or(0);
+        let g = u8::from_str_radix(&hex[2..4], 16).unwrap_or(0);
+        let b = u8::from_str_radix(&hex[4..6], 16).unwrap_or(0);
+        [r, g, b, alpha]
+    } else {
+        [0, 0, 0, alpha]
+    }
+}
+
+fn badge_color(badge: ElementBadge) -> [u8; 4] {
+    match badge {
+        ElementBadge::Wind => screen_color_rgba(&surfaces::CHIP_WIND, 255),
+        ElementBadge::Fire => screen_color_rgba(&surfaces::CHIP_FIRE, 255),
+        ElementBadge::Forest => screen_color_rgba(&surfaces::CHIP_FOREST, 255),
+        ElementBadge::Mountain => screen_color_rgba(&surfaces::CHIP_MOUNTAIN, 255),
+    }
+}
+
+/// Rend la scène open world / Kizuna Town en CPU framebuffer RGBA8 1280x720.
+#[must_use]
+pub fn render_open_world<'a>(world: &OpenWorldState, f: &'a Font) -> Frame<'a> {
+    let mut s = Frame::new(f);
+
+    // Authentic design system tokens from aphrody_nie_ui::surfaces
+    let col_header_blue = screen_color_rgba(&surfaces::HEADER_BLUE, 255);
+    let col_header_deep = screen_color_rgba(&surfaces::HEADER_BLUE_DEEP, 255);
+    let col_cyan = screen_color_rgba(&surfaces::SELECTION_CYAN, 255);
+    let col_btn_primary = screen_color_rgba(&surfaces::BUTTON_PRIMARY, 255);
+    let col_tile_deep = screen_color_rgba(&surfaces::TILE_DEEP, 240);
+    let col_tile_bevel = screen_color_rgba(&surfaces::TILE_BEVEL, 255);
+
+    // Reference color module for token palette consistency
+    let _ = color::ColorToken::css_line;
+
+    let horizon_y = 260i32;
+
+    // 1. Sky & horizon gradient
+    let (sky_top, sky_bot): ([u8; 3], [u8; 3]) = match world.zone {
+        WorldZoneId::Nagumohara => ([14, 28, 56], [32, 64, 112]),
+        WorldZoneId::Raimon => ([12, 26, 44], [26, 68, 92]),
+        WorldZoneId::KizunaTown => ([22, 18, 50], [58, 44, 102]),
+        WorldZoneId::OdaibaStadium => ([10, 16, 36], [24, 46, 86]),
+    };
+    for y in 0..horizon_y {
+        let t = y as f32 / horizon_y as f32;
+        let c = [
+            (f32::from(sky_top[0]) * (1.0 - t) + f32::from(sky_bot[0]) * t) as u8,
+            (f32::from(sky_top[1]) * (1.0 - t) + f32::from(sky_bot[1]) * t) as u8,
+            (f32::from(sky_top[2]) * (1.0 - t) + f32::from(sky_bot[2]) * t) as u8,
+            255,
+        ];
+        s.rect(0, y, W as i32, y + 1, c);
+    }
+
+    // 2. Ground with zone perspective grid
+    let (ground_top, ground_bot): ([u8; 3], [u8; 3]) = match world.zone {
+        WorldZoneId::Nagumohara => ([18, 32, 60], [8, 14, 30]),
+        WorldZoneId::Raimon => ([16, 36, 48], [6, 18, 26]),
+        WorldZoneId::KizunaTown => ([24, 22, 54], [10, 10, 26]),
+        WorldZoneId::OdaibaStadium => ([16, 26, 48], [6, 12, 24]),
+    };
+    for y in horizon_y..(H as i32) {
+        let t = (y - horizon_y) as f32 / (H as i32 - horizon_y) as f32;
+        let c = [
+            (f32::from(ground_top[0]) * (1.0 - t) + f32::from(ground_bot[0]) * t) as u8,
+            (f32::from(ground_top[1]) * (1.0 - t) + f32::from(ground_bot[1]) * t) as u8,
+            (f32::from(ground_top[2]) * (1.0 - t) + f32::from(ground_bot[2]) * t) as u8,
+            255,
+        ];
+        s.rect(0, y, W as i32, y + 1, c);
+    }
+
+    // Horizon line
+    s.rect(0, horizon_y - 2, W as i32, horizon_y + 1, col_tile_bevel);
+
+    // Perspective grid: vanishing point at center horizon
+    let (vx, vy) = (W as i32 / 2, horizon_y);
+    for y in horizon_y..(H as i32) {
+        let t = (y - vy) as f32 / (H as i32 - vy) as f32;
+        for i in -12..=12 {
+            let x = (vx as f32 + (i as f32 * 85.0) * t) as i32;
+            if x >= 0 && x < W as i32 {
+                let o = (y as usize * W + x as usize) * 4;
+                s.buf[o] = s.buf[o].saturating_add(col_tile_bevel[0] / 3);
+                s.buf[o + 1] = s.buf[o + 1].saturating_add(col_tile_bevel[1] / 3);
+                s.buf[o + 2] = s.buf[o + 2].saturating_add(col_tile_bevel[2] / 3);
+            }
+        }
+    }
+    // Transverse lines
+    for k in 1..=8 {
+        let t = (k as f32 / 8.0).powf(1.8);
+        let ly = horizon_y + ((H as i32 - horizon_y) as f32 * t) as i32;
+        s.rect(
+            0,
+            ly,
+            W as i32,
+            ly + 1,
+            [col_tile_bevel[0], col_tile_bevel[1], col_tile_bevel[2], 120],
+        );
+    }
+
+    // 3. 3D entity projection (camera-relative)
+    let (sin_y, cos_y) = (world.camera.yaw.sin(), world.camera.yaw.cos());
+
+    // Kizuna Town sockets and monuments
+    if world.zone == WorldZoneId::KizunaTown {
+        for placement in &world.kizuna.placements {
+            let dx = placement.pos.x - world.player.position.x;
+            let dz = placement.pos.z - world.player.position.z;
+            let cam_x = dx * cos_y - dz * sin_y;
+            let cam_z = dx * sin_y + dz * cos_y;
+            let z_proj = cam_z + 11.0;
+            if z_proj > 2.0 {
+                let sx = (640.0 + (cam_x / z_proj) * 800.0) as i32;
+                let sy = (500.0 - (cam_z / (z_proj + 5.0)) * 600.0) as i32;
+                if sx > 40 && sx < (W as i32 - 40) && sy > (horizon_y + 10) && sy < (H as i32 - 40)
+                {
+                    s.rect(sx - 24, sy - 10, sx + 24, sy + 10, col_tile_deep);
+                    s.rect(sx - 22, sy - 8, sx + 22, sy + 8, col_tile_bevel);
+                    s.rect(sx - 18, sy - 6, sx + 18, sy + 6, col_cyan);
+                    let tag = format!("Socle #{}", placement.object_id);
+                    let tw = f.largeur(&tag) as i32;
+                    s.text(sx - tw / 2, sy - 30, &tag, col_cyan);
+                }
+            }
+        }
+        // Kizuna Town HUD status card
+        s.rect(24, 76, 320, 116, col_tile_deep);
+        s.rect(24, 76, 28, 116, col_cyan);
+        let kiz_txt = format!(
+            "KIZUNA : {} pts | {} PO",
+            world.kizuna.kizuna_power, world.kizuna.kizuna_coins
+        );
+        s.text(38, 88, &kiz_txt, [255, 230, 120, 255]);
+    }
+
+    // NPCs with element affinity chips
+    for npc in &world.npcs {
+        let dx = npc.ctrl.position.x - world.player.position.x;
+        let dz = npc.ctrl.position.z - world.player.position.z;
+        let cam_x = dx * cos_y - dz * sin_y;
+        let cam_z = dx * sin_y + dz * cos_y;
+        let z_proj = cam_z + 11.0;
+        if z_proj > 2.0 {
+            let sx = (640.0 + (cam_x / z_proj) * 800.0) as i32;
+            let sy = (500.0 - (cam_z / (z_proj + 5.0)) * 600.0) as i32;
+            if sx > 60 && sx < (W as i32 - 60) && sy > (horizon_y + 10) && sy < (H as i32 - 40) {
+                let elem_c = badge_color(npc.element);
+                s.rect(sx - 14, sy - 14, sx + 14, sy + 14, col_tile_deep);
+                s.rect(sx - 12, sy - 12, sx + 12, sy + 12, elem_c);
+
+                let elem_label = match npc.element {
+                    ElementBadge::Wind => "VENT",
+                    ElementBadge::Fire => "FEU",
+                    ElementBadge::Forest => "BOIS",
+                    ElementBadge::Mountain => "TERRE",
+                };
+                let label = format!("{} [{}]", npc.name, elem_label);
+                let lw = f.largeur(&label) as i32;
+                s.rect(
+                    sx - lw / 2 - 6,
+                    sy - 38,
+                    sx + lw / 2 + 6,
+                    sy - 16,
+                    [10, 16, 36, 230],
+                );
+                s.rect(sx - lw / 2 - 6, sy - 18, sx + lw / 2 + 6, sy - 16, elem_c);
+                s.text(sx - lw / 2, sy - 35, &label, [240, 248, 255, 255]);
+            }
+        }
+    }
+
+    // Player marker & directional arrow at center-bottom
+    let px_screen = 640;
+    let py_screen = 500;
+    s.rect(
+        px_screen - 14,
+        py_screen - 14,
+        px_screen + 14,
+        py_screen + 14,
+        col_tile_deep,
+    );
+    s.rect(
+        px_screen - 12,
+        py_screen - 12,
+        px_screen + 12,
+        py_screen + 12,
+        col_btn_primary,
+    );
+
+    let pdir_x = (world.player.direction.x * 16.0) as i32;
+    let pdir_z = (world.player.direction.z * 16.0) as i32;
+    s.rect(
+        px_screen + pdir_x - 3,
+        py_screen - pdir_z - 3,
+        px_screen + pdir_x + 3,
+        py_screen - pdir_z + 3,
+        col_cyan,
+    );
+
+    let pw = f.largeur(&world.leader_name) as i32;
+    s.rect(
+        px_screen - pw / 2 - 6,
+        py_screen - 38,
+        px_screen + pw / 2 + 6,
+        py_screen - 16,
+        [10, 20, 42, 220],
+    );
+    s.rect(
+        px_screen - pw / 2 - 6,
+        py_screen - 18,
+        px_screen + pw / 2 + 6,
+        py_screen - 16,
+        col_cyan,
+    );
+    s.text(
+        px_screen - pw / 2,
+        py_screen - 35,
+        &world.leader_name,
+        [255, 255, 255, 255],
+    );
+
+    // 4. Skewed header banner (-10 deg angle)
+    for y in 12..68 {
+        let dy = y - 12;
+        let x_skew = (dy as f32 * 0.1763) as i32;
+        let bx0 = 24 + x_skew;
+        let bx1 = 980 + x_skew;
+        s.rect(bx0, y, bx1, y + 1, col_header_blue);
+        if ((bx0 + y * 2) / 16) % 2 == 0 {
+            s.rect(bx0, y, bx1, y + 1, col_header_deep);
+        }
+    }
+    s.rect(24, 12, 980, 14, col_cyan);
+    s.rect(34, 66, 990, 68, col_tile_bevel);
+
+    s.text(50, 20, world.zone.title_fr(), [255, 255, 255, 255]);
+    let leader_info = format!("Chef : {}   Nv. {}", world.leader_name, world.party_level);
+    s.text(50, 44, &leader_info, [210, 235, 255, 255]);
+    let match_info = format!("Victoires : {}", world.matches_won);
+    s.text(420, 44, &match_info, col_cyan);
+    let phase_info = format!("Phase : {:?}", world.phase);
+    s.text(620, 44, &phase_info, [180, 210, 245, 255]);
+
+    // 5. Top-right minimap radar
+    let rx0 = W as i32 - 190;
+    let ry0 = 16;
+    let rw = 170;
+    let rh = 170;
+    let rx1 = rx0 + rw;
+    let ry1 = ry0 + rh;
+    s.rect(rx0, ry0, rx1, ry1, col_tile_deep);
+    s.rect(rx0, ry0, rx1, ry0 + 3, col_cyan);
+    s.rect(rx0, ry1 - 3, rx1, ry1, col_tile_bevel);
+    s.rect(rx0, ry0, rx0 + 3, ry1, col_tile_bevel);
+    s.rect(rx1 - 3, ry0, rx1, ry1, col_cyan);
+
+    s.text(rx0 + 10, ry0 + 6, "RADAR ZONE", [180, 220, 255, 255]);
+    let rcx = rx0 + rw / 2;
+    let rcy = ry0 + rh / 2 + 10;
+    s.rect(rx0 + 12, rcy, rx1 - 12, rcy + 1, [40, 80, 140, 180]);
+    s.rect(rcx, ry0 + 26, rcx + 1, ry1 - 12, [40, 80, 140, 180]);
+
+    let (hw, hd) = world.zone.half_extents();
+    let scale = 60.0;
+    for npc in &world.npcs {
+        let nx = rcx + ((npc.ctrl.position.x / hw) * scale) as i32;
+        let ny = rcy - ((npc.ctrl.position.z / hd) * scale) as i32;
+        if nx >= rx0 + 4 && nx <= rx1 - 4 && ny >= ry0 + 20 && ny <= ry1 - 4 {
+            let ec = badge_color(npc.element);
+            s.rect(nx - 2, ny - 2, nx + 3, ny + 3, ec);
+        }
+    }
+    let p_dot_x = rcx + ((world.player.position.x / hw) * scale) as i32;
+    let p_dot_y = rcy - ((world.player.position.z / hd) * scale) as i32;
+    if p_dot_x >= rx0 + 4 && p_dot_x <= rx1 - 4 && p_dot_y >= ry0 + 20 && p_dot_y <= ry1 - 4 {
+        s.rect(p_dot_x - 3, p_dot_y - 3, p_dot_x + 4, p_dot_y + 4, col_cyan);
+    }
+
+    // 6. Bottom-right proximity prompt badge when world.active_prompt() is present
+    if let Some(prompt) = world.active_prompt() {
+        let (prompt_title, prompt_desc) = match prompt {
+            ProximityAction::TalkNpc {
+                speaker,
+                triggers_battle,
+                ..
+            } => {
+                if triggers_battle {
+                    ("MATCH", format!("Defier {speaker} en match"))
+                } else {
+                    ("PARLER", format!("Discuter avec {speaker}"))
+                }
+            }
+            ProximityAction::ZoneTransition { label, .. } => {
+                ("VOYAGE", format!("Prendre le train vers {label}"))
+            }
+            ProximityAction::StartBattle { opponent_name } => {
+                ("DEFI", format!("Affronter {opponent_name}"))
+            }
+            ProximityAction::KizunaCustomize { socket_id } => {
+                ("KIZUNA", format!("Amenager le Socle #{socket_id}"))
+            }
+        };
+        let bx1 = W as i32 - 32;
+        let bx0 = bx1 - 380;
+        let by1 = H as i32 - 36;
+        let by0 = by1 - 56;
+        for y in by0..by1 {
+            let skew = ((y - by0) as f32 * 0.1763) as i32;
+            s.rect(bx0 + skew, y, bx1 + skew, y + 1, col_tile_deep);
+        }
+        s.rect(bx0, by0, bx0 + 6, by1, col_cyan);
+        s.rect(bx0 + 14, by0 + 12, bx0 + 84, by1 - 12, col_btn_primary);
+        let key_w = f.largeur("ENTREE") as i32;
+        s.text(
+            bx0 + 14 + (70 - key_w) / 2,
+            by0 + 18,
+            "ENTREE",
+            [255, 255, 255, 255],
+        );
+        s.text(bx0 + 96, by0 + 12, prompt_title, col_cyan);
+        let desc_cut = f.tronquer(&prompt_desc, 260);
+        s.text(bx0 + 96, by0 + 32, &desc_cut, [230, 240, 255, 255]);
+    }
+
+    // 7. Lower dialogue panel when world.active_dialogue is active
+    if let Some((npc_idx, line_idx)) = world.active_dialogue
+        && let Some(npc) = world.npcs.get(npc_idx)
+        && let Some(line) = npc.dialogue.get(line_idx)
+    {
+        let dx0 = 60;
+        let dx1 = W as i32 - 60;
+        let dy1 = H as i32 - 40;
+        let dy0 = dy1 - 150;
+
+        s.rect(dx0, dy0, dx1, dy1, [10, 16, 32, 245]);
+        s.rect(dx0, dy0, dx1, dy0 + 3, col_cyan);
+        s.rect(dx0, dy1 - 3, dx1, dy1, col_tile_bevel);
+
+        let elem_c = badge_color(npc.element);
+        let name_w = f.largeur(&npc.name) as i32 + 80;
+        s.rect(
+            dx0 + 20,
+            dy0 - 36,
+            dx0 + 20 + name_w,
+            dy0 + 2,
+            col_tile_deep,
+        );
+        s.rect(dx0 + 20, dy0 - 36, dx0 + 24, dy0 + 2, elem_c);
+        s.rect(dx0 + 28, dy0 - 26, dx0 + 40, dy0 - 14, elem_c);
+        s.text(dx0 + 46, dy0 - 28, &npc.name, [255, 255, 255, 255]);
+
+        s.text_wrapped(
+            dx0 + 36,
+            dy0 + 26,
+            dx1 - dx0 - 72,
+            38,
+            line,
+            [245, 250, 255, 255],
+        );
+
+        let prog = format!(
+            "{}/{}  [ENTREE] Continuer",
+            line_idx + 1,
+            npc.dialogue.len()
+        );
+        let pw = f.largeur(&prog) as i32;
+        s.text(dx1 - pw - 30, dy1 - 28, &prog, col_cyan);
+    }
+
+    // 8. Bottom help bar
+    s.rect(0, H as i32 - 24, W as i32, H as i32, [8, 12, 24, 230]);
+    s.text(
+        24,
+        H as i32 - 18,
+        "[Fleches / ZQSD] Se deplacer   [Entree] Interagir   [Echap] Menu",
+        [140, 170, 210, 255],
+    );
+
+    s
+}
+
 /// Chemins des assets d'un personnage 3D (toile de fond menu/histoire). Natif (chemins disque).
 #[cfg(not(target_arch = "wasm32"))]
 pub struct CharAssets<'a> {
@@ -704,5 +1092,20 @@ mod tests {
         for desc in &super::MENU_DESCRIPTIONS {
             assert!(!desc.is_empty());
         }
+    }
+
+    #[test]
+    fn render_open_world_generates_valid_rgba_frame() {
+        let font = super::Font::default();
+        let nagumo = super::OpenWorldState::new(super::WorldZoneId::Nagumohara);
+        let frame_nagumo = super::render_open_world(&nagumo, &font);
+        assert_eq!(frame_nagumo.buf.len(), super::W * super::H * 4);
+        // Ensure buffer is not empty (contains rendered sky, grid, banner)
+        assert!(frame_nagumo.buf.iter().any(|&b| b > 0));
+
+        let kizuna = super::OpenWorldState::new(super::WorldZoneId::KizunaTown);
+        let frame_kizuna = super::render_open_world(&kizuna, &font);
+        assert_eq!(frame_kizuna.buf.len(), super::W * super::H * 4);
+        assert!(frame_kizuna.buf.iter().any(|&b| b > 0));
     }
 }
