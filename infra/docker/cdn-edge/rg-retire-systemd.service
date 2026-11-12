@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# vps: retire the legacy rg-core / rg-website units once prod on prd is healthy.
+[Unit]
+Description=Retire the Rose Griffon systemd path on vps (guarded by health checks)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/srv/rosegriffon/bin/retire-vps-systemd.sh

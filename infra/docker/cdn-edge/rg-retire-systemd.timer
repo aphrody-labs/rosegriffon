@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Daily from 2026-11-15 (the script holds off before RG_RETIRE_AFTER and while unhealthy).
+[Unit]
+Description=Retire the Rose Griffon systemd path on vps, daily check
+
+[Timer]
+OnCalendar=*-*-* 08:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
