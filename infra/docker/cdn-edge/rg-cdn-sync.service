@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# vps (storage role): prd -> vps -> cdn edge + R2 (infra/scripts/sync-cdn.sh).
+[Unit]
+Description=Rose Griffon derived assets sync (prd -> vps -> cdn, R2)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+ExecStart=/srv/rosegriffon/bin/sync-cdn.sh
+Nice=10
+IOSchedulingClass=idle

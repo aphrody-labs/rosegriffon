@@ -34,6 +34,14 @@ x-build: &build
   secrets:
     - rg_env
 
+# In-container paths and service URLs that the systemd env files carried as host paths.
+x-paths: &paths
+  APHRODY_WORKSPACE_ROOT: /app
+  RG_BOT_DIR: /app/apps/rg-bot
+  GOOGLE_APPLICATION_CREDENTIALS: /run/rg-secrets/google-calendar-service.json
+  REDIS_URL: redis://redis:6379
+  AZALEE_API_URL: http://core:8810/v1/azalee
+
 x-common: &common
   restart: unless-stopped
   init: true
@@ -86,15 +94,19 @@ services:
       RG_MEDIA_ROOT: /var/lib/rg-core/media
       CDN_STATIC_ROOT: /data/cdn
       ACHILLEA_BACKUP_DIR: /var/lib/rg-core/backups/achillea
-      RANKED_STORAGE_DIR: /var/lib/rg-core/ranked
+      RANKED_STORAGE_DIR: /var/lib/rg-core/disputes
       RG_CRON_SHARED_ROOT: /var/lib/rg-core/shared
+      <<: *paths
     volumes:
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/state:/var/lib/rg-core
+      - ${RG_SRV_ROOT:-/srv/rosegriffon}/secrets:/run/rg-secrets:ro
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/cdn/static:/data/cdn
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/log/nginx:/var/log/nginx:ro
     shm_size: 512m
     depends_on:
       model-serve: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      inagle-pg: { condition: service_healthy }
     stop_grace_period: 20s
     deploy:
       resources:
@@ -111,11 +123,13 @@ services:
       RG_MEDIA_ROOT: /var/lib/rg-core/media
       CDN_STATIC_ROOT: /data/cdn
       ACHILLEA_BACKUP_DIR: /var/lib/rg-core/backups/achillea
-      RANKED_STORAGE_DIR: /var/lib/rg-core/ranked
+      RANKED_STORAGE_DIR: /var/lib/rg-core/disputes
       RG_CRON_SHARED_ROOT: /var/lib/rg-core/shared
+      <<: *paths
       NIE_MODEL_SERVE_URL: http://model-serve:8792
     volumes:
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/state:/var/lib/rg-core
+      - ${RG_SRV_ROOT:-/srv/rosegriffon}/secrets:/run/rg-secrets:ro
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/cdn/static:/data/cdn
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/log/nginx:/var/log/nginx:ro
     shm_size: 512m
@@ -133,6 +147,9 @@ services:
       HOSTNAME: 0.0.0.0
       PORT: "3100"
       NODE_ENV: production
+      <<: *paths
+    volumes:
+      - ${RG_SRV_ROOT:-/srv/rosegriffon}/secrets:/run/rg-secrets:ro
     depends_on:
       core: { condition: service_healthy }
     deploy:
@@ -144,10 +161,13 @@ services:
     image: nginxinc/nginx-unprivileged:${NGINX_VERSION:-1.29-alpine}
     read_only: true
     tmpfs: [/tmp]
-    # Loopback only: the host nginx keeps TLS and the public 80/443 for every vhost on vps
+    # Loopback (host nginx, TLS and public 80/443) plus the mesh origin port for the cdn host.
     # (infra/docker/host-nginx/rosegriffon-stack.conf proxies the rosegriffon names here).
     ports:
       - "127.0.0.1:${RG_NGINX_PORT:-18080}:8080"
+      # Origin for the cdn host (cdn.rosegriffon.fr, nie.aphrody.app) over the private mesh:
+      # RG_ORIGIN_BIND is the prd mesh address, set by `just deploy-stack`; loopback otherwise.
+      - "${RG_ORIGIN_BIND:-127.0.0.1}:${RG_ORIGIN_PORT:-18081}:8080"
     volumes:
       - ./infra/docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./infra/docker/nginx/conf.d:/etc/nginx/conf.d:ro
@@ -166,6 +186,40 @@ services:
       core: { condition: service_healthy }
       website: { condition: service_healthy }
       model-serve: { condition: service_healthy }
+
+  # Cache only (apps/rg-bot/src/lib/cache.ts, packages/rg-db/src/redis.ts): no persistence.
+  redis:
+    <<: *common
+    image: redis:${REDIS_VERSION:-8-alpine}
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits: { memory: 768m }
+
+  # Azalee / Inagle database (INAGLE_DATABASE_URL=postgres://...@inagle-pg:5432/inagle).
+  # Credentials come from inagle-pg.env (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB).
+  inagle-pg:
+    <<: *common
+    image: postgres:${INAGLE_PG_VERSION:-18-alpine}
+    env_file:
+      - path: ${RG_INAGLE_ENV_FILE:-/etc/rosegriffon/inagle-pg.env}
+        required: true
+    volumes:
+      - ${RG_SRV_ROOT:-/srv/rosegriffon}/db/inagle:/var/lib/postgresql
+    shm_size: 256m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits: { memory: 2g }
 
   # --- profile "tools": on-demand jobs, owned by the Steam/CDN agent --------------------
   # Slot reserved for:

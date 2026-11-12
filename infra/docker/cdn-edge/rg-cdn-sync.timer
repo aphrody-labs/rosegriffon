@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+[Unit]
+Description=Rose Griffon derived assets sync every 10 minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
