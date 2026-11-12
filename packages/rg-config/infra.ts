@@ -192,6 +192,8 @@ export function composeEnv(
   return {
     RG_SRV_ROOT: host.srv_root,
     RG_ENV_FILE: host.env_file,
+    // Database credentials sit next to the main env file.
+    RG_INAGLE_ENV_FILE: host.env_file.replace(/[^/]*$/, "inagle-pg.env"),
     RG_STACK_DIR: host.stack_dir,
     RG_DOMAIN: domain(infra, env),
   };

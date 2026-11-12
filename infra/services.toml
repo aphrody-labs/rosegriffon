@@ -77,6 +77,24 @@ state = ["cache/nginx", "log/nginx"]
 vhosts = ["cdn"]
 env = ["RG_NGINX_PORT"]
 
+[services.redis]
+entry = "compose.yaml"
+image = "redis"
+compose = "compose.yaml"
+port = 6379
+role = "prod"
+state = []
+env = ["REDIS_URL"]
+
+[services.inagle-pg]
+entry = "compose.yaml"
+image = "postgres"
+compose = "compose.yaml"
+port = 5432
+role = "prod"
+state = ["db/inagle"]
+env = ["POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"]
+
 [services.steam-depot]
 entry = "crates/bun-steam"
 dockerfile = "infra/docker/steam-depot/Dockerfile"

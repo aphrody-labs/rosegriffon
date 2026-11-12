@@ -7,6 +7,7 @@ import {
   renderUpstreams,
   resolveHost,
   service,
+  services,
 } from "../../packages/rg-config/infra.ts";
 import {
   deployScript,
@@ -100,4 +101,15 @@ test("migrate: build on target, stop, sync state, start, verify", () => {
   expect(() =>
     migratePlan(infra, {}, service(infra, "core"), prod, prod, "x"),
   ).toThrow();
+});
+
+test("every compose service is in the registry", () => {
+  const compose = Bun.YAML.parse(
+    readFileSync(resolve(REPO_ROOT, "compose.yaml"), "utf8"),
+  ) as {
+    services: Record<string, unknown>;
+  };
+  const known = new Set(services(infra).map((s) => s.name));
+  for (const name of Object.keys(compose.services))
+    expect(known.has(name)).toBe(true);
 });
