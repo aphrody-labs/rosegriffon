@@ -146,3 +146,28 @@ State written by the stack lives in `/srv/rosegriffon/state`; copy it back
   `APHRODY_WORKSPACE_ROOT`, `RG_BOT_DIR`, `APHRODY_BIN`, `RG_CRON_SHARED_ROOT`,
   `RANKED_STORAGE_DIR`) must point inside a mount (`/var/lib/rg-core/...`) or be mounted.
 - `rust-toolchain.toml` says `nightly` without a date: pin `RUST_TOOLCHAIN` in the Dockerfile.
+
+## Production on prd (cutover done 2026-11-12)
+
+Roles (infra/hosts.toml): build/storage = vps, cdn = cdn, prod = prd.
+
+```
+Cloudflare --(origin rule: port 8443)--> prd host nginx :8443 (TLS, lineage rosegriffon.fr)
+                                              -> stack nginx 127.0.0.1:18080 -> website, core, model-serve
+cdn.rosegriffon.fr, nie.aphrody.app --> cdn nginx :443 (/static from disk, rest cached)
+                                              -> prd :8443 (origin vhost allow-listed to cdn)
+```
+
+- prd ports 80/443 belong to the shenron-gateway container: the Rose Griffon TLS entry is
+  8443 (`host-nginx/nginx.prd.conf`, `rosegriffon-stack.conf`). Cloudflare zone rule
+  "rosegriffon prd origin port" (phase http_request_origin) sends the prod names to 8443;
+  `/etc/fleet/firewall.nft` opens 8443 to the Cloudflare ranges (comment `rosegriffon-cf`).
+- Images: `just build` on vps, `just deploy` ships them (`docker save | docker load`).
+  vps builds with `/etc/rosegriffon/rosegriffon.build.env` (loopback DB URLs, host network).
+- prd data: `/srv/rosegriffon` (state, cdn/static, game/ievr read-only copy, db/inagle owned
+  by uid 70, cache/nginx and log/nginx owned by uid 101). Secrets in `/srv/rosegriffon/secrets`.
+- Assets: `rg-cdn-sync.timer` on vps runs `infra/scripts/sync-cdn.sh` (prd -> vps -> cdn, R2
+  bucket `rosegriffon-cdn`). `just cdn-sync` runs it now; `just cdn-edge` reinstalls the edge.
+- Rollback: on cdn `~/rg-dns-rollback.sh` (records back to vps, origin rule emptied), on prd
+  `docker compose stop core website`, on vps `sudo systemctl enable --now rg-core rg-website`.
+  The systemd units on vps are disabled, not removed.

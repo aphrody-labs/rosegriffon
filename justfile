@@ -84,3 +84,11 @@ rollback tag service="all" *args:
 # Move a service and its state: --to <role|host> [--from <role|host>] [--apply].
 migrate service *args:
     {{ops}} migrate {{service}} {{args}}
+
+# Derived assets: prod -> storage copy -> cdn edge and R2 (rg-cdn-sync.timer, every 10 min).
+cdn-sync:
+    {{ops}} ssh storage -- sudo systemctl start rg-cdn-sync.service
+
+# Install the cdn edge vhosts (infra/docker/cdn-edge/) on the cdn role and reload nginx.
+cdn-edge:
+    h=$({{ops}} host cdn ssh); scp -q infra/docker/cdn-edge/rosegriffon-cdn.conf infra/docker/cdn-edge/rosegriffon-cdn-edge.inc "$h:/tmp/" && ssh "$h" "sudo install -m 644 /tmp/rosegriffon-cdn-edge.inc /etc/nginx/snippets/ && sudo install -m 644 /tmp/rosegriffon-cdn.conf /etc/nginx/conf.d/ && sudo nginx -t && sudo systemctl reload nginx"
