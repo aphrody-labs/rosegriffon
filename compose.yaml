@@ -252,6 +252,21 @@ services:
   #   cdn-sync     Bun.s3 push of ${RG_SRV_ROOT}/cdn/static to R2/S3.
   #                Run: docker compose --profile tools run --rm cdn-sync
   # Both use `profiles: [tools]`, `restart: "no"` and the `backend` network; neither publishes ports.
+  steam-depot:
+    profiles: [tools]
+    build:
+      context: .
+      dockerfile: infra/docker/steam-depot/Dockerfile
+    image: ${RG_REGISTRY:-rosegriffon}/steam-depot:${RG_TAG:-latest}
+    restart: "no"
+    init: true
+    networks: [backend]
+    security_opt: ["no-new-privileges:true"]
+    # Host dirs belong to the deploy user (1000); the token file stays 0600 in a 0700 dir.
+    user: "1000:1000"
+    volumes:
+      - ${RG_SRV_ROOT:-/srv/rosegriffon}/steam:/steam
+      - ${RG_SRV_ROOT:-/srv/rosegriffon}/game/ievr:/game
   # --- end of tools slot -----------------------------------------------------------------
 
 networks:
