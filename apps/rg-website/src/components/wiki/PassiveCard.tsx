@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import type { SpriteCommonKey } from "@/config/sprites-common";
 import { cn } from "@/lib/utils";

@@ -2,7 +2,7 @@
 
 import type { BaseCharacter } from "@rosegriffon/inagle";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Star } from "lucide-react";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";

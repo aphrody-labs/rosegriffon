@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import type { Sanction } from "@rosegriffon/achillea-types/domain/sanction";
 import {

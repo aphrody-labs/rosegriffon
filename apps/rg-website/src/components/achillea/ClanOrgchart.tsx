@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import type { ClanMemberDTO } from "@rosegriffon/achillea-types";
 import { ClanMemberRole, ClanMemberDistinction } from "@rosegriffon/achillea-types/enums/clanMemberRole";
 import { UserAvatar } from "@/components/achillea/UserAvatar";

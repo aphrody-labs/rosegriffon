@@ -1,5 +1,5 @@
 import { ArrowLeft, Lock, RefreshCw, ShoppingBag } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { Suspense } from "react";
 
 import { getCart } from "@/lib/shop/cart";

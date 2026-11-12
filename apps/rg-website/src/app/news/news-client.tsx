@@ -3,7 +3,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { enUS, fr, ja } from "date-fns/locale";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useRouter } from "next/navigation";
 import { ArticleCard } from "@/components/news/ArticleCard";
 import { CategoryChips } from "@/components/news/CategoryChips";

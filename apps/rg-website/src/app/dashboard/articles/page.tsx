@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
 import { Calendar, ChevronRight, Edit, Eye, FileText, PenSquare, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { redirect } from "next/navigation";
 import { createPostgresClient } from "@rosegriffon/db/service";
 

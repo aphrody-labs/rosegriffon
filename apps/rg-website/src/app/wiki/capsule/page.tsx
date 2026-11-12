@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { Gift, Info, SearchX, Shirt } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { FadeInItem, FadeInStagger } from "@/components/ui/fade-in";
 import { CapsuleCard, CostumeCard } from "@/components/wiki/GachaCard";
 import { WikiPagination } from "@/components/wiki/WikiPagination";

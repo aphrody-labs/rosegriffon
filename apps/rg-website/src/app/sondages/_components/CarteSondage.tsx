@@ -10,7 +10,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowRight, CalendarDays, Users } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { ContenuDiscord, TexteDiscordInline } from "@/lib/discord/markdown";
 import type { ContexteMentions } from "@/lib/discord/markdown-ast";

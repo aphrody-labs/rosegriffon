@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { redirect } from "next/navigation";
 import { createPostgresClient } from "@rosegriffon/db/service";
 

@@ -4,7 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowRight, AtSign, Newspaper } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useEffect, useRef, useState } from "react";
 import { isRemoteAvatar } from "@/lib/avatar";
 import { getAuthorInfo } from "@/lib/author";

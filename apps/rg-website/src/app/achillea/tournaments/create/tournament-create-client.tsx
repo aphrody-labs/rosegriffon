@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import { absoluteUrl } from "@/lib/site-url";
 import { StageType, MatchFormat, ScoreReportPolicy } from "@rosegriffon/achillea-types/enums/eventEnums";

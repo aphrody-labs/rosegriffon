@@ -2,7 +2,7 @@ import { Badge, Button, Card, CardContent, CardHeader } from "@rosegriffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { ArrowRight, Calendar, Eye, Newspaper } from "@/lib/icons-config";
 import { getPgPool } from "@/lib/db/pg";

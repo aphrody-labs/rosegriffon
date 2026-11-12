@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { SEASON_LABELS, SERIES_LABELS, type TeamListItem } from "@rosegriffon/azalee/wiki/teams-shared";

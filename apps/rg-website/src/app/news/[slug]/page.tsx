@@ -14,7 +14,7 @@ import {
   User,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { getArticleSeries } from "@/app/actions/article-series";
 import { getRelatedArticles } from "@/app/actions/articles";

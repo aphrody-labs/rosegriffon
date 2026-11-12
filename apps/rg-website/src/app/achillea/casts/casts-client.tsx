@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { createAchilleaClient } from "@/lib/achillea";
 import { CastCard } from "@/components/achillea/CastCard";
 import type { CasterPublic } from "@rosegriffon/achillea-types/domain/cast";

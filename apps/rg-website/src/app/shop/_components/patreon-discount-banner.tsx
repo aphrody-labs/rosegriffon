@@ -1,5 +1,5 @@
 import { PatreonIcon } from "@rosegriffon/ui";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { PATRON_DISCOUNT_PERCENT, getPatronDiscount } from "@/lib/patreon/discount";
 import { getServerUser } from "@/lib/auth-helpers";

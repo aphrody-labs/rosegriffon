@@ -3,7 +3,7 @@
 import { Badge, Card, CardContent } from "@rosegriffon/ui";
 import { Check, X } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useState } from "react";
 import type { PublicClan } from "@/lib/achillea/unified-clans";
 

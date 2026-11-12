@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { createAchilleaClient } from "@/lib/achillea";
 import type { LeaderboardPage, RankedTierInfo } from "@rosegriffon/achillea-types";
 import { UserAvatar } from "@/components/achillea/UserAvatar";

@@ -1,5 +1,5 @@
 import { Button } from "@rosegriffon/ui";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { ProjectCard } from "@/components/shared/ProjectCard";
 

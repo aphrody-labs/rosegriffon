@@ -1,6 +1,6 @@
 import { Button } from "@rosegriffon/ui";
 import { FileQuestion } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 export default function ChroniqueNotFound() {
   return (

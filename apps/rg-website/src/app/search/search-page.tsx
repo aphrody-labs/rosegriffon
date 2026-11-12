@@ -1,5 +1,5 @@
 import { BookOpen, Newspaper, Search, Swords } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@rosegriffon/ui";
 import {

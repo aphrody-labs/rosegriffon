@@ -2,7 +2,7 @@
 
 import { Clock, Hourglass, Store } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { getItemIconUrl, PLACEHOLDERS, resolveAssetUrl } from "@rosegriffon/azalee/images";

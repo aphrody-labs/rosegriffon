@@ -24,7 +24,7 @@ import { iecodeDataPath } from "@aphrody/paths";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import { wiki } from "@rosegriffon/app-shell";
 

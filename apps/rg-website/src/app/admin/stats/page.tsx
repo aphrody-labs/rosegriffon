@@ -13,7 +13,7 @@ import {
 } from "@rosegriffon/ui";
 import { formatBytes } from "@rosegriffon/db/platform";
 import { BarChart3, CheckCircle2, ExternalLink, Gauge, Users, XCircle } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { lireAudience, lireAudienceDistante, type StatsDomaine } from "@/lib/stats/audience";
 import { lireSites, type Site } from "@/lib/stats/sites";

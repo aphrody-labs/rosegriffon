@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { resolveRoster, type ResolvedChara } from "@rosegriffon/azalee/game/roster-resolver";

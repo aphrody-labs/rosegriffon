@@ -1,7 +1,7 @@
 "use client";
 
 import { ShoppingBag } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 export function CartIconButton({ initialCount }: { initialCount: number }) {
   const count = initialCount;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { createAchilleaClient } from "@/lib/achillea";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import type { CircuitRanking } from "@rosegriffon/achillea-types";

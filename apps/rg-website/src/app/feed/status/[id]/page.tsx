@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { CommentsSection } from "@/components/shared/CommentsSection";
 import { requireAdminOrFail } from "@/lib/auth-helpers";

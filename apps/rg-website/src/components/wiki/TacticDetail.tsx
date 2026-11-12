@@ -2,7 +2,7 @@
 
 import { ArrowLeft, Flame, Hourglass, Map, Store, Timer, Zap } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useState } from "react";
 import { SHOP_FR, translateEffect } from "@rosegriffon/azalee/text/translations";
 

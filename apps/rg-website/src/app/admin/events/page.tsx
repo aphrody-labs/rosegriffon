@@ -1,6 +1,6 @@
 import { Button, Card, CardContent, CardHeader, CardTitle, AdminPageHeader, PaginationControls } from "@rosegriffon/ui";
 import { Calendar, Plus } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { SyncEventsButton } from "@/components/admin/events/sync-button";
 

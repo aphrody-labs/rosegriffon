@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 import { Sparkline } from "@/components/achillea/Sparkline";

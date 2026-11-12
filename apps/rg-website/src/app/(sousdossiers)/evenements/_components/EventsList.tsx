@@ -1,5 +1,5 @@
 import { Calendar, Clock, Info, Map, MapPin } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { memo } from "react";
 
 import { cn } from "@/lib/utils";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import Image from "next/image";
 import { createAchilleaClient, rankImagePath } from "@/lib/achillea";
 import { TierDistribution } from "@/components/achillea/TierDistribution";

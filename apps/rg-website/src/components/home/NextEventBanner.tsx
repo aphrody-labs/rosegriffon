@@ -2,7 +2,7 @@
 
 import { useClock } from "@/hooks/use-clock";
 import { ArrowRight, Clock, MapPin } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import type { CalendarEvent } from "@/types/api";
 

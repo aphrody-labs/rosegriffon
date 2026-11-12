@@ -4,7 +4,7 @@ import { wiki } from "@rosegriffon/app-shell";
 import type { BaseCharacter } from "@rosegriffon/inagle";
 import { CircleDot, Sparkles } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { useLanguage } from "@/components/providers/language-provider";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";

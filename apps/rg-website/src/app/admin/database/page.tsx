@@ -1,5 +1,5 @@
 import { Backpack, BadgeCheck, ScanSearch, Swords, User, Users, Zap } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import type React from "react";
 import { AdminPageHeader as DashboardPageHeader, Card, CardContent, CardTitle } from "@rosegriffon/ui";
 import { ElementChartLoader } from "./ElementChartLoader";

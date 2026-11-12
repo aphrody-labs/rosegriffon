@@ -9,7 +9,7 @@ import {
   useTransform,
 } from "motion/react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useEffect, useState } from "react";
 import { GlobalSearch } from "@/components/wiki/GlobalSearch";
 import type { WikiSectionStats } from "./WikiCarousel";

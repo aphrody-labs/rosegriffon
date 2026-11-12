@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { Icon } from "@/components/ui/Icon";
 import { SHOP_CATEGORY_FR } from "@rosegriffon/azalee/wiki/shops-shared";
 import { cn } from "@/lib/utils";

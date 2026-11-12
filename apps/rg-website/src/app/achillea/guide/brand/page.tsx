@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import Image from "next/image";
 import { Card, CardHeader, CardTitle, CardContent, Badge } from "@rosegriffon/ui";
 import { Palette, Type, Image as ImageIcon, ArrowLeft } from "lucide-react";

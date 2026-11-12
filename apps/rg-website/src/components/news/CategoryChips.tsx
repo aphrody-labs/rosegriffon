@@ -1,7 +1,7 @@
 "use client";
 
 import { Twitter } from "@/lib/brand-icons";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useSearchParams } from "next/navigation";
 import { CATEGORIES } from "@/components/dashboard/news-editor/constants";
 

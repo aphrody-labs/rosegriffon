@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { AnimatedCounter } from "./AnimatedCounter";
 import { Icon } from "@/components/ui/Icon";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useRouter } from "next/navigation";
 import { createAchilleaClient, useAchilleaAuth } from "@/lib/achillea";
 import { COFONDATEURS_REQUIS, LOGO_TYPES, erreurLogo, lireCofondateurs, messageErreurCreation } from "./erreurs";

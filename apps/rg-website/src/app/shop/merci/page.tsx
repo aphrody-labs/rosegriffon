@@ -1,5 +1,5 @@
 import { Check, Home, ShoppingBag } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { getStripe } from "@/lib/shop/stripe";
 import { formatEuros } from "@/lib/shop/products";

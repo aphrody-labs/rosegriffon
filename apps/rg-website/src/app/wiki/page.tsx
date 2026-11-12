@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { Suspense } from "react";
 import { ArrowRight, Shield, Sparkles, Trophy, Users, Zap } from "lucide-react";
 import { AnimatedSection } from "@/components/home/AnimatedSection";

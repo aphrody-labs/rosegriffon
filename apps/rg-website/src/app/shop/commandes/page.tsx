@@ -1,5 +1,5 @@
 import { ArrowRight, PackageOpen, ShoppingBag } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { redirect } from "next/navigation";
 
 import { createPostgresClient } from "@rosegriffon/db/service";

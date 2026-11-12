@@ -3,7 +3,7 @@
 import { Button, Card, DiscordIcon } from "@rosegriffon/ui";
 import { ArrowRight, Award, Calendar, Gamepad2, Swords, Trophy, Users } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useEffect, useState } from "react";
 import { UserAvatar } from "@/components/achillea/UserAvatar";
 

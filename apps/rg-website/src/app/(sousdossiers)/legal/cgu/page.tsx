@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { absoluteUrl, SITE_URL } from "@/lib/site-url";
 

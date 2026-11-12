@@ -1,6 +1,6 @@
 import { wiki } from "@rosegriffon/app-shell";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 

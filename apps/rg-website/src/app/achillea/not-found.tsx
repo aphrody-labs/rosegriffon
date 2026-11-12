@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { Button } from "@rosegriffon/ui";
 import { FileQuestion, ArrowLeft } from "lucide-react";
 import { metadonneesAchillea } from "@/app/achillea/metadonnees";

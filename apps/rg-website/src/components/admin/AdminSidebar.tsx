@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import type { NavItem } from "@rosegriffon/ui";
 import { AdminSidebar as SharedAdminSidebar } from "@rosegriffon/ui";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 

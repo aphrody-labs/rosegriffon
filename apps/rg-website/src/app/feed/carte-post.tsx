@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartNoAxesColumn, Heart, MessageCircle, Play, Repeat2 } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { Fragment, useState } from "react";
 
 import type { MetriquesFeed, PostFeed, ProfilFeed, Reseau } from "@/lib/feed/types";

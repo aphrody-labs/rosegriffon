@@ -1,6 +1,6 @@
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@rosegriffon/ui";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { PublicTiers } from "@/components/patreon/PublicTiers";
 import {

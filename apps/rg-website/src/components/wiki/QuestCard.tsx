@@ -1,5 +1,5 @@
 import { Flag, ScrollText } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import type { Quest } from "@/lib/wiki/quests";
 import { cn } from "@/lib/utils";
 

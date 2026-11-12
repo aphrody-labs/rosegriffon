@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { createAchilleaClient } from "@/lib/achillea";
 import { remainingTournamentPages } from "@/lib/achillea/tournament-pagination";
 import { TournamentTable } from "@/components/achillea/TournamentTable";

@@ -1,5 +1,5 @@
 import { Eye, Newspaper, TrendingUp } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { getArticleStats } from "@/app/actions/articles";
 import {
   DashboardStatsCard as DashboardMetricCard,

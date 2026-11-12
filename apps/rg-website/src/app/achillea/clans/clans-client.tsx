@@ -2,7 +2,7 @@
 
 import { Button, Skeleton } from "@rosegriffon/ui";
 import { ArrowUpDown, Plus, Search, Users } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useEffect, useMemo, useState } from "react";
 import { ClanCard } from "@/components/achillea/ClanCard";
 import { listPublicClans, type PublicClan } from "@/lib/achillea/unified-clans";

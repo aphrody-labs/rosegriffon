@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import ImageWithSkeleton from "@/components/shared/ImageWithSkeleton";
 import { TeamStructuredData } from "@/components/shared/StructuredData";

@@ -1,6 +1,6 @@
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { Heart, Mail, Users } from "@/lib/icons-config";
 import { absoluteUrl } from "@/lib/site-url";

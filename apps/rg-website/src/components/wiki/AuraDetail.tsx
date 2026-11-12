@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ArrowRight, CircleDot, LayoutGrid, Sparkles, Store, TrendingUp } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import CharacterModelViewer from "@/components/wiki/CharacterModelViewer";

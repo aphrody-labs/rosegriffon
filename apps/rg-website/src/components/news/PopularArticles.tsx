@@ -1,7 +1,7 @@
 "use client";
 
 import { Eye, TrendingUp } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 const CATEGORY_LABELS: Record<string, string> = {
   announcement: "Annonce",

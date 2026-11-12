@@ -3,7 +3,7 @@ export const revalidate = 3600;
 
 import { ArrowLeft, ArrowRight, Flag, Info, ScrollText } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { getQuest, getQuestNeighbors, type Quest } from "@/lib/wiki/quests";
 import { wiki } from "@rosegriffon/app-shell";

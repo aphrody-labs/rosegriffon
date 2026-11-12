@@ -1,5 +1,5 @@
 import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { TweetFormClient } from "./tweet-form-client";
 

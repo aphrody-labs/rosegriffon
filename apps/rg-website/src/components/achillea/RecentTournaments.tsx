@@ -3,7 +3,7 @@
 import { tournamentStateLabel } from "@rosegriffon/achillea-core";
 import type { TournamentListItem, TournamentState } from "@rosegriffon/achillea-types";
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useLanguage } from "@/components/providers/language-provider";
 
 /** Phrase de l'encart vide de l'accueil quand des tournois terminés existent. */

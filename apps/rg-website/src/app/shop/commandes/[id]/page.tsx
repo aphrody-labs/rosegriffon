@@ -1,6 +1,6 @@
 import { ArrowLeft, MapPin, Package, Truck } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { notFound, redirect } from "next/navigation";
 
 import { createPostgresClient } from "@rosegriffon/db/service";

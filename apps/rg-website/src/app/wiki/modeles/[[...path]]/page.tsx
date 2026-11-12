@@ -16,7 +16,7 @@
  * dans une liste écrite à la main qui vieillit en silence.
  */
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { wiki } from "@rosegriffon/app-shell";
 import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";
 import InlineModelViewer from "@/components/wiki/InlineModelViewer";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { AdminPageHeader as DashboardPageHeader, Button } from "@rosegriffon/ui";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { Icon } from "@/components/ui/Icon";

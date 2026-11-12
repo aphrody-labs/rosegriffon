@@ -1,7 +1,7 @@
 "use client";
 
 import { BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 

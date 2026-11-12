@@ -8,7 +8,7 @@
 import { Button } from "@rosegriffon/ui/button";
 import { Textarea } from "@rosegriffon/ui/textarea";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 

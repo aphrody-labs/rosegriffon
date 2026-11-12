@@ -1,5 +1,5 @@
 import { ArrowRight, Swords } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 /**
  * Section « réseau Rose Griffon » de la home Azalée.

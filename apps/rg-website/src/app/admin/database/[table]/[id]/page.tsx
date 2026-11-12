@@ -1,5 +1,5 @@
 import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { Button } from "@rosegriffon/ui";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { GenericEditorForm } from "./generic-editor-form";

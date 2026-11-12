@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import { CastAvailabilityStatus } from "@rosegriffon/achillea-types/enums/cast";
 import { Tv, ArrowLeft, ShieldAlert, Loader2, Check } from "lucide-react";

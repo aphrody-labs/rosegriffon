@@ -2,7 +2,7 @@
 
 import { Button } from "@rosegriffon/ui";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useRouter } from "next/navigation";
 
 import TextPressure from "@/components/blocks/TextAnimations/TextPressure/TextPressure";

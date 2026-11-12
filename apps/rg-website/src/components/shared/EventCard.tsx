@@ -6,7 +6,7 @@ import { useClock } from "@/hooks/use-clock";
 import { Button, Card } from "@rosegriffon/ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { memo, useMemo } from "react";
 
 import { ArrowRight, CalendarDays, MapPin } from "@/lib/icons-config";

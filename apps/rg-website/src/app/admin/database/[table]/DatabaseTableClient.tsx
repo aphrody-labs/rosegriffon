@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useState } from "react";
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";

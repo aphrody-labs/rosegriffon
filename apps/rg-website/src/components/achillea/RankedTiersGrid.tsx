@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { rankImagePath } from "@/lib/achillea";
 import { ArrowRight, Crown } from "lucide-react";
 import type { RankedTierInfo } from "@rosegriffon/achillea-types";

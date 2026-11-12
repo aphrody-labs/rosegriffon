@@ -1,6 +1,6 @@
 import { Button } from "@rosegriffon/ui";
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 
 import { EventForm } from "@/components/admin/events/event-form";

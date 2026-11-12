@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { searchTranslations } from "@/app/actions/translate";
 import type { TranslationResult } from "@/app/actions/translate";

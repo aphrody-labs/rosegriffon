@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { Suspense } from "react";
 
 import { Input, Skeleton } from "@rosegriffon/ui";

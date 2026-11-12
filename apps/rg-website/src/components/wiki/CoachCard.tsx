@@ -2,7 +2,7 @@
 
 import { ClipboardList } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useState } from "react";
 import { ElementIcon } from "@/components/wiki/ElementIcon";
 import { getCharacterFaceUrl } from "@rosegriffon/azalee/images";

@@ -3,7 +3,7 @@ export const revalidate = 3600;
 
 import { ArrowLeft, ArrowRight, Award, Info, Trophy as TrophyIcon } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { getTrophy, getTrophyNeighbors } from "@/lib/wiki/trophies";
 import { CATEGORY_LABELS, type Trophy } from "@rosegriffon/azalee/wiki/trophies-shared";

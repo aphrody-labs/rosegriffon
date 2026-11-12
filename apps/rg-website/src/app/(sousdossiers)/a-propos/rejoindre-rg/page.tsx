@@ -1,7 +1,7 @@
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { getAllTeamMembers } from "@/app/admin/staff/actions";
 import {

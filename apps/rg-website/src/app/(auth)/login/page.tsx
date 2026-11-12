@@ -14,7 +14,7 @@ import {
   TwitchIcon,
 } from "@rosegriffon/ui";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 

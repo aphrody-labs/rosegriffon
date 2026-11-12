@@ -1,6 +1,6 @@
 import { Button } from "@rosegriffon/ui";
 import { Edit, ExternalLink } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import TwitterIcon from "@/shared/icons/twitter";
 

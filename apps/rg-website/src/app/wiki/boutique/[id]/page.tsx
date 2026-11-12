@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { ShopItemsGrid } from "@/components/wiki/ShopItemsGrid";

@@ -1,5 +1,5 @@
 import { cn } from "@rosegriffon/ui";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { type Campagne, etatCampagne, libelleEtatCampagne } from "@/lib/x-campagnes/types";
 

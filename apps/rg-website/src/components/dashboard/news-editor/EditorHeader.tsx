@@ -17,7 +17,7 @@ import {
   SlidersHorizontal,
   Type,
 } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import {
   Button,
   TabsList,

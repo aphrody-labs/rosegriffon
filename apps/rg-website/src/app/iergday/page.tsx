@@ -1,7 +1,7 @@
 import { Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@rosegriffon/ui";
 import { Hash, ImageIcon, ImagePlus, Users } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { PageContainer, PageHero } from "@/components/shared/PageShell";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";

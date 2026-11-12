@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
 import { ArrowLeft, PenSquare } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { redirect } from "next/navigation";
 
 import { ArticleEditor } from "@/components/articles/ArticleEditor";

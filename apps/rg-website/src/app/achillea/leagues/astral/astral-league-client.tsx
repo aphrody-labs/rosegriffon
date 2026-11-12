@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { createAchilleaClient } from "@/lib/achillea";
 import type { LeagueSeasonPayload, LeagueMatchRow } from "@rosegriffon/achillea-types/domain/league";
 import { Trophy, ArrowLeft, Calendar, Users, Sparkles, Layers, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";

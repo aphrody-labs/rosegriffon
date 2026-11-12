@@ -9,7 +9,7 @@ import {
   Mail,
   UserPlus,
 } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button, Input, PatreonIcon } from "@rosegriffon/ui";

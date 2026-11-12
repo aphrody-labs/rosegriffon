@@ -1,6 +1,6 @@
 import { BookOpen } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 const CATEGORY_LABELS: Record<string, string> = {
   announcement: "Annonce",

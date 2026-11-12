@@ -3,7 +3,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Bell, FileText, type LucideIcon, Megaphone } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { markAsRead } from "@/app/actions/notifications";
 import { cn } from "@/lib/utils";
 

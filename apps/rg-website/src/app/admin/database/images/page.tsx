@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, ImageOff, List, Star, Users } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import type React from "react";
 import { AdminPageHeader as DashboardPageHeader, Badge } from "@rosegriffon/ui";
 import { createPostgresClient } from "@rosegriffon/db/service";

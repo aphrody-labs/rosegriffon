@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@rosegriffon/ui";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useEffect } from "react";
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {

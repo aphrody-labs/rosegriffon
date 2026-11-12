@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import Image from "next/image";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import type { RankedAdminDispute } from "@rosegriffon/achillea-types/domain/ranked";

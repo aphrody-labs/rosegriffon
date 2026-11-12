@@ -4,7 +4,7 @@ export const dynamicParams = true;
 
 import { ArrowLeftRight } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { CharacterSheetWithLevel } from "@/components/wiki/CharacterSheetWithLevel";
 import { HowToObtain } from "@/components/wiki/HowToObtain";

@@ -4,7 +4,7 @@ import { Calendar, ChevronLeft, Clock } from "lucide-react";
 import { Twitter } from "@/lib/brand-icons";
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { getPgPool } from "@/lib/db/pg";
 import { getAuthorInfo } from "@/lib/author";

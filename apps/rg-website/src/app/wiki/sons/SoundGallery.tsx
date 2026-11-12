@@ -10,7 +10,7 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { ChevronDown, ChevronRight, Play, Volume2, Repeat } from "lucide-react";
 import { AudioPlayer } from "./AudioPlayer";
 import {

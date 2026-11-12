@@ -3,7 +3,7 @@
 import { Button, Card, CardContent, CardFooter, Tabs, TabsContent, TabsList, TabsTrigger } from "@rosegriffon/ui";
 import { motion } from "motion/react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useState } from "react";
 
 import { RgtvScheduleClient } from "@/components/RgtvScheduleClient";

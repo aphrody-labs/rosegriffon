@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import Image from "next/image";
 import { useAchilleaAuth, createAchilleaClient, rankImagePath, winRatePercent } from "@/lib/achillea";
 import { Sparkline } from "@/components/achillea/Sparkline";

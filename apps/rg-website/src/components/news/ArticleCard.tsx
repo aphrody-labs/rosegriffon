@@ -3,7 +3,7 @@
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useState } from "react";
 import type { FeedItem } from "@/app/news/news-client";
 import { LikeButton } from "@/components/news/LikeButton";

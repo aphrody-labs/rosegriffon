@@ -1,6 +1,6 @@
 import { AdminPageHeader, Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rosegriffon/ui";
 import { Hash } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import {
   bilanCampagne,

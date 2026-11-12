@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@rosegriffon/ui";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import RgEmote from "@/components/shared/emotes/RgEmote";
 

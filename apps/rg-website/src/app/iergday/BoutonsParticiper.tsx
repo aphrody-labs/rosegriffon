@@ -1,5 +1,5 @@
 import { DiscordIcon, InstagramIcon, XIcon } from "@rosegriffon/ui";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 /**
  * OÙ POSTER SA CRÉATION — les trois voies, côte à côte.

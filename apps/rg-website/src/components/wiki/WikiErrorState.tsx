@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertCircle, ArrowLeft, RefreshCw } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { Button } from "@rosegriffon/ui";
 
 /** État d'erreur commun aux fiches wiki, avec une action de reprise explicite. */

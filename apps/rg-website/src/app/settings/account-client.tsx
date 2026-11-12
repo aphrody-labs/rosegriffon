@@ -17,7 +17,7 @@ import {
   type AccountTabId,
   TwoFactorCard,
 } from "@rosegriffon/ui";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 

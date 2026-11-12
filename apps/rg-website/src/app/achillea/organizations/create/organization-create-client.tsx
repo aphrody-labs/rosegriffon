@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useAchilleaAuth, createAchilleaClient } from "@/lib/achillea";
 import { absoluteUrl } from "@/lib/site-url";
 import { normalizeNames } from "@rosegriffon/achillea-core/names";

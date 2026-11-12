@@ -3,7 +3,7 @@ export const revalidate = 3600;
 
 import { Gift } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { CapsuleCard } from "@/components/wiki/GachaCard";
 import { getCapsulePoolPrizes, getCapsulePrize } from "@/lib/wiki/gacha";

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 interface TagCloudProps {
   tags: Array<{ tag: string; count: number }>;

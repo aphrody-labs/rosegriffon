@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import type { TournamentListItem } from "@rosegriffon/achillea-types/domain/tournament";
 import { eventTypeLabel } from "@rosegriffon/achillea-core/labels";
 import type { EventTypeEnum } from "@rosegriffon/achillea-types";

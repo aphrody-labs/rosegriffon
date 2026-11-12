@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Pin } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { NewsActions } from "@/components/dashboard/news-actions";
 import { Badge } from "@rosegriffon/ui";
 import { Icon } from "@/components/ui/Icon";

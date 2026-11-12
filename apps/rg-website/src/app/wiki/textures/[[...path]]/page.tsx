@@ -12,7 +12,7 @@
  * Server Component : aucune donnée n'est bundlée, tout vient du pont VFS au rendu.
  */
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { wiki } from "@rosegriffon/app-shell";
 import { lsOrNull, texContainer, texUrl } from "@rosegriffon/azalee/cpk/live";
 import { MediaBack, MediaCount, MediaEmpty, MediaHeader } from "@/components/wiki/MediaShell";

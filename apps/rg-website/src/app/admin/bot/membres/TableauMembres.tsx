@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { ChevronLeft, ChevronRight, Info } from "lucide-react";

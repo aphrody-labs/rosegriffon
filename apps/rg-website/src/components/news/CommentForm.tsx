@@ -2,7 +2,7 @@
 
 import { User } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createComment } from "@/app/actions/comments";

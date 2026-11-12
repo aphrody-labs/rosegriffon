@@ -1,6 +1,6 @@
 import { Card } from "@rosegriffon/ui";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { getTweet } from "react-tweet/api";
 
 import { Heart, MessageCircle } from "@/lib/icons-config"; // Assurez-vous que Repeat2 (Retweet) est dispo, sinon une autre icone

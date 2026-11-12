@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { CoachFace } from "@/components/wiki/CoachFace";
 import { ElementIcon } from "@/components/wiki/ElementIcon";
 import type { Coach } from "@/lib/wiki/coaches";

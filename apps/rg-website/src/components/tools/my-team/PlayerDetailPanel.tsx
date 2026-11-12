@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { getCharacterSkills } from "@/app/actions/teams";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";

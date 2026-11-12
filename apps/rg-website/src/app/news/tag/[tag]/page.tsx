@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowLeft, Tag } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { Badge, Button } from "@rosegriffon/ui";
 import { WikiPagination } from "@/components/wiki/WikiPagination";
 import { getPgPool } from "@/lib/db/pg";

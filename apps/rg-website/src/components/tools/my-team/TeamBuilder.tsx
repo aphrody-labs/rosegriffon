@@ -14,7 +14,7 @@ import {
 import type { CollisionDetection, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { deleteTeam, saveTeam, updateTeam } from "@/app/actions/teams";

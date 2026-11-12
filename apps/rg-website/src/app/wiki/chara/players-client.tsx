@@ -9,7 +9,7 @@ import {
   Loader2,
   X,
 } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/components/providers/language-provider";
 import { FadeInItem } from "@/components/ui/fade-in";

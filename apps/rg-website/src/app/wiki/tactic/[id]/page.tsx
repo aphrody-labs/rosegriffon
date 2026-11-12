@@ -4,7 +4,7 @@ export const revalidate = 3600;
 export const dynamicParams = true;
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { notFound } from "next/navigation";
 import { TacticDetail } from "@/components/wiki/TacticDetail";
 import { wikiService } from "@/lib/wiki-service";

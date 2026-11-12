@@ -5,7 +5,7 @@
 
 import { Button, Input } from "@rosegriffon/ui";
 import { Search } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import type { StatutSondage } from "@/lib/discord/polls";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { formatAchCurrency } from "@/lib/achillea";
 import type { WalletBalance } from "@rosegriffon/achillea-types/domain/wallet";
 import { WalletTransactionDirection } from "@rosegriffon/achillea-types/enums/wallet";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 
 import { comptesDuFiltre, GROUPES, MARQUES, parametresDuFiltre, RESEAUX, TOUS_LES_COMPTES } from "@/lib/feed/comptes";
 import type { FiltreFil } from "@/lib/feed/comptes";

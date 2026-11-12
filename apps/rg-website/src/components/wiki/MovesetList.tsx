@@ -2,7 +2,7 @@
 
 import { CircleDot, Sparkles } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { getSkillElementIconUrl } from "@rosegriffon/azalee/images";
 import { cn } from "@/lib/utils";
 import { wiki } from "@rosegriffon/app-shell";

@@ -16,7 +16,7 @@ import {
   PinOff,
   Trash2,
 } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/shared/Link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
