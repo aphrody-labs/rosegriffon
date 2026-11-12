@@ -190,11 +190,9 @@ import {
 
 test("the website stays self-hosted: direct Postgres + long CPU exceed the edge free tiers", () => {
   const svc = { name: "website", ...infra.services.services.website } as never;
-  // Commercial + postgres + long-cpu: neither Cloudflare (10 ms CPU, no TCP pool) nor Vercel fit.
+  // Postgres + long-cpu are missing from both edge tiers (Cloudflare: 10 ms CPU, no TCP pool).
   expect(platformBlocker(infra, svc, "cloudflare")).toContain("missing");
-  expect(platformBlocker(infra, svc, "vercel")).toBe(
-    "free tier is non-commercial only",
-  );
+  expect(platformBlocker(infra, svc, "vercel")).toContain("missing");
   expect(platformFor(infra, svc).key).toBe("vps");
 });
 
