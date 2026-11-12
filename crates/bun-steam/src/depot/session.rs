@@ -29,8 +29,9 @@ use steamroom::types::key_value::KeyValue;
 use steamroom_client::login::{CredentialsLoginFlow, GuardType, LoginBuilder};
 use tracing::{info, warn};
 
+use crate::depot::auth::{self, GENERATE_FOR_APP_METHOD, RENEWAL_ALLOW};
 use crate::depot::options::{SteamDownloadOptions, SteamGuardKind, SteamGuardProvider};
-use crate::depot::token_store::TokenStore;
+use crate::depot::token_backend::{self, ReadOnlyStore, StoredToken, TokenBackend};
 
 // ─── Cache d'app info parsé ───────────────────────────────────────────────────
 
@@ -54,7 +55,7 @@ pub struct AppData {
 /// creds valides et une connexion réseau.
 pub struct SteamSession {
     client: SteamClient<LoggedIn>,
-    token_store: Arc<TokenStore>,
+    token_store: Arc<dyn TokenBackend>,
     app_cache: HashMap<u32, AppData>,
     depot_keys: HashMap<u32, DepotKey>,
 }
@@ -67,7 +68,14 @@ impl SteamSession {
     /// 2. Sinon si `username` + `password` fournis → `CredentialsLogin` + 2FA via `guard_provider`
     /// 3. Si `username` est `None` → login anonyme (jeux gratuits seulement)
     pub async fn connect(opts: &SteamDownloadOptions) -> Result<Self> {
-        let token_store = Arc::new(TokenStore::load(opts.token_store_path.as_deref()));
+        let token_store: Arc<dyn TokenBackend> = match &opts.token_backend {
+            Some(b) => b.clone(),
+            None => Arc::new(token_backend::FileBackend::open(
+                opts.token_store_path
+                    .clone()
+                    .unwrap_or_else(crate::depot::token_store::default_path),
+            )),
+        };
 
         let client = login_with_opts(opts, &token_store).await?;
 
@@ -80,7 +88,7 @@ impl SteamSession {
     }
 
     /// Retourne une référence au token store (pour persister de nouveaux tokens).
-    pub fn token_store(&self) -> &Arc<TokenStore> {
+    pub fn token_store(&self) -> &Arc<dyn TokenBackend> {
         &self.token_store
     }
 
@@ -236,11 +244,35 @@ impl SteamSession {
 
 // ─── Logique de login ─────────────────────────────────────────────────────────
 
+/// Steam rejected the stored refresh token (revoked or expired), or none is stored: an
+/// interactive `bun-steam-depot login <user>` is required. Mapped to exit code 2 by the binary.
+#[derive(Debug, thiserror::Error)]
+#[error(
+    "connexion Steam requise pour {account} : {reason}. Lancez `bun-steam-depot login {account}`"
+)]
+pub struct NeedsLogin {
+    pub account: String,
+    pub reason: &'static str,
+}
+
 async fn login_with_opts(
     opts: &SteamDownloadOptions,
-    token_store: &TokenStore,
+    token_store: &Arc<dyn TokenBackend>,
 ) -> Result<SteamClient<LoggedIn>> {
-    let Some(ref username) = opts.username else {
+    // Interactive login: credentials are only used when explicitly given (`login`).
+    if let (Some(username), Some(password)) = (&opts.username, &opts.password) {
+        return credentials_login(opts, token_store, username, password).await;
+    }
+
+    let stored = token_store.load(opts.username.as_deref()).await?;
+    let Some(stored) = stored else {
+        if let Some(username) = &opts.username {
+            return Err(NeedsLogin {
+                account: username.clone(),
+                reason: "aucun refresh token",
+            }
+            .into());
+        }
         info!("login anonyme Steam…");
         return LoginBuilder::new()
             .device_name("bunre-steam")
@@ -250,41 +282,97 @@ async fn login_with_opts(
             .map_err(|e| anyhow::anyhow!("login anonyme échoué : {e}"));
     };
 
-    // Refresh token en cache ?
-    let cached = token_store.get(username);
-    if let Some(ref token) = cached.refresh_token
-        && !token.is_empty()
-    {
-        info!("login avec refresh token caché pour {username}");
-        let result = LoginBuilder::new()
-            .device_name("bunre-steam")
-            .with_refresh_token(username, token)
-            .login()
-            .await;
-
-        match result {
-            Ok(client) => return Ok(client),
-            Err(steamroom_client::login::LoginError::LogonFailed(
-                steamroom::enums::EResultError::InvalidPassword
-                | steamroom::enums::EResultError::AccessDenied
-                | steamroom::enums::EResultError::Expired,
-            ))
-            | Err(steamroom_client::login::LoginError::InvalidPassword) => {
-                warn!("refresh token rejeté pour {username}, re-authentification par mot de passe");
-                token_store.set(username, Some(""), None);
-            }
-            Err(e) => return Err(anyhow::anyhow!("login token échoué : {e}")),
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs());
+    if stored.claims().is_expired(now) {
+        let _ = token_store.forget(&stored.account).await;
+        return Err(NeedsLogin {
+            account: stored.account,
+            reason: "refresh token expiré",
         }
+        .into());
     }
 
-    // Pas de token → credentials + 2FA.
-    let Some(ref password) = opts.password else {
-        anyhow::bail!(
-            "Aucun refresh token caché pour {username} et aucun mot de passe fourni. \
-             Relancez avec STEAM_PASSWORD ou réutilisez le refresh token mis en cache par une connexion précédente de bun-steam-depot."
-        );
+    info!(account = %stored.account, store = token_store.kind().as_str(), "login avec refresh token");
+    let result = LoginBuilder::new()
+        .device_name("bunre-steam")
+        .with_refresh_token(&stored.account, &stored.refresh_token)
+        .login()
+        .await;
+
+    let client = match result {
+        Ok(client) => client,
+        Err(steamroom_client::login::LoginError::LogonFailed(
+            steamroom::enums::EResultError::InvalidPassword
+            | steamroom::enums::EResultError::AccessDenied
+            | steamroom::enums::EResultError::Expired,
+        ))
+        | Err(steamroom_client::login::LoginError::InvalidPassword) => {
+            let _ = token_store.forget(&stored.account).await;
+            return Err(NeedsLogin {
+                account: stored.account,
+                reason: "refresh token révoqué",
+            }
+            .into());
+        }
+        Err(e) => return Err(anyhow::anyhow!("login token échoué : {e}")),
     };
 
+    renew_and_rotate(&client, token_store, &stored).await;
+    Ok(client)
+}
+
+/// Asks Steam for a fresh access token with renewal allowed and writes a rotated refresh token
+/// back to the canonical store. Best-effort: a failed renewal never fails the run, since the
+/// current refresh token just logged in successfully.
+async fn renew_and_rotate(
+    client: &SteamClient<LoggedIn>,
+    token_store: &Arc<dyn TokenBackend>,
+    stored: &StoredToken,
+) {
+    let Some(steam_id) = stored.steam_id.or(stored.claims().steam_id) else {
+        warn!("steamid inconnu, renouvellement du refresh token ignoré");
+        return;
+    };
+    let body = auth::encode_generate_for_app(&stored.refresh_token, steam_id, RENEWAL_ALLOW);
+    let response = match client
+        .call_service_method(GENERATE_FOR_APP_METHOD, &body)
+        .await
+    {
+        Ok(r) => r,
+        Err(e) => {
+            warn!("GenerateAccessTokenForApp : {e}");
+            return;
+        }
+    };
+    let Some(decoded) = auth::decode_generate_for_app(&response.body) else {
+        warn!("réponse GenerateAccessTokenForApp illisible");
+        return;
+    };
+    let Some(rotated) = auth::rotation(&stored.refresh_token, &decoded) else {
+        return;
+    };
+    let next = StoredToken::new(stored.account.clone(), rotated, Some(steam_id));
+    match token_store.save(&next).await {
+        Ok(()) => info!(
+            store = token_store.kind().as_str(),
+            "refresh token renouvelé"
+        ),
+        Err(e) if e.downcast_ref::<ReadOnlyStore>().is_some() => warn!(
+            store = token_store.kind().as_str(),
+            "Steam a renouvelé le refresh token mais le magasin est en lecture seule"
+        ),
+        Err(e) => warn!("persistance du refresh token renouvelé : {e}"),
+    }
+}
+
+async fn credentials_login(
+    opts: &SteamDownloadOptions,
+    token_store: &Arc<dyn TokenBackend>,
+    username: &str,
+    password: &str,
+) -> Result<SteamClient<LoggedIn>> {
     info!("login par credentials pour {username}…");
     let flow = LoginBuilder::new()
         .device_name("bunre-steam")
@@ -296,10 +384,8 @@ async fn login_with_opts(
     let approved = match flow {
         CredentialsLoginFlow::Approved(a) => a,
         CredentialsLoginFlow::NeedsGuardCode(challenge) => {
-            // Demander le code via le provider configuré.
             let kind = guard_kind_from_steamroom(challenge.allowed_kinds());
             let guard_code = get_guard_code(opts, kind).await?;
-
             let steamroom_kind = guard_kind_to_steamroom(kind);
             match challenge.submit_code(&guard_code, steamroom_kind).await {
                 Ok(a) => a,
@@ -318,10 +404,20 @@ async fn login_with_opts(
         _ => anyhow::bail!("flux d'authentification inattendu"),
     };
 
-    // Persiste le nouveau refresh token.
+    // Only the refresh token, account name and steamid are persisted; never the password.
     let tokens = approved.tokens();
     let account = tokens.account_name.as_deref().unwrap_or(username);
-    token_store.set(account, Some(&tokens.refresh_token), None);
+    let record = StoredToken::new(
+        account.to_ascii_lowercase(),
+        tokens.refresh_token.clone(),
+        None,
+    );
+    token_store.save(&record).await.map_err(|e| {
+        anyhow::anyhow!(
+            "persistance du refresh token ({}) : {e}",
+            token_store.kind().as_str()
+        )
+    })?;
 
     approved
         .finish()

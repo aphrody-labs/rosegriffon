@@ -2390,6 +2390,8 @@ fn steam_cmd(op: SteamOp) -> anyhow::Result<()> {
                 .clone()
                 .unwrap_or_else(bun_steam::depot::token_store::default_path),
         ),
+        // Même sélection `STEAM_TOKEN_STORE` que `bun-steam-depot` (file par défaut).
+        token_backend: Some(bun_steam::depot::token_backend::from_env(c.token_store.clone())?),
         guard_provider: None,
         // Garde anti-blocage : un depot muet est interrompu au lieu de dormir
         // indéfiniment (cf. bun_steam::depot::options::SteamDownloadOptions::stall_timeout).

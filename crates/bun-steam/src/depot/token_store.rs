@@ -24,9 +24,12 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use tracing::warn;
 
-/// Chemin par défaut du token store nie.
-/// `~/.local/share/nie/steam-tokens.json`
+/// Chemin par défaut du token store : `$STEAM_HOME/steam-tokens.json` si `STEAM_HOME` est défini,
+/// sinon `~/.local/share/nie/steam-tokens.json`.
 pub fn default_path() -> PathBuf {
+    if let Some(home) = std::env::var_os("STEAM_HOME").filter(|v| !v.is_empty()) {
+        return PathBuf::from(home).join("steam-tokens.json");
+    }
     dirs_next::data_dir()
         .unwrap_or_else(|| PathBuf::from("."))
         .join("nie")
@@ -43,6 +46,10 @@ pub struct AccountTokens {
     /// Guard data ("machine remembered"). Si présent, évite de redemander le 2FA.
     #[serde(rename = "guardData", skip_serializing_if = "Option::is_none")]
     pub guard_data: Option<String>,
+
+    /// SteamID 64 du compte (lu dans le JWT au login), pour `auth status`.
+    #[serde(rename = "steamId", default, skip_serializing_if = "Option::is_none")]
+    pub steam_id: Option<u64>,
 }
 
 /// Cache JSON thread-safe des jetons par compte.
@@ -135,6 +142,28 @@ impl TokenStore {
             };
         }
         self.save_locked(&guard);
+    }
+
+    /// Enregistre le SteamID du compte (persisté immédiatement).
+    pub fn set_steam_id(&self, account: &str, steam_id: Option<u64>) {
+        if self.path.is_none() {
+            return;
+        }
+        let mut guard = self.inner.lock().expect("token-store lock poisoned");
+        guard.entry(account.to_ascii_lowercase()).or_default().steam_id = steam_id;
+        self.save_locked(&guard);
+    }
+
+    /// Comptes présents avec un refresh token non vide.
+    pub fn accounts(&self) -> Vec<String> {
+        let guard = self.inner.lock().expect("token-store lock poisoned");
+        let mut v: Vec<String> = guard
+            .iter()
+            .filter(|(_, t)| t.refresh_token.as_deref().is_some_and(|r| !r.is_empty()))
+            .map(|(k, _)| k.clone())
+            .collect();
+        v.sort();
+        v
     }
 
     /// Persiste le store sur disque (best-effort, silencieux en cas d'erreur).

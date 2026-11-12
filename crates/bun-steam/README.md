@@ -16,9 +16,18 @@ installs) is [`packages/bun-steam`](../../packages/bun-steam).
 | `depot`       | Depot planning (always); CM depot client with feature `depot` and the `bun-steam-depot` binary.                                                                                                                  |
 | `emulator`    | In-process Steamworks API emulator (feature `emulator`).                                                                                                                                                         |
 
-Credentials: no module prompts for, logs or prints a password or token value. `config` reports
-cached sessions as booleans only. The `depot` client keeps its per-account refresh-token cache
-(`~/.local/share/nie/steam-tokens.json`) from its iecode origin.
+Credentials: no module prompts for, logs or prints a password or token value, except the
+`bun-steam-depot login` command, which reads the password and the Steam Guard code from the TTY
+(echo off) and keeps them in memory only. Persisted: refresh token, account name and steamid, in
+the store chosen by `STEAM_TOKEN_STORE` (`file` = `$STEAM_HOME/steam-tokens.json` mode 0600,
+`env`, `cloudflare` Workers KV, `github` Actions secret). Each run renews the access token and
+writes a rotated refresh token back; exit code 2 means a new `login` is needed. `config` reports
+cached sessions as booleans only. See [`docs/auth.md`](../../docs/auth.md).
+
+`bun-steam-depot` (feature `depot`) replaces steamcmd for our use: `login <user>`, `update`
+(resume: valid files skipped), `verify` (every file hashed against the manifest), `list`,
+`auth status`, `auth export --to <store>`. Windows depots are selected with `--os windows` on any
+host OS. Container: `infra/docker/steam-depot`.
 
 Shared fixtures in `tests/fixtures` (`text.vdf`, `shortcuts.vdf`, `types.bin.vdf` and their
 `*.expected.json`) are parsed by both implementations.

@@ -6,6 +6,8 @@
 //! [`planning`] is platform-neutral and always available (also on `wasm32`); the CM client
 //! (session, downloader, transfer, per-account token cache) needs feature `depot`.
 
+/// Platform-neutral refresh-token lifecycle (JWT claims, renewal wire format, rotation).
+pub mod auth;
 /// Platform-neutral depot selection and manifest collision planning.
 pub mod planning;
 
@@ -24,6 +26,9 @@ pub mod session;
 /// Per-account refresh-token and guard-data cache of the CM client.
 #[cfg(feature = "depot")]
 pub mod token_store;
+/// Pluggable refresh-token stores (`STEAM_TOKEN_STORE`).
+#[cfg(feature = "depot")]
+pub mod token_backend;
 /// Chunk cache, rate limiting and transfer counters.
 #[cfg(feature = "depot")]
 pub mod transfer;

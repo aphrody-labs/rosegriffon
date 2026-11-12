@@ -133,6 +133,9 @@ pub struct SteamDownloadOptions {
     /// Défaut : [`crate::depot::token_store::default_path()`].
     pub token_store_path: Option<PathBuf>,
 
+    /// Magasin de jetons explicite (`STEAM_TOKEN_STORE`), prioritaire sur `token_store_path`.
+    pub token_backend: Option<std::sync::Arc<dyn crate::depot::token_backend::TokenBackend>>,
+
     /// Fournisseur de codes Steam Guard (2FA). `None` → utilise [`EnvGuardProvider`].
     pub guard_provider: Option<std::sync::Arc<dyn SteamGuardProvider>>,
 
@@ -208,6 +211,7 @@ impl SteamDownloadOptions {
             max_downloads: 16,
             verify: true,
             token_store_path: Some(crate::depot::token_store::default_path()),
+            token_backend: None,
             guard_provider: None,
             stall_timeout: Some(Duration::from_secs(300)),
             transfer: TransferOptions::default(),
@@ -278,6 +282,8 @@ pub struct DownloadResult {
     pub downloaded_bytes: u64,
     pub file_count: u64,
     pub duration: Duration,
+    /// The stored refresh token is missing, expired or revoked: run `login` again.
+    pub needs_login: bool,
 }
 
 impl DownloadResult {
@@ -292,6 +298,7 @@ impl DownloadResult {
             downloaded_bytes: 0,
             file_count: 0,
             duration,
+            needs_login: false,
         }
     }
 }

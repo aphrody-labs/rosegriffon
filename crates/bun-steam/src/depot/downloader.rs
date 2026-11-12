@@ -74,7 +74,11 @@ impl SteamDepotDownloader {
 
         match self.download_app_inner(opts, progress).await {
             Ok(result) => result,
-            Err(e) => DownloadResult::err(app_id, install_dir, &e.to_string(), start.elapsed()),
+            Err(e) => {
+                let mut r = DownloadResult::err(app_id, install_dir, &format!("{e:#}"), start.elapsed());
+                r.needs_login = e.chain().any(|c| c.is::<crate::depot::session::NeedsLogin>());
+                r
+            }
         }
     }
 
@@ -458,6 +462,7 @@ impl SteamDepotDownloader {
             downloaded_bytes: total_downloaded,
             file_count: total_files,
             duration,
+            needs_login: false,
         })
     }
 
