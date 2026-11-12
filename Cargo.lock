@@ -1052,6 +1052,8 @@ dependencies = [
 name = "aphrody-nie-wasm"
 version = "1.4.7"
 dependencies = [
+ "anyhow",
+ "aphrody-gpu-backend",
  "aphrody-nie-app",
  "aphrody-nie-asm",
  "aphrody-nie-bench",
@@ -1080,8 +1082,10 @@ dependencies = [
  "aphrody-nie-ui",
  "aphrody-nie-zukan",
  "bun-steam",
+ "bytemuck",
  "console_error_panic_hook",
  "getrandom 0.3.4",
+ "js-sys",
  "parking_lot 0.12.5",
  "serde",
  "serde_json",
