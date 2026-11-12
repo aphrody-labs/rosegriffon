@@ -8,38 +8,42 @@ https://partner.steamgames.com/doc/api/ISteamUser.
 1. Client: `ISteamUser::GetAuthTicketForWebApi(const char *pchIdentity)` returns an
    `HAuthTicket`; the ticket bytes arrive in the `GetTicketForWebApiResponse_t` callback.
    `pchIdentity` is a free string naming the receiving service (for example
-   `"my-backend"`). The function was added in a 2023 SDK release (unverified: SDK 1.57).
+   `"my-backend"`). Declared in the SDK header `isteamuser.h` as
+   `virtual HAuthTicket GetAuthTicketForWebApi( const char *pchIdentity )`
+   (`third_party/steam-ecosystem/steamworks-rs/steamworks-sys/lib/steam/public/steam/isteamuser.h` line 136).
 2. Client sends the hex-encoded ticket to the backend over its own channel (HTTPS).
-3. Backend: `GET https://api.steampowered.com/ISteamUserAuth/AuthenticateUserTicket/v1/`
-   (or `partner.steam-api.com` with a publisher key) with:
-   - `key`: Web API key or publisher key
-   - `appid`: the game's AppID
-   - `ticket`: hex string
-   - `identity`: the same string passed to `GetAuthTicketForWebApi` (required for tickets
-     made with it; reported by https://partner.steamgames.com/doc/webapi/ISteamUserAuth)
-4. Success response: `response.params` with `result: "OK"`, `steamid`, `ownersteamid`,
-   `vacbanned`, `publisherbanned`. `ownersteamid` differs from `steamid` when the game is
-   played through Family Sharing.
+3. Backend: `GET https://partner.steam-api.com/ISteamUserAuth/AuthenticateUserTicket/v1/`
+   with a publisher key, or `https://api.steampowered.com/` with a user Web API key (rate
+   limited). All four parameters are required: `key` (sent in the `x-webapi-key` header, see [`keys.md`](keys.md)), `appid`, `ticket` (hex of the ticket
+   bytes) and `identity` (the string passed to `GetAuthTicketForWebApi`). Call it from a
+   secure server only, never from a client
+   (https://partner.steamgames.com/doc/webapi/ISteamUserAuth, fetched 2026-11-12).
+4. Response: `response.params` with `result`, `steamid`, `ownersteamid`, `vacbanned` and
+   `publisherbanned` (field names from
+   `third_party/steam-ecosystem/steam-rs/src/steam_user_auth/authenticate_user_ticket.rs`).
 5. When the session ends, the client calls `ISteamUser::CancelAuthTicket(hTicket)`.
-
-Legacy: tickets from `GetAuthSessionTicket` were also accepted by `AuthenticateUserTicket`
-without `identity`; Valve recommends `GetAuthTicketForWebApi` for web backends.
 
 ## Game server and P2P tickets
 
-- Sender: `ISteamUser::GetAuthSessionTicket(pTicket, cbMaxTicket, &pcbTicket, pSteamNetworkingIdentity)`.
-- Receiver (game server): `ISteamGameServer::BeginAuthSession(pTicket, cbTicket, steamID)`,
-  then wait for `ValidateAuthTicketResponse_t`; end with `EndAuthSession(steamID)`.
-- The receiver must be connected to Steam; the check is made by Steam, not offline.
+Signatures below are from the Steamworks SDK headers vendored in
+`third_party/steam-ecosystem/steamworks-rs/steamworks-sys/lib/steam/public/steam/`.
 
-## Ownership checks after identity
-
-- `ISteamUser::UserHasLicenseForApp` (game server side) for DLC.
-- Web API: `ISteamUser/CheckAppOwnership/v2` (publisher key, partner host;
-  https://partner.steamgames.com/doc/webapi/ISteamUser).
+- Sender: `GetAuthSessionTicket(void *pTicket, int cbMaxTicket, uint32 *pcbTicket, const SteamNetworkingIdentity *)`
+  on `ISteamUser` (isteamuser.h line 131) or `ISteamGameServer` (isteamgameserver.h line 157).
+- Receiver: `BeginAuthSession(const void *pAuthTicket, int cbAuthTicket, CSteamID steamID)`
+  (isteamuser.h line 140, isteamgameserver.h line 161), which the header describes as
+  checking that the ticket "is valid and isnt reused"; the result arrives in the
+  `ValidateAuthTicketResponse_t` callback (isteamuser.h line 319). Stop with
+  `EndAuthSession(steamID)`; the sender releases its ticket with `CancelAuthTicket`.
+- After `BeginAuthSession`, `UserHasLicenseForApp(steamID, appID)` checks DLC ownership
+  (isteamuser.h line 150, isteamgameserver.h line 171).
 
 ## Encrypted app tickets
 
-`ISteamUser::RequestEncryptedAppTicket` produces a ticket encrypted with a per-app key
-from the partner site, decrypted offline by the backend with the SDK's
-`steamencryptedappticket` library. Use it when the backend cannot call Steam.
+`ISteamUser::RequestEncryptedAppTicket(void *pDataToInclude, int cbDataToInclude)`
+(isteamuser.h line 165) yields a ticket that the backend decrypts offline with the functions
+in `steamencryptedappticket.h` (same SDK directory), such as
+`SteamEncryptedAppTicket::BDecryptTicket`, with a private symmetric key generated per title
+under Edit Steamworks Settings, Security, SDK Auth (needs the Manage Signing permission). The
+key must be stored securely and never shipped in the application
+(https://partner.steamgames.com/doc/features/auth, fetched 2026-11-12).

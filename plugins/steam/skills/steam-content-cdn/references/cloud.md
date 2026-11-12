@@ -1,6 +1,6 @@
 # Steam Cloud
 
-Source: https://partner.steamgames.com/doc/features/cloud (fetched 2026-11-12), `steam-protobufs/steam/steammessages_cloud.steamclient.proto`.
+Source: https://partner.steamgames.com/doc/features/cloud (fetched 2026-11-12), `third_party/steam-ecosystem/steam-protobufs/steam/steammessages_cloud.steamclient.proto`.
 
 ## Auto-Cloud roots
 
@@ -19,11 +19,11 @@ Source: https://partner.steamgames.com/doc/features/cloud (fetched 2026-11-12), 
 | LinuxHome             | Linux   | `~/`                                                                    |
 | LinuxXdgDataHome      | Linux   | `$XDG_DATA_HOME/`                                                       |
 
-## Local layout (unverified: not on the partner page)
+## Local layout
 
-- `<Steam>/userdata/<accountid>/<appid>/remote/`: files written through ISteamRemoteStorage.
-- `<Steam>/userdata/<accountid>/<appid>/remotecache.vdf`: per-file sync state.
-- `<accountid>` is the 32-bit account ID (see `steam-ids-and-urls`). Use `app_paths` to resolve.
+The local directory layout is described once, in the files table of [`../../steam-local-inspect/references/layout.md`](../../steam-local-inspect/references/layout.md).
+
+- `<accountid>` is the 32-bit account ID (see [`../../steam-ids-and-urls/references/steamid.md`](../../steam-ids-and-urls/references/steamid.md)). Use `app_paths` to resolve.
 
 ## CM service `Cloud` (selected RPCs)
 

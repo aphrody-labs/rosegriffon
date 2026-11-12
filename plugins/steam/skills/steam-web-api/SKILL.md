@@ -1,6 +1,6 @@
 ---
 name: steam-web-api
-description: This skill should be used when the user asks to "call the Steam Web API", "get a player's owned games", "resolve a Steam vanity URL", "look up Steam achievements", "get the Steam app list", "fetch Steam store app details", "get current player count for a Steam game", "query Workshop items", "get Steam reviews for an app", or mentions api.steampowered.com, partner.steam-api.com, ISteamUser, IPlayerService, ISteamUserStats, IStoreService, appdetails, or a Steam Web API key. For obtaining or protecting keys and for login flows, steam-auth applies.
+description: This skill should be used when the user asks to "call the Steam Web API", "get a player's owned games", "get the Steam app list", "fetch Steam store app details", "get Steam reviews", or mentions api.steampowered.com, ISteamUser, IPlayerService, IStoreService, or appdetails. For obtaining or protecting keys and for login flows, steam-auth applies.
 ---
 
 # Steam Web API
@@ -12,26 +12,23 @@ Use this skill to build, debug, or explain HTTP calls to Valve's Steam Web API a
 Build every call as:
 
 ```
-https://api.steampowered.com/<Interface>/<Method>/v<N>/?key=<KEY>&<params>
+https://api.steampowered.com/<Interface>/<Method>/v<N>/?<params>   (key in the x-webapi-key header)
 ```
 
 - Use `api.steampowered.com` for public methods (HTTP and HTTPS). Source: https://partner.steamgames.com/doc/webapi_overview
-- Use `https://partner.steam-api.com` only from a secure server with a publisher key. That host is HTTPS-only. Every request needs a publisher key, and requests without a valid one return 403. Repeated 403s bring strict per-IP rate limits. Source: same page.
-- Always use HTTPS when a key is attached. Pass the key as the `key` query parameter or in the `x-webapi-key` request header. Source: https://partner.steamgames.com/doc/webapi_overview/auth
-- For `*Service` interfaces (IPlayerService, IStoreService, IPublishedFileService, IUserReviewsService), parameters can go into a URL-encoded JSON blob in `input_json`. Keep `key` and `format` as separate parameters. Source: https://partner.steamgames.com/doc/webapi_overview
-- Use `format=json` (default), `xml` or `vdf` (unverified: the overview names `format` but does not list its values in the fetched text).
+- Partner host and publisher key rules: [`../steam-auth/references/keys.md`](../steam-auth/references/keys.md).
+- Always use HTTPS when a key is attached. How a key is passed is in [`../steam-auth/references/keys.md`](../steam-auth/references/keys.md).
+- For `*Service` interfaces (IPlayerService, IStoreService, IPublishedFileService, IUserReviewsService), parameters can go into a URL-encoded JSON blob in `input_json`. Keep `format` as a separate parameter; the key goes in the header ([`../steam-auth/references/keys.md`](../steam-auth/references/keys.md)). Source: https://partner.steamgames.com/doc/webapi_overview
+- `format` accepts `json` (default), `xml` and `vdf`. The overview does not list the values; verified with keyless calls to `ISteamWebAPIUtil/GetServerInfo/v1/?format=vdf` and `?format=xml` on 2026-11-12.
 - Array parameters use indexed names such as `publishedfileids[0]` and `name[0]`. Source: https://partner.steamgames.com/doc/webapi/ISteamRemoteStorage
 
 ## Keys and limits
 
-- User keys are free and need a Steam account, a domain name, and acceptance of the Terms. Register one at https://steamcommunity.com/dev/apikey. Source: https://partner.steamgames.com/doc/webapi_overview/auth
-- Publisher keys belong to a Steamworks publisher group (Users & Permissions -> Manage Groups -> Create WebAPI Key). They can be IP-locked and must never ship in a client. Source: same page.
-- The Terms of Use cap usage at 100,000 calls per day. Keys are personal, confidential, and non-transferable. Source: https://steamcommunity.com/dev/apiterms
-- Never print, log, or commit a key. Read it from the `STEAM_WEB_API_KEY` environment variable.
+- Obtaining and handling keys (user and publisher keys, daily cap, terms, environment variable, header, secrecy): [`../steam-auth/references/keys.md`](../steam-auth/references/keys.md).
 
 ## Choosing a method
 
-Start with the table below. Full parameter lists are in `references/interfaces.md`.
+Start with the table below. Full parameter lists are in [`references/interfaces.md`](references/interfaces.md).
 
 | Need                             | Method                                                               | Key      |
 | -------------------------------- | -------------------------------------------------------------------- | -------- |
@@ -55,22 +52,22 @@ Start with the table below. Full parameter lists are in `references/interfaces.m
 
 Rules that save time:
 
-- Use IStoreService/GetAppList for the app list. ISteamApps/GetAppList/v2 is deprecated because it "can no longer scale to the number of items available on Steam". Source: https://partner.steamgames.com/doc/webapi/ISteamApps
-- Use IUserReviewsService/GetAppReviews for reviews. `store.steampowered.com/appreviews/<appid>?json=1` is deprecated. Source: https://partner.steamgames.com/doc/webapi/IUserReviewsService
-- Private profiles return empty or missing data on GetOwnedGames, GetFriendList, and GetPlayerAchievements. Check `communityvisibilitystate` from GetPlayerSummaries first (unverified: the page documenting this behavior returned 403 when fetched).
+- Use IStoreService/GetAppList for the app list; ISteamApps/GetAppList/v2 is deprecated ([`references/interfaces.md`](references/interfaces.md)).
+- Use IUserReviewsService/GetAppReviews for reviews; the storefront `appreviews` endpoint is deprecated ([`references/store-api.md`](references/store-api.md)).
+- Private profiles return empty or missing data on GetOwnedGames, GetFriendList, and GetPlayerAchievements. GetOwnedGames returns games only "if their owned games/game details are visible to you" (https://partner.steamgames.com/doc/webapi/IPlayerService); GetFriendList returns HTTP 401 for a private friend list (https://partner.steamgames.com/doc/webapi/ISteamUser). Check `communityvisibilitystate` from GetPlayerSummaries first. The partner sample shows values 1 and 3 without defining them; `third_party/steam-ecosystem/steam-rs/src/steam_user/get_player_summaries.rs` documents 1 as private.
 - Resolve a vanity name or profile URL to a SteamID64 before calling any per-user method.
 
 ## Store endpoints (undocumented)
 
-`store.steampowered.com/api/appdetails`, `/api/packagedetails`, and related endpoints are not part of the documented Web API. They need no key, can change without notice, and are rate-limited per IP. Treat them as best-effort. Cache responses and back off on 429 or 403. See `references/store-api.md`.
+`store.steampowered.com/api/appdetails`, `/api/packagedetails`, and related endpoints are not part of the documented Web API. They need no key, can change without notice, and are rate-limited per IP. Treat them as best-effort. Cache responses and back off on HTTP 429. See [`references/store-api.md`](references/store-api.md).
 
 ## Plugin MCP tools
 
 Prefer the plugin tools over hand-built HTTP calls:
 
-- `web_api_call`: generic `<Interface>/<Method>/v<N>` call. It adds `STEAM_WEB_API_KEY` when that variable is set. Without it, only keyless methods work (GetNumberOfCurrentPlayers, GetGlobalAchievementPercentagesForApp, GetNewsForApp, UpToDateCheck, GetPublishedFileDetails, GetAppReviews).
+- `web_api_call`: generic `<Interface>/<Method>/v<N>` call. It adds `STEAM_WEB_API_KEY` when that variable is set. Without it, only keyless methods work. A keyless call to `ISteamWebAPIUtil/GetSupportedAPIList/v1/` (2026-11-12) lists exactly the methods that take no `key` parameter. The keyless methods, interface by interface, and the common methods that need a key are listed in [`references/interfaces.md`](references/interfaces.md).
 - `store_appdetails`: wraps `store.steampowered.com/api/appdetails` with `cc`, `l`, and `filters`.
-- `resolve_steamid`: turns a vanity name, profile URL, or SteamID form into a SteamID64. Vanity resolution needs a key.
+- `resolve_steamid`: turns a vanity name, profile URL, or SteamID form into a SteamID64. Vanity names use ResolveVanityURL when a key is set, otherwise the public `steamcommunity.com/id/<name>/?xml=1` feed (`plugins/steam/servers/steam-mcp.ts`).
 
 If a call fails, report the HTTP status and the error body. Do not retry the same call in a loop.
 
@@ -79,7 +76,7 @@ If a call fails, report the HTTP status and the error body. Do not retry the sam
 1. Identify the data needed and pick the method from the table.
 2. Check the key requirement. If a key is required and `STEAM_WEB_API_KEY` is unset, say so and offer keyless alternatives.
 3. Resolve SteamIDs, then make the call. Use `input_json` for `*Service` methods when passing arrays.
-4. For bulk work, page (`last_appid`, `cursor`), cache, and stay well under 100,000 calls per day.
+4. For bulk work, page (`last_appid`, `cursor`), cache, and stay well under the daily cap ([`../steam-auth/references/keys.md`](../steam-auth/references/keys.md)).
 5. Cite the method version used. Older versions may still respond but are unsupported (for example, GetNewsForApp v1 versus v2).
 
 ## Additional Resources
@@ -101,4 +98,4 @@ If a call fails, report the HTTP status and the error body. Do not retry the sam
 - https://partner.steamgames.com/doc/webapi/ISteamRemoteStorage
 - https://partner.steamgames.com/doc/webapi/IPublishedFileService
 - https://partner.steamgames.com/doc/webapi/IUserReviewsService
-- Local typed client: `C:\src\third_party\steam-ecosystem\steam-rs\src\lib.rs` (base `https://api.steampowered.com`)
+- Local typed client: `third_party/steam-ecosystem/steam-rs/src/lib.rs` (base `https://api.steampowered.com`)

@@ -1,6 +1,6 @@
 # SteamID reference
 
-Sources: `C:\src\third_party\steam-ecosystem\steamkit\SteamKit2\SteamKit2\Types\SteamID.cs`, https://developer.valvesoftware.com/wiki/SteamID
+Sources: `third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Types/SteamID.cs`, https://developer.valvesoftware.com/wiki/SteamID
 
 ## Masks (SteamID.cs)
 
@@ -16,7 +16,7 @@ From `AccountTypeChars`: I Invalid, U Individual, M Multiseat, G GameServer, A A
 
 ## Universes
 
-0 Invalid, 1 Public, 2 Beta, 3 Internal, 4 Dev (EUniverse, SteamKit generated enums).
+0 Invalid, 1 Public, 2 Beta, 3 Internal, 4 Dev (`EUniverse` in `third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Base/Generated/SteamLanguage.cs`, which also defines `EAccountType`).
 
 ## Conversion (pseudo code, uint64)
 

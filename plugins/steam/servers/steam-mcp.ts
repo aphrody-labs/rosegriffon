@@ -22,7 +22,9 @@ import {
 const PROTOCOL = "2025-06-18";
 const SUPPORTED_PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
 const API = "https://api.steampowered.com";
-const UA = "steam-plugin-mcp/0.1 (+https://github.com/aphrody-labs/rosegriffon)";
+const OPENID = "https://steamcommunity.com/openid/login";
+const UA =
+  "steam-plugin-mcp/0.1 (+https://github.com/aphrody-labs/rosegriffon)";
 
 type Json = Record<string, unknown>;
 type Tool = {
@@ -44,11 +46,18 @@ function root(a: Json): string {
   return r;
 }
 
-async function getJson(url: string): Promise<unknown> {
+async function getJson(
+  url: string,
+  extra: Record<string, string> = {},
+): Promise<unknown> {
   const res = await fetch(url, {
-    headers: { "user-agent": UA, accept: "application/json" },
+    headers: { "user-agent": UA, accept: "application/json", ...extra },
   });
   const text = await res.text();
+  if (res.status === 429)
+    throw new Error(
+      `HTTP 429: rate limited by Steam for ${redact(url)}; retry later`,
+    );
   if (!res.ok)
     throw new Error(
       `HTTP ${res.status} for ${redact(url)}: ${text.slice(0, 300)}`,
@@ -114,30 +123,35 @@ const tools: Tool[] = [
         );
       if (a.input_json)
         u.searchParams.set("input_json", JSON.stringify(a.input_json));
+      // The key travels in the x-webapi-key header, never in the URL
+      // (https://partner.steamgames.com/doc/webapi_overview/auth).
       const k = a.use_key === false ? undefined : key();
-      if (k) u.searchParams.set("key", k);
       u.searchParams.set("format", "json");
-      if (a.http_method === "POST") {
-        const body = u.searchParams.toString();
-        const res = await fetch(`${u.origin}${u.pathname}`, {
-          method: "POST",
-          headers: {
-            "user-agent": UA,
-            "content-type": "application/x-www-form-urlencoded",
-          },
-          body,
-        });
-        const text = await res.text();
-        return {
-          status: res.status,
-          keyUsed: Boolean(k),
-          body: safeParse(text),
-        };
-      }
+      const headers: Record<string, string> = { "user-agent": UA };
+      if (k) headers["x-webapi-key"] = k;
+      const post = a.http_method === "POST";
+      if (post) headers["content-type"] = "application/x-www-form-urlencoded";
+      const res = await fetch(post ? `${u.origin}${u.pathname}` : u, {
+        method: post ? "POST" : "GET",
+        headers,
+        body: post ? u.searchParams.toString() : undefined,
+      });
+      const text = await res.text();
+      if ((res.status === 401 || res.status === 403) && !k)
+        throw new Error(
+          `HTTP ${res.status}: ${iface}/${method} needs a Web API key. Set STEAM_WEB_API_KEY (see the plugin README) or use a keyless method; ISteamWebAPIUtil/GetSupportedAPIList lists the methods available without a key.`,
+        );
+      if (res.status === 429)
+        throw new Error("HTTP 429: rate limited by Steam; retry later");
+      if (!res.ok)
+        throw new Error(
+          `HTTP ${res.status} for ${redact(u.toString())}: ${text.slice(0, 300)}`,
+        );
       return {
+        status: res.status,
         keyUsed: Boolean(k),
         url: redact(u.toString()),
-        body: await getJson(u.toString()),
+        body: safeParse(text),
       };
     },
   },
@@ -180,8 +194,8 @@ const tools: Tool[] = [
       if (!vanity) throw new Error("unrecognized SteamID or vanity");
       const k = key();
       if (k) {
-        const u = `${API}/ISteamUser/ResolveVanityURL/v1/?key=${encodeURIComponent(k)}&vanityurl=${encodeURIComponent(vanity)}`;
-        const r = (await getJson(u)) as {
+        const u = `${API}/ISteamUser/ResolveVanityURL/v1/?vanityurl=${encodeURIComponent(vanity)}`;
+        const r = (await getJson(u, { "x-webapi-key": k })) as {
           response?: { success?: number; steamid?: string; message?: string };
         };
         if (r.response?.success === 1 && r.response.steamid)
@@ -323,15 +337,122 @@ const tools: Tool[] = [
       ),
   },
   {
+    name: "openid_login_url",
+    description:
+      "Build the 'Sign in through Steam' OpenID 2.0 redirect URL (checkid_setup on https://steamcommunity.com/openid/login) for a return_to callback. Works without a Web API key.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        return_to: {
+          type: "string",
+          description: "Absolute https callback URL",
+        },
+        realm: {
+          type: "string",
+          description: "Defaults to the origin of return_to",
+        },
+      },
+      required: ["return_to"],
+    },
+    run: async (a) => {
+      const returnTo = new URL(String(a.return_to));
+      const u = new URL(OPENID);
+      const sel = "http://specs.openid.net/auth/2.0/identifier_select";
+      u.searchParams.set("openid.ns", "http://specs.openid.net/auth/2.0");
+      u.searchParams.set("openid.mode", "checkid_setup");
+      u.searchParams.set("openid.return_to", returnTo.toString());
+      u.searchParams.set(
+        "openid.realm",
+        String(a.realm ?? `${returnTo.origin}/`),
+      );
+      u.searchParams.set("openid.identity", sel);
+      u.searchParams.set("openid.claimed_id", sel);
+      return { url: u.toString() };
+    },
+  },
+  {
+    name: "openid_verify",
+    description:
+      "Verify a Steam OpenID 2.0 callback: posts every openid.* field back with openid.mode=check_authentication, checks is_valid:true, op_endpoint, return_to and the claimed_id format, and returns the SteamID in every form. Pass the full callback URL or its query string. Works without a Web API key.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        callback: {
+          type: "string",
+          description: "Full callback URL or query string",
+        },
+        expected_return_to: {
+          type: "string",
+          description:
+            "URL the callback arrived on; openid.return_to must match its scheme, host and path, and contain its query parameters (OpenID 2.0 section 11.1)",
+        },
+      },
+      required: ["callback", "expected_return_to"],
+    },
+    run: async (a) => {
+      const raw = String(a.callback);
+      const q = new URLSearchParams(
+        raw.includes("?") ? raw.slice(raw.indexOf("?") + 1) : raw,
+      );
+      if (q.get("openid.mode") !== "id_res")
+        throw new Error(
+          `openid.mode is ${q.get("openid.mode") ?? "missing"}, expected id_res`,
+        );
+      if (q.get("openid.op_endpoint") !== OPENID)
+        throw new Error("openid.op_endpoint is not the Steam endpoint");
+      const want = new URL(String(a.expected_return_to));
+      let got: URL;
+      try {
+        got = new URL(String(q.get("openid.return_to") ?? ""));
+      } catch {
+        throw new Error("openid.return_to is missing or not a URL");
+      }
+      const sameBase =
+        got.protocol === want.protocol &&
+        got.host === want.host &&
+        got.pathname === want.pathname;
+      const sameQuery = [...want.searchParams].every(
+        ([k, v]) => got.searchParams.get(k) === v,
+      );
+      if (!sameBase || !sameQuery)
+        throw new Error("openid.return_to does not match expected_return_to");
+      const m = (q.get("openid.claimed_id") ?? "").match(
+        /^https:\/\/steamcommunity\.com\/openid\/id\/(\d{17})$/,
+      );
+      if (!m) throw new Error("openid.claimed_id has an unexpected format");
+      const body = new URLSearchParams();
+      for (const [k, v] of q) if (k.startsWith("openid.")) body.set(k, v);
+      body.set("openid.mode", "check_authentication");
+      const res = await fetch(OPENID, {
+        method: "POST",
+        headers: {
+          "user-agent": UA,
+          "content-type": "application/x-www-form-urlencoded",
+        },
+        body,
+      });
+      const text = await res.text();
+      const valid = /^is_valid:true$/m.test(text);
+      if (!valid)
+        throw new Error("Steam rejected the assertion (is_valid is not true)");
+      return {
+        valid,
+        nonce: q.get("openid.response_nonce"),
+        note: "Store the nonce and reject repeats (OpenID 2.0 section 11.3).",
+        ...parseSteamId(m[1]!)!,
+      };
+    },
+  },
+  {
     name: "steamdb_link",
     description:
-      "Build steamdb.info links (and store/community links) for an app, depot, sub, build or user. Links only: never fetches or scrapes SteamDB.",
+      "Build steamdb.info links (and store/community links) for an app, depot, sub or user. Links only: never fetches or scrapes SteamDB.",
     inputSchema: {
       type: "object",
       properties: {
         kind: {
           type: "string",
-          enum: ["app", "depot", "sub", "build", "user"],
+          enum: ["app", "depot", "sub", "user"],
         },
         id: { type: "string" },
       },

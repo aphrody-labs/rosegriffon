@@ -1,6 +1,6 @@
 # Content server protocol
 
-Source: `steam-protobufs/steam/steammessages_contentsystem.steamclient.proto` (service `ContentServerDirectory`), `steamkit/SteamKit2/SteamKit2/Steam/CDN/Client.cs`.
+Source: `third_party/steam-ecosystem/steam-protobufs/steam/steammessages_contentsystem.steamclient.proto` (service `ContentServerDirectory`), `third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Steam/CDN/Client.cs`.
 
 ## RPCs
 
@@ -17,14 +17,14 @@ Source: `steam-protobufs/steam/steammessages_contentsystem.steamclient.proto` (s
 
 - Manifest: `depot/<depotid>/manifest/<manifestid>/5/<requestcode>` (SteamKit falls back to omitting the code segment when it is 0).
 - Chunk: `depot/<depotid>/chunk/<sha1hex>`.
-- CDN auth token: appended to the URL for servers that need it (exact query form: read `Client.cs`, unverified here).
+- CDN auth token: `GetCDNAuthToken` returns the token string, which SteamKit uses verbatim as the URL query string (`BuildCommand` sets `UriBuilder.Query`, `third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Steam/CDN/Client.cs`).
 
 ## Chunk decode (DepotChunk.cs)
 
 1. AES-256 decrypt with the depot key (ECB IV, then CBC PKCS7).
-2. Detect compression: `VSZa` zstd, `VZa` LZMA, `PK\x03\x04` zip.
-3. Check output length against `cb_original` and checksum against `ChunkData.crc`.
+2. Detect compression: `VSZa` zstd, `VZa` LZMA (Valve's VZip container, `third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Util/VZipUtil.cs`), `PK\x03\x04` zip.
+3. Check output length against `cb_original` and Adler-32 (seed 0) of the output against `ChunkData.crc` (`third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Steam/CDN/DepotChunk.cs`, `third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Util/Adler32.cs`).
 
 ## Request codes
 
-Required for most manifests since Valve introduced them; they expire (lifetime unverified). Branch-protected manifests need `app_branch` and `branch_password_hash`.
+DepotDownloader requests a code with `GetManifestRequestCode` before downloading a manifest, treats a returned 0 as fatal, and requests a new code once the previous one is 5 minutes old (`third_party/steam-ecosystem/depotdownloader/DepotDownloader/ContentDownloader.cs`, `GetDepotManifestRequestCodeAsync` call). When no code is returned for an anonymous session it suggests logging in, as old manifests may not be available to anonymous accounts (`third_party/steam-ecosystem/depotdownloader/DepotDownloader/Steam3Session.cs`). Branch-protected manifests use the `app_branch` and `branch_password_hash` request fields (proto above).

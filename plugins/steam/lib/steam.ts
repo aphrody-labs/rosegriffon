@@ -44,7 +44,7 @@ export function parseVdf(input: string): Vdf {
       while (i < n && input[i] !== '"') {
         if (input[i] === "\\" && i + 1 < n) {
           const e = input[i + 1];
-          out += e === "n" ? "\n" : e === "t" ? "\t" : e;
+          out += e === "n" ? "\n" : e === "t" ? "\t" : e === "r" ? "\r" : e;
           i += 2;
         } else out += input[i++];
       }
@@ -189,7 +189,7 @@ export function readAppInfo(
     const next = p + 8 + size;
     apps++;
     if (wantApp !== undefined && appid === wantApp) {
-      // appid(4) size(4) infoState(4) lastUpdated(4) picsToken(8) sha1(20) changeNumber(4) [binarySha1(20) for >= v28]
+      // appid(4) size(4) infoState(4) lastUpdated(4) picsToken(8) sha1(20) changeNumber(4) [binarySha1(20) for >= v40, magic low byte 0x28]
       const header = 4 + 4 + 4 + 4 + 8 + 20 + 4 + (version >= 0x28 ? 20 : 0);
       found = parseBinaryVdf(buf, p + header, strings).value;
     }
@@ -417,9 +417,9 @@ export async function appPaths(
     accountId: Number(u),
     appDir: exists(join(userdata, u, String(appid))),
     remote: exists(join(userdata, u, String(appid), "remote")),
-    screenshots: exists(
-      join(userdata, u, "760", "remote", String(appid), "screenshots"),
-    ),
+    // Any userdata/<accountid>/<n>/remote/<appid>/screenshots directory present on disk
+    // (the client stores screenshots as <gameid>/screenshots/, per steamclient64.dll strings).
+    screenshots: findScreenshots(join(userdata, u), appid),
   }));
   return {
     appid,
@@ -441,6 +441,13 @@ export async function appPaths(
   };
 }
 
+function findScreenshots(userDir: string, appid: number): string[] {
+  if (!existsSync(userDir)) return [];
+  return readdirSync(userDir)
+    .map((d) => join(userDir, d, "remote", String(appid), "screenshots"))
+    .filter((p) => existsSync(p));
+}
+
 export function dirSize(path: string, limit = 200_000): number {
   let total = 0;
   let seen = 0;
@@ -460,7 +467,8 @@ export function dirSize(path: string, limit = 200_000): number {
 
 /** Base of individual SteamID64 values (universe 1, type 1, instance 1). */
 export const STEAMID64_BASE = 76561197960265728n;
-const TYPE_LETTERS = ["I", "U", "M", "G", "A", "P", "C", "g", "T", "", "a"];
+// Letters per EAccountType index, as SteamKit SteamID.cs AccountTypeChars; unknown types render as "i".
+const TYPE_LETTERS = ["I", "U", "M", "G", "A", "P", "C", "g", "T", "i", "a"];
 
 export interface SteamIdForms {
   steamid64: string;
@@ -478,7 +486,7 @@ export function decodeSteamId64(id: bigint): SteamIdForms {
   const instance = Number((id >> 32n) & 0xfffffn);
   const accountType = Number((id >> 52n) & 0xfn);
   const universe = Number((id >> 56n) & 0xffn);
-  const letter = TYPE_LETTERS[accountType] ?? "I";
+  const letter = TYPE_LETTERS[accountType] ?? "i";
   return {
     steamid64: id.toString(),
     accountId,
@@ -550,9 +558,6 @@ export function steamdbLinks(
         sub: `${b}/sub/${id}/`,
         store: `https://store.steampowered.com/sub/${id}/`,
       };
-    case "build":
-    case "patchnotes":
-      return { patchnotes: `${b}/patchnotes/${id}/` };
     case "user":
     case "calculator":
       return {
@@ -560,7 +565,7 @@ export function steamdbLinks(
         profile: `https://steamcommunity.com/profiles/${id}`,
       };
     default:
-      throw new Error(`unknown kind ${kind} (app, depot, sub, build, user)`);
+      throw new Error(`unknown kind ${kind} (app, depot, sub, user)`);
   }
 }
 

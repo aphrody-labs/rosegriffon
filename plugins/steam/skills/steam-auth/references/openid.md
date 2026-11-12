@@ -6,8 +6,9 @@ profile comes from the Web API afterwards (source: https://partner.steamgames.co
 section "Website").
 
 - OP endpoint: `https://steamcommunity.com/openid/login`
-- Discovery document (XRDS): `https://steamcommunity.com/openid` (unverified: returned
-  `application/xrds+xml` in past observations; the fixed endpoint above is enough).
+- Discovery document (XRDS): `https://steamcommunity.com/openid` returns
+  `application/xrds+xml` with one `http://specs.openid.net/auth/2.0/server` service whose
+  URI is the endpoint above (fetched 2026-11-12).
 - Claimed identifier format: `https://steamcommunity.com/openid/id/<steamid64>`
 
 ## Step 1: redirect (checkid_setup)
@@ -47,7 +48,7 @@ is_valid:true
 Accept only `is_valid:true`. Then also check, on the server:
 
 1. `openid.op_endpoint` equals `https://steamcommunity.com/openid/login`.
-2. `openid.return_to` equals the URL the request actually arrived on (spec 11.1).
+2. `openid.return_to` has the same scheme, host and path as the URL the request arrived on, and contains its query parameters (spec 11.1).
 3. `openid.claimed_id` matches `^https://steamcommunity.com/openid/id/(\d{17})$`. The
    capture is the SteamID64.
 4. `openid.response_nonce` has not been seen before (replay protection, spec 11.3). Store
@@ -61,11 +62,10 @@ Accept only `is_valid:true`. Then also check, on the server:
   was received.
 - The flow is browser-only; it does not yield a token usable against the Web API on the
   user's behalf.
-- Many libraries exist (passport-steam, node-openid); the steps above are what they do.
-  Verify that a chosen library performs step 3 and the nonce check.
+- When using a library, verify that it performs step 3 and the nonce check.
 
 ## After login
 
 Call `ISteamUser/GetPlayerSummaries/v2/?steamids=<id64>` with a Web API key (MCP tool
 `web_api_call`) for persona name, avatar and profile URL. Visibility fields depend on the
-user's privacy settings (see steam-web-api skill).
+user's privacy settings (see [`../../steam-web-api/SKILL.md`](../../steam-web-api/SKILL.md)).

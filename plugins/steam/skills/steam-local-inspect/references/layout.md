@@ -1,24 +1,43 @@
 # Files read by steam-inspect
 
-| File                                                   | Format                                             | Used for                                                                                                                                                    |
-| ------------------------------------------------------ | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `steamapps/libraryfolders.vdf`                         | text KV                                            | Library list. The current format has `path`, `label`, `contentid`, `totalsize`, `apps { appid size }`; the old format is `"1" "D:\\Games"`.                 |
-| `steamapps/appmanifest_<appid>.acf`                    | text KV `AppState`                                 | appid, name, installdir, buildid, StateFlags, SizeOnDisk, LastUpdated, InstalledDepots { depot { manifest size } }, SharedDepots, UserConfig, MountedConfig |
-| `depotcache/<depotid>_<manifestid>.manifest`           | binary depot manifest                              | Listed by `paths`; decode with steamctl or steamroom                                                                                                        |
-| `appcache/appinfo.vdf`                                 | binary, magic `0x07564427`/`28`/`29` (v39/v40/v41) | PICS app metadata; v41 adds an int64 string-table offset after the header                                                                                   |
-| `userdata/<accountid>/<appid>/remote`                  | files                                              | Steam Cloud working copy                                                                                                                                    |
-| `userdata/<accountid>/760/remote/<appid>/screenshots`  | files                                              | Screenshots (unverified on this host: no screenshots present)                                                                                               |
-| `steamapps/compatdata/<appid>/pfx`                     | Wine prefix                                        | Proton prefix (Linux)                                                                                                                                       |
-| `steamapps/shadercache/<appid>`                        | Fossilize caches                                   | Shader pre-caching                                                                                                                                          |
-| `steamapps/workshop/content/<appid>/<publishedfileid>` | files                                              | Workshop items; `appworkshop_<appid>.acf` lists them                                                                                                        |
+## Steam root lookup order
 
-Verified on the local Windows install (C:/Program Files (x86)/Steam) for AppID 2799860 on
-2026-11-12. The `<accountid>` directory name is the 32-bit account id, that is the
-SteamID64 minus 76561197960265728.
+As implemented by `findSteamRoot` in `plugins/steam/lib/steam.ts` (the first candidate that contains `steamapps/` wins):
+
+1. `$STEAM_PATH`
+2. Windows `HKCU\Software\Valve\Steam` value `SteamPath`
+3. Windows `HKLM\SOFTWARE\WOW6432Node\Valve\Steam` value `InstallPath`
+4. `C:\Program Files (x86)\Steam`
+
+Items 2 to 4 run on Windows only; items 5 to 10 run on every other platform (`plugins/steam/lib/steam.ts` `findSteamRoot`).
+
+5. `~/.steam/steam`
+6. `~/.local/share/Steam`
+7. `~/.var/app/com.valvesoftware.Steam/.local/share/Steam` (Flatpak)
+8. `~/.var/app/com.valvesoftware.Steam/.steam/steam` (Flatpak)
+9. `~/snap/steam/common/.local/share/Steam` (Snap)
+10. `~/Library/Application Support/Steam` (macOS)
+
+## Files
+
+| File                                                  | Format                | Used for                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `steamapps/libraryfolders.vdf`                        | text KV               | Root `libraryfolders` keyed `"0"`, `"1"`, ...; each entry has `path`, `label`, `contentid`, `totalsize`, `update_clean_bytes_tally`, `time_last_update_verified`, `apps { "<appid>" "<size bytes>" }`. The old format is `"1" "D:\Games"`. Verified on the local install.                                                                                                                                                                                                                                                                                         |
+| `steamapps/appmanifest_<appid>.acf`                   | text KV `AppState`    | `appid`, `Universe`, `LauncherPath`, `name`, `StateFlags`, `installdir`, `LastUpdated`, `LastPlayed`, `SizeOnDisk`, `StagingSize`, `buildid`, `LastOwner` (SteamID64), `DownloadType`, `UpdateResult`, `BytesToDownload`, `BytesDownloaded`, `BytesToStage`, `BytesStaged`, `TargetBuildID`, `AutoUpdateBehavior`, `AllowOtherDownloadsWhileRunning`, `ScheduledAutoUpdate`, `InstalledDepots { <depot> { manifest size } }`, `InstallScripts`, `SharedDepots { <depot> <owning appid> }`, `UserConfig`, `MountedConfig` (verified on `appmanifest_2799860.acf`). |
+| `depotcache/<depotid>_<manifestid>.manifest`          | binary depot manifest | Listed by `paths`; decode with steamctl or steamroom                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `appcache/appinfo.vdf`                                | binary (v39 to v41)   | PICS app metadata; format in [`vdf-formats.md`](../../steam-client-windows/references/vdf-formats.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `userdata/<accountid>/<appid>/remote`                 | files                 | Steam Cloud working copy: the app's `remote/` files plus `remotecache.vdf` beside it (observed in the worked example below); Cloud concepts in [`cloud.md`](../../steam-content-cdn/references/cloud.md)                                                                                                                                                                                                                                                                                                                                                          |
+| `userdata/<accountid>/<n>/remote/<appid>/screenshots` | files                 | `<n>` is any app directory under `userdata/<accountid>/`: `findScreenshots` in `plugins/steam/lib/steam.ts` scans all of them; `steamclient64.dll` strings show `<gameid>/screenshots/` and `thumbnails/`                                                                                                                                                                                                                                                                                                                                                         |
+| `steamapps/compatdata/<appid>/pfx`                    | Wine prefix           | Proton prefix (Linux)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `steamapps/shadercache/<appid>`                       | Fossilize caches      | Shader pre-caching                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `steamapps/workshop/`                                 | directory             | Workshop items; install path in [`steam-content-cdn`](../../steam-content-cdn/SKILL.md) (Workshop)                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+
+The `<accountid>` directory name is the 32-bit account id; see
+[`../../steam-ids-and-urls/references/steamid.md`](../../steam-ids-and-urls/references/steamid.md).
 
 ## StateFlags bits
 
-Per third_party/steam-ecosystem/steamlocate-rs/src/app.rs (`StateFlag::from_bit_offset`):
+Per `third_party/steam-ecosystem/steamlocate-rs/src/app.rs` (`StateFlag::from_bit_offset`):
 
 | Bit | Value   | Name           |
 | --- | ------- | -------------- |
@@ -46,3 +65,14 @@ Per third_party/steam-ecosystem/steamlocate-rs/src/app.rs (`StateFlag::from_bit_
 
 Common values: 4 (installed), 6 (installed and update required), 1026 (update started and
 required).
+
+## Worked example (verified on this host, 2026-11-12)
+
+On the local Windows install (`C:/Program Files (x86)/Steam`), `apps 2799860` returns
+INAZUMA ELEVEN: Victory Road, buildid 26031700, about 61 GB, StateFlags 4
+(FullyInstalled). `paths 2799860` shows the install in
+`steamapps/common/INAZUMA ELEVEN Victory Road`, the depot manifest
+`depotcache/2799861_5864006674348129563.manifest` (depot 2799861, manifest
+5864006674348129563), and `userdata/<accountid>/2799860/` with `remote/` and `remotecache.vdf` present (see
+[`cloud.md`](../../steam-content-cdn/references/cloud.md)).
+`appinfo 2799860` reads a v41 appinfo.vdf.

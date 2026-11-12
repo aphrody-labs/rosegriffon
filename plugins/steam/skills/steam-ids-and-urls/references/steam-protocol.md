@@ -1,17 +1,17 @@
 # steam:// browser protocol
 
-Primary source: https://developer.valvesoftware.com/wiki/Steam_browser_protocol. The page returned HTTP 403 to automated fetches on 2026-11-12, so every syntax below is (unverified) and must be confirmed in a browser before use.
+Source: https://developer.valvesoftware.com/wiki/Steam_browser_protocol, read through the Wayback snapshot https://web.archive.org/web/20261020182138/https://developer.valvesoftware.com/wiki/Steam_browser_protocol (accessed 2026-11-12; the live wiki serves a bot challenge to automated clients).
 
-| Command                     | Purpose                                                           |
-| --------------------------- | ----------------------------------------------------------------- |
-| `steam://run/<appid>`       | Launch an app; installs first if needed (unverified)              |
-| `steam://rungameid/<appid>` | Launch by game ID; also used for non-Steam shortcuts (unverified) |
-| `steam://install/<appid>`   | Open the install dialog (unverified)                              |
-| `steam://uninstall/<appid>` | Uninstall prompt (unverified)                                     |
-| `steam://validate/<appid>`  | Verify local files (unverified)                                   |
-| `steam://store/<appid>`     | Open the store page in the client (unverified)                    |
-| `steam://nav/<section>`     | Navigate client UI (unverified)                                   |
-| `steam://open/<page>`       | Open a client page such as `friends` or `downloads` (unverified)  |
-| `steam://url/<WebPageName>` | Open a named Steam web page (unverified)                          |
+| Command                     | Purpose (wiki wording, condensed)                                                   |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `steam://run/<id>//<args>/` | Runs an application, installing it if necessary; `//<args>` is optional launch args |
+| `steam://rungameid/<id>`    | Same as run, with support for mods and non-Steam shortcuts                          |
+| `steam://install/<id>`      | Installs an application (example: `steam://install/8230`)                           |
+| `steam://uninstall/<id>`    | Deletes the specified apps' cache files                                             |
+| `steam://validate/<id>`     | Validates the local files of an app                                                 |
+| `steam://store/<id>`        | Opens the store for an app (default store page if no id)                            |
+| `steam://nav/<component>`   | Opens a Steam window without making it active                                       |
+| `steam://open/<component>`  | Opens a Steam window                                                                |
+| `steam://url/<named page>`  | Opens a named Steam web page                                                        |
 
-Do not invent further commands. Add rows only after reading the wiki page.
+The same page also lists, among others: `advertise`, `appnews`, `backup`, `connect`, `defrag`, `flushconfig`, `friends`, `gameproperties`, `installaddon`, `launch`, `openurl`, `preload`, `purchase`, `removeaddon`, `runsafe`, `settings`, `subscriptioninstall`, `updatenews`. Read the page before using one of these.

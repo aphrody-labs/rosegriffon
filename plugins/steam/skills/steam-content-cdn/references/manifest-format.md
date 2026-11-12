@@ -1,6 +1,6 @@
 # Depot manifest format
 
-Sources: `steam-protobufs/steam/content_manifest.proto`, `steamkit/SteamKit2/SteamKit2/Types/DepotManifest.cs`, `steamkit/SteamKit2/SteamKit2/Steam/CDN/Client.cs`.
+Sources: `third_party/steam-ecosystem/steam-protobufs/steam/content_manifest.proto`, `third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Types/DepotManifest.cs`, `third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Steam/CDN/Client.cs`.
 
 ## Container
 
@@ -36,4 +36,4 @@ Sources: `steam-protobufs/steam/content_manifest.proto`, `steamkit/SteamKit2/Ste
 
 ## Local depotcache
 
-`<Steam>/depotcache/<depotid>_<manifestid>.manifest`. Verified: `2799861_5864006674348129563.manifest`. The local copy is raw sections, not zipped: the file starts with `D0 17 F6 71` (payload magic, little-endian; verified 2026-11-12).
+Local file naming and worked example: [`../../steam-local-inspect/references/layout.md`](../../steam-local-inspect/references/layout.md). The local copy is raw sections, not zipped: the file starts with `D0 17 F6 71` (payload magic, little-endian; verified 2026-11-12).
