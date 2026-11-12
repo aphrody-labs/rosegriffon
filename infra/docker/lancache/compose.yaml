@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0
+# Steam-only LAN/CDN content cache on Alpine nginx, modelled on lancachenet/monolithic
+# (third_party/steam-ecosystem/lancache-monolithic, MIT). The upstream image is built on
+# lancachenet/ubuntu-nginx, which the container policy forbids, so this keeps its caching
+# rules (1 MiB slices, cache lock, $uri$slice_range key, loop detection) on nginx:alpine.
+#
+# Opt-in only: profile `tools`, never started by `just deploy-stack`.
+#   docker compose -f infra/docker/lancache/compose.yaml --profile tools up -d lancache
+#   docker compose -f infra/docker/lancache/compose.yaml --profile tools down
+#
+# Clients use it through DNS: point lancache.steamcontent.com (and *.steamcontent.com) at the
+# cache host, e.g. with lancachenet/lancache-dns or a static record on the LAN resolver.
+# The Steam client switches to the cache when lancache.steamcontent.com resolves to a private IP.
+# Prefill: tpill90/steam-lancache-prefill (third_party/steam-ecosystem/steam-lancache-prefill).
+
+name: rosegriffon-lancache
+
+services:
+  lancache:
+    image: nginx:${NGINX_VERSION:-1.29-alpine}
+    profiles: [tools]
+    restart: "no"
+    init: true
+    security_opt: ["no-new-privileges:true"]
+    # Loopback by default; set LANCACHE_BIND=0.0.0.0 (or a LAN IP) on a real LAN host.
+    ports:
+      - "${LANCACHE_BIND:-127.0.0.1}:${LANCACHE_PORT:-8081}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${LANCACHE_ROOT:-/srv/lancache}/cache:/data/cache
+      - ${LANCACHE_ROOT:-/srv/lancache}/logs:/data/logs
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/lancache-heartbeat"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: local
+      options: { max-size: "20m", max-file: "5" }
