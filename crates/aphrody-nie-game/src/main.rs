@@ -1945,6 +1945,8 @@ fn decrire_ecran(e: &aphrody_nie_app::flow::Screen) -> String {
         S::Menu { sel } => format!("menu[{sel}] {}", aphrody_nie_app::MENU[*sel]),
         S::ModeSelect { sel } => format!("mode[{sel}] {}", aphrody_nie_app::MODES[*sel]),
         S::Match { .. } => "match".into(),
+        S::OpenWorld { .. } => "monde ouvert".into(),
+        S::KizunaTown { .. } => "kizuna town".into(),
         S::Story {
             idx,
             titre,
