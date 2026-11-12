@@ -2,7 +2,7 @@
 // KeyValues (VDF) parsing, SteamID conversion and link builders. Bun built-ins only.
 //
 // Formats follow third_party/steam-ecosystem/valvekeyvalue (KV1 text and binary),
-// steamlocate-rs (library discovery) and crates/bun-steam/src/{vdf,install}.rs.
+// steamlocate-rs (library discovery) and aphrody-dev/steam-depot (src crates/steam-depot)/src/{vdf,install}.rs.
 
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";

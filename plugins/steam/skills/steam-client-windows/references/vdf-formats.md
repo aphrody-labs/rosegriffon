@@ -3,9 +3,9 @@
 ## Text KeyValues (VDF, ACF)
 
 - Tokens: quoted string, unquoted token, `{`, `}`. A key followed by a string is a leaf; a key followed by `{` opens an object.
-- `//` starts a line comment. Escapes inside quotes: `\\`, `\"`, `\n`, `\r`, `\t`; any other escaped character is kept as is (tokenizer in `apps/rosegriffon/crates/bun-steam/src/vdf.rs`: quoted-string escape match and `//` line-comment skip).
-- Keys may repeat. bun-steam keeps duplicates in order as an ordered entry list (`apps/rosegriffon/crates/bun-steam/src/vdf.rs` `VdfValue`); the plugin's `parseVdf` (`plugins/steam/lib/steam.ts`) keeps only the last value, so `read_vdf` output shows one value per key.
-- Parser: `parse_vdf` in `apps/rosegriffon/crates/bun-steam/src/vdf.rs`; Rust alternative `third_party/steam-ecosystem/vdf-rs`; .NET `third_party/steam-ecosystem/valvekeyvalue`.
+- `//` starts a line comment. Escapes inside quotes: `\\`, `\"`, `\n`, `\r`, `\t`; any other escaped character is kept as is (tokenizer in `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/vdf.rs`: quoted-string escape match and `//` line-comment skip).
+- Keys may repeat. bun-steam keeps duplicates in order as an ordered entry list (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/vdf.rs` `VdfValue`); the plugin's `parseVdf` (`plugins/steam/lib/steam.ts`) keeps only the last value, so `read_vdf` output shows one value per key.
+- Parser: `parse_vdf` in `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/vdf.rs`; Rust alternative `third_party/steam-ecosystem/vdf-rs`; .NET `third_party/steam-ecosystem/valvekeyvalue`.
 
 ## Binary KeyValues
 
@@ -26,7 +26,7 @@ Each node: one type byte, NUL-terminated key (or a u32 string-table index in app
 | 0x0A | int64         | 8 bytes LE                                                   |
 | 0x0B | alternate end | none                                                         |
 
-Sources: `apps/rosegriffon/crates/bun-steam/src/vdf.rs` (`bin_type`), `third_party/steam-ecosystem/valvekeyvalue/ValveKeyValue/ValveKeyValue/KeyValues1/KV1BinaryNodeType.cs`. ValveKeyValue also detects an optional `VBKV` header (`0x564B4256`, `third_party/steam-ecosystem/valvekeyvalue/ValveKeyValue/ValveKeyValue/Deserialization/KeyValues1/KV1BinaryReader.cs`).
+Sources: `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/vdf.rs` (`bin_type`), `third_party/steam-ecosystem/valvekeyvalue/ValveKeyValue/ValveKeyValue/KeyValues1/KV1BinaryNodeType.cs`. ValveKeyValue also detects an optional `VBKV` header (`0x564B4256`, `third_party/steam-ecosystem/valvekeyvalue/ValveKeyValue/ValveKeyValue/Deserialization/KeyValues1/KV1BinaryReader.cs`).
 
 ## appcache/appinfo.vdf
 
@@ -52,4 +52,4 @@ Header: u32 magic (`0x065655` << 8 | version), u32 universe. v39 `0x06565527`, v
 
 Record (repeat until package id `0xFFFFFFFF`): u32 package id, 20-byte SHA-1, u32 change number, u64 PICS token (v40+), binary KV blob.
 
-Sources: `third_party/steam-ecosystem/steamappinfo/README.md`, `third_party/steam-ecosystem/steamappinfo/SteamAppInfoParser/AppInfo.cs`, `third_party/steam-ecosystem/steamappinfo/SteamAppInfoParser/PackageInfo.cs`; `apps/rosegriffon/crates/bun-steam/src/vdf.rs` (`appinfo_magic`, `packageinfo_magic`, `parse_appinfo`, `parse_packageinfo`).
+Sources: `third_party/steam-ecosystem/steamappinfo/README.md`, `third_party/steam-ecosystem/steamappinfo/SteamAppInfoParser/AppInfo.cs`, `third_party/steam-ecosystem/steamappinfo/SteamAppInfoParser/PackageInfo.cs`; `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/vdf.rs` (`appinfo_magic`, `packageinfo_magic`, `parse_appinfo`, `parse_packageinfo`).

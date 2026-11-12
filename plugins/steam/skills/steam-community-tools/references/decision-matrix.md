@@ -35,5 +35,5 @@
 
 The license table covers code reuse only, not use. Whether to run ArchiSteamFarm at all is covered by the ArchiSteamFarm caveat in [`../SKILL.md`](../SKILL.md).
 
-Sources: `apps/rosegriffon/crates/bun-steam/UPSTREAM.md`, license files under `third_party/steam-ecosystem/`,
+Sources: `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`, license files under `third_party/steam-ecosystem/`,
 GitHub repository pages listed in `../SKILL.md`.

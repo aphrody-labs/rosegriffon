@@ -16,7 +16,7 @@ Ce qui reste en TypeScript (Bun) : auth, db, api, serveur, contrats, couche Disc
 Rust (workspace racine, `Cargo.toml`, 56 membres) :
 
 - `crates/aphrody-nie-*` (47 crates) : `formats` (CPK, CRILAYLA, cfg.bin, famille G4*, USM, menus), `save`, `render`/`render3d`, `wasm`, `ui`, `editor`, `game`, `runtime`, `lua`, `mcp`, `wiki`, `zukan`, `pg`, `sql`, `net`, `launcher`, `play`, etc.
-- `crates/bun-steam` (dépôt Steam), `crates/re`, `crates/yolo-re-*`, `crates/yre-worker` (RE), `crates/shenron-gpu`, `crates/aphrody-softraster`.
+- `aphrody-dev/steam-depot (src crates/steam-depot)` (dépôt Steam), `crates/re`, `crates/yolo-re-*`, `crates/yre-worker` (RE), `crates/shenron-gpu`, `crates/aphrody-softraster`.
 - Nouveau : `crates/nie-pkg` (registre + manifestes), `crates/nie-pkg-ui` (PoC Dioxus).
 
 TypeScript (fichiers .ts/.tsx hors node_modules) :

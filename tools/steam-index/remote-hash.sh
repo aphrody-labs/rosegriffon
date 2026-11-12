@@ -16,7 +16,6 @@ here="$(cd "$(dirname "$0")" && pwd)"
 
 ssh "$host" "mkdir -p $repo/tools/steam-index $repo/crates"
 rsync -az --delete --exclude target "$here/" "$host:$repo/tools/steam-index/"
-rsync -az --delete --exclude target "$here/../../crates/bun-steam/" "$host:$repo/crates/bun-steam/"
 rsync -az "$here/../../Cargo.toml" "$here/../../rust-toolchain.toml" "$host:$repo/"
 ssh "$host" "cd $repo/tools/steam-index && cargo build --release -j 8 && \
   nohup bun index.ts --hash --steam '$steam_root' > hash.log 2>&1 &"

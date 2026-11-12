@@ -12,7 +12,7 @@ Local source root: `third_party/steam-ecosystem/`.
   The live site returned HTTP 403 to `curl -I` from vps and a Cloudflare challenge in the
   browser (2026-11-12), which was not bypassed.
 - In this plugin: build links with the MCP tool `steamdb_link`; it does not fetch pages.
-- Related: SteamTracking (`third_party/steam-ecosystem/steamtracking`, sparse, no license stated, `apps/rosegriffon/crates/bun-steam/UPSTREAM.md`).
+- Related: SteamTracking (`third_party/steam-ecosystem/steamtracking`, sparse, no license stated, `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`).
 
 ## SteamCMD
 
@@ -37,7 +37,7 @@ Local source root: `third_party/steam-ecosystem/`.
   prefix supported), `-validate`, `-manifest-only`.
 - `-beta` / `-betapassword` are not in the 3.x README or `--help`, but `Program.cs` (lines 249-250)
   still accepts them as aliases of `-branch` / `-branchpassword`. Prefer `-branch`.
-- vps: `DepotDownloader` 3.4.0 (`apps/rosegriffon/crates/bun-steam/UPSTREAM.md`). Reference only for `bun-steam`.
+- vps: `DepotDownloader` 3.4.0 (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`). Reference only for `bun-steam`.
 
 ## steamroom
 
@@ -50,7 +50,7 @@ Local source root: `third_party/steam-ecosystem/`.
   `steamroom download --app 480 --depot 481 --manifest <id> --file-regex '\.dll$' --verify -o out/`;
   `--branch-password`, `--max-downloads 16`, `--local-keys`.
 - Offline manifest read: `steamroom files --manifest-file <file.manifest>` (`third_party/steam-ecosystem/steamroom/README.md`).
-- vps: steamroom-cli 0.3.0 (`apps/rosegriffon/crates/bun-steam/UPSTREAM.md`).
+- vps: steamroom-cli 0.3.0 (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`).
 
 ## steamctl
 
@@ -60,15 +60,15 @@ Local source root: `third_party/steam-ecosystem/`.
   `clear`, `cloud` (list, list_apps), `depot` (info, list, download, diff), `hlmaster query`,
   `ugc info`, `webapi` (set-key, clear-key, list), `workshop` (search, info, download,
   subscribe, unsubscribe, favorite).
-- Offline manifest read: `steamctl depot info -f <file.manifest>` (`apps/rosegriffon/crates/bun-steam/UPSTREAM.md`).
-- vps: steamctl 0.9.5, uv tool from commit 274a8db0 (`apps/rosegriffon/crates/bun-steam/UPSTREAM.md`).
+- Offline manifest read: `steamctl depot info -f <file.manifest>` (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`).
+- vps: steamctl 0.9.5, uv tool from commit 274a8db0 (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`).
 
 ## Libraries and mirrored tools
 
 | Library                | Lang | License           | Source path                                          | Notes                                                                       |
 | ---------------------- | ---- | ----------------- | ---------------------------------------------------- | --------------------------------------------------------------------------- |
 | SteamKit2              | C#   | LGPL-2.1          | `third_party/steam-ecosystem/steamkit`               | EMsg, manifest format reference                                             |
-| node-steam-user        | JS   | MIT               | `third_party/steam-ecosystem/node-steam-user`        | CM client; runs under Bun (`apps/rosegriffon/crates/bun-steam/UPSTREAM.md`) |
+| node-steam-user        | JS   | MIT               | `third_party/steam-ecosystem/node-steam-user`        | CM client; runs under Bun (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`) |
 | node-steam-session     | JS   | MIT               | `third_party/steam-ecosystem/node-steam-session`     | IAuthenticationService login                                                |
 | ValvePython steam      | Py   | MIT               | `third_party/steam-ecosystem/valvepython-steam`      | CM client and CDN                                                           |
 | steam-vent             | Rust | MIT               | `third_party/steam-ecosystem/steam-vent`             | repository is Codeberg (`Cargo.toml`)                                       |

@@ -58,7 +58,7 @@ authentication problems from primary sources and from evidence on the machine.
 2. Upstream code mirrored in the monorepo when present: `third_party/steam-ecosystem/`
    (SteamKit, steam-protobufs, steamroom, DepotDownloader, steamctl, node-steam-user,
    node-steam-session, steamlocate-rs, vdf-rs, valvekeyvalue, steamappinfo, lancache) and
-   `apps/rosegriffon/crates/bun-steam` with its `UPSTREAM.md`.
+   `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)` with its `UPSTREAM.md`.
 3. Official docs through WebFetch: partner.steamgames.com/doc, developer.valvesoftware.com,
    github.com/ValveSoftware (Proton, steam-runtime, gamescope, steam-for-linux), the Arch
    wiki and the WineHQ wiki.

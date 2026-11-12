@@ -1,7 +1,7 @@
 # steam-index
 
 Read-only index of a local Steam install, stored as SQLite at
-`~/.local/share/nie/steam-index.sqlite`. The Rust half (`src/main.rs`) uses the `crates/bun-steam`
+`~/.local/share/nie/steam-index.sqlite`. The Rust half (`src/main.rs`) uses the `aphrody-dev/steam-depot (src crates/steam-depot)`
 parsers (`vdf::parse_vdf`, `vdf::parse_appinfo`, `vdf::parse_packageinfo`,
 `install::scan_steam_libraries`, `config::library_folders`, `config::login_users`) and streams
 blake3 hashes. The Bun half (`index.ts`) writes the database with `bun:sqlite`.

@@ -100,7 +100,7 @@ state = ["db/inagle"]
 env = ["POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"]
 
 [services.steam-depot]
-entry = "crates/bun-steam"
+entry = "https://github.com/aphrody-dev/steam-depot (canonical: aphrody-dev/src crates/steam-depot)"
 dockerfile = "infra/docker/steam-depot/Dockerfile"
 compose = "compose.yaml"
 profile = "tools"

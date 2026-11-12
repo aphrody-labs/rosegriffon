@@ -2550,7 +2550,7 @@
       "cargoOwner": "root-workspace",
       "buildOwner": "bun scripts/cargo.ts",
       "migrationState": "folded",
-      "notes": "single RE core (features pipeline, nie); Steam depot client and emulator moved to crates/bun-steam (features depot, emulator)"
+      "notes": "single RE core (features pipeline, nie); Steam depot client and emulator moved to aphrody-dev/steam-depot (src crates/steam-depot) (features depot, emulator)"
     },
     {
       "submodule": "fabc19c0021e3e992786dc2a093a749c8a1c26f0",

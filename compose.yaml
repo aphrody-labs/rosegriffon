@@ -246,7 +246,7 @@ services:
 
   # --- profile "tools": on-demand jobs, owned by the Steam/CDN agent --------------------
   # Slot reserved for:
-  #   steam-depot  infra/docker/steam-depot/ (crates/bun-steam, `bun-steam-depot`, static musl,
+  #   steam-depot  infra/docker/steam-depot/ (aphrody-dev/steam-depot (src crates/steam-depot), `bun-steam-depot`, static musl,
   #                Alpine). STEAM_HOME=/srv/rosegriffon/steam (0700), writes the game into
   #                ${RG_SRV_ROOT}/game/ievr. Run: docker compose --profile tools run --rm steam-depot
   #   cdn-sync     Bun.s3 push of ${RG_SRV_ROOT}/cdn/static to R2/S3.

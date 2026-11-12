@@ -27,7 +27,7 @@ Servers come from `GetServersForSteamPipe`, manifest downloads need a code from 
 
 ## Tools
 
-DepotDownloader, steamctl (offline manifest reads) and steamroom (the Rust library `apps/rosegriffon/crates/bun-steam` depends on; see `apps/rosegriffon/crates/bun-steam/src/depot/`). Licenses, commands and the versions installed on vps: [`../steam-community-tools/references/tools.md`](../steam-community-tools/references/tools.md).
+DepotDownloader, steamctl (offline manifest reads) and steamroom (the Rust library `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)` depends on; see `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/depot/`). Licenses, commands and the versions installed on vps: [`../steam-community-tools/references/tools.md`](../steam-community-tools/references/tools.md).
 
 ## Steam Cloud
 
@@ -64,7 +64,7 @@ DNS, cache key, trigger domain, and prefill rules: [`references/lancache.md`](re
 - `third_party/steam-ecosystem/steamkit/SteamKit2/SteamKit2/Steam/CDN/Client.cs`, `DepotChunk.cs`, `ClientLancache.cs`
 - `third_party/steam-ecosystem/lancache-monolithic/overlay/`, `third_party/steam-ecosystem/lancache-dns/Dockerfile`
 - `third_party/steam-ecosystem/steam-lancache-prefill/SteamPrefill/Settings/AppConfig.cs`
-- `apps/rosegriffon/crates/bun-steam/UPSTREAM.md`, `apps/rosegriffon/crates/bun-steam/src/depot/`
+- `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`, `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/depot/`
 - https://partner.steamgames.com/doc/sdk/uploading
 - https://partner.steamgames.com/doc/store/application/depots
 - https://partner.steamgames.com/doc/features/cloud (fetched 2026-11-12)

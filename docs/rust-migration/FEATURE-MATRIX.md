@@ -41,7 +41,7 @@ Statuts : `full` livré en Rust, `partial` livré partiellement (souvent encore 
 - DS (ie1, ie2, ie3) : émulateur melonDS, Kuriimu2 ; données C# existantes `apps/iecode-dotnet/Core/NdsSharp`.
 - 3DS (ie3 EU, go1-3) : Azahar, Kuriimu2, formats XPCK/XMTN/IMGC (`docs/lvl5.md`).
 - Wii (Strikers) : Dolphin.
-- Victory Road : `packages/inagle`, `packages/azalee`, `crates/aphrody-nie-formats` (CPK, G4*), `crates/aphrody-nie-save`, `crates/bun-steam`, crawl Level-5 `packages/rg-cron/src/tasks/ie-crawl`.
+- Victory Road : `packages/inagle`, `packages/azalee`, `crates/aphrody-nie-formats` (CPK, G4*), `crates/aphrody-nie-save`, `aphrody-dev/steam-depot (src crates/steam-depot)`, crawl Level-5 `packages/rg-cron/src/tasks/ie-crawl`.
 - Cross : `packages/inagle-cross`.
 
 ## Non vérifié

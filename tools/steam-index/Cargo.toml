@@ -11,6 +11,6 @@ description = "Read-only Steam install indexer: emits metadata JSON and streams 
 [workspace]
 
 [dependencies]
-bun-steam = { path = "../../crates/bun-steam" }
+bun-steam = { git = "https://github.com/aphrody-dev/steam-depot", rev = "a79da1ab5c3611ea23f0bc16f197a8bc4a9cf92c", package = "steam-depot" }
 serde_json = "1"
 blake3 = "1.8"

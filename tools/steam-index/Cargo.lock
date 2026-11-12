@@ -22,17 +22,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bun-steam"
-version = "1.4.8"
-dependencies = [
- "crc32fast",
- "serde",
- "serde_json",
- "thiserror",
- "windows",
-]
-
-[[package]]
 name = "cc"
 version = "1.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -164,12 +153,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 
 [[package]]
+name = "steam-depot"
+version = "1.4.8"
+source = "git+https://github.com/aphrody-dev/steam-depot?rev=a79da1ab5c3611ea23f0bc16f197a8bc4a9cf92c#a79da1ab5c3611ea23f0bc16f197a8bc4a9cf92c"
+dependencies = [
+ "crc32fast",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "windows",
+]
+
+[[package]]
 name = "steam-index"
 version = "0.1.0"
 dependencies = [
  "blake3",
- "bun-steam",
  "serde_json",
+ "steam-depot",
 ]
 
 [[package]]

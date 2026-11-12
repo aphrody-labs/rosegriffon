@@ -501,7 +501,6 @@ dependencies = [
  "aphrody-nie-wiki",
  "aphrody-nie-zukan",
  "base64 0.23.1",
- "bun-steam",
  "clap",
  "futures-util",
  "globset",
@@ -522,6 +521,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.11.1",
+ "steam-depot",
  "tokio",
  "tokio-tungstenite",
  "tracing",
@@ -1013,8 +1013,8 @@ dependencies = [
 name = "aphrody-nie-trace"
 version = "1.4.8"
 dependencies = [
- "bun-steam",
  "libc",
+ "steam-depot",
  "thiserror 2.0.21",
  "windows-sys 0.61.2",
 ]
@@ -1081,7 +1081,6 @@ dependencies = [
  "aphrody-nie-trace",
  "aphrody-nie-ui",
  "aphrody-nie-zukan",
- "bun-steam",
  "bytemuck",
  "console_error_panic_hook",
  "getrandom 0.3.4",
@@ -1089,6 +1088,7 @@ dependencies = [
  "parking_lot 0.12.5",
  "serde",
  "serde_json",
+ "steam-depot",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -2935,31 +2935,6 @@ dependencies = [
  "tempfile",
  "thiserror 2.0.21",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "bun-steam"
-version = "1.4.8"
-dependencies = [
- "anyhow",
- "bytes",
- "clap",
- "crc32fast",
- "dirs-next",
- "hex",
- "libc",
- "reqwest 0.13.5",
- "serde",
- "serde_json",
- "steamroom",
- "steamroom-client",
- "tempfile",
- "thiserror 2.0.21",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "windows 0.62.2",
- "zip",
 ]
 
 [[package]]
@@ -11859,10 +11834,34 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
+name = "steam-depot"
+version = "1.4.8"
+source = "git+https://github.com/aphrody-dev/steam-depot?rev=a79da1ab5c3611ea23f0bc16f197a8bc4a9cf92c#a79da1ab5c3611ea23f0bc16f197a8bc4a9cf92c"
+dependencies = [
+ "anyhow",
+ "bytes",
+ "clap",
+ "crc32fast",
+ "dirs-next",
+ "hex",
+ "libc",
+ "reqwest 0.13.5",
+ "serde",
+ "serde_json",
+ "steamroom",
+ "steamroom-client",
+ "thiserror 2.0.21",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "windows 0.62.2",
+ "zip",
+]
+
+[[package]]
 name = "steamroom"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a6f84572d075f7f0999613be04c2b5c1da48496fd571d38b1d18a4e85257ce5"
+source = "git+https://github.com/aphrody-dev/steamroom?tag=v0.2.0#2bc5b67f2c703dff675711de7f565117bdfa6671"
 dependencies = [
  "adler",
  "aes 0.9.4",
@@ -11901,8 +11900,7 @@ dependencies = [
 [[package]]
 name = "steamroom-client"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2530e8ba0882efc1ae954daf937f8d28d7e78a22feb8c918369494a22f85f017"
+source = "git+https://github.com/aphrody-dev/steamroom?tag=v0.2.0#2bc5b67f2c703dff675711de7f565117bdfa6671"
 dependencies = [
  "base64 0.22.1",
  "bytes",
@@ -15194,7 +15192,6 @@ dependencies = [
  "anyhow",
  "aphrody-nie-formats",
  "aphrody-nie-index",
- "bun-steam",
  "crc32fast",
  "cridecoder",
  "criterion",
@@ -15220,6 +15217,7 @@ dependencies = [
  "serde_json",
  "sha1 0.11.0",
  "sha2 0.11.1",
+ "steam-depot",
  "tempfile",
  "thiserror 2.0.21",
  "tracing",

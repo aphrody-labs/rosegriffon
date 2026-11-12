@@ -20,13 +20,13 @@ Decky Loader, ProtonDB, protontricks, steam-tui and steam-lancache-prefill.
 2. Get data from Steam itself instead: anonymous PICS and CDN access through steamroom,
    DepotDownloader, steamctl or a CM client library, as the SteamDB FAQ itself recommends
    (SteamKit or Steam Web APIs).
-3. Check the license before reusing code. `apps/rosegriffon/crates/bun-steam` is Apache-2.0. GPL-2.0
+3. Check the license before reusing code. `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)` is Apache-2.0. GPL-2.0
    (DepotDownloader) and LGPL-2.1 (SteamKit2) code is reference only and must not enter
    `bun-steam`; MIT and MIT/Apache-2.0 sources may be ported with attribution
-   (`apps/rosegriffon/crates/bun-steam/UPSTREAM.md`).
+   (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`).
 4. Run heavy downloads on `vps`, not on the local Windows host; the tools installed there are listed in [`references/tools.md`](references/tools.md).
 5. Prefer anonymous login. Content of a paid app needs an account that owns a license
-   (`apps/rosegriffon/crates/bun-steam/UPSTREAM.md`: `-manifest-only` resolves AppInfo anonymously, content needs a license).
+   (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`: `-manifest-only` resolves AppInfo anonymously, content needs a license).
 
 ## SteamDB links: use `steamdb_link`
 
@@ -101,7 +101,7 @@ Sources of every library above are mirrored under `third_party/steam-ecosystem/`
 
 ## Sources
 
-- `apps/rosegriffon/crates/bun-steam/UPSTREAM.md`
+- `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`
 - `third_party/steam-ecosystem/{depotdownloader,steamroom,steamctl,steamkit,node-steam-user,node-steam-session,valvepython-steam,steam-vent,steamworks-rs,steam-lancache-prefill,steamtracking,vdf-rs,steamlocate-rs}/`
 - https://steamdb.info/faq/
 - https://developer.valvesoftware.com/wiki/SteamCMD (read in Chrome, accessed 2026-11-12)

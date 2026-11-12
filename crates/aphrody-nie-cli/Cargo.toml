@@ -46,7 +46,7 @@ aphrody-nie-index = { path = "../aphrody-nie-index", version = "1.4.8", features
 aphrody-nie-seed = { path = "../aphrody-nie-seed", version = "1.4.8", features = ["host"], optional = true }
 aphrody-nie-queue = { path = "../aphrody-nie-queue", version = "1.4.8", features = ["host"], optional = true }
 aphrody-re = { package = "yolo-re-core", path = "../yolo-re-core", version = "1.4.8", default-features = false, features = ["nie"], optional = true }
-bun-steam = { path = "../bun-steam", version = "1.4.8", features = ["depot"], optional = true }
+bun-steam = { workspace = true, features = ["depot"], optional = true }
 aphrody-nie-trace = { path = "../aphrody-nie-trace", version = "1.4.8", features = ["host"], optional = true }
 aphrody-nie-computer-use = { path = "../aphrody-nie-computer-use", version = "1.4.8", features = ["host"], optional = true }
 aphrody-nie-data = { path = "../aphrody-nie-data", version = "1.4.8", features = ["serde", "std"], optional = true }

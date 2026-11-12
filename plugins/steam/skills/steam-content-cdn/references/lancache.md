@@ -24,4 +24,4 @@ steam-lancache-prefill logs in, lets the user pick owned apps interactively, dow
 
 ## In this repo
 
-Rules ported to Alpine nginx in `apps/rosegriffon/infra/docker/lancache/` (per `apps/rosegriffon/crates/bun-steam/UPSTREAM.md`); the upstream image is Ubuntu-based. nginx listens on port 80 inside the container (`nginx.conf`, `listen 80`), published on the host as `${LANCACHE_BIND:-127.0.0.1}:${LANCACHE_PORT:-8081}`, so loopback port 8081 by default (`apps/rosegriffon/infra/docker/lancache/compose.yaml`, `ports`).
+Rules ported to Alpine nginx in `apps/rosegriffon/infra/docker/lancache/` (per `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/UPSTREAM.md`); the upstream image is Ubuntu-based. nginx listens on port 80 inside the container (`nginx.conf`, `listen 80`), published on the host as `${LANCACHE_BIND:-127.0.0.1}:${LANCACHE_PORT:-8081}`, so loopback port 8081 by default (`apps/rosegriffon/infra/docker/lancache/compose.yaml`, `ports`).

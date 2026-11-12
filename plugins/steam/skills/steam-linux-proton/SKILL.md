@@ -7,7 +7,7 @@ description: This skill should be used when the user asks to "run a Windows game
 
 Use this skill to diagnose and configure Steam games on Linux: runtimes (pressure-vessel, scout, soldier, sniper), Proton builds and compatibilitytools.d, Wine prefixes, translation layers (DXVK, VKD3D-Proton), gamescope, distribution packaging, SteamOS and the Steam Deck. Work on the remote Linux hosts, not on the Windows workstation, and never run heavy builds locally.
 
-Use the plugin MCP tools first: `local_apps` to list installed apps and their libraries, `app_paths` to resolve `steamapps/common/<installdir>` and `steamapps/compatdata/<appid>`, `read_vdf` to read `compatibilitytool.vdf` and other non-secret VDF files (refused files: [../steam-local-inspect/SKILL.md](../steam-local-inspect/SKILL.md), Rules). The tools live in `plugins/steam/servers/steam-mcp.ts`; the Rust equivalents are in `apps/rosegriffon/crates/bun-steam/src/proton.rs` and `apps/rosegriffon/crates/bun-steam/src/install.rs`.
+Use the plugin MCP tools first: `local_apps` to list installed apps and their libraries, `app_paths` to resolve `steamapps/common/<installdir>` and `steamapps/compatdata/<appid>`, `read_vdf` to read `compatibilitytool.vdf` and other non-secret VDF files (refused files: [../steam-local-inspect/SKILL.md](../steam-local-inspect/SKILL.md), Rules). The tools live in `plugins/steam/servers/steam-mcp.ts`; the Rust equivalents are in `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/proton.rs` and `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/install.rs`.
 
 ## 1. Locate Steam
 
@@ -23,13 +23,13 @@ From the steam-runtime README:
 - Steam Runtime 4: "Steam Linux Runtime 4.0", used by Proton 11 and newer.
 - Proton 5.0 and earlier use the scout `LD_LIBRARY_PATH` runtime.
 
-The container launcher is pressure-vessel, "a container launching tool" (https://github.com/ValveSoftware/steam-runtime/blob/master/doc/reporting-steamlinuxruntime-bugs.md). The tools install as `steamapps/common/SteamLinuxRuntime_<name>`; `bun-steam` classifies any directory starting with `SteamLinuxRuntime` as a runtime (`apps/rosegriffon/crates/bun-steam/src/proton.rs` `classify`). For container debugging read `doc/steamlinuxruntime-known-issues.md` and `doc/reporting-steamlinuxruntime-bugs.md` in the steam-runtime repo before guessing env vars.
+The container launcher is pressure-vessel, "a container launching tool" (https://github.com/ValveSoftware/steam-runtime/blob/master/doc/reporting-steamlinuxruntime-bugs.md). The tools install as `steamapps/common/SteamLinuxRuntime_<name>`; `bun-steam` classifies any directory starting with `SteamLinuxRuntime` as a runtime (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/proton.rs` `classify`). For container debugging read `doc/steamlinuxruntime-known-issues.md` and `doc/reporting-steamlinuxruntime-bugs.md` in the steam-runtime repo before guessing env vars.
 
 ## 3. Proton
 
-Valve Proton is a Steam tool app. App ids from `proton.rs` `VALVE_PROTON_APPS`: Proton Experimental 1493710, Proton Hotfix 2180100, Proton 10.0 3658110, Proton 9.0 2805730, Proton 8.0 2348590. Anti-cheat runtimes (doc comments in `apps/rosegriffon/crates/bun-steam/src/proton.rs`, lines 319-321): EasyAntiCheat 1826330, BattlEye 1161040.
+Valve Proton is a Steam tool app. App ids from `proton.rs` `VALVE_PROTON_APPS`: Proton Experimental 1493710, Proton Hotfix 2180100, Proton 10.0 3658110, Proton 9.0 2805730, Proton 8.0 2348590. Anti-cheat runtimes (doc comments in `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/proton.rs`, lines 319-321): EasyAntiCheat 1826330, BattlEye 1161040.
 
-Per-game state lives in `steamapps/compatdata/<appid>/`; `pfx/` inside it is the Wine prefix (`pfx/drive_c/users/steamuser/...`). Source: `apps/rosegriffon/crates/bun-steam/src/proton.rs` (what `app_paths` resolves); the Arch wiki also names `steamapps/compatdata` as the per-game save directory (https://wiki.archlinux.org/title/Steam, accessed 2026-11-12). The Proton README does not document these paths.
+Per-game state lives in `steamapps/compatdata/<appid>/`; `pfx/` inside it is the Wine prefix (`pfx/drive_c/users/steamuser/...`). Source: `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/proton.rs` (what `app_paths` resolves); the Arch wiki also names `steamapps/compatdata` as the per-game save directory (https://wiki.archlinux.org/title/Steam, accessed 2026-11-12). The Proton README does not document these paths.
 
 Runtime options from the Proton README (env var, with the compat-config name in parentheses where given):
 
@@ -59,7 +59,7 @@ For persistent overrides across games, rename `user_settings.sample.py` to `user
 
 ## 6. Launch options
 
-Format: `VAR=value ... [wrapper] %command%` (`apps/rosegriffon/crates/bun-steam/src/proton.rs`, launch options builder). Examples:
+Format: `VAR=value ... [wrapper] %command%` (`apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/proton.rs`, launch options builder). Examples:
 
 - `PROTON_LOG=1 %command%`
 - `PROTON_USE_WINED3D=1 %command%`
@@ -96,4 +96,4 @@ Options from the gamescope README (https://github.com/ValveSoftware/gamescope, f
 - https://wiki.archlinux.org/title/Steam, /title/Gamescope, /title/GameMode (read in Chrome, accessed 2026-11-12)
 - https://wiki.cachyos.org/features/kernel/ and https://github.com/CachyOS/linux-cachyos (README)
 - https://github.com/ValveSoftware/steam-runtime/blob/master/doc/reporting-steamlinuxruntime-bugs.md
-- `apps/rosegriffon/crates/bun-steam/src/proton.rs`, `apps/rosegriffon/crates/bun-steam/src/install.rs`, `apps/rosegriffon/crates/bun-steam/src/launch.rs`
+- `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/proton.rs`, `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/install.rs`, `apps/rosegriffon/aphrody-dev/steam-depot (src crates/steam-depot)/src/launch.rs`
