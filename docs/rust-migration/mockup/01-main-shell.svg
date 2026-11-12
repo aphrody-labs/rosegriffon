@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" font-family="Inter, Segoe UI, sans-serif">
+<title>NIE - Shell principal</title>
+<g id="main-shell">
+<rect x="0" y="0" width="1440" height="900" rx="0" id="bg" fill="#131420"/>
+<g id="sidebar">
+<rect x="0" y="0" width="240" height="900" rx="0" fill="#152d52"/>
+<text x="24" y="40" fill="#fcfaf8" font-size="20" font-weight="700">NIE</text>
+<text x="24" y="60" fill="#e0ecff" font-size="12">Inazuma Eleven engine</text>
+<rect x="12" y="78" width="216" height="36" rx="8" fill="#224271"/>
+<rect x="12" y="78" width="3" height="36" rx="0" fill="#97c0fc"/>
+<text x="32" y="100" fill="#fcfaf8" font-size="14">Bibliotheque</text>
+<text x="32" y="144" fill="#fcfaf8" font-size="14">Matrice</text>
+<text x="32" y="188" fill="#fcfaf8" font-size="14">Outils</text>
+<text x="32" y="232" fill="#fcfaf8" font-size="14">Parametres</text>
+<text x="24" y="860" fill="#e0ecff" font-size="12">Registre rev 1 - synchronise</text>
+</g><g id="topbar">
+<rect x="264" y="12" width="420" height="32" rx="8" fill="#152d52"/>
+<text x="280" y="33" fill="#e0ecff" font-size="14">Rechercher un jeu, une plateforme...</text>
+<rect x="704" y="12" width="160" height="32" rx="8" fill="#152d52"/>
+<text x="720" y="33" fill="#fcfaf8" font-size="14">Plateforme : toutes</text>
+<rect x="240" y="55" width="1200" height="1" rx="0" fill="#224271"/>
+</g>
+<text x="264" y="104" fill="#fcfaf8" font-size="28" font-weight="700">Accueil</text>
+<text x="264" y="132" fill="#e0ecff" font-size="14">11 jeux au registre - 2 installes - 1 mise a jour</text>
+<rect x="264" y="160" width="376" height="120" rx="12" fill="#152d52"/>
+<rect x="656" y="160" width="376" height="120" rx="12" fill="#152d52"/>
+<rect x="1048" y="160" width="376" height="120" rx="12" fill="#152d52"/>
+<text x="288" y="200" fill="#e0ecff" font-size="12">Installes</text>
+<text x="288" y="248" fill="#97c0fc" font-size="28" font-weight="700">2</text>
+<text x="680" y="200" fill="#e0ecff" font-size="12">Mises a jour</text>
+<text x="680" y="248" fill="#e6c961" font-size="28" font-weight="700">1</text>
+<text x="1072" y="200" fill="#e0ecff" font-size="12">Verifications en echec</text>
+<text x="1072" y="248" fill="#c74955" font-size="28" font-weight="700">0</text>
+<text x="264" y="328" fill="#fcfaf8" font-size="20" font-weight="600">Recents</text>
+<g id="card-ievr">
+<rect x="264" y="352" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="280" y="368" width="232" height="92" rx="4" fill="#224271"/>
+<text x="280" y="484" fill="#fcfaf8" font-size="14" font-weight="600">Inazuma Eleven: Victory Road</text>
+<text x="280" y="504" fill="#e0ecff" font-size="12">PC - Switch - PS4 - PS5</text>
+<rect x="280" y="516" width="10" height="10" rx="5" fill="#97c0fc"/>
+<text x="296" y="525" fill="#e0ecff" font-size="12">Installe - verifie</text>
+</g>
+<g id="card-go1">
+<rect x="552" y="352" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="568" y="368" width="232" height="92" rx="4" fill="#224271"/>
+<text x="568" y="484" fill="#fcfaf8" font-size="14" font-weight="600">Inazuma Eleven GO</text>
+<text x="568" y="504" fill="#e0ecff" font-size="12">3DS</text>
+<rect x="568" y="516" width="10" height="10" rx="5" fill="#e6c961"/>
+<text x="584" y="525" fill="#e0ecff" font-size="12">Mise a jour du manifeste</text>
+</g>
+<g id="card-ie1">
+<rect x="840" y="352" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="856" y="368" width="232" height="92" rx="4" fill="#224271"/>
+<text x="856" y="484" fill="#fcfaf8" font-size="14" font-weight="600">Inazuma Eleven</text>
+<text x="856" y="504" fill="#e0ecff" font-size="12">DS - 3DS</text>
+<rect x="856" y="516" width="10" height="10" rx="5" fill="#224271"/>
+<text x="872" y="525" fill="#e0ecff" font-size="12">Non installe</text>
+</g>
+</g></svg>

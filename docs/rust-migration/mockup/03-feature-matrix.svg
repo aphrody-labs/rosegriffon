@@ -1,0 +1,309 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" font-family="Inter, Segoe UI, sans-serif">
+<title>NIE - Matrice des fonctionnalites</title>
+<g id="feature-matrix">
+<rect x="0" y="0" width="1440" height="900" rx="0" id="bg" fill="#131420"/>
+<g id="sidebar">
+<rect x="0" y="0" width="240" height="900" rx="0" fill="#152d52"/>
+<text x="24" y="40" fill="#fcfaf8" font-size="20" font-weight="700">NIE</text>
+<text x="24" y="60" fill="#e0ecff" font-size="12">Inazuma Eleven engine</text>
+<text x="32" y="100" fill="#fcfaf8" font-size="14">Bibliotheque</text>
+<rect x="12" y="122" width="216" height="36" rx="8" fill="#224271"/>
+<rect x="12" y="122" width="3" height="36" rx="0" fill="#97c0fc"/>
+<text x="32" y="144" fill="#fcfaf8" font-size="14">Matrice</text>
+<text x="32" y="188" fill="#fcfaf8" font-size="14">Outils</text>
+<text x="32" y="232" fill="#fcfaf8" font-size="14">Parametres</text>
+<text x="24" y="860" fill="#e0ecff" font-size="12">Registre rev 1 - synchronise</text>
+</g><g id="topbar">
+<rect x="264" y="12" width="420" height="32" rx="8" fill="#152d52"/>
+<text x="280" y="33" fill="#e0ecff" font-size="14">Rechercher un jeu, une plateforme...</text>
+<rect x="704" y="12" width="160" height="32" rx="8" fill="#152d52"/>
+<text x="720" y="33" fill="#fcfaf8" font-size="14">Plateforme : toutes</text>
+<rect x="240" y="55" width="1200" height="1" rx="0" fill="#224271"/>
+</g>
+<text x="264" y="104" fill="#fcfaf8" font-size="28" font-weight="700">Matrice des fonctionnalites</text>
+<text x="520" y="150" fill="#e0ecff" font-size="12">dump</text>
+<text x="608" y="150" fill="#e0ecff" font-size="12">extract</text>
+<text x="696" y="150" fill="#e0ecff" font-size="12">texte</text>
+<text x="784" y="150" fill="#e0ecff" font-size="12">trad</text>
+<text x="872" y="150" fill="#e0ecff" font-size="12">save</text>
+<text x="960" y="150" fill="#e0ecff" font-size="12">equipe</text>
+<text x="1048" y="150" fill="#e0ecff" font-size="12">wiki</text>
+<text x="1136" y="150" fill="#e0ecff" font-size="12">runtime</text>
+<text x="1224" y="150" fill="#e0ecff" font-size="12">netplay</text>
+<text x="1312" y="150" fill="#e0ecff" font-size="12">mods</text>
+<g id="row-ie1">
+<rect x="264" y="164" width="1152" height="52" rx="4" fill="#152d52"/>
+<text x="280" y="186" fill="#fcfaf8" font-size="14">ie1</text>
+<text x="280" y="204" fill="#e0ecff" font-size="12">ds, 3ds</text>
+<rect x="520" y="176" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="528" y="195" fill="#131420" font-size="12">full</text>
+<rect x="608" y="176" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="616" y="195" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="696" y="176" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="704" y="195" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="784" y="176" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="792" y="195" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="872" y="176" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="880" y="195" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="960" y="176" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="968" y="195" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1048" y="176" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="1056" y="195" fill="#131420" font-size="12">partial</text>
+<rect x="1136" y="176" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1144" y="195" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1224" y="176" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1232" y="195" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1312" y="176" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1320" y="195" fill="#fcfaf8" font-size="12">none</text>
+</g>
+<g id="row-ie2">
+<rect x="264" y="226" width="1152" height="52" rx="4" fill="#152d52"/>
+<text x="280" y="248" fill="#fcfaf8" font-size="14">ie2</text>
+<text x="280" y="266" fill="#e0ecff" font-size="12">ds</text>
+<rect x="520" y="238" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="528" y="257" fill="#131420" font-size="12">full</text>
+<rect x="608" y="238" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="616" y="257" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="696" y="238" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="704" y="257" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="784" y="238" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="792" y="257" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="872" y="238" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="880" y="257" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="960" y="238" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="968" y="257" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1048" y="238" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="1056" y="257" fill="#131420" font-size="12">partial</text>
+<rect x="1136" y="238" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1144" y="257" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1224" y="238" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1232" y="257" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1312" y="238" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1320" y="257" fill="#fcfaf8" font-size="12">none</text>
+</g>
+<g id="row-ie3">
+<rect x="264" y="288" width="1152" height="52" rx="4" fill="#152d52"/>
+<text x="280" y="310" fill="#fcfaf8" font-size="14">ie3</text>
+<text x="280" y="328" fill="#e0ecff" font-size="12">ds, 3ds</text>
+<rect x="520" y="300" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="528" y="319" fill="#131420" font-size="12">full</text>
+<rect x="608" y="300" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="616" y="319" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="696" y="300" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="704" y="319" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="784" y="300" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="792" y="319" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="872" y="300" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="880" y="319" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="960" y="300" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="968" y="319" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1048" y="300" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="1056" y="319" fill="#131420" font-size="12">partial</text>
+<rect x="1136" y="300" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1144" y="319" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1224" y="300" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1232" y="319" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1312" y="300" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1320" y="319" fill="#fcfaf8" font-size="12">none</text>
+</g>
+<g id="row-strikers">
+<rect x="264" y="350" width="1152" height="52" rx="4" fill="#152d52"/>
+<text x="280" y="372" fill="#fcfaf8" font-size="14">strikers</text>
+<text x="280" y="390" fill="#e0ecff" font-size="12">wii</text>
+<rect x="520" y="362" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="528" y="381" fill="#131420" font-size="12">full</text>
+<rect x="608" y="362" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="616" y="381" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="696" y="362" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="704" y="381" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="784" y="362" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="792" y="381" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="872" y="362" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="880" y="381" fill="#fcfaf8" font-size="12">none</text>
+<rect x="960" y="362" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="968" y="381" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1048" y="362" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="1056" y="381" fill="#131420" font-size="12">partial</text>
+<rect x="1136" y="362" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1144" y="381" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1224" y="362" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="1232" y="381" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1312" y="362" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1320" y="381" fill="#fcfaf8" font-size="12">none</text>
+</g>
+<g id="row-strikers-2012">
+<rect x="264" y="412" width="1152" height="52" rx="4" fill="#152d52"/>
+<text x="280" y="434" fill="#fcfaf8" font-size="14">strikers-2012</text>
+<text x="280" y="452" fill="#e0ecff" font-size="12">wii</text>
+<rect x="520" y="424" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="528" y="443" fill="#131420" font-size="12">full</text>
+<rect x="608" y="424" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="616" y="443" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="696" y="424" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="704" y="443" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="784" y="424" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="792" y="443" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="872" y="424" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="880" y="443" fill="#fcfaf8" font-size="12">none</text>
+<rect x="960" y="424" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="968" y="443" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1048" y="424" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="1056" y="443" fill="#131420" font-size="12">partial</text>
+<rect x="1136" y="424" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1144" y="443" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1224" y="424" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="1232" y="443" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1312" y="424" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1320" y="443" fill="#fcfaf8" font-size="12">none</text>
+</g>
+<g id="row-go-strikers-2013">
+<rect x="264" y="474" width="1152" height="52" rx="4" fill="#152d52"/>
+<text x="280" y="496" fill="#fcfaf8" font-size="14">go-strikers-2013</text>
+<text x="280" y="514" fill="#e0ecff" font-size="12">wii</text>
+<rect x="520" y="486" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="528" y="505" fill="#131420" font-size="12">full</text>
+<rect x="608" y="486" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="616" y="505" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="696" y="486" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="704" y="505" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="784" y="486" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="792" y="505" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="872" y="486" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="880" y="505" fill="#fcfaf8" font-size="12">none</text>
+<rect x="960" y="486" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="968" y="505" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1048" y="486" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="1056" y="505" fill="#131420" font-size="12">partial</text>
+<rect x="1136" y="486" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1144" y="505" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1224" y="486" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="1232" y="505" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1312" y="486" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1320" y="505" fill="#fcfaf8" font-size="12">none</text>
+</g>
+<g id="row-go1">
+<rect x="264" y="536" width="1152" height="52" rx="4" fill="#152d52"/>
+<text x="280" y="558" fill="#fcfaf8" font-size="14">go1</text>
+<text x="280" y="576" fill="#e0ecff" font-size="12">3ds</text>
+<rect x="520" y="548" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="528" y="567" fill="#131420" font-size="12">full</text>
+<rect x="608" y="548" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="616" y="567" fill="#131420" font-size="12">partial</text>
+<rect x="696" y="548" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="704" y="567" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="784" y="548" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="792" y="567" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="872" y="548" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="880" y="567" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="960" y="548" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="968" y="567" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1048" y="548" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="1056" y="567" fill="#131420" font-size="12">partial</text>
+<rect x="1136" y="548" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1144" y="567" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1224" y="548" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1232" y="567" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1312" y="548" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1320" y="567" fill="#fcfaf8" font-size="12">none</text>
+</g>
+<g id="row-go2">
+<rect x="264" y="598" width="1152" height="52" rx="4" fill="#152d52"/>
+<text x="280" y="620" fill="#fcfaf8" font-size="14">go2</text>
+<text x="280" y="638" fill="#e0ecff" font-size="12">3ds</text>
+<rect x="520" y="610" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="528" y="629" fill="#131420" font-size="12">full</text>
+<rect x="608" y="610" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="616" y="629" fill="#131420" font-size="12">partial</text>
+<rect x="696" y="610" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="704" y="629" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="784" y="610" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="792" y="629" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="872" y="610" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="880" y="629" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="960" y="610" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="968" y="629" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1048" y="610" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="1056" y="629" fill="#131420" font-size="12">partial</text>
+<rect x="1136" y="610" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1144" y="629" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1224" y="610" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1232" y="629" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1312" y="610" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1320" y="629" fill="#fcfaf8" font-size="12">none</text>
+</g>
+<g id="row-go3">
+<rect x="264" y="660" width="1152" height="52" rx="4" fill="#152d52"/>
+<text x="280" y="682" fill="#fcfaf8" font-size="14">go3</text>
+<text x="280" y="700" fill="#e0ecff" font-size="12">3ds</text>
+<rect x="520" y="672" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="528" y="691" fill="#131420" font-size="12">full</text>
+<rect x="608" y="672" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="616" y="691" fill="#131420" font-size="12">partial</text>
+<rect x="696" y="672" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="704" y="691" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="784" y="672" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="792" y="691" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="872" y="672" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="880" y="691" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="960" y="672" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="968" y="691" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1048" y="672" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="1056" y="691" fill="#131420" font-size="12">partial</text>
+<rect x="1136" y="672" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1144" y="691" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1224" y="672" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1232" y="691" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1312" y="672" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1320" y="691" fill="#fcfaf8" font-size="12">none</text>
+</g>
+<g id="row-cross">
+<rect x="264" y="722" width="1152" height="52" rx="4" fill="#152d52"/>
+<text x="280" y="744" fill="#fcfaf8" font-size="14">cross</text>
+<text x="280" y="762" fill="#e0ecff" font-size="12">mobile</text>
+<rect x="520" y="734" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="528" y="753" fill="#131420" font-size="12">partial</text>
+<rect x="608" y="734" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="616" y="753" fill="#131420" font-size="12">partial</text>
+<rect x="696" y="734" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="704" y="753" fill="#131420" font-size="12">partial</text>
+<rect x="784" y="734" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="792" y="753" fill="#fcfaf8" font-size="12">none</text>
+<rect x="872" y="734" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="880" y="753" fill="#fcfaf8" font-size="12">none</text>
+<rect x="960" y="734" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="968" y="753" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="1048" y="734" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="1056" y="753" fill="#131420" font-size="12">partial</text>
+<rect x="1136" y="734" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1144" y="753" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1224" y="734" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1232" y="753" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1312" y="734" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1320" y="753" fill="#fcfaf8" font-size="12">none</text>
+</g>
+<g id="row-ievr">
+<rect x="264" y="784" width="1152" height="52" rx="4" fill="#152d52"/>
+<text x="280" y="806" fill="#fcfaf8" font-size="14">ievr</text>
+<text x="280" y="824" fill="#e0ecff" font-size="12">pc, switch, switch2, ps4, ps5</text>
+<rect x="520" y="796" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="528" y="815" fill="#131420" font-size="12">full</text>
+<rect x="608" y="796" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="616" y="815" fill="#131420" font-size="12">full</text>
+<rect x="696" y="796" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="704" y="815" fill="#131420" font-size="12">full</text>
+<rect x="784" y="796" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="792" y="815" fill="#fcfaf8" font-size="12">planned</text>
+<rect x="872" y="796" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="880" y="815" fill="#131420" font-size="12">full</text>
+<rect x="960" y="796" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="968" y="815" fill="#131420" font-size="12">partial</text>
+<rect x="1048" y="796" width="76" height="28" rx="4" fill="#97c0fc"/>
+<text x="1056" y="815" fill="#131420" font-size="12">full</text>
+<rect x="1136" y="796" width="76" height="28" rx="4" fill="#e6c961"/>
+<text x="1144" y="815" fill="#131420" font-size="12">partial</text>
+<rect x="1224" y="796" width="76" height="28" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1232" y="815" fill="#fcfaf8" font-size="12">none</text>
+<rect x="1312" y="796" width="76" height="28" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="1320" y="815" fill="#fcfaf8" font-size="12">planned</text>
+</g>
+</g></svg>

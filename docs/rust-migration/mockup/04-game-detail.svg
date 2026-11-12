@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" font-family="Inter, Segoe UI, sans-serif">
+<title>NIE - Fiche jeu Victory Road</title>
+<g id="game-detail">
+<rect x="0" y="0" width="1440" height="900" rx="0" id="bg" fill="#131420"/>
+<g id="sidebar">
+<rect x="0" y="0" width="240" height="900" rx="0" fill="#152d52"/>
+<text x="24" y="40" fill="#fcfaf8" font-size="20" font-weight="700">NIE</text>
+<text x="24" y="60" fill="#e0ecff" font-size="12">Inazuma Eleven engine</text>
+<rect x="12" y="78" width="216" height="36" rx="8" fill="#224271"/>
+<rect x="12" y="78" width="3" height="36" rx="0" fill="#97c0fc"/>
+<text x="32" y="100" fill="#fcfaf8" font-size="14">Bibliotheque</text>
+<text x="32" y="144" fill="#fcfaf8" font-size="14">Matrice</text>
+<text x="32" y="188" fill="#fcfaf8" font-size="14">Outils</text>
+<text x="32" y="232" fill="#fcfaf8" font-size="14">Parametres</text>
+<text x="24" y="860" fill="#e0ecff" font-size="12">Registre rev 1 - synchronise</text>
+</g><g id="topbar">
+<rect x="264" y="12" width="420" height="32" rx="8" fill="#152d52"/>
+<text x="280" y="33" fill="#e0ecff" font-size="14">Rechercher un jeu, une plateforme...</text>
+<rect x="704" y="12" width="160" height="32" rx="8" fill="#152d52"/>
+<text x="720" y="33" fill="#fcfaf8" font-size="14">Plateforme : toutes</text>
+<rect x="240" y="55" width="1200" height="1" rx="0" fill="#224271"/>
+</g>
+<rect x="264" y="80" width="1152" height="200" rx="12" fill="#152d52"/>
+<rect x="288" y="104" width="152" height="152" rx="8" fill="#224271"/>
+<text x="464" y="140" fill="#fcfaf8" font-size="28" font-weight="700">Inazuma Eleven: Victory Road</text>
+<text x="464" y="168" fill="#e0ecff" font-size="14">ievr - alias ares - serie victory-road - manifeste rev 1</text>
+<text x="464" y="196" fill="#e0ecff" font-size="14">PC (Steam 2799860) - Switch - Switch 2 - PS4 - PS5</text>
+<rect x="464" y="216" width="140" height="36" rx="8" fill="#97c0fc"/>
+<text x="504" y="239" fill="#131420" font-size="14" font-weight="600">Verifier</text>
+<rect x="616" y="216" width="160" height="36" rx="8" fill="none" stroke="#97c0fc"/>
+<text x="640" y="239" fill="#97c0fc" font-size="14">Mettre a jour</text>
+<g id="verify-report">
+<rect x="264" y="304" width="560" height="200" rx="12" fill="#152d52"/>
+<text x="288" y="340" fill="#fcfaf8" font-size="20" font-weight="600">Derniere verification</text>
+<text x="288" y="380" fill="#97c0fc" font-size="14">ok 1284 fichiers</text>
+<text x="288" y="408" fill="#e6c961" font-size="14">modifies 0</text>
+<text x="288" y="436" fill="#c74955" font-size="14">manquants 0</text>
+<text x="288" y="476" fill="#e0ecff" font-size="12">BLAKE3 - source D:/Games/IEVR</text>
+</g><g id="features">
+<rect x="848" y="304" width="568" height="420" rx="12" fill="#152d52"/>
+<text x="872" y="340" fill="#fcfaf8" font-size="20" font-weight="600">Fonctionnalites</text>
+<text x="872" y="372" fill="#e0ecff" font-size="14">dump_verify</text>
+<rect x="1280" y="354" width="112" height="26" rx="4" fill="#97c0fc"/>
+<text x="1292" y="372" fill="#131420" font-size="12">full</text>
+<text x="872" y="406" fill="#e0ecff" font-size="14">asset_extract</text>
+<rect x="1280" y="388" width="112" height="26" rx="4" fill="#97c0fc"/>
+<text x="1292" y="406" fill="#131420" font-size="12">full</text>
+<text x="872" y="440" fill="#e0ecff" font-size="14">text_extract</text>
+<rect x="1280" y="422" width="112" height="26" rx="4" fill="#97c0fc"/>
+<text x="1292" y="440" fill="#131420" font-size="12">full</text>
+<text x="872" y="474" fill="#e0ecff" font-size="14">translation_patch</text>
+<rect x="1280" y="456" width="112" height="26" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="1292" y="474" fill="#fcfaf8" font-size="12">planned</text>
+<text x="872" y="508" fill="#e0ecff" font-size="14">save_edit</text>
+<rect x="1280" y="490" width="112" height="26" rx="4" fill="#97c0fc"/>
+<text x="1292" y="508" fill="#131420" font-size="12">full</text>
+<text x="872" y="542" fill="#e0ecff" font-size="14">team_builder</text>
+<rect x="1280" y="524" width="112" height="26" rx="4" fill="#e6c961"/>
+<text x="1292" y="542" fill="#131420" font-size="12">partial</text>
+<text x="872" y="576" fill="#e0ecff" font-size="14">wiki_data</text>
+<rect x="1280" y="558" width="112" height="26" rx="4" fill="#97c0fc"/>
+<text x="1292" y="576" fill="#131420" font-size="12">full</text>
+<text x="872" y="610" fill="#e0ecff" font-size="14">nie_runtime</text>
+<rect x="1280" y="592" width="112" height="26" rx="4" fill="#e6c961"/>
+<text x="1292" y="610" fill="#131420" font-size="12">partial</text>
+<text x="872" y="644" fill="#e0ecff" font-size="14">netplay</text>
+<rect x="1280" y="626" width="112" height="26" rx="4" fill="#c74955" fill-opacity="0.4"/>
+<text x="1292" y="644" fill="#fcfaf8" font-size="12">none</text>
+<text x="872" y="678" fill="#e0ecff" font-size="14">mod_loader</text>
+<rect x="1280" y="660" width="112" height="26" rx="4" fill="none" stroke="#97c0fc"/>
+<text x="1292" y="678" fill="#fcfaf8" font-size="12">planned</text>
+</g><g id="ecosystem">
+<rect x="264" y="528" width="560" height="196" rx="12" fill="#152d52"/>
+<text x="288" y="564" fill="#fcfaf8" font-size="20" font-weight="600">Ecosysteme</text>
+<text x="288" y="600" fill="#e0ecff" font-size="14">data - inagle</text>
+<text x="288" y="628" fill="#e0ecff" font-size="14">wiki - Azalee</text>
+<text x="288" y="656" fill="#e0ecff" font-size="14">tool - aphrody-nie-save</text>
+<text x="288" y="684" fill="#e0ecff" font-size="14">store - Steam 2799860</text>
+</g>
+</g></svg>

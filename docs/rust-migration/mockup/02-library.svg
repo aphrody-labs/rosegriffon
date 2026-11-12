@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" font-family="Inter, Segoe UI, sans-serif">
+<title>NIE - Bibliotheque (gestionnaire de paquets)</title>
+<g id="library">
+<rect x="0" y="0" width="1440" height="900" rx="0" id="bg" fill="#131420"/>
+<g id="sidebar">
+<rect x="0" y="0" width="240" height="900" rx="0" fill="#152d52"/>
+<text x="24" y="40" fill="#fcfaf8" font-size="20" font-weight="700">NIE</text>
+<text x="24" y="60" fill="#e0ecff" font-size="12">Inazuma Eleven engine</text>
+<rect x="12" y="78" width="216" height="36" rx="8" fill="#224271"/>
+<rect x="12" y="78" width="3" height="36" rx="0" fill="#97c0fc"/>
+<text x="32" y="100" fill="#fcfaf8" font-size="14">Bibliotheque</text>
+<text x="32" y="144" fill="#fcfaf8" font-size="14">Matrice</text>
+<text x="32" y="188" fill="#fcfaf8" font-size="14">Outils</text>
+<text x="32" y="232" fill="#fcfaf8" font-size="14">Parametres</text>
+<text x="24" y="860" fill="#e0ecff" font-size="12">Registre rev 1 - synchronise</text>
+</g><g id="topbar">
+<rect x="264" y="12" width="420" height="32" rx="8" fill="#152d52"/>
+<text x="280" y="33" fill="#e0ecff" font-size="14">Rechercher un jeu, une plateforme...</text>
+<rect x="704" y="12" width="160" height="32" rx="8" fill="#152d52"/>
+<text x="720" y="33" fill="#fcfaf8" font-size="14">Plateforme : toutes</text>
+<rect x="240" y="55" width="1200" height="1" rx="0" fill="#224271"/>
+</g>
+<text x="264" y="104" fill="#fcfaf8" font-size="28" font-weight="700">Bibliotheque</text>
+<rect x="1232" y="80" width="184" height="36" rx="8" fill="#97c0fc"/>
+<text x="1252" y="103" fill="#131420" font-size="14" font-weight="600">Installer un dump</text>
+<g id="card-ievr">
+<rect x="264" y="140" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="280" y="156" width="232" height="92" rx="4" fill="#224271"/>
+<text x="280" y="272" fill="#fcfaf8" font-size="14" font-weight="600">Inazuma Eleven: Victory Road</text>
+<text x="280" y="292" fill="#e0ecff" font-size="12">PC - Switch - Switch 2 - PS4 - PS5</text>
+<rect x="280" y="304" width="10" height="10" rx="5" fill="#97c0fc"/>
+<text x="296" y="313" fill="#e0ecff" font-size="12">Installe - verifie</text>
+</g>
+<g id="card-ie1">
+<rect x="552" y="140" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="568" y="156" width="232" height="92" rx="4" fill="#224271"/>
+<text x="568" y="272" fill="#fcfaf8" font-size="14" font-weight="600">Inazuma Eleven</text>
+<text x="568" y="292" fill="#e0ecff" font-size="12">DS - 3DS</text>
+<rect x="568" y="304" width="10" height="10" rx="5" fill="#224271"/>
+<text x="584" y="313" fill="#e0ecff" font-size="12">Non installe</text>
+</g>
+<g id="card-ie2">
+<rect x="840" y="140" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="856" y="156" width="232" height="92" rx="4" fill="#224271"/>
+<text x="856" y="272" fill="#fcfaf8" font-size="14" font-weight="600">Inazuma Eleven 2</text>
+<text x="856" y="292" fill="#e0ecff" font-size="12">DS</text>
+<rect x="856" y="304" width="10" height="10" rx="5" fill="#224271"/>
+<text x="872" y="313" fill="#e0ecff" font-size="12">Non installe</text>
+</g>
+<g id="card-ie3">
+<rect x="1128" y="140" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="1144" y="156" width="232" height="92" rx="4" fill="#224271"/>
+<text x="1144" y="272" fill="#fcfaf8" font-size="14" font-weight="600">Inazuma Eleven 3</text>
+<text x="1144" y="292" fill="#e0ecff" font-size="12">DS - 3DS</text>
+<rect x="1144" y="304" width="10" height="10" rx="5" fill="#224271"/>
+<text x="1160" y="313" fill="#e0ecff" font-size="12">Non installe</text>
+</g>
+<g id="card-go1">
+<rect x="264" y="360" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="280" y="376" width="232" height="92" rx="4" fill="#224271"/>
+<text x="280" y="492" fill="#fcfaf8" font-size="14" font-weight="600">Inazuma Eleven GO</text>
+<text x="280" y="512" fill="#e0ecff" font-size="12">3DS</text>
+<rect x="280" y="524" width="10" height="10" rx="5" fill="#e6c961"/>
+<text x="296" y="533" fill="#e0ecff" font-size="12">Mise a jour dispo</text>
+</g>
+<g id="card-go2">
+<rect x="552" y="360" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="568" y="376" width="232" height="92" rx="4" fill="#224271"/>
+<text x="568" y="492" fill="#fcfaf8" font-size="14" font-weight="600">GO Chrono Stones</text>
+<text x="568" y="512" fill="#e0ecff" font-size="12">3DS</text>
+<rect x="568" y="524" width="10" height="10" rx="5" fill="#224271"/>
+<text x="584" y="533" fill="#e0ecff" font-size="12">Non installe</text>
+</g>
+<g id="card-go3">
+<rect x="840" y="360" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="856" y="376" width="232" height="92" rx="4" fill="#224271"/>
+<text x="856" y="492" fill="#fcfaf8" font-size="14" font-weight="600">GO Galaxy</text>
+<text x="856" y="512" fill="#e0ecff" font-size="12">3DS</text>
+<rect x="856" y="524" width="10" height="10" rx="5" fill="#224271"/>
+<text x="872" y="533" fill="#e0ecff" font-size="12">Non installe</text>
+</g>
+<g id="card-strikers">
+<rect x="1128" y="360" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="1144" y="376" width="232" height="92" rx="4" fill="#224271"/>
+<text x="1144" y="492" fill="#fcfaf8" font-size="14" font-weight="600">Inazuma Eleven Strikers</text>
+<text x="1144" y="512" fill="#e0ecff" font-size="12">Wii</text>
+<rect x="1144" y="524" width="10" height="10" rx="5" fill="#224271"/>
+<text x="1160" y="533" fill="#e0ecff" font-size="12">Non installe</text>
+</g>
+<g id="card-strikers-2012">
+<rect x="264" y="580" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="280" y="596" width="232" height="92" rx="4" fill="#224271"/>
+<text x="280" y="712" fill="#fcfaf8" font-size="14" font-weight="600">Strikers 2012 Xtreme</text>
+<text x="280" y="732" fill="#e0ecff" font-size="12">Wii</text>
+<rect x="280" y="744" width="10" height="10" rx="5" fill="#224271"/>
+<text x="296" y="753" fill="#e0ecff" font-size="12">Non installe</text>
+</g>
+<g id="card-go-strikers-2013">
+<rect x="552" y="580" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="568" y="596" width="232" height="92" rx="4" fill="#224271"/>
+<text x="568" y="712" fill="#fcfaf8" font-size="14" font-weight="600">GO Strikers 2013</text>
+<text x="568" y="732" fill="#e0ecff" font-size="12">Wii</text>
+<rect x="568" y="744" width="10" height="10" rx="5" fill="#224271"/>
+<text x="584" y="753" fill="#e0ecff" font-size="12">Non installe</text>
+</g>
+<g id="card-cross">
+<rect x="840" y="580" width="264" height="196" rx="8" fill="#152d52"/>
+<rect x="856" y="596" width="232" height="92" rx="4" fill="#224271"/>
+<text x="856" y="712" fill="#fcfaf8" font-size="14" font-weight="600">Inazuma Eleven Cross</text>
+<text x="856" y="732" fill="#e0ecff" font-size="12">Mobile</text>
+<rect x="856" y="744" width="10" height="10" rx="5" fill="#224271"/>
+<text x="872" y="753" fill="#e0ecff" font-size="12">Non installe</text>
+</g>
+</g></svg>
