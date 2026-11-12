@@ -207,6 +207,8 @@ export function composeEnv(
     RG_INAGLE_ENV_FILE: host.env_file.replace(/[^/]*$/, "inagle-pg.env"),
     RG_STACK_DIR: host.stack_dir,
     RG_DOMAIN: domain(infra, env),
+    // Private mesh address: services published for the other roles bind here only.
+    RG_MESH_IP: host.mesh_ip,
   };
 }
 

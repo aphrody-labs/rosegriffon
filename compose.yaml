@@ -222,9 +222,12 @@ services:
 
   # Azalee / Inagle database (INAGLE_DATABASE_URL=postgres://...@inagle-pg:5432/inagle).
   # Credentials come from inagle-pg.env (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB).
+  # Published on the mesh address only (RG_MESH_IP): the build role prerenders against it.
   inagle-pg:
     <<: *common
     image: postgres:${INAGLE_PG_VERSION:-18-alpine}
+    ports:
+      - "${RG_MESH_IP:-127.0.0.1}:${RG_INAGLE_PORT:-15433}:5432"
     env_file:
       - path: ${RG_INAGLE_ENV_FILE:-/etc/rosegriffon/inagle-pg.env}
         required: true
