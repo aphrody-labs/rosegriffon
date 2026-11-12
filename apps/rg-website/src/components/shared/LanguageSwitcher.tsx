@@ -32,7 +32,7 @@ export function LanguageSwitcher() {
           size="sm"
           className="h-12 min-w-11 gap-1 px-2 text-inherit hover:bg-sidebar-accent hover:text-inherit md:h-10"
           title={`${t("ui.language.current")}: ${currentName}`}
-          aria-label={`${t("ui.language.current")}: ${currentName}. ${t("ui.language.change")}`}
+          aria-label={`${language.toUpperCase()} - ${t("ui.language.current")}: ${currentName}. ${t("ui.language.change")}`}
         >
           <Languages data-icon="inline-start" aria-hidden />
           <span className="text-xs font-black uppercase" aria-hidden="true">
