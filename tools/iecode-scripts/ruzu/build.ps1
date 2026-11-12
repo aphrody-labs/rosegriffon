@@ -82,7 +82,7 @@ $VcpkgPackages = @(
 function Confirm-Install {
     param([Parameter(Mandatory)][string]$Prompt)
 
-    if ($Yes -or $env:RUZU_SETUP_ASSUME_YES -eq "1") {
+    if ($Yes -or $env:RUZU_SETUP_ASSUME_YES -eq "1" -or $env:RUZU_INTERACTIVE -ne "1") {
         return $true
     }
 

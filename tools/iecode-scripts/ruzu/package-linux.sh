@@ -57,8 +57,10 @@ distro_name=${PRETTY_NAME:-$distro_id}
 package_name="Ruzu-$distro_tag-$package_revision-$arch"
 archive="$repo_root/target/release/$package_name.deb"
 printf 'Package: %s\nDebian version: %s\n' "$package_name.deb" "$deb_version"
+if [ "${RUZU_INTERACTIVE:-0}" = 1 ]; then
 printf 'Generate this package? [y/N]: '
 IFS= read -r answer || answer=
+else answer=y; fi
 case "$answer" in
     y|Y|yes|Yes|YES) ;;
     *) echo "Packaging cancelled; no package files were changed."; exit 1 ;;

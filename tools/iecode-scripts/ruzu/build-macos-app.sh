@@ -74,9 +74,9 @@ if [[ "$package" == true ]]; then
     esac
     package_name="Ruzu-macOS-$package_revision-$package_arch-clang"
     printf 'Package directory: %s\nStandalone archive: %s.zip\n' "$package_name" "$package_name"
-    printf 'Generate this package? [y/N]: '
+    if [ "${RUZU_INTERACTIVE:-0}" = 1 ]; then printf 'Generate this package? [y/N]: '; fi
     confirmation=
-    IFS= read -r confirmation || true
+    if [ "${RUZU_INTERACTIVE:-0}" = 1 ]; then IFS= read -r confirmation || true; else confirmation=y; fi
     case "$confirmation" in
         y|Y|yes|YES|Yes|o|O|oui|OUI|Oui) ;;
         *) echo "Packaging cancelled; no package files were changed."; exit 1 ;;

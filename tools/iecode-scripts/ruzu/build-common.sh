@@ -12,6 +12,7 @@ CARGO_EXTRA_ARGS=
 
 confirm_install() {
     prompt=$1
+    [ "${RUZU_INTERACTIVE:-0}" = 1 ] || return 0
     printf '%s [y/N] ' "$prompt"
     IFS= read -r answer || answer=
     case "$answer" in

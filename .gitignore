@@ -27,7 +27,8 @@ secrets/
 __pycache__/
 
 # Local tool state, never versioned
-.claude/
+.claude/*
+!.claude/settings.json
 .agents/
 .codex/
 .cursor/

@@ -143,7 +143,7 @@ def release(repo, platform, skip_deps=False):
     print(
         f"Will commit Cargo version {version}, build, tag {tag}, package and push to origin/{branch}."
     )
-    if input("Continue? [y/N]: ").strip().lower() not in ("y", "yes", "o", "oui"):
+    if os.environ.get("RUZU_INTERACTIVE") == "1" and input("Continue? [y/N]: ").strip().lower() not in ("y", "yes", "o", "oui"):
         print("Cancelled; no files or commits changed.")
         return
     clean(repo)
