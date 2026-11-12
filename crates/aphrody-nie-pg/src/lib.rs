@@ -16,7 +16,13 @@ pub use decode::{Body, DecodeError, Decoded, decode};
 pub use store::{ImportOutcome, migrate, store_file};
 
 /// Embedded migrations, applied in order by [`migrate`].
-pub const MIGRATIONS: &[(i32, &str)] = &[(1, include_str!("../migrations/0001_nie_cfgbin.sql"))];
+pub const MIGRATIONS: &[(i32, &str)] = &[
+    (1, include_str!("../migrations/0001_nie_cfgbin.sql")),
+    (2, include_str!("../migrations/0002_nie_vfs_cfs_binary.sql")),
+    (3, include_str!("../migrations/0003_nie_lua_scripts.sql")),
+    (4, include_str!("../migrations/0004_nie_wiki_projections.sql")),
+    (5, include_str!("../migrations/0005_nie_vfs_trgm_index.sql")),
+];
 
 /// True for a VFS path of a binary config file to import.
 #[must_use]

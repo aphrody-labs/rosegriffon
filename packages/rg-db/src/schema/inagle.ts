@@ -384,3 +384,221 @@ export interface InagleGameTextTable {
   value: string;
   updated_at: ColumnType<Date, string | undefined, string | Date> | null;
 }
+
+export interface NieVfsArchiveTable {
+  id: ColumnType<number, never, never>;
+  name: string;
+  kind: "cpk" | "cfs" | "zip" | "tar" | "criware" | "loose";
+  file_count: number;
+  total_bytes: number;
+  toc_offset: number;
+  header_meta: Json;
+  indexed_at: ColumnType<Date, string | undefined, never>;
+}
+
+export interface NieVfsFileTable {
+  id: ColumnType<number, never, never>;
+  archive_id: number | null;
+  path: string;
+  parent_dir: string;
+  filename: string;
+  extension: string;
+  format_kind:
+    | "cfgbin"
+    | "lua"
+    | "texture"
+    | "model"
+    | "animation"
+    | "audio"
+    | "video"
+    | "vfx"
+    | "collision"
+    | "cfs_bin"
+    | "archive"
+    | "text"
+    | "font"
+    | "shader"
+    | "generic";
+  byte_size: number;
+  compressed_size: number | null;
+  compression_codec: "crilayla" | "zlib" | "lz4" | "gzip" | "none" | null;
+  sha256: string | null;
+  crc32: string | null;
+  mime_type: string;
+  cdn_url: string | null;
+  metadata: Json;
+  indexed_at: ColumnType<Date, string | undefined, never>;
+}
+
+export interface NieCfsBinaryTable {
+  id: ColumnType<number, never, never>;
+  vfs_file_id: number;
+  magic: string;
+  format_name: string;
+  endianness: "little" | "big";
+  version: number;
+  header_size: number;
+  payload_size: number;
+  section_count: number;
+  sections: Json;
+  symbols: Json;
+  attributes: Json;
+  parsed_at: ColumnType<Date, string | undefined, never>;
+}
+
+export interface NieLuaScriptTable {
+  id: string;
+  vfs_file_id: number | null;
+  path: string;
+  name: string;
+  category: string;
+  lua_version: string;
+  is_compiled: boolean;
+  sha256: string | null;
+  byte_size: number;
+  num_functions: number;
+  num_upvalues: number;
+  num_constants: number;
+  source_code: string | null;
+  ast: Json;
+  header_meta: Json;
+  event_hooks: string[];
+  crc32_tokens: string[];
+  updated_at: ColumnType<Date, string | undefined, string | Date>;
+}
+
+export interface NieLuaFunctionTable {
+  id: ColumnType<number, never, never>;
+  script_id: string;
+  proto_idx: number;
+  name: string | null;
+  line_start: number;
+  line_end: number;
+  param_count: number;
+  is_vararg: boolean;
+  max_stack_size: number;
+  instruction_count: number;
+  upvalue_count: number;
+  disassembly: Json;
+  constants: Json;
+  local_vars: Json;
+}
+
+export interface NieLuaStringRefTable {
+  id: ColumnType<number, never, never>;
+  script_id: string;
+  value: string;
+  kind: "literal" | "global_call" | "table_key" | "identifier";
+  occurrences: number;
+}
+
+export interface NieWikiCharaSheetView {
+  id: string;
+  chara_id: string | null;
+  internal_code: string | null;
+  name_fr: string | null;
+  name_en: string | null;
+  name_ja: string | null;
+  description_fr: string | null;
+  description_en: string | null;
+  rarity: string | null;
+  rarity_code: number | null;
+  element: string | null;
+  position: string | null;
+  gender: string | null;
+  image_url: string | null;
+  series: string | null;
+  slug: string | null;
+  team_id: string | null;
+  stat_frappe: number | null;
+  stat_controle: number | null;
+  stat_technique: number | null;
+  stat_pression: number | null;
+  stat_physique: number | null;
+  stat_agilite: number | null;
+  stat_intelligence: number | null;
+  stat_total: number | null;
+  model_id: string | null;
+  vfs_model_path: string | null;
+  cdn_model_url: string | null;
+  vfs_texture_path: string | null;
+  cdn_texture_url: string | null;
+  stats: Json;
+  skills: Json;
+  teams: Json;
+  created_at: Date | null;
+}
+
+export interface NieWikiSkillSheetView {
+  id: string;
+  name_fr: string | null;
+  name_en: string | null;
+  name_ja: string | null;
+  description_fr: string | null;
+  description_en: string | null;
+  category: string | null;
+  element: string | null;
+  power_min: number | null;
+  power_max: number | null;
+  tp_cost: number | null;
+  tension_cost: number | null;
+  image_url: string | null;
+  cutin_event_name: string | null;
+  cutin_asset_data: Json;
+  lua_script_id: string | null;
+  lua_category: string | null;
+  vfs_anim_path: string | null;
+  cdn_anim_url: string | null;
+  data: Json;
+  updated_at: Date | null;
+}
+
+export interface NieWikiItemSheetView {
+  id: string;
+  name_fr: string | null;
+  name_en: string | null;
+  name_ja: string | null;
+  description_fr: string | null;
+  description_en: string | null;
+  category: string | null;
+  rarity: number | null;
+  buy_price: number | null;
+  sell_price: number | null;
+  boost_type: string | null;
+  effect_value: number | null;
+  image_url: string | null;
+  vfs_icon_path: string | null;
+  cdn_icon_url: string | null;
+  data: Json;
+  updated_at: Date | null;
+}
+
+export interface NieVfsExplorerView {
+  id: number;
+  path: string;
+  parent_dir: string;
+  filename: string;
+  extension: string;
+  format_kind: string;
+  byte_size: number;
+  compressed_size: number | null;
+  compression_codec: string | null;
+  mime_type: string;
+  cdn_url: string | null;
+  archive_name: string | null;
+  archive_kind: string | null;
+  indexed_at: Date;
+}
+
+export interface NieLuaCatalogView {
+  id: string;
+  name: string;
+  category: string;
+  lua_version: string;
+  num_functions: number;
+  num_constants: number;
+  event_hooks: string[];
+  header_meta: Json;
+  vfs_path: string | null;
+  cdn_url: string | null;
+}
