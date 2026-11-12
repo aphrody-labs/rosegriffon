@@ -10,6 +10,7 @@
   },
   "files": [
     "README.md",
+    "infra.ts",
     "oxlintrc.json",
     "public-urls.ts",
     "tailwind-preset.ts",
@@ -21,6 +22,7 @@
   ],
   "type": "module",
   "exports": {
+    "./infra": "./infra.ts",
     "./public-urls": "./public-urls.ts",
     "./tsconfig-base.json": "./tsconfig-base.json",
     "./tsconfig-nextjs.json": "./tsconfig-nextjs.json",

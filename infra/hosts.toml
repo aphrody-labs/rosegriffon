@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: Apache-2.0
+# Host inventory: the only file that names machines, addresses and host paths.
+# Everything else (justfile, infra/ops, compose, docs) asks for a ROLE and resolves it here:
+#
+#   bun infra/ops/cli.ts host prod          -> prd
+#   bun infra/ops/cli.ts host prod ssh      -> ssh alias
+#   bun infra/ops/cli.ts ssh build -- nproc
+#
+# Overrides (environment, highest priority):
+#   RG_HOST_<ROLE>=<host key | ssh alias>    e.g. RG_HOST_PROD=vps moves every prod verb to vps
+#   RG_HOST_<KEY>_<FIELD>=<value>            e.g. RG_HOST_PRD_SRV_ROOT=/data/rosegriffon
+# Adding a host: add a [hosts.<key>] table, then point a role at it. See docs/ARCHITECTURE.md.
+
+# Role -> host key. Roles are open: add one here and use it from services.toml.
+[roles]
+build = "vps"   # image and Rust/WASM builds (12 cores, sccache)
+storage = "vps" # game install, Steam home, archives, backups
+cdn = "cdn"     # static/derived assets, R2 sync origin
+prod = "prd"    # the compose stack (website, core, cron, model-serve, nginx)
+
+[hosts.vps]
+ssh = "vps"
+user = "ubuntu"
+public_ip = "51.77.147.152"
+mesh_ip = "10.200.77.1"
+cores = 12
+capabilities = ["docker", "build", "sccache", "storage"]
+srv_root = "/srv/rosegriffon"
+stack_dir = "/home/ubuntu/src/rosegriffon-stack"
+env_file = "/etc/rosegriffon/rosegriffon.env"
+
+[hosts.cdn]
+ssh = "cdn"
+user = "ubuntu"
+public_ip = "51.255.162.6"
+mesh_ip = "10.200.77.3"
+cores = 6
+capabilities = ["docker", "bun-test", "cdn"]
+srv_root = "/srv/rosegriffon"
+stack_dir = "/home/ubuntu/src/rosegriffon-stack"
+env_file = "/etc/rosegriffon/rosegriffon.env"
+
+[hosts.prd]
+ssh = "prd"
+user = "root"
+public_ip = "72.60.186.43"
+mesh_ip = "10.200.77.5"
+cores = 8
+capabilities = ["docker", "prod"]
+srv_root = "/srv/rosegriffon"
+stack_dir = "/root/src/rosegriffon-stack"
+env_file = "/etc/rosegriffon/rosegriffon.env"

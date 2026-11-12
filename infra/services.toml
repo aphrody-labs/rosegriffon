@@ -1,0 +1,96 @@
+# SPDX-License-Identifier: Apache-2.0
+# Service registry: one entry per deployable unit, one uniform contract.
+#
+#   entry     source entry point
+#   image     Dockerfile + target that builds it (or an upstream image)
+#   compose   compose file + service name (profile when opt-in)
+#   port      container port, health = HTTP path probed from the stack network
+#   role      host role it deploys to (infra/hosts.toml), overridable per verb with --role
+#   state     directories under the host srv_root that belong to the service (moved by migrate)
+#   env       configuration keys (env only, values live in the host env_file, never here)
+#   upstream  nginx upstream rendered into infra/docker/nginx/conf.d/00-upstreams.conf
+#
+# Read by infra/ops (bun infra/ops/cli.ts services) through @rosegriffon/config/infra.
+
+# Public apex domain. Every vhost is "<sub>.<domain>"; override with RG_DOMAIN.
+[site]
+domain = "rosegriffon.fr"
+
+[services.model-serve]
+entry = "crates/aphrody-nie-model-serve"
+dockerfile = "infra/docker/Dockerfile"
+target = "model-serve"
+compose = "compose.yaml"
+port = 8792
+health = "/health"
+role = "prod"
+state = ["game/ievr", "cache/model-serve", "nie"]
+env = ["NIE_GAME_DIR", "NIE_MODEL_SERVE_HOST", "NIE_MODEL_SERVE_PORT", "NIE_MODEL_CACHE_DIR"]
+upstream = { name = "model_serve", keepalive = 16 }
+
+[services.core]
+entry = "apps/rg-bot/src/core.ts"
+dockerfile = "infra/docker/Dockerfile"
+target = "core"
+compose = "compose.yaml"
+port = 8810
+health = "/health"
+role = "prod"
+state = ["state"]
+vhosts = ["api", "ranked", "bot", "mcp", "db"]
+env = ["RG_CORE_HOST", "RG_CORE_PORT", "RG_CORE_CRON", "NIE_MODEL_SERVE_URL", "RG_MEDIA_ROOT", "CDN_STATIC_ROOT", "ACHILLEA_BACKUP_DIR", "RANKED_STORAGE_DIR", "RG_CRON_SHARED_ROOT", "WEBSITE_URL", "PUBLIC_API_URL", "DATABASE_URL"]
+upstream = { name = "rg_core", keepalive = 32 }
+
+[services.cron]
+entry = "packages/rg-cron/src/scheduler.ts"
+dockerfile = "infra/docker/Dockerfile"
+target = "cron"
+compose = "compose.yaml"
+profile = "cron-split"
+port = 8811
+health = "/health"
+role = "prod"
+state = ["state"]
+env = ["RG_CRON_PORT", "RG_MEDIA_ROOT", "CDN_STATIC_ROOT", "RG_CRON_SHARED_ROOT", "NIE_MODEL_SERVE_URL"]
+
+[services.website]
+entry = "apps/rg-website"
+dockerfile = "infra/docker/Dockerfile"
+target = "website"
+compose = "compose.yaml"
+port = 3100
+health = "/api/health"
+role = "prod"
+state = []
+vhosts = ["@", "www", "achillea", "azalee", "shop"]
+env = ["HOSTNAME", "PORT", "NODE_ENV", "RG_API_URL", "RG_MEDIA_PUBLIC_ORIGIN", "DATABASE_URL"]
+upstream = { name = "rg_website", keepalive = 32 }
+
+[services.nginx]
+entry = "infra/docker/nginx/nginx.conf"
+image = "nginxinc/nginx-unprivileged"
+compose = "compose.yaml"
+port = 8080
+health = "/nginx-health"
+role = "prod"
+state = ["cache/nginx", "log/nginx"]
+vhosts = ["cdn"]
+env = ["RG_NGINX_PORT"]
+
+[services.steam-depot]
+entry = "crates/bun-steam"
+dockerfile = "infra/docker/steam-depot/Dockerfile"
+compose = "compose.yaml"
+profile = "tools"
+role = "storage"
+state = ["steam", "game/ievr"]
+env = ["STEAM_HOME", "STEAM_INSTALL_DIR"]
+
+[services.cdn-sync]
+entry = "infra/docker/cdn-sync/sync.ts"
+dockerfile = "infra/docker/cdn-sync/Dockerfile"
+compose = "compose.yaml"
+profile = "tools"
+role = "cdn"
+state = ["cdn/static"]
+env = ["CDN_SYNC_SOURCE", "CDN_SYNC_PREFIX", "CDN_SYNC_TARGETS", "CDN_SYNC_DRY_RUN", "CDN_SYNC_CONCURRENCY"]

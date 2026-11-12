@@ -1,9 +1,20 @@
 {
   "extends": "./tsconfig-base.json",
   "compilerOptions": {
-    "lib": ["ESNext", "DOM"],
-    "types": ["bun"],
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "types": [
+      "bun"
+    ],
     "noEmit": true
   },
-  "include": ["tailwind-preset.ts", "public-urls.ts", "test/public-urls.test.ts"]
+  "include": [
+    "tailwind-preset.ts",
+    "public-urls.ts",
+    "test/public-urls.test.ts",
+    "infra.ts",
+    "test/infra.test.ts"
+  ]
 }
