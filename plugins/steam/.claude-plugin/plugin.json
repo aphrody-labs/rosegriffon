@@ -1,0 +1,17 @@
+{
+  "name": "steam",
+  "version": "0.1.0",
+  "description": "Steam ecosystem knowledge and tools: Web API, auth, IDs and URLs, depots and CDN, Windows client layout, Linux/Proton/SteamOS, community tools, local install inspection, and a Bun stdio MCP server.",
+  "author": { "name": "Aphrody" },
+  "repository": "https://github.com/aphrody-dev/rosegriffon",
+  "license": "Apache-2.0",
+  "keywords": [
+    "steam",
+    "steamworks",
+    "proton",
+    "steamos",
+    "depot",
+    "vdf",
+    "mcp"
+  ]
+}

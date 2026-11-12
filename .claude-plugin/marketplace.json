@@ -1,0 +1,17 @@
+{
+  "name": "rosegriffon-plugins",
+  "owner": {
+    "name": "Aphrody"
+  },
+  "metadata": {
+    "description": "Local marketplace for plugins maintained in the rosegriffon repository."
+  },
+  "plugins": [
+    {
+      "name": "steam",
+      "source": "./plugins/steam",
+      "description": "Steam ecosystem knowledge and tools: Web API, auth, IDs and URLs, depots and CDN, Windows client, Linux/Proton/SteamOS, community tools, local inspection, MCP server.",
+      "category": "development"
+    }
+  ]
+}
