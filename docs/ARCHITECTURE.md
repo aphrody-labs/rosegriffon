@@ -34,6 +34,7 @@ Overrides, for one command or a whole session:
   An unknown value is used as an ad hoc ssh alias with the default paths.
 - `RG_HOST_<KEY>_<FIELD>=<value>`: one field of one host (`RG_HOST_PRD_SRV_ROOT=/data/rg`).
 - `RG_DOMAIN=<apex>`: the public domain used for vhosts, verification and URL defaults.
+- `RG_REPO_URL=<git url>`: repository cloned into a host `stack_dir` (default `[repo]` in `infra/services.toml`).
 
 ## Service modules
 

@@ -11,11 +11,10 @@ import {
   type InfraEnv,
   type Service,
   composeEnv,
+  repoUrl,
   services as allServices,
   vhost,
 } from "../../packages/rg-config/infra.ts";
-
-export const REPO_URL = "https://github.com/aphrody-dev/rosegriffon.git";
 
 const q = (s: string) => `'${s.replaceAll("'", `'\\''`)}'`;
 
@@ -55,7 +54,7 @@ export function prelude(
     .join("\n");
   const checkout = ref
     ? [
-        `[ -d "$RG_STACK_DIR/.git" ] || git clone --filter=blob:none ${REPO_URL} "$RG_STACK_DIR"`,
+        `[ -d "$RG_STACK_DIR/.git" ] || git clone --filter=blob:none ${q(repoUrl(infra, env))} "$RG_STACK_DIR"`,
         `git -C "$RG_STACK_DIR" fetch --quiet origin`,
         `git -C "$RG_STACK_DIR" checkout --quiet --detach ${q(ref)}`,
       ].join("\n")

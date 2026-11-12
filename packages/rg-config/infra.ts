@@ -53,6 +53,7 @@ export interface HostsManifest {
 
 export interface ServicesManifest {
   site: { domain: string };
+  repo?: { url: string };
   services: Record<
     string,
     Omit<Service, "name" | "vhosts" | "state" | "env"> & Partial<Service>
@@ -147,6 +148,16 @@ export function resolveHost(
   throw new Error(
     `unknown role or host "${roleOrHost}" (roles: ${roles(infra).join(", ")})`,
   );
+}
+
+/** Repository cloned into a host stack_dir (`RG_REPO_URL` overrides). */
+export function repoUrl(infra: Infra, env: InfraEnv = {}): string {
+  const url = set(env, "RG_REPO_URL") ?? infra.services.repo?.url;
+  if (!url)
+    throw new Error(
+      "no [repo] url in infra/services.toml and RG_REPO_URL is unset",
+    );
+  return url;
 }
 
 /** Public apex domain. */

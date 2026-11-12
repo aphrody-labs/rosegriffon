@@ -16,6 +16,10 @@
 [site]
 domain = "rosegriffon.fr"
 
+# Repository cloned into each host stack_dir on first deploy; override with RG_REPO_URL.
+[repo]
+url = "https://github.com/aphrody-labs/rosegriffon.git"
+
 [services.model-serve]
 entry = "crates/aphrody-nie-model-serve"
 dockerfile = "infra/docker/Dockerfile"
