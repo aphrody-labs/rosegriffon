@@ -24,11 +24,13 @@ interface ProjectCardProps {
    * Défaut : grille 1 / 2 / 3 colonnes dans un conteneur `max-w-7xl`.
    */
   sizes?: string;
+  /** Carte visible au premier affichage : image chargée en priorité (LCP). */
+  priority?: boolean;
 }
 
 const SIZES_PAR_DEFAUT = "(min-width: 1024px) 26rem, (min-width: 640px) 50vw, 100vw";
 
-export function ProjectCard({ projet, sizes = SIZES_PAR_DEFAUT }: ProjectCardProps) {
+export function ProjectCard({ projet, sizes = SIZES_PAR_DEFAUT, priority = false }: ProjectCardProps) {
   const Icone = projet.icone;
 
   return (
@@ -46,7 +48,8 @@ export function ProjectCard({ projet, sizes = SIZES_PAR_DEFAUT }: ProjectCardPro
                 fill
                 sizes={sizes}
                 className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
+                preload={priority}
+                loading={priority ? "eager" : "lazy"}
               />
             ) : (
               <div className="flex size-full items-center justify-center">

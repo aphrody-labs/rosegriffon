@@ -34,8 +34,8 @@ export default function ProjetsPage() {
 
       {/* Grille — même carte et mêmes données que l'extrait de la page d'accueil */}
       <section className="grid grid-cols-1 gap-4 min-[600px]:grid-cols-2 min-[1200px]:grid-cols-3">
-        {PROJETS.map(projet => (
-          <ProjectCard key={projet.slug} projet={projet} />
+        {PROJETS.map((projet, i) => (
+          <ProjectCard key={projet.slug} projet={projet} priority={i < 3} />
         ))}
       </section>
     </div>
