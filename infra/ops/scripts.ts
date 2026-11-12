@@ -161,20 +161,27 @@ export function verifyScript(
   const probes = list
     .filter((s) => s.port && s.health && s.profile !== "tools")
     .map((s) => `probe ${s.name} ${s.port} ${s.health}`);
-  const names = list.flatMap((s) => s.vhosts.map((v) => vhost(infra, v, env)));
+  /// Each vhost is probed on the health path of the service behind it (nginx-only vhosts:
+  // /health, since /nginx-health is the container probe).
+  const names = list.flatMap((s) =>
+    s.vhosts.map(
+      (v) =>
+        `${vhost(infra, v, env)}@${s.name === "nginx" || !s.health ? "/health" : s.health}`,
+    ),
+  );
   const lines = [
     prelude(host, infra, env),
     `fail=0`,
     // Through the stack nginx when it runs on this host, else from inside the service itself.
-    `probe() { if docker compose exec -T nginx wget -q -O /dev/null -T 10 "http://$1:$2$3" 2>/dev/null || docker compose exec -T "$1" wget -q -O /dev/null -T 10 "http://127.0.0.1:$2$3"; then echo "ok   $1:$2$3"; else echo "FAIL $1:$2$3"; fail=1; fi; }`,
+    `probe() { if docker compose exec -T nginx wget -q -O /dev/null -T 10 "http://$1:$2$3" </dev/null 2>/dev/null || docker compose exec -T "$1" wget -q -O /dev/null -T 10 "http://127.0.0.1:$2$3" </dev/null; then echo "ok   $1:$2$3"; else echo "FAIL $1:$2$3"; fail=1; fi; }`,
     `docker compose ps`,
     ...probes,
   ];
   if (names.length)
     lines.push(
-      `for h in ${names.join(" ")}; do`,
-      `  curl -s -o /dev/null -w "stack  $h %{http_code}\\n" --max-time 10 -H "Host: $h" "http://127.0.0.1:\${RG_NGINX_PORT:-18080}/health"`,
-      `  curl -s -o /dev/null -w "public $h %{http_code}\\n" --max-time 10 "https://$h/health"`,
+      `for hp in ${names.join(" ")}; do h=\${hp%%@*}; p=\${hp#*@}`,
+      `  curl -s -o /dev/null -w "stack  $h$p %{http_code}\\n" --max-time 10 -H "Host: $h" "http://127.0.0.1:\${RG_NGINX_PORT:-18080}$p"`,
+      `  curl -s -o /dev/null -w "public $h$p %{http_code}\\n" --max-time 10 "https://$h$p"`,
       `done`,
     );
   lines.push(`exit $fail`);
