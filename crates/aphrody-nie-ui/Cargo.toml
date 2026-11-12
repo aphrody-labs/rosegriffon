@@ -11,7 +11,9 @@ description = "Typed design tokens and native UI constants for Inazuma Eleven: V
 workspace = true
 
 [dependencies]
-aphrody-nie-formats = { path = "../aphrody-nie-formats", version = "1.4.8" }
+aphrody-nie-formats = { path = "../aphrody-nie-formats", version = "1.4.8", features = ["serde"] }
+png = { version = "0.18.1", default-features = false }
+serde = { workspace = true, features = ["derive"] }
 serde_json = "1.0.154"
 
 [[bin]]

@@ -16,10 +16,12 @@ import { getCharacterImageUrl } from "@rosegriffon/azalee/images";
 
 export const metadata: Metadata = {
   alternates: { canonical: absoluteUrl("/wiki") },
-  description: "L'information la plus précise autour d'Inazuma Eleven. Stats, techniques, et actualités en français.",
+  description:
+    "L'information la plus précise autour d'Inazuma Eleven. Stats, techniques, et actualités en français.",
   openGraph: withDefaultOgImage({
     title: "Azalée - Inazuma Eleven: Victory Road",
-    description: "L'information la plus précise autour d'Inazuma Eleven. Stats, techniques, et actualités en français.",
+    description:
+      "L'information la plus précise autour d'Inazuma Eleven. Stats, techniques, et actualités en français.",
     url: absoluteUrl("/wiki"),
     siteName: "Azalée",
     locale: "fr_FR",
@@ -75,7 +77,12 @@ function formatPosition(posCode: string | null, rawPos: string | null): string {
   if (code.includes("GK") || code.includes("GARDIEN")) return "Gardien";
   if (code.includes("FW") || code.includes("ATTAQUANT")) return "Attaquant";
   if (code.includes("MF") || code.includes("MILIEU")) return "Milieu";
-  if (code.includes("DF") || code.includes("DÉFENSEUR") || code.includes("DEFENSEUR")) return "Défenseur";
+  if (
+    code.includes("DF") ||
+    code.includes("DÉFENSEUR") ||
+    code.includes("DEFENSEUR")
+  )
+    return "Défenseur";
   return rawPos && rawPos !== "Inconnu" ? rawPos : "Joueur";
 }
 
@@ -87,10 +94,19 @@ function getElementBadgeClass(element: string | null): string {
   if (el.includes("vent") || el.includes("wind")) {
     return "bg-sky-500/10 text-sky-400 border-sky-500/20";
   }
-  if (el.includes("montagne") || el.includes("mountain") || el.includes("terre")) {
+  if (
+    el.includes("montagne") ||
+    el.includes("mountain") ||
+    el.includes("terre")
+  ) {
     return "bg-amber-500/10 text-amber-400 border-amber-500/20";
   }
-  if (el.includes("forêt") || el.includes("foret") || el.includes("forest") || el.includes("bois")) {
+  if (
+    el.includes("forêt") ||
+    el.includes("foret") ||
+    el.includes("forest") ||
+    el.includes("bois")
+  ) {
     return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
   }
   return "bg-surface-container text-on-surface-variant border-outline-variant/20";
@@ -107,7 +123,7 @@ export default async function HomePage() {
     wikiCountsRes,
     featuredCharsRes,
     featuredSkillsRes,
-    vfsStatsRes,
+    teamStatsRes,
   ] = await Promise.all([
     pool
       .query(
@@ -184,14 +200,11 @@ export default async function HomePage() {
       )
       .catch(() => ({ rows: [] })),
     inaglePool
-      .query<VfsStatsRow>(
-        `SELECT 
-           (SELECT COUNT(*)::int FROM nie.vfs_file) AS total_vfs,
-           (SELECT COUNT(*)::int FROM nie.vfs_archive) AS total_archives,
-           (SELECT COUNT(*)::int FROM nie.lua_script) AS total_lua`,
+      .query<TeamStatsRow>(
+        `SELECT COUNT(*)::int AS total_teams FROM public.inagle_teams`,
       )
       .catch(() => ({
-        rows: [{ total_vfs: 255308, total_archives: 937, total_lua: 666 }],
+        rows: [{ total_teams: 162 }],
       })),
   ]);
 
@@ -214,7 +227,7 @@ export default async function HomePage() {
 
   const featuredCharacters = featuredCharsRes.rows;
   const featuredSkills = featuredSkillsRes.rows;
-  const vfsMetrics = vfsStatsRes.rows[0] ?? { total_vfs: 255308, total_archives: 937, total_lua: 666 };
+  const totalTeams = teamStatsRes.rows[0]?.total_teams ?? 162;
 
   const jsonLd = [
     {
@@ -254,7 +267,10 @@ export default async function HomePage() {
     {
       "@context": "https://schema.org",
       "@type": "VideoGame",
-      alternateName: ["Inazuma Eleven: Heroes' Great Road", "Inazuma Eleven: Eiyuutachi no Great Road"],
+      alternateName: [
+        "Inazuma Eleven: Heroes' Great Road",
+        "Inazuma Eleven: Eiyuutachi no Great Road",
+      ],
       applicationCategory: "Game",
       description:
         "Jeu de football RPG développé par Level-5. Recrutez des joueurs, maîtrisez les techniques spéciales et menez votre équipe à la victoire.",
@@ -277,7 +293,10 @@ export default async function HomePage() {
 
   return (
     <div className="animate-in fade-in duration-700">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Dynamic Landing Hero */}
       <LandingHero stats={wikiStats} />
@@ -295,15 +314,15 @@ export default async function HomePage() {
                 <div className="flex items-center gap-2 mb-2">
                   <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                    Moteur de Connaissance Souverain & VFS
+                    Encyclopédie Azalée
                   </span>
                 </div>
-                <h2 className="text-xl md:text-2xl font-black text-on-surface tracking-tight">
+                <h2 className="font-[BradBunR] text-xl md:text-2xl font-black text-on-surface tracking-tight">
                   Base de Données Inazuma Eleven: Victory Road
                 </h2>
                 <p className="text-sm text-on-surface-variant/80 mt-1 max-w-2xl">
-                  Catalogue décompressé et indexé en direct : modèles 3D, fichiers audio, animations cut-in,
-                  techniques et scripts Lua décodés.
+                  Statistiques officielles, modèles 3D, répliques doublées,
+                  séquences vidéo et techniques spéciales en français.
                 </p>
               </div>
 
@@ -345,14 +364,14 @@ export default async function HomePage() {
                 </Link>
 
                 <Link
-                  href="/wiki/cpk"
+                  href="/wiki/equipe"
                   className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/15 hover:border-sky-400/40 transition group"
                 >
                   <div className="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
-                    <FolderTree className="size-3.5 text-sky-400" /> Fichiers VFS
+                    <Shield className="size-3.5 text-sky-400" /> Équipes
                   </div>
                   <div className="text-lg md:text-xl font-black text-on-surface mt-0.5 group-hover:text-sky-400 transition-colors tabular-nums">
-                    {vfsMetrics.total_vfs.toLocaleString("fr-FR")}
+                    {totalTeams.toLocaleString("fr-FR")}
                   </div>
                 </Link>
               </div>
@@ -371,20 +390,22 @@ export default async function HomePage() {
                     Joueurs Emblématiques
                   </h2>
                   <p className="text-xs md:text-sm text-on-surface-variant mt-1">
-                    Explorez les fiches détaillées, modèles 3D, animations et statistiques des personnages légendaires
+                    Explorez les fiches détaillées, modèles 3D, animations et
+                    statistiques des personnages légendaires
                   </p>
                 </div>
                 <Link
                   href="/wiki/chara"
                   className="inline-flex items-center gap-1.5 text-xs md:text-sm font-bold text-primary hover:underline group"
                 >
-                  Voir tous les joueurs ({wikiStats.characters.toLocaleString("fr-FR")})
+                  Voir tous les joueurs (
+                  {wikiStats.characters.toLocaleString("fr-FR")})
                   <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 md:gap-4">
-                {featuredCharacters.map(char => {
+                {featuredCharacters.map((char) => {
                   const avatarUrl = char.internal_code
                     ? getCharacterImageUrl(char.internal_code)
                     : char.image_url || "/images/placeholder-character.svg";
@@ -421,7 +442,9 @@ export default async function HomePage() {
 
                         <div className="flex items-center gap-1.5 mt-2.5">
                           {char.element && (
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${elBadge}`}>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${elBadge}`}
+                            >
                               {char.element}
                             </span>
                           )}
@@ -449,20 +472,22 @@ export default async function HomePage() {
                     Techniques Spéciales & Hissatsu
                   </h2>
                   <p className="text-xs md:text-sm text-on-surface-variant mt-1">
-                    Tirs destructeurs, arrêts divins, dribbles fulgurants et super-techniques
+                    Tirs destructeurs, arrêts divins, dribbles fulgurants et
+                    super-techniques
                   </p>
                 </div>
                 <Link
                   href="/wiki/skill"
                   className="inline-flex items-center gap-1.5 text-xs md:text-sm font-bold text-primary hover:underline group"
                 >
-                  Voir toutes les techniques ({wikiStats.skills.toLocaleString("fr-FR")})
+                  Voir toutes les techniques (
+                  {wikiStats.skills.toLocaleString("fr-FR")})
                   <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {featuredSkills.map(skill => {
+                {featuredSkills.map((skill) => {
                   const elBadge = getElementBadgeClass(skill.element);
 
                   return (
@@ -488,7 +513,9 @@ export default async function HomePage() {
                               </span>
                             )}
                             {skill.element && (
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${elBadge} backdrop-blur-md`}>
+                              <span
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${elBadge} backdrop-blur-md`}
+                              >
                                 {skill.element}
                               </span>
                             )}
@@ -508,12 +535,16 @@ export default async function HomePage() {
                         <div className="flex items-center justify-between text-xs text-on-surface-variant/80 mt-3 pt-2.5 border-t border-outline-variant/15">
                           <div className="flex items-center gap-1">
                             <span className="font-medium">Puissance :</span>
-                            <span className="font-bold text-amber-500 tabular-nums">{skill.power_max ?? "—"}</span>
+                            <span className="font-bold text-amber-500 tabular-nums">
+                              {skill.power_max ?? "—"}
+                            </span>
                           </div>
                           {skill.tp_cost !== null && skill.tp_cost > 0 && (
                             <div className="flex items-center gap-1">
                               <span className="font-medium">PT :</span>
-                              <span className="font-bold text-sky-400 tabular-nums">{skill.tp_cost}</span>
+                              <span className="font-bold text-sky-400 tabular-nums">
+                                {skill.tp_cost}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -529,16 +560,32 @@ export default async function HomePage() {
         {/* Latest News (3 items) */}
         <AnimatedSection direction="up">
           <section>
-            <Suspense fallback={<div className="h-96 animate-pulse bg-surface-container rounded-3xl" />}>
-              <LatestNewsSection articles={standardNews} tweets={recentTweets} />
+            <Suspense
+              fallback={
+                <div className="h-96 animate-pulse bg-surface-container rounded-3xl" />
+              }
+            >
+              <LatestNewsSection
+                articles={standardNews}
+                tweets={recentTweets}
+              />
             </Suspense>
           </section>
         </AnimatedSection>
 
         {/* Section Divider */}
-        <div className="flex items-center gap-4 px-8 md:hidden" aria-hidden="true">
+        <div
+          className="flex items-center gap-4 px-8 md:hidden"
+          aria-hidden="true"
+        >
           <div className="flex-1 h-px bg-outline-variant/20" />
-          <Image src="/logo.webp" alt="" width={20} height={20} className="size-5 opacity-30" />
+          <Image
+            src="/logo.webp"
+            alt=""
+            width={20}
+            height={20}
+            className="size-5 opacity-30"
+          />
           <div className="flex-1 h-px bg-outline-variant/20" />
         </div>
 

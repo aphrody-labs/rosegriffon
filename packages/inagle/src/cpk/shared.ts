@@ -50,8 +50,31 @@ export interface CpkListing {
 /** Type de contenu CDN dérivé de l'extension. */
 export type CpkAssetKind = "image" | "model" | "raw";
 
-export const CDN_BASE =
-  (typeof process !== "undefined" && (process.env.NIE_CDN_BASE || process.env.MODEL_SERVE_URL)) || "";
+/** Origine publique du CDN servant les assets décodés aux navigateurs (`<img>`, `<audio>`, `<video>`, GLB). */
+export const PUBLIC_CDN_BASE = (
+  (typeof process !== "undefined"
+    ? process.env.NEXT_PUBLIC_CDN_ORIGIN || process.env.NIE_CDN_BASE || ""
+    : "") || "https://cdn.rosegriffon.fr"
+).replace(/\/+$/, "");
+
+/** Alias historique conservé pour tous les constructeurs d'URL publiques. */
+export const CDN_BASE = PUBLIC_CDN_BASE;
+
+/**
+ * Origine interne de `aphrody-nie-model-serve` pour les lectures serveur (`SSR` / `RSC`),
+ * contournant le blocage public nginx sur `/vfs/*` et le rate-limit `nie_assets`.
+ * Côté navigateur, retombe sur [`PUBLIC_CDN_BASE`].
+ */
+export function resolveModelServeFetchBase(): string {
+  if (typeof window === "undefined" && typeof process !== "undefined") {
+    const local =
+      process.env.NIE_MODEL_SERVE_URL ||
+      process.env.MODEL_SERVE_URL ||
+      `http://127.0.0.1:${process.env.NIE_MODEL_SERVE_PORT || "8792"}`;
+    return local.replace(/\/+$/, "");
+  }
+  return PUBLIC_CDN_BASE;
+}
 
 /** Extensions décodées en image (g4tx → png live par le CDN). */
 const IMAGE_EXTS = new Set(["g4tx"]);
@@ -92,7 +115,9 @@ export function cpkAssetUrl(path: string, ext?: string): string | null {
 
   if (kind === "image") {
     // g4tx vivent 100 % sous `data/dx11/` → `/dx11/<reste>.png` (g4tx→png live).
-    const rel = path.startsWith("data/dx11/") ? path.slice("data/dx11/".length) : stripDataPrefix(path);
+    const rel = path.startsWith("data/dx11/")
+      ? path.slice("data/dx11/".length)
+      : stripDataPrefix(path);
     const noExt = rel.replace(/\.g4tx$/i, "");
     return `${CDN_BASE}/dx11/${encodeVfsPath(noExt)}.png`;
   }
@@ -144,9 +169,14 @@ export function cpkVideoUrl(path: string): string {
  * Variante WebP redimensionnée pour les vignettes d'images (g4tx → webp `?w=`).
  * Sert la galerie/arbre en léger ; `null` si l'extension n'est pas une image.
  */
-export function cpkThumbUrl(path: string, ext?: string, width = 400): string | null {
+export function cpkThumbUrl(
+  path: string,
+  ext?: string,
+  width = 400,
+): string | null {
   const url = cpkAssetUrl(path, ext);
-  if (!url || cpkAssetKind(ext ?? path.split(".").pop() ?? "") !== "image") return null;
+  if (!url || cpkAssetKind(ext ?? path.split(".").pop() ?? "") !== "image")
+    return null;
   // `/dx11/...png` accepte `?w=&format=webp` (cdn-variants resize+webp).
   return `${url}?w=${width}&format=webp`;
 }
@@ -210,9 +240,20 @@ export function normalizeDir(path: string): string {
  * rendu de la fiche fichier (`<img>`, viewer 3D, player audio/vidéo, texte,
  * config binaire, ou lien brut). Purement dérivée de l'extension.
  */
-export type CpkPreviewKind = "image" | "model" | "text" | "config" | "sound" | "movie" | "package" | "raw";
+export type CpkPreviewKind =
+  "image" | "model" | "text" | "config" | "sound" | "movie" | "package" | "raw";
 
-const TEXT_EXTS = new Set(["txt", "json", "xml", "csv", "lua", "cfg", "ini", "yml", "yaml"]);
+const TEXT_EXTS = new Set([
+  "txt",
+  "json",
+  "xml",
+  "csv",
+  "lua",
+  "cfg",
+  "ini",
+  "yml",
+  "yaml",
+]);
 // `ext` = dernier segment après le point (cf. materialize.ts), donc `foo.cfg.bin` → ext `bin`.
 const CONFIG_EXTS = new Set(["bin", "objbin", "fxbin", "mevbin"]);
 const SOUND_EXTS = new Set(["acb", "awb", "hca", "wav", "at9"]);

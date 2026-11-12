@@ -13,7 +13,13 @@
  * de rendre au lieu de casser.
  */
 
-import { CDN_BASE, type CpkDir, type CpkFile } from "./shared";
+import {
+  CDN_BASE,
+  cpkPreviewKind,
+  resolveModelServeFetchBase,
+  type CpkDir,
+  type CpkFile,
+} from "./shared";
 
 /**
  * Un fichier du VFS live.
@@ -108,14 +114,16 @@ export class VfsError extends Error {
 }
 
 async function getJson<T>(chemin: string): Promise<T> {
+  const base = resolveModelServeFetchBase();
   let res: Response;
   try {
-    res = await fetch(`${CDN_BASE}${chemin}`);
+    res = await fetch(`${base}${chemin}`);
   } catch {
     // Statut 0 = la requête n'a pas abouti (DNS, TLS, réseau) : distinct d'un 404 du pont.
     throw new VfsError(`pont VFS injoignable (${chemin})`, 0);
   }
-  if (!res.ok) throw new VfsError(`pont VFS ${res.status} sur ${chemin}`, res.status);
+  if (!res.ok)
+    throw new VfsError(`pont VFS ${res.status} sur ${chemin}`, res.status);
   return (await res.json()) as T;
 }
 
@@ -125,8 +133,16 @@ async function getJson<T>(chemin: string): Promise<T> {
  * `limit` à 0 ne renvoie que les sous-dossiers et le total — ce que veut un arbre qui n'affiche
  * que la structure, sans payer le transfert des fichiers.
  */
-export function vfsLs(dir: string, limit = 1000, offset = 0): Promise<VfsListing> {
-  const q = new URLSearchParams({ path: dir, limit: String(limit), offset: String(offset) });
+export function vfsLs(
+  dir: string,
+  limit = 1000,
+  offset = 0,
+): Promise<VfsListing> {
+  const q = new URLSearchParams({
+    path: dir,
+    limit: String(limit),
+    offset: String(offset),
+  });
   return getJson<VfsListing>(`/vfs/ls?${q}`);
 }
 
@@ -165,7 +181,11 @@ export function vfsStats(): Promise<VfsStats> {
  * Une galerie qui rend côté serveur ne doit pas répondre 500 parce que le CDN a hoqueté ; elle
  * doit rendre son cadre et dire que la source est indisponible.
  */
-export async function lsOrNull(dir: string, limit = 1000, offset = 0): Promise<VfsListing | null> {
+export async function lsOrNull(
+  dir: string,
+  limit = 1000,
+  offset = 0,
+): Promise<VfsListing | null> {
   try {
     return await vfsLs(dir, limit, offset);
   } catch {
@@ -185,20 +205,34 @@ export async function lsOrNull(dir: string, limit = 1000, offset = 0): Promise<V
  * @param format identifiant de format (`raw` rend les octets d'origine).
  * @param options `awbId` exporte un cue précis d'une banque audio.
  */
-export function exportUrl(path: string, format: string, options: { awbId?: number | null } = {}): string {
+export function exportUrl(
+  path: string,
+  format: string,
+  options: { awbId?: number | null } = {},
+): string {
   const q = new URLSearchParams({ format });
   if (options.awbId != null) q.set("id", String(options.awbId));
   return `${CDN_BASE}/export/${path}?${q}`;
 }
 
 /**
- * Emplacement du fichier dans l'explorateur CPK du site.
- *
- * Une page média montre un fichier décodé ; l'explorateur montre où il VIT — son dossier, son
- * archive CPK, sa taille, ses formats. Le lien manquait dans les deux sens.
+ * Emplacement média correspondant dans l'encyclopédie Azalée (`/wiki/*`).
  */
 export function cpkExplorerHref(path: string): string {
-  return `/cpk/${path.replace(/^data\//, "")}`;
+  const ext = path.split(".").pop() ?? "";
+  const kind = cpkPreviewKind(ext);
+  switch (kind) {
+    case "image":
+      return "/wiki/textures";
+    case "model":
+      return "/wiki/modeles";
+    case "sound":
+      return "/wiki/sons";
+    case "movie":
+      return "/wiki/videos";
+    default:
+      return "/wiki";
+  }
 }
 
 /** Une texture nommée à l'intérieur d'un conteneur G4TX. */
@@ -242,7 +276,8 @@ export interface TexContainer {
  */
 export async function texContainer(rel: string): Promise<TexContainer | null> {
   try {
-    const res = await fetch(`${CDN_BASE}/tex-info/${rel}.g4tx`);
+    const base = resolveModelServeFetchBase();
+    const res = await fetch(`${base}/tex-info/${rel}.g4tx`);
     if (!res.ok) return null;
     return (await res.json()) as TexContainer;
   } catch {

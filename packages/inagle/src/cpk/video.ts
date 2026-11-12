@@ -21,7 +21,7 @@
  */
 
 import { exportUrl } from "./live";
-import { CDN_BASE } from "./shared";
+import { CDN_BASE, resolveModelServeFetchBase } from "./shared";
 
 /** Une piste sonore portée par le conteneur du film lui-même — 2 films sur 97. */
 export interface FilmPisteInterne {
@@ -202,7 +202,11 @@ export function videoDownloadUrl(path: string, format: string): string {
  * H.264 → MP4, VP9 → WebM, MPEG-2 → flux élémentaire `.m2v` (VLC et mpv le lisent ; aucun
  * navigateur ne le décode, et l'emballer en MP4 serait un mensonge).
  */
-export function formatSortie(film: FilmDto): { id: string; ext: string; libelle: string } {
+export function formatSortie(film: FilmDto): {
+  id: string;
+  ext: string;
+  libelle: string;
+} {
   switch (film.codec) {
     case "vp9":
       return { id: "webm", ext: "webm", libelle: "WebM" };
@@ -220,7 +224,10 @@ export function aDuSon(film: FilmDto): boolean {
 
 /** Récupère le catalogue. Lève si le pont ne répond pas ou ne l'a pas encore construit. */
 export async function fetchVideoCatalogue(): Promise<CatalogueVideo> {
-  const res = await fetch(videoCatalogUrl(), { cache: "no-store" });
+  const res = await fetch(
+    `${resolveModelServeFetchBase()}/video/catalog.json`,
+    { cache: "no-store" },
+  );
   if (!res.ok) throw new Error(`catalogue vidéo ${res.status}`);
   return (await res.json()) as CatalogueVideo;
 }
@@ -240,25 +247,34 @@ export async function fetchVideoCatalogueOrNull(): Promise<CatalogueVideo | null
 }
 
 /** Durée en `m:ss`, ou `h:mm:ss` au-delà de l'heure. `null` si la durée est inconnue. */
-export function formatDuree(secondes: number | null | undefined): string | null {
-  if (secondes == null || !Number.isFinite(secondes) || secondes <= 0) return null;
+export function formatDuree(
+  secondes: number | null | undefined,
+): string | null {
+  if (secondes == null || !Number.isFinite(secondes) || secondes <= 0)
+    return null;
   const total = Math.round(secondes);
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
   const deuxChiffres = (n: number) => String(n).padStart(2, "0");
-  return h > 0 ? `${h}:${deuxChiffres(m)}:${deuxChiffres(s)}` : `${m}:${deuxChiffres(s)}`;
+  return h > 0
+    ? `${h}:${deuxChiffres(m)}:${deuxChiffres(s)}`
+    : `${m}:${deuxChiffres(s)}`;
 }
 
 /** Taille en unités binaires, telle qu'on l'annonce à côté d'un lien de téléchargement. */
 export function formatOctets(octets: number): string {
   const mio = octets / 1024 ** 2;
-  return mio >= 1024 ? `${(mio / 1024).toFixed(1).replace(".", ",")} Gio` : `${Math.round(mio)} Mio`;
+  return mio >= 1024
+    ? `${(mio / 1024).toFixed(1).replace(".", ",")} Gio`
+    : `${Math.round(mio)} Mio`;
 }
 
 /** Définition `1920×1080`, ou `null` si le conteneur ne la déclare pas. */
 export function formatDefinition(film: FilmDto): string | null {
-  return film.largeur > 0 && film.hauteur > 0 ? `${film.largeur}×${film.hauteur}` : null;
+  return film.largeur > 0 && film.hauteur > 0
+    ? `${film.largeur}×${film.hauteur}`
+    : null;
 }
 
 /**

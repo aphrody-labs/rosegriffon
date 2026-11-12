@@ -5272,6 +5272,39 @@ fn handle_connection(mut stream: TcpStream, state: Arc<State>) {
         return;
     }
 
+    // `/ui/font-metrics.json` — métriques typographiques dérivées de `font_def/font.cfg.bin`
+    // (`aphrody_nie_formats::font::FontMetrics`) pour le compositeur WebAssembly de `/play`,
+    // à associer à l'atlas RGBA `/tex/dx11/font/font_def/font.png`.
+    if path == "/ui/font-metrics.json" || path == "/ui/font-metrics" {
+        let cfg_bytes = {
+            let vfs = &state.vfs;
+            vfs.read("data/common/font/font/font_def/font.cfg.bin").ok()
+        };
+        let Some(raw) = cfg_bytes else {
+            respond_text(&mut stream, 404, "Not Found", "font.cfg.bin absent du VFS");
+            return;
+        };
+        let parsed = aphrody_nie_formats::cfgbin::parse_t2b(&raw)
+            .ok()
+            .map(|t2b| aphrody_nie_formats::font::parse_metrics(&t2b));
+        match parsed.and_then(|m| serde_json::to_vec(&m).ok()) {
+            Some(bytes) => respond(
+                &mut stream,
+                200,
+                "OK",
+                "application/json; charset=utf-8",
+                &bytes,
+            ),
+            None => respond_text(
+                &mut stream,
+                500,
+                "Internal Server Error",
+                "métriques de police non sérialisables",
+            ),
+        }
+        return;
+    }
+
     // `/ui/theme.json` — le thème de l'interface : la palette de texte du jeu + ses polices.
     //
     // Les couleurs ne sont pas choisies : ce sont les 70 entrées de `common/font/font_color.cfg.bin`

@@ -48,8 +48,12 @@
 
 pub mod color;
 pub mod compose;
+pub mod compositor;
 pub mod css;
+pub mod eac_frame;
+pub mod gamepad_glyphs;
 pub mod icons;
+pub mod match_hud;
 pub mod roles;
 pub mod screens;
 pub mod surfaces;

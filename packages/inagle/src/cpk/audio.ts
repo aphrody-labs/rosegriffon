@@ -14,7 +14,7 @@
  * miroir SQLite et vit donc côté serveur.
  */
 
-import { CDN_BASE } from "./shared";
+import { CDN_BASE, resolveModelServeFetchBase } from "./shared";
 
 /** Un cue d'une banque, résolu jusqu'à sa forme d'onde. */
 export interface AudioCue {
@@ -85,13 +85,15 @@ export function cpkAudioInfoUrl(path: string): string {
 
 /** Récupère le catalogue d'une banque. Lève si le pont ne répond pas. */
 export async function fetchAudioBank(path: string): Promise<AudioBank> {
-  const res = await fetch(cpkAudioInfoUrl(path));
+  const res = await fetch(`${resolveModelServeFetchBase()}/audio-info/${path}`);
   if (!res.ok) throw new Error(`catalogue audio ${res.status} sur ${path}`);
   return (await res.json()) as AudioBank;
 }
 
 /** Variante tolérante : `null` au lieu d'une exception. */
-export async function fetchAudioBankOrNull(path: string): Promise<AudioBank | null> {
+export async function fetchAudioBankOrNull(
+  path: string,
+): Promise<AudioBank | null> {
   try {
     return await fetchAudioBank(path);
   } catch {
@@ -100,7 +102,8 @@ export async function fetchAudioBankOrNull(path: string): Promise<AudioBank | nu
 }
 
 /** Famille d'une banque, déduite de son emplacement et de son nom. */
-export type AudioBankKind = "voix" | "bgm" | "technique" | "effet" | "systeme" | "autre";
+export type AudioBankKind =
+  "voix" | "bgm" | "technique" | "effet" | "systeme" | "autre";
 
 /**
  * Classe une banque par son chemin.
@@ -110,7 +113,9 @@ export type AudioBankKind = "voix" | "bgm" | "technique" | "effet" | "systeme" |
  * parlant à la racine de `sound_asset/`.
  */
 export function audioBankKind(path: string): AudioBankKind {
-  const nom = (path.split("/").pop() ?? "").replace(/\.acb$/i, "").toLowerCase();
+  const nom = (path.split("/").pop() ?? "")
+    .replace(/\.acb$/i, "")
+    .toLowerCase();
   if (/^c\d{8,9}$/.test(nom)) return "voix";
   if (nom.includes("voice")) return "voix";
   if (nom.startsWith("bgm")) return "bgm";
@@ -151,5 +156,7 @@ export function formatDuration(sec: number): string {
   if (sec < 1) return `${sec.toFixed(2).replace(".", ",")} s`;
   const m = Math.floor(sec / 60);
   const s = Math.round(sec % 60);
-  return m > 0 ? `${m}:${String(s).padStart(2, "0")}` : `${sec.toFixed(1).replace(".", ",")} s`;
+  return m > 0
+    ? `${m}:${String(s).padStart(2, "0")}`
+    : `${sec.toFixed(1).replace(".", ",")} s`;
 }
