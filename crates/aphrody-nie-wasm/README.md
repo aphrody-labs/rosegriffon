@@ -94,3 +94,17 @@ validate a Focus duel choice. East (B): hold to charge a shot, release to shoot.
 Hissatsu shot (50 Tension, within 32 m). North (Y): defensive Hissatsu (30 Tension). L1: switch
 player. R1: Zone (full Tension, half-speed world). Start: pause (resume, camera, restart,
 quit). These rules are local to the nie engine; they are not measured from `nie.exe`.
+
+## Delivery to the website
+
+The package never enters git. `wasm-opt -O3` is run on the wasm-bindgen output, then
+`bun infra/scripts/publish-nie-wasm.ts --pkg crates/aphrody-nie-wasm/pkg --static <cdn static dir>
+--release apps/rg-website/src/lib/nie-wasm-release.json` copies the JS glue and the wasm into
+`/static/nie/wasm/<hash>/` (first 16 hex digits of SHA-256 over both files) and writes the small
+release JSON the website commits. nginx serves `/static/` with
+`Cache-Control: public, max-age=31536000, immutable` and `Access-Control-Allow-Origin: *`, so a
+release is fetched once per browser and a new build always gets a new URL. The host
+(`apps/rg-website/src/lib/nie-client-host.ts`) imports the glue from that URL at runtime.
+
+Boot files (`SplashScreen.png`, `L5logo.mp4`, `IE_15th.mp4`) come from
+`bun infra/scripts/derive-nie-boot.ts --game <install> --static <cdn static dir>`.
