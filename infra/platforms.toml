@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: Apache-2.0
+# Platform inventory: where a service may run, and what each platform gives away for free.
+# services.toml lists ordered `platforms` candidates per service; `ops platform` picks the first
+# candidate whose free allowance covers the service's declared needs, so a unit moves between
+# self-hosted and full Cloudflare (either direction) by editing one list, never the code.
+#
+#   free_*          verified free-tier allowance (0 = not offered, -1 = unmetered)
+#   cpu_ms          CPU milliseconds allowed per request (the binding limit on Cloudflare free)
+#   commercial      may host a unit that takes money (Vercel Hobby forbids it; donations are fine)
+#   stateful        may hold a database, game install or any writable volume
+#   needs           service `requires` keys this platform satisfies
+#
+# Sources (checked 2026-11-12): vercel.com/docs/plans/hobby, /docs/limits/fair-use-guidelines,
+# developers.cloudflare.com/workers/platform/limits, /workers/platform/pricing.
+
+[platforms.vps]
+kind = "self-host"
+# The fleet itself: no metering, no terms, no cold start. Costs a fixed monthly rent.
+free_requests_per_day = -1
+free_bandwidth_gb = -1
+cpu_ms = -1
+commercial = true
+stateful = true
+# Self-host is the superset: every capability, so any unit can always fall back here.
+needs = [
+  "docker",
+  "postgres",
+  "redis",
+  "gpu",
+  "long-cpu",
+  "websocket",
+  "cron",
+  "disk",
+  "static",
+  "cache",
+  "edge-render",
+  "ssr",
+  "isr",
+  "image-opt",
+  "r2",
+]
+
+[platforms.cloudflare]
+kind = "edge"
+# Workers free: 100k req/day shared with Pages Functions, 10 ms CPU per invocation, 64 MiB bundle,
+# 50 subrequests/request, 5 cron triggers, 20k static files. No commercial restriction.
+free_requests_per_day = 100000
+free_bandwidth_gb = -1
+cpu_ms = 10
+commercial = true
+stateful = false
+needs = ["static", "cache", "edge-render", "ssr", "isr", "r2", "cron"]
+
+[platforms.vercel]
+kind = "serverless"
+# Hobby: 1M invocations, 100 GB transfer, 4 CPU-hours a month, 300 s max duration.
+# NON-COMMERCIAL ONLY: a unit that sells, advertises or takes payment needs Pro. Donations are fine.
+free_requests_per_day = 33000
+free_bandwidth_gb = 100
+cpu_ms = 300000
+commercial = false
+stateful = false
+needs = ["static", "cache", "ssr", "isr", "image-opt"]

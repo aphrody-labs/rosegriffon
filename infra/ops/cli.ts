@@ -41,6 +41,11 @@ import {
   services,
 } from "../../packages/rg-config/infra.ts";
 import {
+  platformBlocker,
+  platformCandidates,
+  platformFor,
+} from "../../packages/rg-config/platform.ts";
+import {
   buildScript,
   deployScript,
   migratePlan,
@@ -266,6 +271,29 @@ async function main(argv: string[]): Promise<number> {
             `${s.name.padEnd(12)} role=${s.role.padEnd(8)} host=${resolveHost(infra, s.role, env).key.padEnd(5)} ${s.target ? `target=${s.target}` : `image=${s.image ?? s.dockerfile}`}${s.port ? ` :${s.port}${s.health ?? ""}` : ""}${s.profile ? ` profile=${s.profile}` : ""}`,
           );
       return 0;
+    }
+    case "platform": {
+      const list = pos.length
+        ? pos.map((n) => service(infra, n))
+        : services(infra);
+      let bad = 0;
+      for (const s of list) {
+        const cands = platformCandidates(infra, s);
+        const detail = cands
+          .map((k) => {
+            const why = platformBlocker(infra, s, k);
+            return why ? `${k}:no(${why})` : `${k}:ok`;
+          })
+          .join(" ");
+        let chosen = "NONE";
+        try {
+          chosen = platformFor(infra, s, env).key;
+        } catch {
+          bad++;
+        }
+        console.log(`${s.name.padEnd(12)} -> ${chosen.padEnd(10)} ${detail}`);
+      }
+      return bad ? 1 : 0;
     }
     case "render":
       return render(flags.check === true);

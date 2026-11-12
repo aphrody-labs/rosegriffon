@@ -64,6 +64,23 @@ export interface ServicesManifest {
 export interface Infra {
   hosts: HostsManifest;
   services: ServicesManifest;
+  platforms: PlatformsManifest;
+}
+
+/** One row of infra/platforms.toml: a free-tier allowance and what it is allowed to host. */
+export interface Platform {
+  key: string;
+  kind: string;
+  free_requests_per_day: number;
+  free_bandwidth_gb: number;
+  cpu_ms: number;
+  commercial: boolean;
+  stateful: boolean;
+  needs: string[];
+}
+
+export interface PlatformsManifest {
+  platforms: Record<string, Omit<Platform, "key">>;
 }
 
 const STRING_FIELDS = [
@@ -93,6 +110,7 @@ export function loadInfra(root: string = REPO_ROOT): Infra {
   return {
     hosts: parse("hosts.toml") as unknown as HostsManifest,
     services: parse("services.toml") as unknown as ServicesManifest,
+    platforms: parse("platforms.toml") as unknown as PlatformsManifest,
   };
 }
 

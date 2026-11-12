@@ -181,3 +181,41 @@ test("rankHosts prefers the least loaded live candidate and drops dead or full h
     ),
   ).toEqual(["vps"]);
 });
+
+import {
+  platformBlocker,
+  platformCandidates,
+  platformFor,
+} from "../../packages/rg-config/platform.ts";
+
+test("platformFor keeps a commercial SSR site off Vercel but allows Cloudflare", () => {
+  const web = infra.services.services.website;
+  const svc = { name: "website", ...web } as never;
+  expect(platformCandidates(infra, svc)).toContain("cloudflare");
+  expect(platformBlocker(infra, svc, "cloudflare")).toBeNull();
+  // website is commercial; vercel forbids commercial, so it must not be chosen even if listed.
+  expect(platformBlocker(infra, svc, "vercel")).toBe(
+    "free tier is non-commercial only",
+  );
+  expect(platformFor(infra, svc).key).toBe("vps");
+});
+
+test("stateful and long-cpu services cannot move to the edge", () => {
+  const pg = {
+    name: "inagle-pg",
+    ...infra.services.services["inagle-pg"],
+  } as never;
+  expect(platformBlocker(infra, pg, "cloudflare")).toContain("missing");
+  const depot = {
+    name: "steam-depot",
+    ...infra.services.services["steam-depot"],
+  } as never;
+  expect(platformFor(infra, depot).key).toBe("vps");
+});
+
+test("RG_PLATFORM_<svc> override forces a platform", () => {
+  const web = { name: "website", ...infra.services.services.website } as never;
+  expect(
+    platformFor(infra, web, { RG_PLATFORM_WEBSITE: "cloudflare" }).key,
+  ).toBe("cloudflare");
+});
