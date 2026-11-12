@@ -1,0 +1,6 @@
+{
+  "dir": "nie/wasm/0000000000000000",
+  "js": "aphrody_nie_wasm.js",
+  "wasm": "aphrody_nie_wasm_bg.wasm",
+  "wasmBytes": 0
+}
