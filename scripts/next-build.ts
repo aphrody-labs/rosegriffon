@@ -28,6 +28,14 @@ export async function buildNext(root: string, app: string, args: string[]): Prom
   );
   const syncExit = await sync.exited;
   if (syncExit !== 0) return syncExit;
+  // next.config.ts imports @rosegriffon/lua-plugin/next, which resolves to its untracked dist/.
+  const lua = Bun.spawn([process.execPath, "run", "build.ts"], {
+    cwd: join(root, "packages/rg-lua"),
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+  const luaExit = await lua.exited;
+  if (luaExit !== 0) return luaExit;
   const startedAt = Date.now();
   const runner = (await import(Bun.resolveSync("@aphrody/next-bun/run", app))) as {
     runNext(args: string[], cwd: string): Promise<number>;
