@@ -145,9 +145,14 @@ struct Cli {
     #[arg(long)]
     asset_cross_ref: Option<PathBuf>,
 
-    /// Port d'écoute (localhost uniquement).
+    /// Port d'écoute.
     #[arg(long, default_value_t = 8790)]
     port: u16,
+
+    /// Adresse d'écoute. Boucle locale par défaut ; `0.0.0.0` dans un conteneur, où le port
+    /// n'est joignable que sur le réseau interne de compose.yaml (aucun port publié).
+    #[arg(long, env = "NIE_MODEL_SERVE_HOST", default_value = "127.0.0.1")]
+    host: String,
 
     /// Nombre de threads de travail.
     #[arg(long, default_value_t = 4)]
@@ -6694,7 +6699,7 @@ fn main() -> Result<()> {
     }
 
     // Bind du serveur TCP.
-    let addr = format!("127.0.0.1:{}", cli.port);
+    let addr = format!("{}:{}", cli.host, cli.port);
     let listener = TcpListener::bind(&addr).with_context(|| format!("bind {addr}"))?;
     info!("aphrody-nie-model-serve en écoute sur http://{addr}");
 
