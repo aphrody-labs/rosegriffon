@@ -31,6 +31,9 @@ x-env: &env
 x-build: &build
   context: .
   dockerfile: infra/docker/Dockerfile
+  # The website prerender reads the databases. On the build role (vps) the build env file
+  # (RG_BUILD_ENV_FILE) reaches them on the host loopback, hence RG_BUILD_NETWORK=host there.
+  network: ${RG_BUILD_NETWORK:-default}
   secrets:
     - rg_env
 
@@ -161,13 +164,10 @@ services:
     image: nginxinc/nginx-unprivileged:${NGINX_VERSION:-1.29-alpine}
     read_only: true
     tmpfs: [/tmp]
-    # Loopback (host nginx, TLS and public 80/443) plus the mesh origin port for the cdn host.
+    # Loopback only: the host nginx keeps TLS and the public 80/443 (prd: host-nginx/).
     # (infra/docker/host-nginx/rosegriffon-stack.conf proxies the rosegriffon names here).
     ports:
       - "127.0.0.1:${RG_NGINX_PORT:-18080}:8080"
-      # Origin for the cdn host (cdn.rosegriffon.fr, nie.aphrody.app) over the private mesh:
-      # RG_ORIGIN_BIND is the prd mesh address, set by `just deploy-stack`; loopback otherwise.
-      - "${RG_ORIGIN_BIND:-127.0.0.1}:${RG_ORIGIN_PORT:-18081}:8080"
     volumes:
       - ./infra/docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./infra/docker/nginx/conf.d:/etc/nginx/conf.d:ro
@@ -177,7 +177,15 @@ services:
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/cache/nginx:/var/cache/nginx
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/log/nginx:/var/log/nginx
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/nginx-health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "http://127.0.0.1:8080/nginx-health",
+        ]
       interval: 15s
       timeout: 5s
       start_period: 10s
@@ -191,7 +199,18 @@ services:
   redis:
     <<: *common
     image: redis:${REDIS_VERSION:-8-alpine}
-    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+    command:
+      [
+        "redis-server",
+        "--save",
+        "",
+        "--appendonly",
+        "no",
+        "--maxmemory",
+        "512mb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+      ]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -213,7 +232,8 @@ services:
       - ${RG_SRV_ROOT:-/srv/rosegriffon}/db/inagle:/var/lib/postgresql
     shm_size: 256m
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      test:
+        ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -238,4 +258,4 @@ networks:
 secrets:
   # Build-time only: NEXT_PUBLIC_* for the website bundle, mounted in one RUN, never in a layer.
   rg_env:
-    file: ${RG_ENV_FILE:-/etc/rosegriffon/rosegriffon.env}
+    file: ${RG_BUILD_ENV_FILE:-${RG_ENV_FILE:-/etc/rosegriffon/rosegriffon.env}}
