@@ -41,9 +41,16 @@ if (!process.argv.includes("--force")) {
 }
 
 console.log(`steam: preparing steam-depot on ${host.key}`);
-await ssh(
-  `cd ${host.stack_dir} && git pull -q --ff-only && docker compose --profile tools build -q steam-depot`,
+// The prod checkout is a detached deploy ref: build the pinned steam-depot revision without moving it.
+const rev = /ARG STEAM_DEPOT_REV=(w+)/.exec(
+  await Bun.file(
+    new URL("../infra/docker/steam-depot/Dockerfile", import.meta.url),
+  ).text(),
+)?.[1];
+const built = await ssh(
+  `${compose} build -q --build-arg STEAM_DEPOT_REV=${rev} steam-depot`,
 );
+if (built.code !== 0) process.exit(built.code);
 
 const page = join(tmpdir(), `rg-steam-qr-${process.pid}.html`);
 const cleanup = () => rmSync(page, { force: true });
