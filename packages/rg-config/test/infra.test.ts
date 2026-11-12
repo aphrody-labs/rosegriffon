@@ -3,6 +3,8 @@ import {
   composeEnv,
   domain,
   loadInfra,
+  renderComposeEnv,
+  renderTemplate,
   renderUpstreams,
   resolveHost,
   roles,
@@ -57,4 +59,23 @@ test("upstreams are rendered from the registry", () => {
     expect(out).toContain(
       `upstream ${s.upstream!.name} {\n    server ${s.name}:${s.port};`,
     );
+});
+
+test("templates expand vhosts from the registry", () => {
+  const out = renderTemplate(
+    "a ${RG_VHOSTS:website:!www} b ${RG_VHOST:www} c ${RG_DOMAIN}",
+    infra,
+    { RG_DOMAIN: "example.test" },
+  );
+  expect(out).toBe(
+    "a example.test achillea.example.test azalee.example.test shop.example.test b www.example.test c example.test",
+  );
+  expect(() => renderTemplate("${RG_VHOSTS:nope}", infra)).toThrow();
+});
+
+test("compose env file per host", () => {
+  const prd = resolveHost(infra, "prod");
+  expect(renderComposeEnv(prd, infra)).toContain(
+    `RG_SRV_ROOT=${prd.srv_root}\n`,
+  );
 });

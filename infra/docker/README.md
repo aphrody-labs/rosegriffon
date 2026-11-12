@@ -21,15 +21,15 @@ nginx publishes only `127.0.0.1:18080`; the other services publish nothing.
 
 ## Services
 
-| Service       | Source                                         | Port | Health |
-| ------------- | ---------------------------------------------- | ---- | ------ |
-| `nginx`       | `nginxinc/nginx-unprivileged:1.29-alpine`, `infra/docker/nginx/` | 8080 -> 127.0.0.1:18080 | `/nginx-health` |
-| `website`     | `apps/rg-website` (Next standalone, Bun)        | 3100 | `/api/health` (503 = DB down, still alive) |
-| `core`        | `apps/rg-bot/src/core.ts`: Discord gateways rg/azalee/achillea, ranked Colyseus, unified API `/v1`, bot admin, in-process cron. Aliases `api`, `bot` | 8810 | `/health` |
-| `model-serve` | `crates/aphrody-nie-model-serve`, static musl   | 8792 | `/health` |
-| `cron`        | `packages/rg-cron/src/scheduler.ts`, profile `cron-split` (opt-in) | 8811 | `/health` |
-| `steam-depot` | profile `tools`, `infra/docker/steam-depot/` (other agent) | none | on demand |
-| `cdn-sync`    | profile `tools`, Bun.s3 push to R2/S3 (other agent) | none | on demand |
+| Service       | Source                                                                                                                                               | Port                    | Health                                     |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------ |
+| `nginx`       | `nginxinc/nginx-unprivileged:1.29-alpine`, `infra/docker/nginx/`                                                                                     | 8080 -> 127.0.0.1:18080 | `/nginx-health`                            |
+| `website`     | `apps/rg-website` (Next standalone, Bun)                                                                                                             | 3100                    | `/api/health` (503 = DB down, still alive) |
+| `core`        | `apps/rg-bot/src/core.ts`: Discord gateways rg/azalee/achillea, ranked Colyseus, unified API `/v1`, bot admin, in-process cron. Aliases `api`, `bot` | 8810                    | `/health`                                  |
+| `model-serve` | `crates/aphrody-nie-model-serve`, static musl                                                                                                        | 8792                    | `/health`                                  |
+| `cron`        | `packages/rg-cron/src/scheduler.ts`, profile `cron-split` (opt-in)                                                                                   | 8811                    | `/health`                                  |
+| `steam-depot` | profile `tools`, `infra/docker/steam-depot/` (other agent)                                                                                           | none                    | on demand                                  |
+| `cdn-sync`    | profile `tools`, Bun.s3 push to R2/S3 (other agent)                                                                                                  | none                    | on demand                                  |
 
 API and bots stay one process: the unified API reads the live gateway client and relays the
 per-profile admin servers on :8810; a split would need a second Discord login with the same token.
@@ -42,17 +42,17 @@ pub/sub (`REDIS_URL=redis://host.docker.internal:6379`), then switch with
 
 ## Host layout
 
-| Host path (vps)                        | Container path                               | Mode |
-| -------------------------------------- | -------------------------------------------- | ---- |
-| `/srv/rosegriffon/game/ievr`           | `/data/game` (model-serve)                    | ro   |
-| `/srv/rosegriffon/steam`               | `STEAM_HOME` (steam-depot), 0700              | rw   |
-| `/srv/rosegriffon/cdn/static`          | `/data/cdn` (nginx ro; core, cron rw)         |      |
-| `/srv/rosegriffon/cache/nginx`         | `/var/cache/nginx`                            | rw   |
-| `/srv/rosegriffon/cache/model-serve`   | `/var/cache/nie-model-serve`                  | rw   |
-| `/srv/rosegriffon/state`               | `/var/lib/rg-core` (core, cron); `state/media` -> `/data/media` (nginx ro) | rw |
-| `/srv/rosegriffon/nie`                 | `/srv/nie`, model-serve working dir (`var/*.ndjson`) | rw |
-| `/srv/rosegriffon/log/nginx`           | `/var/log/nginx` (nginx rw; core, cron ro: `rg-stats.log`) | |
-| `/etc/rosegriffon/rosegriffon.env`     | `env_file` of every service, build secret `rg_env` | 0640 |
+| Host path (vps)                      | Container path                                                             | Mode |
+| ------------------------------------ | -------------------------------------------------------------------------- | ---- |
+| `/srv/rosegriffon/game/ievr`         | `/data/game` (model-serve)                                                 | ro   |
+| `/srv/rosegriffon/steam`             | `STEAM_HOME` (steam-depot), 0700                                           | rw   |
+| `/srv/rosegriffon/cdn/static`        | `/data/cdn` (nginx ro; core, cron rw)                                      |      |
+| `/srv/rosegriffon/cache/nginx`       | `/var/cache/nginx`                                                         | rw   |
+| `/srv/rosegriffon/cache/model-serve` | `/var/cache/nie-model-serve`                                               | rw   |
+| `/srv/rosegriffon/state`             | `/var/lib/rg-core` (core, cron); `state/media` -> `/data/media` (nginx ro) | rw   |
+| `/srv/rosegriffon/nie`               | `/srv/nie`, model-serve working dir (`var/*.ndjson`)                       | rw   |
+| `/srv/rosegriffon/log/nginx`         | `/var/log/nginx` (nginx rw; core, cron ro: `rg-stats.log`)                 |      |
+| `/etc/rosegriffon/rosegriffon.env`   | `env_file` of every service, build secret `rg_env`                         | 0640 |
 
 All bind mounts. No named volume holds data; build caches are BuildKit cache mounts.
 Containers run as uid 1000, the host `ubuntu` user that owns `/srv/rosegriffon`.

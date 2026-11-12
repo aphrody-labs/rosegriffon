@@ -20,19 +20,34 @@
       "id": "achillea",
       "seed": "#6d00ce",
       "dark": true,
-      "selectors": [":root.achillea", ":root.theme-achillea", ".achillea", ".theme-achillea"]
+      "selectors": [
+        ":root.achillea",
+        ":root.theme-achillea",
+        ".achillea",
+        ".theme-achillea"
+      ]
     },
     {
       "id": "azalee-light",
       "seed": "#f89c5a",
       "dark": false,
-      "selectors": [":root.azalee-light", ":root.theme-azalee-light", ".azalee-light", ".theme-azalee-light"]
+      "selectors": [
+        ":root.azalee-light",
+        ":root.theme-azalee-light",
+        ".azalee-light",
+        ".theme-azalee-light"
+      ]
     },
     {
       "id": "azalee-dark",
       "seed": "#f89c5a",
       "dark": true,
-      "selectors": [":root.azalee-dark", ":root.theme-azalee-dark", ".azalee-dark", ".theme-azalee-dark"]
+      "selectors": [
+        ":root.azalee-dark",
+        ":root.theme-azalee-dark",
+        ".azalee-dark",
+        ".theme-azalee-dark"
+      ]
     }
   ]
 }

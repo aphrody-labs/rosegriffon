@@ -21,7 +21,12 @@ test("shared source aliases resolve to admitted flat owners", () => {
       configuration.compilerOptions.paths[`@rosegriffon/${owner}/*`],
     ).toEqual([`../rg-${owner}/src/*`]);
     expect(existsSync(resolve(configurationRoot, entry))).toBe(true);
-    expect(product.workspaces).toContain(`packages/rg-${owner}`);
+    // Admitted explicitly or through the packages/* glob.
+    expect(
+      product.workspaces.some(
+        (w: string) => w === `packages/rg-${owner}` || w === "packages/*",
+      ),
+    ).toBe(true);
   }
   expect(
     resolve(configurationRoot, configuration.compilerOptions.rootDir),

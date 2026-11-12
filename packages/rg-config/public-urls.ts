@@ -32,8 +32,18 @@
 export type PublicUrlEnv = Readonly<Record<string, string | undefined>>;
 
 export const PUBLIC_URL_ENV = {
-  site: ["NEXT_PUBLIC_SITE_URL", "SHENRON_PUBLIC_SITE_URL", "SITE_PUBLIC_URL", "BETTER_AUTH_URL"],
-  api: ["NEXT_PUBLIC_SHENRON_API_URL", "SHENRON_PUBLIC_API_URL", "API_PUBLIC_URL", "SHENRON_API_URL"],
+  site: [
+    "NEXT_PUBLIC_SITE_URL",
+    "SHENRON_PUBLIC_SITE_URL",
+    "SITE_PUBLIC_URL",
+    "BETTER_AUTH_URL",
+  ],
+  api: [
+    "NEXT_PUBLIC_SHENRON_API_URL",
+    "SHENRON_PUBLIC_API_URL",
+    "API_PUBLIC_URL",
+    "SHENRON_API_URL",
+  ],
   assets: ["NEXT_PUBLIC_SHENRON_ASSETS_URL", "SHENRON_PUBLIC_ASSETS_URL"],
 } as const satisfies Record<string, readonly string[]>;
 
@@ -47,10 +57,14 @@ export const DEFAULT_PUBLIC_ORIGINS = {
 
 const trimSlash = (u: string): string => u.replace(/\/+$/, "");
 
-function firstSet(env: PublicUrlEnv, names: readonly string[]): string | undefined {
+function firstSet(
+  env: PublicUrlEnv,
+  names: readonly string[],
+): string | undefined {
   for (const name of names) {
     const value = env[name]?.trim();
-    if (value && value !== "undefined" && value !== "null") return trimSlash(value);
+    if (value && value !== "undefined" && value !== "null")
+      return trimSlash(value);
   }
   return undefined;
 }
@@ -124,7 +138,10 @@ export function discordDefaultAvatar(userId: string): string {
 }
 
 /** Discord media hosts serving avatars, banners and signed attachments. */
-export const DISCORD_MEDIA_HOSTS = ["cdn.discordapp.com", "media.discordapp.net"] as const;
+export const DISCORD_MEDIA_HOSTS = [
+  "cdn.discordapp.com",
+  "media.discordapp.net",
+] as const;
 
 /** Structural subset of Next's `images.remotePatterns` entry (no `next` import here). */
 export interface RemoteImagePattern {
@@ -133,7 +150,10 @@ export interface RemoteImagePattern {
   pathname: string;
 }
 
-function patternFor(origin: string, pathname: string): RemoteImagePattern | null {
+function patternFor(
+  origin: string,
+  pathname: string,
+): RemoteImagePattern | null {
   try {
     const u = new URL(origin);
     const protocol = u.protocol === "http:" ? "http" : "https";
@@ -150,7 +170,9 @@ function patternFor(origin: string, pathname: string): RemoteImagePattern | null
  * {@link resolveSiteUrl}, plus the CDN mirror and Discord media. Duplicates
  * (assets base == api origin) are removed.
  */
-export function ownImageRemotePatterns(env: PublicUrlEnv): RemoteImagePattern[] {
+export function ownImageRemotePatterns(
+  env: PublicUrlEnv,
+): RemoteImagePattern[] {
   const api = resolveApiUrl(env);
   const site = resolveSiteUrl(env);
   const candidates = [
@@ -162,7 +184,7 @@ export function ownImageRemotePatterns(env: PublicUrlEnv): RemoteImagePattern[] 
     patternFor(api, "/api/public/manga/couleur/**"),
     patternFor(site, "/db/**"),
     patternFor(site, "/assets/**"),
-    ...DISCORD_MEDIA_HOSTS.map(h => patternFor(`https://${h}`, "/**")),
+    ...DISCORD_MEDIA_HOSTS.map((h) => patternFor(`https://${h}`, "/**")),
   ];
   const seen = new Set<string>();
   const out: RemoteImagePattern[] = [];
@@ -176,7 +198,8 @@ export function ownImageRemotePatterns(env: PublicUrlEnv): RemoteImagePattern[] 
   return out;
 }
 
-export type DiscordImageSize = 16 | 32 | 64 | 128 | 256 | 512 | 1024 | 2048 | 4096;
+export type DiscordImageSize =
+  16 | 32 | 64 | 128 | 256 | 512 | 1024 | 2048 | 4096;
 
 /** Public guild icon, retaining animated Discord hashes. */
 export function discordGuildIcon(

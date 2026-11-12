@@ -1,0 +1,5 @@
+# nginx configuration is not a language bun fmt knows: it would be reformatted as Markdown.
+*.inc
+**/nginx/**/*.conf
+infra/docker/**/*.conf
+infra/nginx/**
