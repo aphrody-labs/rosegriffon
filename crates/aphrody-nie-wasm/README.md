@@ -45,7 +45,26 @@ the host) -> `loading` -> `autosave` -> `start` -> `title-menu` (13 measured con
 `mode-competition` starts a match and `avatar` opens the avatar editor (six tabs, L1/R1);
 other entries are reported as `menuAction` events with `handled: false`.
 
+## GPU client (`class NieGpuClient`, feature `webgpu`, `webgl` for the WebGL2 fallback)
+
+What `/play` uses. Rust owns the requestAnimationFrame loop, keyboard and gamepad input,
+devicePixelRatio sizing up to 3840x2160 and a wgpu surface (lowest-latency present mode the
+surface offers, `desired_maximum_frame_latency = 1`). Layout scenes, text, footer, EAC window
+and HUD are recorded as instanced quads (atlases uploaded once); the match is drawn by the
+`aphrody-nie-render3d` GPU scene pass. No CPU frame buffer.
+
+| Method | Role |
+|---|---|
+| `await NieGpuClient.create(canvas, cdnBase?, io(requests, media))` | start; `io` receives asset requests and media commands as JSON |
+| `provide_asset(id, bytes)`, `asset_failed(id, status, reason)`, `video_ended(name)` | host answers |
+| `frame_stats()` | JSON pacing measured in wasm: `fps`, `frame_ms`, `p99_ms`, `max_ms`, `cpu_ms`, backend, size |
+| `set_debug_overlay(on)` | in-canvas frame-time overlay (also F3, or `?nie-debug` in the URL) |
+| `stage()`, `focused_control()`, `frames()`, `stop()` | probes and teardown |
+
 ## JS API (`class NieClientRuntime`)
+
+CPU frame path, built only with feature `cpu-frame` (`render_into`): golden tests and headless
+captures.
 
 | Method | Role |
 |---|---|

@@ -5,9 +5,12 @@ describe("backingSize", () => {
   test("applies devicePixelRatio below the cap", () => {
     expect(backingSize(800, 450, 2)).toEqual({ w: 1600, h: 900 });
   });
-  test("caps the backing store at 1920x1080 pixels and keeps the aspect", () => {
+  test("reaches 4K on a 1080p dpr-2 screen", () => {
+    expect(backingSize(1920, 1080, 2)).toEqual({ w: 3840, h: 2160 });
+  });
+  test("caps the backing store at 3840x2160 pixels and keeps the aspect", () => {
     const { w, h } = backingSize(2560, 1440, 2);
-    expect(w * h).toBeLessThanOrEqual(1920 * 1080);
+    expect(w * h).toBeLessThanOrEqual(3840 * 2160);
     expect(Math.abs(w / h - 16 / 9)).toBeLessThan(0.01);
   });
 });

@@ -1,12 +1,14 @@
 /**
- * Thin browser host for `NieClientRuntime` (crates/aphrody-nie-wasm/src/client.rs, JS API in
- * crates/aphrody-nie-wasm/README.md). The runtime owns every pixel and every decision; the host
- * only moves bytes: frames into a canvas, gamepad/keyboard state in, CDN responses in, and
- * audio/video commands out to WebAudio and a hidden <video>.
+ * Thin browser loader for `NieGpuClient` (crates/aphrody-nie-wasm/src/gpu_client.rs). Rust owns
+ * the frame: the requestAnimationFrame loop, keyboard and gamepad input, devicePixelRatio sizing
+ * up to 4K and the WebGPU (WebGL2 fallback) surface on the canvas. This module only fetches and
+ * instantiates the wasm, hands it the canvas, answers asset requests and plays the audio/video
+ * commands the runtime emits through its `io` callback.
  *
  * The wasm package is not bundled: it is published to the CDN under a content-addressed,
  * immutable directory (`/static/nie/wasm/<hash>/`, see infra/scripts/publish-nie-wasm.ts) named
- * by `nie-wasm-release.json`, and imported at runtime.
+ * by `nie-wasm-release.json`, and imported at runtime. It must be built with
+ * `--features webgl` (WebGPU plus the WebGL2 fallback).
  */
 import release from "./nie-wasm-release.json";
 
@@ -16,40 +18,36 @@ export const NIE_CDN_BASE = (
 
 /** Fetches in flight at once (nginx `limit_conn` is 8 per client; leave room for media). */
 export const ASSET_CONCURRENCY = 6;
-/** Upper bound on backing-store pixels: the runtime rasterises on the CPU. */
-const MAX_PIXELS = 1920 * 1080;
-const GAMEPAD_PERIOD_MS = 1000 / 60;
+/** Upper bound on backing-store pixels, mirrored from `gpu_client::MAX_PIXELS` (4K). */
+const MAX_PIXELS = 3840 * 2160;
 
-/** Subset of the wasm-bindgen class used by the host. */
-export interface NieRuntime {
-  resize(w: number, h: number): void;
-  tick(dtMs: number): void;
-  render_into(out: Uint8Array): void;
-  set_gamepad(buttons: Float32Array, axes: Float32Array, id: string): void;
-  clear_gamepad(): void;
-  blur(): void;
-  key_down(code: string): boolean;
-  key_up(code: string): void;
-  poll_asset_requests(): string;
+/** Subset of the wasm-bindgen `NieGpuClient` used by the loader. */
+export interface NieClient {
   provide_asset(id: number, bytes: Uint8Array): void;
   asset_failed(id: number, status: number, reason: string): void;
-  poll_media_commands(): string;
-  poll_events(): string;
   video_ended(name: string): void;
   wants_video(): boolean;
   stage(): string;
   focused_control(): string | undefined;
-  match_score(): Uint32Array;
+  frames(): number;
+  frame_stats(): string;
+  set_debug_overlay(on: boolean): void;
+  stop(): void;
   free?(): void;
 }
 
+/** Kept for the asset pump's narrow contract. */
+export type NieRuntime = Pick<NieClient, "provide_asset" | "asset_failed">;
+
 interface NieModule {
   default: (opts: { module_or_path: string }) => Promise<unknown>;
-  NieClientRuntime: new (
-    cdnBase: string | undefined,
-    w: number,
-    h: number,
-  ) => NieRuntime;
+  NieGpuClient: {
+    create(
+      canvas: HTMLCanvasElement,
+      cdnBase: string | undefined,
+      io: (requests: string, media: string) => void,
+    ): Promise<NieClient>;
+  };
 }
 
 export type Fetcher = (url: string, init?: RequestInit) => Promise<Response>;
@@ -70,7 +68,11 @@ export function wasmUrls(cdn = NIE_CDN_BASE) {
   return { js: `${base}/${release.js}`, wasm: `${base}/${release.wasm}` };
 }
 
-/** Backing-store size for a CSS box: devicePixelRatio aware, capped at MAX_PIXELS. */
+/**
+ * Backing-store size for a CSS box: devicePixelRatio aware, capped at 4K. The runtime applies
+ * the same rule (`gpu_client::backing_size`) every frame; this copy sizes the canvas before the
+ * GPU surface exists.
+ */
 export function backingSize(cssW: number, cssH: number, dpr: number) {
   let w = Math.max(1, Math.round(cssW * dpr));
   let h = Math.max(1, Math.round(cssH * dpr));
@@ -239,6 +241,9 @@ declare global {
       stage(): string;
       focusedControl(): string | null;
       frames(): number;
+      /** Frame pacing measured in wasm (fps, frame_ms, p99_ms, cpu_ms, backend, size). */
+      frameStats(): unknown;
+      overlay(on: boolean): void;
       ready: boolean;
     };
   }
@@ -254,31 +259,17 @@ export async function startNieHost(
   )) as NieModule;
   await mod.default({ module_or_path: wasm });
 
-  let { w, h } = backingSize(
-    window.innerWidth,
-    window.innerHeight,
+  const { w, h } = backingSize(
+    canvas.clientWidth || window.innerWidth,
+    canvas.clientHeight || window.innerHeight,
     window.devicePixelRatio || 1,
   );
-  const rt = new mod.NieClientRuntime(NIE_CDN_BASE, w, h);
-  const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true })!;
-  let pixels = new Uint8ClampedArray(w * h * 4);
-  let image = new ImageData(pixels, w, h);
-  let view = new Uint8Array(pixels.buffer);
-  let layer: OffscreenCanvas | null = null;
+  canvas.width = w;
+  canvas.height = h;
 
-  const applySize = () => {
-    canvas.width = w;
-    canvas.height = h;
-    rt.resize(w, h);
-    pixels = new Uint8ClampedArray(w * h * 4);
-    image = new ImageData(pixels, w, h);
-    view = new Uint8Array(pixels.buffer);
-    layer = null;
-  };
-  applySize();
-
-  const pump = new AssetPump(rt);
   const audio = new AudioOut();
+  // The boot video plays in a fullscreen element UNDER the canvas: the runtime presents a
+  // transparent frame while it wants the video, so no video pixel ever crosses into wasm.
   const video = document.createElement("video");
   video.muted = true;
   video.playsInline = true;
@@ -286,56 +277,22 @@ export async function startNieHost(
   video.crossOrigin = "anonymous";
   video.setAttribute("aria-hidden", "true");
   video.style.cssText =
-    "position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none";
+    "position:fixed;inset:0;width:100vw;height:100vh;object-fit:contain;background:#000;pointer-events:none;z-index:0";
+  canvas.style.background = "transparent";
+  canvas.style.zIndex = "1";
   document.body.appendChild(video);
+
+  let client: NieClient | null = null;
   let videoName: string | null = null;
   const endVideo = () => {
     if (videoName) {
       const n = videoName;
       videoName = null;
-      rt.video_ended(n);
+      client?.video_ended(n);
     }
   };
   video.addEventListener("ended", endVideo);
   video.addEventListener("error", endVideo);
-
-  let gestured = false;
-  const onGesture = () => {
-    audio.unlock();
-    video.muted = false;
-    if (!gestured) {
-      gestured = true;
-      if (!document.fullscreenElement)
-        void document.documentElement.requestFullscreen?.().catch(() => {});
-    }
-  };
-
-  const onKeyDown = (e: KeyboardEvent) => {
-    onGesture();
-    if (rt.key_down(e.code)) e.preventDefault();
-  };
-  const onKeyUp = (e: KeyboardEvent) => rt.key_up(e.code);
-  const onBlur = () => rt.blur();
-  const onVisibility = () => {
-    if (document.hidden) rt.blur();
-  };
-  const onResize = () => {
-    const s = backingSize(
-      window.innerWidth,
-      window.innerHeight,
-      window.devicePixelRatio || 1,
-    );
-    if (s.w !== w || s.h !== h) {
-      ({ w, h } = s);
-      applySize();
-    }
-  };
-  window.addEventListener("keydown", onKeyDown);
-  window.addEventListener("keyup", onKeyUp);
-  window.addEventListener("blur", onBlur);
-  window.addEventListener("resize", onResize);
-  window.addEventListener("pointerdown", onGesture);
-  document.addEventListener("visibilitychange", onVisibility);
 
   const media = (cmds: MediaCommand[]) => {
     for (const c of cmds) {
@@ -364,84 +321,53 @@ export async function startNieHost(
     }
   };
 
-  let padSeen = false;
-  let lastPad = 0;
-  const pollGamepad = (now: number) => {
-    if (now - lastPad < GAMEPAD_PERIOD_MS - 1) return;
-    lastPad = now;
-    const pad = navigator.getGamepads?.().find((p) => p && p.connected) ?? null;
-    if (pad) {
-      rt.set_gamepad(
-        Float32Array.from(pad.buttons, (b) => b.value),
-        Float32Array.from(pad.axes),
-        pad.id,
-      );
-      padSeen = true;
-    } else if (padSeen) {
-      rt.clear_gamepad();
-      padSeen = false;
+  let pump: AssetPump | null = null;
+  const pending: AssetRequest[] = [];
+  const io = (requests: string, cmds: string) => {
+    if (requests !== "[]") {
+      const reqs = JSON.parse(requests) as AssetRequest[];
+      if (pump) pump.push(reqs);
+      else pending.push(...reqs);
     }
-  };
-
-  const draw = () => {
-    rt.render_into(view);
-    if (rt.wants_video() && videoName && video.readyState >= 2) {
-      // Boot video under the runtime frame: composite the frame with its alpha.
-      const vw = video.videoWidth || w;
-      const vh = video.videoHeight || h;
-      const s = Math.min(w / vw, h / vh);
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, w, h);
-      ctx.drawImage(video, (w - vw * s) / 2, (h - vh * s) / 2, vw * s, vh * s);
-      layer ??= new OffscreenCanvas(w, h);
-      layer.getContext("2d")!.putImageData(image, 0, 0);
-      ctx.drawImage(layer, 0, 0);
-    } else {
-      ctx.putImageData(image, 0, 0);
-    }
-  };
-
-  let frames = 0;
-  let raf = 0;
-  let last = performance.now();
-  let running = true;
-  const frame = (now: number) => {
-    if (!running) return;
-    const dt = Math.min(now - last, 100);
-    last = now;
-    pollGamepad(now);
-    rt.tick(dt);
-    const reqs = rt.poll_asset_requests();
-    if (reqs !== "[]") pump.push(JSON.parse(reqs) as AssetRequest[]);
-    const cmds = rt.poll_media_commands();
     if (cmds !== "[]") media(JSON.parse(cmds) as MediaCommand[]);
-    rt.poll_events();
-    draw();
-    frames++;
-    raf = requestAnimationFrame(frame);
   };
-  raf = requestAnimationFrame(frame);
+
+  client = await mod.NieGpuClient.create(canvas, NIE_CDN_BASE, io);
+  const rt = client;
+  pump = new AssetPump(rt);
+  if (pending.length) pump.push(pending.splice(0));
+
+  // Audio and fullscreen need a user gesture; input itself is read by the runtime.
+  let gestured = false;
+  const onGesture = () => {
+    audio.unlock();
+    video.muted = false;
+    if (!gestured) {
+      gestured = true;
+      if (!document.fullscreenElement)
+        void document.documentElement.requestFullscreen?.().catch(() => {});
+    }
+  };
+  window.addEventListener("keydown", onGesture);
+  window.addEventListener("pointerdown", onGesture);
 
   window.__nie = {
     stage: () => rt.stage(),
     focusedControl: () => rt.focused_control() ?? null,
-    frames: () => frames,
+    frames: () => rt.frames(),
+    frameStats: () => JSON.parse(rt.frame_stats()),
+    overlay: (on) => rt.set_debug_overlay(on),
     ready: true,
   };
 
   return {
     stop() {
-      running = false;
-      cancelAnimationFrame(raf);
-      pump.stop();
+      rt.stop();
+      pump?.stop();
       audio.close();
       video.remove();
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
-      window.removeEventListener("blur", onBlur);
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("keydown", onGesture);
       window.removeEventListener("pointerdown", onGesture);
-      document.removeEventListener("visibilitychange", onVisibility);
       delete window.__nie;
       rt.free?.();
     },

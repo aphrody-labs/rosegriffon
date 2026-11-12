@@ -222,6 +222,12 @@ impl SceneCompositor {
         self.font_atlas.is_some() && self.font_metrics.is_some()
     }
 
+    /// The decoded `font_def` atlas (width, height, RGBA8), once received.
+    #[must_use]
+    pub fn font_atlas(&self) -> Option<(u32, u32, &[u8])> {
+        self.font_atlas.as_ref().map(|(w, h, rgba)| (*w, *h, rgba.as_slice()))
+    }
+
     /// Accès en lecture à un atlas décodé par son chemin VFS (`data/dx11/...`).
     #[must_use]
     pub fn atlas(&self, asset_path: &str) -> Option<&DecodedAtlas> {

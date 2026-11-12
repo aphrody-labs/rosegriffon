@@ -91,6 +91,8 @@
 #![allow(clippy::pedantic)]
 
 pub mod client;
+#[cfg(feature = "webgpu")]
+pub mod gpu_client;
 pub mod native_audio;
 pub use native_audio::{audio_bank_cue_to_wav, audio_bank_json, audio_cue_to_wav};
 

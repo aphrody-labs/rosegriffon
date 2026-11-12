@@ -29,14 +29,19 @@ use aphrody_nie_formats::menu_presentation::{Scene, parse_scene, scene_json};
 use aphrody_nie_render3d::scene::Tri;
 use aphrody_nie_runtime::session::{HissatsuKind, MatchEvent, MatchPhase, MatchSession};
 use aphrody_nie_runtime::{HALF_LEN, HALF_WID};
-use aphrody_nie_ui::compositor::{SceneCompositor, fill_solid, navigate_spatial};
-use aphrody_nie_ui::eac_frame::{EAC_SPLASH_KEY, render_eac_launcher};
+use aphrody_nie_ui::compositor::{SceneCompositor, navigate_spatial};
+use aphrody_nie_ui::eac_frame::{EAC_SPLASH_KEY, render_eac_launcher_on};
 use aphrody_nie_ui::gamepad_glyphs::{
-    ControllerFamily, FooterPrompt, GAIJI_GAME_PATH, PromptButton, draw_footer_bar,
+    ControllerFamily, FooterPrompt, GAIJI_GAME_PATH, PromptButton, draw_footer_bar_on,
 };
 use aphrody_nie_ui::match_hud::{
-    HUD_CMN_ASSET, HUD_WIN_ASSET, MatchHudView, MinimapDot, render_match_hud,
+    HUD_CMN_ASSET, HUD_WIN_ASSET, MatchHudView, MinimapDot, render_match_hud_on,
 };
+#[cfg(any(test, feature = "cpu-frame"))]
+use aphrody_nie_ui::compositor::fill_solid;
+#[cfg(any(test, feature = "cpu-frame"))]
+use aphrody_nie_ui::paint::RasterPainter;
+use aphrody_nie_ui::paint::Painter;
 use serde::Serialize;
 
 #[cfg(target_arch = "wasm32")]
@@ -259,6 +264,8 @@ pub struct NieClientRuntime {
     stadium: Vec<Tri>,
     camera: MatchCamera,
     render_scale: f32,
+    /// Bumped each time `models` changes, so a GPU backend re-uploads them once.
+    models_gen: u32,
 }
 
 impl NieClientRuntime {
@@ -456,6 +463,7 @@ impl NieClientRuntime {
         };
         let models = MatchModels::from_glb(h, a, b).map_err(|e| format!("{e:#}"))?;
         self.models = Some(models);
+        self.models_gen = self.models_gen.wrapping_add(1);
         if self.stadium.is_empty() {
             self.stadium = match3d::stadium();
         }
@@ -610,34 +618,21 @@ impl NieClientRuntime {
         }
     }
 
-    fn compose(&self, ids: &[&str], focused: &[&str], canvas: &mut [u8]) {
+    fn compose(&self, ids: &[&str], focused: &[&str], canvas: &mut dyn Painter) {
         let scenes: Vec<&Scene> = ids.iter().filter_map(|id| self.scene(id)).collect();
         let pulse = (self.time * 2.0).fract();
-        self.compositor.compose_scenes(
-            &scenes,
-            focused,
-            pulse,
-            canvas,
-            self.width,
-            self.height,
-            true,
-        );
+        self.compositor
+            .compose_scenes_on(&scenes, focused, pulse, canvas, true);
     }
 
-    fn footer(&self, prompts: &[FooterPrompt<'_>], canvas: &mut [u8]) {
-        let y = self.height as i32 - 34;
-        draw_footer_bar(
-            &self.compositor,
-            self.family,
-            prompts,
-            y,
-            canvas,
-            self.width,
-            self.height,
-        );
+    fn footer(&self, prompts: &[FooterPrompt<'_>], canvas: &mut dyn Painter) {
+        let y = canvas.size().1 as i32 - 34;
+        draw_footer_bar_on(&self.compositor, self.family, prompts, y, canvas);
     }
 
-    fn render_match(&self, canvas: &mut [u8]) {
+    /// CPU raster of the 3D match into `canvas` (golden/test fallback; the browser uses the GPU).
+    #[cfg(any(test, feature = "cpu-frame"))]
+    fn raster_match(&self, canvas: &mut [u8]) {
         let (Some(session), Some(models)) = (&self.session, &self.models) else {
             fill_solid(canvas, [0, 0, 0, 255]);
             return;
@@ -665,7 +660,14 @@ impl NieClientRuntime {
                 canvas[d..d + 4].copy_from_slice(&img[s..s + 4]);
             }
         }
+    }
 
+    /// Match HUD over the 3D view.
+    fn match_hud(&self, canvas: &mut dyn Painter) {
+        let Some(session) = &self.session else {
+            return;
+        };
+        let controlled = session.controlled();
         let dots: Vec<MinimapDot> = session
             .world
             .players
@@ -709,7 +711,129 @@ impl NieClientRuntime {
             camera_label: self.camera.label(),
             controller: self.family,
         };
-        render_match_hud(&self.compositor, &view, canvas, w, h);
+        render_match_hud_on(&self.compositor, &view, canvas);
+    }
+}
+
+#[cfg_attr(not(all(target_arch = "wasm32", feature = "webgpu")), allow(dead_code))]
+impl NieClientRuntime {
+    /// Shared 2D compositor (atlases and font for the GPU texture cache).
+    pub(crate) fn compositor(&self) -> &SceneCompositor {
+        &self.compositor
+    }
+
+    /// Fraction of the output resolution the 3D match is rendered at.
+    pub(crate) fn match_render_scale(&self) -> f32 {
+        self.render_scale
+    }
+
+    /// Whether the boot logo is showing with its video playing underneath.
+    pub(crate) fn video_under_frame(&self) -> bool {
+        matches!(self.stage, Stage::BootLogo { .. }) && self.wants_video()
+    }
+
+    /// Everything the GPU match pass needs, when a match is on screen.
+    pub(crate) fn match_frame(&self) -> Option<MatchFrame<'_>> {
+        if !matches!(self.stage, Stage::Match) {
+            return None;
+        }
+        let (session, models) = (self.session.as_ref()?, self.models.as_ref()?);
+        let controlled = session.controlled();
+        Some(MatchFrame {
+            models,
+            models_gen: self.models_gen,
+            stadium: &self.stadium,
+            placements: match3d::placements(&session.world, models),
+            marker: controlled
+                .and_then(|i| session.world.players.get(i))
+                .map(|p| [p.pos.x, p.pos.y]),
+            camera: match3d::camera_for(&session.world, self.camera, controlled),
+        })
+    }
+}
+
+/// Per-frame inputs of the GPU match pass.
+#[cfg_attr(not(all(target_arch = "wasm32", feature = "webgpu")), allow(dead_code))]
+pub(crate) struct MatchFrame<'a> {
+    pub models: &'a MatchModels,
+    pub models_gen: u32,
+    pub stadium: &'a [Tri],
+    pub placements: Vec<(match3d::MatchModelKind, aphrody_nie_render3d::scene::Mat4)>,
+    pub marker: Option<[f32; 2]>,
+    pub camera: aphrody_nie_render3d::scene::Camera,
+}
+
+impl NieClientRuntime {
+    /// Paints every 2D layer of the current frame on `out` (CPU raster or GPU quad recorder).
+    /// In `Stage::Match` only the HUD is painted: the 3D view is drawn underneath by the caller.
+    pub(crate) fn paint_ui(&self, out: &mut dyn Painter) {
+        match self.stage {
+            Stage::EacLauncher { .. } => {
+                let (settled, total) = self.group_progress(Group::Boot);
+                let progress = if total == 0 {
+                    1.0
+                } else {
+                    settled as f32 / total as f32
+                };
+                render_eac_launcher_on(&self.compositor, progress, settled, total, out);
+            }
+            Stage::BootLogo { .. } => out.clear([0, 0, 0, 255]),
+            Stage::Loading { .. } | Stage::MatchLoading => self.compose(&["loading"], &[], out),
+            Stage::Autosave => {
+                self.compose(&["autosave"], &["confirm"], out);
+                self.footer(
+                    &[FooterPrompt {
+                        button: PromptButton::South,
+                        label: "Continuer",
+                    }],
+                    out,
+                );
+            }
+            Stage::Start => self.compose(&["start"], &["confirm"], out),
+            Stage::TitleMenu => {
+                let focused: Vec<&str> = self.focus.as_deref().into_iter().collect();
+                self.compose(&["title-menu"], &focused, out);
+                self.footer(
+                    &[
+                        FooterPrompt {
+                            button: PromptButton::Dpad,
+                            label: "Choisir",
+                        },
+                        FooterPrompt {
+                            button: PromptButton::South,
+                            label: "Valider",
+                        },
+                        FooterPrompt {
+                            button: PromptButton::East,
+                            label: "Retour",
+                        },
+                    ],
+                    out,
+                );
+            }
+            Stage::Avatar { tab } => {
+                let focused: Vec<&str> = self.avatar_focus.as_deref().into_iter().collect();
+                self.compose(&[AVATAR_TABS[tab]], &focused, out);
+                self.footer(
+                    &[
+                        FooterPrompt {
+                            button: PromptButton::L1,
+                            label: "Onglet",
+                        },
+                        FooterPrompt {
+                            button: PromptButton::R1,
+                            label: "Onglet",
+                        },
+                        FooterPrompt {
+                            button: PromptButton::East,
+                            label: "Retour",
+                        },
+                    ],
+                    out,
+                );
+            }
+            Stage::Match => self.match_hud(out),
+        }
     }
 }
 
@@ -765,6 +889,7 @@ impl NieClientRuntime {
             stadium: Vec::new(),
             camera: MatchCamera::default(),
             render_scale: 0.5,
+            models_gen: 0,
         };
         // Lot de démarrage : ce que la fenêtre EAC fait réellement attendre.
         let splash = format!("{}/static/nie/boot/SplashScreen.png", rt.cdn);
@@ -857,77 +982,17 @@ impl NieClientRuntime {
     }
 
     /// Peint l'image courante dans `out` (RGBA8, `width × height × 4` octets).
+    #[cfg(any(test, feature = "cpu-frame"))]
     pub fn render_into(&self, out: &mut [u8]) {
         let (w, h) = (self.width, self.height);
         if out.len() < (w as usize) * (h as usize) * 4 {
             return;
         }
-        match self.stage {
-            Stage::EacLauncher { .. } => {
-                let (settled, total) = self.group_progress(Group::Boot);
-                let progress = if total == 0 {
-                    1.0
-                } else {
-                    settled as f32 / total as f32
-                };
-                render_eac_launcher(&self.compositor, progress, settled, total, out, w, h);
-            }
-            Stage::BootLogo { .. } => fill_solid(out, [0, 0, 0, 255]),
-            Stage::Loading { .. } | Stage::MatchLoading => self.compose(&["loading"], &[], out),
-            Stage::Autosave => {
-                self.compose(&["autosave"], &["confirm"], out);
-                self.footer(
-                    &[FooterPrompt {
-                        button: PromptButton::South,
-                        label: "Continuer",
-                    }],
-                    out,
-                );
-            }
-            Stage::Start => self.compose(&["start"], &["confirm"], out),
-            Stage::TitleMenu => {
-                let focused: Vec<&str> = self.focus.as_deref().into_iter().collect();
-                self.compose(&["title-menu"], &focused, out);
-                self.footer(
-                    &[
-                        FooterPrompt {
-                            button: PromptButton::Dpad,
-                            label: "Choisir",
-                        },
-                        FooterPrompt {
-                            button: PromptButton::South,
-                            label: "Valider",
-                        },
-                        FooterPrompt {
-                            button: PromptButton::East,
-                            label: "Retour",
-                        },
-                    ],
-                    out,
-                );
-            }
-            Stage::Avatar { tab } => {
-                let focused: Vec<&str> = self.avatar_focus.as_deref().into_iter().collect();
-                self.compose(&[AVATAR_TABS[tab]], &focused, out);
-                self.footer(
-                    &[
-                        FooterPrompt {
-                            button: PromptButton::L1,
-                            label: "Onglet",
-                        },
-                        FooterPrompt {
-                            button: PromptButton::R1,
-                            label: "Onglet",
-                        },
-                        FooterPrompt {
-                            button: PromptButton::East,
-                            label: "Retour",
-                        },
-                    ],
-                    out,
-                );
-            }
-            Stage::Match => self.render_match(out),
+        if matches!(self.stage, Stage::Match) {
+            self.raster_match(out);
+        }
+        if let Some(mut p) = RasterPainter::new(out, w, h) {
+            self.paint_ui(&mut p);
         }
     }
 
