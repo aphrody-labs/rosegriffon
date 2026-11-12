@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArrowRight, Database, FolderTree, Sparkles, Trophy, Users, Zap } from "lucide-react";
+import { ArrowRight, Shield, Sparkles, Trophy, Users, Zap } from "lucide-react";
 import { AnimatedSection } from "@/components/home/AnimatedSection";
 import { LandingHero } from "@/components/home/LandingHero";
 import { LatestNewsSection } from "@/components/home/LatestNewsSection";
@@ -66,10 +66,8 @@ interface FeaturedSkillRow {
   thumbnail_url: string | null;
 }
 
-interface VfsStatsRow {
-  total_vfs: number;
-  total_archives: number;
-  total_lua: number;
+interface TeamStatsRow {
+  total_teams: number;
 }
 
 function formatPosition(posCode: string | null, rawPos: string | null): string {
