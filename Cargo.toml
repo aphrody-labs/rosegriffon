@@ -113,7 +113,7 @@ bevy_mesh = { version = "0.20.1", default-features = false }
 bevy_reflect = { version = "0.20.1", default-features = false }
 bevy-wgpu-types = { package = "wgpu-types", version = "30.0.1", default-features = false }
 wgpu = { version = "30.0.1", default-features = false, features = ["std", "wgsl", "vulkan", "gles", "dx12", "metal", "web", "webgpu"] }
-bun-steam = { git = "https://github.com/aphrody-dev/steam-depot", rev = "a79da1ab5c3611ea23f0bc16f197a8bc4a9cf92c", package = "steam-depot", default-features = false }
+bun-steam = { git = "https://github.com/aphrody-dev/steam-depot", rev = "d098b41687a63767ee5eee3a351b2936a1d902e6", package = "steam-depot", default-features = false }
 parking_lot = "0.12.3"
 bytemuck = { version = "1.0", features = ["derive", "extern_crate_alloc", "min_const_generics"] }
 clap = { version = "4", features = ["derive", "env"] }

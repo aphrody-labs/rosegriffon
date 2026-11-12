@@ -21,7 +21,7 @@ WORKDIR /src
 COPY rust-toolchain.toml ./
 # rust-toolchain.toml pins the channel; rustup installs it on first use.
 # Canonical source: aphrody-dev/src crates/steam-depot, mirrored read-only to aphrody-dev/steam-depot.
-ARG STEAM_DEPOT_REV=a79da1ab5c3611ea23f0bc16f197a8bc4a9cf92c
+ARG STEAM_DEPOT_REV=d098b41687a63767ee5eee3a351b2936a1d902e6
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \
     rustup target add x86_64-unknown-linux-musl \

@@ -92,3 +92,7 @@ cdn-sync:
 # Install the cdn edge vhosts (infra/docker/cdn-edge/) on the cdn role and reload nginx.
 cdn-edge:
     h=$({{ops}} host cdn ssh); scp -q infra/docker/cdn-edge/rosegriffon-cdn.conf infra/docker/cdn-edge/rosegriffon-cdn-edge.inc "$h:/tmp/" && ssh "$h" "sudo install -m 644 /tmp/rosegriffon-cdn-edge.inc /etc/nginx/snippets/ && sudo install -m 644 /tmp/rosegriffon-cdn.conf /etc/nginx/conf.d/ && sudo nginx -t && sudo systemctl reload nginx"
+
+# One-click Steam login of the storage host: QR in Chrome, approve in the Steam app, no password.
+steam-login *args:
+    bun scripts/steam-login.ts {{args}}
