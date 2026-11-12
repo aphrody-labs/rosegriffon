@@ -8,11 +8,11 @@ export const contentType = "image/png";
 const ACCENT = "#66BB6A";
 
 const ITEM_TYPES = [
-  { emoji: "👟", label: "Chaussures" },
-  { emoji: "⌚", label: "Bracelets" },
-  { emoji: "📿", label: "Pendentifs" },
-  { emoji: "🔗", label: "Liens Kizuna" },
-  { emoji: "🧪", label: "Consommables" },
+  "Chaussures",
+  "Bracelets",
+  "Pendentifs",
+  "Liens Kizuna",
+  "Consommables",
 ];
 
 export default async function Image() {
@@ -106,21 +106,19 @@ export default async function Image() {
 
         {/* Item type pills */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 12 }}>
-          {ITEM_TYPES.map(t => (
+          {ITEM_TYPES.map(label => (
             <div
-              key={t.label}
+              key={label}
               style={{
                 alignItems: "center",
                 background: `${ACCENT}15`,
                 border: `1px solid ${ACCENT}30`,
                 borderRadius: 20,
                 display: "flex",
-                gap: 8,
                 padding: "8px 18px",
               }}
             >
-              <div style={{ display: "flex", fontSize: 16 }}>{t.emoji}</div>
-              <div style={{ color: ACCENT, display: "flex", fontSize: 14, fontWeight: 700 }}>{t.label}</div>
+              <div style={{ color: ACCENT, display: "flex", fontSize: 14, fontWeight: 700 }}>{label}</div>
             </div>
           ))}
         </div>

@@ -115,7 +115,7 @@ export default function WalletPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       {/* Breadcrumb */}
-      <div className="space-y-1 border-b border-border pb-6">
+      <div className="space-y-1 border-b border-outline-variant/15 pb-6">
         <Link
           href="/achillea"
           className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition mb-2"
@@ -124,7 +124,7 @@ export default function WalletPage() {
           Retour au hub Achilléa
         </Link>
         <div className="flex items-center gap-2">
-          <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
+          <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
             <Wallet className="w-5 h-5" />
           </span>
           <h1 className="text-3xl font-bold tracking-tight">Portefeuille Virtuel (ACH)</h1>
@@ -142,7 +142,7 @@ export default function WalletPage() {
       ) : (
         <div className="space-y-8">
           {/* Balance Card */}
-          <div className="border-2 border-border bg-gradient-to-br from-card via-card to-warning/5 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="border border-outline-variant/15 bg-gradient-to-br from-surface-container/80 via-surface-container/60 to-warning/5 backdrop-blur-md rounded-2xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2 text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-2">
                 <Coins className="w-5 h-5 text-warning" />
@@ -156,7 +156,7 @@ export default function WalletPage() {
               <p className="text-xs text-muted-foreground">Crédits cumulés utilisables lors des évènements Achilléa.</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-background/80 border border-border text-xs space-y-2 max-w-sm">
+            <div className="p-4 rounded-xl bg-surface-container-high/70 border border-outline-variant/15 text-xs space-y-2 max-w-sm">
               <div className="font-bold flex items-center gap-1 text-foreground">
                 <Info className="w-4 h-4 text-primary" />
                 Usage de la monnaie ACH
@@ -168,8 +168,8 @@ export default function WalletPage() {
           </div>
 
           {/* Transaction History */}
-          <div className="border border-border rounded-2xl bg-card overflow-hidden">
-            <div className="p-4 border-b border-border bg-muted/20">
+          <div className="border border-outline-variant/15 rounded-2xl bg-surface-container/60 backdrop-blur-md overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-outline-variant/15 bg-surface-container-high/60">
               <h3 className="font-bold text-xs uppercase text-muted-foreground">
                 Historique des transactions ({transactions.length})
               </h3>
@@ -180,13 +180,13 @@ export default function WalletPage() {
                 Aucune transaction enregistrée pour ce compte.
               </div>
             ) : (
-              <div className="divide-y divide-border/60">
+              <div className="divide-y divide-outline-variant/10">
                 {transactions.map(tx => {
                   const isCredit = tx.direction === WalletTransactionDirection.In;
                   return (
                     <div
                       key={tx.id}
-                      className="p-4 flex items-center justify-between gap-4 hover:bg-muted/20 transition"
+                      className="p-4 flex items-center justify-between gap-4 hover:bg-surface-container-high/40 transition-colors duration-150"
                     >
                       <div className="flex items-center gap-3">
                         <div

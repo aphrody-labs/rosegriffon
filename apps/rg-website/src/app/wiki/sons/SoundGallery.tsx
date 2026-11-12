@@ -11,6 +11,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
+import { ChevronDown, ChevronRight, Play, Volume2, Repeat } from "lucide-react";
 import { AudioPlayer } from "./AudioPlayer";
 import {
   audioBankKindLabel,
@@ -167,7 +168,7 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
         className="w-full rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:outline-none"
       />
 
-      <p className="px-1 text-xs text-on-surface-variant">
+      <p className="px-1 text-xs text-on-surface-variant tabular-nums">
         {visibles.length.toLocaleString("fr")} banque{visibles.length > 1 ? "s" : ""} affichée
         {visibles.length > 1 ? "s" : ""} — {namedCount.toLocaleString("fr")} rattachée
         {namedCount > 1 ? "s" : ""} à un personnage. Les autres portent un code absent du miroir : elles restent
@@ -181,12 +182,12 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
           return (
             <li
               key={b.path}
-              className="overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-low"
+              className="overflow-hidden rounded-2xl border border-outline-variant/15 bg-surface-container"
             >
               <button
                 type="button"
                 onClick={() => void ouvrir(b.path)}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-surface-container"
+                className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-surface-container-high"
               >
                 <span className="rounded-full bg-surface-container-high px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">
                   {audioBankKindLabel(b.kind)}
@@ -201,11 +202,13 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
                     <span className="font-mono">{b.name}</span>
                   </span>
                 </span>
-                <span className="shrink-0 text-xs text-on-surface-variant">{est_ouverte ? "▾" : "▸"}</span>
+                <span className="shrink-0 text-on-surface-variant">
+                  {est_ouverte ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+                </span>
               </button>
 
               {est_ouverte && (
-                <div className="border-t border-outline-variant px-4 py-3">
+                <div className="border-t border-outline-variant/15 px-4 py-3">
                   {chargement === b.path && (
                     <p className="text-xs italic text-on-surface-variant">Lecture du catalogue…</p>
                   )}
@@ -215,7 +218,7 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
                   {cat && (
                     <>
                       <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-on-surface-variant">
-                        <span>{cat.cueCount.toLocaleString("fr")} cues</span>
+                        <span className="tabular-nums">{cat.cueCount.toLocaleString("fr")} cues</span>
                         {b.ownerSlug && (
                           <Link href={`/wiki/chara/${b.ownerSlug}`} className="text-primary hover:underline">
                             Fiche du personnage
@@ -231,11 +234,17 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
                               <button
                                 type="button"
                                 onClick={() => setPiste({ path: b.path, index: rang })}
-                                className={`flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left text-xs transition hover:bg-surface-container ${
+                                className={`flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left text-xs transition hover:bg-surface-container-high ${
                                   actif ? "bg-surface-container-high" : ""
                                 }`}
                               >
-                                <span className="shrink-0 text-on-surface-variant">{actif ? "◆" : "▶"}</span>
+                                <span className="shrink-0 text-on-surface-variant">
+                                  {actif ? (
+                                    <Volume2 className="size-3.5 text-primary" />
+                                  ) : (
+                                    <Play className="size-3.5" />
+                                  )}
+                                </span>
                                 <span className="min-w-0 flex-1 truncate font-mono text-on-surface">
                                   {c.name ?? `cue ${c.index}`}
                                 </span>
@@ -244,7 +253,7 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
                                 </span>
                                 {c.looped && (
                                   <span className="shrink-0 text-on-surface-variant" title="Boucle">
-                                    ↻
+                                    <Repeat className="size-3" aria-hidden="true" />
                                   </span>
                                 )}
                               </button>
@@ -262,7 +271,7 @@ export function SoundGallery({ banks, namedCount }: { banks: BankEntry[]; namedC
       </ul>
 
       {visibles.length > 400 && (
-        <p className="px-1 text-xs italic text-on-surface-variant">
+        <p className="px-1 text-xs italic text-on-surface-variant tabular-nums">
           400 banques affichées sur {visibles.length.toLocaleString("fr")} — affinez la recherche pour atteindre les
           autres.
         </p>

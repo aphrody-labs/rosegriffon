@@ -111,7 +111,7 @@ export default function LicencePage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
       {/* Breadcrumb */}
-      <div className="space-y-1 border-b border-border pb-6">
+      <div className="space-y-1 border-b border-outline-variant/15 pb-6">
         <Link
           href="/achillea"
           className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition mb-2"
@@ -120,7 +120,7 @@ export default function LicencePage() {
           Retour au hub Achilléa
         </Link>
         <div className="flex items-center gap-2">
-          <span className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20">
+          <span className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
             <IdCard className="w-5 h-5" />
           </span>
           <h1 className="text-3xl font-bold tracking-tight">Licence Compétiteur</h1>
@@ -146,13 +146,13 @@ export default function LicencePage() {
           <button
             type="button"
             onClick={() => setReload(value => value + 1)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all active:scale-[0.99]"
           >
             Réessayer
           </button>
         </div>
       ) : !license ? (
-        <div className="border border-dashed border-border rounded-2xl p-12 text-center space-y-3">
+        <div className="border border-dashed border-outline-variant/25 rounded-2xl p-12 text-center space-y-3 bg-surface-container/30 backdrop-blur-md">
           <AlertCircle className="w-10 h-10 text-muted-foreground/60 mx-auto" />
           <h3 className="font-bold text-base">Aucune licence active</h3>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
@@ -163,9 +163,9 @@ export default function LicencePage() {
       ) : (
         <div className="space-y-6">
           {/* Official License Badge Card */}
-          <div className="border-2 border-border/80 bg-gradient-to-br from-card via-card to-muted/20 rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-xl space-y-6">
+          <div className="border border-outline-variant/20 bg-gradient-to-br from-surface-container/90 via-surface-container/70 to-surface-container-high/40 backdrop-blur-md rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-xl space-y-6">
             {/* Top Card Header */}
-            <div className="flex items-center justify-between border-b border-border/60 pb-4">
+            <div className="flex items-center justify-between border-b border-outline-variant/15 pb-4">
               <div className="flex items-center gap-2">
                 <span className="font-black tracking-widest text-sm text-primary">ACHILLÉA</span>
                 <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
@@ -188,18 +188,18 @@ export default function LicencePage() {
                 <h2 className="text-xl font-black text-foreground truncate">{user?.username}</h2>
                 <div className="font-mono text-xs font-semibold text-primary">N° {license.licenseNumber}</div>
               </div>
-              <div className="p-2 rounded-xl bg-background border border-border shrink-0 hidden sm:block">
+              <div className="p-2.5 rounded-2xl bg-surface-container-high/80 border border-outline-variant/20 shrink-0 hidden sm:block">
                 <QrCode className="w-12 h-12 text-foreground" />
               </div>
             </div>
 
             {/* Dates & Validity */}
             <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
-              <div className="p-3 rounded-xl bg-background/60 border border-border">
+              <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                 <div className="text-muted-foreground">Date d'émission</div>
                 <div className="font-bold mt-0.5">{new Date(license.issuedAt).toLocaleDateString("fr-FR")}</div>
               </div>
-              <div className="p-3 rounded-xl bg-background/60 border border-border">
+              <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                 <div className="text-muted-foreground">Valable jusqu'au</div>
                 <div className="font-bold mt-0.5">{new Date(license.validUntil).toLocaleDateString("fr-FR")}</div>
               </div>

@@ -40,7 +40,7 @@ function downloadName(item: GalleryLightboxItem): string {
 /**
  * Lightbox plein écran pour la galerie : image complète (`object-contain`), bouton
  * de téléchargement (fetch blob → `a[download]`), navigation précédent/suivant
- * (flèches clavier ←/→ + boutons), fermeture (Échap, clic backdrop, bouton ✕).
+ * (flèches clavier gauche/droite + boutons), fermeture (Échap, clic backdrop, bouton fermer).
  * Accessible : `role="dialog"`/`aria-modal`, focus trap léger, scroll du body bloqué.
  */
 export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLightboxProps) {
@@ -143,7 +143,7 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
       className="fixed inset-0 m-0 h-full w-full max-w-none border-0 p-0 text-inherit z-[60] flex flex-col bg-surface/95 backdrop-blur-md"
     >
       {/* Barre d'outils : titre + catégorie à gauche, actions à droite. */}
-      <div className="flex items-center justify-between gap-3 border-b border-outline-variant/30 px-4 py-3">
+      <div className="flex items-center justify-between gap-3 border-b border-outline-variant/15 px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           {item.categoryLabel && (
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-surface-container-high px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
@@ -244,7 +244,7 @@ export function GalleryLightbox({ items, index, onClose, onNavigate }: GalleryLi
       </div>
 
       {/* Compteur de position. */}
-      <div className="border-t border-outline-variant/30 px-4 py-2 text-center text-xs font-medium text-on-surface-variant">
+      <div className="border-t border-outline-variant/15 px-4 py-2 text-center text-xs font-medium text-on-surface-variant tabular-nums">
         {index + 1} / {items.length}
       </div>
     </dialog>,

@@ -27,7 +27,7 @@ export const metadata = metadonneesAchillea({
 export default function AchilleaGuidePage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-      <div className="space-y-2 border-b border-border/60 pb-6">
+      <div className="space-y-2 border-b border-outline-variant/15 pb-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">Guide Compétitif</h1>
@@ -37,7 +37,7 @@ export default function AchilleaGuidePage() {
           </div>
           <Link
             href="/achillea/guide/brand"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/80 bg-muted/40 hover:bg-muted text-xs font-semibold transition"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-outline-variant/20 bg-surface-container/60 hover:bg-surface-container-high text-xs font-semibold transition shadow-xs"
           >
             <Palette className="size-4 text-primary" />
             Brand Kit & Palette
@@ -46,7 +46,7 @@ export default function AchilleaGuidePage() {
       </div>
 
       {/* Créer son compte */}
-      <Card className="border-border/60">
+      <Card className="border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl shadow-sm">
         <CardHeader className="p-6 pb-2">
           <CardTitle className="text-xl flex items-center gap-2.5">
             <UserPlus className="size-5 text-primary" />
@@ -79,7 +79,7 @@ export default function AchilleaGuidePage() {
       </Card>
 
       {/* Les Clans */}
-      <Card className="border-border/60">
+      <Card className="border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl shadow-sm">
         <CardHeader className="p-6 pb-2">
           <CardTitle className="text-xl flex items-center gap-2.5">
             <Users className="size-5 text-primary" />
@@ -146,7 +146,7 @@ export default function AchilleaGuidePage() {
       </Card>
 
       {/* Commandes Discord */}
-      <Card className="border-border/60">
+      <Card className="border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl shadow-sm">
         <CardHeader className="p-6 pb-2">
           <CardTitle className="text-xl flex items-center gap-2.5">
             <FaDiscord className="size-5 text-discord" />
@@ -158,25 +158,25 @@ export default function AchilleaGuidePage() {
             <AccordionItem value="clans">
               <AccordionTrigger className="text-sm font-semibold hover:no-underline">Commandes Clan</AccordionTrigger>
               <AccordionContent className="space-y-3 pt-2 text-xs">
-                <div className="p-3 rounded-lg bg-muted/40 space-y-1">
+                <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15 space-y-1">
                   <div className="font-mono font-bold text-primary">/create-clan @m1 @m2 @m3 @m4</div>
                   <div className="text-muted-foreground">Fonder un clan avec 4 membres fondateurs.</div>
                 </div>
-                <div className="p-3 rounded-lg bg-muted/40 space-y-1">
+                <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15 space-y-1">
                   <div className="font-mono font-bold text-primary">/clan infos [sigle]</div>
                   <div className="text-muted-foreground">
                     Afficher la fiche d&apos;un clan ou lister tous les clans.
                   </div>
                 </div>
-                <div className="p-3 rounded-lg bg-muted/40 space-y-1">
+                <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15 space-y-1">
                   <div className="font-mono font-bold text-primary">/clan apply &lt;sigle&gt;</div>
                   <div className="text-muted-foreground">Déposer une candidature dans un clan.</div>
                 </div>
-                <div className="p-3 rounded-lg bg-muted/40 space-y-1">
+                <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15 space-y-1">
                   <div className="font-mono font-bold text-primary">/clan invite-member @joueur</div>
                   <div className="text-muted-foreground">Inviter un joueur à rejoindre le clan (VP ou Président).</div>
                 </div>
-                <div className="p-3 rounded-lg bg-muted/40 space-y-1">
+                <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15 space-y-1">
                   <div className="font-mono font-bold text-primary">/clan manage</div>
                   <div className="text-muted-foreground">Gérer les membres, paramètres et candidatures.</div>
                 </div>
@@ -188,17 +188,17 @@ export default function AchilleaGuidePage() {
                 Commandes Joueurs & Matchs
               </AccordionTrigger>
               <AccordionContent className="space-y-3 pt-2 text-xs">
-                <div className="p-3 rounded-lg bg-muted/40 space-y-1">
+                <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15 space-y-1">
                   <div className="font-mono font-bold text-primary">/player infos [@joueur]</div>
                   <div className="text-muted-foreground">
                     Afficher les statistiques ELO et circuit d&apos;un joueur.
                   </div>
                 </div>
-                <div className="p-3 rounded-lg bg-muted/40 space-y-1">
+                <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15 space-y-1">
                   <div className="font-mono font-bold text-primary">/player settings</div>
                   <div className="text-muted-foreground">Lier Twitch, mettre à jour sa bio ou son pseudo en jeu.</div>
                 </div>
-                <div className="p-3 rounded-lg bg-muted/40 space-y-1">
+                <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15 space-y-1">
                   <div className="font-mono font-bold text-primary">/interclan request &lt;sigle&gt; &lt;date&gt;</div>
                   <div className="text-muted-foreground">Défier un clan adverse en rencontre officielle 5v5.</div>
                 </div>
@@ -209,7 +209,7 @@ export default function AchilleaGuidePage() {
       </Card>
 
       {/* Règles des Tournois */}
-      <Card className="border-border/60">
+      <Card className="border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl shadow-sm">
         <CardHeader className="p-6 pb-2">
           <CardTitle className="text-xl flex items-center gap-2.5">
             <Trophy className="size-5 text-warning" />
@@ -230,14 +230,14 @@ export default function AchilleaGuidePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl border border-border/60 bg-muted/20 space-y-1">
+            <div className="p-4 rounded-xl border border-outline-variant/15 bg-surface-container-high/60 space-y-1">
               <div className="font-bold">Phase Suisse (Swiss Stage)</div>
               <p className="text-xs text-muted-foreground">
                 Matchs en <strong>BO3</strong>. En cas d&apos;égalité parfaite, 4e match décisif au but en or.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl border border-border/60 bg-muted/20 space-y-1">
+            <div className="p-4 rounded-xl border border-outline-variant/15 bg-surface-container-high/60 space-y-1">
               <div className="font-bold">Playoffs & Arbre Final</div>
               <p className="text-xs text-muted-foreground">
                 Arbre éliminatoire en <strong>BO5</strong>. Matchs décisifs au but en or en cas d&apos;égalité après la
@@ -308,7 +308,7 @@ export default function AchilleaGuidePage() {
       </Card>
 
       {/* Réseaux officiels */}
-      <Card className="border-border/60">
+      <Card className="border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl shadow-sm">
         <CardHeader className="p-6 pb-2">
           <CardTitle className="text-xl flex items-center gap-2.5">
             <Megaphone className="size-5 text-primary" />
@@ -321,7 +321,7 @@ export default function AchilleaGuidePage() {
               href="https://discord.gg/achillea"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 rounded-lg border border-border/60 hover:bg-muted/40 transition"
+              className="flex items-center justify-between p-3 rounded-xl border border-outline-variant/15 bg-surface-container-high/60 hover:bg-surface-container-high transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 <FaDiscord className="size-4 text-discord" />
@@ -334,7 +334,7 @@ export default function AchilleaGuidePage() {
               href="https://x.com/Achillea_IE"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 rounded-lg border border-border/60 hover:bg-muted/40 transition"
+              className="flex items-center justify-between p-3 rounded-xl border border-outline-variant/15 bg-surface-container-high/60 hover:bg-surface-container-high transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 <FaXTwitter className="size-4 text-foreground" />
@@ -347,7 +347,7 @@ export default function AchilleaGuidePage() {
               href="https://twitch.tv/Achillea_IE"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 rounded-lg border border-border/60 hover:bg-muted/40 transition"
+              className="flex items-center justify-between p-3 rounded-xl border border-outline-variant/15 bg-surface-container-high/60 hover:bg-surface-container-high transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 <FaTwitch className={`size-4 ${MARQUE.twitch}`} />
@@ -360,7 +360,7 @@ export default function AchilleaGuidePage() {
               href="https://youtube.com/@AchilleaRG"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 rounded-lg border border-border/60 hover:bg-muted/40 transition"
+              className="flex items-center justify-between p-3 rounded-xl border border-outline-variant/15 bg-surface-container-high/60 hover:bg-surface-container-high transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 <FaYoutube className={`size-4 ${MARQUE.youtube}`} />

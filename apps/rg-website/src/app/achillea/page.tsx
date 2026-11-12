@@ -172,7 +172,7 @@ export default async function AchilleaHomePage() {
   const recent = featured ? [] : await loadRecentTournaments(createAchilleaClient());
 
   return (
-    <div className="achillea-home-page">
+    <div className="achillea-home-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12">
       <HeroSection
         featured={featured}
         featuredParticipants={featuredParticipants}
@@ -181,41 +181,65 @@ export default async function AchilleaHomePage() {
         stats={stats}
       />
       {playlists.length > 0 && (
-        <section aria-labelledby="vods-title" className="achillea-vods">
-          <div className="achillea-vods__header">
+        <section
+          aria-labelledby="vods-title"
+          className="rounded-3xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-6 sm:p-8"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-outline-variant/10 pb-4">
             <div>
-              <span>
-                <Video aria-hidden="true" /> Vidéos
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary mb-1">
+                <Video className="size-4" aria-hidden="true" /> Archives Vidéos
               </span>
-              <h2 id="vods-title">Revoir les matchs</h2>
+              <h2 id="vods-title" className="text-2xl font-black text-on-surface tracking-tight">
+                Revoir les Matchs & VODs
+              </h2>
             </div>
-            <a href="https://www.youtube.com/@AchilleaRG" target="_blank" rel="noopener noreferrer">
-              Chaîne Achilléa <ArrowRight aria-hidden="true" />
+            <a
+              href="https://www.youtube.com/@AchilleaRG"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all duration-150 self-start sm:self-auto"
+            >
+              Chaîne Achilléa <ArrowRight className="size-4" aria-hidden="true" />
             </a>
           </div>
-          <div className="achillea-vods__grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {playlists.map(playlist => (
               <a
                 key={playlist.id}
                 href={playlist.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="achillea-vods__card"
+                className="group flex flex-col rounded-2xl border border-outline-variant/10 bg-surface-container-high/40 hover:bg-surface-container-high transition-all duration-200 hover:-translate-y-1 hover:shadow-lg overflow-hidden"
               >
-                <div>
+                <div className="relative aspect-video w-full overflow-hidden bg-surface-container-highest">
                   <Image
                     src={playlist.miniature}
                     alt=""
                     fill
                     unoptimized
                     sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <PlayCircle aria-hidden="true" />
-                  {playlist.videos !== null && <span>{playlist.videos} vidéos</span>}
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <PlayCircle className="size-12 text-white/90 group-hover:scale-110 transition-transform drop-shadow-md" aria-hidden="true" />
+                  </div>
+                  {playlist.videos !== null && (
+                    <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/75 text-[11px] font-bold text-white font-mono backdrop-blur-xs">
+                      {playlist.videos} vidéos
+                    </span>
+                  )}
                 </div>
-                <h3>{playlist.titre}</h3>
-                {playlist.description && <p>{playlist.description}</p>}
+                <div className="p-4 flex flex-col flex-1">
+                  <h3 className="text-base font-bold text-on-surface line-clamp-1 group-hover:text-primary transition-colors">
+                    {playlist.titre}
+                  </h3>
+                  {playlist.description && (
+                    <p className="text-xs text-on-surface-variant line-clamp-2 mt-1">
+                      {playlist.description}
+                    </p>
+                  )}
+                </div>
               </a>
             ))}
           </div>

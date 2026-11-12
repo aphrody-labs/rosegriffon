@@ -12,6 +12,7 @@
  * sans écran de chargement.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ExternalLink, Heart } from "lucide-react";
 import { estChargeable, nomModele } from "@/lib/vroid/licence";
 import type { ModeleVroid, PageModeles, SourceModeles } from "@/lib/vroid/types";
 import { ConditionsUtilisation } from "./ConditionsUtilisation";
@@ -247,7 +248,7 @@ function CarteModele({ modele, actif, onSelection }: { modele: ModeleVroid; acti
         className={`group w-full overflow-hidden rounded-2xl border text-left transition ${
           actif
             ? "border-primary bg-surface-container"
-            : "border-outline-variant/40 bg-surface-container-low hover:border-primary/50 hover:bg-surface-container"
+            : "border-outline-variant/15 bg-surface-container hover:border-primary/50 hover:bg-surface-container-high"
         }`}
         onClick={onSelection}
         type="button"
@@ -272,8 +273,10 @@ function CarteModele({ modele, actif, onSelection }: { modele: ModeleVroid; acti
         <div className="space-y-0.5 p-2.5">
           <p className="truncate text-sm font-medium text-on-surface">{nom}</p>
           <p className="truncate text-xs text-on-surface-variant">{modele.character?.user?.name}</p>
-          <p className="text-xs text-on-surface-variant">
-            {modele.heart_count.toLocaleString("fr")} ❤ · {modele.view_count.toLocaleString("fr")} vues
+          <p className="flex items-center gap-1 text-xs text-on-surface-variant">
+            <span className="tabular-nums">{modele.heart_count.toLocaleString("fr")}</span>
+            <Heart className="size-3 text-rose-500 fill-rose-500/80 shrink-0" aria-label="coups de cœur" />
+            <span className="tabular-nums">· {modele.view_count.toLocaleString("fr")} vues</span>
           </p>
         </div>
       </button>
@@ -286,7 +289,7 @@ function FicheModele({ modele }: { modele: ModeleVroid }) {
   const version = modele.latest_character_model_version;
 
   return (
-    <div className="space-y-2 rounded-2xl border border-outline-variant/40 bg-surface-container-low p-4">
+    <div className="space-y-2 rounded-2xl border border-outline-variant/15 bg-surface-container p-4">
       <h2 className="text-base font-semibold text-on-surface">{nomModele(modele)}</h2>
       <p className="text-sm text-on-surface-variant">
         Par <span className="font-medium text-on-surface">{modele.character?.user?.name}</span> — le crédit de
@@ -294,19 +297,20 @@ function FicheModele({ modele }: { modele: ModeleVroid }) {
       </p>
 
       {version && (
-        <p className="text-xs text-on-surface-variant">
+        <p className="text-xs text-on-surface-variant tabular-nums">
           {version.triangle_count.toLocaleString("fr")} triangles · {version.material_count.toLocaleString("fr")}{" "}
           matériaux · {version.joint_count.toLocaleString("fr")} os
         </p>
       )}
 
       <a
-        className="inline-block text-sm font-medium text-primary hover:underline"
+        className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
         href={`https://hub.vroid.com/characters/${modele.character?.id}/models/${modele.id}`}
         rel="noreferrer noopener"
         target="_blank"
       >
-        Voir la fiche sur VRoid Hub ↗
+        <span>Voir la fiche sur VRoid Hub</span>
+        <ExternalLink className="size-3.5" aria-hidden="true" />
       </a>
     </div>
   );

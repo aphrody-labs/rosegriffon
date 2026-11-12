@@ -312,48 +312,51 @@ export default async function HomePage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto">
                 <Link
                   href="/wiki/chara"
-                  className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/10 hover:border-primary/40 transition group"
+                  className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/15 hover:border-primary/40 transition group"
                 >
                   <div className="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
                     <Users className="size-3.5 text-primary" /> Joueurs
                   </div>
-                  <div className="text-lg md:text-xl font-black text-on-surface mt-0.5 group-hover:text-primary transition-colors">
+                  <div className="text-lg md:text-xl font-black text-on-surface mt-0.5 group-hover:text-primary transition-colors tabular-nums">
                     {wikiStats.characters.toLocaleString("fr-FR")}
                   </div>
                 </Link>
 
                 <Link
                   href="/wiki/skill"
-                  className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/10 hover:border-primary/40 transition group"
+                  className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/15 hover:border-primary/40 transition group"
                 >
                   <div className="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
                     <Zap className="size-3.5 text-amber-500" /> Techniques
                   </div>
-                  <div className="text-lg md:text-xl font-black text-on-surface mt-0.5 group-hover:text-amber-500 transition-colors">
+                  <div className="text-lg md:text-xl font-black text-on-surface mt-0.5 group-hover:text-amber-500 transition-colors tabular-nums">
                     {wikiStats.skills.toLocaleString("fr-FR")}
                   </div>
                 </Link>
 
                 <Link
                   href="/wiki/item"
-                  className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/10 hover:border-primary/40 transition group"
+                  className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/15 hover:border-primary/40 transition group"
                 >
                   <div className="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
                     <Trophy className="size-3.5 text-emerald-500" /> Objets
                   </div>
-                  <div className="text-lg md:text-xl font-black text-on-surface mt-0.5 group-hover:text-emerald-500 transition-colors">
+                  <div className="text-lg md:text-xl font-black text-on-surface mt-0.5 group-hover:text-emerald-500 transition-colors tabular-nums">
                     {wikiStats.items.toLocaleString("fr-FR")}
                   </div>
                 </Link>
 
-                <div className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/10">
+                <Link
+                  href="/wiki/cpk"
+                  className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/15 hover:border-sky-400/40 transition group"
+                >
                   <div className="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
                     <FolderTree className="size-3.5 text-sky-400" /> Fichiers VFS
                   </div>
-                  <div className="text-lg md:text-xl font-black text-on-surface mt-0.5">
+                  <div className="text-lg md:text-xl font-black text-on-surface mt-0.5 group-hover:text-sky-400 transition-colors tabular-nums">
                     {vfsMetrics.total_vfs.toLocaleString("fr-FR")}
                   </div>
-                </div>
+                </Link>
               </div>
             </div>
           </section>
@@ -504,15 +507,15 @@ export default async function HomePage() {
                           </h3>
                         </div>
 
-                        <div className="flex items-center justify-between text-xs text-on-surface-variant/80 mt-3 pt-2.5 border-t border-outline-variant/10">
+                        <div className="flex items-center justify-between text-xs text-on-surface-variant/80 mt-3 pt-2.5 border-t border-outline-variant/15">
                           <div className="flex items-center gap-1">
                             <span className="font-medium">Puissance :</span>
-                            <span className="font-bold text-amber-500">{skill.power_max ?? "—"}</span>
+                            <span className="font-bold text-amber-500 tabular-nums">{skill.power_max ?? "—"}</span>
                           </div>
                           {skill.tp_cost !== null && skill.tp_cost > 0 && (
                             <div className="flex items-center gap-1">
                               <span className="font-medium">PT :</span>
-                              <span className="font-bold text-sky-400">{skill.tp_cost}</span>
+                              <span className="font-bold text-sky-400 tabular-nums">{skill.tp_cost}</span>
                             </div>
                           )}
                         </div>

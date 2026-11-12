@@ -61,7 +61,7 @@ export default function ClansPage({ initialQuery = "" }: { initialQuery?: string
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline/15 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline-variant/15 pb-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Users className="size-6 text-primary" />
@@ -81,7 +81,7 @@ export default function ClansPage({ initialQuery = "" }: { initialQuery?: string
       </div>
 
       {/* Filters toolbar */}
-      <div className="p-4 rounded-2xl border border-outline/20 bg-surface/80 backdrop-blur-md space-y-4">
+      <div className="p-4 rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md space-y-4 shadow-sm">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {/* Search input */}
           <div className="relative sm:col-span-2">
@@ -91,7 +91,7 @@ export default function ClansPage({ initialQuery = "" }: { initialQuery?: string
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Rechercher par nom ou tag (ex. RG, Inazuma)..."
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-outline/25 bg-surface-variant/30 text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-outline-variant/25 bg-surface-container-high/60 text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary transition-colors"
             />
           </div>
 
@@ -100,7 +100,7 @@ export default function ClansPage({ initialQuery = "" }: { initialQuery?: string
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value === "name" ? "name" : "fame")}
-              className="flex-1 px-3 py-2 text-sm rounded-xl border border-outline/25 bg-surface-variant/30 text-on-surface focus:outline-none focus:border-primary"
+              className="flex-1 px-3 py-2 text-sm rounded-xl border border-outline-variant/25 bg-surface-container-high/60 text-on-surface focus:outline-none focus:border-primary transition-colors"
             >
               <option value="fame">Notoriété</option>
               <option value="name">Nom</option>

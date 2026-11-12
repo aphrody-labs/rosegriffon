@@ -217,7 +217,7 @@ export function PlayersClient({
               showFilters={false}
               containerClassName="max-w-md w-full"
             />
-            <div className="rounded-3xl border border-outline-variant/30 bg-surface-container-low/60 px-5 py-4">
+            <div className="rounded-3xl border border-outline-variant/15 bg-surface-container/60 px-5 py-4">
               <CharacterFilters teams={teams} />
             </div>
           </div>
@@ -345,7 +345,7 @@ export function PlayersClient({
               />
             </div>
           ) : (
-            <div className="py-20 text-center rounded-[32px] border border-outline-variant bg-surface-container-low border-dashed">
+            <div className="py-20 text-center rounded-[32px] border border-outline-variant/15 bg-surface-container border-dashed">
               <p className="text-on-surface-variant italic">
                 {t("wiki.players.no_results")}
               </p>

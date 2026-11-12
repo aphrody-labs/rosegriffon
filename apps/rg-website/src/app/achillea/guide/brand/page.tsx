@@ -116,7 +116,7 @@ export default function AchilleaBrandPage() {
       </div>
 
       {/* Palette des 11 Paliers */}
-      <Card className="border-border/60">
+      <Card className="border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl shadow-sm">
         <CardHeader className="p-6 pb-2">
           <CardTitle className="text-xl flex items-center gap-2.5">
             <Palette className="size-5 text-primary" />
@@ -132,7 +132,7 @@ export default function AchilleaBrandPage() {
             {PALETTES.map(p => (
               <div
                 key={p.rank}
-                className="rounded-xl overflow-hidden border border-border/60 bg-muted/20 flex flex-col"
+                className="rounded-2xl overflow-hidden border border-outline-variant/15 bg-surface-container-high/60 flex flex-col shadow-xs"
               >
                 <div
                   className="h-20 w-full"
@@ -159,7 +159,7 @@ export default function AchilleaBrandPage() {
       </Card>
 
       {/* Typographies */}
-      <Card className="border-border/60">
+      <Card className="border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl shadow-sm">
         <CardHeader className="p-6 pb-2">
           <CardTitle className="text-xl flex items-center gap-2.5">
             <Type className="size-5 text-primary" />
@@ -169,7 +169,7 @@ export default function AchilleaBrandPage() {
         <CardContent className="p-6 pt-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {FONTS.map(font => (
-              <div key={font.family} className="border border-border/60 rounded-xl p-4 bg-muted/20 space-y-2">
+              <div key={font.family} className="border border-outline-variant/15 rounded-2xl p-4 bg-surface-container-high/60 space-y-2">
                 <div className="flex items-baseline justify-between gap-2">
                   <div className="font-bold text-sm">{font.label}</div>
                   <Badge variant="outline" className="text-[10px] font-mono text-muted-foreground">
@@ -185,7 +185,7 @@ export default function AchilleaBrandPage() {
       </Card>
 
       {/* Logos & Visuels */}
-      <Card className="border-border/60">
+      <Card className="border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl shadow-sm">
         <CardHeader className="p-6 pb-2">
           <CardTitle className="text-xl flex items-center gap-2.5">
             <ImageIcon className="size-5 text-primary" />
@@ -197,9 +197,9 @@ export default function AchilleaBrandPage() {
             {LOGOS.map(logo => (
               <div
                 key={logo.path}
-                className="border border-border/60 rounded-xl p-4 bg-muted/20 flex flex-col items-center text-center space-y-3"
+                className="border border-outline-variant/15 rounded-2xl p-4 bg-surface-container-high/60 flex flex-col items-center text-center space-y-3"
               >
-                <div className="h-28 w-full flex items-center justify-center p-2 bg-black/40 rounded-lg relative">
+                <div className="h-28 w-full flex items-center justify-center p-2 bg-black/40 rounded-xl relative">
                   <Image
                     src={logo.path}
                     alt={logo.label}

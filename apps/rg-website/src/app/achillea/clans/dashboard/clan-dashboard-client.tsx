@@ -281,22 +281,22 @@ export default function ClanDashboardPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
       {/* Breadcrumb */}
-      <div className="space-y-1 border-b border-border pb-6">
+      <div className="space-y-1 border-b border-outline-variant/15 pb-6">
         <Link
           href="/achillea/clans"
-          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition mb-2"
+          className="inline-flex items-center gap-1.5 text-xs text-on-surface-variant hover:text-on-surface transition mb-2"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Retour aux clans
         </Link>
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20">
-              <Shield className="w-5 h-5" />
+          <div className="flex items-center gap-3">
+            <span className="p-2.5 rounded-2xl bg-primary/10 text-primary border border-primary/20">
+              <Shield className="w-6 h-6" />
             </span>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Gestion du Clan</h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <h1 className="text-2xl font-bold tracking-tight text-on-surface">Gestion du Clan</h1>
+              <p className="text-xs text-on-surface-variant mt-0.5">
                 {clan ? `${clan.name} [${clan.shortenedName}]` : "Tableau de bord de gestion"}
               </p>
             </div>
@@ -305,7 +305,7 @@ export default function ClanDashboardPage() {
           {clan && (
             <Link
               href={`/achillea/clans/${clan.id}`}
-              className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border bg-card hover:bg-muted transition"
+              className="px-3.5 py-1.5 text-xs font-semibold rounded-xl border border-outline-variant/15 bg-surface-container/60 hover:bg-surface-container-high text-on-surface transition-all duration-150 active:scale-[0.99]"
             >
               Voir la fiche publique
             </Link>
@@ -314,7 +314,7 @@ export default function ClanDashboardPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-border pb-px overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-outline-variant/15 pb-px overflow-x-auto">
         <button
           type="button"
           onClick={() => setActiveTab("members")}
@@ -374,29 +374,29 @@ export default function ClanDashboardPage() {
         <>
           {/* Members Tab */}
           {activeTab === "members" && (
-            <div className="border border-border rounded-2xl bg-card overflow-hidden">
-              <div className="p-4 border-b border-border bg-muted/20 flex items-center justify-between">
-                <h3 className="font-bold text-xs uppercase text-muted-foreground">Effectif du clan</h3>
+            <div className="border border-outline-variant/15 rounded-3xl bg-surface-container/60 backdrop-blur-md overflow-hidden">
+              <div className="p-4 border-b border-outline-variant/10 bg-surface-container-high/40 flex items-center justify-between">
+                <h3 className="font-bold text-xs uppercase tracking-wider text-primary">Effectif du clan</h3>
               </div>
 
-              <div className="divide-y divide-border/60">
+              <div className="divide-y divide-outline-variant/10">
                 {members.map(m => (
                   <div
                     key={m.user?.id}
-                    className="p-3 px-4 flex items-center justify-between gap-4 hover:bg-muted/20 transition"
+                    className="p-3.5 px-4 flex items-center justify-between gap-4 hover:bg-surface-container-high/40 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <UserAvatar avatar={m.user?.avatar} name={m.user?.username || "Membre"} className="w-8 h-8" />
                       <div>
-                        <div className="font-semibold text-xs text-foreground">{m.user?.username}</div>
-                        <div className="text-[10px] text-muted-foreground">
+                        <div className="font-semibold text-xs text-on-surface">{m.user?.username}</div>
+                        <div className="text-[10px] text-on-surface-variant font-mono">
                           Rejoint le {new Date(m.createdAt).toLocaleDateString("fr-FR")}
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-muted text-muted-foreground">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-container-high text-on-surface-variant border border-outline-variant/15">
                         {m.clanRole === 3 ? "Président" : m.clanRole === 2 ? "Vice-Président" : "Membre"}
                       </span>
 

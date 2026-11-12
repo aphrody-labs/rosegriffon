@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useReducer, useState } from "react";
+import { Check } from "lucide-react";
 import { cdnOrigin } from "@rosegriffon/assets";
 import { Button } from "@rosegriffon/ui/button";
 import { Input } from "@rosegriffon/ui/input";
@@ -186,8 +187,8 @@ export function Atelier({
                   <VignettePiece key={vignette ?? part.id} url={vignette} />
                   <span className="atelier-piece-nom">{nom}</span>
                   {selection?.id === part.id && (
-                    <span className="atelier-selection" aria-hidden="true">
-                      ✓
+                    <span className="atelier-selection inline-flex items-center justify-center" aria-hidden="true">
+                      <Check className="size-3" />
                     </span>
                   )}
                 </Button>

@@ -131,7 +131,7 @@ export default function RankedLeaderboardPage({
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
       {/* Breadcrumb / Top Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/15 pb-6">
         <div className="space-y-1">
           <Link
             href="/achillea/ranked"
@@ -141,7 +141,7 @@ export default function RankedLeaderboardPage({
             Retour au hub classé
           </Link>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
+            <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
               <Trophy className="w-5 h-5" />
             </span>
             <h1 className="text-3xl font-bold tracking-tight">Classement Général (Leaderboard)</h1>
@@ -154,7 +154,7 @@ export default function RankedLeaderboardPage({
         {/* Mode switch */}
         <fieldset
           aria-label="Mode du classement"
-          className="m-0 min-w-0 border-0 flex items-center p-1 bg-muted rounded-lg self-start sm:self-auto"
+          className="m-0 min-w-0 border border-outline-variant/15 flex items-center p-1 bg-surface-container/60 backdrop-blur-md rounded-2xl self-start sm:self-auto"
         >
           <button
             type="button"
@@ -165,9 +165,9 @@ export default function RankedLeaderboardPage({
               setTierKey("");
               setTiers(null);
             }}
-            className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+            className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-xl transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
               mode === 2
-                ? "bg-primary text-primary-foreground shadow-sm"
+                ? "bg-surface-container-high text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -182,9 +182,9 @@ export default function RankedLeaderboardPage({
               setTierKey("");
               setTiers(null);
             }}
-            className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+            className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-xl transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
               mode === 4
-                ? "bg-primary text-primary-foreground shadow-sm"
+                ? "bg-surface-container-high text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -203,7 +203,7 @@ export default function RankedLeaderboardPage({
             placeholder="Rechercher un joueur..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="min-h-11 w-full pl-9 pr-3 py-2 text-lg bg-card border border-border rounded-lg placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="min-h-11 w-full pl-9 pr-3 py-2 text-lg bg-surface-container/60 border border-outline-variant/15 rounded-2xl placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
           />
         </div>
         <label className="flex w-full flex-col gap-1 text-lg sm:w-64">
@@ -214,7 +214,7 @@ export default function RankedLeaderboardPage({
               setTierKey(event.target.value);
               setPage(0);
             }}
-            className="min-h-11 rounded-lg border border-border bg-card px-3 py-2 text-lg text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="min-h-11 rounded-2xl border border-outline-variant/15 bg-surface-container/60 px-3 py-2 text-lg text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
           >
             <option value="">Tous les paliers</option>
             {tiers?.map(tier => (
@@ -228,14 +228,14 @@ export default function RankedLeaderboardPage({
           <output className="text-lg text-warning">Paliers indisponibles. Le classement reste consultable.</output>
         )}
 
-        <div className="text-lg text-muted-foreground self-end sm:self-auto">
+        <div className="text-lg text-muted-foreground self-end sm:self-auto font-mono">
           Total : <span className="font-semibold text-foreground">{total}</span> joueur
           {total > 1 ? "s" : ""} classé{total > 1 ? "s" : ""}
         </div>
       </div>
 
       {/* Leaderboard Table */}
-      <div className="border border-border rounded-2xl bg-card overflow-hidden shadow-sm">
+      <div className="border border-outline-variant/15 rounded-2xl bg-surface-container/60 backdrop-blur-md overflow-hidden shadow-sm">
         {loading ? (
           <div className="py-20 text-center space-y-3">
             <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
@@ -271,7 +271,7 @@ export default function RankedLeaderboardPage({
                   {total > 1 ? "s" : ""} classé{total > 1 ? "s" : ""}
                 </caption>
                 <thead>
-                  <tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-lg tracking-wider">
+                  <tr className="border-b border-outline-variant/15 bg-surface-container-high/60 text-muted-foreground uppercase text-lg tracking-wider font-semibold">
                     <th scope="col" className="py-3 px-4 w-16 text-center">
                       Rang
                     </th>
@@ -295,11 +295,11 @@ export default function RankedLeaderboardPage({
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/60">
+                <tbody className="divide-y divide-outline-variant/10">
                   {entries.map(entry => {
                     const actualRank = entry.rank;
                     return (
-                      <tr key={entry.userId} className="hover:bg-muted/30 transition-colors">
+                      <tr key={entry.userId} className="hover:bg-surface-container-high/40 transition-colors duration-150">
                         <td className="py-3 px-4 text-center font-bold">
                           {actualRank === 1 ? (
                             <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${MEDAILLE.or.pastille} text-lg font-extrabold`}>

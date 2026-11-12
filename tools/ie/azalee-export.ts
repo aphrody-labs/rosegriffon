@@ -10,7 +10,7 @@ import { Database } from "bun:sqlite";
 import { mkdirSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 
-const mirror = resolve(process.argv[2] ?? process.env.NIE_WIKI_DB ?? "C:/src/rosegriffon/var/inagle-mirror.sqlite");
+const mirror = resolve(process.argv[2] ?? process.env.NIE_WIKI_DB ?? "C:/src/apps/rosegriffon/var/inagle-mirror.sqlite");
 const outDir = resolve(process.argv[3] ?? join(import.meta.dir, "..", "..", "var", "ie-export", "azalee"));
 mkdirSync(outDir, { recursive: true });
 

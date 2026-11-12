@@ -36,7 +36,7 @@ export function CharacterStatsPopover({ stats, name }: CharacterStatsPopoverProp
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[calc(100vw-2rem)] max-w-sm sm:w-80 p-4 bg-surface-container-high border-outline-variant"
+        className="w-[calc(100vw-2rem)] max-w-sm sm:w-80 p-4 bg-surface-container-high border-outline-variant/15"
         align="center"
       >
         <div className="space-y-4">
@@ -58,7 +58,7 @@ export function CharacterStatsPopover({ stats, name }: CharacterStatsPopoverProp
                 <div key={key} className="space-y-1">
                   <div className="flex justify-between text-xs">
                     <span className="text-on-surface-variant">{config.fr}</span>
-                    <span className="font-medium text-on-surface font-mono">{value}</span>
+                    <span className="font-medium text-on-surface font-mono tabular-nums">{value}</span>
                   </div>
                   <div className="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
                     <div
@@ -71,9 +71,9 @@ export function CharacterStatsPopover({ stats, name }: CharacterStatsPopoverProp
             })}
           </div>
 
-          <div className="pt-2 border-t border-outline-variant/30 flex justify-between items-center text-xs text-on-surface-variant">
+          <div className="pt-2 border-t border-outline-variant/15 flex justify-between items-center text-xs text-on-surface-variant">
             <span>Total</span>
-            <span className="font-medium text-on-surface font-mono text-sm">
+            <span className="font-medium text-on-surface font-mono text-sm tabular-nums">
               {Object.values(stats).reduce((a, b) => a + b, 0)}
             </span>
           </div>

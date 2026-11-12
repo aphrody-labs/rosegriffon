@@ -10,7 +10,7 @@ modes. Do not install while the game is running.
 ## 1. Build and check
 
 ```bash
-NIE_GAME_DIR=".../INAZUMA ELEVEN Victory Road" RG_ASSETS=C:/src/rosegriffon/packages/rg-assets/public \
+NIE_GAME_DIR=".../INAZUMA ELEVEN Victory Road" RG_ASSETS=C:/src/apps/rosegriffon/packages/rg-assets/public \
   bash mods/RoseGriffon/scripts/build.sh          # ends with "verdict valide"
 ```
 

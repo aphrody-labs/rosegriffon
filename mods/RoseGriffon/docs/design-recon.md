@@ -13,13 +13,13 @@ own `rg-ui` source, so this is a reuse map, not a clean-room clone.
 | https://rosegriffon.fr/projets | project grid, expanded sidebar sub-nav |
 | https://rosegriffon.fr/projets/outils/pfp | Avatar RG tool (closest analogue to the avatar maker) |
 | theme switcher menu (opened, nothing selected) | 5 entries: Roy, Gaëlle, Azalée clair, Azalée sombre, Achilléa |
-| `C:/src/rosegriffon/packages/rg-ui/src/lib/themes.ts` | `THEMES` (brand palette + icon), `THEME_PACKS` (title, logo, wallpaper, pet, OKLCH seed), `sectionTheme()` |
-| `C:/src/rosegriffon/packages/rg-ui/src/tokens.ts` | generated hex projection of 7 themes: `md3` and `shadcn` roles, `MARQUE`, `FORMES` |
-| `C:/src/rosegriffon/packages/rg-ui/src/brands.css` | generated M3 sheets for `theme-rg`, `theme-rg-dark`, `achillea`, `azalee-light`, `azalee-dark` |
-| `C:/src/rosegriffon/packages/rg-ui/src/styles.css` | hand-written Roy/Gaëlle OKLCH blocks, M3 type scale, state layers, motion |
-| `C:/src/rosegriffon/packages/rg-ui/src/components/theme-provider.tsx` | `ThemeProvider` (next-themes, class on `<html>`, key `rg-theme`, default `roy`), `useTheme()` |
-| `C:/src/rosegriffon/packages/rg-app-shell/src/components/ThemeToggle.tsx` | switcher UI and labels |
-| `C:/src/rosegriffon/apps/rg-website/src/lib/fonts.ts`, `src/app/globals.css` | Roboto body, Poppins headings |
+| `C:/src/apps/rosegriffon/packages/rg-ui/src/lib/themes.ts` | `THEMES` (brand palette + icon), `THEME_PACKS` (title, logo, wallpaper, pet, OKLCH seed), `sectionTheme()` |
+| `C:/src/apps/rosegriffon/packages/rg-ui/src/tokens.ts` | generated hex projection of 7 themes: `md3` and `shadcn` roles, `MARQUE`, `FORMES` |
+| `C:/src/apps/rosegriffon/packages/rg-ui/src/brands.css` | generated M3 sheets for `theme-rg`, `theme-rg-dark`, `achillea`, `azalee-light`, `azalee-dark` |
+| `C:/src/apps/rosegriffon/packages/rg-ui/src/styles.css` | hand-written Roy/Gaëlle OKLCH blocks, M3 type scale, state layers, motion |
+| `C:/src/apps/rosegriffon/packages/rg-ui/src/components/theme-provider.tsx` | `ThemeProvider` (next-themes, class on `<html>`, key `rg-theme`, default `roy`), `useTheme()` |
+| `C:/src/apps/rosegriffon/packages/rg-app-shell/src/components/ThemeToggle.tsx` | switcher UI and labels |
+| `C:/src/apps/rosegriffon/apps/rg-website/src/lib/fonts.ts`, `src/app/globals.css` | Roboto body, Poppins headings |
 
 Screenshots were only viewed, not saved. Several captures timed out (renderer busy on
 the home page); the theme menu content was read from the accessibility tree.

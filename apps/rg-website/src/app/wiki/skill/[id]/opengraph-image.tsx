@@ -144,13 +144,23 @@ export default async function Image({ params }: { params: Promise<{ id: string }
               borderRadius: 20,
               color: elementColor,
               display: "flex",
-              fontSize: 64,
               height: 180,
               justifyContent: "center",
               width: 180,
             }}
           >
-            ⚡
+            <svg
+              width="64"
+              height="64"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={elementColor}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill={elementColor} />
+            </svg>
           </div>
         )}
       </div>

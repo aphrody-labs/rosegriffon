@@ -38,7 +38,7 @@ See `INSTALL.md` for the dry run, install and rollback procedure.
 ## Build
 
 ```bash
-NIE_GAME_DIR=".../INAZUMA ELEVEN Victory Road" RG_ASSETS=C:/src/rosegriffon/packages/rg-assets/public \
+NIE_GAME_DIR=".../INAZUMA ELEVEN Victory Road" RG_ASSETS=C:/src/apps/rosegriffon/packages/rg-assets/public \
   bash mods/RoseGriffon/scripts/build.sh
 ```
 

@@ -4,6 +4,7 @@ import type { BaseCharacter } from "@rosegriffon/inagle";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Star } from "lucide-react";
 import { CommonSpriteIcon } from "@/components/ui/CommonSpriteIcon";
 import { Icon } from "@/components/ui/Icon";
 import { RarityBadge } from "@/components/ui/rarity-badge";
@@ -475,7 +476,7 @@ function FormationPicker({
           <select
             value={selectedIdx}
             onChange={e => onSelect(Number(e.target.value))}
-            className="w-full appearance-none rounded-xl bg-surface-container border border-outline-variant/30 px-3 min-h-[44px] py-2.5 pr-8 text-sm font-bold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/50"
+            className="w-full appearance-none rounded-xl bg-surface-container border border-outline-variant/15 px-3 min-h-[44px] py-2.5 pr-8 text-sm font-bold text-on-surface focus:outline-hidden focus:ring-2 focus:ring-primary/50"
           >
             {formations.map((f, i) => (
               <option key={i} value={i}>
@@ -489,15 +490,35 @@ function FormationPicker({
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none"
           />
         </div>
-        <div className="flex items-center gap-2 mt-1.5 px-1">
-          <span className="text-[10px] text-on-surface-variant">{selected.layout}</span>
-          <span className="text-[10px] text-on-surface-variant">
-            ATT {"★".repeat(selected.off)}
-            {"☆".repeat(5 - selected.off)}
+        <div className="flex items-center gap-3 mt-1.5 px-1 text-[11px] text-on-surface-variant font-medium">
+          <span className="font-mono text-xs">{selected.layout}</span>
+          <span className="inline-flex items-center gap-1">
+            <span>ATT</span>
+            <span className="inline-flex items-center gap-0.5" aria-label={`Attaque ${selected.off} sur 5`}>
+              {Array.from({ length: 5 }, (_, idx) => (
+                <Star
+                  key={`off-${idx}`}
+                  className={cn(
+                    "size-2.5",
+                    idx < selected.off ? "fill-amber-400 text-amber-400" : "fill-outline-variant/20 text-outline-variant/30"
+                  )}
+                />
+              ))}
+            </span>
           </span>
-          <span className="text-[10px] text-on-surface-variant">
-            DEF {"★".repeat(selected.def)}
-            {"☆".repeat(5 - selected.def)}
+          <span className="inline-flex items-center gap-1">
+            <span>DEF</span>
+            <span className="inline-flex items-center gap-0.5" aria-label={`Défense ${selected.def} sur 5`}>
+              {Array.from({ length: 5 }, (_, idx) => (
+                <Star
+                  key={`def-${idx}`}
+                  className={cn(
+                    "size-2.5",
+                    idx < selected.def ? "fill-sky-400 text-sky-400" : "fill-outline-variant/20 text-outline-variant/30"
+                  )}
+                />
+              ))}
+            </span>
           </span>
         </div>
       </div>
@@ -542,7 +563,7 @@ function StatBar({ label, value, max = 150 }: { label: string; value: number; ma
     <div className="space-y-1">
       <div className="flex justify-between text-[11px] font-semibold text-on-surface-variant">
         <span>{label}</span>
-        <span className="font-bold text-on-surface">{value}</span>
+        <span className="font-bold text-on-surface tabular-nums">{value}</span>
       </div>
       <div className="h-1.5 w-full rounded-full bg-surface-container-high overflow-hidden">
         <div

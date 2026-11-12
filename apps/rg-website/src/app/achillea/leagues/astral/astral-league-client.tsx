@@ -90,7 +90,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-4 min-[600px]:px-6 min-[600px]:py-6">
       {/* Breadcrumb */}
-      <div className="space-y-2 border-b border-border pb-4">
+      <div className="space-y-2 border-b border-outline-variant/15 pb-4">
         <Link
           href="/achillea"
           className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition mb-2"
@@ -99,7 +99,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
           Retour au hub Achilléa
         </Link>
         <div className="flex items-center gap-2">
-          <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
+          <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
             <Trophy className="w-5 h-5" />
           </span>
           <h1 className="text-2xl font-bold tracking-tight min-[840px]:text-3xl">Astral League</h1>
@@ -121,11 +121,11 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-border pb-px overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-outline-variant/15 pb-px overflow-x-auto">
         <button
           type="button"
           onClick={() => setActiveTab("standings")}
-          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
+          className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all duration-150 -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
             activeTab === "standings"
               ? "border-primary text-foreground"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -137,7 +137,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
         <button
           type="button"
           onClick={() => setActiveTab("matches")}
-          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
+          className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all duration-150 -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
             activeTab === "matches"
               ? "border-primary text-foreground"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -149,7 +149,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
         <button
           type="button"
           onClick={() => setActiveTab("playoffs")}
-          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
+          className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all duration-150 -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
             activeTab === "playoffs"
               ? "border-primary text-foreground"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -161,7 +161,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
         <button
           type="button"
           onClick={() => setActiveTab("rules")}
-          className={`px-4 py-2 text-xs font-semibold border-b-2 transition -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
+          className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all duration-150 -mb-px flex shrink-0 items-center gap-1.5 whitespace-nowrap ${
             activeTab === "rules"
               ? "border-primary text-foreground"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -181,11 +181,11 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
         <>
           {/* Standings Tab */}
           {activeTab === "standings" && (
-            <div className="border border-border rounded-2xl bg-card overflow-hidden shadow-sm">
+            <div className="border border-outline-variant/15 rounded-2xl bg-surface-container/60 backdrop-blur-md overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-xs tracking-wider">
+                    <tr className="border-b border-outline-variant/15 bg-surface-container-high/60 text-muted-foreground uppercase text-xs tracking-wider font-semibold">
                       <th className="py-3 px-4 w-12 text-center">Rang</th>
                       <th className="py-3 px-4">Équipe</th>
                       <th className="py-3 px-3 text-center">J</th>
@@ -199,7 +199,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                       <th className="py-3 px-4 text-right">Points</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/60">
+                  <tbody className="divide-y divide-outline-variant/10">
                     {standings.map(row => {
                       const isPlayoffSpot = row.rank <= 4;
                       const teamName = teamsMap.get(row.teamId) || row.teamId;
@@ -207,7 +207,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                       return (
                         <tr
                           key={row.teamId}
-                          className={`transition hover:bg-muted/30 ${isPlayoffSpot ? "bg-primary/[0.02]" : ""}`}
+                          className={`transition-colors duration-150 hover:bg-surface-container-high/40 ${isPlayoffSpot ? "bg-primary/[0.02]" : ""}`}
                         >
                           <td className="py-3 px-4 text-center font-bold">
                             <span
@@ -228,7 +228,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                           </td>
                           <td aria-label={teamName} className="py-3 px-4 font-semibold text-foreground">
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                              <span className="font-mono text-xs px-1.5 py-0.5 rounded-lg bg-surface-container-high text-muted-foreground border border-outline-variant/20">
                                 {row.teamId}
                               </span>
                               <span>{teamName}</span>
@@ -264,7 +264,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                 </table>
               </div>
 
-              <div className="p-3 bg-muted/20 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="p-3 bg-surface-container-high/40 border-t border-outline-variant/15 flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="w-2.5 h-2.5 rounded-full bg-primary/40 inline-block" />
                 <span>Les 4 premières équipes sont qualifiées pour les Play-offs.</span>
               </div>
@@ -275,12 +275,12 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
           {activeTab === "matches" && (
             <div className="space-y-4">
               {/* Matchday Selector */}
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-card border border-border">
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-surface-container/60 backdrop-blur-md border border-outline-variant/15 shadow-sm">
                 <button
                   type="button"
                   onClick={() => setSelectedMatchday(d => Math.max(1, d - 1))}
                   disabled={selectedMatchday === 1}
-                  className="p-1.5 rounded-lg border border-border hover:bg-muted disabled:opacity-40 transition"
+                  className="p-1.5 rounded-lg border border-outline-variant/20 hover:bg-surface-container-high disabled:opacity-40 transition"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -291,7 +291,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                   type="button"
                   onClick={() => setSelectedMatchday(d => Math.min(totalMatchdays, d + 1))}
                   disabled={selectedMatchday >= totalMatchdays}
-                  className="p-1.5 rounded-lg border border-border hover:bg-muted disabled:opacity-40 transition"
+                  className="p-1.5 rounded-lg border border-outline-variant/20 hover:bg-surface-container-high disabled:opacity-40 transition"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -299,7 +299,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
 
               {/* Matches list for current day */}
               {matchdayResults.length === 0 ? (
-                <div className="border border-dashed border-border rounded-2xl p-12 text-center text-xs text-muted-foreground">
+                <div className="border border-dashed border-outline-variant/25 rounded-2xl p-12 text-center text-xs text-muted-foreground bg-surface-container/30 backdrop-blur-md">
                   Aucune rencontre programmée pour cette journée.
                 </div>
               ) : (
@@ -311,14 +311,14 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                     return (
                       <div
                         key={idx}
-                        className="border border-border bg-card rounded-2xl p-4 flex items-center justify-between gap-4"
+                        className="border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm hover:bg-surface-container-high/60 transition-all duration-200"
                       >
                         <div className="text-right flex-1 min-w-0">
                           <div className="font-bold text-xs truncate">{homeName}</div>
                           <div className="text-xs font-mono text-muted-foreground">[{match.homeId}]</div>
                         </div>
 
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background border border-border font-mono font-bold text-sm shrink-0">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-container-high border border-outline-variant/20 font-mono font-bold text-sm shrink-0">
                           <span>{match.homeScore}</span>
                           <span className="text-muted-foreground">-</span>
                           <span>{match.awayScore}</span>
@@ -339,7 +339,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
           {/* Playoffs Final Four Tab */}
           {activeTab === "playoffs" && (
             <div className="space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border">
+              <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-surface-container/60 backdrop-blur-md border border-outline-variant/15 shadow-sm">
                 <div className="flex items-center gap-3">
                   <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
                     <Trophy className="w-5 h-5" />
@@ -359,13 +359,13 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
               </div>
 
               {season?.meta?.champion && (
-                <div className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm font-bold text-warning/80">
+                <div className="rounded-2xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm font-bold text-warning/80">
                   Champion de la saison : {teamsMap.get(season.meta.champion) ?? season.meta.champion}
                 </div>
               )}
 
               {playoffResults.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+                <div className="rounded-2xl border border-dashed border-outline-variant/25 bg-surface-container/30 backdrop-blur-md p-10 text-center text-sm text-muted-foreground">
                   Aucun résultat de play-offs publié pour cette saison.
                 </div>
               ) : (
@@ -373,16 +373,16 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
                   {playoffResults.map((match, index) => (
                     <article
                       key={`${match.round}-${index}`}
-                      className="rounded-2xl border border-border bg-card p-5 shadow-xs"
+                      className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-5 shadow-xs hover:bg-surface-container-high/60 transition-all duration-200"
                     >
-                      <h4 className="mb-3 border-b border-border/60 pb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      <h4 className="mb-3 border-b border-outline-variant/15 pb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                         {match.label}
                       </h4>
                       <div className="flex items-center justify-between gap-3 text-sm">
                         <span className="min-w-0 truncate font-semibold">
                           {teamsMap.get(match.homeId) ?? match.homeId}
                         </span>
-                        <span className="shrink-0 rounded-lg bg-background px-3 py-1 font-mono font-bold">
+                        <span className="shrink-0 rounded-xl bg-surface-container-high px-3 py-1 font-mono font-bold border border-outline-variant/20">
                           {match.homeScore} - {match.awayScore}
                         </span>
                         <span className="min-w-0 truncate text-right font-semibold">
@@ -398,7 +398,7 @@ export default function AstralLeaguePage({ initialSeason = null }: { initialSeas
 
           {/* Rules Tab */}
           {activeTab === "rules" && (
-            <div className="border border-border bg-card rounded-2xl p-6 space-y-4 text-xs text-muted-foreground leading-relaxed">
+            <div className="border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl p-6 space-y-4 text-xs text-muted-foreground leading-relaxed shadow-sm">
               <h3 className="font-bold text-sm text-foreground">Barème de Points Astral League</h3>
               <ul className="list-disc list-inside space-y-1.5">
                 <li>

@@ -147,7 +147,7 @@ export default function AchilleaAdminSanctionsPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/15 pb-6">
         <div className="space-y-1">
           <Link
             href="/achillea/admins/dashboard"
@@ -157,7 +157,7 @@ export default function AchilleaAdminSanctionsPage() {
             Retour au backoffice
           </Link>
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-lg bg-destructive/10 text-destructive border border-destructive/20">
+            <span className="p-2 rounded-xl bg-destructive/10 text-destructive border border-destructive/20">
               <ShieldAlert className="size-5" />
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Registre des Sanctions</h1>
@@ -172,7 +172,7 @@ export default function AchilleaAdminSanctionsPage() {
             variant={activeOnly ? "default" : "outline"}
             size="sm"
             onClick={() => setActiveOnly(!activeOnly)}
-            className="text-xs"
+            className="text-xs rounded-xl"
           >
             {activeOnly ? "Sanctions actives" : "Toutes les sanctions"}
           </Button>
@@ -185,7 +185,7 @@ export default function AchilleaAdminSanctionsPage() {
               void loadSanctions();
             }}
             disabled={refreshing}
-            className="gap-2 text-xs"
+            className="gap-2 text-xs rounded-xl"
           >
             <RefreshCw className={`size-3.5 ${refreshing ? "animate-spin" : ""}`} />
           </Button>
@@ -193,7 +193,7 @@ export default function AchilleaAdminSanctionsPage() {
           <Button
             size="sm"
             onClick={() => setCreateOpen(true)}
-            className="gap-1.5 text-xs bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            className="gap-1.5 text-xs bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl"
           >
             <Plus className="size-3.5" />
             Émettre une sanction
@@ -203,12 +203,12 @@ export default function AchilleaAdminSanctionsPage() {
 
       {loading ? (
         <div className="space-y-3">
-          <Skeleton className="h-16 rounded-xl" />
-          <Skeleton className="h-16 rounded-xl" />
-          <Skeleton className="h-16 rounded-xl" />
+          <Skeleton className="h-16 rounded-2xl" />
+          <Skeleton className="h-16 rounded-2xl" />
+          <Skeleton className="h-16 rounded-2xl" />
         </div>
       ) : sanctions.length === 0 ? (
-        <div className="p-12 text-center border border-border/60 rounded-xl bg-card/40 space-y-3">
+        <div className="p-12 text-center border border-outline-variant/15 rounded-2xl bg-surface-container/40 backdrop-blur-md space-y-3">
           <CheckCircle2 className="size-10 text-success mx-auto" />
           <div className="font-bold text-base">Aucune sanction trouvée</div>
           <p className="text-xs text-muted-foreground">
@@ -218,10 +218,10 @@ export default function AchilleaAdminSanctionsPage() {
           </p>
         </div>
       ) : (
-        <div className="border border-border/60 rounded-xl overflow-hidden bg-card/50">
+        <div className="border border-outline-variant/15 rounded-2xl overflow-hidden bg-surface-container/60 backdrop-blur-md shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-muted-foreground uppercase bg-muted/40 border-b border-border/60">
+              <thead className="text-xs text-muted-foreground uppercase bg-surface-container-high/60 border-b border-outline-variant/15 font-semibold">
                 <tr>
                   <th className="px-4 py-3">Joueur (Discord ID)</th>
                   <th className="px-4 py-3">Type</th>
@@ -231,14 +231,14 @@ export default function AchilleaAdminSanctionsPage() {
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/40">
+              <tbody className="divide-y divide-outline-variant/10">
                 {sanctions.map(s => {
                   const isRevoked = !!s.revokedAt;
                   const isExpired = s.expiresAt && new Date(s.expiresAt).getTime() < clockTime;
                   const isActive = !isRevoked && !isExpired;
 
                   return (
-                    <tr key={s.id} className="hover:bg-muted/20">
+                    <tr key={s.id} className="hover:bg-surface-container-high/40 transition-colors duration-150">
                       <td className="px-4 py-3 font-mono text-xs font-semibold">
                         <Link href={`/achillea/users/${s.userId}`} className="hover:text-primary transition underline">
                           {s.userId}

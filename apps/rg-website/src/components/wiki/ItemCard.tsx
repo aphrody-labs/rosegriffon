@@ -1,6 +1,6 @@
 "use client";
 
-import { Store } from "lucide-react";
+import { Clock, Hourglass, Store } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -93,7 +93,7 @@ export function ItemCard({
       className={cn(
         "block h-full transition-all duration-200 relative overflow-hidden group",
         "hover:shadow-lg hover:-translate-y-0.5",
-        "border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container",
+        "border border-outline-variant/15 bg-surface-container hover:bg-surface-container-high",
         "rounded-2xl",
         className,
       )}
@@ -132,7 +132,7 @@ export function ItemCard({
             {topStats.map(([key, value]) => (
               <span
                 key={key}
-                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-primary/10 text-[10px] font-bold text-primary"
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-primary/10 text-[10px] font-bold text-primary tabular-nums"
               >
                 {STAT_SHORT[key] || key} {value > 0 ? "+" : ""}
                 {value}
@@ -143,13 +143,15 @@ export function ItemCard({
             {isTactic && stats && (
               <>
                 {stats.duration && (
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-tertiary/10 text-[10px] font-bold text-tertiary">
-                    ⏱ {stats.duration}s
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-tertiary/10 text-[10px] font-bold text-tertiary font-mono tabular-nums">
+                    <Clock className="size-2.5 shrink-0" aria-hidden="true" />
+                    <span>{stats.duration}s</span>
                   </span>
                 )}
                 {stats.cooldown && (
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-error/10 text-[10px] font-bold text-error">
-                    ⏳ {stats.cooldown}s
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-error/10 text-[10px] font-bold text-error font-mono tabular-nums">
+                    <Hourglass className="size-2.5 shrink-0" aria-hidden="true" />
+                    <span>{stats.cooldown}s</span>
                   </span>
                 )}
               </>

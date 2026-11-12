@@ -125,10 +125,10 @@ export default function RankedHubPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline-variant/15 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
+            <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
               <Swords className="w-5 h-5" />
             </span>
             <h1 className="text-3xl font-bold tracking-tight">Système Classé (Ranked)</h1>
@@ -143,21 +143,21 @@ export default function RankedHubPage() {
         <div className="flex items-center gap-2 flex-wrap">
           <Link
             href="/achillea/ranked/leaderboard"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-card hover:bg-accent transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl border border-outline-variant/15 bg-surface-container/60 hover:bg-surface-container-high transition-colors"
           >
             <Trophy className="w-3.5 h-3.5 text-warning" />
             Classement
           </Link>
           <Link
             href="/achillea/ranked/tiers"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-card hover:bg-accent transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl border border-outline-variant/15 bg-surface-container/60 hover:bg-surface-container-high transition-colors"
           >
             <Layers className="w-3.5 h-3.5 text-primary" />
             Paliers
           </Link>
           <Link
             href="/achillea/ranked/history"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-card hover:bg-accent transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl border border-outline-variant/15 bg-surface-container/60 hover:bg-surface-container-high transition-colors"
           >
             <History className="w-3.5 h-3.5 text-success" />
             Historique
@@ -166,12 +166,12 @@ export default function RankedHubPage() {
       </div>
 
       {/* Mode & Type Selectors */}
-      <div className="flex flex-wrap items-center justify-center gap-4 p-2 bg-card/60 backdrop-blur-sm border border-border rounded-xl">
-        <div className="flex items-center p-1 bg-muted rounded-lg">
+      <div className="flex flex-wrap items-center justify-center gap-4 p-2 bg-surface-container/60 backdrop-blur-md border border-outline-variant/15 rounded-2xl">
+        <div className="flex items-center p-1 bg-surface-container-high/60 rounded-xl">
           <button
             type="button"
             onClick={() => startTransition(() => setMode(2))}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               mode === 2
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -182,7 +182,7 @@ export default function RankedHubPage() {
           <button
             type="button"
             onClick={() => startTransition(() => setMode(4))}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               mode === 4
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -192,11 +192,11 @@ export default function RankedHubPage() {
           </button>
         </div>
 
-        <div className="flex items-center p-1 bg-muted rounded-lg">
+        <div className="flex items-center p-1 bg-surface-container-high/60 rounded-xl">
           <button
             type="button"
             onClick={() => setIsRanked(true)}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               isRanked ? "bg-warning text-warning-foreground shadow-sm font-bold" : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -205,7 +205,7 @@ export default function RankedHubPage() {
           <button
             type="button"
             onClick={() => setIsRanked(false)}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               !isRanked
                 ? "bg-secondary text-secondary-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -226,11 +226,11 @@ export default function RankedHubPage() {
        * `GET /auth/me` réponde, y compris à un joueur déjà connecté.
        */}
       {isLoading ? (
-        <div className="p-12 text-center border border-border rounded-2xl bg-card text-sm text-muted-foreground">
+        <div className="p-12 text-center border border-outline-variant/15 rounded-2xl bg-surface-container/60 backdrop-blur-md text-sm text-muted-foreground">
           Vérification de la session…
         </div>
       ) : !isAuthenticated ? (
-        <div className="p-8 border border-border/80 bg-card/40 backdrop-blur-sm rounded-2xl text-center space-y-4">
+        <div className="p-8 border border-outline-variant/15 bg-surface-container/40 backdrop-blur-md rounded-2xl text-center space-y-4 shadow-sm">
           <ShieldAlert className="w-12 h-12 text-warning mx-auto opacity-80" />
           <div className="space-y-1">
             <h2 className="text-xl font-bold">Connexion requise pour votre profil classé</h2>
@@ -253,27 +253,27 @@ export default function RankedHubPage() {
           <button
             type="button"
             onClick={() => login()}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition shadow-lg"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 transition shadow-lg active:scale-[0.99]"
           >
             Se connecter avec Discord
           </button>
         </div>
       ) : loadingProfile ? (
-        <div className="p-12 text-center border border-border rounded-2xl bg-card">
+        <div className="p-12 text-center border border-outline-variant/15 rounded-2xl bg-surface-container/60 backdrop-blur-md">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground mb-3" />
           <p className="text-sm text-muted-foreground">Chargement de votre profil classé...</p>
         </div>
       ) : profileError || !profile ? (
         <div
           role="alert"
-          className="p-8 border border-destructive/30 bg-card rounded-2xl text-center text-sm text-destructive"
+          className="p-8 border border-destructive/30 bg-surface-container/60 backdrop-blur-md rounded-2xl text-center text-sm text-destructive"
         >
           {profileError ?? "Profil classé introuvable."}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Profile card */}
-          <div className="md:col-span-2 border border-border bg-card rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+          <div className="md:col-span-2 border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl p-6 shadow-sm flex flex-col justify-between">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               {profile.tier ? (
                 <div
@@ -290,7 +290,7 @@ export default function RankedHubPage() {
                   />
                 </div>
               ) : (
-                <div className="w-28 h-28 rounded-2xl flex items-center justify-center shrink-0 border border-border bg-muted text-sm font-semibold text-muted-foreground">
+                <div className="w-28 h-28 rounded-2xl flex items-center justify-center shrink-0 border border-outline-variant/20 bg-surface-container-high text-sm font-semibold text-muted-foreground">
                   À jouer
                 </div>
               )}
@@ -298,40 +298,40 @@ export default function RankedHubPage() {
               <div className="space-y-3 text-center sm:text-left flex-1">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                   <h2 className="text-2xl font-bold tracking-tight">{tierKey}</h2>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning/10 text-warning border border-warning/30">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning/10 text-warning border border-warning/30 font-mono">
                     {profile?.elo ?? 0} AP
                   </span>
-                  <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-muted text-muted-foreground">
+                  <span className="px-2 py-0.5 rounded-lg text-xs font-medium bg-surface-container-high text-muted-foreground">
                     {mode === 2 ? "1v1" : "2v2"}
                   </span>
                   {profile.globalRank != null && (profile.totalPlayers ?? 0) > 0 && profile.percentile != null && (
-                    <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                    <span className="px-2 py-0.5 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20">
                       Top {profile.percentile}%
                     </span>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                  <div className="p-2 rounded-lg bg-background/60 border border-border">
+                  <div className="p-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                     <div className="text-muted-foreground">Victoires</div>
-                    <div className="text-base font-bold text-success">{profile?.wins ?? 0}</div>
+                    <div className="text-base font-bold text-success font-mono">{profile?.wins ?? 0}</div>
                   </div>
-                  <div className="p-2 rounded-lg bg-background/60 border border-border">
+                  <div className="p-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                     <div className="text-muted-foreground">Défaites</div>
-                    <div className="text-base font-bold text-destructive">{profile?.losses ?? 0}</div>
+                    <div className="text-base font-bold text-destructive font-mono">{profile?.losses ?? 0}</div>
                   </div>
-                  <div className="p-2 rounded-lg bg-background/60 border border-border">
+                  <div className="p-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                     <div className="text-muted-foreground">Taux V</div>
-                    <div className="text-base font-bold">{winrate}%</div>
+                    <div className="text-base font-bold font-mono">{winrate}%</div>
                   </div>
-                  <div className="p-2 rounded-lg bg-background/60 border border-border">
+                  <div className="p-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/15">
                     <div className="text-muted-foreground">Pic ELO</div>
-                    <div className="text-base font-bold text-warning">{profile?.peakRating ?? 0} AP</div>
+                    <div className="text-base font-bold text-warning font-mono">{profile?.peakRating ?? 0} AP</div>
                   </div>
                 </div>
 
                 {trend?.sparkline && trend.sparkline.length > 1 && (
-                  <div className="pt-2 flex items-center justify-between gap-4 border-t border-border/50 text-xs text-muted-foreground">
+                  <div className="pt-2 flex items-center justify-between gap-4 border-t border-outline-variant/15 text-xs text-muted-foreground">
                     <span>Tendance récente ({trend.sparkline.length} m.)</span>
                     <Sparkline data={trend.sparkline} width={140} height={28} />
                   </div>
@@ -341,7 +341,7 @@ export default function RankedHubPage() {
           </div>
 
           {/* Challenge link or quick action */}
-          <div className="border border-border bg-card rounded-2xl p-6 flex flex-col justify-between space-y-4">
+          <div className="border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl p-6 flex flex-col justify-between space-y-4 shadow-sm">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Swords className="w-4 h-4 text-warning" aria-hidden />
@@ -354,12 +354,12 @@ export default function RankedHubPage() {
 
             {challengeLink ? (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 p-2 bg-background border border-border rounded-lg text-xs font-mono">
+                <div className="flex items-center gap-2 p-2 bg-surface-container-high/70 border border-outline-variant/20 rounded-xl text-xs font-mono">
                   <span className="truncate flex-1">CODE: {challengeLink.code}</span>
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="p-1.5 rounded-md hover:bg-muted transition text-muted-foreground hover:text-foreground"
+                    className="p-1.5 rounded-lg hover:bg-surface-container-highest transition text-muted-foreground hover:text-foreground"
                     title="Copier le lien"
                   >
                     {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
@@ -374,7 +374,7 @@ export default function RankedHubPage() {
                 type="button"
                 onClick={handleCreateChallenge}
                 disabled={creatingLink}
-                className="w-full py-2 px-3 text-xs font-semibold rounded-lg border border-border bg-secondary hover:bg-secondary/80 transition flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-3 text-xs font-semibold rounded-xl border border-outline-variant/25 bg-secondary hover:bg-secondary/80 transition-all active:scale-[0.99] flex items-center justify-center gap-2 shadow-xs"
               >
                 {creatingLink ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -387,7 +387,7 @@ export default function RankedHubPage() {
 
             <Link
               href="/achillea/ranked/match"
-              className="inline-flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition pt-2 border-t border-border"
+              className="inline-flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition pt-2 border-t border-outline-variant/15"
             >
               Accéder à l'écran de match en cours
               <ExternalLink className="w-3 h-3" />
@@ -398,7 +398,7 @@ export default function RankedHubPage() {
 
       {/* Matchmaking Queue Card */}
       {isAuthenticated && (
-        <div className="border border-border/80 bg-gradient-to-b from-card/80 to-card rounded-2xl p-8 text-center space-y-6 shadow-md">
+        <div className="border border-outline-variant/20 bg-gradient-to-b from-surface-container/80 to-surface-container/60 backdrop-blur-md rounded-2xl p-8 text-center space-y-6 shadow-md">
           {!isSearching ? (
             <div className="space-y-4 max-w-md mx-auto">
               <div className="space-y-1">

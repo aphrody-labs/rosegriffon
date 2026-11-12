@@ -53,17 +53,17 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/15 pb-6">
         <div className="space-y-1">
           <Link
             href="/achillea/ranked"
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-lg text-muted-foreground hover:text-foreground transition mb-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl text-lg text-muted-foreground hover:text-foreground transition mb-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Retour au hub classé
           </Link>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20">
+            <span className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
               <Layers className="w-5 h-5" />
             </span>
             <h1 className="text-3xl font-bold tracking-tight">Paliers Compétitifs</h1>
@@ -74,14 +74,14 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
         </div>
 
         {/* Mode switch */}
-        <div className="flex items-center p-1 bg-muted rounded-lg self-start sm:self-auto">
+        <div className="flex items-center p-1 bg-surface-container/60 backdrop-blur-md border border-outline-variant/15 rounded-2xl self-start sm:self-auto">
           <button
             type="button"
             aria-pressed={mode === 2}
             onClick={() => setMode(2)}
-            className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+            className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-xl transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
               mode === 2
-                ? "bg-primary text-primary-foreground shadow-sm"
+                ? "bg-surface-container-high text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -91,9 +91,9 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
             type="button"
             aria-pressed={mode === 4}
             onClick={() => setMode(4)}
-            className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-md transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+            className={`min-h-11 px-4 py-1.5 text-lg font-semibold rounded-xl transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
               mode === 4
-                ? "bg-primary text-primary-foreground shadow-sm"
+                ? "bg-surface-container-high text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -103,7 +103,7 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
       </div>
 
       {/* Distribution bar */}
-      <div className="border border-border bg-card rounded-2xl p-6 shadow-sm space-y-4">
+      <div className="border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl p-6 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-primary" />
@@ -142,8 +142,8 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
             return (
               <div
                 key={tier.key}
-                className={`border rounded-2xl p-5 bg-card relative overflow-hidden transition hover:shadow-md ${
-                  isTopTier ? "border-warning/40" : "border-border"
+                className={`border rounded-2xl p-5 bg-surface-container/60 backdrop-blur-md relative overflow-hidden transition-all duration-200 hover:bg-surface-container-high/60 hover:shadow-lg hover:border-outline-variant/30 active:scale-[0.99] ${
+                  isTopTier ? "border-warning/40 shadow-xs" : "border-outline-variant/15"
                 }`}
               >
                 {isTopTier && (
@@ -174,7 +174,7 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
 
                     <p className="text-lg text-muted-foreground">Palier {idx + 1} sur 11</p>
 
-                    <div className="flex items-center justify-between gap-3 text-lg pt-2 border-t border-border/60 text-muted-foreground">
+                    <div className="flex items-center justify-between gap-3 text-lg pt-2 border-t border-outline-variant/15 text-muted-foreground">
                       <span>{tier.playerCount} joueurs</span>
                       <span className="font-semibold text-foreground">{pct}% de l'effectif</span>
                     </div>
@@ -187,7 +187,7 @@ export default function RankedTiersPage({ initialTiers }: { initialTiers?: Ranke
       )}
 
       {/* Progression note */}
-      <div className="p-6 rounded-2xl bg-muted/30 border border-border space-y-2 text-lg text-muted-foreground">
+      <div className="p-6 rounded-2xl bg-surface-container/40 backdrop-blur-md border border-outline-variant/15 space-y-2 text-lg text-muted-foreground">
         <h4 className="font-semibold text-foreground text-lg flex items-center gap-1.5">
           <ScrollText className="w-4 h-4 text-warning" aria-hidden />
           Règles du système d'AP (Achilléa Points)

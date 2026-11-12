@@ -21,10 +21,10 @@ export function ClanCard({ clan, className }: ClanCardProps) {
       className="block group rounded-2xl focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
       <Card
-        className={`border border-outline/20 hover:border-primary/50 transition-colors bg-surface ${className ?? ""}`}
+        className={`border border-outline-variant/15 hover:border-primary/50 transition-all duration-200 hover:shadow-lg hover:bg-surface-container-high/60 bg-surface-container/60 backdrop-blur-md rounded-2xl ${className ?? ""}`}
       >
         <CardContent className="p-4 sm:p-5 flex gap-4 items-start">
-          <div className="relative shrink-0 size-20 sm:size-24 rounded-xl overflow-hidden border border-outline/30 bg-surface-variant">
+          <div className="relative shrink-0 size-20 sm:size-24 rounded-xl overflow-hidden border border-outline-variant/20 bg-surface-container-high">
             {clan.avatarUrl && failedAvatarUrl !== clan.avatarUrl ? (
               <Image
                 src={clan.avatarUrl}

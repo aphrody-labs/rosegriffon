@@ -24,10 +24,10 @@ export default function SavePage() {
       >
         <h1
           className="
-      font-[BradBunR] text-2xl
+      font-[BradBunR] font-black tracking-tight text-2xl
       sm:text-3xl
       md:text-4xl
-      text-on-surface tracking-wide
+      text-on-surface
     "
         >
           Lecteur de sauvegarde

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Check, X, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronUp, Check, X, Sparkles, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { VariantComparisonResult } from "@rosegriffon/inagle";
 
@@ -72,7 +72,7 @@ export function CharaVariantsComparison({ comparisons, baseName }: CharaVariants
   };
 
   return (
-    <div className="bg-surface-container-low rounded-[20px] sm:rounded-[24px] border border-outline-variant/30 px-4 py-4 sm:px-6 sm:py-5 space-y-4">
+    <div className="bg-surface-container rounded-[20px] sm:rounded-[24px] border border-outline-variant/15 px-4 py-4 sm:px-6 sm:py-5 space-y-4">
       <div className="flex items-center gap-2">
         <Sparkles className="size-5 text-primary" />
         <h2 className="text-sm sm:text-base font-black uppercase tracking-wider text-on-surface">
@@ -117,7 +117,7 @@ export function CharaVariantsComparison({ comparisons, baseName }: CharaVariants
                   >
                     {c.classification}
                   </div>
-                  <span className="text-xs font-bold text-on-surface truncate">Rarité : {c.rarity}</span>
+                  <span className="text-xs font-bold text-on-surface truncate">Rarité : <span className="tabular-nums">{c.rarity}</span></span>
                   <span className="text-[10px] text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded">
                     {c.position} | {c.element}
                   </span>
@@ -160,9 +160,9 @@ export function CharaVariantsComparison({ comparisons, baseName }: CharaVariants
                             className="flex items-center justify-between p-2 rounded-xl bg-surface-container/20 border border-outline-variant/10 text-xs"
                           >
                             <span className="text-on-surface-variant">{STAT_LABELS[stat.stat] || stat.stat}</span>
-                            <div className="flex items-center gap-2 font-mono">
+                            <div className="flex items-center gap-2 font-mono tabular-nums">
                               <span className="text-on-surface-variant/60">{stat.baseValue}</span>
-                              <span className="text-on-surface-variant/40">➔</span>
+                              <ArrowRight className="size-3 text-on-surface-variant/40 shrink-0" aria-hidden="true" />
                               <span className="font-bold text-on-surface">{stat.variantValue}</span>
                               {hasDiff && (
                                 <span

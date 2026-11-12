@@ -68,10 +68,10 @@ export default function ToolsPage() {
     <div className="w-full">
       <h1
         className="
-     font-[BradBunR] text-2xl
+     font-[BradBunR] font-black tracking-tight text-2xl
      sm:text-3xl
      md:text-4xl
-     text-on-surface tracking-wide mb-6
+     text-on-surface mb-6
      sm:mb-10
    "
       >

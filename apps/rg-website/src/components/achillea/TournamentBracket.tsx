@@ -113,7 +113,7 @@ export function TournamentBracket({
 
     return (
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-muted/40 border border-border">
+        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-surface-container/60 backdrop-blur-md border border-outline-variant/15 shadow-sm">
           <div className="flex items-center gap-3">
             <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
               <Clock className="w-6 h-6" />
@@ -136,7 +136,7 @@ export function TournamentBracket({
           <div className="flex flex-col sm:flex-row items-stretch gap-6 sm:gap-8 min-w-0 sm:min-w-[720px]">
             {simulatedRounds.map((r, rIdx) => (
               <div key={rIdx} className="flex-1 space-y-4">
-                <div className="text-center font-bold text-lg uppercase tracking-wider py-1.5 px-3 rounded-lg bg-card border border-border text-foreground shadow-sm">
+                <div className="text-center font-bold text-lg uppercase tracking-wider py-1.5 px-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/15 text-foreground shadow-sm">
                   {r.title}
                 </div>
 
@@ -149,7 +149,7 @@ export function TournamentBracket({
                     return (
                       <div
                         key={mIdx}
-                        className="p-3 rounded-xl bg-card border border-border/70 shadow-xs space-y-2 relative"
+                        className="p-3 rounded-2xl bg-surface-container/70 backdrop-blur-md border border-outline-variant/20 shadow-xs space-y-2 relative"
                       >
                         <div className="flex items-center justify-between gap-2 text-lg">
                           <div className="flex items-center gap-2 truncate">
@@ -160,7 +160,7 @@ export function TournamentBracket({
                                 className="w-8 h-8 shrink-0"
                               />
                             ) : (
-                              <div className="w-8 h-8 rounded-full bg-muted border border-border/80 flex items-center justify-center text-lg text-muted-foreground font-mono">
+                              <div className="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-lg text-muted-foreground font-mono">
                                 {mIdx * 2 + 1}
                               </div>
                             )}
@@ -173,7 +173,7 @@ export function TournamentBracket({
                           <span className="font-mono text-lg font-bold text-muted-foreground">-</span>
                         </div>
 
-                        <div className="border-t border-border/40" />
+                        <div className="border-t border-outline-variant/15" />
 
                         <div className="flex items-center justify-between gap-2 text-lg">
                           <div className="flex items-center gap-2 truncate">
@@ -184,7 +184,7 @@ export function TournamentBracket({
                                 className="w-8 h-8 shrink-0"
                               />
                             ) : (
-                              <div className="w-8 h-8 rounded-full bg-muted border border-border/80 flex items-center justify-center text-lg text-muted-foreground font-mono">
+                              <div className="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-lg text-muted-foreground font-mono">
                                 {mIdx * 2 + 2}
                               </div>
                             )}
@@ -211,7 +211,7 @@ export function TournamentBracket({
   // Affichage des matchs réels de l'arbre de compétition
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-surface-container/60 backdrop-blur-md border border-outline-variant/15 shadow-xs">
         <div className="flex items-center gap-2">
           <span className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
             <Swords className="w-6 h-6" />
@@ -245,7 +245,7 @@ export function TournamentBracket({
                   className={`text-center font-bold text-lg uppercase tracking-wider py-2 px-3 rounded-xl border shadow-xs flex items-center justify-center gap-1.5 ${
                     isFinal
                       ? "bg-warning/10 border-warning/30 text-warning"
-                      : "bg-card border-border text-foreground"
+                      : "bg-surface-container-high/60 border-outline-variant/15 text-foreground"
                   }`}
                 >
                   {isFinal && <Trophy className="w-5 h-5 text-warning" />}
@@ -275,8 +275,8 @@ export function TournamentBracket({
                             : undefined
                         }
                         className={`block w-full text-left p-3.5 min-h-11 rounded-2xl border transition-all duration-200 shadow-xs relative group focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                          onSelectMatch ? "hover:border-primary/60 hover:shadow-md" : ""
-                        } bg-card border-border/80`}
+                          onSelectMatch ? "hover:border-primary/60 hover:shadow-md active:scale-[0.99]" : ""
+                        } bg-surface-container/70 backdrop-blur-md border-outline-variant/20`}
                       >
                         <div className="space-y-2.5">
                           {/* Opponent 1 */}
@@ -296,12 +296,12 @@ export function TournamentBracket({
                                   (m.opponent1?.id != null ? `Participant #${m.opponent1.id}` : "En attente")}
                               </span>
                             </div>
-                            <span className="font-mono text-lg font-bold px-1.5 py-0.5 rounded bg-muted/60">
+                            <span className="font-mono text-lg font-bold px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/15">
                               {score1}
                             </span>
                           </div>
 
-                          <div className="border-t border-border/40" />
+                          <div className="border-t border-outline-variant/15" />
 
                           {/* Opponent 2 */}
                           <div
@@ -320,7 +320,7 @@ export function TournamentBracket({
                                   (m.opponent2?.id != null ? `Participant #${m.opponent2.id}` : "En attente")}
                               </span>
                             </div>
-                            <span className="font-mono text-lg font-bold px-1.5 py-0.5 rounded bg-muted/60">
+                            <span className="font-mono text-lg font-bold px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/15">
                               {score2}
                             </span>
                           </div>

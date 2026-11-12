@@ -55,7 +55,7 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
 
   if (!tournaments.length) {
     return (
-      <output className="text-center py-12 border border-dashed border-outline/30 rounded-2xl p-6 text-lg text-on-surface-variant">
+      <output className="text-center py-12 border border-dashed border-outline-variant/25 rounded-2xl p-6 text-lg text-on-surface-variant bg-surface-container/30 backdrop-blur-md">
         <Trophy aria-hidden="true" className="size-10 mx-auto mb-2 opacity-40" />
         <p className="font-semibold">Aucun tournoi trouvé</p>
       </output>
@@ -66,7 +66,7 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
     <div className={className}>
       <ul className="grid gap-4 lg:hidden" aria-label="Tournois">
         {tournaments.map(t => (
-          <li key={t.id} className="rounded-2xl border border-outline/30 bg-surface p-4 text-lg text-on-surface">
+          <li key={t.id} className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-4 text-lg text-on-surface shadow-sm transition-all duration-200 hover:bg-surface-container-high/60">
             <h2 className="font-bold leading-snug">{t.name}</h2>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Badge
@@ -87,7 +87,7 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
             </p>
             <Link
               href={`/achillea/tournaments/${t.id}`}
-              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-outline/40 px-4 font-semibold text-primary focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-outline-variant/30 px-4 font-semibold text-primary hover:bg-surface-container-high transition-colors focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               Détails et description complète
               <ChevronRight aria-hidden="true" className="size-5" />
@@ -95,10 +95,10 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
           </li>
         ))}
       </ul>
-      <div className="hidden overflow-x-auto rounded-2xl border border-outline/30 bg-surface lg:block">
+      <div className="hidden overflow-x-auto rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md lg:block shadow-sm">
         <table className="w-full text-left text-lg">
           <caption className="sr-only">Liste des tournois Achilléa</caption>
-          <thead className="border-b border-outline/30 bg-surface-variant/40 font-bold text-on-surface-variant">
+          <thead className="border-b border-outline-variant/15 bg-surface-container-high/60 font-bold text-on-surface-variant">
             <tr>
               <th scope="col" className="px-4 py-4">
                 Tournoi
@@ -120,15 +120,15 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-outline/20 text-on-surface">
+          <tbody className="divide-y divide-outline-variant/10 text-on-surface">
             {tournaments.map(t => (
-              <tr key={t.id} className="hover:bg-surface-variant/20">
+              <tr key={t.id} className="hover:bg-surface-container-high/40 transition-colors duration-150">
                 <th scope="row" className="px-4 py-4 font-semibold">
                   <Link
                     href={`/achillea/tournaments/${t.id}`}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-lg text-primary focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-lg text-primary focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary hover:underline"
                   >
-                    <Trophy aria-hidden="true" className="size-6 shrink-0" />
+                    <Trophy aria-hidden="true" className="size-6 shrink-0 text-warning" />
                     {t.name}
                   </Link>
                 </th>
@@ -146,7 +146,7 @@ export function TournamentTable({ tournaments, loading = false, className }: Tou
                 <td className="px-4 py-4">
                   <Link
                     href={`/achillea/tournaments/${t.id}`}
-                    className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-outline/40 px-4 font-semibold text-primary focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-outline-variant/30 px-4 font-semibold text-primary hover:bg-surface-container-high transition-colors focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
                     Détails
                     <ChevronRight aria-hidden="true" className="size-5" />

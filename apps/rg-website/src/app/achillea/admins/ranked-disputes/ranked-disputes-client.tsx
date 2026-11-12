@@ -133,7 +133,7 @@ export default function AchilleaAdminRankedDisputesPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/15 pb-6">
         <div className="space-y-1">
           <Link
             href="/achillea/admins/dashboard"
@@ -143,7 +143,7 @@ export default function AchilleaAdminRankedDisputesPage() {
             Retour au backoffice
           </Link>
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-lg bg-warning/10 text-warning border border-warning/20">
+            <span className="p-2 rounded-xl bg-warning/10 text-warning border border-warning/20">
               <Gavel className="size-5" />
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Chambre d&apos;Arbitrage Ranked</h1>
@@ -161,7 +161,7 @@ export default function AchilleaAdminRankedDisputesPage() {
             void loadDisputes();
           }}
           disabled={refreshing}
-          className="gap-2 text-xs"
+          className="gap-2 text-xs rounded-xl"
         >
           <RefreshCw className={`size-3.5 ${refreshing ? "animate-spin" : ""}`} />
           Actualiser
@@ -170,11 +170,11 @@ export default function AchilleaAdminRankedDisputesPage() {
 
       {loading ? (
         <div className="space-y-3">
-          <Skeleton className="h-24 rounded-xl" />
-          <Skeleton className="h-24 rounded-xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
         </div>
       ) : disputes.length === 0 ? (
-        <div className="p-12 text-center border border-border/60 rounded-xl bg-card/40 space-y-3">
+        <div className="p-12 text-center border border-outline-variant/15 rounded-2xl bg-surface-container/40 backdrop-blur-md space-y-3">
           <CheckCircle2 className="size-10 text-success mx-auto" />
           <div className="font-bold text-base">Aucun litige en attente</div>
           <p className="text-xs text-muted-foreground">
@@ -184,14 +184,14 @@ export default function AchilleaAdminRankedDisputesPage() {
       ) : (
         <div className="space-y-6">
           {disputes.map(d => (
-            <Card key={d.lobbyId} className="border-border/60 bg-card/50 shadow-sm overflow-hidden">
-              <CardHeader className="p-5 pb-3 border-b border-border/40 bg-muted/20">
+            <Card key={d.lobbyId} className="border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl shadow-sm overflow-hidden">
+              <CardHeader className="p-5 pb-3 border-b border-outline-variant/15 bg-surface-container-high/60">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
                     <Badge variant="outline" className="border-warning/30 text-warning">
                       Lobby #{d.lobbyId}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground font-mono">
                       Mode : {d.mode === 2 ? "Duo (2v2)" : "Solo (1v1)"} · Signalé le{" "}
                       {new Date(d.createdAt).toLocaleDateString("fr-FR", {
                         hour: "2-digit",
@@ -205,11 +205,11 @@ export default function AchilleaAdminRankedDisputesPage() {
                       variant="destructive"
                       size="sm"
                       onClick={() => handleCancelLobby(d.lobbyId)}
-                      className="text-xs"
+                      className="text-xs rounded-xl"
                     >
                       Annuler le match
                     </Button>
-                    <Button size="sm" onClick={() => handleOpenArbitrage(d)} className="gap-1.5 text-xs">
+                    <Button size="sm" onClick={() => handleOpenArbitrage(d)} className="gap-1.5 text-xs rounded-xl">
                       <Scale className="size-3.5" />
                       Trancher le litige
                     </Button>

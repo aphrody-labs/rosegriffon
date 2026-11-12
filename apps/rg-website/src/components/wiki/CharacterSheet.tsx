@@ -644,8 +644,8 @@ export function CharacterSheet({
           ═══════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Stats Panel */}
-        <section className="bg-surface-container-lowest rounded-[24px] sm:rounded-[32px] border border-outline-variant/30 overflow-hidden shadow-sm">
-          <div className="bg-surface-container-low px-4 sm:px-8 py-3 sm:py-4 border-b border-outline-variant/20 flex items-center justify-between">
+        <section className="bg-surface-container rounded-[24px] sm:rounded-[32px] border border-outline-variant/15 overflow-hidden shadow-sm">
+          <div className="bg-surface-container-high px-4 sm:px-8 py-3 sm:py-4 border-b border-outline-variant/15 flex items-center justify-between">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <TrendingUp size={20} className="sm:size-6 text-primary" aria-hidden="true" />
               <h2 className="text-xs sm:text-sm font-black uppercase tracking-widest text-on-surface">Statistiques</h2>
@@ -727,8 +727,8 @@ export function CharacterSheet({
         </section>
 
         {/* Moveset Panel */}
-        <section className="bg-surface-container-lowest rounded-[24px] sm:rounded-[32px] border border-outline-variant/30 overflow-hidden shadow-sm flex flex-col">
-          <div className="bg-surface-container-low px-4 sm:px-8 py-2.5 sm:py-4 border-b border-outline-variant/20 flex flex-col gap-2">
+        <section className="bg-surface-container rounded-[24px] sm:rounded-[32px] border border-outline-variant/15 overflow-hidden shadow-sm flex flex-col">
+          <div className="bg-surface-container-high px-4 sm:px-8 py-2.5 sm:py-4 border-b border-outline-variant/15 flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <CircleDot size={20} className="sm:size-6 text-primary" aria-hidden="true" />
@@ -916,8 +916,8 @@ export function CharacterSheet({
       {/* ═══════════════════════════════════════════════════
           PROFILE & DETAILS
           ═══════════════════════════════════════════════════ */}
-      <section className="bg-surface-container-lowest rounded-[24px] sm:rounded-[32px] border border-outline-variant/30 overflow-hidden shadow-sm">
-        <div className="bg-surface-container-low px-4 sm:px-8 py-3 sm:py-4 border-b border-outline-variant/20 flex items-center gap-1.5 sm:gap-2">
+      <section className="bg-surface-container rounded-[24px] sm:rounded-[32px] border border-outline-variant/15 overflow-hidden shadow-sm">
+        <div className="bg-surface-container-high px-4 sm:px-8 py-3 sm:py-4 border-b border-outline-variant/15 flex items-center gap-1.5 sm:gap-2">
           <FileText size={20} className="sm:size-6 text-primary" aria-hidden="true" />
           <h2 className="text-xs sm:text-sm font-black uppercase tracking-widest text-on-surface">Profil</h2>
         </div>

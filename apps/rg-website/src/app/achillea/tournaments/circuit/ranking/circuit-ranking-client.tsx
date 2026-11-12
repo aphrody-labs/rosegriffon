@@ -96,7 +96,7 @@ export default function CircuitRankingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 pb-2 items-end">
           {/* #2 */}
           {top3[1] && (
-            <div className={`order-2 sm:order-1 ${MEDAILLE.argent.carte} rounded-2xl p-5 text-center space-y-3 relative shadow-md`}>
+            <div className={`order-2 sm:order-1 ${MEDAILLE.argent.carte} rounded-2xl p-5 text-center space-y-3 relative shadow-md backdrop-blur-md transition-transform duration-200 hover:-translate-y-1`}>
               <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold ${MEDAILLE.argent.pastille} shadow`}>
                 #2 Argent
               </span>
@@ -110,12 +110,12 @@ export default function CircuitRankingPage() {
               <div>
                 <Link
                   href={`/achillea/users/${top3[1].userId}`}
-                  className="inline-flex min-h-11 items-center font-bold text-lg hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  className="inline-flex min-h-11 items-center font-bold text-lg hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
                   {top3[1].displayName}
                 </Link>
-                {top3[1].clan && <span className="text-lg text-muted-foreground">[{top3[1].clan.shortName}]</span>}
-                <div className={`text-xl font-extrabold ${MEDAILLE.argent.texte} mt-1`}>{top3[1].points} pts</div>
+                {top3[1].clan && <span className="text-lg text-muted-foreground"> [{top3[1].clan.shortName}]</span>}
+                <div className={`text-xl font-extrabold ${MEDAILLE.argent.texte} mt-1 font-mono`}>{top3[1].points} pts</div>
                 <div className="text-lg text-muted-foreground mt-0.5">
                   {top3[1].wins} titre{top3[1].wins > 1 ? "s" : ""} · {top3[1].tournamentsPlayed} tournoi
                   {top3[1].tournamentsPlayed > 1 ? "s" : ""}
@@ -126,7 +126,7 @@ export default function CircuitRankingPage() {
 
           {/* #1 Champion */}
           {top3[0] && (
-            <div className={`order-1 sm:order-2 ${MEDAILLE.or.carte} rounded-2xl p-6 text-center space-y-3 relative shadow-xl sm:-translate-y-2`}>
+            <div className={`order-1 sm:order-2 ${MEDAILLE.or.carte} rounded-2xl p-6 text-center space-y-3 relative shadow-xl backdrop-blur-md sm:-translate-y-2 transition-transform duration-200 hover:-translate-y-3`}>
               <div className={`absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3.5 py-1 rounded-full text-lg font-bold ${MEDAILLE.or.pastille} shadow-lg`}>
                 <Crown className="w-3.5 h-3.5 fill-black" />
                 #1 Leader Circuit
@@ -141,12 +141,12 @@ export default function CircuitRankingPage() {
               <div>
                 <Link
                   href={`/achillea/users/${top3[0].userId}`}
-                  className={`inline-flex min-h-11 items-center font-bold text-lg ${MEDAILLE.or.survolTexte} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`}
+                  className={`inline-flex min-h-11 items-center font-bold text-lg ${MEDAILLE.or.survolTexte} transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`}
                 >
                   {top3[0].displayName}
                 </Link>
-                {top3[0].clan && <span className="text-lg text-muted-foreground">[{top3[0].clan.shortName}]</span>}
-                <div className={`text-2xl font-black ${MEDAILLE.or.texte} mt-1`}>{top3[0].points} pts</div>
+                {top3[0].clan && <span className="text-lg text-muted-foreground"> [{top3[0].clan.shortName}]</span>}
+                <div className={`text-2xl font-black ${MEDAILLE.or.texte} mt-1 font-mono`}>{top3[0].points} pts</div>
                 <div className="text-lg text-muted-foreground mt-0.5">
                   {top3[0].wins} titre{top3[0].wins > 1 ? "s" : ""} · {top3[0].tournamentsPlayed} tournoi
                   {top3[0].tournamentsPlayed > 1 ? "s" : ""}
@@ -157,7 +157,7 @@ export default function CircuitRankingPage() {
 
           {/* #3 */}
           {top3[2] && (
-            <div className={`order-3 ${MEDAILLE.bronze.carte} rounded-2xl p-5 text-center space-y-3 relative shadow-md`}>
+            <div className={`order-3 ${MEDAILLE.bronze.carte} rounded-2xl p-5 text-center space-y-3 relative shadow-md backdrop-blur-md transition-transform duration-200 hover:-translate-y-1`}>
               <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-lg font-bold ${MEDAILLE.bronze.pastilleClaire} shadow`}>
                 #3 Bronze
               </span>
@@ -171,12 +171,12 @@ export default function CircuitRankingPage() {
               <div>
                 <Link
                   href={`/achillea/users/${top3[2].userId}`}
-                  className="inline-flex min-h-11 items-center font-bold text-lg hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  className="inline-flex min-h-11 items-center font-bold text-lg hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
                   {top3[2].displayName}
                 </Link>
-                {top3[2].clan && <span className="text-lg text-muted-foreground">[{top3[2].clan.shortName}]</span>}
-                <div className={`text-xl font-extrabold ${MEDAILLE.bronze.texte} mt-1`}>{top3[2].points} pts</div>
+                {top3[2].clan && <span className="text-lg text-muted-foreground"> [{top3[2].clan.shortName}]</span>}
+                <div className={`text-xl font-extrabold ${MEDAILLE.bronze.texte} mt-1 font-mono`}>{top3[2].points} pts</div>
                 <div className="text-lg text-muted-foreground mt-0.5">
                   {top3[2].wins} titre{top3[2].wins > 1 ? "s" : ""} · {top3[2].tournamentsPlayed} tournoi
                   {top3[2].tournamentsPlayed > 1 ? "s" : ""}
@@ -247,12 +247,12 @@ export default function CircuitRankingPage() {
           {/* Players Tab */}
           {activeTab === "players" &&
             (leaderboard.length === 0 ? (
-              <p className="rounded-xl border border-border p-5 text-lg">
+              <p className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-5 text-lg">
                 Aucun résultat de bracket homologué pour le moment.
               </p>
             ) : (
               <div className="space-y-4">
-                <div className="flex flex-wrap gap-4 rounded-xl border border-border bg-card p-4 text-lg">
+                <div className="flex flex-wrap gap-4 rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-4 text-lg shadow-sm">
                   <label className="flex flex-col gap-1">
                     Rechercher un joueur ou un clan
                     <input
@@ -260,7 +260,8 @@ export default function CircuitRankingPage() {
                       aria-label="Rechercher un joueur ou un clan"
                       value={playerQuery}
                       onChange={event => setPlayerQuery(event.target.value)}
-                      className="min-h-11 rounded-md border border-border bg-background px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      placeholder="Nom, pseudo ou clan..."
+                      className="min-h-11 rounded-xl border border-outline-variant/25 bg-surface-container-high/60 px-3 py-2 text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
                     />
                   </label>
                   <label className="flex flex-col gap-1">
@@ -268,7 +269,7 @@ export default function CircuitRankingPage() {
                     <select
                       value={minimumTournaments}
                       onChange={event => setMinimumTournaments(Number(event.target.value))}
-                      className="min-h-11 rounded-md border border-border bg-background px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      className="min-h-11 rounded-xl border border-outline-variant/25 bg-surface-container-high/60 px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
                     >
                       <option value={0}>Tous</option>
                       <option value={2}>2 ou plus</option>
@@ -281,22 +282,22 @@ export default function CircuitRankingPage() {
                   </p>
                 </div>
                 {visiblePlayers.length === 0 ? (
-                  <p className="rounded-xl border border-border p-5 text-lg">Aucun joueur ne correspond aux filtres.</p>
+                  <p className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-5 text-lg">Aucun joueur ne correspond aux filtres.</p>
                 ) : (
                   <>
                     <div className="grid gap-3 lg:hidden" aria-label="Classement des joueurs">
                       {visiblePlayers.map(player => (
                         <article
                           key={player.userId}
-                          className="rounded-2xl border border-border bg-card p-4 text-lg space-y-3"
+                          className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-4 text-lg space-y-3 shadow-sm"
                         >
                           <div className="flex items-center justify-between gap-3">
-                            <span className="font-bold text-warning">#{leaderboard.indexOf(player) + 1}</span>
-                            <strong className="text-warning">{player.points} pts</strong>
+                            <span className="font-bold text-warning font-mono">#{leaderboard.indexOf(player) + 1}</span>
+                            <strong className="text-warning font-mono">{player.points} pts</strong>
                           </div>
                           <Link
                             href={`/achillea/users/${player.userId}`}
-                            className="flex min-h-11 items-center gap-3 font-semibold text-foreground hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                            className="flex min-h-11 items-center gap-3 font-semibold text-foreground hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                           >
                             <UserAvatar avatar={player.avatar} displayName={player.displayName} className="h-10 w-10" />
                             {player.displayName}
@@ -312,7 +313,16 @@ export default function CircuitRankingPage() {
                             </div>
                             <div>
                               <dt>Titres</dt>
-                              <dd className="text-foreground">{player.wins}</dd>
+                              <dd className="text-foreground font-semibold">
+                                {player.wins > 0 ? (
+                                  <span className="inline-flex items-center gap-1 font-mono text-warning">
+                                    <Trophy className="size-3.5" aria-hidden="true" />
+                                    {player.wins}
+                                  </span>
+                                ) : (
+                                  "0"
+                                )}
+                              </dd>
                             </div>
                             <div>
                               <dt>Podiums</dt>
@@ -330,10 +340,10 @@ export default function CircuitRankingPage() {
                         </article>
                       ))}
                     </div>
-                    <div className="hidden lg:block border border-border rounded-2xl bg-card overflow-x-auto">
+                    <div className="hidden lg:block border border-outline-variant/15 rounded-2xl bg-surface-container/50 backdrop-blur-md overflow-x-auto shadow-sm">
                       <table className="w-full min-w-[1000px] text-left text-lg">
                         <thead>
-                          <tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-lg tracking-wider">
+                          <tr className="border-b border-outline-variant/15 bg-surface-container-high/60 text-muted-foreground uppercase text-lg tracking-wider font-semibold">
                             <th className="py-3 px-4 w-16 text-center">Rang</th>
                             <th className="py-3 px-4">Joueur</th>
                             <th className="py-3 px-4 text-center">Clan</th>
@@ -345,16 +355,16 @@ export default function CircuitRankingPage() {
                             <th className="py-3 px-4 text-right">Tournois</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-border/60">
+                        <tbody className="divide-y divide-outline-variant/10">
                           {visiblePlayers.map(player => (
-                            <tr key={player.userId} className="hover:bg-muted/30 transition">
+                            <tr key={player.userId} className="hover:bg-surface-container-high/40 transition-colors duration-150">
                               <td className="py-3 px-4 text-center font-bold text-muted-foreground font-mono">
                                 #{leaderboard.indexOf(player) + 1}
                               </td>
                               <td className="py-3 px-4">
                                 <Link
                                   href={`/achillea/users/${player.userId}`}
-                                  className="inline-flex items-center gap-2.5 font-semibold text-foreground hover:text-primary transition"
+                                  className="inline-flex items-center gap-2.5 font-semibold text-foreground hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                                 >
                                   <UserAvatar
                                     avatar={player.avatar}
@@ -366,7 +376,7 @@ export default function CircuitRankingPage() {
                               </td>
                               <td className="py-3 px-4 text-center">
                                 {player.clan ? (
-                                  <span className="px-2 py-0.5 rounded bg-muted text-lg font-mono">
+                                  <span className="px-2 py-0.5 rounded-lg bg-surface-container-high text-lg font-mono border border-outline-variant/20">
                                     [{player.clan.shortName}]
                                   </span>
                                 ) : (
@@ -376,8 +386,15 @@ export default function CircuitRankingPage() {
                               <td className="py-3 px-4 text-right font-bold text-warning font-mono text-lg">
                                 {player.points} pts
                               </td>
-                              <td className="py-3 px-4 text-right font-semibold text-success">
-                                {player.wins > 0 ? `🏆 ${player.wins}` : "0"}
+                              <td className="py-3 px-4 text-right font-semibold text-success font-mono">
+                                {player.wins > 0 ? (
+                                  <span className="inline-flex items-center justify-end gap-1.5 font-mono">
+                                    <Trophy className="size-4 text-warning inline" aria-hidden="true" />
+                                    <span>{player.wins}</span>
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground">0</span>
+                                )}
                               </td>
                               <td className="py-3 px-4 text-right font-mono">{player.podiums}</td>
                               <td className="py-3 px-4 text-right">{player.bestRankLabel || `#${player.bestRank}`}</td>
@@ -410,41 +427,49 @@ export default function CircuitRankingPage() {
                     aria-label="Rechercher un clan"
                     value={clanQuery}
                     onChange={event => setClanQuery(event.target.value)}
-                    className="min-h-11 rounded-md border border-border bg-background px-3 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    placeholder="Nom ou tag du clan..."
+                    className="min-h-11 rounded-xl border border-outline-variant/25 bg-surface-container-high/60 px-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
                   />
                 </label>
                 <p aria-live="polite" className="text-lg text-muted-foreground">
                   {visibleClans.length} clan{visibleClans.length > 1 ? "s" : ""} sur {clanRanking.length}
                 </p>
                 {visibleClans.length === 0 && (
-                  <p className="rounded-xl border border-border p-5 text-lg">
+                  <p className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-5 text-lg">
                     Aucun clan ne correspond à la recherche.
                   </p>
                 )}
                 <div className="grid gap-3 md:hidden">
                   {visibleClans.map(clan => (
-                    <article key={clan.id} className="rounded-2xl border border-border bg-card p-4 text-lg">
+                    <article key={clan.id} className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-4 text-lg shadow-sm space-y-2">
                       <div className="flex justify-between gap-3">
-                        <strong>#{clanRanking.indexOf(clan) + 1}</strong>
-                        <strong className="text-warning">{clan.points} pts</strong>
+                        <strong className="font-mono">#{clanRanking.indexOf(clan) + 1}</strong>
+                        <strong className="text-warning font-mono">{clan.points} pts</strong>
                       </div>
                       <Link
                         href={`/achillea/clans/${clan.id}`}
-                        className="flex min-h-11 items-center font-bold hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        className="flex min-h-11 items-center font-bold text-foreground hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                       >
                         {clan.name} [{clan.shortName}]
                       </Link>
-                      <p>
-                        {clan.wins} titre{clan.wins > 1 ? "s" : ""} · {clan.players} joueur
-                        {clan.players > 1 ? "s" : ""} actif{clan.players > 1 ? "s" : ""}
+                      <p className="text-muted-foreground">
+                        {clan.wins > 0 ? (
+                          <span className="inline-flex items-center gap-1 font-semibold text-warning mr-2">
+                            <Trophy className="size-3.5" aria-hidden="true" />
+                            {clan.wins} titre{clan.wins > 1 ? "s" : ""}
+                          </span>
+                        ) : (
+                          "0 titre · "
+                        )}
+                        {clan.players} joueur{clan.players > 1 ? "s" : ""} actif{clan.players > 1 ? "s" : ""}
                       </p>
                     </article>
                   ))}
                 </div>
-                <div className="hidden md:block border border-border rounded-2xl bg-card overflow-x-auto">
+                <div className="hidden md:block border border-outline-variant/15 rounded-2xl bg-surface-container/50 backdrop-blur-md overflow-x-auto shadow-sm">
                   <table className="w-full min-w-[720px] text-left text-lg">
                     <thead>
-                      <tr className="border-b border-border bg-muted/40 text-muted-foreground uppercase text-lg tracking-wider">
+                      <tr className="border-b border-outline-variant/15 bg-surface-container-high/60 text-muted-foreground uppercase text-lg tracking-wider font-semibold">
                         <th className="py-3 px-4 w-16 text-center">Rang</th>
                         <th className="py-3 px-4">Clan</th>
                         <th className="py-3 px-4 text-right">Points Cumulés</th>
@@ -452,16 +477,16 @@ export default function CircuitRankingPage() {
                         <th className="py-3 px-4 text-right">Joueurs Actifs</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border/60">
+                    <tbody className="divide-y divide-outline-variant/10">
                       {visibleClans.map(clan => (
-                        <tr key={clan.id} className="hover:bg-muted/30 transition">
+                        <tr key={clan.id} className="hover:bg-surface-container-high/40 transition-colors duration-150">
                           <td className="py-3 px-4 text-center font-bold text-muted-foreground font-mono">
                             #{clanRanking.indexOf(clan) + 1}
                           </td>
                           <td className="py-3 px-4">
                             <Link
                               href={`/achillea/clans/${clan.id}`}
-                              className="font-bold text-foreground hover:text-primary transition"
+                              className="font-bold text-foreground hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                             >
                               {clan.name} [{clan.shortName}]
                             </Link>
@@ -469,8 +494,15 @@ export default function CircuitRankingPage() {
                           <td className="py-3 px-4 text-right font-bold text-warning font-mono text-lg">
                             {clan.points} pts
                           </td>
-                          <td className="py-3 px-4 text-right font-semibold text-success">
-                            {clan.wins > 0 ? `🏆 ${clan.wins}` : "0"}
+                          <td className="py-3 px-4 text-right font-semibold text-success font-mono">
+                            {clan.wins > 0 ? (
+                              <span className="inline-flex items-center justify-end gap-1.5 font-mono">
+                                <Trophy className="size-4 text-warning inline" aria-hidden="true" />
+                                <span>{clan.wins}</span>
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">0</span>
+                            )}
                           </td>
                           <td className="py-3 px-4 text-right text-muted-foreground font-mono">{clan.players}</td>
                         </tr>
@@ -484,7 +516,7 @@ export default function CircuitRankingPage() {
           {/* Tournaments Palmarès */}
           {activeTab === "tournaments" &&
             (tournaments.length === 0 ? (
-              <p className="rounded-xl border border-border p-5 text-lg">
+              <p className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-5 text-lg">
                 Aucun tournoi du circuit disponible pour le moment.
               </p>
             ) : (
@@ -494,7 +526,7 @@ export default function CircuitRankingPage() {
                   <select
                     value={standingsFilter}
                     onChange={event => setStandingsFilter(event.target.value as typeof standingsFilter)}
-                    className="min-h-11 rounded-md border border-border bg-background px-3 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    className="min-h-11 rounded-xl border border-outline-variant/25 bg-surface-container-high/60 px-3 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
                   >
                     <option value="all">Tous les tournois</option>
                     <option value="resolved">Classement résolu</option>
@@ -505,41 +537,52 @@ export default function CircuitRankingPage() {
                   {visibleTournaments.length} tournoi{visibleTournaments.length > 1 ? "s" : ""} sur {tournaments.length}
                 </p>
                 {visibleTournaments.length === 0 && (
-                  <p className="rounded-xl border border-border p-5 text-lg">Aucun tournoi ne correspond au filtre.</p>
+                  <p className="rounded-2xl border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md p-5 text-lg">Aucun tournoi ne correspond au filtre.</p>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {visibleTournaments.map(t => (
                     <div
                       key={t.id}
-                      className="border border-border bg-card rounded-2xl p-5 space-y-3 transition hover:shadow-md"
+                      className="border border-outline-variant/15 bg-surface-container/60 backdrop-blur-md rounded-2xl p-5 space-y-3 transition-all duration-200 hover:bg-surface-container-high/60 hover:shadow-lg hover:border-outline-variant/30 active:scale-[0.99]"
                     >
                       <div className="flex items-center justify-between">
                         <h4 className="font-bold text-lg">{t.name}</h4>
-                        <span className="text-lg text-muted-foreground">
+                        <span className="text-lg text-muted-foreground font-mono">
                           {new Date(t.grandFinalAt).toLocaleDateString("fr-FR")}
                         </span>
                       </div>
 
                       {/* Podium preview */}
-                      <div className="space-y-1.5 pt-2 border-t border-border/60 text-lg">
+                      <div className="space-y-1.5 pt-2 border-t border-outline-variant/15 text-lg">
                         {t.standingsStatus === "unresolved" && (
                           <p className="text-lg text-muted-foreground">
                             Classement historique non résolu : aucun podium ni point attribué.
                           </p>
                         )}
-                        {t.podium.map(p => (
-                          <div key={p.userId} className="flex items-center justify-between text-muted-foreground">
-                            <span className="font-medium text-foreground">
-                              {p.rankLabel || (p.rank === 1 ? "🥇 1er" : p.rank === 2 ? "🥈 2e" : "🥉 3e")} :{" "}
-                              {p.displayName}
-                            </span>
-                          </div>
-                        ))}
+                        {t.podium.map(p => {
+                          const medalStyle =
+                            p.rank === 1
+                              ? MEDAILLE.or.texte
+                              : p.rank === 2
+                                ? MEDAILLE.argent.texte
+                                : MEDAILLE.bronze.texte;
+                          const rankLabel = p.rankLabel || (p.rank === 1 ? "1er" : p.rank === 2 ? "2e" : "3e");
+                          return (
+                            <div key={p.userId} className="flex items-center justify-between text-muted-foreground">
+                              <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+                                <Trophy className={`size-3.5 ${medalStyle}`} aria-hidden="true" />
+                                <span>
+                                  {rankLabel} : {p.displayName}
+                                </span>
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
 
                       <Link
                         href={`/achillea/tournaments/${t.id}`}
-                        className="inline-flex min-h-11 items-center gap-1 text-lg text-primary font-semibold hover:underline pt-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        className="inline-flex min-h-11 items-center gap-1 text-lg text-primary font-semibold hover:underline pt-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
                       >
                         Voir le tournoi
                         <ChevronRight className="w-3.5 h-3.5" />

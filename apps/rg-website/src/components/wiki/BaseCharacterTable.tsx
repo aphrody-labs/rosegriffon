@@ -234,9 +234,9 @@ function BaseCharacterRow({
     : getCharacterImageUrl(character.internalCode);
 
   return (
-    <TableRow className="border-outline-variant/50 hover:bg-surface-container-high/50 transition-colors">
+    <TableRow className="border-outline-variant/15 hover:bg-surface-container-high/50 transition-colors">
       {/* N° */}
-      <TableCell className="text-center font-mono text-on-surface-variant hidden sm:table-cell">
+      <TableCell className="text-center font-mono text-on-surface-variant hidden sm:table-cell tabular-nums">
         {rowIndex + 1}
       </TableCell>
 
@@ -550,7 +550,7 @@ function BaseCharacterCard({
   return (
     <div
       className={cn(
-        "relative rounded-2xl border border-outline-variant/40 bg-surface-container-low p-4 flex flex-col gap-3 hover:bg-surface-container-high/60 transition-all duration-300 shadow-sm group",
+        "relative rounded-2xl border border-outline-variant/15 bg-surface-container p-4 flex flex-col gap-3 hover:bg-surface-container-high transition-all duration-300 shadow-sm group",
         // Cartes hors du premier écran : rendu différé, taille réservée.
         deferred &&
           "[content-visibility:auto] [contain-intrinsic-size:auto_none_auto_176px]",
@@ -666,7 +666,7 @@ function BaseCharacterCard({
           affichée ; la ligne disparaît quand les deux manquent (plus de
           « Const : — — »). */}
       {(constellationName || playstyleSprite) && (
-        <div className="flex items-center justify-between border-t border-outline-variant/35 pt-2 mt-1 text-[11px] text-on-surface-variant">
+        <div className="flex items-center justify-between border-t border-outline-variant/15 pt-2 mt-1 text-[11px] text-on-surface-variant">
           {constellationName ? (
             <div className="flex items-center gap-1">
               <span className="opacity-60 text-[10px] uppercase font-bold">
@@ -718,10 +718,10 @@ export function BaseCharacterTable({
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block rounded-lg border border-outline-variant overflow-hidden bg-surface-container-low">
+      <div className="hidden md:block rounded-xl border border-outline-variant/15 overflow-hidden bg-surface-container">
         <Table>
           <TableHeader>
-            <TableRow className="bg-surface-container hover:bg-surface-container border-outline-variant">
+            <TableRow className="bg-surface-container-high hover:bg-surface-container-high border-outline-variant/15">
               <TableHead className="w-12 text-center text-on-surface-variant hidden sm:table-cell">
                 {t("wiki.table.headers.number")}
               </TableHead>
