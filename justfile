@@ -82,3 +82,46 @@ deploy-verify:
     for h in rosegriffon.fr achillea.rosegriffon.fr api.rosegriffon.fr ranked.rosegriffon.fr; do
     curl -s -o /dev/null -w "$h %{http_code}\n" --max-time 10 https://$h/; done
     EOF
+
+# --- Docker stack (compose.yaml, infra/docker/README.md): the single deploy entry ---------
+
+# Checkout dedicated to the stack on the VPS (never the systemd build tree).
+stack_dir := env("RG_STACK_DIR", "/home/ubuntu/src/rosegriffon-stack")
+
+# Build every image on the VPS (12 cores, per policy), start the stack with --wait, smoke-check.
+[script("bash", "-euo", "pipefail")]
+deploy-stack ref="origin/main":
+    {{vps}} <<'EOF'
+    set -euo pipefail
+    dir={{stack_dir}}
+    [ -d "$dir/.git" ] || git clone --filter=blob:none https://github.com/aphrody-dev/rosegriffon.git "$dir"
+    git -C "$dir" fetch --quiet origin
+    git -C "$dir" checkout --quiet --detach {{ref}}
+    cd "$dir"
+    export RG_TAG=$(git rev-parse --short HEAD)
+    docker compose config -q
+    docker compose build --pull
+    docker compose up -d --wait --wait-timeout 300 --remove-orphans
+    docker compose ps
+    EOF
+    just deploy-stack-smoke
+
+# Health of every service from inside the stack network, then the public names through nginx.
+[script("bash", "-euo", "pipefail")]
+deploy-stack-smoke:
+    {{vps}} <<'EOF'
+    set -euo pipefail
+    cd {{stack_dir}}
+    for target in core:8810/health model-serve:8792/health cron:8811/health website:3100/api/health nginx:8080/nginx-health; do
+    docker compose exec -T nginx wget -q -O /dev/null -T 10 "http://$target" && echo "ok   $target" || echo "FAIL $target"
+    done
+    for h in rosegriffon.fr api.rosegriffon.fr bot.rosegriffon.fr cdn.rosegriffon.fr; do
+    curl -s -o /dev/null -w "$h %{http_code}\n" --max-time 10 --resolve "$h:443:127.0.0.1" "https://$h/health"; done
+    EOF
+
+# Roll the stack back to the previous image tag (RG_TAG of the last good deploy).
+[script("bash", "-euo", "pipefail")]
+deploy-stack-rollback tag:
+    {{vps}} <<'EOF'
+    cd {{stack_dir}} && RG_TAG={{tag}} docker compose up -d --wait --no-build
+    EOF

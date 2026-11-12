@@ -1,0 +1,31 @@
+# Build context for infra/docker/Dockerfile: sources and lockfiles only.
+.git
+**/.git
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+**/target
+**/*.tsbuildinfo
+var
+mods
+deploy
+supabase
+docs
+templates
+tools
+apps/iecode-dotnet
+apps/cli
+
+# Secrets never enter the context; build-time values come from the `rg_env` BuildKit secret.
+**/.env
+**/.env.*
+!**/.env.example
+**/*.env
+**/*.pem
+**/*.p12
+**/*.pfx
+**/.secrets
+**/secrets
+.claude
+.vercel
