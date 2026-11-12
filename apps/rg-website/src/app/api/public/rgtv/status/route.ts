@@ -10,8 +10,8 @@ interface ScheduleSlotRow {
   category: string | null;
 }
 
-const {TWITCH_CLIENT_ID} = process.env;
-const {TWITCH_CLIENT_SECRET} = process.env;
+const { TWITCH_CLIENT_ID } = process.env;
+const { TWITCH_CLIENT_SECRET } = process.env;
 const DEFAULT_CHANNEL = "rose_griffontv";
 const ALLOWED_CHANNELS = new Set(["rose_griffontv", "achillea_ie"]);
 
@@ -25,8 +25,12 @@ let accessToken: string | null = null;
 let tokenExpiry: number = 0;
 
 async function getTwitchAccessToken(): Promise<string | null> {
-  if (accessToken && Date.now() < tokenExpiry) {return accessToken;}
-  if (!TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET) {return null;}
+  if (accessToken && Date.now() < tokenExpiry) {
+    return accessToken;
+  }
+  if (!TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET) {
+    return null;
+  }
 
   try {
     const params = new URLSearchParams({
@@ -35,11 +39,16 @@ async function getTwitchAccessToken(): Promise<string | null> {
       grant_type: "client_credentials",
     });
 
-    const response = await fetch(`https://id.twitch.tv/oauth2/token?${params.toString()}`, {
-      method: "POST",
-    });
+    const response = await fetch(
+      `https://id.twitch.tv/oauth2/token?${params.toString()}`,
+      {
+        method: "POST",
+      },
+    );
 
-    if (!response.ok) {return null;}
+    if (!response.ok) {
+      return null;
+    }
 
     const data: TwitchTokenResponse = await response.json();
     accessToken = data.access_token;
@@ -58,8 +67,13 @@ function twitchHeaders(token: string) {
 }
 
 async function twitchFetch(url: string, token: string) {
-  const res = await fetch(url, { headers: twitchHeaders(token), next: { revalidate: 300 } });
-  if (!res.ok) {return null;}
+  const res = await fetch(url, {
+    headers: twitchHeaders(token),
+    next: { revalidate: 300 },
+  });
+  if (!res.ok) {
+    return null;
+  }
   return res.json();
 }
 
@@ -83,12 +97,19 @@ interface YoutubeVideo {
 
 async function fetchYoutubeVideos(channel: string): Promise<YoutubeVideo[]> {
   const channelId = YOUTUBE_CHANNEL_IDS[channel];
-  if (!channelId) {return [];}
+  if (!channelId) {
+    return [];
+  }
   try {
-    const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
-      next: { revalidate: 600 },
-    });
-    if (!res.ok) {return [];}
+    const res = await fetch(
+      `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
+      {
+        next: { revalidate: 600 },
+      },
+    );
+    if (!res.ok) {
+      return [];
+    }
     const xml = await res.text();
     const decode = (s: string) =>
       s
@@ -131,11 +152,19 @@ async function fetchYoutubeVideos(channel: string): Promise<YoutubeVideo[]> {
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const requestedChannel = url.searchParams.get("channel") || DEFAULT_CHANNEL;
-  const channel = ALLOWED_CHANNELS.has(requestedChannel) ? requestedChannel : DEFAULT_CHANNEL;
+  const channel = ALLOWED_CHANNELS.has(requestedChannel)
+    ? requestedChannel
+    : DEFAULT_CHANNEL;
   const isPrimaryChannel = channel === DEFAULT_CHANNEL;
 
   const token = await getTwitchAccessToken();
-  let liveData = { category: "", is_live: false, started_at: "", title: "", viewers: 0 };
+  let liveData = {
+    category: "",
+    is_live: false,
+    started_at: "",
+    title: "",
+    viewers: 0,
+  };
   let userId: string | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let videos: any[] = [];
@@ -147,18 +176,18 @@ export async function GET(request: Request) {
 
   if (token && TWITCH_CLIENT_ID) {
     try {
-      // 1. Récupérer l'utilisateur (pour broadcaster_id)
-      const userData = await twitchFetch(
-        `https://api.twitch.tv/helix/users?login=${channel}`,
-        token
-      );
+      // 1+2. User (pour broadcaster_id) et statut live (cache 1 min) : indépendants, en parallèle.
+      const [userData, streamData] = await Promise.all([
+        twitchFetch(
+          `https://api.twitch.tv/helix/users?login=${channel}`,
+          token,
+        ),
+        fetch(`https://api.twitch.tv/helix/streams?user_login=${channel}`, {
+          headers: twitchHeaders(token),
+          next: { revalidate: 60 },
+        }).then((r) => (r.ok ? r.json() : null)),
+      ]);
       userId = userData?.data?.[0]?.id || null;
-
-      // 2. Statut live (cache 1 min)
-      const streamData = await fetch(`https://api.twitch.tv/helix/streams?user_login=${channel}`, {
-        headers: twitchHeaders(token),
-        next: { revalidate: 60 },
-      }).then((r) => (r.ok ? r.json() : null));
 
       const stream = streamData?.data?.[0];
       if (stream) {
@@ -184,56 +213,74 @@ export async function GET(request: Request) {
           url: v.url,
           view_count: v.view_count,
         });
-        for (const type of ["archive", "highlight", "upload"] as const) {
-          const data = await twitchFetch(
-            `https://api.twitch.tv/helix/videos?user_id=${userId}&first=12&type=${type}`,
-            token
-          );
-          const list = data?.data || [];
-          if (list.length > 0) {
-            videos = list.map(mapVideo);
-            break;
+        // VODs (3+5), clips (4) et followers (5) ne dépendent que de userId : les trois en parallèle.
+        const vodsPromise = (async () => {
+          for (const type of ["archive", "highlight", "upload"] as const) {
+            const data = await twitchFetch(
+              `https://api.twitch.tv/helix/videos?user_id=${userId}&first=12&type=${type}`,
+              token,
+            );
+            const list = data?.data || [];
+            if (list.length > 0) {
+              return list.map(mapVideo);
+            }
           }
-        }
-
-        // Fallback YouTube si Twitch n'a aucun VOD
-        if (videos.length === 0) {
-          videos = await fetchYoutubeVideos(channel);
-        }
+          // Fallback YouTube si Twitch n'a aucun VOD
+          return fetchYoutubeVideos(channel);
+        })();
 
         // 4. Tous les clips all-time (paginate jusqu'à épuisement, max 2000)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const allClips: any[] = [];
-        let cursor: string | undefined;
-        const MAX_CLIP_PAGES = 20; // 20 * 100 = 2000 clips max
-        for (let i = 0; i < MAX_CLIP_PAGES; i++) {
-          const params = new URLSearchParams({ broadcaster_id: userId, first: "100" });
-          if (cursor) {params.set("after", cursor);}
-          const page = await twitchFetch(
-            `https://api.twitch.tv/helix/clips?${params.toString()}`,
-            token
-          );
-          if (!page?.data?.length) {break;}
-          allClips.push(...page.data);
-          cursor = page.pagination?.cursor;
-          if (!cursor) {break;}
-        }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        clips = allClips.map((c: any) => ({
-          created_at: c.created_at,
-          creator_name: c.creator_name,
-          id: c.id,
-          thumbnail_url: c.thumbnail_url,
-          title: c.title,
-          url: c.url,
-          view_count: c.view_count,
-        }));
+        const clipsPromise = (async () => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const allClips: any[] = [];
+          let cursor: string | undefined;
+          const MAX_CLIP_PAGES = 20; // 20 * 100 = 2000 clips max
+          for (let i = 0; i < MAX_CLIP_PAGES; i++) {
+            const params = new URLSearchParams({
+              broadcaster_id: userId,
+              first: "100",
+            });
+            if (cursor) {
+              params.set("after", cursor);
+            }
+            const page = await twitchFetch(
+              `https://api.twitch.tv/helix/clips?${params.toString()}`,
+              token,
+            );
+            if (!page?.data?.length) {
+              break;
+            }
+            allClips.push(...page.data);
+            cursor = page.pagination?.cursor;
+            if (!cursor) {
+              break;
+            }
+          }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return allClips.map((c: any) => ({
+            created_at: c.created_at,
+            creator_name: c.creator_name,
+            id: c.id,
+            thumbnail_url: c.thumbnail_url,
+            title: c.title,
+            url: c.url,
+            view_count: c.view_count,
+          }));
+        })();
 
         // 5. Followers count
-        const followersData = await twitchFetch(
+        const followersPromise = twitchFetch(
           `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${userId}&first=1`,
-          token
+          token,
         );
+
+        const [vodsResult, clipsResult, followersData] = await Promise.all([
+          vodsPromise,
+          clipsPromise,
+          followersPromise,
+        ]);
+        videos = vodsResult;
+        clips = clipsResult;
         followers = followersData?.total || 0;
 
         // 6. Channel info
@@ -258,7 +305,10 @@ export async function GET(request: Request) {
   let currentScheduled: unknown = null;
   if (isPrimaryChannel) {
     const today = new Date().getDay();
-    const nowTime = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    const nowTime = new Date().toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
     let schedule: ScheduleSlotRow[] = [];
     try {
@@ -268,31 +318,40 @@ export async function GET(request: Request) {
          FROM stream_schedules
          WHERE day_of_week = $1 AND status = $2
          ORDER BY start_time ASC`,
-        [today, "active"]
+        [today, "active"],
       );
       schedule = result.rows;
     } catch (dbError) {
       console.error("Erreur Postgres Schedule:", dbError);
     }
 
-    nextStream = schedule.find((s) => s.start_time && s.start_time > nowTime) || null;
+    nextStream =
+      schedule.find((s) => s.start_time && s.start_time > nowTime) || null;
     currentScheduled =
-      schedule.find((s) => s.start_time && s.end_time && s.start_time <= nowTime && s.end_time > nowTime) ||
-      null;
+      schedule.find(
+        (s) =>
+          s.start_time &&
+          s.end_time &&
+          s.start_time <= nowTime &&
+          s.end_time > nowTime,
+      ) || null;
   }
 
-  return Response.json({
-    channel,
-    url: `https://twitch.tv/${channel}`,
-    live: liveData,
-    videos,
-    clips,
-    followers,
-    channelInfo,
-    schedule: {
-      current: currentScheduled,
-      next: nextStream,
+  return Response.json(
+    {
+      channel,
+      url: `https://twitch.tv/${channel}`,
+      live: liveData,
+      videos,
+      clips,
+      followers,
+      channelInfo,
+      schedule: {
+        current: currentScheduled,
+        next: nextStream,
+      },
+      updated_at: new Date().toISOString(),
     },
-    updated_at: new Date().toISOString(),
-  }, { headers: cachePublic(60, 300) });
+    { headers: cachePublic(60, 300) },
+  );
 }
