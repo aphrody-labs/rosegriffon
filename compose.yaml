@@ -168,6 +168,8 @@ services:
     # (infra/docker/host-nginx/rosegriffon-stack.conf proxies the rosegriffon names here).
     ports:
       - "127.0.0.1:${RG_NGINX_PORT:-18080}:8080"
+      # Mesh bind: the edge role (fr2) proxies here; only the private WireGuard address is exposed.
+      - "${RG_MESH_IP:-127.0.0.1}:${RG_NGINX_PORT:-18080}:8080"
     volumes:
       - ./infra/docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./infra/docker/nginx/conf.d:/etc/nginx/conf.d:ro
