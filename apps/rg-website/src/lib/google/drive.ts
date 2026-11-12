@@ -2,26 +2,18 @@ import "server-only";
 
 import { google } from "googleapis";
 
+import { getServiceAccountAuth } from "./auth";
+
 /**
  * Accès en lecture au Drive partagé de l'association.
  *
- * Authentification par **compte de service** (`calendar-service@rgfr-8927d`),
- * pas par le client OAuth web : le tableau de bord lit des dossiers partagés
- * avec ce compte, il n'a donc pas besoin qu'un administrateur se connecte, et
- * cet accès reste fonctionnel indépendamment de la connexion « Google » des
- * visiteurs.
- *
- * Les identifiants viennent des mêmes variables que le calendrier
- * (`GOOGLE_CLIENT_EMAIL` + `GOOGLE_PRIVATE_KEY`), avec le même garde-fou contre
- * les valeurs restées sous forme de secret scellé.
+ * Authentification par **compte de service** (`calendar-service@rgfr-8927d`)
+ * via le helper partagé `getServiceAccountAuth`, pas par le client OAuth web :
+ * le tableau de bord lit des dossiers partagés avec ce compte, sans qu'un
+ * administrateur ait à se connecter.
  */
 
 const SCOPES = ["https://www.googleapis.com/auth/drive.readonly"];
-
-/** Un secret scellé non déchiffré commence par ce préfixe une fois encodé. */
-function isSealedBlob(value: string): boolean {
-  return value.startsWith("eyJ2Ijoi");
-}
 
 export interface DriveFile {
   id: string;
@@ -41,8 +33,10 @@ export function describeMimeType(mimeType: string): string {
     "application/vnd.google-apps.folder": "Dossier",
     "application/vnd.google-apps.presentation": "Présentation",
     "application/vnd.google-apps.spreadsheet": "Feuille de calcul",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Classeur Excel",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Document Word",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+      "Classeur Excel",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      "Document Word",
   };
   if (map[mimeType]) {
     return map[mimeType];
@@ -63,28 +57,12 @@ export function describeMimeType(mimeType: string): string {
  * affichable si Google est indisponible ou si les identifiants manquent.
  */
 export async function listRecentDriveFiles(limit = 8): Promise<DriveFile[]> {
-  const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY;
-
-  if (!clientEmail || !privateKey) {
-    return [];
-  }
-  if (isSealedBlob(clientEmail) || isSealedBlob(privateKey)) {
-    console.error("[drive] identifiants inutilisables : un secret scellé (eyJ2Ijoi…) a remplacé la valeur en clair.");
+  const auth = getServiceAccountAuth(SCOPES);
+  if (!auth) {
     return [];
   }
 
   try {
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: clientEmail,
-        // Les sauts de ligne de la clé PEM sont stockés littéralement (`\n`)
-        // dans le fichier d'environnement.
-        private_key: privateKey.replaceAll(/\\n/g, "\n"),
-      },
-      scopes: SCOPES,
-    });
-
     const drive = google.drive({ auth, version: "v3" });
     const res = await drive.files.list({
       fields: "files(id,name,mimeType,modifiedTime,size,webViewLink)",
@@ -97,7 +75,7 @@ export async function listRecentDriveFiles(limit = 8): Promise<DriveFile[]> {
       q: "trashed = false",
     });
 
-    return (res.data.files ?? []).map(file => ({
+    return (res.data.files ?? []).map((file) => ({
       id: file.id ?? "",
       isFolder: file.mimeType === "application/vnd.google-apps.folder",
       mimeType: file.mimeType ?? "",

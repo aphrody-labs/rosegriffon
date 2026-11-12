@@ -1,44 +1,27 @@
 "use server";
 
-import fs from "node:fs";
-import path from "node:path";
 import { google } from "googleapis";
 import { revalidatePath } from "next/cache";
 import { createPostgresClient } from "@rosegriffon/db/service";
 import { getServerSession } from "@/lib/auth-helpers";
 import { isAdminRole } from "@/lib/auth-roles";
+import { getServiceAccountAuth } from "@/lib/google/auth";
 import { convertGoogleDocToHtml } from "@/lib/google-docs";
 
 const DRIVE_FOLDER_ID = "19UJsSXVRV0sEd67JCwHSu9Atm3H_5D6K";
+const DOC_SCOPES = [
+  "https://www.googleapis.com/auth/documents.readonly",
+  "https://www.googleapis.com/auth/drive",
+];
 
 function getGoogleAuth() {
-  const keyFilePath = path.join(process.cwd(), "google.json");
-
-  // 1. Try local file (dev/legacy)
-  if (fs.existsSync(keyFilePath)) {
-    return new google.auth.GoogleAuth({
-      keyFile: keyFilePath,
-      scopes: ["https://www.googleapis.com/auth/documents.readonly", "https://www.googleapis.com/auth/drive"],
-    });
+  const auth = getServiceAccountAuth(DOC_SCOPES);
+  if (!auth) {
+    throw new Error(
+      "Compte de service Google non configuré (GOOGLE_APPLICATION_CREDENTIALS ou équivalent)",
+    );
   }
-
-  // 2. Try JSON content in Env Var (Docker/Prod)
-  if (process.env.GOOGLE_SERVICE_ACCOUNT) {
-    try {
-      const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
-      return new google.auth.GoogleAuth({
-        credentials,
-        scopes: ["https://www.googleapis.com/auth/documents.readonly", "https://www.googleapis.com/auth/drive"],
-      });
-    } catch (error) {
-      console.error("Invalid GOOGLE_SERVICE_ACCOUNT JSON", error);
-    }
-  }
-
-  // 3. Fallback to standard discovery (GOOGLE_APPLICATION_CREDENTIALS or GCE metadata)
-  return new google.auth.GoogleAuth({
-    scopes: ["https://www.googleapis.com/auth/documents.readonly", "https://www.googleapis.com/auth/drive"],
-  });
+  return auth;
 }
 
 async function requireDocAdmin() {
@@ -48,7 +31,11 @@ async function requireDocAdmin() {
   }
 
   const supabase = createPostgresClient();
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", session.user.id)
+    .single();
 
   if (!profile || !isAdminRole(profile.role)) {
     return { error: "Permissions insuffisantes" as const, user: null };
@@ -103,7 +90,10 @@ export async function importGoogleDoc(docId: string) {
 
     if (error) {
       console.error("Supabase Insert Error:", error);
-      return { error: `Erreur base de données: ${error.message}`, success: false };
+      return {
+        error: `Erreur base de données: ${error.message}`,
+        success: false,
+      };
     }
 
     revalidatePath("/admin/news");
@@ -139,7 +129,10 @@ export async function importDriveFolder() {
 
     const files = res.data.files || [];
     if (files.length === 0) {
-      return { success: true, message: "Aucun document trouvé dans le dossier." };
+      return {
+        success: true,
+        message: "Aucun document trouvé dans le dossier.",
+      };
     }
 
     let importedCount = 0;
@@ -153,11 +146,17 @@ export async function importDriveFolder() {
     }
 
     revalidatePath("/admin/news");
-    return { message: `${importedCount} articles importés avec succès.`, success: true };
+    return {
+      message: `${importedCount} articles importés avec succès.`,
+      success: true,
+    };
   } catch (error: unknown) {
     const err = error as { message?: string };
     console.error("Drive Import Error:", err);
-    return { error: err.message || "Erreur lors de l'importation du dossier.", success: false };
+    return {
+      error: err.message || "Erreur lors de l'importation du dossier.",
+      success: false,
+    };
   }
 }
 
@@ -172,7 +171,11 @@ export async function exportToGoogleDrive(newsId: string) {
     }
 
     const supabase = createPostgresClient();
-    const { data: news, error: fetchError } = await supabase.from("articles").select("*").eq("id", newsId).single();
+    const { data: news, error: fetchError } = await supabase
+      .from("articles")
+      .select("*")
+      .eq("id", newsId)
+      .single();
 
     if (fetchError || !news) {
       return { success: false, error: "Article introuvable." };
@@ -198,6 +201,9 @@ export async function exportToGoogleDrive(newsId: string) {
   } catch (error: unknown) {
     const err = error as { message?: string };
     console.error("Drive Export Error:", err);
-    return { error: err.message || "Erreur lors de l'exportation.", success: false };
+    return {
+      error: err.message || "Erreur lors de l'exportation.",
+      success: false,
+    };
   }
 }
