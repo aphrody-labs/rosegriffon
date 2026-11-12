@@ -1,0 +1,168 @@
+# NIE game registry: every Inazuma Eleven game NIE knows about.
+# One [[game]] per title; releases list every platform it shipped on.
+# Feature support: full | partial | planned | none.
+# Release years and regions are best-effort community data; fields marked
+# `verified = false` still need a primary source check (docs/rust-migration/FEATURE-MATRIX.md).
+# NIE never ships game content: `install` registers and hashes a dump the user owns.
+
+schema = 1
+
+[[game]]
+id = "ie1"
+title = "Inazuma Eleven"
+series = "original"
+revision = 1
+features = { dump_verify = "full", asset_extract = "planned", text_extract = "planned", translation_patch = "planned", save_edit = "planned", team_builder = "planned", wiki_data = "partial", nie_runtime = "none", netplay = "none", mod_loader = "none" }
+releases = [
+  { platform = "ds", year = 2008, regions = ["jp", "eu"], format = "nds-rom", verified = true },
+  { platform = "3ds", year = 2014, regions = ["eu"], format = "3ds-eshop", verified = false },
+]
+ecosystem = [
+  { kind = "emulator", name = "melonDS", url = "https://melonds.kuribo64.net" },
+  { kind = "tool", name = "Kuriimu2", url = "https://github.com/FanTranslatorsInternational/Kuriimu2" },
+]
+
+[[game]]
+id = "ie2"
+title = "Inazuma Eleven 2: Firestorm / Blizzard"
+series = "original"
+revision = 1
+features = { dump_verify = "full", asset_extract = "planned", text_extract = "planned", translation_patch = "planned", save_edit = "planned", team_builder = "planned", wiki_data = "partial", nie_runtime = "none", netplay = "none", mod_loader = "none" }
+releases = [
+  { platform = "ds", year = 2009, regions = ["jp", "eu"], format = "nds-rom", verified = true },
+]
+ecosystem = [
+  { kind = "emulator", name = "melonDS", url = "https://melonds.kuribo64.net" },
+  { kind = "tool", name = "Kuriimu2", url = "https://github.com/FanTranslatorsInternational/Kuriimu2" },
+]
+
+[[game]]
+id = "ie3"
+title = "Inazuma Eleven 3: Lightning Bolt / Bomb Blast / Team Ogre Attacks"
+series = "original"
+revision = 1
+features = { dump_verify = "full", asset_extract = "planned", text_extract = "planned", translation_patch = "planned", save_edit = "planned", team_builder = "planned", wiki_data = "partial", nie_runtime = "none", netplay = "none", mod_loader = "none" }
+releases = [
+  { platform = "ds", year = 2010, regions = ["jp"], format = "nds-rom", verified = true },
+  { platform = "3ds", year = 2013, regions = ["eu"], format = "3ds-cart", verified = true },
+]
+ecosystem = [
+  { kind = "emulator", name = "melonDS", url = "https://melonds.kuribo64.net" },
+  { kind = "emulator", name = "Azahar", url = "https://azahar-emu.org" },
+  { kind = "tool", name = "Kuriimu2", url = "https://github.com/FanTranslatorsInternational/Kuriimu2" },
+]
+
+[[game]]
+id = "strikers"
+title = "Inazuma Eleven Strikers"
+series = "strikers"
+revision = 1
+features = { dump_verify = "full", asset_extract = "planned", text_extract = "planned", translation_patch = "planned", save_edit = "none", team_builder = "planned", wiki_data = "partial", nie_runtime = "none", netplay = "planned", mod_loader = "none" }
+releases = [
+  { platform = "wii", year = 2011, regions = ["jp", "eu"], format = "wii-disc", verified = true },
+]
+ecosystem = [
+  { kind = "emulator", name = "Dolphin", url = "https://dolphin-emu.org" },
+]
+
+[[game]]
+id = "strikers-2012"
+title = "Inazuma Eleven Strikers 2012 Xtreme"
+series = "strikers"
+revision = 1
+features = { dump_verify = "full", asset_extract = "planned", text_extract = "planned", translation_patch = "planned", save_edit = "none", team_builder = "planned", wiki_data = "partial", nie_runtime = "none", netplay = "planned", mod_loader = "none" }
+releases = [
+  { platform = "wii", year = 2011, regions = ["jp"], format = "wii-disc", verified = true },
+]
+ecosystem = [
+  { kind = "emulator", name = "Dolphin", url = "https://dolphin-emu.org" },
+]
+
+[[game]]
+id = "go-strikers-2013"
+title = "Inazuma Eleven GO Strikers 2013"
+series = "strikers"
+revision = 1
+features = { dump_verify = "full", asset_extract = "planned", text_extract = "planned", translation_patch = "planned", save_edit = "none", team_builder = "planned", wiki_data = "partial", nie_runtime = "none", netplay = "planned", mod_loader = "none" }
+releases = [
+  { platform = "wii", year = 2012, regions = ["jp"], format = "wii-disc", verified = true },
+]
+ecosystem = [
+  { kind = "emulator", name = "Dolphin", url = "https://dolphin-emu.org" },
+]
+
+[[game]]
+id = "go1"
+title = "Inazuma Eleven GO: Light / Shadow"
+series = "go"
+revision = 1
+features = { dump_verify = "full", asset_extract = "partial", text_extract = "planned", translation_patch = "planned", save_edit = "planned", team_builder = "planned", wiki_data = "partial", nie_runtime = "none", netplay = "none", mod_loader = "none" }
+releases = [
+  { platform = "3ds", year = 2011, regions = ["jp", "eu"], format = "3ds-cart", verified = true },
+]
+ecosystem = [
+  { kind = "emulator", name = "Azahar", url = "https://azahar-emu.org" },
+  { kind = "tool", name = "Kuriimu2", url = "https://github.com/FanTranslatorsInternational/Kuriimu2" },
+]
+
+[[game]]
+id = "go2"
+title = "Inazuma Eleven GO Chrono Stones: Wildfire / Thunderflash"
+series = "go"
+revision = 1
+features = { dump_verify = "full", asset_extract = "partial", text_extract = "planned", translation_patch = "planned", save_edit = "planned", team_builder = "planned", wiki_data = "partial", nie_runtime = "none", netplay = "none", mod_loader = "none" }
+releases = [
+  { platform = "3ds", year = 2012, regions = ["jp", "eu"], format = "3ds-cart", verified = true },
+]
+ecosystem = [
+  { kind = "emulator", name = "Azahar", url = "https://azahar-emu.org" },
+  { kind = "tool", name = "Kuriimu2", url = "https://github.com/FanTranslatorsInternational/Kuriimu2" },
+]
+
+[[game]]
+id = "go3"
+title = "Inazuma Eleven GO Galaxy: Big Bang / Supernova"
+series = "go"
+revision = 1
+features = { dump_verify = "full", asset_extract = "partial", text_extract = "planned", translation_patch = "planned", save_edit = "planned", team_builder = "planned", wiki_data = "partial", nie_runtime = "none", netplay = "none", mod_loader = "none" }
+releases = [
+  { platform = "3ds", year = 2013, regions = ["jp"], format = "3ds-cart", verified = true },
+]
+ecosystem = [
+  { kind = "emulator", name = "Azahar", url = "https://azahar-emu.org" },
+  { kind = "tool", name = "Kuriimu2", url = "https://github.com/FanTranslatorsInternational/Kuriimu2" },
+]
+
+[[game]]
+id = "cross"
+title = "Inazuma Eleven Cross"
+series = "mobile"
+revision = 1
+features = { dump_verify = "partial", asset_extract = "partial", text_extract = "partial", translation_patch = "none", save_edit = "none", team_builder = "planned", wiki_data = "partial", nie_runtime = "none", netplay = "none", mod_loader = "none" }
+releases = [
+  { platform = "mobile", year = 2026, regions = ["jp"], format = "mobile-app", verified = false },
+]
+ecosystem = [
+  { kind = "data", name = "inagle-cross (in-repo masterdata schemas)", url = "packages/inagle-cross" },
+]
+
+[[game]]
+id = "ievr"
+title = "Inazuma Eleven: Victory Road"
+series = "victory-road"
+aliases = ["ares", "ares-no-tenbin"]
+revision = 1
+features = { dump_verify = "full", asset_extract = "full", text_extract = "full", translation_patch = "planned", save_edit = "full", team_builder = "partial", wiki_data = "full", nie_runtime = "partial", netplay = "none", mod_loader = "planned" }
+releases = [
+  { platform = "pc", year = 2025, regions = ["ww"], format = "steam-depot", steam_app_id = 2799860, verified = true },
+  { platform = "switch", year = 2025, regions = ["ww"], format = "switch-nsp", verified = true },
+  { platform = "switch2", year = 2025, regions = ["ww"], format = "switch-nsp", verified = false },
+  { platform = "ps4", year = 2025, regions = ["ww"], format = "ps-pkg", verified = true },
+  { platform = "ps5", year = 2025, regions = ["ww"], format = "ps-pkg", verified = true },
+]
+ecosystem = [
+  { kind = "data", name = "inagle (in-repo IEVR data API)", url = "packages/inagle" },
+  { kind = "wiki", name = "Azalee (in-repo wiki library)", url = "packages/azalee" },
+  { kind = "tool", name = "aphrody-nie-save", url = "crates/aphrody-nie-save" },
+  { kind = "store", name = "Steam", url = "https://store.steampowered.com/app/2799860" },
+]

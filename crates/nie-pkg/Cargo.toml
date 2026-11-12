@@ -1,0 +1,25 @@
+[package]
+name = "nie-pkg"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license-file = "LICENSE"
+publish = false
+description = "NIE game package manager: per-game manifests, registry of every Inazuma Eleven game, install/list/verify/update of user-owned dumps"
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "nie-pkg"
+path = "src/bin/nie-pkg.rs"
+
+[dependencies]
+serde = { workspace = true }
+toml = { version = "1.2.1", default-features = false, features = ["parse", "display", "serde", "std"] }
+blake3 = { version = "1.8.7", default-features = false, features = ["std"] }
+thiserror = { workspace = true, features = ["std"] }
+clap = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

@@ -50,6 +50,8 @@ members = [
     "crates/aphrody-nie-zukan",
     "crates/aphrody-softraster",
     "crates/bun-steam",
+    "crates/nie-pkg",
+    "crates/nie-pkg-ui",
     "crates/re",
     "crates/shenron-gpu",
     "crates/yolo-re-bin-format",
