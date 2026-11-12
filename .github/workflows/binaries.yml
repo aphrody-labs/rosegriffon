@@ -3,6 +3,8 @@ name: rosegriffon binaries
 on:
   push:
     tags: ["v*"]
+    branches: [main]
+    paths: [package.json]
   workflow_dispatch:
     inputs:
       tag:
@@ -59,8 +61,9 @@ jobs:
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+          TAG: ${{ github.event.inputs.tag || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || '' }}
         run: |
+          TAG=${TAG:-v$(jq -r .version package.json)}
           gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
             || gh release create "$TAG" -R "$GITHUB_REPOSITORY" --title "rosegriffon $TAG" --notes "Self-hostable rosegriffon executables (site, unified API, Discord gateway, ranked, cron)." --target "$GITHUB_SHA"
           gh release upload "$TAG" dist/rosegriffon-* dist/SHA256SUMS -R "$GITHUB_REPOSITORY" --clobber
