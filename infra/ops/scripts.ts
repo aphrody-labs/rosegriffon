@@ -104,11 +104,17 @@ export function shipLines(
   const built = list.filter((s) => s.target && s.dockerfile);
   if (!built.length) return [];
   const ssh = env.RG_SHIP_SSH?.trim() || from.ssh;
+  // Mesh alias first, public alias when the WireGuard link is down: no human fixes the tunnel mid-deploy.
+  const fallback = env.RG_SHIP_SSH_FALLBACK?.trim() || `${from.key}-public`;
+  const candidates = [...new Set([ssh, fallback])].map(q).join(" ");
   return [
     `imgs=$(docker compose${profileFlags(built)} config --images ${targetsOf(built)} | grep "^\${RG_REGISTRY:-rosegriffon}/" | sort -u | tr "\\n" " ")`,
     `echo "ship from ${from.key}: $imgs"`,
     // -n: the script itself arrives on stdin (bash -s); ssh must not swallow the rest of it.
-    `ssh -n -o BatchMode=yes ${q(ssh)} "docker save $imgs" | docker load`,
+    `ship_ssh=; for h in ${candidates}; do if ssh -n -o BatchMode=yes -o ConnectTimeout=8 "$h" true 2>/dev/null; then ship_ssh=$h; break; fi; done`,
+    `[ -n "$ship_ssh" ] || { echo "ship: no route to ${from.key} (${candidates})" >&2; exit 1; }`,
+    `echo "ship via $ship_ssh"`,
+    `ssh -n -o BatchMode=yes "$ship_ssh" "docker save $imgs" | docker load`,
   ];
 }
 
