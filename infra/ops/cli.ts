@@ -10,7 +10,7 @@
  *   services [--json]                  the registry
  *   render [--check]                   regenerate nginx config from the registry
  *   build <service|all> [--role build] [--ref origin/main]
- *   deploy <service|all> [--role <svc role>] [--ref origin/main]
+ *   deploy <service|all> [--role <svc role>] [--ref origin/main] [--build-here]
  *   verify <service|all> [--role <svc role>]
  *   rollback <tag> [service|all] [--role <svc role>]
  *   migrate <service> --to <role|host> [--from <role|host>] [--ref origin/main] [--apply]
@@ -200,6 +200,8 @@ async function main(argv: string[]): Promise<number> {
           select(infra, name),
           ref,
           name === "all",
+          // Images come from the build role (`just build`) unless --build-here.
+          flags["build-here"] ? undefined : resolveHost(infra, "build", env),
         ),
         dry,
       );

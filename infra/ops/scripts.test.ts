@@ -113,3 +113,31 @@ test("every compose service is in the registry", () => {
   for (const name of Object.keys(compose.services))
     expect(known.has(name)).toBe(true);
 });
+
+test("deploy ships images from the build role instead of building on prod", () => {
+  const build = resolveHost(infra, "build");
+  const s = deployScript(
+    prod,
+    infra,
+    {},
+    select(infra, "all"),
+    "origin/main",
+    true,
+    build,
+  );
+  expect(s).toContain(
+    `ssh -o BatchMode=yes '${build.ssh}' "docker save $imgs" | docker load`,
+  );
+  expect(s).toContain("--no-build");
+  expect(s).not.toContain("compose build");
+  const local = deployScript(
+    prod,
+    infra,
+    {},
+    select(infra, "all"),
+    "origin/main",
+    true,
+    prod,
+  );
+  expect(local).toContain("compose build --pull");
+});

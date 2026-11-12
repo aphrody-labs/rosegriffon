@@ -5,6 +5,8 @@ limit_conn nie_conn 8;
 limit_req_status 429;
 limit_conn_status 429;
 proxy_pass http://model_serve;
+# model-serve sends its own Access-Control-Allow-Origin; the one added below must be the only one.
+proxy_hide_header Access-Control-Allow-Origin;
 proxy_http_version 1.1;
 proxy_set_header Host $host;
 proxy_set_header Connection "";

@@ -79,10 +79,33 @@ export function buildScript(
 ): string {
   return [
     prelude(host, infra, env, ref),
+    // The website prerender reads the databases: a build env file next to the runtime one
+    // (loopback URLs of the build host) switches the build to the host network.
+    `b="\${RG_ENV_FILE%/*}/rosegriffon.build.env"; if [ -r "$b" ]; then export RG_BUILD_ENV_FILE="$b" RG_BUILD_NETWORK=host; fi`,
     `docker compose${profileFlags(list)} config -q`,
     `docker compose${profileFlags(list)} build --pull ${targetsOf(list)}`,
     `echo "built RG_TAG=$RG_TAG on $(hostname)"`,
   ].join("\n");
+}
+
+/**
+ * Lines that copy the stack images (RG_TAG) built on `from` into the local Docker engine:
+ * `docker save` over ssh piped into `docker load`, no registry. The deploy host reaches the
+ * build host through its ssh alias (RG_SHIP_SSH overrides it).
+ */
+export function shipLines(
+  from: Host,
+  list: Service[],
+  env: InfraEnv,
+): string[] {
+  const built = list.filter((s) => s.target);
+  if (!built.length) return [];
+  const ssh = env.RG_SHIP_SSH?.trim() || from.ssh;
+  return [
+    `imgs=$(docker compose${profileFlags(built)} config --images ${targetsOf(built)} | sort -u | tr "\\n" " ")`,
+    `echo "ship from ${from.key}: $imgs"`,
+    `ssh -o BatchMode=yes ${q(ssh)} "docker save $imgs" | docker load`,
+  ];
 }
 
 export function deployScript(
@@ -92,19 +115,26 @@ export function deployScript(
   list: Service[],
   ref: string,
   all: boolean,
+  /** Build host when it is not the deploy host: images are shipped instead of built here. */
+  buildHost?: Host,
 ): string {
   const longRunning = list.filter((s) => s.profile !== "tools");
   const tools = list.filter((s) => s.profile === "tools");
+  const ship = buildHost && buildHost.key !== host.key;
   const lines = [
     prelude(host, infra, env, ref),
     // Two rg-core processes would log the same Discord bots in twice and run cron twice.
     `if systemctl is-active --quiet rg-core 2>/dev/null; then echo "rg-core.service is active on $(hostname): cut over first"; exit 1; fi`,
     `docker compose${profileFlags(list)} config -q`,
-    `docker compose${profileFlags(list)} build --pull ${targetsOf(list)}`,
+    ...(ship
+      ? shipLines(buildHost, list, env)
+      : [
+          `docker compose${profileFlags(list)} build --pull ${targetsOf(list)}`,
+        ]),
   ];
   if (longRunning.length)
     lines.push(
-      `docker compose${profileFlags(longRunning)} up -d --wait --wait-timeout 300 ${all ? "--remove-orphans" : targetsOf(longRunning)}`,
+      `docker compose${profileFlags(longRunning)} up -d --wait --wait-timeout 300${ship ? " --no-build" : ""} ${all ? "--remove-orphans" : targetsOf(longRunning)}`,
     );
   for (const t of tools)
     lines.push(
