@@ -46,10 +46,12 @@ bun run --filter '@rosegriffon/cron' typecheck
 
 The root `justfile` drives the same workspace tasks (`just` lists them):
 `just install` (`bun install --ignore-scripts`), `just check`, `just lint`, `just test`,
-`just build`, `just ci` (check, lint, test, build), `just compile [args]`, `just tokens`
-(rg-ui themes and tokens). `deploy-preflight`, `deploy-build`, `deploy-status`, `deploy-site`
-and `deploy-verify` only wrap the VPS steps of `docs/vps/RUNBOOK-2026-11-05.md` (section 4);
-run them by hand, in that order.
+`just fmt`, `just ci` (check, lint, test, workspace build), `just compile [args]`, `just tokens`
+(rg-ui themes and tokens). Host verbs are uniform over the service registry:
+`just build|deploy|verify <service|all> [--role R]`, `just rollback <tag> [service]`,
+`just migrate <service> --to <role|host> [--apply]`, plus `just host <role>`, `just ssh <role>`,
+`just services` and `just render`. Roles, services, data flow and migration:
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## VPS Service: `rg-core` executable
 
@@ -104,7 +106,7 @@ Inazuma Eleven: Victory Road (`nie.exe` Level-5 "Lives" engine) reverse-engineer
 | Unified API | Vercel Function (Bun), prebuilt Build Output | `apps/rg-bot/vercel.ts`, `apps/rg-bot/src/scripts/build-vercel.ts` |
 | Postgres, Auth, Storage, Realtime | Supabase project `rg` (ref `xzwfnxzkxtcpgmtqulbh`) | `supabase/config.toml`, `supabase/migrations` |
 | Game data mirror | Neon project `inagle` (pooled endpoint, `INAGLE_DATABASE_URL`) | schema owned by `@rosegriffon/inagle` in Bun OS |
-| Long-running services | VPS `rg-core` (`rosegriffon serve` or `apps/rg-bot/src/core.ts`) behind nginx | `infra/systemd`, `infra/nginx`, `scripts/assemble-vps-release.sh` |
+| Long-running services | compose stack on the `prod` role host (`core`, `website`, `model-serve`, `nginx`) | `infra/hosts.toml`, `infra/services.toml`, `compose.yaml`, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Models | `aphrody-nie-model-serve` (Bun OS), relayed by rg-core | `NIE_MODEL_SERVE_*` |
 
 Supabase: `supabase link --project-ref xzwfnxzkxtcpgmtqulbh`, then `supabase db push` from the

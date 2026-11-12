@@ -5,7 +5,7 @@ Ce document décrit l'architecture de la base de données du projet **Rose Griff
 Depuis le 11/8/2026, la pile est **entièrement self-hostée sur le VPS** (plus de
 projet Supabase Cloud, plus d'URL `*.supabase.co`) : voir
 [self-host-supabase.md](self-host-supabase.md) pour le détail des services de
-remplacement (PostgREST, Storage, Realtime) et [deploy.md](deploy.md) pour la
+remplacement (PostgREST, Storage, Realtime) et [ARCHITECTURE.md](ARCHITECTURE.md) pour la
 publication.
 
 ---

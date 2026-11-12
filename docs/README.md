@@ -38,7 +38,7 @@ dans `.gitignore`.
 | Doc | Portée |
 | --- | --- |
 | [PROD-STATUS.md](PROD-STATUS.md) | État vérifié de la production et surfaces retirées. |
-| [deploy.md](deploy.md) | Déploiement et exploitation : services, procédures, diagnostic, interdits. |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Rôles d'hôtes, services, flux de données, déploiement et migration. |
 | [deploiement-sans-coupure.md](deploiement-sans-coupure.md) | Publication bleu/vert : slots, versions, prévisualisation, et les trois pièges qui cassent une prod pendant un déploiement. |
 | [self-host-supabase.md](self-host-supabase.md) | Sortie de Supabase : PostgreSQL local, PostgREST, Storage et Realtime auto-hébergés. |
 | [bot-azalee.md](bot-azalee.md) | Second bot Discord (serveur Azalée) sur le même code que le bot Rose Griffon : profils, jeton, invitation, curseur d'annonce. |

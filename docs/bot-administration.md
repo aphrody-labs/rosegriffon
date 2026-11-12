@@ -276,4 +276,4 @@ curl -s http://127.0.0.1:3007/sante
 - [bot-commandes.md](bot-commandes.md) — catalogue des slash commands et plan de bascule
 - [bot-communaute.md](bot-communaute.md) — niveaux, jetons Kizuna, tickets
 - [bot-azalee.md](bot-azalee.md) — le second profil et son registre
-- [deploy.md](deploy.md) — services, procédures, interdits
+- [ARCHITECTURE.md](ARCHITECTURE.md) — rôles, services, déploiement, migration

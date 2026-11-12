@@ -1,6 +1,7 @@
 # Rose Griffon Docker stack
 
-`compose.yaml` (repository root) runs every Rose Griffon process on `vps`. Images come from
+`compose.yaml` (repository root) runs every Rose Griffon process on the `prod` role host
+(`just host prod`; roles in `infra/hosts.toml`, overview in `docs/ARCHITECTURE.md`). Images come from
 [`Dockerfile`](./Dockerfile), one target per service. The systemd units in `infra/systemd/`
 and the host nginx files in `infra/nginx/` stay in the repository as the rollback path.
 
@@ -77,15 +78,19 @@ reads it as BuildKit secret `rg_env` inside one `RUN`; only `NEXT_PUBLIC_*` reac
 
 ## Deploy
 
+Hosts, services and verbs are described once in [docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md).
+The stack deploys to the host holding the `prod` role (`infra/hosts.toml`):
+
 ```sh
-just deploy-stack [ref]            # build on vps, up -d --wait, smoke checks
-just deploy-stack-smoke            # service health, stack nginx on 127.0.0.1:18080, public names
-just deploy-stack-rollback <tag>   # previous images (tag = short commit of a good deploy)
+just deploy [service|all] [--ref REF]   # checkout, build, up -d --wait on the prod host, then verify
+just verify [service|all]               # service health in the stack network, stack nginx, public names
+just rollback <tag> [service]           # previous images (tag = short commit of a good deploy)
+just migrate <service> --to <role|host> # move state + service (dry run unless --apply)
 ```
 
-`deploy-stack` uses its own checkout (`/home/ubuntu/src/rosegriffon-stack`, `RG_STACK_DIR`),
-builds there on the 12 vps cores, tags images with the short commit, and refuses to start
-while `rg-core.service` is active (two processes would log the bots in twice and run cron twice).
+Each host has its own stack checkout (`stack_dir` in `infra/hosts.toml`). The images are built
+there, tagged with the short commit, and the deploy refuses to start while `rg-core.service`
+is active (two processes would log the bots in twice and run cron twice).
 
 ## Cutover (not done; by hand, in order)
 
@@ -113,7 +118,7 @@ while `rg-core.service` is active (two processes would log the bots in twice and
    sudo install -m 644 infra/docker/host-nginx/rosegriffon-stack.conf /etc/nginx/conf.d/
    sudo mkdir -p /etc/nginx/conf.d.off && sudo mv /etc/nginx/conf.d/rg-core.conf /etc/nginx/conf.d/rosegriffon.fr.conf /etc/nginx/conf.d.off/
    sudo nginx -t && sudo systemctl reload nginx
-   just deploy-stack-smoke
+   just verify
    sudo systemctl disable rg-core rg-website
    ```
    `nie.aphrody.app` still includes `snippets/nie-assets.inc`, which proxies to
@@ -128,7 +133,7 @@ sudo rm /etc/nginx/conf.d/rosegriffon-stack.conf
 cd ~/src/rosegriffon-stack && docker compose down          # data stays in /srv/rosegriffon
 sudo nginx -t && sudo systemctl reload nginx
 sudo systemctl enable --now rg-core rg-website
-just deploy-verify
+# legacy systemd checks: see infra/systemd/
 ```
 
 The systemd units still read `/etc/aphrody/rg-core.env`, `/etc/rg/rg.env` and `/var/lib/rg-core`.
