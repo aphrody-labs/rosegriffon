@@ -56,7 +56,9 @@ export function prelude(
     ? [
         `[ -d "$RG_STACK_DIR/.git" ] || git clone --filter=blob:none ${q(repoUrl(infra, env))} "$RG_STACK_DIR"`,
         `git -C "$RG_STACK_DIR" fetch --quiet origin`,
-        `git -C "$RG_STACK_DIR" checkout --quiet --detach ${q(ref)}`,
+        // The stack dir is a deploy checkout: local edits and generated leftovers never survive.
+        `git -C "$RG_STACK_DIR" checkout --quiet --force --detach ${q(ref)}`,
+        `git -C "$RG_STACK_DIR" clean -fdq`,
       ].join("\n")
     : "";
   return [
