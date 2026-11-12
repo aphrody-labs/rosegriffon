@@ -188,16 +188,26 @@ import {
   platformFor,
 } from "../../packages/rg-config/platform.ts";
 
-test("platformFor keeps a commercial SSR site off Vercel but allows Cloudflare", () => {
-  const web = infra.services.services.website;
-  const svc = { name: "website", ...web } as never;
-  expect(platformCandidates(infra, svc)).toContain("cloudflare");
-  expect(platformBlocker(infra, svc, "cloudflare")).toBeNull();
-  // website is commercial; vercel forbids commercial, so it must not be chosen even if listed.
+test("the website stays self-hosted: direct Postgres + long CPU exceed the edge free tiers", () => {
+  const svc = { name: "website", ...infra.services.services.website } as never;
+  // Commercial + postgres + long-cpu: neither Cloudflare (10 ms CPU, no TCP pool) nor Vercel fit.
+  expect(platformBlocker(infra, svc, "cloudflare")).toContain("missing");
   expect(platformBlocker(infra, svc, "vercel")).toBe(
     "free tier is non-commercial only",
   );
   expect(platformFor(infra, svc).key).toBe("vps");
+});
+
+test("a static, non-commercial service can move to the edge", () => {
+  const svc = {
+    name: "wiki-static",
+    role: "prod",
+    platforms: ["cloudflare", "vps"],
+    requires: ["static", "cache"],
+    commercial: false,
+    state: [],
+  } as never;
+  expect(platformFor(infra, svc).key).toBe("cloudflare");
 });
 
 test("stateful and long-cpu services cannot move to the edge", () => {

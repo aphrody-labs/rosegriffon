@@ -32,9 +32,14 @@ port = 8792
 health = "/health"
 role = "prod"
 platforms = ["vps"]
-requires = ["gpu","long-cpu","disk"]
+requires = ["gpu", "long-cpu", "disk"]
 state = ["game/ievr", "cache/model-serve", "nie"]
-env = ["NIE_GAME_DIR", "NIE_MODEL_SERVE_HOST", "NIE_MODEL_SERVE_PORT", "NIE_MODEL_CACHE_DIR"]
+env = [
+  "NIE_GAME_DIR",
+  "NIE_MODEL_SERVE_HOST",
+  "NIE_MODEL_SERVE_PORT",
+  "NIE_MODEL_CACHE_DIR",
+]
 upstream = { name = "model_serve", keepalive = 16 }
 
 [services.core]
@@ -46,10 +51,23 @@ port = 8810
 health = "/health"
 role = "prod"
 platforms = ["vps"]
-requires = ["postgres","redis","websocket","long-cpu"]
+requires = ["postgres", "redis", "websocket", "long-cpu"]
 state = ["state"]
 vhosts = ["api", "ranked", "bot", "mcp", "db"]
-env = ["RG_CORE_HOST", "RG_CORE_PORT", "RG_CORE_CRON", "NIE_MODEL_SERVE_URL", "RG_MEDIA_ROOT", "CDN_STATIC_ROOT", "ACHILLEA_BACKUP_DIR", "RANKED_STORAGE_DIR", "RG_CRON_SHARED_ROOT", "WEBSITE_URL", "PUBLIC_API_URL", "DATABASE_URL"]
+env = [
+  "RG_CORE_HOST",
+  "RG_CORE_PORT",
+  "RG_CORE_CRON",
+  "NIE_MODEL_SERVE_URL",
+  "RG_MEDIA_ROOT",
+  "CDN_STATIC_ROOT",
+  "ACHILLEA_BACKUP_DIR",
+  "RANKED_STORAGE_DIR",
+  "RG_CRON_SHARED_ROOT",
+  "WEBSITE_URL",
+  "PUBLIC_API_URL",
+  "DATABASE_URL",
+]
 upstream = { name = "rg_core", keepalive = 32 }
 
 [services.cron]
@@ -61,10 +79,16 @@ profile = "cron-split"
 port = 8811
 health = "/health"
 role = "prod"
-platforms = ["vps","cloudflare"]
-requires = ["cron","long-cpu"]
+platforms = ["vps", "cloudflare"]
+requires = ["cron", "long-cpu"]
 state = ["state"]
-env = ["RG_CRON_PORT", "RG_MEDIA_ROOT", "CDN_STATIC_ROOT", "RG_CRON_SHARED_ROOT", "NIE_MODEL_SERVE_URL"]
+env = [
+  "RG_CRON_PORT",
+  "RG_MEDIA_ROOT",
+  "CDN_STATIC_ROOT",
+  "RG_CRON_SHARED_ROOT",
+  "NIE_MODEL_SERVE_URL",
+]
 
 [services.website]
 entry = "apps/rg-website"
@@ -74,12 +98,19 @@ compose = "compose.yaml"
 port = 3100
 health = "/api/health"
 role = "prod"
-platforms = ["vps","cloudflare"]
-requires = ["ssr","static","cache"]
+platforms = ["vps"]
+requires = ["ssr", "static", "cache", "postgres", "long-cpu"]
 commercial = true
 state = []
 vhosts = ["@", "www", "achillea", "azalee", "shop"]
-env = ["HOSTNAME", "PORT", "NODE_ENV", "RG_API_URL", "RG_MEDIA_PUBLIC_ORIGIN", "DATABASE_URL"]
+env = [
+  "HOSTNAME",
+  "PORT",
+  "NODE_ENV",
+  "RG_API_URL",
+  "RG_MEDIA_PUBLIC_ORIGIN",
+  "DATABASE_URL",
+]
 upstream = { name = "rg_website", keepalive = 32 }
 
 [services.nginx]
@@ -89,8 +120,8 @@ compose = "compose.yaml"
 port = 8080
 health = "/nginx-health"
 role = "prod"
-platforms = ["vps","cloudflare"]
-requires = ["static","cache"]
+platforms = ["vps", "cloudflare"]
+requires = ["static", "cache"]
 state = ["cache/nginx", "log/nginx"]
 vhosts = ["cdn"]
 env = ["RG_NGINX_PORT"]
@@ -102,7 +133,7 @@ compose = "compose.yaml"
 port = 6379
 role = "prod"
 platforms = ["vps"]
-requires = ["redis","disk"]
+requires = ["redis", "disk"]
 state = []
 env = ["REDIS_URL"]
 
@@ -113,7 +144,7 @@ compose = "compose.yaml"
 port = 5432
 role = "prod"
 platforms = ["vps"]
-requires = ["postgres","disk"]
+requires = ["postgres", "disk"]
 state = ["db/inagle"]
 env = ["POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"]
 
@@ -124,7 +155,7 @@ compose = "compose.yaml"
 profile = "tools"
 role = "storage"
 platforms = ["vps"]
-requires = ["disk","long-cpu"]
+requires = ["disk", "long-cpu"]
 state = ["steam", "game/ievr"]
 env = ["STEAM_HOME", "STEAM_INSTALL_DIR"]
 
@@ -134,7 +165,13 @@ dockerfile = "infra/docker/cdn-sync/Dockerfile"
 compose = "compose.yaml"
 profile = "tools"
 role = "cdn"
-platforms = ["vps","cloudflare"]
-requires = ["r2","cron"]
+platforms = ["vps", "cloudflare"]
+requires = ["r2", "cron"]
 state = ["cdn/static"]
-env = ["CDN_SYNC_SOURCE", "CDN_SYNC_PREFIX", "CDN_SYNC_TARGETS", "CDN_SYNC_DRY_RUN", "CDN_SYNC_CONCURRENCY"]
+env = [
+  "CDN_SYNC_SOURCE",
+  "CDN_SYNC_PREFIX",
+  "CDN_SYNC_TARGETS",
+  "CDN_SYNC_DRY_RUN",
+  "CDN_SYNC_CONCURRENCY",
+]
