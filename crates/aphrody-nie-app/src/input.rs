@@ -272,9 +272,256 @@ pub fn movement(keys: &ButtonInput<Key>) -> (f32, f32) {
     )
 }
 
+// ── Manette ─────────────────────────────────────────────────────────────────────
+
+pub use aphrody_nie_runtime::pad::{PadButton, PadFrame};
+
+/// Zone morte radiale des sticks : en deçà, un stick au repos qui dérive n'est pas lu.
+pub const STICK_DEADZONE: f32 = 0.18;
+/// Seuil à partir duquel un bouton analogique (gâchettes L2/R2) compte comme enfoncé.
+pub const BUTTON_THRESHOLD: f32 = 0.5;
+/// Délai avant la première répétition d'une direction de menu tenue.
+pub const MENU_REPEAT_DELAY_S: f32 = 0.40;
+/// Intervalle entre deux répétitions d'une direction de menu tenue.
+pub const MENU_REPEAT_INTERVAL_S: f32 = 0.12;
+
+/// État d'une manette au format Standard Gamepad : seize boutons analogiques, deux sticks.
+///
+/// L'hôte recopie à chaque image `Gamepad.buttons[i].value` et `Gamepad.axes` dans
+/// [`GamepadState::update`] ; tout le reste (zone morte, fronts, répétition des menus) se fait
+/// ici, une seule fois pour tous les hôtes.
+#[derive(Debug, Clone, Default)]
+pub struct GamepadState {
+    values: [f32; 16],
+    axes: [f32; 4],
+    held: u16,
+    prev: u16,
+    repeat: Option<((i8, i8), f32)>,
+}
+
+impl GamepadState {
+    /// Recopie une image brute. Les boutons au-delà de seize et les axes au-delà de quatre sont
+    /// ignorés ; une valeur non finie compte pour zéro.
+    pub fn update(&mut self, buttons: &[f32], axes: &[f32]) {
+        let clean = |v: f32| if v.is_finite() { v } else { 0.0 };
+        self.prev = self.held;
+        self.values = [0.0; 16];
+        let mut held = 0u16;
+        for (i, v) in buttons.iter().take(16).enumerate() {
+            let v = clean(*v).clamp(0.0, 1.0);
+            self.values[i] = v;
+            if v >= BUTTON_THRESHOLD {
+                held |= 1 << i;
+            }
+        }
+        self.held = held;
+        self.axes = [0.0; 4];
+        for (i, v) in axes.iter().take(4).enumerate() {
+            self.axes[i] = clean(*v).clamp(-1.0, 1.0);
+        }
+    }
+
+    /// Fusionne un état clavier (bits [`PadButton::bit`]) dans l'image courante, pour jouer sans
+    /// manette. À appeler après [`GamepadState::update`].
+    pub fn merge_held(&mut self, bits: u16) {
+        self.held |= bits;
+    }
+
+    /// Relâche tout (perte de focus, manette débranchée).
+    pub fn release_all(&mut self) {
+        self.prev = self.held;
+        self.held = 0;
+        self.values = [0.0; 16];
+        self.axes = [0.0; 4];
+        self.repeat = None;
+    }
+
+    /// Valeur analogique d'un bouton (`0..=1`).
+    #[must_use]
+    pub fn value(&self, b: PadButton) -> f32 {
+        self.values[b as usize]
+    }
+
+    fn stick(&self, ix: usize) -> (f32, f32) {
+        let (x, y) = (self.axes[ix], -self.axes[ix + 1]);
+        let m = (x * x + y * y).sqrt();
+        if m < STICK_DEADZONE {
+            return (0.0, 0.0);
+        }
+        // Remise à l'échelle : la sortie repart de zéro au bord de la zone morte, sans saut.
+        let k = ((m - STICK_DEADZONE) / (1.0 - STICK_DEADZONE)).min(1.0) / m;
+        (x * k, y * k)
+    }
+
+    /// Stick gauche, zone morte appliquée, `y` positif vers le haut.
+    #[must_use]
+    pub fn left_stick(&self) -> (f32, f32) {
+        self.stick(0)
+    }
+
+    /// Stick droit, zone morte appliquée, `y` positif vers le haut.
+    #[must_use]
+    pub fn right_stick(&self) -> (f32, f32) {
+        self.stick(2)
+    }
+
+    /// L'image destinée au moteur.
+    #[must_use]
+    pub fn frame(&self) -> PadFrame {
+        PadFrame {
+            left: self.left_stick(),
+            right: self.right_stick(),
+            held: self.held,
+            pressed: self.held & !self.prev,
+            released: self.prev & !self.held,
+        }
+    }
+
+    /// Le bouton vient-il d'être enfoncé ?
+    #[must_use]
+    pub fn just_pressed(&self, b: PadButton) -> bool {
+        self.held & !self.prev & b.bit() != 0
+    }
+
+    /// Direction de menu à appliquer sur cette image, avec répétition quand elle est tenue.
+    ///
+    /// Rend `(dx, dy)` en **coordonnées écran** (`dy` positif vers le bas, comme les rectangles
+    /// des scènes), ou `None` s'il n'y a rien à faire. La croix et le stick gauche servent tous
+    /// les deux ; une direction tenue répète après [`MENU_REPEAT_DELAY_S`].
+    pub fn menu_direction(&mut self, dt: f32) -> Option<(f32, f32)> {
+        let (sx, sy) = self.left_stick();
+        let held = self.held;
+        let axis = |neg: PadButton, pos: PadButton, stick: f32| -> i8 {
+            let d = i8::from(held & pos.bit() != 0) - i8::from(held & neg.bit() != 0);
+            if d != 0 {
+                d
+            } else if stick > 0.5 {
+                1
+            } else if stick < -0.5 {
+                -1
+            } else {
+                0
+            }
+        };
+        let dir = (
+            axis(PadButton::DpadLeft, PadButton::DpadRight, sx),
+            // Le stick a `y` vers le haut ; l'écran l'a vers le bas.
+            axis(PadButton::DpadUp, PadButton::DpadDown, -sy),
+        );
+        if dir == (0, 0) {
+            self.repeat = None;
+            return None;
+        }
+        let fire = match self.repeat {
+            Some((d, t)) if d == dir => {
+                let t = t - dt.max(0.0);
+                if t <= 0.0 {
+                    self.repeat = Some((dir, MENU_REPEAT_INTERVAL_S));
+                    true
+                } else {
+                    self.repeat = Some((dir, t));
+                    false
+                }
+            }
+            _ => {
+                self.repeat = Some((dir, MENU_REPEAT_DELAY_S));
+                true
+            }
+        };
+        fire.then_some((f32::from(dir.0), f32::from(dir.1)))
+    }
+
+    /// Commande de menu des boutons de façade sur cette image, dans le vocabulaire de
+    /// [`BINDINGS`] : sud et Start = valider, est = retour, nord = information, R1 = suivant.
+    #[must_use]
+    pub fn menu_button_command(&self) -> Option<&'static str> {
+        [
+            (PadButton::South, "CMD_ENTER"),
+            (PadButton::Start, "CMD_ENTER"),
+            (PadButton::East, "CMD_BACK"),
+            (PadButton::North, "CMD_INFO"),
+            (PadButton::R1, "CMD_FCS_NEXT"),
+        ]
+        .into_iter()
+        .find(|(b, _)| self.just_pressed(*b))
+        .map(|(_, c)| c)
+    }
+}
+
+/// Bouton de manette émulé par une touche, pour jouer au clavier.
+///
+/// Flèches et ZQSD/WASD = croix, Entrée/Espace = sud, Échap/Retour arrière = est, Tab = L1,
+/// `I` = nord. Les autres boutons n'ont pas d'équivalent dans [`Key`].
+#[must_use]
+pub fn pad_button_for_key(key: Key) -> Option<PadButton> {
+    Some(match key {
+        Key::Up | Key::W | Key::Z => PadButton::DpadUp,
+        Key::Down | Key::S => PadButton::DpadDown,
+        Key::Left | Key::A | Key::Q => PadButton::DpadLeft,
+        Key::Right | Key::D => PadButton::DpadRight,
+        Key::Enter | Key::NumpadEnter | Key::Space => PadButton::South,
+        Key::Escape | Key::Backspace => PadButton::East,
+        Key::Tab => PadButton::L1,
+        Key::I => PadButton::North,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn la_manette_produit_des_fronts_et_une_zone_morte() {
+        let mut g = GamepadState::default();
+        let mut b = [0.0f32; 16];
+        b[PadButton::South as usize] = 1.0;
+        b[PadButton::R2 as usize] = 0.3; // gâchette effleurée : pas enfoncée
+        g.update(&b, &[0.1, 0.05, 0.0, 0.0]);
+        let f = g.frame();
+        assert!(f.just_pressed(PadButton::South) && f.is_held(PadButton::South));
+        assert!(!f.is_held(PadButton::R2));
+        assert!((g.value(PadButton::R2) - 0.3).abs() < 1e-6);
+        assert_eq!(f.left, (0.0, 0.0), "dérive sous la zone morte");
+        g.update(&b, &[0.0, -1.0, 0.0, 0.0]);
+        let f = g.frame();
+        assert!(!f.just_pressed(PadButton::South), "tenu, pas réappuyé");
+        assert!((f.left.1 - 1.0).abs() < 1e-6, "axe W3C inversé : haut = +y");
+        g.update(&[0.0; 16], &[]);
+        assert!(g.frame().just_released(PadButton::South));
+    }
+
+    #[test]
+    fn une_direction_de_menu_tenue_se_repete_apres_le_delai() {
+        let mut g = GamepadState::default();
+        let mut b = [0.0f32; 16];
+        b[PadButton::DpadDown as usize] = 1.0;
+        g.update(&b, &[]);
+        assert_eq!(g.menu_direction(0.016), Some((0.0, 1.0)));
+        assert_eq!(g.menu_direction(0.2), None);
+        assert_eq!(g.menu_direction(0.25), Some((0.0, 1.0)), "répétition");
+        assert_eq!(g.menu_direction(0.05), None);
+        assert_eq!(g.menu_direction(0.08), Some((0.0, 1.0)));
+        g.update(&[0.0; 16], &[0.9, 0.0, 0.0, 0.0]);
+        assert_eq!(
+            g.menu_direction(0.016),
+            Some((1.0, 0.0)),
+            "le stick navigue aussi"
+        );
+    }
+
+    #[test]
+    fn les_boutons_de_facade_parlent_le_vocabulaire_des_menus() {
+        let mut g = GamepadState::default();
+        let mut b = [0.0f32; 16];
+        b[PadButton::East as usize] = 1.0;
+        g.update(&b, &[]);
+        assert_eq!(g.menu_button_command(), Some("CMD_BACK"));
+        for cmd in ["CMD_ENTER", "CMD_BACK", "CMD_INFO", "CMD_FCS_NEXT"] {
+            assert!(BINDINGS.iter().any(|(_, c)| *c == cmd), "{cmd}");
+        }
+        assert_eq!(pad_button_for_key(Key::Enter), Some(PadButton::South));
+        assert_eq!(pad_button_for_key(Key::Z), Some(PadButton::DpadUp));
+    }
 
     /// Une touche déjà enfoncée ne réalimente pas `just_pressed`.
     ///

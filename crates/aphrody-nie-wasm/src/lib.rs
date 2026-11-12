@@ -90,6 +90,7 @@
 #![forbid(unsafe_code)]
 #![allow(clippy::pedantic)]
 
+pub mod client;
 pub mod native_audio;
 pub use native_audio::{audio_bank_cue_to_wav, audio_bank_json, audio_cue_to_wav};
 
@@ -2504,6 +2505,26 @@ fn screen_snapshot(screen: &aphrody_nie_app::flow::Screen) -> Result<String, Str
                 "awaitingDialogue": repliques.is_empty(),
             },
         }),
+        aphrody_nie_app::flow::Screen::OpenWorld { state }
+        | aphrody_nie_app::flow::Screen::KizunaTown { state } => serde_json::json!({
+            "schemaVersion": 1,
+            "screen": {
+                "kind": if matches!(screen, aphrody_nie_app::flow::Screen::KizunaTown { .. }) {
+                    "kizunaTown"
+                } else {
+                    "openWorld"
+                },
+                "mapCode": state.zone.map_code(),
+                "tick": state.tick_count,
+                "player": {
+                    "x": state.player.position.x,
+                    "y": state.player.position.y,
+                    "z": state.player.position.z,
+                },
+                "npcCount": state.npcs.len(),
+                "activeDialogue": state.active_dialogue.is_some(),
+            },
+        }),
         aphrody_nie_app::flow::Screen::Info { title } => serde_json::json!({
             "schemaVersion": 1,
             "screen": { "kind": "info", "title": title },
@@ -3960,13 +3981,13 @@ mod tests {
         assert_eq!(list_json["screen"]["kind"], "list");
         assert_eq!(list_json["screen"]["lineCount"], 2);
 
-        let mut story_screen = aphrody_nie_app::flow::Screen::new();
-        story_screen.input("CMD_ENTER");
-        for _ in 0..5 {
-            story_screen.input("CMD_FCS_NEXT");
-        }
-        story_screen.input("CMD_ENTER");
-        story_screen.input("CMD_ENTER");
+        // « Mode Histoire » ouvre désormais l'exploration (`Screen::OpenWorld`) : l'écran de
+        // dialogue n'est plus atteint par le menu, il est posé tel qu'un événement l'ouvrirait.
+        let mut story_screen = aphrody_nie_app::flow::Screen::Story {
+            idx: 0,
+            titre: String::new(),
+            repliques: Vec::new(),
+        };
         assert!(story_screen.attend_dialogue());
         story_screen.fournir_dialogue("event_001".into(), vec!["A real line".into()]);
         let story_json: serde_json::Value = serde_json::from_str(

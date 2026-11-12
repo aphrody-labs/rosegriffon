@@ -16,7 +16,9 @@
 
 pub mod g4mt;
 pub mod open_world;
+pub mod pad;
 pub mod render;
+pub mod session;
 
 pub use aphrody_nie_core::animation::{
     AnimationClip, AnimationError, BoneId, BonePose, BoneTrack, Keyframe, PoseFrame, Rotation,
@@ -276,6 +278,23 @@ pub struct World {
     kick_timer: f32,
     /// Immunité au tacle après récupération (s) : donne au porteur un burst d'attaque net.
     steal_lock: f32,
+    /// Multiplicateur de vitesse du joueur piloté, par équipe (sprint, Zone). `1.0` = inchangé.
+    pub speed_scale: [f32; 2],
+    /// Joueur imposé par un changement de joueur (`L1`) ou une passe, par équipe.
+    ///
+    /// `None` = règle d'origine (porteur, sinon le plus proche du ballon). Le porteur de l'équipe
+    /// garde toujours la priorité : on ne quitte pas le contrôle du ballon en changeant de joueur.
+    pub control_override: [Option<usize>; 2],
+    /// Portée de parade du gardien de chaque équipe, en fraction de [`SAVE_RADIUS`].
+    ///
+    /// Une frappe Hissatsu la réduit pour la durée du tir ; `1.0` = règle d'origine.
+    pub keeper_reach: [f32; 2],
+    /// Joueur qui vient de frapper : il ne peut pas reprendre le ballon pendant `kick_release`.
+    ///
+    /// Sans ce verrou, le frappeur resté à moins de [`CONTROL_RADIUS`] reprend le ballon au pas
+    /// suivant et le redribble, ce qui annule la passe ou le tir qu'il vient de donner.
+    released_by: Option<usize>,
+    kick_release: f32,
 }
 
 /// Formation 4-4-2 en fractions du demi-terrain pour l'équipe domicile (attaque +x).
@@ -330,6 +349,11 @@ impl World {
             possessor: None,
             kick_timer: 0.0,
             steal_lock: 0.0,
+            speed_scale: [1.0, 1.0],
+            control_override: [None, None],
+            keeper_reach: [1.0, 1.0],
+            released_by: None,
+            kick_release: 0.0,
         }
     }
 
@@ -346,6 +370,11 @@ impl World {
     #[must_use]
     pub fn controlled_for_team(&self, team: u8) -> Option<usize> {
         if let Some(i) = self.possessor
+            && self.players.get(i).is_some_and(|p| p.team == team)
+        {
+            return Some(i);
+        }
+        if let Some(i) = self.control_override[usize::from(team.min(1))]
             && self.players.get(i).is_some_and(|p| p.team == team)
         {
             return Some(i);
@@ -413,6 +442,22 @@ impl World {
         // désynchronisation invisible jusqu'à ce qu'elle produise ses effets.
         feed(self.kick_timer.to_bits());
         feed(self.steal_lock.to_bits());
+        // Les champs pilotés par `session` n'entrent que hors de leur valeur neutre : un monde
+        // jamais touché par une session garde exactement le hachage qu'il avait avant eux.
+        if let Some(r) = self.released_by {
+            feed(r as u32);
+            feed(self.kick_release.to_bits());
+        }
+        for (team, o) in self.control_override.iter().enumerate() {
+            if let Some(i) = o {
+                feed(0xC0DE_0000 | (team as u32) << 8 | (*i as u32 & 0xFF));
+            }
+        }
+        for v in self.speed_scale.iter().chain(self.keeper_reach.iter()) {
+            if v.to_bits() != 1.0f32.to_bits() {
+                feed(v.to_bits());
+            }
+        }
         for p in &self.players {
             feed(p.pos.x.to_bits());
             feed(p.pos.y.to_bits());
@@ -431,6 +476,12 @@ impl World {
         }
         if self.steal_lock > 0.0 {
             self.steal_lock -= dt;
+        }
+        if self.kick_release > 0.0 {
+            self.kick_release -= dt;
+            if self.kick_release <= 0.0 {
+                self.released_by = None;
+            }
         }
         self.step_players(dt);
         self.step_ball(dt);
@@ -483,14 +534,14 @@ impl World {
                 p.home
             };
             // Le joueur pilote obéit à la direction demandée, pas à sa cible d'IA.
-            let dir = if pilote_home == Some(i) {
-                self.input.dir.norm()
+            let (dir, scale) = if pilote_home == Some(i) {
+                (self.input.dir.norm(), self.speed_scale[0])
             } else if pilote_away == Some(i) {
-                self.away_input.dir.norm()
+                (self.away_input.dir.norm(), self.speed_scale[1])
             } else {
-                (target - p.pos).norm()
+                ((target - p.pos).norm(), 1.0)
             };
-            p.vel = dir * PLAYER_SPEED;
+            p.vel = dir * (PLAYER_SPEED * scale);
             p.pos = p.pos + p.vel * dt;
             p.pos.x = p.pos.x.clamp(-HALF_LEN, HALF_LEN);
             p.pos.y = p.pos.y.clamp(-HALF_WID, HALF_WID);
@@ -540,6 +591,9 @@ impl World {
         // Plus proche joueur (global) et son équipe.
         let mut nearest = (usize::MAX, f32::MAX);
         for (i, p) in self.players.iter().enumerate() {
+            if self.released_by == Some(i) {
+                continue;
+            }
             let d = (p.pos - ball2).len();
             if d < nearest.1 {
                 nearest = (i, d);
@@ -548,7 +602,9 @@ impl World {
 
         // Porteur courant conservé s'il reste à portée de contrôle.
         let prev = self.possessor;
-        let keep = prev.filter(|&i| (self.players[i].pos - ball2).len() < CONTROL_RADIUS);
+        let keep = prev.filter(|&i| {
+            self.released_by != Some(i) && (self.players[i].pos - ball2).len() < CONTROL_RADIUS
+        });
         let owner = match keep {
             // Conserve sauf si un ADVERSE entre dans le rayon de tacle (hors verrou de possession).
             Some(c) => {
@@ -617,11 +673,27 @@ impl World {
             let dir = (V2::new(goal_x, post) - ball2).norm();
             self.ball.vel = V3::new(dir.x * KICK_POWER, dir.y * KICK_POWER, KICK_LOFT);
             self.kick_timer = KICK_COOLDOWN;
+        } else if let Some((dir, scale)) = self.piloted_dribble(i, team) {
+            // Porteur piloté : le ballon suit le stick, à la vitesse du joueur, au lieu de filer
+            // vers le but adverse. Sans entrée, le dribble d'IA ci-dessous reste inchangé.
+            self.ball.vel.x = dir.x * PLAYER_SPEED * scale;
+            self.ball.vel.y = dir.y * PLAYER_SPEED * scale;
         } else {
             let dir = to_goal.norm();
             self.ball.vel.x = dir.x * DRIBBLE_SPEED;
             self.ball.vel.y = dir.y * DRIBBLE_SPEED;
         }
+    }
+
+    /// Direction et vitesse relative du dribble si le porteur `i` est piloté par une entrée.
+    fn piloted_dribble(&self, i: usize, team: u8) -> Option<(V2, f32)> {
+        let input = if team == 0 {
+            self.input
+        } else {
+            self.away_input
+        };
+        (input.dir.len() > 0.01 && self.controlled_for_team(team) == Some(i))
+            .then(|| (input.dir.norm(), self.speed_scale[usize::from(team.min(1))]))
     }
 
     /// Parade du gardien : si un ballon **bas** approche le but d'une équipe et que son GK est à
@@ -644,7 +716,8 @@ impl World {
             else {
                 continue;
             };
-            if (self.players[gk].pos - ball2).len() < SAVE_RADIUS {
+            if (self.players[gk].pos - ball2).len() < SAVE_RADIUS * self.keeper_reach[team as usize]
+            {
                 // Dégagement en cloche douce vers le centre du terrain.
                 let away = if team == 0 { 1.0 } else { -1.0 };
                 self.ball.vel = V3::new(away * 9.0, ball2.y * -0.2, 3.0);
@@ -684,6 +757,36 @@ impl World {
         self.possessor = None;
         self.kick_timer = KICK_COOLDOWN;
         self.steal_lock = 0.0;
+        self.released_by = None;
+        self.kick_release = 0.0;
+    }
+
+    /// Frappe le ballon depuis le porteur `from` : vitesse imposée, cadence de frappe armée, et le
+    /// frappeur ne peut pas reprendre le ballon pendant `release` secondes.
+    pub(crate) fn kick_from(&mut self, from: usize, vel: V3, release: f32) {
+        self.ball.vel = vel;
+        self.kick_timer = KICK_COOLDOWN;
+        self.possessor = None;
+        self.released_by = Some(from);
+        self.kick_release = release.max(TICK_DT);
+    }
+
+    /// Donne le ballon à `to` (issue d'un duel) : ballon posé à ses pieds, immunité au tacle.
+    pub(crate) fn award_ball(&mut self, to: usize) {
+        if let Some(p) = self.players.get(to) {
+            self.ball.pos = V3::new(p.pos.x, p.pos.y, 0.11);
+            self.ball.vel = V3::default();
+            self.possessor = Some(to);
+            self.steal_lock = POSSESSION_LOCK;
+            self.released_by = None;
+            self.kick_release = 0.0;
+        }
+    }
+
+    /// Remet tout le monde en formation, ballon au centre (coup d'envoi d'une mi-temps).
+    pub fn restart_kickoff(&mut self) {
+        self.reset_after_goal();
+        self.control_override = [None, None];
     }
 
     /// Index du porteur actuel (le plus proche à portée de contrôle), s'il y en a un.

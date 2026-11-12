@@ -1077,6 +1077,7 @@ dependencies = [
  "aphrody-nie-seed",
  "aphrody-nie-tasks",
  "aphrody-nie-trace",
+ "aphrody-nie-ui",
  "aphrody-nie-zukan",
  "bun-steam",
  "console_error_panic_hook",

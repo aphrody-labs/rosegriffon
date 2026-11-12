@@ -28,8 +28,8 @@ pub mod flow;
 pub mod game_data;
 /// Entrées : état des touches et table unique touche → commande de menu.
 pub mod input;
-/// Rendu 3D d'un match (vrais modèles du VFS) — natif seulement, comme `effectif`.
-#[cfg(not(target_arch = "wasm32"))]
+/// Rendu 3D d'un match : stade, buts, marquages et vrais modèles GLB (wasm32 compris) ; le
+/// chargement depuis un VFS local reste natif.
 pub mod match3d;
 pub mod render;
 #[cfg(not(target_arch = "wasm32"))]

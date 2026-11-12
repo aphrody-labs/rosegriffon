@@ -37,6 +37,8 @@ aphrody-nie-lua = { workspace = true, default-features = false }
 # aphrody-nie-app : le JEU jouable (FSM GameState + rendu CPU framebuffer). Cœur wasm-safe
 # (l'I/O assets est gatée hors wasm) → expose `WasmGame` pour le canvas navigateur.
 aphrody-nie-app.workspace = true
+# Compositeur de scènes VFS, fenêtre EAC, glyphes de manette et HUD de match du client plein écran.
+aphrody-nie-ui.workspace = true
 # `aphrody-nie-runtime` provides the deterministic local match simulation and top-down renderer exposed by
 # `WasmMatch`; it is not the native executable's match engine. `aphrody-nie-render3d` follows separately.
 aphrody-nie-runtime.workspace = true
