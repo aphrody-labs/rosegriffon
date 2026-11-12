@@ -90,6 +90,7 @@
       "version": "1.4.4",
       "dependencies": {
         "@aphrody/next-bun": "catalog:",
+        "@aphrody/nie-ui": "workspace:*",
         "@aphrody/paths": "catalog:",
         "@base-ui/react": "catalog:",
         "@better-auth/passkey": "catalog:",
@@ -329,7 +330,7 @@
       },
     },
     "packages/ieverse": {
-      "name": "ieverse",
+      "name": "@rosegriffon/ieverse",
       "version": "1.4.7",
       "devDependencies": {
         "@types/bun": "catalog:",
@@ -379,16 +380,13 @@
         "@types/node": "catalog:",
       },
     },
-    "packages/inagle-ui": {
-      "name": "@aphrody/inagle-ui",
-      "version": "1.4.8",
-      "peerDependencies": {
-        "@rosegriffon/inagle": "workspace:*",
-      },
-    },
     "packages/nie-ui": {
       "name": "@aphrody/nie-ui",
       "version": "1.4.7",
+      "dependencies": {
+        "@aphrody/filmcraft": "workspace:*",
+        "@aphrody/hyperframes": "workspace:*",
+      },
       "devDependencies": {
         "@types/bun": "catalog:",
       },
@@ -800,8 +798,6 @@
     "@aphrody/filmcraft": ["@aphrody/filmcraft@workspace:packages/filmcraft"],
 
     "@aphrody/hyperframes": ["@aphrody/hyperframes@workspace:packages/hyperframes"],
-
-    "@aphrody/inagle-ui": ["@aphrody/inagle-ui@workspace:packages/inagle-ui"],
 
     "@aphrody/m3-tailwind": ["@aphrody/m3-tailwind@3.3.11", "", { "dependencies": { "@aphrody/m3-tokens": "3.3.11" }, "peerDependencies": { "tailwindcss": "^4.0.0" } }, "sha512-yKEKdjbMi4v1jBgTZpFA8S/ACiFSr2eL+CfqRzrXeJRrABX14CMyShiJtDghQZEJ5po2aCoO/RCWvi+iPb5UkA=="],
 
@@ -1522,6 +1518,8 @@
     "@rosegriffon/discord-sync": ["@rosegriffon/discord-sync@workspace:packages/rg-discord-sync"],
 
     "@rosegriffon/i18n": ["@rosegriffon/i18n@workspace:packages/rg-i18n"],
+
+    "@rosegriffon/ieverse": ["@rosegriffon/ieverse@workspace:packages/ieverse"],
 
     "@rosegriffon/inagle": ["@rosegriffon/inagle@workspace:packages/inagle"],
 
@@ -2402,8 +2400,6 @@
     "iecode-homebrew": ["iecode-homebrew@workspace:packages/iecode-homebrew"],
 
     "ieee754": ["ieee754@1.2.1", "", {}, "sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA=="],
-
-    "ieverse": ["ieverse@workspace:packages/ieverse"],
 
     "ignore": ["ignore@5.3.2", "", {}, "sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g=="],
 
