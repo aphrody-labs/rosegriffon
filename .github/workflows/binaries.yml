@@ -23,8 +23,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest, target: linux-x64, file: rosegriffon-linux-x64 }
-          - { os: windows-latest, target: windows-x64, file: rosegriffon-windows-x64.exe }
+          - { os: ubuntu-latest, target: linux-x64, file: rg-core-linux-x64 }
+          - { os: windows-latest, target: windows-x64, file: rg-core-windows-x64.exe }
     env:
       NEXT_TELEMETRY_DISABLED: "1"
       # Public build-time configuration of the site (no secrets): repository variables.
@@ -57,7 +57,7 @@ jobs:
           path: dist
           merge-multiple: true
       - name: Checksums
-        run: cd dist && sha256sum rosegriffon-* > SHA256SUMS && cat SHA256SUMS
+        run: cd dist && sha256sum rg-core-* > SHA256SUMS && cat SHA256SUMS
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -66,4 +66,4 @@ jobs:
           TAG=${TAG:-v$(jq -r .version package.json)}
           gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
             || gh release create "$TAG" -R "$GITHUB_REPOSITORY" --title "rosegriffon $TAG" --notes "Self-hostable rosegriffon executables (site, unified API, Discord gateway, ranked, cron)." --target "$GITHUB_SHA"
-          gh release upload "$TAG" dist/rosegriffon-* dist/SHA256SUMS -R "$GITHUB_REPOSITORY" --clobber
+          gh release upload "$TAG" dist/rg-core-* dist/SHA256SUMS -R "$GITHUB_REPOSITORY" --clobber
