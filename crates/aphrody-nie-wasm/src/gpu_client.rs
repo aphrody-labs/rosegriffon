@@ -176,6 +176,45 @@ impl FramePacing {
     }
 }
 
+/// Retry schedule for rebuilding the GPU after a lost device or surface.
+///
+/// The first rebuild is immediate; each failed attempt doubles the wait, capped at
+/// [`Recovery::MAX_DELAY_MS`], so a GPU that stays unavailable is not hammered every frame.
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
+pub struct Recovery {
+    failures: u32,
+    retry_at: f64,
+}
+
+impl Recovery {
+    /// Longest wait between two rebuild attempts.
+    pub const MAX_DELAY_MS: f64 = 8000.0;
+
+    /// Whether a rebuild may start at `now` (ms).
+    #[must_use]
+    pub fn due(&self, now: f64) -> bool {
+        now >= self.retry_at
+    }
+
+    /// Records a failed rebuild at `now` and schedules the next one.
+    pub fn failed(&mut self, now: f64) {
+        self.failures = self.failures.saturating_add(1);
+        let delay = 250.0 * f64::from(1u32 << self.failures.min(6));
+        self.retry_at = now + delay.min(Self::MAX_DELAY_MS);
+    }
+
+    /// Records a successful rebuild.
+    pub fn succeeded(&mut self) {
+        *self = Self::default();
+    }
+
+    /// Consecutive failed attempts.
+    #[must_use]
+    pub fn failures(&self) -> u32 {
+        self.failures
+    }
+}
+
 /// Instanced quad shader.
 pub const QUAD_WGSL: &str = include_str!("gpu_quad.wgsl");
 
@@ -187,6 +226,8 @@ mod web {
     use std::cell::RefCell;
     use std::collections::HashMap;
     use std::rc::Rc;
+    use std::sync::Arc;
+    use std::sync::atomic::{AtomicBool, Ordering};
 
     use aphrody_gpu_backend::wgpu;
     use aphrody_nie_app::match3d::{self, MatchModelKind};
@@ -197,7 +238,7 @@ mod web {
     use wasm_bindgen::prelude::*;
     use web_sys::{Event, HtmlCanvasElement, KeyboardEvent};
 
-    use super::{FramePacing, QUAD_WGSL, Run, backing_size, batch, logical_size};
+    use super::{FramePacing, QUAD_WGSL, Recovery, Run, backing_size, batch, logical_size};
     use crate::client::NieClientRuntime;
 
     /// Font atlas key in the texture cache.
@@ -243,6 +284,15 @@ mod web {
         matchgpu: Option<MatchGpu>,
         backend: String,
         present_mode: wgpu::PresentMode,
+        /// Set by the device-lost callback, or by a lost surface: the whole GPU state
+        /// (device, surface, atlases) must be rebuilt.
+        lost: Arc<AtomicBool>,
+    }
+
+    /// Outcome of a frame presentation.
+    enum DrawError {
+        /// Device or surface lost: rebuild the GPU state and re-upload every atlas.
+        Lost(String),
     }
 
     struct State {
@@ -263,6 +313,11 @@ mod web {
         buttons: Vec<f32>,
         axes: Vec<f32>,
         fault: Option<String>,
+        /// A GPU rebuild is in flight (async adapter/device request).
+        rebuilding: bool,
+        recovery: Recovery,
+        /// Successful GPU rebuilds since start.
+        recoveries: u32,
     }
 
     impl Gpu {
@@ -300,6 +355,19 @@ mod web {
             .await
             .context("GPU device")?;
             let (device, queue) = (device.device, device.queue);
+            let lost = Arc::new(AtomicBool::new(false));
+            {
+                let lost = Arc::clone(&lost);
+                device.set_device_lost_callback(move |reason, message| {
+                    // `Destroyed` is our own teardown (replaced device), not a loss.
+                    if reason != wgpu::DeviceLostReason::Destroyed {
+                        web_sys::console::warn_1(&JsValue::from_str(&format!(
+                            "NIE GPU device lost ({reason:?}): {message}"
+                        )));
+                        lost.store(true, Ordering::Release);
+                    }
+                });
+            }
             let caps = surface.get_capabilities(&adapter);
             // Lowest latency first; browsers expose Fifo only, native WebGL may expose more.
             let present_mode = [
@@ -478,7 +546,12 @@ mod web {
                 matchgpu: None,
                 backend,
                 present_mode: present_mode.unwrap_or(wgpu::PresentMode::Fifo),
+                lost,
             })
+        }
+
+        fn is_lost(&self) -> bool {
+            self.lost.load(Ordering::Acquire)
         }
 
         fn resize(&mut self, width: u32, height: u32) {
@@ -633,7 +706,10 @@ mod web {
             packed: &[f32],
             runs: &[Run],
             logical: (u32, u32),
-        ) -> Result<(), String> {
+        ) -> Result<(), DrawError> {
+            if self.is_lost() {
+                return Err(DrawError::Lost("device lost".into()));
+            }
             let device = self.renderer.device().clone();
             let queue = self.renderer.queue().clone();
             let bytes: &[u8] = bytemuck::cast_slice(packed);
@@ -657,6 +733,7 @@ mod web {
             let (frame, reconfigure) = match self.surface.get_current_texture() {
                 wgpu::CurrentSurfaceTexture::Success(f) => (f, false),
                 wgpu::CurrentSurfaceTexture::Suboptimal(f) => (f, true),
+                // Skip this frame; the next one tries again.
                 wgpu::CurrentSurfaceTexture::Timeout | wgpu::CurrentSurfaceTexture::Occluded => {
                     return Ok(());
                 }
@@ -664,9 +741,15 @@ mod web {
                     self.surface.configure(&device, &self.config);
                     return Ok(());
                 }
-                wgpu::CurrentSurfaceTexture::Lost => return Err("surface lost".into()),
+                // A lost surface needs a new surface; a validation failure here means the
+                // device went away under the surface. Both are recovered by a full rebuild.
+                wgpu::CurrentSurfaceTexture::Lost => {
+                    self.lost.store(true, Ordering::Release);
+                    return Err(DrawError::Lost("surface lost".into()));
+                }
                 wgpu::CurrentSurfaceTexture::Validation => {
-                    return Err("surface validation failed".into());
+                    self.lost.store(true, Ordering::Release);
+                    return Err(DrawError::Lost("surface validation failed".into()));
                 }
             };
             let target = frame
@@ -798,6 +881,11 @@ mod web {
             let media = self.rt.poll_media_commands();
             let _ = self.rt.poll_events();
 
+            if self.rebuilding || self.gpu.is_lost() {
+                // The simulation keeps running; nothing is drawn until the GPU is back.
+                self.pacing.record(interval as f32, (now() - start) as f32);
+                return (requests, media);
+            }
             let (w, h) = self.sync_size();
             let logical = (self.rt.width(), self.rt.height());
             let has_match = self.gpu.render_match(&self.rt, w, h);
@@ -839,12 +927,54 @@ mod web {
             self.gpu.sync_textures(&self.rt, &self.list);
             batch(&self.list, &mut self.quads, &mut self.runs);
             super::pack(&self.quads, &mut self.packed);
-            if let Err(e) = self.gpu.draw(&self.list, &self.packed, &self.runs, logical) {
+            if let Err(DrawError::Lost(e)) =
+                self.gpu.draw(&self.list, &self.packed, &self.runs, logical)
+            {
                 self.fault = Some(e);
             }
             self.pacing.record(interval as f32, (now() - start) as f32);
             (requests, media)
         }
+
+        /// Whether the GPU must be rebuilt now (lost, none in flight, backoff elapsed).
+        fn rebuild_due(&self) -> bool {
+            self.running && !self.rebuilding && self.gpu.is_lost() && self.recovery.due(now())
+        }
+    }
+
+    /// Recreates instance, surface, device and pipelines on the same canvas, then swaps
+    /// them in. The new texture cache is empty, so [`Gpu::sync_textures`] re-uploads every
+    /// atlas (and the font) from the compositor's CPU copies on the next frame.
+    fn rebuild(state: Rc<RefCell<State>>) {
+        let (canvas, w, h) = {
+            let mut st = state.borrow_mut();
+            st.rebuilding = true;
+            (st.canvas.clone(), st.canvas.width().max(1), st.canvas.height().max(1))
+        };
+        wasm_bindgen_futures::spawn_local(async move {
+            let built = Gpu::new(&canvas, w, h).await;
+            let mut st = state.borrow_mut();
+            st.rebuilding = false;
+            match built {
+                Ok(gpu) => {
+                    // Dropping the old surface may unconfigure the shared canvas context:
+                    // configure the new one after the swap.
+                    st.gpu = gpu;
+                    st.gpu.surface.configure(st.gpu.renderer.device(), &st.gpu.config);
+                    st.recovery.succeeded();
+                    st.recoveries += 1;
+                    st.fault = None;
+                    st.last_ts = None;
+                }
+                Err(e) => {
+                    st.recovery.failed(now());
+                    st.fault = Some(format!(
+                        "GPU rebuild failed (attempt {}): {e:#}",
+                        st.recovery.failures()
+                    ));
+                }
+            }
+        });
     }
 
     fn now() -> f64 {
@@ -942,7 +1072,14 @@ mod web {
                             .request_animation_frame(cb.as_ref().unchecked_ref())
                             .unwrap_or(0);
                     }
-                    (requests != "[]" || media != "[]").then(|| (st.io.clone(), requests, media))
+                    let rebuild_now = st.rebuild_due();
+                    let io = (requests != "[]" || media != "[]")
+                        .then(|| (st.io.clone(), requests, media));
+                    drop(st);
+                    if rebuild_now {
+                        rebuild(Rc::clone(&state));
+                    }
+                    io
                 };
                 // Called with no borrow held: the host may call back into the client.
                 if let Some((cb, requests, media)) = io {
@@ -1006,6 +1143,9 @@ mod web {
                 buttons: Vec::new(),
                 axes: Vec::new(),
                 fault: None,
+                rebuilding: false,
+                recovery: Recovery::default(),
+                recoveries: 0,
             }));
             let mut client = NieGpuClient {
                 state,
@@ -1074,6 +1214,8 @@ mod web {
                 "ui_width": st.rt.width(),
                 "ui_height": st.rt.height(),
                 "fault": st.fault,
+                "gpu_lost": st.gpu.is_lost(),
+                "recoveries": st.recoveries,
             })
             .to_string()
         }
@@ -1185,6 +1327,26 @@ mod web {
 mod tests {
     use super::*;
     use aphrody_nie_ui::paint::{Painter, QuadRecorder};
+
+    #[test]
+    fn recovery_retries_immediately_then_backs_off_and_resets() {
+        let mut r = Recovery::default();
+        assert!(r.due(0.0), "first rebuild after a loss is immediate");
+        r.failed(1000.0);
+        assert_eq!(r.failures(), 1);
+        assert!(!r.due(1499.0));
+        assert!(r.due(1500.0));
+        r.failed(1500.0);
+        assert!(!r.due(2499.0));
+        assert!(r.due(2500.0));
+        for _ in 0..20 {
+            r.failed(10_000.0);
+        }
+        assert!(r.due(10_000.0 + Recovery::MAX_DELAY_MS), "delay is capped");
+        r.succeeded();
+        assert_eq!(r, Recovery::default());
+        assert!(r.due(0.0));
+    }
 
     #[test]
     fn backing_store_follows_dpr_up_to_4k() {
