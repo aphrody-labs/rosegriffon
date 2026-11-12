@@ -7,7 +7,7 @@
 #   website      apps/rg-website, Next standalone on Bun          :3100
 #   core         apps/rg-bot/src/core.ts: Discord gateways (rg, azalee, achillea),
 #                ranked Colyseus, unified API /v1, bot admin       :8810
-#   cron         packages/rg-cron/src/scheduler.ts (Bun.cron)     :8811
+#   cron         packages/rg-cron/src/scheduler.ts (Bun.cron)     :8811, opt-in
 #   model-serve  crates/aphrody-nie-model-serve, static musl      :8792
 #
 # Policy: Alpine runtimes, pinned versions, non-root uid 1000 (matches the host `ubuntu`
@@ -90,15 +90,20 @@ WORKDIR /app
 COPY --from=server-deps --chown=bun:bun /app/ ./
 COPY --chown=bun:bun tsconfig.json tsconfig.base.json ./
 COPY --chown=bun:bun packages ./packages
-RUN mkdir -p /var/lib/rg-core /data/cdn && chown bun:bun /var/lib/rg-core /data/cdn
+# Cron tasks drive a headless Chrome through Bun.WebView (packages/rg-cron/src/lib/webview.ts);
+# they run in core (default) or in the cron service.
+ARG CHROMIUM_VERSION=156.0.8078.79-r0
+ARG FONT_NOTO_VERSION=2026.11.01-r0
+RUN apk add --no-cache chromium=${CHROMIUM_VERSION} font-noto=${FONT_NOTO_VERSION} \
+    && mkdir -p /var/lib/rg-core /data/cdn && chown bun:bun /var/lib/rg-core /data/cdn
+ENV BUN_CHROME_PATH=/usr/bin/chromium
 
 FROM server-base AS core
 COPY --chown=bun:bun apps/rg-bot ./apps/rg-bot
-# Cron and nie-model-serve run as their own services; rg-core relays the model hosts to
-# NIE_MODEL_SERVE_URL instead of supervising a child.
+# nie-model-serve runs as its own service; rg-core relays the model hosts to
+# NIE_MODEL_SERVE_URL instead of supervising a child. Cron: RG_CORE_CRON (compose.yaml).
 ENV RG_CORE_HOST=0.0.0.0 \
     RG_CORE_PORT=8810 \
-    RG_CORE_CRON=0 \
     RG_CORE_MODELES=0
 USER 1000:1000
 WORKDIR /var/lib/rg-core
@@ -108,12 +113,7 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=5 \
 CMD ["bun", "/app/apps/rg-bot/src/core.ts"]
 
 FROM server-base AS cron
-# Some tasks drive a headless Chrome through Bun.WebView (packages/rg-cron/src/lib/webview.ts).
-ARG CHROMIUM_VERSION=156.0.8078.79-r0
-ARG FONT_NOTO_VERSION=2026.11.01-r0
-RUN apk add --no-cache chromium=${CHROMIUM_VERSION} font-noto=${FONT_NOTO_VERSION}
-ENV BUN_CHROME_PATH=/usr/bin/chromium \
-    RG_CRON_PORT=8811
+ENV RG_CRON_PORT=8811
 USER 1000:1000
 WORKDIR /var/lib/rg-core
 EXPOSE 8811

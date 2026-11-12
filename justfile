@@ -94,6 +94,8 @@ deploy-stack ref="origin/main":
     {{vps}} <<'EOF'
     set -euo pipefail
     dir={{stack_dir}}
+    # Two rg-core processes would log the same Discord bots in twice and run cron twice.
+    if systemctl is-active --quiet rg-core; then echo "rg-core.service is active: cut over first (infra/docker/README.md)"; exit 1; fi
     [ -d "$dir/.git" ] || git clone --filter=blob:none https://github.com/aphrody-dev/rosegriffon.git "$dir"
     git -C "$dir" fetch --quiet origin
     git -C "$dir" checkout --quiet --detach {{ref}}
@@ -112,11 +114,17 @@ deploy-stack-smoke:
     {{vps}} <<'EOF'
     set -euo pipefail
     cd {{stack_dir}}
-    for target in core:8810/health model-serve:8792/health cron:8811/health website:3100/api/health nginx:8080/nginx-health; do
+    docker compose ps
+    for target in core:8810/health model-serve:8792/health website:3100/api/health nginx:8080/nginx-health; do
     docker compose exec -T nginx wget -q -O /dev/null -T 10 "http://$target" && echo "ok   $target" || echo "FAIL $target"
     done
+    # Through the stack nginx on loopback (what the host nginx proxies to).
     for h in rosegriffon.fr api.rosegriffon.fr bot.rosegriffon.fr cdn.rosegriffon.fr; do
-    curl -s -o /dev/null -w "$h %{http_code}\n" --max-time 10 --resolve "$h:443:127.0.0.1" "https://$h/health"; done
+    curl -s -o /dev/null -w "stack $h %{http_code}\n" --max-time 10 -H "Host: $h" "http://127.0.0.1:18080/health"; done
+    curl -s -o /dev/null -w "stack cdn /raw/x %{http_code} (want 404)\n" -H "Host: cdn.rosegriffon.fr" http://127.0.0.1:18080/raw/x
+    # Public names through the host nginx (meaningful once its vhosts point at the stack).
+    for h in rosegriffon.fr api.rosegriffon.fr bot.rosegriffon.fr cdn.rosegriffon.fr; do
+    curl -s -o /dev/null -w "public $h %{http_code}\n" --max-time 10 "https://$h/health"; done
     EOF
 
 # Roll the stack back to the previous image tag (RG_TAG of the last good deploy).
