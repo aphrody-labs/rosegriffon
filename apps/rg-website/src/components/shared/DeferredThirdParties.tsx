@@ -18,7 +18,13 @@ import {
  * Pages sans publicité : textes légaux et outils, où une annonce n'apporte
  * rien et coûte du temps de rendu. Préfixes de chemin.
  */
-const SANS_PUB = ["/legal", "/projets/outils", "/projets/nostalgie", "/design-system", "/admin"];
+const SANS_PUB = [
+  "/legal",
+  "/projets/outils",
+  "/projets/nostalgie",
+  "/design-system",
+  "/admin",
+];
 
 const GESTES = ["pointerdown", "keydown", "scroll", "touchstart"] as const;
 
@@ -34,7 +40,11 @@ const gtag: (...args: unknown[]) => void = function () {
 
 /** Consentement courant ; `undefined` tant que le navigateur ne l’a pas lu. */
 function useConsentement() {
-  return useSyncExternalStore(abonnerConsentement, instantaneConsentement, instantaneServeur);
+  return useSyncExternalStore(
+    abonnerConsentement,
+    instantaneConsentement,
+    instantaneServeur,
+  );
 }
 
 /**
@@ -54,14 +64,18 @@ function useGtm(gtmId: string | undefined, c: Consentement | null | undefined) {
       if (document.getElementById("gtm-script")) return;
       gtag("consent", "default", signauxGoogle(null));
       gtag("consent", "update", signauxGoogle(c));
-      (window as FenetreGoogle).dataLayer?.push({ "gtm.start": Date.now(), event: "gtm.js" });
+      (window as FenetreGoogle).dataLayer?.push({
+        "gtm.start": Date.now(),
+        event: "gtm.js",
+      });
       const s = document.createElement("script");
       s.id = "gtm-script";
       s.async = true;
       s.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmId)}`;
       document.head.append(s);
     };
-    for (const g of GESTES) addEventListener(g, charger, { once: true, passive: true });
+    for (const g of GESTES)
+      addEventListener(g, charger, { once: true, passive: true });
     const repli = setTimeout(charger, 8000);
     return () => {
       for (const g of GESTES) removeEventListener(g, charger);
@@ -71,7 +85,8 @@ function useGtm(gtmId: string | undefined, c: Consentement | null | undefined) {
 
   // Retrait du consentement après chargement : on prévient GTM.
   useEffect(() => {
-    if (c && document.getElementById("gtm-script")) gtag("consent", "update", signauxGoogle(c));
+    if (c && document.getElementById("gtm-script"))
+      gtag("consent", "update", signauxGoogle(c));
   }, [c]);
 }
 
@@ -79,7 +94,9 @@ export function DeferredThirdParties({ gtmId }: { gtmId?: string }) {
   const chemin = usePathname() ?? "/";
   const c = useConsentement();
   useGtm(gtmId, c);
-  const pub = c?.pub && !SANS_PUB.some(p => chemin === p || chemin.startsWith(`${p}/`));
+  if (chemin === "/play" || chemin.startsWith("/play/")) return null;
+  const pub =
+    c?.pub && !SANS_PUB.some((p) => chemin === p || chemin.startsWith(`${p}/`));
   return (
     <>
       <BandeauConsentement consentement={c} />
