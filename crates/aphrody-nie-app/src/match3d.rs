@@ -503,6 +503,81 @@ fn marqueur(out: &mut Vec<Tri>, x: f32, z: f32) {
     }
 }
 
+/// Which of the three match models an instance uses.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MatchModelKind {
+    /// Home team player.
+    Home,
+    /// Away team player.
+    Away,
+    /// The ball.
+    Ball,
+}
+
+impl MatchModels {
+    /// The decoded model for `kind`.
+    #[must_use]
+    pub fn model(&self, kind: MatchModelKind) -> &Model {
+        match kind {
+            MatchModelKind::Home => &self.home,
+            MatchModelKind::Away => &self.away,
+            MatchModelKind::Ball => &self.ball,
+        }
+    }
+}
+
+/// World placement of every player and the ball, shared by the CPU and GPU match renderers.
+#[must_use]
+pub fn placements(world: &World, models: &MatchModels) -> Vec<(MatchModelKind, Mat4)> {
+    let mut out = Vec::with_capacity(world.players.len() + 1);
+    for p in &world.players {
+        // Le joueur regarde où il court ; à l'arrêt, le but qu'il attaque (le gardien, le jeu).
+        let attack = if p.team == 0 { 1.0 } else { -1.0 };
+        let (dx, dz) = if p.vel.len() > 0.2 && p.role != Role::Goalkeeper {
+            (p.vel.x, p.vel.y)
+        } else {
+            (attack, 0.0)
+        };
+        let (kind, fit) = if p.team == 0 {
+            (MatchModelKind::Home, models.home_fit)
+        } else {
+            (MatchModelKind::Away, models.away_fit)
+        };
+        out.push((kind, placement([p.pos.x, 0.0, p.pos.y], dx.atan2(dz), fit)));
+    }
+    let b = world.ball.pos;
+    out.push((
+        MatchModelKind::Ball,
+        placement(
+            [b.x, b.z.max(0.0) + BALL_DIAMETER * 0.5, b.y],
+            world.time * 6.0,
+            models.ball_fit,
+        ),
+    ));
+    out
+}
+
+/// Ground marker under the controlled player, as flat triangles.
+#[must_use]
+pub fn controlled_marker(world: &World, controlled: Option<usize>) -> Vec<Tri> {
+    let mut out = Vec::new();
+    if let Some(p) = controlled.and_then(|i| world.players.get(i)) {
+        marqueur(&mut out, p.pos.x, p.pos.y);
+    }
+    out
+}
+
+/// The ground marker centred on the origin (translate it under the controlled player).
+#[must_use]
+pub fn marker_at_origin() -> Vec<Tri> {
+    let mut out = Vec::new();
+    marqueur(&mut out, 0.0, 0.0);
+    out
+}
+
+/// Background gradient of the match view (top, bottom).
+pub const SKY: ([u8; 3], [u8; 3]) = ([118, 152, 214], [56, 84, 140]);
+
 /// Rend le match en 3D dans une image RGBA8 `w × h`.
 ///
 /// `stadium` est la géométrie de [`stadium`], calculée une fois par l'appelant. Le repère du
@@ -518,40 +593,15 @@ pub fn render_match(
     h: u32,
 ) -> Vec<u8> {
     let mut flat = stadium.to_vec();
-    if let Some(p) = controlled.and_then(|i| world.players.get(i)) {
-        marqueur(&mut flat, p.pos.x, p.pos.y);
-    }
-
-    let mut instances: Vec<Instance> = Vec::with_capacity(world.players.len() + 1);
-    for p in &world.players {
-        // Le joueur regarde où il court ; à l'arrêt, le but qu'il attaque (le gardien, le jeu).
-        let attack = if p.team == 0 { 1.0 } else { -1.0 };
-        let (dx, dz) = if p.vel.len() > 0.2 && p.role != Role::Goalkeeper {
-            (p.vel.x, p.vel.y)
-        } else {
-            (attack, 0.0)
-        };
-        let (model, fit) = if p.team == 0 {
-            (&models.home, models.home_fit)
-        } else {
-            (&models.away, models.away_fit)
-        };
-        instances.push(Instance {
-            model,
-            transform: placement([p.pos.x, 0.0, p.pos.y], dx.atan2(dz), fit),
+    flat.extend(controlled_marker(world, controlled));
+    let instances: Vec<Instance> = placements(world, models)
+        .into_iter()
+        .map(|(kind, transform)| Instance {
+            model: models.model(kind),
+            transform,
             two_sided: false,
-        });
-    }
-    let b = world.ball.pos;
-    instances.push(Instance {
-        model: &models.ball,
-        transform: placement(
-            [b.x, b.z.max(0.0) + BALL_DIAMETER * 0.5, b.y],
-            world.time * 6.0,
-            models.ball_fit,
-        ),
-        two_sided: false,
-    });
+        })
+        .collect();
 
     scene::render_scene(
         &flat,
@@ -559,8 +609,8 @@ pub fn render_match(
         &camera_for(world, mode, controlled),
         w,
         h,
-        [118, 152, 214],
-        [56, 84, 140],
+        SKY.0,
+        SKY.1,
     )
 }
 
