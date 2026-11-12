@@ -1145,15 +1145,15 @@ mod tests {
         assert_eq!(scene.controls.len(), 13);
 
         // Depuis Mode Histoire (`1`), aller à droite mène à Mode Chronique (`2`).
-        let right = navigate_spatial(&scene.controls, Some("1"), 1.0, 0.0);
-        assert_eq!(right.as_deref(), Some("2"));
+        let right = navigate_spatial(&scene.controls, Some("title-item-1"), 1.0, 0.0);
+        assert_eq!(right.as_deref(), Some("title-item-2"));
 
         // Descendre depuis la rangée centrale atteint la rangée basse (`6` Guide joueur / `5` Options).
-        let down = navigate_spatial(&scene.controls, Some("7"), 0.0, 1.0);
-        assert!(matches!(down.as_deref(), Some("6" | "5" | "8")));
+        let down = navigate_spatial(&scene.controls, Some("title-item-7"), 0.0, 1.0);
+        assert!(matches!(down.as_deref(), Some("title-item-6" | "title-item-5" | "title-item-8")));
 
         // Monter depuis la droite de la rangée centrale atteint les bannières Équipe / Avatar.
-        let up = navigate_spatial(&scene.controls, Some("10"), 0.0, -1.0);
+        let up = navigate_spatial(&scene.controls, Some("title-item-10"), 0.0, -1.0);
         assert!(matches!(up.as_deref(), Some("avatar" | "team")));
     }
 

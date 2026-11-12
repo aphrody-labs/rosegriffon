@@ -66,10 +66,14 @@ pub fn render_eac_launcher_on(
     }
     canvas.clear([5, 7, 12, 255]);
 
-    let win_w = ((w as i32) * 62 / 100).clamp(520, 800);
-    let win_h = (win_w * 9 / 16).clamp(300, 450);
-    let wx = (w as i32 - win_w) / 2;
-    let wy = (h as i32 - win_h) / 2;
+    // The 520x300 floor keeps the native window legible on large canvases, but it must
+    // never exceed the canvas itself, otherwise the status band and progress bar are
+    // painted off-screen on small viewports.
+    let (cw, ch) = (w as i32, h as i32);
+    let win_w = (cw * 62 / 100).clamp(520.min(cw), 800.min(cw));
+    let win_h = (win_w * 9 / 16).clamp(300.min(ch), 450.min(ch));
+    let wx = (cw - win_w) / 2;
+    let wy = (ch - win_h) / 2;
 
     // Ombre portée de la fenêtre native EACLauncher.
     canvas.fill_rect(wx + 10,
