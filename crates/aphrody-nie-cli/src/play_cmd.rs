@@ -135,6 +135,8 @@ pub fn run(args: PlayArgs) -> Result<()> {
         Screen::Story { idx, titre, .. } => (format!("Story(event={titre}, idx={idx})"), None),
         Screen::Info { title } => (format!("Info({title})"), None),
         Screen::Liste { titre, sel, .. } => (format!("Liste({titre}, sel={sel})"), None),
+        Screen::OpenWorld { .. } => ("OpenWorld".to_string(), None),
+        Screen::KizunaTown { .. } => ("KizunaTown".to_string(), None),
     };
 
     // Render frame if output requested or for render verification
