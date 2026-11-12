@@ -107,7 +107,8 @@ export function shipLines(
   return [
     `imgs=$(docker compose${profileFlags(built)} config --images ${targetsOf(built)} | grep "^\${RG_REGISTRY:-rosegriffon}/" | sort -u | tr "\\n" " ")`,
     `echo "ship from ${from.key}: $imgs"`,
-    `ssh -o BatchMode=yes ${q(ssh)} "docker save $imgs" | docker load`,
+    // -n: the script itself arrives on stdin (bash -s); ssh must not swallow the rest of it.
+    `ssh -n -o BatchMode=yes ${q(ssh)} "docker save $imgs" | docker load`,
   ];
 }
 

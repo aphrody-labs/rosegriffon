@@ -126,7 +126,7 @@ test("deploy ships images from the build role instead of building on prod", () =
     build,
   );
   expect(s).toContain(
-    `ssh -o BatchMode=yes '${build.ssh}' "docker save $imgs" | docker load`,
+    `ssh -n -o BatchMode=yes '${build.ssh}' "docker save $imgs" | docker load`,
   );
   expect(s).toContain("--no-build");
   expect(s).not.toContain("compose build");
