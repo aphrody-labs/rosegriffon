@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "steam-index"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+description = "Read-only Steam install indexer: emits metadata JSON and streams blake3 file hashes, using the bun-steam parsers."
+
+# Standalone so the tool builds without touching the root workspace member list.
+[workspace]
+
+[dependencies]
+bun-steam = { path = "../../crates/bun-steam" }
+serde_json = "1"
+blake3 = "1.8"
