@@ -45,6 +45,8 @@ pub struct DecodedAtlas {
 pub struct SceneCompositor {
     atlases: BTreeMap<String, DecodedAtlas>,
     pending_regions: BTreeMap<String, BTreeMap<String, AtlasRegion>>,
+    /// Power-of-two reduction applied when an atlas exceeded the memory budget.
+    atlas_shift: BTreeMap<String, u32>,
     font_atlas: Option<(u32, u32, Vec<u8>)>,
     font_metrics: Option<FontMetrics>,
 }
@@ -115,6 +117,114 @@ pub fn decode_png_rgba(bytes: &[u8], max_rgba_bytes: usize) -> Result<(u32, u32,
         }
     }
     Ok((frame.width, frame.height, rgba))
+}
+
+/// Largest power-of-two reduction tried by [`decode_png_rgba_fit`] (1/16 per side).
+const MAX_FIT_SHIFT: u32 = 4;
+
+/// Decodes a PNG into RGBA8 that fits `max_rgba_bytes`, box-filtering it by `2^shift` per side
+/// when the full image would not fit. Returns `(width, height, rgba, shift)`.
+///
+/// Rows are streamed and averaged on the fly, so the full-size image is never held in
+/// memory: the 8352x6000 title field atlas `title00_01_st` (191 MiB as RGBA, also above the
+/// 8192 px GPU texture limit) decodes to 4176x3000 (48 MiB).
+///
+/// # Errors
+///
+/// Invalid PNG, an interlaced PNG that would need reduction, or an image that still does
+/// not fit at 1/16 scale.
+pub fn decode_png_rgba_fit(
+    bytes: &[u8],
+    max_rgba_bytes: usize,
+) -> Result<(u32, u32, Vec<u8>, u32), String> {
+    let mut decoder = png::Decoder::new(std::io::Cursor::new(bytes));
+    decoder.set_transformations(png::Transformations::normalize_to_color8());
+    let mut reader = decoder
+        .read_info()
+        .map_err(|e| format!("png read_info: {e}"))?;
+    let (w, h, interlaced) = {
+        let info = reader.info();
+        (info.width, info.height, info.interlaced)
+    };
+    let fits = |s: u32| {
+        let (ow, oh) = ((w >> s).max(1) as usize, (h >> s).max(1) as usize);
+        ow * oh * 4 <= max_rgba_bytes
+    };
+    if w == 0 || h == 0 {
+        return Err(String::from("png size 0 out of bounds"));
+    }
+    if fits(0) {
+        let (w, h, rgba) = decode_png_rgba(bytes, max_rgba_bytes)?;
+        return Ok((w, h, rgba, 0));
+    }
+    let shift = (1..=MAX_FIT_SHIFT)
+        .find(|&s| fits(s))
+        .ok_or_else(|| format!("png {w}x{h} too large even at 1/{}", 1 << MAX_FIT_SHIFT))?;
+    if interlaced {
+        return Err(String::from("interlaced png cannot be reduced while streaming"));
+    }
+    let (ow, oh) = ((w >> shift).max(1), (h >> shift).max(1));
+    let (color, _) = reader.output_color_type();
+    let channels = match color {
+        png::ColorType::Rgba => 4,
+        png::ColorType::Rgb => 3,
+        png::ColorType::GrayscaleAlpha => 2,
+        png::ColorType::Grayscale => 1,
+        png::ColorType::Indexed => return Err(String::from("png indexed palette was not expanded")),
+    };
+    let factor = 1usize << shift;
+    let mut rgba = vec![0u8; ow as usize * oh as usize * 4];
+    let mut acc = vec![0u32; ow as usize * 4];
+    let samples = (factor * factor) as u32;
+    for y in 0..h as usize {
+        let row = reader
+            .next_row()
+            .map_err(|e| format!("png next_row: {e}"))?
+            .ok_or_else(|| String::from("png ended early"))?;
+        let data = row.data();
+        let oy = y / factor;
+        if oy >= oh as usize {
+            continue;
+        }
+        for ox in 0..ow as usize {
+            for dx in 0..factor {
+                let i = (ox * factor + dx) * channels;
+                let px = &data[i..i + channels];
+                let (r, g, b, a) = match channels {
+                    4 => (px[0], px[1], px[2], px[3]),
+                    3 => (px[0], px[1], px[2], 255),
+                    2 => (px[0], px[0], px[0], px[1]),
+                    _ => (px[0], px[0], px[0], 255),
+                };
+                let o = ox * 4;
+                acc[o] += u32::from(r);
+                acc[o + 1] += u32::from(g);
+                acc[o + 2] += u32::from(b);
+                acc[o + 3] += u32::from(a);
+            }
+        }
+        if y % factor == factor - 1 {
+            let out = &mut rgba[oy * ow as usize * 4..(oy + 1) * ow as usize * 4];
+            for (o, a) in out.iter_mut().zip(acc.iter_mut()) {
+                *o = ((*a + samples / 2) / samples) as u8;
+                *a = 0;
+            }
+        }
+    }
+    Ok((ow, oh, rgba, shift))
+}
+
+/// Scales a region given in full-resolution atlas pixels down by `2^shift`.
+fn shift_region(r: AtlasRegion, shift: u32) -> AtlasRegion {
+    if shift == 0 {
+        return r;
+    }
+    AtlasRegion {
+        x: r.x >> shift,
+        y: r.y >> shift,
+        width: (r.width >> shift).max(1),
+        height: (r.height >> shift).max(1),
+    }
 }
 
 /// Extrait les régions d'atlas d'une réponse `/tex-info/<rel>.g4tx` (`aphrody-nie-model-serve`).
@@ -248,16 +358,40 @@ impl SceneCompositor {
     pub fn insert_png(&mut self, asset_path: &str, png_bytes: &[u8]) -> Result<(), String> {
         // `font_def` fait 4096x2048x4 = 33.55 MiB ; plafond unitaire fixé à 48 MiB.
         const MAX_ATLAS_BYTES: usize = 48 * 1024 * 1024;
-        let (width, height, rgba) = decode_png_rgba(png_bytes, MAX_ATLAS_BYTES)?;
         if asset_path == "data/dx11/font/font_def/font.g4tx" || asset_path == "font_def" {
+            let (width, height, rgba) = decode_png_rgba(png_bytes, MAX_ATLAS_BYTES)?;
             self.font_atlas = Some((width, height, rgba));
             return Ok(());
         }
-        let mut regions = self
-            .pending_regions
-            .remove(asset_path)
-            .or_else(|| self.atlases.remove(asset_path).map(|old| old.regions))
-            .unwrap_or_default();
+        // Oversized atlases (the title field is 8352x6000) are reduced instead of rejected;
+        // their `/tex-info` regions, in full-resolution pixels, are scaled to match.
+        let (width, height, rgba, shift) = decode_png_rgba_fit(png_bytes, MAX_ATLAS_BYTES)?;
+        let old_shift = self.atlas_shift.insert(asset_path.to_owned(), shift).unwrap_or(0);
+        let mut regions: BTreeMap<String, AtlasRegion> = match self.pending_regions.remove(asset_path)
+        {
+            Some(full) => full
+                .into_iter()
+                .map(|(k, r)| (k, shift_region(r, shift)))
+                .collect(),
+            None => self
+                .atlases
+                .remove(asset_path)
+                .map(|old| {
+                    old.regions
+                        .into_iter()
+                        .map(|(k, r)| {
+                            let full = AtlasRegion {
+                                x: r.x << old_shift,
+                                y: r.y << old_shift,
+                                width: r.width << old_shift,
+                                height: r.height << old_shift,
+                            };
+                            (k, shift_region(full, shift))
+                        })
+                        .collect()
+                })
+                .unwrap_or_default(),
+        };
         if let Some(stem) = asset_path
             .rsplit('/')
             .next()
@@ -290,8 +424,9 @@ impl SceneCompositor {
     pub fn insert_tex_info(&mut self, asset_path: &str, tex_info_json: &str) -> Result<(), String> {
         let parsed = parse_tex_info_regions(tex_info_json)?;
         if let Some(atlas) = self.atlases.get_mut(asset_path) {
+            let shift = self.atlas_shift.get(asset_path).copied().unwrap_or(0);
             for (k, v) in parsed {
-                atlas.regions.insert(k, v);
+                atlas.regions.insert(k, shift_region(v, shift));
             }
         } else {
             self.pending_regions.insert(asset_path.to_owned(), parsed);
@@ -1137,6 +1272,63 @@ const fn glyph_5x7(ch: char) -> [u8; 7] {
 mod tests {
     use super::*;
     use aphrody_nie_formats::menu_presentation::{parse_scene, scene_json};
+
+    fn encode_rgba(w: u32, h: u32, rgba: &[u8]) -> Vec<u8> {
+        let mut out = Vec::new();
+        let mut enc = png::Encoder::new(&mut out, w, h);
+        enc.set_color(png::ColorType::Rgba);
+        enc.set_depth(png::BitDepth::Eight);
+        enc.write_header()
+            .expect("header")
+            .write_image_data(rgba)
+            .expect("data");
+        out
+    }
+
+    #[test]
+    fn oversized_atlas_is_reduced_and_regions_follow() {
+        // 8x4 image: left half red, right half blue; 2x2 blocks average exactly.
+        let (w, h) = (8u32, 4u32);
+        let mut rgba = Vec::new();
+        for _y in 0..h {
+            for x in 0..w {
+                rgba.extend_from_slice(if x < 4 { &[255, 0, 0, 255] } else { &[0, 0, 255, 255] });
+            }
+        }
+        let png = encode_rgba(w, h, &rgba);
+        let (ow, oh, out, shift) = decode_png_rgba_fit(&png, 8 * 4 * 4 - 1).expect("fit");
+        assert_eq!((ow, oh, shift), (4, 2, 1));
+        assert_eq!(&out[0..4], &[255, 0, 0, 255]);
+        assert_eq!(&out[12..16], &[0, 0, 255, 255]);
+        let (_, _, _, none) = decode_png_rgba_fit(&png, 8 * 4 * 4).expect("full");
+        assert_eq!(none, 0);
+
+        let mut comp = SceneCompositor::new();
+        comp.insert_tex_info(
+            "a.g4tx",
+            r#"{"textures":[{"name":"a","width":8,"height":4,"regionsDetail":[{"name":"right","x":4,"y":0,"width":4,"height":4}]}]}"#,
+        )
+        .expect("tex-info");
+        // Reuse the reduction path through the compositor with a tiny budget.
+        let (rw, rh, rrgba, rshift) = decode_png_rgba_fit(&png, 64).expect("fit");
+        assert_eq!(rshift, 1);
+        assert_eq!(shift_region(AtlasRegion { x: 4, y: 0, width: 4, height: 4 }, rshift), AtlasRegion {
+            x: 2,
+            y: 0,
+            width: 2,
+            height: 2
+        });
+        assert_eq!((rw, rh, rrgba.len()), (4, 2, 32));
+        comp.insert_png("a.g4tx", &png).expect("small atlas fits as is");
+        assert_eq!(comp.atlas("a.g4tx").and_then(|a| a.regions.get("right")).copied(), Some(
+            AtlasRegion {
+                x: 4,
+                y: 0,
+                width: 4,
+                height: 4
+            }
+        ));
+    }
 
     #[test]
     fn spatial_navigation_traverses_title_menu_rows_and_banners() {
