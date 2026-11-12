@@ -428,6 +428,9 @@ pub struct GpuRenderer {
     /// la caméra ; aucun objet GPU n'est donc alloué dans la boucle des primitives.
     camera_buffer: wgpu::Buffer,
     camera_bind_group: wgpu::BindGroup,
+    camera_layout: wgpu::BindGroupLayout,
+    /// One uniform buffer + bind group per scene instance, grown on demand and reused.
+    scene_uniforms: Vec<(wgpu::Buffer, wgpu::BindGroup)>,
     texture_layout: wgpu::BindGroupLayout,
     sampler: wgpu::Sampler,
     /// Reusable arena for the small dynamic uploads performed each frame.
@@ -773,6 +776,8 @@ impl GpuRenderer {
             line_pipeline,
             camera_buffer,
             camera_bind_group,
+            camera_layout,
+            scene_uniforms: Vec::new(),
             texture_layout,
             sampler,
             staging_belt,
@@ -807,6 +812,9 @@ impl GpuRenderer {
         }
         self.targets = None;
         self.camera_buffer.destroy();
+        for (buffer, _) in self.scene_uniforms.drain(..) {
+            buffer.destroy();
+        }
         self.resources_released = true;
     }
 
@@ -1391,9 +1399,201 @@ fn mat_mul(a: [[f32; 4]; 4], b: [[f32; 4]; 4]) -> [[f32; 4]; 4] {
     (glam::Mat4::from_cols_array_2d(&a) * glam::Mat4::from_cols_array_2d(&b)).to_cols_array_2d()
 }
 
+/// One model placed in a GPU scene: the GPU twin of [`crate::scene::Instance`].
+pub struct SceneInstance<'a> {
+    /// Model uploaded once with [`GpuRenderer::upload`].
+    pub model: &'a GpuModel,
+    /// Model-to-world transform, row-major like [`crate::scene::Mat4`].
+    pub transform: crate::scene::Mat4,
+}
+
+/// Builds a model whose single texture is a palette of the flat colours of `tris`, so flat
+/// world geometry (pitch, lines, goals) goes through the same textured pipeline as characters.
+#[must_use]
+pub fn flat_model(tris: &[crate::scene::Tri]) -> Model {
+    let mut palette: Vec<[u8; 3]> = Vec::new();
+    let mut slot = Vec::with_capacity(tris.len());
+    for t in tris {
+        let i = palette.iter().position(|c| *c == t.color).unwrap_or_else(|| {
+            palette.push(t.color);
+            palette.len() - 1
+        });
+        slot.push(i);
+    }
+    let n = palette.len().max(1);
+    let mut rgba = Vec::with_capacity(n * 4);
+    for c in &palette {
+        rgba.extend_from_slice(&[c[0], c[1], c[2], 255]);
+    }
+    if palette.is_empty() {
+        rgba.extend_from_slice(&[0, 0, 0, 255]);
+    }
+    let mut positions = Vec::with_capacity(tris.len() * 3);
+    let mut normals = Vec::with_capacity(tris.len() * 3);
+    let mut uv = Vec::with_capacity(tris.len() * 3);
+    for (t, &i) in tris.iter().zip(&slot) {
+        let a = glam::Vec3::from(t.p[0]);
+        let n3 = (glam::Vec3::from(t.p[1]) - a)
+            .cross(glam::Vec3::from(t.p[2]) - a)
+            .normalize_or_zero()
+            .to_array();
+        let u = (i as f32 + 0.5) / n as f32;
+        for p in t.p {
+            positions.push(p);
+            normals.push(n3);
+            uv.push([u, 0.5]);
+        }
+    }
+    let indices = (0..u32::try_from(positions.len()).unwrap_or(u32::MAX)).collect();
+    Model {
+        primitives: vec![crate::glb::Primitive {
+            positions,
+            normals,
+            uv,
+            indices,
+            texture: Some(0),
+        }],
+        textures: vec![crate::glb::Texture {
+            width: u32::try_from(n).unwrap_or(1),
+            height: 1,
+            rgba,
+        }],
+    }
+}
+
+impl GpuRenderer {
+    /// Draws several placed models under a look-at camera into the renderer's colour target,
+    /// on the GPU, without any CPU readback. The GPU path of [`crate::scene::render_scene`].
+    ///
+    /// The target is cleared to transparent so the caller composites its own background.
+    ///
+    /// # Errors
+    ///
+    /// Fails when the size exceeds the device texture limit.
+    pub fn render_scene_to_texture(
+        &mut self,
+        instances: &[SceneInstance<'_>],
+        camera: &crate::scene::Camera,
+        width: u32,
+        height: u32,
+    ) -> Result<&wgpu::TextureView> {
+        let width = width.max(1);
+        let height = height.max(1);
+        let limit = self.device.limits().max_texture_dimension_2d;
+        anyhow::ensure!(
+            width <= limit && height <= limit,
+            "dimensions du viewport supérieures à la limite GPU ({limit})"
+        );
+        self.ensure_targets(width, height);
+        while self.scene_uniforms.len() < instances.len() {
+            let buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
+                label: Some("scene instance"),
+                size: std::mem::size_of::<CameraUniform>() as u64,
+                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+                mapped_at_creation: false,
+            });
+            let bind = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("scene instance"),
+                layout: &self.camera_layout,
+                entries: &[wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: buffer.as_entire_binding(),
+                }],
+            });
+            self.scene_uniforms.push((buffer, bind));
+        }
+
+        let aspect = width as f32 / height as f32;
+        let proj = glam::camera::rh::proj::directx::perspective(camera.fov_y, aspect, 0.25, 2000.0);
+        let view = glam::camera::rh::view::look_at_mat4(
+            glam::Vec3::from(camera.eye),
+            glam::Vec3::from(camera.target),
+            glam::Vec3::from(camera.up),
+        );
+        let view_proj = proj * view;
+        let light = glam::Vec3::new(0.3, 0.85, 0.4).normalize();
+        for (inst, (buffer, _)) in instances.iter().zip(&self.scene_uniforms) {
+            // Row-major scene matrix -> column-major glam matrix.
+            let model = glam::Mat4::from_cols_array_2d(&inst.transform).transpose();
+            let uniform = CameraUniform {
+                view_proj: (view_proj * model).to_cols_array_2d(),
+                normal_rot: glam::Mat4::from_mat3(glam::Mat3::from_mat4(model))
+                    .to_cols_array_2d(),
+                light: [light.x, light.y, light.z, 0.0],
+            };
+            self.queue
+                .write_buffer(buffer, 0, bytemuck::bytes_of(&uniform));
+        }
+
+        let targets = self
+            .targets
+            .as_ref()
+            .expect("cibles créées juste au-dessus");
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("scene"),
+            });
+        {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("scene"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &targets.color_view,
+                    depth_slice: None,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                    view: &targets.depth_view,
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(1.0),
+                        store: wgpu::StoreOp::Discard,
+                    }),
+                    stencil_ops: None,
+                }),
+                timestamp_writes: None,
+                occlusion_query_set: None,
+                multiview_mask: None,
+            });
+            pass.set_pipeline(&self.pipeline);
+            for (inst, (_, bind)) in instances.iter().zip(&self.scene_uniforms) {
+                pass.set_bind_group(0, bind, &[]);
+                for prim in &inst.model.primitives {
+                    pass.set_bind_group(1, &inst.model.textures[prim.texture_index].bind_group, &[]);
+                    pass.set_vertex_buffer(0, prim.vertices.slice(..));
+                    pass.set_index_buffer(prim.indices.slice(..), wgpu::IndexFormat::Uint32);
+                    pass.draw_indexed(0..prim.index_count, 0, 0..1);
+                }
+            }
+        }
+        self.queue.submit(Some(encoder.finish()));
+        Ok(&targets.color_view)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn flat_model_maps_each_colour_to_its_palette_texel() {
+        let tri = |c: [u8; 3]| crate::scene::Tri {
+            p: [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]],
+            color: c,
+        };
+        let m = flat_model(&[tri([10, 20, 30]), tri([200, 0, 0]), tri([10, 20, 30])]);
+        assert_eq!(m.textures[0].width, 2);
+        assert_eq!(m.textures[0].rgba, vec![10, 20, 30, 255, 200, 0, 0, 255]);
+        let p = &m.primitives[0];
+        assert_eq!(p.positions.len(), 9);
+        assert_eq!(p.uv[0], [0.25, 0.5]);
+        assert_eq!(p.uv[3], [0.75, 0.5]);
+        assert_eq!(p.uv[6], [0.25, 0.5]);
+        assert!((p.normals[0][1].abs() - 1.0).abs() < 1e-6);
+    }
 
     #[test]
     fn model_shader_passes_strict_webgpu_validation() {
