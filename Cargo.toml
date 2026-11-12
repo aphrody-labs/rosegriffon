@@ -52,7 +52,6 @@ members = [
     "crates/nie-pkg",
     "crates/nie-pkg-ui",
     "crates/re",
-    "crates/shenron-gpu",
     "crates/yolo-re-bin-format",
     "crates/yolo-re-core",
     "crates/yre-worker",
