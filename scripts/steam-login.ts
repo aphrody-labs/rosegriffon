@@ -3,25 +3,49 @@
 /**
  * One-click Steam login for the storage host (`just steam-login`).
  *
- * Runs `steam-depot login-qr` on the storage role host (infra/hosts.toml), shows the Steam QR
- * challenge in a Chrome app window, and exits once the Steam mobile app approved it. The refresh
- * token is written by steam-depot straight into the host token store (0600): no password is
- * typed, and nothing secret passes through this machine or its terminal. The QR page is a temp
- * file deleted on exit.
+ * The account name comes from the Windows Steam client (config/loginusers.vdf, most recent user;
+ * the name only, never a credential). The password and the Steam Guard e-mail code are typed once
+ * into steam-depot's hidden prompt, which runs on the storage host over `ssh -t`: they are never
+ * echoed, logged, or stored; only the resulting refresh token is kept, in the host token store
+ * (0600). Later `update` runs reuse that token unattended.
  *
- *   bun scripts/steam-login.ts [--force]     --force: log in again even if a token is stored
+ *   bun scripts/steam-login.ts [--force] [--qr] [--user <name>]
+ *     --force  log in again even if a token is stored
+ *     --qr     approve a QR code from the Steam mobile app instead (shown in a Chrome window)
  */
 
-import { rmSync, writeFileSync } from "node:fs";
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadInfra, resolveHost } from "../packages/rg-config/infra.ts";
 
+const argv = process.argv.slice(2);
+const flag = (n: string) => argv.includes(`--${n}`);
+const opt = (n: string) => {
+  const i = argv.indexOf(`--${n}`);
+  return i >= 0 ? argv[i + 1] : undefined;
+};
+
+const STEAM_DIR = process.env.STEAM_DIR ?? "C:/Program Files (x86)/Steam";
 const CHROME =
   process.env.RG_CHROME ??
   "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const host = resolveHost(loadInfra(), "storage", process.env);
 const compose = `cd ${host.stack_dir} && docker compose --profile tools`;
+
+/** Most recent account name of the local Steam client. */
+function localAccount(): string | undefined {
+  try {
+    const vdf = readFileSync(`${STEAM_DIR}/config/loginusers.vdf`, "utf8");
+    const users = [...vdf.matchAll(/"\d{17}"\s*\{([^}]*)\}/g)].map(
+      (m) => m[1]!,
+    );
+    const pick = users.find((u) => /"MostRecent"\s*"1"/.test(u)) ?? users[0];
+    return pick ? /"AccountName"\s*"([^"]+)"/.exec(pick)?.[1] : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 async function ssh(cmd: string): Promise<{ code: number; out: string }> {
   const p = Bun.spawn(["ssh", "-o", "BatchMode=yes", "-n", host.ssh, cmd], {
@@ -32,7 +56,7 @@ async function ssh(cmd: string): Promise<{ code: number; out: string }> {
   return { code: await p.exited, out };
 }
 
-if (!process.argv.includes("--force")) {
+if (!flag("force")) {
   const s = await ssh(`${compose} run --rm -T steam-depot auth status`);
   if (s.code === 0 && /account=(?!-)/.test(s.out)) {
     console.log(`steam: already logged in on ${host.key} (${s.out.trim()})`);
@@ -40,22 +64,34 @@ if (!process.argv.includes("--force")) {
   }
 }
 
-console.log(`steam: preparing steam-depot on ${host.key}`);
 // The prod checkout is a detached deploy ref: build the pinned steam-depot revision without moving it.
-const rev = /ARG STEAM_DEPOT_REV=(w+)/.exec(
-  await Bun.file(
-    new URL("../infra/docker/steam-depot/Dockerfile", import.meta.url),
-  ).text(),
-)?.[1];
+const dockerfile = await Bun.file(
+  new URL("../infra/docker/steam-depot/Dockerfile", import.meta.url),
+).text();
+const rev = /ARG STEAM_DEPOT_REV=([0-9a-f]{40})/.exec(dockerfile)?.[1];
+if (!rev)
+  throw new Error("STEAM_DEPOT_REV not found in the steam-depot Dockerfile");
+console.log(`steam: preparing steam-depot ${rev.slice(0, 7)} on ${host.key}`);
 const built = await ssh(
   `${compose} build -q --build-arg STEAM_DEPOT_REV=${rev} steam-depot`,
 );
 if (built.code !== 0) process.exit(built.code);
 
-const page = join(tmpdir(), `rg-steam-qr-${process.pid}.html`);
-const cleanup = () => rmSync(page, { force: true });
-process.on("exit", cleanup);
+if (!flag("qr")) {
+  const user = opt("user") ?? localAccount();
+  if (!user) throw new Error("no Steam account found; pass --user <name>");
+  console.log(
+    `steam: logging in ${user} on ${host.key} (password and code stay hidden)`,
+  );
+  const p = Bun.spawn(
+    ["ssh", "-t", host.ssh, `${compose} run --rm steam-depot login ${user}`],
+    { stdin: "inherit", stdout: "inherit", stderr: "inherit" },
+  );
+  process.exit(await p.exited);
+}
 
+const page = join(tmpdir(), `rg-steam-qr-${process.pid}.html`);
+process.on("exit", () => rmSync(page, { force: true }));
 const proc = Bun.spawn(
   [
     "ssh",
@@ -65,9 +101,8 @@ const proc = Bun.spawn(
     host.ssh,
     `${compose} run --rm -T steam-depot login-qr`,
   ],
-  { stdout: "pipe", stderr: "pipe" },
+  { stdout: "pipe", stderr: "inherit" },
 );
-
 let buf = "";
 const decoder = new TextDecoder();
 for await (const chunk of proc.stdout) {
@@ -82,30 +117,14 @@ for await (const chunk of proc.stdout) {
         `<!doctype html><meta charset="utf-8"><title>Steam - Rose Griffon</title>` +
           `<body style="margin:0;display:grid;place-items:center;height:100vh;background:#171a21;color:#c7d5e0;font:16px system-ui">` +
           `<div style="text-align:center"><div style="background:#fff;padding:16px;border-radius:8px">${line.slice(4)}</div>` +
-          `<p>Steam app &gt; Steam Guard &gt; scan this code. The window can be closed afterwards.</p></div>`,
+          `<p>Steam app &gt; Steam Guard &gt; scan this code.</p></div>`,
       );
-      Bun.spawn(
-        [CHROME, `--app=file:///${page.replaceAll("\\", "/")}`, "--new-window"],
-        {
-          stdout: "ignore",
-          stderr: "ignore",
-        },
-      );
-      console.log(
-        "steam: QR shown in Chrome, waiting for approval in the Steam app",
-      );
-    } else if (line.startsWith("store=")) {
-      console.log(`steam: ${line}`);
-    }
+      Bun.spawn([CHROME, `--app=file:///${page.replaceAll("\\", "/")}`], {
+        stdout: "ignore",
+        stderr: "ignore",
+      });
+      console.log("steam: QR shown in Chrome, waiting for approval");
+    } else if (line.startsWith("store=")) console.log(`steam: ${line}`);
   }
 }
-const code = await proc.exited;
-const err =
-  (await new Response(proc.stderr).text()).trim().split("\n").at(-1) ?? "";
-cleanup();
-console.log(
-  code === 0
-    ? `steam: login ok on ${host.key}`
-    : `steam: login failed (${err})`,
-);
-process.exit(code);
+process.exit(await proc.exited);
