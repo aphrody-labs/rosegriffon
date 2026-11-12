@@ -54,3 +54,6 @@ tools/ie/save-editor/rsrc-dump/
 *.dump
 nie_memory_dump_*.bin
 
+
+*.tar.gz
+
