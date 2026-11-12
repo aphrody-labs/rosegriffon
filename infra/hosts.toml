@@ -44,6 +44,7 @@ env_file = "/etc/rosegriffon/rosegriffon.env"
 ssh = "prd"
 user = "root"
 public_ip = "72.60.186.43"
+hostinger_id = 2116886
 mesh_ip = "10.200.77.5"
 cores = 8
 capabilities = ["docker", "prod"]
