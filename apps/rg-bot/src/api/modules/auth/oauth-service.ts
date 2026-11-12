@@ -1,11 +1,12 @@
 import { parseProviderOAuthState } from "@rosegriffon/achillea-core/oauth";
 import type { Kysely } from "kysely";
 import type { Database } from "@rosegriffon/db/schema";
+import { rgUrl } from "@rosegriffon/config/rg-urls";
 
 type OAuthResult = { ok: true; redirect: string } | { ok: false; status: 400 | 404 | 500; message: string };
 
-const website = () => process.env.WEBSITE_URL ?? "https://rosegriffon.fr";
-const callbackUrl = () => `${process.env.PUBLIC_API_URL ?? "https://api.rosegriffon.fr"}/v1/auth/oauth/callback`;
+const website = () => rgUrl(process.env, "site", "WEBSITE_URL");
+const callbackUrl = () => `${rgUrl(process.env, "api", "PUBLIC_API_URL")}/v1/auth/oauth/callback`;
 
 export abstract class ProviderOAuthService {
   static async handle(db: Kysely<Database>, provider: string, code: string, state: string): Promise<OAuthResult> {

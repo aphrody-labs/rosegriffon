@@ -4,12 +4,13 @@ import { formatLicenseNumber, generateQrSecret, LICENSE_VALIDITY_MS } from "@ros
 import { LicenseStatus } from "@rosegriffon/achillea-core/enums";
 import { resolveDiscordAvatarUrl } from "@rosegriffon/achillea-core/identity";
 import { journaliserAudit } from "../audit";
+import { rgUrl } from "@rosegriffon/config/rg-urls";
 
 type LicenseRow = Selectable<LicenseTable>;
 
 /** Base publique des routes Achilléa (relais `/api` de `rg-core`), pour `pdf_url`. */
 export function publicApiBase(): string {
-  return (process.env.ACHILLEA_PUBLIC_API_URL ?? "https://ranked.rosegriffon.fr/api").replace(/\/+$/, "");
+  return rgUrl(process.env, "rankedApi", "ACHILLEA_PUBLIC_API_URL").replace(/\/+$/, "");
 }
 
 export function toLicenseDto(row: LicenseRow) {

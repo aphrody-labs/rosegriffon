@@ -7,6 +7,7 @@ import { createPostgresClient } from "@rosegriffon/db/service";
 
 import { ArticleSchema } from "./schema";
 import type { ArticleInput } from "./schema";
+import { rgUrl } from "@rosegriffon/config/rg-urls";
 
 async function checkStaffPermission() {
   const supabase = createPostgresClient();
@@ -269,7 +270,7 @@ async function triggerDiscordAnnouncement(article: {
     return;
   }
   try {
-    const res = await fetch(`${process.env.RG_API_URL ?? "https://api.rosegriffon.fr"}/v1/discord/announce`, {
+    const res = await fetch(`${rgUrl(process.env, "api", "RG_API_URL")}/v1/discord/announce`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -15,6 +15,7 @@
 import { envoyerMpAchillea, publierSalonAchillea, type MessageAchillea } from "../../../../lib/achillea-discord";
 import { CastSlotRole } from "@rosegriffon/achillea-core/enums";
 import type { CastDb, CastEvent } from "./service";
+import { rgUrl } from "@rosegriffon/config/rg-urls";
 
 export const ACHILLEA_COLOR = 0x6d00ce;
 
@@ -31,7 +32,7 @@ const roleLabel = (role: string) => ROLE_LABELS[role] ?? role;
 const unix = (date: Date | string) => Math.floor(new Date(date).getTime() / 1000);
 
 export function castsPageUrl(eventId: string): string {
-  return `${(process.env.WEBSITE_URL ?? "https://rosegriffon.fr").replace(/\/+$/, "")}/achillea/casts?event=${eventId}`;
+  return `${rgUrl(process.env, "site", "WEBSITE_URL").replace(/\/+$/, "")}/achillea/casts?event=${eventId}`;
 }
 
 export function attributionMessage(event: Pick<CastEvent, "id" | "name" | "kind" | "scheduledAt">, role: string): MessageAchillea {

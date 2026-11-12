@@ -9,6 +9,7 @@ import { CHEMIN_SNAPSHOT, lireSnapshot } from "@rosegriffon/types/feed";
 import type { Reseau, SnapshotFeed } from "@rosegriffon/types/feed";
 
 import { memo } from "../memo";
+import { rgUrl } from "@rosegriffon/config/rg-urls";
 
 const TTL_MS = 30_000;
 /** Au-delà, l'instantané est jugé périmé et la source retombe sur la lecture en direct si elle existe. */
@@ -22,7 +23,7 @@ async function charger(reseau: Reseau): Promise<SnapshotFeed | null> {
       const fichier = Bun.file(join(racine, "assets", chemin));
       if (await fichier.exists()) return lireSnapshot(await fichier.json(), reseau);
     }
-    const origine = (process.env.RG_MEDIA_PUBLIC_ORIGIN ?? "https://cdn.rosegriffon.fr").replace(/\/+$/, "");
+    const origine = rgUrl(process.env, "cdn", "RG_MEDIA_PUBLIC_ORIGIN").replace(/\/+$/, "");
     const reponse = await fetch(`${origine}/storage/v1/object/public/assets/${chemin}`, {
       signal: AbortSignal.timeout(4000),
     });

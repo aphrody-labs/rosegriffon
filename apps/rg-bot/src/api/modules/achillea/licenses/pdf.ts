@@ -11,6 +11,7 @@
 import { PDFDocument, type SKRSContext2D } from "@aphrody/canvas";
 import qrcode from "qrcode-generator";
 import { fetchImage, FONT_SANS, registerAchilleaFonts, websiteHost } from "../images/render";
+import { rgUrl } from "@rosegriffon/config/rg-urls";
 
 /** A6 paysage en points (148 × 105 mm). */
 const W = 420;
@@ -31,7 +32,7 @@ export interface LicensePdfInput {
 export function licenseVerifyBaseUrl(): string {
   const override = process.env.ACHILLEA_LICENSE_VERIFY_URL?.trim();
   if (override) return override.replace(/\/+$/, "");
-  return `${(process.env.WEBSITE_URL ?? "https://rosegriffon.fr").replace(/\/+$/, "")}/achillea/licence/verify`;
+  return `${rgUrl(process.env, "site", "WEBSITE_URL").replace(/\/+$/, "")}/achillea/licence/verify`;
 }
 
 function drawQr(ctx: SKRSContext2D, text: string, x: number, y: number, size: number): void {

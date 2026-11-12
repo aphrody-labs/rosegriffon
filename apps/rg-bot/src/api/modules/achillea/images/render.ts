@@ -9,6 +9,7 @@
  */
 
 import { GlobalFonts, loadImage, type Image, type SKRSContext2D } from "@aphrody/canvas";
+import { rgUrl } from "@rosegriffon/config/rg-urls";
 
 const FONTS: ReadonlyArray<{ file: string; alias: string }> = [
   { file: "InterVariable.woff2", alias: "Achillea Sans" },
@@ -183,7 +184,7 @@ export function drawCircleImage(
 /** Domaine affiché en pied d'image. */
 export function websiteHost(): string {
   try {
-    return new URL(process.env.WEBSITE_URL ?? "https://rosegriffon.fr").host;
+    return new URL(rgUrl(process.env, "site", "WEBSITE_URL")).host;
   } catch {
     return "rosegriffon.fr";
   }

@@ -13,6 +13,7 @@ import { ProviderOAuthService } from "./oauth-service";
 import { resolveAchilleaSession } from "./session";
 import { achilleaSessionClearCookie } from "./logout";
 import { findLinkedPublicProfile } from "../achillea/users/public-profile";
+import { rgUrl } from "@rosegriffon/config/rg-urls";
 
 export const authController = new Elysia({ prefix: "/auth" })
   .use(dbPlugin)
@@ -201,7 +202,7 @@ export const authController = new Elysia({ prefix: "/auth" })
         .execute();
       await db.insertInto("oauth_csrf").values({ token, discord_id: userId }).execute();
       const state = formatProviderOAuthState(userId, token);
-      const callback = `${process.env.PUBLIC_API_URL ?? "https://api.rosegriffon.fr"}/v1/auth/oauth/callback`;
+      const callback = `${rgUrl(process.env, "api", "PUBLIC_API_URL")}/v1/auth/oauth/callback`;
       const url =
         provider === "twitch"
           ? buildTwitchOAuthUrl({ callbackUrl: callback, clientId: process.env.TWITCH_CLIENT_ID ?? "", state })

@@ -50,6 +50,7 @@ import {
 } from "./persistence";
 import { listMatchEvents, logMatchEvent } from "./telemetry";
 import { resolveRankedProofUrl, uploadRankedProof } from "./storage";
+import { rgUrl } from "@rosegriffon/config/rg-urls";
 
 const PORT = Number(process.env.PORT ?? process.env.RANKED_PORT ?? 4002);
 const HOST = process.env.RANKED_HOST ?? "127.0.0.1";
@@ -263,7 +264,7 @@ function appliquerCors(req: RequeteRanked, res: ReponseRanked, requete: Request)
 /** Appel de l'API unifiée (`/v1/*`) : en processus sous `rg-core`, HTTP sinon. */
 export type ApiUnifiee = (requete: Request) => Promise<Response>;
 
-const URL_API_UNIFIEE = (process.env.UNIFIED_API_URL ?? "https://api.rosegriffon.fr").replace(/\/$/, "");
+const URL_API_UNIFIEE = rgUrl(process.env, "api", "UNIFIED_API_URL").replace(/\/$/, "");
 let apiUnifiee: ApiUnifiee = requete => fetch(requete);
 
 function appelerApiUnifiee(requete: Request): Promise<Response> {
