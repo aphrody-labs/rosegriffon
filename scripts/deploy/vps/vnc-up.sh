@@ -1,4 +1,5 @@
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 P=/home/ubuntu/.aphrody/private; mkdir -p $P; chmod 700 $P
 [ -s $P/remote.token ] || (openssl rand -hex 24 > $P/remote.token)
 [ -s $P/vnc.password ] || (openssl rand -hex 4 > $P/vnc.password)
