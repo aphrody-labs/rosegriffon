@@ -100,11 +100,12 @@ export function shipLines(
   list: Service[],
   env: InfraEnv,
 ): string[] {
-  const built = list.filter((s) => s.target);
+  // Only images built from the Dockerfile; upstream images are pulled by compose.
+  const built = list.filter((s) => s.target && s.dockerfile);
   if (!built.length) return [];
   const ssh = env.RG_SHIP_SSH?.trim() || from.ssh;
   return [
-    `imgs=$(docker compose${profileFlags(built)} config --images ${targetsOf(built)} | sort -u | tr "\\n" " ")`,
+    `imgs=$(docker compose${profileFlags(built)} config --images ${targetsOf(built)} | grep "^\${RG_REGISTRY:-rosegriffon}/" | sort -u | tr "\\n" " ")`,
     `echo "ship from ${from.key}: $imgs"`,
     `ssh -o BatchMode=yes ${q(ssh)} "docker save $imgs" | docker load`,
   ];
