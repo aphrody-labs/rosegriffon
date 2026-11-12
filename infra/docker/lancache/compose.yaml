@@ -30,7 +30,15 @@ services:
       - ${LANCACHE_ROOT:-/srv/lancache}/cache:/data/cache
       - ${LANCACHE_ROOT:-/srv/lancache}/logs:/data/logs
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/lancache-heartbeat"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "http://127.0.0.1/lancache-heartbeat",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
