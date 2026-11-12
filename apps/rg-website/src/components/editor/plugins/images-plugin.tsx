@@ -55,7 +55,7 @@ export function InsertImageUriDialogBody({ onClick }: { onClick: (payload: Inser
         <Label htmlFor="image-url">URL de l&apos;image</Label>
         <Input
           id="image-url"
-          placeholder="https://example.com/image.jpg"
+          placeholder="https://google.com/image.jpg"
           onChange={e => setSrc(e.target.value)}
           value={src}
           data-test-id="image-modal-url-input"

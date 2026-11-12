@@ -481,7 +481,7 @@ describe("profils — barrière de vie privée", () => {
     const propre = assainirProfil({
       username: "yoyo__goat",
       full_name: "Prénom Nom",
-      email: "prive@example.com",
+      email: "prive@google.com",
       address_line1: "1 rue de la Paix",
       address_line2: null,
       city: "Paris",
@@ -496,7 +496,7 @@ describe("profils — barrière de vie privée", () => {
       role: "superadmin",
       discord_id: "123",
     });
-    expect(JSON.stringify(propre)).not.toContain("example.com");
+    expect(JSON.stringify(propre)).not.toContain("google.com");
     expect(JSON.stringify(propre)).not.toContain("75002");
     expect(JSON.stringify(propre)).not.toContain("Prénom Nom");
   });

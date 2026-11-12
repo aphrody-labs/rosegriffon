@@ -104,7 +104,7 @@ describe("useSidebarAuth", () => {
     // Fixtures partielles : seuls les champs lus par le hook sont fournis.
     // On caste a `never` au moment de l'assertion (cf. toEqual ci-dessous)
     // pour ne pas dupliquer les types complets User/Profile dans le test.
-    const mockUser = { email: "test@example.com", id: "user-123" };
+    const mockUser = { email: "test@google.com", id: "user-123" };
     const mockProfile = { id: "user-123", username: "testuser" };
 
     mockUseSession.mockReturnValue({ data: { user: mockUser }, isPending: false });
@@ -132,7 +132,7 @@ describe("useSidebarAuth", () => {
   });
 
   it("should handle error fetching user", async () => {
-    const mockUser = { email: "test@example.com", id: "user-123" };
+    const mockUser = { email: "test@google.com", id: "user-123" };
     mockUseSession.mockReturnValue({ data: { user: mockUser }, isPending: false });
 
     mockGetCurrentProfile.mockRejectedValue(new Error("Network error"));

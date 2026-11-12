@@ -144,7 +144,7 @@ describe("resolveAssetUrl — mapping image_url legacy webp → chemin CPK réel
   });
 
   test("URL absolue ou racine inchangée", () => {
-    expect(resolveAssetUrl("https://example.com/x.png")).toBe("https://example.com/x.png");
+    expect(resolveAssetUrl("https://google.com/x.png")).toBe("https://google.com/x.png");
     expect(resolveAssetUrl("/local.png")).toBe("/local.png");
     expect(resolveAssetUrl(null)).toBeNull();
   });

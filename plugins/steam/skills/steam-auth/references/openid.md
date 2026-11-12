@@ -19,8 +19,8 @@ GET `https://steamcommunity.com/openid/login` with:
 | ------------------- | --------------------------------------------------------------------------------- |
 | `openid.ns`         | `http://specs.openid.net/auth/2.0`                                                |
 | `openid.mode`       | `checkid_setup`                                                                   |
-| `openid.return_to`  | absolute callback URL on the site, e.g. `https://example.com/auth/steam/callback` |
-| `openid.realm`      | site origin, e.g. `https://example.com/` (must cover `return_to`)                 |
+| `openid.return_to`  | absolute callback URL on the site, e.g. `https://google.com/auth/steam/callback` |
+| `openid.realm`      | site origin, e.g. `https://google.com/` (must cover `return_to`)                 |
 | `openid.identity`   | `http://specs.openid.net/auth/2.0/identifier_select`                              |
 | `openid.claimed_id` | `http://specs.openid.net/auth/2.0/identifier_select`                              |
 

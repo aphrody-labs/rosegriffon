@@ -5,10 +5,10 @@ describe("Achillea public profile projection", () => {
   it("uses the claimed RG identity and bio for a linked player", () => {
     expect(
       projectPublicIdentity(
-        { id: "rg-id", username: "rose", avatar_url: "https://example.com/rg.png", bio: null },
-        { username: "old-discord", avatar: "https://example.com/old.png", bio: "old bio" },
+        { id: "rg-id", username: "rose", avatar_url: "https://google.com/rg.png", bio: null },
+        { username: "old-discord", avatar: "https://google.com/old.png", bio: "old bio" },
       ),
-    ).toEqual({ username: "rose", rgProfileUsername: "rose", avatar: "https://example.com/rg.png", bio: null });
+    ).toEqual({ username: "rose", rgProfileUsername: "rose", avatar: "https://google.com/rg.png", bio: null });
   });
 
   it("keeps a Discord-only player's existing profile", () => {

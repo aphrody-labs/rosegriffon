@@ -50,12 +50,12 @@ test("host injection preserves binary bytes", async () => {
     bytes: async () => bytes,
   }));
   const service = await createZukanWebService();
-  expect(await service.bytes("https://example.com/frame.png")).toEqual(bytes);
+  expect(await service.bytes("https://google.com/frame.png")).toEqual(bytes);
 });
 
 test("PNG frame validation preserves bytes and manifest dimensions/hash", () => {
   const bytes = Buffer.from("89504e470d0a1a0a0000000d494844520000000200000003", "hex");
-  const frame = zukanReferenceFrame(bytes, "https://example.com/frame.png");
+  const frame = zukanReferenceFrame(bytes, "https://google.com/frame.png");
   expect(frame.bytes).toEqual(bytes);
   expect(frame.metadata.width).toBe(2);
   expect(frame.metadata.height).toBe(3);

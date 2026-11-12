@@ -244,7 +244,7 @@ export function Toolbar() {
                     handleLinkSubmit();
                   }
                 }}
-                placeholder="https://example.com"
+                placeholder="https://google.com"
               />
             </div>
           </div>

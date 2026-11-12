@@ -456,7 +456,7 @@ mod tests {
             ("assetPath", serde_json::json!("data/../capture.g4tx")),
             (
                 "assetPath",
-                serde_json::json!("https://example.com/texture.g4tx"),
+                serde_json::json!("https://google.com/texture.g4tx"),
             ),
             ("actionId", serde_json::json!("missing")),
             ("rect", serde_json::json!({"x":0,"y":0,"w":0,"h":10})),

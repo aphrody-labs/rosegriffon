@@ -113,7 +113,7 @@ TEST(ModScanner, ScanLoadsMetadata) {
         {"Author", "Auteur"},
         {"ModVersion", "1.2.3"},
         {"GameVersion", "5.00"},
-        {"ModLink", "https://example.com"}};
+        {"ModLink", "https://google.com"}};
     create_mock_mod(tmp.path(), "test_mod", meta);
 
     auto mods = scan_mods(tmp.path());
@@ -122,7 +122,7 @@ TEST(ModScanner, ScanLoadsMetadata) {
     EXPECT_EQ(mods[0].metadata.author, "Auteur");
     EXPECT_EQ(mods[0].metadata.mod_version, "1.2.3");
     EXPECT_EQ(mods[0].metadata.game_version, "5.00");
-    EXPECT_EQ(mods[0].metadata.mod_link, "https://example.com");
+    EXPECT_EQ(mods[0].metadata.mod_link, "https://google.com");
 }
 
 TEST(ModScanner, ScanHandlesInvalidJson) {

@@ -216,7 +216,7 @@ mod tests {
                 ..Options::default()
             };
             let mut db = DB::open(&db_path, opt).expect("create db");
-            db.put(b"META:https://example.com", b"\x01\x00")
+            db.put(b"META:https://google.com", b"\x01\x00")
                 .expect("put 1");
             db.put(b"_app.localhost\x00\x01key", b"hello world")
                 .expect("put 2");
@@ -229,9 +229,9 @@ mod tests {
         let by_key: std::collections::HashMap<&str, &LevelDbEntry> =
             entries.iter().map(|e| (e.key_hex.as_str(), e)).collect();
 
-        let k1 = hex::encode(b"META:https://example.com");
+        let k1 = hex::encode(b"META:https://google.com");
         let e1 = by_key.get(k1.as_str()).expect("entry 1 present");
-        assert_eq!(e1.key_utf8.as_deref(), Some("META:https://example.com"));
+        assert_eq!(e1.key_utf8.as_deref(), Some("META:https://google.com"));
         assert_eq!(e1.value_len, 2);
         // Value 0x01 0x00 is not printable text but IS valid UTF-8 (both are
         // control points), so the preview is Some.

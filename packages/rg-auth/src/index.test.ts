@@ -43,7 +43,7 @@ describe("resolveProfile", () => {
   });
 
   it("should fallback to email if Discord bridge fails", async () => {
-    const mockProfile = { id: "profile-email", email: "test@example.com", role: "editor" };
+    const mockProfile = { id: "profile-email", email: "test@google.com", role: "editor" };
 
     // 1. Direct ID fails
     mockSupabase.maybeSingle.mockResolvedValueOnce({ data: null });
@@ -54,11 +54,11 @@ describe("resolveProfile", () => {
 
     const result = await resolveProfile(mockSupabase as never, {
       id: "user-123",
-      email: "test@example.com",
+      email: "test@google.com",
     });
 
     expect(result).toEqual(mockProfile as never);
-    expect(mockSupabase.eq).toHaveBeenCalledWith("email", "test@example.com");
+    expect(mockSupabase.eq).toHaveBeenCalledWith("email", "test@google.com");
   });
 });
 

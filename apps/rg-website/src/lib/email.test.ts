@@ -4,7 +4,7 @@ import { sendContactFormEmail, sendEmail, sendMediationRequestEmail, sendTournam
 describe("Gestion d'Envoi d'Email (Email Service)", () => {
   it("envoie un email générique avec succès (mode simulé/connecté)", async () => {
     const result = await sendEmail({
-      to: "test@example.com",
+      to: "test@google.com",
       subject: "Test unitaire email",
       html: "<p>Contenu test</p>",
     });

@@ -83,7 +83,7 @@ TEST(UpdateChecker, ExtractGameBananaId_PartialUrl) {
 TEST(UpdateChecker, ExtractGameBananaId_Invalid) {
     EXPECT_EQ(extract_gamebanana_id(""), 0);
     EXPECT_EQ(extract_gamebanana_id("not a url"), 0);
-    EXPECT_EQ(extract_gamebanana_id("https://example.com/mods/123"), 0);
+    EXPECT_EQ(extract_gamebanana_id("https://google.com/mods/123"), 0);
 }
 
 // ── GameBananaMod struct defaults ────────────────────────────────────

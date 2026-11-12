@@ -159,7 +159,7 @@ export function generateOpenApiSpec(): OpenApiDocument {
         "Authoritative OpenAPI 3.1 specification for Inazuma Eleven: Victory Road game data, VFS virtual file system, and nie.exe reverse-engineering services across Bun, Rust NIE crates, and C# IECODE.Core.",
       contact: {
         name: "Aphrody Code Team",
-        url: "https://inagle.example.com",
+        url: "https://inagle.google.com",
         email: "contact@aphrody.com",
       },
       license: {
@@ -169,7 +169,7 @@ export function generateOpenApiSpec(): OpenApiDocument {
     },
     servers: [
       {
-        url: "https://inagle.example.com",
+        url: "https://inagle.google.com",
         description: "Production API",
       },
       {

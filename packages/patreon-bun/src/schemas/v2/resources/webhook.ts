@@ -41,7 +41,7 @@ export interface Webhook {
 	/**
 	 * Fully qualified uri where webhook will be sent
 	 * @format uri
-	 * @example 'https://www.example.com/webhooks/incoming'
+	 * @example 'https://www.google.com/webhooks/incoming'
 	 */
 	uri: string;
 }

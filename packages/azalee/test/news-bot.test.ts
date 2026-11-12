@@ -30,7 +30,7 @@ describe("Azalée News Module", () => {
   });
 
   test("extracts text summary without markdown symbols", () => {
-    const md = "## Title\nThis is **bold** text with [links](https://example.com).";
+    const md = "## Title\nThis is **bold** text with [links](https://google.com).";
     const summary = extractSummary(md);
     expect(summary).toBe("Title This is bold text with links.");
   });

@@ -25,7 +25,7 @@ const postWebhooksBody = {
 						uri: {
 							type: "string",
 							description: "Fully qualified uri where webhook will be sent",
-							examples: ["https://www.example.com/webhooks/incoming"],
+							examples: ["https://www.google.com/webhooks/incoming"],
 						},
 					},
 				},

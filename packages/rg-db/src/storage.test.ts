@@ -14,7 +14,7 @@ describe("getAssetUrl", () => {
   });
 
   it("laisse passer les URL absolues telles quelles", () => {
-    const url = "https://example.com/image.png";
+    const url = "https://google.com/image.png";
     expect(getAssetUrl(url)).toBe(url);
   });
 

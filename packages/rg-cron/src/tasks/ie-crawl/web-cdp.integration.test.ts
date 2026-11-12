@@ -33,11 +33,11 @@ if (absent) console.warn(`[Aphrody Web CDP] Navigateur indisponible (${absent}) 
 
 describe("Aphrody Web CDP integration", () => {
   it.skipIf(absent !== null)(
-    "navigates to example.com and returns rendered HTML",
+    "navigates to google.com and returns rendered HTML",
     async () => {
       const page = await WebCdpPage.connect();
       try {
-        await page.goto("https://example.com");
+        await page.goto("https://google.com");
         expect(await page.title()).toBe("Example Domain");
         expect(await page.content()).toContain("Example Domain");
       } finally {
