@@ -26,7 +26,7 @@ describe("AssetPump", () => {
   test("never exceeds the concurrency cap and answers each request once", async () => {
     let active = 0;
     let peak = 0;
-    const fetcher = (async (url: string) => {
+    const fetcher = async (url: string) => {
       active++;
       peak = Math.max(peak, active);
       await Bun.sleep(5);
@@ -35,7 +35,7 @@ describe("AssetPump", () => {
         return new Response("no", { status: 404, statusText: "Not Found" });
       if (url.endsWith("/net")) throw new TypeError("network");
       return new Response(new Uint8Array([1, 2, 3]));
-    }) as unknown as typeof fetch;
+    };
     const provided: number[] = [];
     const failed: [number, number][] = [];
     const pump = new AssetPump(
@@ -70,7 +70,7 @@ describe("AssetPump", () => {
         asset_failed: (id) => failed.push(id),
       },
       6,
-      (async () => new Response("x")) as unknown as typeof fetch,
+      async () => new Response("x"),
     );
     pump.push([{ id: 7, url: "/x" }]);
     while (failed.length === 0) await Bun.sleep(1);

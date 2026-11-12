@@ -52,6 +52,8 @@ interface NieModule {
   ) => NieRuntime;
 }
 
+export type Fetcher = (url: string, init?: RequestInit) => Promise<Response>;
+
 export interface AssetRequest {
   id: number;
   url: string;
@@ -92,7 +94,7 @@ export class AssetPump {
   constructor(
     private rt: Pick<NieRuntime, "provide_asset" | "asset_failed">,
     private limit = ASSET_CONCURRENCY,
-    private fetcher: typeof fetch = (...a) => fetch(...a),
+    private fetcher: Fetcher = (url, init) => fetch(url, init),
   ) {}
 
   push(reqs: AssetRequest[]) {
