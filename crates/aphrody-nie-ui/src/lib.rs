@@ -54,6 +54,7 @@ pub mod eac_frame;
 pub mod gamepad_glyphs;
 pub mod icons;
 pub mod match_hud;
+pub mod paint;
 pub mod roles;
 pub mod screens;
 pub mod surfaces;

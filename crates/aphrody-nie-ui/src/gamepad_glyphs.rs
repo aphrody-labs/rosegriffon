@@ -3,7 +3,8 @@
 //! Associe les actions de `steam_action_manifest.vdf` aux icônes de boutons affichées dans les
 //! barres d'aide au bas des menus et du HUD de match.
 
-use crate::compositor::{SceneCompositor, blend_over, fill_rect_alpha, stroke_rect_alpha};
+use crate::compositor::{SceneCompositor, blend_over};
+use crate::paint::{Painter, RasterPainter};
 
 /// Chemin VFS de l'atlas d'icônes système et manette d'IEVR.
 pub const GAIJI_GAME_PATH: &str = "data/dx11/font/gaiji_game.g4tx";
@@ -90,20 +91,19 @@ pub struct FooterPrompt<'a> {
 
 /// Dessine une rangée de guides de boutons alignée à droite ou centrée dans un bandeau inférieur.
 #[allow(clippy::too_many_arguments)]
-pub fn draw_footer_bar(
+pub fn draw_footer_bar_on(
     compositor: &SceneCompositor,
     family: ControllerFamily,
     prompts: &[FooterPrompt<'_>],
     y: i32,
-    canvas: &mut [u8],
-    w: u32,
-    h: u32,
+    canvas: &mut dyn Painter,
 ) {
+    let (w, h) = canvas.size();
     if prompts.is_empty() || w == 0 || h == 0 {
         return;
     }
-    fill_rect_alpha(canvas, w, h, 0, y - 6, w as i32, 40, [8, 13, 24, 196]);
-    stroke_rect_alpha(canvas, w, h, 0, y - 6, w as i32, 1, 1, [70, 128, 190, 140]);
+    canvas.fill_rect(0, y - 6, w as i32, 40, [8, 13, 24, 196]);
+    canvas.stroke_rect(0, y - 6, w as i32, 1, 1, [70, 128, 190, 140]);
 
     let mut total_w = 0i32;
     for p in prompts {
@@ -111,22 +111,20 @@ pub fn draw_footer_bar(
     }
     let mut cx = ((w as i32) - total_w - 28).max(24);
     for p in prompts {
-        cx += draw_prompt_chip(compositor, family, p.button, p.label, cx, y, canvas, w, h) + 22;
+        cx += draw_prompt_chip_on(compositor, family, p.button, p.label, cx, y, canvas) + 22;
     }
 }
 
 /// Dessine une puce de bouton + son texte d'action et retourne la largeur occupée (px).
 #[allow(clippy::too_many_arguments)]
-pub fn draw_prompt_chip(
+pub fn draw_prompt_chip_on(
     compositor: &SceneCompositor,
     family: ControllerFamily,
     button: PromptButton,
     label: &str,
     x: i32,
     y: i32,
-    canvas: &mut [u8],
-    w: u32,
-    h: u32,
+    canvas: &mut dyn Painter,
 ) -> i32 {
     let icon_size = 26i32;
     let gaiji_candidates = gaiji_region_candidates(family, button);
@@ -135,7 +133,7 @@ pub fn draw_prompt_chip(
         if compositor
             .atlas(GAIJI_GAME_PATH)
             .is_some_and(|a| a.regions.contains_key(*reg))
-            && compositor.blit_named_region(
+            && compositor.blit_named_region_on(
                 GAIJI_GAME_PATH,
                 reg,
                 x,
@@ -144,8 +142,6 @@ pub fn draw_prompt_chip(
                 icon_size as u32,
                 255,
                 canvas,
-                w,
-                h,
             )
         {
             blitted = true;
@@ -153,9 +149,9 @@ pub fn draw_prompt_chip(
         }
     }
     if !blitted {
-        draw_vector_button_badge(compositor, family, button, x, y, icon_size, canvas, w, h);
+        draw_vector_button_badge_on(compositor, family, button, x, y, icon_size, canvas);
     }
-    let text_w = compositor.draw_text_height(
+    let text_w = compositor.draw_text_height_on(
         label,
         x + icon_size + 7,
         y + 4,
@@ -163,8 +159,6 @@ pub fn draw_prompt_chip(
         [238, 244, 255, 255],
         true,
         canvas,
-        w,
-        h,
     );
     icon_size + 7 + text_w
 }
@@ -191,16 +185,14 @@ fn gaiji_region_candidates(
 }
 
 #[allow(clippy::too_many_arguments)]
-fn draw_vector_button_badge(
+fn draw_vector_button_badge_on(
     compositor: &SceneCompositor,
     family: ControllerFamily,
     button: PromptButton,
     x: i32,
     y: i32,
     size: i32,
-    canvas: &mut [u8],
-    w: u32,
-    h: u32,
+    canvas: &mut dyn Painter,
 ) {
     let (bg, short_txt) = match (family, button) {
         (ControllerFamily::PlayStation, PromptButton::South) => ([42, 108, 224, 255], "X"),
@@ -238,12 +230,8 @@ fn draw_vector_button_badge(
     ) || family == ControllerFamily::Keyboard;
 
     if is_pill {
-        fill_rect_alpha(canvas, w, h, x, y + 3, size + 2, size - 6, bg);
-        stroke_rect_alpha(
-            canvas,
-            w,
-            h,
-            x,
+        canvas.fill_rect(x, y + 3, size + 2, size - 6, bg);
+        canvas.stroke_rect(x,
             y + 3,
             size + 2,
             size - 6,
@@ -251,11 +239,7 @@ fn draw_vector_button_badge(
             [230, 240, 255, 220],
         );
     } else {
-        draw_filled_disc(
-            canvas,
-            w,
-            h,
-            x as f32 + size as f32 * 0.5,
+        canvas.fill_disc(x as f32 + size as f32 * 0.5,
             y as f32 + size as f32 * 0.5,
             size as f32 * 0.48,
             bg,
@@ -264,7 +248,7 @@ fn draw_vector_button_badge(
 
     let tw = compositor.measure_text_height(short_txt, 12.0);
     let tx = x + ((size - tw) / 2).max(2);
-    let _ = compositor.draw_text_height(
+    let _ = compositor.draw_text_height_on(
         short_txt,
         tx,
         y + 6,
@@ -272,12 +256,10 @@ fn draw_vector_button_badge(
         [255, 255, 255, 255],
         false,
         canvas,
-        w,
-        h,
     );
 }
 
-fn draw_filled_disc(
+pub(crate) fn draw_filled_disc(
     canvas: &mut [u8],
     w: u32,
     h: u32,
@@ -304,6 +286,40 @@ fn draw_filled_disc(
             }
         }
     }
+}
+
+/// CPU wrapper of [`draw_footer_bar_on`] over an RGBA8 buffer.
+#[allow(clippy::too_many_arguments)]
+pub fn draw_footer_bar(
+    compositor: &SceneCompositor,
+    family: ControllerFamily,
+    prompts: &[FooterPrompt<'_>],
+    y: i32,
+    canvas: &mut [u8],
+    w: u32,
+    h: u32,
+) {
+    if let Some(mut p) = RasterPainter::new(canvas, w, h) {
+        draw_footer_bar_on(compositor, family, prompts, y, &mut p);
+    }
+}
+
+/// CPU wrapper of [`draw_prompt_chip_on`] over an RGBA8 buffer.
+#[allow(clippy::too_many_arguments)]
+pub fn draw_prompt_chip(
+    compositor: &SceneCompositor,
+    family: ControllerFamily,
+    button: PromptButton,
+    label: &str,
+    x: i32,
+    y: i32,
+    canvas: &mut [u8],
+    w: u32,
+    h: u32,
+) -> i32 {
+    RasterPainter::new(canvas, w, h).map_or(0, |mut p| {
+        draw_prompt_chip_on(compositor, family, button, label, x, y, &mut p)
+    })
 }
 
 #[cfg(test)]

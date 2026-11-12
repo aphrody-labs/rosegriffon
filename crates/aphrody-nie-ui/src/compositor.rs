@@ -11,6 +11,8 @@ use std::collections::BTreeMap;
 use aphrody_nie_formats::font::{FontMetrics, GlyphMetric};
 use aphrody_nie_formats::menu_presentation::{Control, Layer, Rect, Scene, Text};
 
+use crate::paint::{Painter, RasterPainter};
+
 /// Sous-rectangle nommé dans un atlas décodé en RGBA8.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AtlasRegion {
@@ -313,6 +315,7 @@ impl SceneCompositor {
     ///
     /// `focused_actions` contient le ou les identifiants d'actions actifs (ex. onglet courant +
     /// bouton focalisé). Retourne le nombre de calques effectivement peints.
+    #[allow(clippy::too_many_arguments)]
     pub fn compose_scenes(
         &self,
         scenes: &[&Scene],
@@ -323,7 +326,22 @@ impl SceneCompositor {
         dst_h: u32,
         clear_bg: bool,
     ) -> usize {
-        if dst_w == 0 || dst_h == 0 || canvas.len() < (dst_w as usize) * (dst_h as usize) * 4 {
+        RasterPainter::new(canvas, dst_w, dst_h).map_or(0, |mut p| {
+            self.compose_scenes_on(scenes, focused_actions, pulse_phase, &mut p, clear_bg)
+        })
+    }
+
+    /// [`Self::compose_scenes`] on any [`Painter`] (CPU raster or GPU quad recorder).
+    pub fn compose_scenes_on(
+        &self,
+        scenes: &[&Scene],
+        focused_actions: &[&str],
+        pulse_phase: f32,
+        canvas: &mut dyn Painter,
+        clear_bg: bool,
+    ) -> usize {
+        let (dst_w, dst_h) = canvas.size();
+        if dst_w == 0 || dst_h == 0 {
             return 0;
         }
         if clear_bg {
@@ -332,7 +350,7 @@ impl SceneCompositor {
                 .and_then(|s| s.background.as_deref())
                 .and_then(parse_hex_rgba)
                 .unwrap_or([6, 10, 18, 255]);
-            fill_solid(canvas, bg);
+            canvas.clear(bg);
         }
 
         let mut drawn = 0usize;
@@ -384,8 +402,6 @@ impl SceneCompositor {
                             sx,
                             sy,
                             canvas,
-                            dst_w,
-                            dst_h,
                         ) {
                             drawn += 1;
                         }
@@ -401,7 +417,7 @@ impl SceneCompositor {
                         let dx = (t.rect.x * sx).round() as i32;
                         let dy = (t.rect.y * sy).round() as i32;
                         let dh = (t.rect.h * sy).round().max(12.0) as f32;
-                        if self.draw_text_height(
+                        if self.draw_text_height_on(
                             &t.text,
                             dx,
                             dy,
@@ -409,8 +425,6 @@ impl SceneCompositor {
                             color,
                             true,
                             canvas,
-                            dst_w,
-                            dst_h,
                         ) > 0
                         {
                             drawn += 1;
@@ -437,6 +451,26 @@ impl SceneCompositor {
         canvas_w: u32,
         canvas_h: u32,
     ) -> bool {
+        RasterPainter::new(canvas, canvas_w, canvas_h).is_some_and(|mut p| {
+            self.blit_named_region_on(
+                asset_path, region_name, dst_x, dst_y, dst_w_px, dst_h_px, opacity, &mut p,
+            )
+        })
+    }
+
+    /// [`Self::blit_named_region`] on any [`Painter`].
+    #[allow(clippy::too_many_arguments)]
+    pub fn blit_named_region_on(
+        &self,
+        asset_path: &str,
+        region_name: &str,
+        dst_x: i32,
+        dst_y: i32,
+        dst_w_px: u32,
+        dst_h_px: u32,
+        opacity: u8,
+        canvas: &mut dyn Painter,
+    ) -> bool {
         let Some(atlas) = self.atlases.get(asset_path) else {
             return false;
         };
@@ -450,20 +484,15 @@ impl SceneCompositor {
                 width: atlas.width,
                 height: atlas.height,
             });
-        blit_region_transformed(
+        canvas.blit(
+            asset_path,
             atlas,
             region,
             None,
             false,
             0.0,
             opacity,
-            dst_x,
-            dst_y,
-            dst_w_px as i32,
-            dst_h_px as i32,
-            canvas,
-            canvas_w,
-            canvas_h,
+            [dst_x, dst_y, dst_w_px as i32, dst_h_px as i32],
         );
         true
     }
@@ -497,6 +526,23 @@ impl SceneCompositor {
         canvas_w: u32,
         canvas_h: u32,
     ) -> i32 {
+        RasterPainter::new(canvas, canvas_w, canvas_h).map_or(0, |mut p| {
+            self.draw_text_height_on(text, x, y, target_px_h, color, shadow, &mut p)
+        })
+    }
+
+    /// [`Self::draw_text_height`] on any [`Painter`].
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw_text_height_on(
+        &self,
+        text: &str,
+        x: i32,
+        y: i32,
+        target_px_h: f32,
+        color: [u8; 4],
+        shadow: bool,
+        canvas: &mut dyn Painter,
+    ) -> i32 {
         if let (Some((atlas_w, _, atlas_rgba)), Some(metrics)) =
             (&self.font_atlas, &self.font_metrics)
         {
@@ -514,8 +560,6 @@ impl SceneCompositor {
                     scale,
                     [0, 0, 0, sh_alpha],
                     canvas,
-                    canvas_w,
-                    canvas_h,
                 );
             }
             return draw_scaled_font_def(
@@ -528,8 +572,6 @@ impl SceneCompositor {
                 scale,
                 color,
                 canvas,
-                canvas_w,
-                canvas_h,
             );
         }
 
@@ -542,11 +584,9 @@ impl SceneCompositor {
                 px_scale,
                 [0, 0, 0, color[3] / 2],
                 canvas,
-                canvas_w,
-                canvas_h,
             );
         }
-        draw_fallback_5x7(text, x, y, px_scale, color, canvas, canvas_w, canvas_h)
+        draw_fallback_5x7(text, x, y, px_scale, color, canvas)
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -557,9 +597,7 @@ impl SceneCompositor {
         opacity: u8,
         sx: f64,
         sy: f64,
-        canvas: &mut [u8],
-        dst_w: u32,
-        dst_h: u32,
+        canvas: &mut dyn Painter,
     ) -> bool {
         let Some(atlas) = self.atlases.get(&layer.asset_path) else {
             return false;
@@ -588,20 +626,15 @@ impl SceneCompositor {
         let dw = (layer.rect.w * sx).round().max(1.0) as i32;
         let dh = (layer.rect.h * sy).round().max(1.0) as i32;
 
-        blit_region_transformed(
+        canvas.blit(
+            &layer.asset_path,
             atlas,
             region,
             mask,
             mask_luminance,
             rot_deg,
             opacity,
-            dx,
-            dy,
-            dw,
-            dh,
-            canvas,
-            dst_w,
-            dst_h,
+            [dx, dy, dw, dh],
         );
         true
     }
@@ -781,7 +814,7 @@ fn parse_hex_rgba(hex: &str) -> Option<[u8; 4]> {
 }
 
 #[allow(clippy::too_many_arguments)]
-fn blit_region_transformed(
+pub(crate) fn blit_region_transformed(
     atlas: &DecodedAtlas,
     region: AtlasRegion,
     mask: Option<AtlasRegion>,
@@ -926,9 +959,7 @@ fn draw_scaled_font_def(
     y: i32,
     scale: f32,
     color: [u8; 4],
-    canvas: &mut [u8],
-    canvas_w: u32,
-    canvas_h: u32,
+    canvas: &mut dyn Painter,
 ) -> i32 {
     let cell_h = metrics.dims.cell_height;
     if cell_h == 0 || atlas_w == 0 {
@@ -947,7 +978,7 @@ fn draw_scaled_font_def(
             cursor_x += 14.0 * scale;
             continue;
         };
-        blit_scaled_glyph(
+        canvas.glyph(
             atlas,
             atlas_w,
             m,
@@ -956,9 +987,6 @@ fn draw_scaled_font_def(
             y,
             scale,
             color,
-            canvas,
-            canvas_w,
-            canvas_h,
         );
         cursor_x += f32::from(m.advance) * scale;
     }
@@ -966,7 +994,7 @@ fn draw_scaled_font_def(
 }
 
 #[allow(clippy::too_many_arguments)]
-fn blit_scaled_glyph(
+pub(crate) fn blit_scaled_glyph(
     atlas: &[u8],
     atlas_w: u32,
     metric: &GlyphMetric,
@@ -1027,9 +1055,7 @@ fn draw_fallback_5x7(
     y: i32,
     scale: i32,
     color: [u8; 4],
-    canvas: &mut [u8],
-    canvas_w: u32,
-    canvas_h: u32,
+    canvas: &mut dyn Painter,
 ) -> i32 {
     let mut cx = x;
     let s = scale.max(1);
@@ -1038,10 +1064,7 @@ fn draw_fallback_5x7(
         for (ry, bits) in rows.iter().enumerate() {
             for rx in 0..5 {
                 if (bits >> (4 - rx)) & 1 == 1 {
-                    fill_rect_alpha(
-                        canvas,
-                        canvas_w,
-                        canvas_h,
+                    canvas.fill_rect(
                         cx + rx * s,
                         y + (ry as i32) * s,
                         s,
@@ -1112,7 +1135,7 @@ mod tests {
     #[test]
     fn spatial_navigation_traverses_title_menu_rows_and_banners() {
         let json = scene_json("title-menu").expect("title-menu embedded");
-        let scene = parse_scene(json).expect("valid scene");
+        let scene = parse_scene(&json).expect("valid scene");
         assert_eq!(scene.controls.len(), 13);
 
         // Depuis Mode Histoire (`1`), aller à droite mène à Mode Chronique (`2`).

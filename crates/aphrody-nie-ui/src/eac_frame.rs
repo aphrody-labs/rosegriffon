@@ -5,9 +5,8 @@
 //! `productid: "da518e53730f4be6acbac5ebf75745e0"`) et les états officiels de
 //! `EasyAntiCheat/Localization/fr_fr.cfg` (`INITIALIZING`, `LOADING`, `WAITING FOR GAME`).
 
-use crate::compositor::{
-    SceneCompositor, fill_rect_alpha, fill_solid, stroke_rect_alpha,
-};
+use crate::compositor::SceneCompositor;
+use crate::paint::{Painter, RasterPainter};
 
 /// Clé d'atlas réservée dans [`SceneCompositor`] pour `EasyAntiCheat/SplashScreen.png`.
 pub const EAC_SPLASH_KEY: &str = "EasyAntiCheat/SplashScreen.png";
@@ -54,19 +53,18 @@ impl EacBootStage {
 }
 
 /// Peint la fenêtre `EACLauncher.exe` centrée sur le canevas `w x h` sans aucun élément DOM/HTML.
-pub fn render_eac_launcher(
+pub fn render_eac_launcher_on(
     compositor: &SceneCompositor,
     progress: f32,
     loaded_assets: usize,
     total_assets: usize,
-    canvas: &mut [u8],
-    w: u32,
-    h: u32,
+    canvas: &mut dyn Painter,
 ) {
-    if w == 0 || h == 0 || canvas.len() < (w as usize) * (h as usize) * 4 {
+    let (w, h) = canvas.size();
+    if w == 0 || h == 0 {
         return;
     }
-    fill_solid(canvas, [5, 7, 12, 255]);
+    canvas.clear([5, 7, 12, 255]);
 
     let win_w = ((w as i32) * 62 / 100).clamp(520, 800);
     let win_h = (win_w * 9 / 16).clamp(300, 450);
@@ -74,20 +72,16 @@ pub fn render_eac_launcher(
     let wy = (h as i32 - win_h) / 2;
 
     // Ombre portée de la fenêtre native EACLauncher.
-    fill_rect_alpha(
-        canvas,
-        w,
-        h,
-        wx + 10,
+    canvas.fill_rect(wx + 10,
         wy + 14,
         win_w,
         win_h,
         [0, 0, 0, 180],
     );
-    fill_rect_alpha(canvas, w, h, wx, wy, win_w, win_h, [13, 19, 30, 255]);
+    canvas.fill_rect(wx, wy, win_w, win_h, [13, 19, 30, 255]);
 
     // Blit de la vraie texture `EasyAntiCheat/SplashScreen.png` dès qu'elle est disponible.
-    let _ = compositor.blit_named_region(
+    let _ = compositor.blit_named_region_on(
         EAC_SPLASH_KEY,
         "SplashScreen",
         wx,
@@ -96,34 +90,24 @@ pub fn render_eac_launcher(
         win_h as u32,
         255,
         canvas,
-        w,
-        h,
     );
 
     // Bandeau inférieur officiel Easy Anti-Cheat (statut + barre de progression cyan).
     let bar_zone_h = 68;
     let by = wy + win_h - bar_zone_h;
-    fill_rect_alpha(canvas, w, h, wx, by, win_w, bar_zone_h, [8, 12, 20, 226]);
+    canvas.fill_rect(wx, by, win_w, bar_zone_h, [8, 12, 20, 226]);
 
     // Logo / badge vectoriel EAC (bouclier bleu/cyan) à gauche du bandeau.
     let bx = wx + 20;
     let shield_y = by + 14;
-    fill_rect_alpha(canvas, w, h, bx, shield_y, 28, 30, [0, 168, 232, 255]);
-    fill_rect_alpha(
-        canvas,
-        w,
-        h,
-        bx + 4,
+    canvas.fill_rect(bx, shield_y, 28, 30, [0, 168, 232, 255]);
+    canvas.fill_rect(bx + 4,
         shield_y + 4,
         20,
         22,
         [10, 22, 38, 255],
     );
-    fill_rect_alpha(
-        canvas,
-        w,
-        h,
-        bx + 8,
+    canvas.fill_rect(bx + 8,
         shield_y + 9,
         12,
         12,
@@ -133,7 +117,7 @@ pub fn render_eac_launcher(
     let clamped = progress.clamp(0.02, 1.0);
     let stage = EacBootStage::from_progress(clamped);
 
-    let _ = compositor.draw_text_height(
+    let _ = compositor.draw_text_height_on(
         EAC_PRODUCT_TITLE,
         bx + 40,
         by + 11,
@@ -141,8 +125,6 @@ pub fn render_eac_launcher(
         [235, 242, 252, 255],
         true,
         canvas,
-        w,
-        h,
     );
 
     let pct = (clamped * 100.0).round() as u32;
@@ -156,7 +138,7 @@ pub fn render_eac_launcher(
     } else {
         stage.status_label().to_owned()
     };
-    let _ = compositor.draw_text_height(
+    let _ = compositor.draw_text_height_on(
         &status,
         bx + 40,
         by + 32,
@@ -164,37 +146,42 @@ pub fn render_eac_launcher(
         [126, 208, 248, 255],
         false,
         canvas,
-        w,
-        h,
     );
 
     // Piste et jauge de progression EAC en bas de la fenêtre.
     let track_h = 6;
     let track_y = wy + win_h - track_h;
-    fill_rect_alpha(canvas, w, h, wx, track_y, win_w, track_h, [22, 34, 52, 255]);
+    canvas.fill_rect(wx, track_y, win_w, track_h, [22, 34, 52, 255]);
     let fill_w = ((win_w as f32) * clamped).round() as i32;
-    fill_rect_alpha(
-        canvas,
-        w,
-        h,
-        wx,
+    canvas.fill_rect(wx,
         track_y,
         fill_w.clamp(4, win_w),
         track_h,
         [0, 186, 255, 255],
     );
 
-    stroke_rect_alpha(
-        canvas,
-        w,
-        h,
-        wx,
+    canvas.stroke_rect(wx,
         wy,
         win_w,
         win_h,
         1,
         [52, 92, 136, 220],
     );
+}
+
+/// CPU wrapper of [`render_eac_launcher_on`] over an RGBA8 buffer.
+pub fn render_eac_launcher(
+    compositor: &SceneCompositor,
+    progress: f32,
+    loaded_assets: usize,
+    total_assets: usize,
+    canvas: &mut [u8],
+    w: u32,
+    h: u32,
+) {
+    if let Some(mut p) = RasterPainter::new(canvas, w, h) {
+        render_eac_launcher_on(compositor, progress, loaded_assets, total_assets, &mut p);
+    }
 }
 
 #[cfg(test)]
