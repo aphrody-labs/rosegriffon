@@ -47,5 +47,5 @@ ENV STEAM_HOME=/steam \
 USER steam:steam
 WORKDIR /game
 VOLUME ["/steam", "/game"]
-ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/steam-depot"]
+ENTRYPOINT ["/sbin/tini", "-s", "--", "/usr/local/bin/steam-depot"]
 CMD ["update"]
