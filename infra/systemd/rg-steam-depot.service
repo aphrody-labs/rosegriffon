@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Unattended depot update of the game into /srv/rosegriffon/game (storage role host).
+# Exit 2 = no Steam token stored yet (run `steam-depot login` once): not a failure.
+[Unit]
+Description=rosegriffon steam-depot update
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/src/rosegriffon-stack
+ExecStart=/usr/bin/docker compose --profile tools run --rm -T steam-depot update
+SuccessExitStatus=2

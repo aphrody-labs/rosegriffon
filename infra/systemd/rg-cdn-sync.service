@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Mirrors /srv/rosegriffon/cdn/static to the cdn host and Cloudflare R2. Runs on the prod role host.
+[Unit]
+Description=rosegriffon cdn sync (prod -> cdn -> R2)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+Environment=RG_PROD_SSH=local
+ExecStart=/srv/rosegriffon/bin/sync-cdn.sh
