@@ -1,7 +1,7 @@
 {
   "name": "steam",
   "version": "0.1.0",
-  "description": "Steam ecosystem knowledge and tools: Web API, auth, IDs and URLs, depots and CDN, Windows client layout, Linux/Proton/SteamOS, community tools, local install inspection, and a Bun stdio MCP server.",
+  "description": "Steam for Claude Code: look up games and prices on the Steam store, read your local Steam library, and get help with logins, game downloads and Proton on Linux.",
   "author": { "name": "Aphrody" },
   "repository": "https://github.com/aphrody-labs/rosegriffon",
   "license": "Apache-2.0",
