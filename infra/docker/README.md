@@ -160,8 +160,10 @@ cdn.rosegriffon.fr, nie.aphrody.app --> cdn nginx :443 (/static from disk, rest 
 
 - prd ports 80/443 belong to the shenron-gateway container: the Rose Griffon TLS entry is
   8443 (`host-nginx/nginx.prd.conf`, `rosegriffon-stack.conf`). Cloudflare zone rule
-  "rosegriffon prd origin port" (phase http_request_origin) sends the prod names to 8443;
-  `/etc/fleet/firewall.nft` opens 8443 to the Cloudflare ranges (comment `rosegriffon-cf`).
+  "rosegriffon prd origin port" (phase http_request_origin) sends the prod names to 8443, then the src rule
+  `aphrody-origin-cacheable-port` sends rosegriffon.fr/www to 9443 (same server block): Cloudflare never caches an
+  8443 origin, and the edge copy is what keeps the site up while prd reboots;
+  `/etc/fleet/firewall.nft` opens 8443 and 9443 to the Cloudflare ranges (comment `rosegriffon-cf`).
 - Images: `just build` on vps, `just deploy` ships them (`docker save | docker load`).
   vps builds with `/etc/rosegriffon/rosegriffon.build.env` (loopback DB URLs, host network).
 - prd data: `/srv/rosegriffon` (state, cdn/static, game/ievr read-only copy, db/inagle owned
