@@ -332,7 +332,10 @@ export default function ClientLayout({
                     <SidebarInset
                       className={cn(
                         "transition-all duration-300 min-w-0",
-                        showRail && "ml-20",
+                        // Réserve du rail posée par CSS sur la classe « medium » (600-839 px), pas par
+                        // useBreakpoint : le hook vaut « compact » au rendu serveur et à l'hydratation, et
+                        // la marge ajoutée ensuite décalait toute la page (CLS 0,37 mesuré à 768 px).
+                        !shouldHideSidebar && "min-[600px]:max-[839px]:ml-20",
                       )}
                     >
                       {/* La réserve en haut compense le Header fixe (4rem+safe-area en mobile, 14 (3.5rem) sur desktop/tablette).
