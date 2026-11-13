@@ -1140,3 +1140,12 @@ main[data-slot="sidebar-inset"] {
   background-position: center;
   background-attachment: fixed;
 }
+
+/* Classe « medium » (600-839 px) : la barre latérale y est un tiroir posé au-dessus du rail, elle ne
+   réserve aucune colonne. Sans cette règle, l'espace de 16rem rendu côté serveur (état « ouvert » du
+   bureau) se refermait à l'hydratation et décalait toute la page (CLS 0,37 mesuré à 768 px). */
+@media (min-width: 600px) and (max-width: 839px) {
+  [data-slot="sidebar-gap"] {
+    width: 0 !important;
+  }
+}
